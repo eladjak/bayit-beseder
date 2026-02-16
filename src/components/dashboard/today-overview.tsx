@@ -1,0 +1,109 @@
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Check, Clock } from "lucide-react";
+import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
+
+export interface TaskItem {
+  id: string;
+  title: string;
+  category: string;
+  estimated_minutes: number;
+  assigned_to_name?: string;
+  completed: boolean;
+}
+
+interface TodayOverviewProps {
+  tasks: TaskItem[];
+  onToggle: (taskId: string) => void;
+}
+
+export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
+  const [completing, setCompleting] = useState<string | null>(null);
+
+  function handleToggle(taskId: string) {
+    setCompleting(taskId);
+    setTimeout(() => {
+      onToggle(taskId);
+      setCompleting(null);
+    }, 200);
+  }
+
+  if (tasks.length === 0) {
+    return (
+      <div className="bg-surface rounded-2xl p-6 text-center">
+        <span className="text-3xl mb-2 block">🎉</span>
+        <p className="font-medium text-foreground">אין משימות להיום!</p>
+        <p className="text-sm text-muted">יום חופשי מגיע לכם</p>
+      </div>
+    );
+  }
+
+  const completed = tasks.filter((t) => t.completed).length;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between px-1">
+        <h2 className="font-semibold text-foreground">משימות להיום</h2>
+        <span className="text-sm text-muted">
+          {completed}/{tasks.length}
+        </span>
+      </div>
+      <div className="space-y-1.5">
+        <AnimatePresence mode="popLayout">
+          {tasks.map((task) => (
+            <motion.div
+              key={task.id}
+              layout
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, x: -50 }}
+              className={`bg-surface rounded-xl p-3 flex items-center gap-3 transition-colors ${
+                task.completed ? "opacity-60" : ""
+              }`}
+            >
+              <button
+                onClick={() => handleToggle(task.id)}
+                className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                  task.completed
+                    ? "bg-success border-success"
+                    : completing === task.id
+                      ? "border-success bg-success/20"
+                      : "border-border hover:border-primary"
+                }`}
+              >
+                {task.completed && (
+                  <Check className="w-4 h-4 text-white" strokeWidth={3} />
+                )}
+              </button>
+              <div className="flex-1 min-w-0">
+                <p
+                  className={`text-sm font-medium ${
+                    task.completed
+                      ? "line-through text-muted"
+                      : "text-foreground"
+                  }`}
+                >
+                  {task.title}
+                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span
+                    className="text-[10px] px-1.5 py-0.5 rounded-full text-white font-medium"
+                    style={{ backgroundColor: getCategoryColor(task.category) }}
+                  >
+                    {getCategoryLabel(task.category)}
+                  </span>
+                  <span className="text-[10px] text-muted flex items-center gap-0.5">
+                    <Clock className="w-3 h-3" />
+                    {task.estimated_minutes} דק׳
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,47 @@
+"use client";
+
+import { AlertTriangle, Shield } from "lucide-react";
+import { motion } from "framer-motion";
+
+interface EmergencyToggleProps {
+  active: boolean;
+  onToggle: () => void;
+}
+
+export function EmergencyToggle({ active, onToggle }: EmergencyToggleProps) {
+  return (
+    <div className="space-y-2">
+      {active && (
+        <motion.div
+          className="bg-blue-50 border border-blue-200 rounded-xl p-3 text-center"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <p className="text-sm font-medium text-blue-700">
+            🫂 מצב חירום פעיל - מתמקדים רק בחשוב
+          </p>
+        </motion.div>
+      )}
+      <button
+        onClick={onToggle}
+        className={`w-full rounded-xl p-3 flex items-center justify-center gap-2 font-medium transition-colors ${
+          active
+            ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+            : "bg-surface text-muted hover:bg-surface-hover border border-border"
+        }`}
+      >
+        {active ? (
+          <>
+            <Shield className="w-5 h-5" />
+            כיבוי מצב חירום
+          </>
+        ) : (
+          <>
+            <AlertTriangle className="w-5 h-5" />
+            הפעלת מצב חירום
+          </>
+        )}
+      </button>
+    </div>
+  );
+}
