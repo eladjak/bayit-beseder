@@ -28,6 +28,17 @@ body {
   color: var(--color-foreground);
 }
 
+/* Dark mode overrides */
+.dark body,
+.dark {
+  --color-background: #1C1917;
+  --color-surface: #292524;
+  --color-surface-hover: #44403C;
+  --color-foreground: #FAFAF9;
+  --color-muted: #A8A29E;
+  --color-border: #44403C;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }
