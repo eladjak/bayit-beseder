@@ -574,3 +574,94 @@ export type CoachingTrigger = CoachingMessage["trigger_type"];
 export type NotificationPreferences = NonNullable<
   Profile["notification_preferences"]
 >;
+
+// ============================================
+// Phase 3 - Simplified tables for hooks
+// ============================================
+
+/** Category row from the categories table */
+export interface CategoryRow {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+}
+
+/** Task row from the tasks table */
+export interface TaskRow {
+  id: string;
+  title: string;
+  description: string | null;
+  category_id: string | null;
+  assigned_to: string | null;
+  status: "pending" | "in_progress" | "completed" | "skipped";
+  due_date: string | null;
+  points: number;
+  recurring: boolean;
+  created_at: string;
+}
+
+/** Insert shape for tasks table */
+export interface TaskInsert {
+  id?: string;
+  title: string;
+  description?: string | null;
+  category_id?: string | null;
+  assigned_to?: string | null;
+  status?: "pending" | "in_progress" | "completed" | "skipped";
+  due_date?: string | null;
+  points?: number;
+  recurring?: boolean;
+  created_at?: string;
+}
+
+/** Update shape for tasks table */
+export interface TaskUpdate {
+  id?: string;
+  title?: string;
+  description?: string | null;
+  category_id?: string | null;
+  assigned_to?: string | null;
+  status?: "pending" | "in_progress" | "completed" | "skipped";
+  due_date?: string | null;
+  points?: number;
+  recurring?: boolean;
+}
+
+/** Task completion row */
+export interface TaskCompletionRow {
+  id: string;
+  task_id: string;
+  user_id: string;
+  completed_at: string;
+  photo_url: string | null;
+  notes: string | null;
+}
+
+/** Insert shape for task_completions */
+export interface TaskCompletionInsert {
+  id?: string;
+  task_id: string;
+  user_id: string;
+  completed_at?: string;
+  photo_url?: string | null;
+  notes?: string | null;
+}
+
+/** Profile row from Phase 3 profiles table (simplified) */
+export interface ProfileRow {
+  id: string;
+  name: string;
+  avatar_url: string | null;
+  points: number;
+  streak: number;
+  created_at: string;
+}
+
+/** Update shape for Phase 3 profiles */
+export interface ProfileUpdate {
+  name?: string;
+  avatar_url?: string | null;
+  points?: number;
+  streak?: number;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { GoldenRuleRing } from "@/components/dashboard/golden-rule-ring";
 import { TodayOverview, type TaskItem } from "@/components/dashboard/today-overview";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
@@ -9,7 +9,13 @@ import { EmergencyToggle } from "@/components/dashboard/emergency-toggle";
 import { CelebrationOverlay } from "@/components/gamification/celebration-overlay";
 import { CoachingBubble } from "@/components/gamification/coaching-bubble";
 import { getRandomMessage } from "@/lib/coaching-messages";
+import { useProfile } from "@/hooks/useProfile";
+import { useTasks } from "@/hooks/useTasks";
+import { useCompletions } from "@/hooks/useCompletions";
 
+// ============================================
+// Mock data (fallback when Supabase not connected)
+// ============================================
 const MOCK_TASKS: TaskItem[] = [
   { id: "1", title: "שטיפת כלים / הפעלת מדיח", category: "kitchen", estimated_minutes: 15, completed: false },
   { id: "2", title: "האכלת חתולים (בוקר)", category: "pets", estimated_minutes: 5, completed: true },
@@ -30,7 +36,34 @@ function getHebrewDate(): string {
 }
 
 export default function DashboardPage() {
-  const [tasks, setTasks] = useState(MOCK_TASKS);
+  // ---- Supabase hooks ----
+  const { profile } = useProfile();
+  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const { tasks: dbTasks, loading: tasksLoading } = useTasks({ dueDate: todayStr });
+  const { markComplete } = useCompletions();
+
+  // ---- Determine if we should use DB data or mock ----
+  const hasDbTasks = !tasksLoading && dbTasks.length > 0;
+
+  // Convert DB tasks to TaskItem shape for TodayOverview
+  const dbTaskItems: TaskItem[] = useMemo(
+    () =>
+      dbTasks.map((t) => ({
+        id: t.id,
+        title: t.title,
+        category: "general", // category name from category_id would need a join; simplified
+        estimated_minutes: 10,
+        completed: t.status === "completed",
+      })),
+    [dbTasks]
+  );
+
+  // ---- Local state for mock tasks (fallback mode) ----
+  const [mockTasks, setMockTasks] = useState(MOCK_TASKS);
+
+  // The actual tasks list shown in the UI
+  const tasks = hasDbTasks ? dbTaskItems : mockTasks;
+
   const [emergencyMode, setEmergencyMode] = useState(false);
   const [celebration, setCelebration] = useState<{
     visible: boolean;
@@ -48,9 +81,30 @@ export default function DashboardPage() {
   const percentage = Math.round((completedCount / tasks.length) * 100);
   const target = emergencyMode ? 50 : 80;
 
+  const streakCount = profile?.streak ?? 5;
+  const displayName = profile?.name ?? "שלום! 👋";
+
   const handleToggle = useCallback(
     (taskId: string) => {
-      setTasks((prev) => {
+      // If using DB tasks, update via Supabase
+      if (hasDbTasks && profile) {
+        const task = dbTasks.find((t) => t.id === taskId);
+        if (task && task.status !== "completed") {
+          markComplete({ taskId, userId: profile.id });
+        }
+        // Trigger celebration for DB mode too
+        const msg = getRandomMessage("task_complete");
+        setCelebration({
+          visible: true,
+          type: "task",
+          message: msg.message,
+          emoji: msg.emoji,
+        });
+        return;
+      }
+
+      // Fallback: local mock toggle
+      setMockTasks((prev) => {
         const updated = prev.map((t) =>
           t.id === taskId ? { ...t, completed: !t.completed } : t
         );
@@ -100,7 +154,7 @@ export default function DashboardPage() {
         return updated;
       });
     },
-    [target]
+    [target, hasDbTasks, profile, dbTasks, markComplete]
   );
 
   const dismissCelebration = useCallback(() => {
@@ -114,7 +168,7 @@ export default function DashboardPage() {
     <div className="px-4 py-6 space-y-5">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-xl font-bold text-foreground">שלום! 👋</h1>
+        <h1 className="text-xl font-bold text-foreground">{displayName}</h1>
         <p className="text-sm text-muted">{getHebrewDate()}</p>
       </div>
 
@@ -124,7 +178,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Streak */}
-      <StreakDisplay count={5} bestCount={12} />
+      <StreakDisplay count={streakCount} bestCount={12} />
 
       {/* Today's Tasks */}
       <TodayOverview tasks={tasks} onToggle={handleToggle} />
