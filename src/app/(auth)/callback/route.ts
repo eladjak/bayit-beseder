@@ -16,22 +16,38 @@ export async function GET(request: Request) {
       } = await supabase.auth.getUser();
 
       if (user) {
+        const displayName =
+          user.user_metadata.full_name ??
+          user.user_metadata.name ??
+          user.email?.split("@")[0] ??
+          "משתמש";
+
+        // Check if profile exists (may have been auto-created by DB trigger)
         const { data: profile } = await supabase
           .from("profiles")
-          .select("id")
+          .select("id, display_name")
           .eq("id", user.id)
           .single();
 
         if (!profile) {
+          // Profile not created by trigger - insert manually
+          // The profiles table requires 'name' (NOT NULL) from the shared schema
           await supabase.from("profiles").insert({
             id: user.id,
-            display_name:
-              user.user_metadata.full_name ??
-              user.user_metadata.name ??
-              user.email?.split("@")[0] ??
-              "משתמש",
+            name: displayName,
+            email: user.email ?? "",
+            display_name: displayName,
             avatar_url: user.user_metadata.avatar_url ?? null,
           });
+        } else if (!profile.display_name) {
+          // Profile exists (from trigger) but missing display_name - update it
+          await supabase
+            .from("profiles")
+            .update({
+              display_name: displayName,
+              avatar_url: user.user_metadata.avatar_url ?? null,
+            })
+            .eq("id", user.id);
         }
       }
 

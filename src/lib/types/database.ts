@@ -12,8 +12,12 @@ export type Database = {
       profiles: {
         Row: {
           id: string;
-          display_name: string;
+          name: string;
+          email: string | null;
+          display_name: string | null;
           avatar_url: string | null;
+          points: number;
+          streak: number;
           push_subscription: Json | null;
           notification_preferences: {
             morning: boolean;
@@ -27,8 +31,12 @@ export type Database = {
         };
         Insert: {
           id: string;
-          display_name: string;
+          name: string;
+          email?: string | null;
+          display_name?: string | null;
           avatar_url?: string | null;
+          points?: number;
+          streak?: number;
           push_subscription?: Json | null;
           notification_preferences?: {
             morning: boolean;
@@ -42,8 +50,12 @@ export type Database = {
         };
         Update: {
           id?: string;
-          display_name?: string;
+          name?: string;
+          email?: string | null;
+          display_name?: string | null;
           avatar_url?: string | null;
+          points?: number;
+          streak?: number;
           push_subscription?: Json | null;
           notification_preferences?: {
             morning: boolean;
