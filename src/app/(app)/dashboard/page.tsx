@@ -6,6 +6,7 @@ import { TodayOverview, type TaskItem } from "@/components/dashboard/today-overv
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { PartnerStatus } from "@/components/dashboard/partner-status";
 import { EmergencyToggle } from "@/components/dashboard/emergency-toggle";
+import { WeeklySummaryCards } from "@/components/dashboard/weekly-summary-cards";
 import { CelebrationOverlay } from "@/components/gamification/celebration-overlay";
 import { CoachingBubble } from "@/components/gamification/coaching-bubble";
 import { getRandomMessage } from "@/lib/coaching-messages";
@@ -48,6 +49,15 @@ function getHebrewDate(): string {
   });
 }
 
+function getTimeGreeting(name: string): { greeting: string; subtitle: string } {
+  const hour = new Date().getHours();
+  if (hour < 6) return { greeting: `לילה טוב, ${name}`, subtitle: "מנוחה טובה מגיעה לכם" };
+  if (hour < 12) return { greeting: `בוקר טוב, ${name}!`, subtitle: "בואו נתחיל את היום" };
+  if (hour < 17) return { greeting: `צהריים טובים, ${name}`, subtitle: "איך הולך היום?" };
+  if (hour < 21) return { greeting: `ערב טוב, ${name}`, subtitle: "בואו נסכם את היום" };
+  return { greeting: `לילה טוב, ${name}`, subtitle: "יום מצוין מאחוריכם" };
+}
+
 export default function DashboardPage() {
   // ---- Supabase hooks ----
   const { profile } = useProfile();
@@ -56,7 +66,9 @@ export default function DashboardPage() {
     dueDate: todayStr,
     realtime: true,
   });
-  const { markComplete } = useCompletions();
+  // Fetch all tasks (no date filter) for summary cards
+  const { tasks: allDbTasks } = useTasks({});
+  const { completions: allCompletions, markComplete } = useCompletions({ limit: 200 });
   const { categoryMap } = useCategories();
 
   // ---- Determine if we should use DB data or mock ----
@@ -107,7 +119,8 @@ export default function DashboardPage() {
   const target = emergencyMode ? 50 : 80;
 
   const streakCount = profile?.streak ?? 5;
-  const displayName = profile?.name ?? "שלום! 👋";
+  const displayName = profile?.name ?? "שלום";
+  const { greeting, subtitle } = getTimeGreeting(displayName);
 
   const handleToggle = useCallback(
     (taskId: string) => {
@@ -191,10 +204,19 @@ export default function DashboardPage() {
 
   return (
     <div className="px-4 py-6 space-y-5">
-      {/* Header */}
+      {/* Header - Time-aware greeting */}
       <div className="text-center">
-        <h1 className="text-xl font-bold text-foreground">{displayName}</h1>
+        <h1 className="text-xl font-bold text-foreground">{greeting}</h1>
         <p className="text-sm text-muted">{getHebrewDate()}</p>
+        {tasks.length > 0 && (
+          <p className="text-xs text-muted mt-1">
+            {completedCount === tasks.length
+              ? "יום מושלם! סיימתם הכל ביחד"
+              : completedCount > 0
+                ? `ביחד סיימתם ${completedCount} מתוך ${tasks.length} משימות`
+                : subtitle}
+          </p>
+        )}
       </div>
 
       {/* Golden Rule Ring */}
@@ -207,6 +229,14 @@ export default function DashboardPage() {
 
       {/* Today's Tasks */}
       <TodayOverview tasks={tasks} onToggle={handleToggle} />
+
+      {/* Weekly Summary Cards */}
+      <WeeklySummaryCards
+        tasks={allDbTasks}
+        completions={allCompletions}
+        streak={streakCount}
+        today={todayStr}
+      />
 
       {/* Partner Status */}
       <div>
