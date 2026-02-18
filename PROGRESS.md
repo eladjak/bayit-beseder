@@ -1,13 +1,31 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Phase 9 Notifications & Gamification DONE
+## Status: LIVE - Phase 10 Auto-Schedule + Room Conditions + Couple Rewards DONE
 ## Last Updated: 2026-02-18
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-8 complete + Phase 9 Notifications & Gamification Enhancement done. App LIVE at https://bayit-beseder.vercel.app. Google OAuth working. WhatsApp daily brief (08:00) and evening summary (20:00) via Green API + Vercel Cron. Settings page has WhatsApp toggle with phone input. Notification center with bell icon, streak tracker with milestone progress, and weekly challenge component added to dashboard.
+Phase 1-9 complete + Phase 10 (Auto-Schedule Engine, Room Conditions, Couple Rewards) done. App LIVE. 107 tests passing. Auto-scheduler cron runs daily at 01:00 Israel time, generates task_instances from 53 templates with rotation assignment. Room condition bars show health per category (green→red degradation). Couple rewards system with 10 Hebrew rewards unlockable through cooperative gameplay.
+
+## Phase 10: Auto-Schedule + Room Conditions + Couple Rewards [DONE]
+### Auto-Schedule Engine
+- [x] `auto-scheduler.ts` - Core scheduling: isTemplateDueOnDate (all 6 recurrence types), getTemplatesDueOnDate, selectAssignee (rotation logic), generateTaskInstances (batch create with dedup)
+- [x] `api/cron/auto-schedule/route.ts` - Vercel Cron endpoint, runs daily at 01:00 Israel (22:00 UTC), generates rolling 7-day window
+- [x] `vercel.json` updated with auto-schedule cron entry
+- [x] 24 tests for scheduling logic (recurrence, assignment rotation, date utilities)
+
+### Room Conditions (Tody-style)
+- [x] `room-health.ts` - computeRoomHealth (linear degradation based on recurrence), getHealthColor (green/yellow/orange/red), getHealthLabel (Hebrew), computeCategoryHealth (average per category)
+- [x] `room-conditions.tsx` - Visual bars per category sorted by worst health first, animated with framer-motion, clickable for category filtering
+- [x] 20 tests for room health calculations
+
+### Couple Rewards System
+- [x] `rewards.ts` - 10 cooperative Hebrew rewards (combined_streak, weekly_tasks, golden_rule, category_complete, total_tasks, both_daily), computeRewardsProgress, getNextReward, getUnlockedCount
+- [x] `couple-rewards.tsx` - Grid of reward cards with lock/unlock states, progress bars, sparkle animations on unlocked, glow on near-unlock (>75%)
+- [x] 18 tests for reward progress calculations
+- [x] Both components integrated into dashboard
 
 ## Phase 9: Notifications & Gamification Enhancement [DONE]
 - [x] `useNotifications` hook with mock data, add/dismiss/markAsRead/markAllAsRead

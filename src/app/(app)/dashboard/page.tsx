@@ -7,12 +7,16 @@ import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { PartnerStatus } from "@/components/dashboard/partner-status";
 import { EmergencyToggle } from "@/components/dashboard/emergency-toggle";
 import { WeeklySummaryCards } from "@/components/dashboard/weekly-summary-cards";
+import { RoomConditions } from "@/components/dashboard/room-conditions";
 import { CelebrationOverlay } from "@/components/gamification/celebration-overlay";
 import { CoachingBubble } from "@/components/gamification/coaching-bubble";
 import { StreakTracker } from "@/components/gamification/streak-tracker";
 import { WeeklyChallenge } from "@/components/gamification/weekly-challenge";
+import { CoupleRewards } from "@/components/gamification/couple-rewards";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { getRandomMessage } from "@/lib/coaching-messages";
+import { computeRoomHealth, getHealthColor } from "@/lib/room-health";
+import { computeRewardsProgress } from "@/lib/rewards";
 import { useProfile } from "@/hooks/useProfile";
 import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
@@ -228,6 +232,52 @@ export default function DashboardPage() {
     [allCompletions]
   );
 
+  // Room conditions - compute health per category from task completions
+  const CATEGORY_INFO: Record<string, { label: string; icon: string; color: string }> = {
+    kitchen: { label: "מטבח", icon: "🍽️", color: "#F59E0B" },
+    bathroom: { label: "אמבטיה", icon: "🚿", color: "#3B82F6" },
+    living: { label: "סלון", icon: "🛋️", color: "#8B5CF6" },
+    bedroom: { label: "חדר שינה", icon: "🛏️", color: "#EC4899" },
+    laundry: { label: "כביסה", icon: "👕", color: "#06B6D4" },
+    outdoor: { label: "חוץ", icon: "🌿", color: "#84CC16" },
+    pets: { label: "חיות מחמד", icon: "🐱", color: "#F97316" },
+    general: { label: "כללי", icon: "🏠", color: "#10B981" },
+  };
+
+  const categoryHealthData = useMemo(() => {
+    // Compute health for each category based on completed tasks
+    const now = new Date();
+    const categoriesWithData = new Set<string>();
+    const latestByCategory: Record<string, Date> = {};
+
+    // Find latest completion per category from tasks
+    for (const t of tasks) {
+      categoriesWithData.add(t.category);
+      if (t.completed) {
+        const existing = latestByCategory[t.category];
+        if (!existing || now > existing) {
+          latestByCategory[t.category] = now;
+        }
+      }
+    }
+
+    return Object.entries(CATEGORY_INFO)
+      .filter(([key]) => categoriesWithData.has(key) || key === "kitchen" || key === "bathroom" || key === "living")
+      .map(([key, info]) => ({
+        category: key,
+        label: info.label,
+        icon: info.icon,
+        color: info.color,
+        health: computeRoomHealth(latestByCategory[key] ?? null, "daily", now),
+      }));
+  }, [tasks]);
+
+  // Couple rewards progress
+  const rewardsProgress = useMemo(
+    () => computeRewardsProgress([], { user1Streak: streakCount, user2Streak: Math.max(streakCount - 2, 0) }, 0, [], todayStr),
+    [streakCount, todayStr]
+  );
+
   return (
     <div className="px-4 py-6 space-y-5">
       {/* Header - Time-aware greeting + Notification Bell */}
@@ -296,6 +346,9 @@ export default function DashboardPage() {
         today={todayStr}
       />
 
+      {/* Room Conditions */}
+      <RoomConditions categoryHealthData={categoryHealthData} />
+
       {/* Partner Status */}
       <div>
         <h2 className="font-semibold text-foreground px-1 mb-2">השותף/ה</h2>
@@ -310,6 +363,9 @@ export default function DashboardPage() {
           ]}
         />
       </div>
+
+      {/* Couple Rewards */}
+      <CoupleRewards rewardsProgress={rewardsProgress} />
 
       {/* Emergency Toggle */}
       <EmergencyToggle
