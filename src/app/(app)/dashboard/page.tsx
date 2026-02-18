@@ -9,12 +9,16 @@ import { EmergencyToggle } from "@/components/dashboard/emergency-toggle";
 import { WeeklySummaryCards } from "@/components/dashboard/weekly-summary-cards";
 import { CelebrationOverlay } from "@/components/gamification/celebration-overlay";
 import { CoachingBubble } from "@/components/gamification/coaching-bubble";
+import { StreakTracker } from "@/components/gamification/streak-tracker";
+import { WeeklyChallenge } from "@/components/gamification/weekly-challenge";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { getRandomMessage } from "@/lib/coaching-messages";
 import { useProfile } from "@/hooks/useProfile";
 import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
 import { useAppSounds } from "@/hooks/useAppSound";
+import { useNotifications } from "@/hooks/useNotifications";
 import { TaskListSkeleton } from "@/components/skeleton";
 import { RingSkeleton } from "@/components/skeleton";
 
@@ -74,6 +78,13 @@ export default function DashboardPage() {
   const { completions: allCompletions, markComplete } = useCompletions({ limit: 200 });
   const { categoryMap } = useCategories();
   const { playComplete, playAchievement, playStreak } = useAppSounds();
+  const {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    dismiss,
+  } = useNotifications();
 
   // ---- Determine if we should use DB data or mock ----
   const hasDbTasks = !tasksLoading && dbTasks.length > 0;
@@ -211,10 +222,26 @@ export default function DashboardPage() {
     setTimeout(() => setCoaching((prev) => ({ ...prev, visible: false })), 3000);
   }, []);
 
+  // Build completion dates array for streak tracker + weekly challenge
+  const completionDates = useMemo(
+    () => allCompletions.map((c) => c.completed_at),
+    [allCompletions]
+  );
+
   return (
     <div className="px-4 py-6 space-y-5">
-      {/* Header - Time-aware greeting */}
-      <div className="text-center">
+      {/* Header - Time-aware greeting + Notification Bell */}
+      <div className="relative text-center">
+        {/* Notification bell - positioned top-left (RTL: visually top-right) */}
+        <div className="absolute top-0 left-0">
+          <NotificationCenter
+            notifications={notifications}
+            unreadCount={unreadCount}
+            markAsRead={markAsRead}
+            markAllAsRead={markAllAsRead}
+            dismiss={dismiss}
+          />
+        </div>
         <h1 className="text-xl font-bold text-foreground">{greeting}</h1>
         <p className="text-sm text-muted">{getHebrewDate()}</p>
         {tasks.length > 0 && (
@@ -239,6 +266,20 @@ export default function DashboardPage() {
 
       {/* Streak */}
       <StreakDisplay count={streakCount} bestCount={12} />
+
+      {/* Streak Tracker - consecutive day tracking */}
+      <StreakTracker
+        completionDates={completionDates}
+        today={todayStr}
+        bestStreak={12}
+      />
+
+      {/* Weekly Challenge */}
+      <WeeklyChallenge
+        completionDates={completionDates}
+        today={todayStr}
+        target={5}
+      />
 
       {/* Today's Tasks */}
       {tasksLoading ? (

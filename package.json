@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test src/__tests__/task-stats.test.mjs"
+    "test": "node --test src/__tests__/task-stats.test.mjs src/__tests__/notifications.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
