@@ -37,11 +37,9 @@ export function useProfile(): UseProfileReturn {
         return;
       }
 
-      // Query the profiles table - uses the existing schema columns
-      // Include 'name' as fallback for profiles created by the DB trigger
       const { data, error: fetchError } = await supabase
         .from("profiles")
-        .select("id, name, display_name, avatar_url, points, streak, household_id, created_at, updated_at")
+        .select("id, display_name, avatar_url, points, streak, partner_id, household_id, created_at, updated_at")
         .eq("id", user.id)
         .single();
 
@@ -50,14 +48,13 @@ export function useProfile(): UseProfileReturn {
         setError(fetchError.message);
         setProfile(null);
       } else if (data) {
-        // Map from the existing profiles table shape to the simplified ProfileRow
-        // Use display_name if set, otherwise fall back to name column
         setProfile({
           id: data.id,
-          name: data.display_name ?? data.name ?? user.email?.split("@")[0] ?? "משתמש",
+          name: data.display_name ?? user.email?.split("@")[0] ?? "משתמש",
           avatar_url: data.avatar_url,
           points: data.points ?? 0,
           streak: data.streak ?? 0,
+          partner_id: data.partner_id ?? null,
           created_at: data.created_at,
         });
       }

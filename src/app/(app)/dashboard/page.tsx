@@ -12,6 +12,7 @@ import { getRandomMessage } from "@/lib/coaching-messages";
 import { useProfile } from "@/hooks/useProfile";
 import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
+import { useCategories } from "@/hooks/useCategories";
 
 // ============================================
 // Mock data (fallback when Supabase not connected)
@@ -27,6 +28,18 @@ const MOCK_TASKS: TaskItem[] = [
   { id: "8", title: "איוורור הבית", category: "general", estimated_minutes: 2, completed: true },
 ];
 
+// Map Hebrew category names to internal category keys for color/label lookups
+const CATEGORY_NAME_TO_KEY: Record<string, string> = {
+  "מטבח": "kitchen",
+  "אמבטיה": "bathroom",
+  "סלון": "living",
+  "חדר שינה": "bedroom",
+  "כביסה": "laundry",
+  "חוץ": "outdoor",
+  "חיות מחמד": "pets",
+  "כללי": "general",
+};
+
 function getHebrewDate(): string {
   return new Date().toLocaleDateString("he-IL", {
     weekday: "long",
@@ -39,8 +52,12 @@ export default function DashboardPage() {
   // ---- Supabase hooks ----
   const { profile } = useProfile();
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
-  const { tasks: dbTasks, loading: tasksLoading } = useTasks({ dueDate: todayStr });
+  const { tasks: dbTasks, loading: tasksLoading } = useTasks({
+    dueDate: todayStr,
+    realtime: true,
+  });
   const { markComplete } = useCompletions();
+  const { categoryMap } = useCategories();
 
   // ---- Determine if we should use DB data or mock ----
   const hasDbTasks = !tasksLoading && dbTasks.length > 0;
@@ -48,14 +65,22 @@ export default function DashboardPage() {
   // Convert DB tasks to TaskItem shape for TodayOverview
   const dbTaskItems: TaskItem[] = useMemo(
     () =>
-      dbTasks.map((t) => ({
-        id: t.id,
-        title: t.title,
-        category: "general", // category name from category_id would need a join; simplified
-        estimated_minutes: 10,
-        completed: t.status === "completed",
-      })),
-    [dbTasks]
+      dbTasks.map((t) => {
+        // Resolve category name from category_id using the categories table
+        const categoryName = t.category_id ? categoryMap[t.category_id] : null;
+        const categoryKey = categoryName
+          ? (CATEGORY_NAME_TO_KEY[categoryName] ?? "general")
+          : "general";
+
+        return {
+          id: t.id,
+          title: t.title,
+          category: categoryKey,
+          estimated_minutes: 10,
+          completed: t.status === "completed",
+        };
+      }),
+    [dbTasks, categoryMap]
   );
 
   // ---- Local state for mock tasks (fallback mode) ----

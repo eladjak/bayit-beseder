@@ -33,8 +33,6 @@ interface UseCompletionsReturn {
 /**
  * Hook for task completion operations.
  * Returns empty array (no error) when Supabase is not connected or table doesn't exist.
- *
- * Note: The "task_completions" table is from Phase 3 migration (001_initial.sql).
  */
 export function useCompletions(
   options: UseCompletionsOptions = {}
@@ -49,8 +47,7 @@ export function useCompletions(
 
     try {
       const supabase = createClient();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let query = (supabase as any)
+      let query = supabase
         .from("task_completions")
         .select("*")
         .order("completed_at", { ascending: false });
@@ -71,7 +68,7 @@ export function useCompletions(
         setError(fetchError.message);
         setCompletions([]);
       } else {
-        setCompletions((data as TaskCompletionRow[]) ?? []);
+        setCompletions(data ?? []);
       }
     } catch {
       setCompletions([]);
@@ -102,8 +99,7 @@ export function useCompletions(
           notes: params.notes ?? null,
         };
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error: insertError } = await (supabase as any)
+        const { data, error: insertError } = await supabase
           .from("task_completions")
           .insert(insertion)
           .select()
@@ -114,17 +110,14 @@ export function useCompletions(
           return null;
         }
 
-        const completion = data as TaskCompletionRow;
-
         // Also update the task status to completed
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await (supabase as any)
+        await supabase
           .from("tasks")
-          .update({ status: "completed" })
+          .update({ status: "completed" as const })
           .eq("id", params.taskId);
 
-        setCompletions((prev) => [completion, ...prev]);
-        return completion;
+        setCompletions((prev) => [data, ...prev]);
+        return data;
       } catch {
         return null;
       }
@@ -136,8 +129,7 @@ export function useCompletions(
     async (taskId: string): Promise<TaskCompletionRow[]> => {
       try {
         const supabase = createClient();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error: fetchError } = await (supabase as any)
+        const { data, error: fetchError } = await supabase
           .from("task_completions")
           .select("*")
           .eq("task_id", taskId)
@@ -148,7 +140,7 @@ export function useCompletions(
           return [];
         }
 
-        return (data as TaskCompletionRow[]) ?? [];
+        return data ?? [];
       } catch {
         return [];
       }

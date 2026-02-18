@@ -13,6 +13,8 @@ interface UseTasksOptions {
   dueDate?: string;
   /** Filter by category_id */
   categoryId?: string;
+  /** Enable Supabase Realtime subscription for live updates */
+  realtime?: boolean;
 }
 
 interface UseTasksReturn {
@@ -26,12 +28,8 @@ interface UseTasksReturn {
 }
 
 /**
- * Hook for CRUD operations on the tasks table.
+ * Hook for CRUD operations on the tasks table with optional Realtime subscription.
  * Returns empty array (no error) when Supabase is not connected or table doesn't exist.
- *
- * Note: The "tasks" table is from Phase 3 migration (001_initial.sql).
- * If the table hasn't been created yet, queries will fail gracefully and
- * the dashboard falls back to mock data.
  */
 export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
   const [tasks, setTasks] = useState<TaskRow[]>([]);
@@ -45,10 +43,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
     try {
       const supabase = createClient();
 
-      // Use rpc-style raw query since "tasks" is not in the generated Database type yet.
-      // The from() call will still work at runtime even if not in the TS type.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let query = (supabase as any).from("tasks").select("*");
+      let query = supabase.from("tasks").select("*");
 
       if (options.assignedTo) {
         query = query.eq("assigned_to", options.assignedTo);
@@ -72,7 +67,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
         setError(fetchError.message);
         setTasks([]);
       } else {
-        setTasks((data as TaskRow[]) ?? []);
+        setTasks(data ?? []);
       }
     } catch {
       // Supabase not available
@@ -87,12 +82,47 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
     fetchTasks();
   }, [fetchTasks]);
 
+  // Realtime subscription for live task updates
+  useEffect(() => {
+    if (!options.realtime) return;
+
+    try {
+      const supabase = createClient();
+      const channel = supabase
+        .channel("tasks-realtime")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "tasks" },
+          (payload) => {
+            if (payload.eventType === "INSERT") {
+              const newTask = payload.new as TaskRow;
+              setTasks((prev) => [newTask, ...prev]);
+            } else if (payload.eventType === "UPDATE") {
+              const updated = payload.new as TaskRow;
+              setTasks((prev) =>
+                prev.map((t) => (t.id === updated.id ? updated : t))
+              );
+            } else if (payload.eventType === "DELETE") {
+              const deleted = payload.old as { id: string };
+              setTasks((prev) => prev.filter((t) => t.id !== deleted.id));
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    } catch {
+      // Realtime not available - silently ignore
+    }
+  }, [options.realtime]);
+
   const createTask = useCallback(
     async (task: TaskInsert): Promise<TaskRow | null> => {
       try {
         const supabase = createClient();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error: insertError } = await (supabase as any)
+        const { data, error: insertError } = await supabase
           .from("tasks")
           .insert(task)
           .select()
@@ -103,22 +133,23 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
           return null;
         }
 
-        const newTask = data as TaskRow;
-        setTasks((prev) => [newTask, ...prev]);
-        return newTask;
+        // If not using realtime, update local state
+        if (!options.realtime) {
+          setTasks((prev) => [data, ...prev]);
+        }
+        return data;
       } catch {
         return null;
       }
     },
-    []
+    [options.realtime]
   );
 
   const updateTask = useCallback(
     async (id: string, updates: TaskUpdate): Promise<boolean> => {
       try {
         const supabase = createClient();
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error: updateError } = await (supabase as any)
+        const { error: updateError } = await supabase
           .from("tasks")
           .update(updates)
           .eq("id", id);
@@ -128,39 +159,46 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
           return false;
         }
 
-        // Update local state immutably
-        setTasks((prev) =>
-          prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
-        );
+        // If not using realtime, update local state immutably
+        if (!options.realtime) {
+          setTasks((prev) =>
+            prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
+          );
+        }
 
         return true;
       } catch {
         return false;
       }
     },
-    []
+    [options.realtime]
   );
 
-  const deleteTask = useCallback(async (id: string): Promise<boolean> => {
-    try {
-      const supabase = createClient();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: deleteError } = await (supabase as any)
-        .from("tasks")
-        .delete()
-        .eq("id", id);
+  const deleteTask = useCallback(
+    async (id: string): Promise<boolean> => {
+      try {
+        const supabase = createClient();
+        const { error: deleteError } = await supabase
+          .from("tasks")
+          .delete()
+          .eq("id", id);
 
-      if (deleteError) {
-        setError(deleteError.message);
+        if (deleteError) {
+          setError(deleteError.message);
+          return false;
+        }
+
+        // If not using realtime, update local state
+        if (!options.realtime) {
+          setTasks((prev) => prev.filter((t) => t.id !== id));
+        }
+        return true;
+      } catch {
         return false;
       }
-
-      setTasks((prev) => prev.filter((t) => t.id !== id));
-      return true;
-    } catch {
-      return false;
-    }
-  }, []);
+    },
+    [options.realtime]
+  );
 
   return {
     tasks,

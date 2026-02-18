@@ -9,15 +9,130 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      profiles: {
+      categories: {
         Row: {
           id: string;
           name: string;
-          email: string | null;
-          display_name: string | null;
+          icon: string | null;
+          color: string | null;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          icon?: string | null;
+          color?: string | null;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          icon?: string | null;
+          color?: string | null;
+        };
+        Relationships: [];
+      };
+      tasks: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          category_id: string | null;
+          assigned_to: string | null;
+          status: "pending" | "in_progress" | "completed" | "skipped";
+          due_date: string | null;
+          points: number;
+          recurring: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          category_id?: string | null;
+          assigned_to?: string | null;
+          status?: "pending" | "in_progress" | "completed" | "skipped";
+          due_date?: string | null;
+          points?: number;
+          recurring?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string | null;
+          category_id?: string | null;
+          assigned_to?: string | null;
+          status?: "pending" | "in_progress" | "completed" | "skipped";
+          due_date?: string | null;
+          points?: number;
+          recurring?: boolean;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "tasks_category_id_fkey";
+            columns: ["category_id"];
+            isOneToOne: false;
+            referencedRelation: "categories";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "tasks_assigned_to_fkey";
+            columns: ["assigned_to"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      task_completions: {
+        Row: {
+          id: string;
+          task_id: string;
+          user_id: string;
+          completed_at: string;
+          photo_url: string | null;
+          notes: string | null;
+        };
+        Insert: {
+          id?: string;
+          task_id: string;
+          user_id: string;
+          completed_at?: string;
+          photo_url?: string | null;
+          notes?: string | null;
+        };
+        Update: {
+          id?: string;
+          task_id?: string;
+          user_id?: string;
+          completed_at?: string;
+          photo_url?: string | null;
+          notes?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "task_completions_task_id_fkey";
+            columns: ["task_id"];
+            isOneToOne: false;
+            referencedRelation: "tasks";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "task_completions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      profiles: {
+        Row: {
+          id: string;
+          display_name: string;
           avatar_url: string | null;
           points: number;
           streak: number;
+          partner_id: string | null;
           push_subscription: Json | null;
           notification_preferences: {
             morning: boolean;
@@ -31,12 +146,11 @@ export type Database = {
         };
         Insert: {
           id: string;
-          name: string;
-          email?: string | null;
-          display_name?: string | null;
+          display_name: string;
           avatar_url?: string | null;
           points?: number;
           streak?: number;
+          partner_id?: string | null;
           push_subscription?: Json | null;
           notification_preferences?: {
             morning: boolean;
@@ -50,12 +164,11 @@ export type Database = {
         };
         Update: {
           id?: string;
-          name?: string;
-          email?: string | null;
-          display_name?: string | null;
+          display_name?: string;
           avatar_url?: string | null;
           points?: number;
           streak?: number;
+          partner_id?: string | null;
           push_subscription?: Json | null;
           notification_preferences?: {
             morning: boolean;
@@ -588,89 +701,39 @@ export type NotificationPreferences = NonNullable<
 >;
 
 // ============================================
-// Phase 3 - Simplified tables for hooks
+// Derived types from Database tables
 // ============================================
 
 /** Category row from the categories table */
-export interface CategoryRow {
-  id: string;
-  name: string;
-  icon: string | null;
-  color: string | null;
-}
+export type CategoryRow = Tables<"categories">;
 
 /** Task row from the tasks table */
-export interface TaskRow {
-  id: string;
-  title: string;
-  description: string | null;
-  category_id: string | null;
-  assigned_to: string | null;
-  status: "pending" | "in_progress" | "completed" | "skipped";
-  due_date: string | null;
-  points: number;
-  recurring: boolean;
-  created_at: string;
-}
+export type TaskRow = Tables<"tasks">;
 
 /** Insert shape for tasks table */
-export interface TaskInsert {
-  id?: string;
-  title: string;
-  description?: string | null;
-  category_id?: string | null;
-  assigned_to?: string | null;
-  status?: "pending" | "in_progress" | "completed" | "skipped";
-  due_date?: string | null;
-  points?: number;
-  recurring?: boolean;
-  created_at?: string;
-}
+export type TaskInsert = InsertTables<"tasks">;
 
 /** Update shape for tasks table */
-export interface TaskUpdate {
-  id?: string;
-  title?: string;
-  description?: string | null;
-  category_id?: string | null;
-  assigned_to?: string | null;
-  status?: "pending" | "in_progress" | "completed" | "skipped";
-  due_date?: string | null;
-  points?: number;
-  recurring?: boolean;
-}
+export type TaskUpdate = UpdateTables<"tasks">;
 
 /** Task completion row */
-export interface TaskCompletionRow {
-  id: string;
-  task_id: string;
-  user_id: string;
-  completed_at: string;
-  photo_url: string | null;
-  notes: string | null;
-}
+export type TaskCompletionRow = Tables<"task_completions">;
 
 /** Insert shape for task_completions */
-export interface TaskCompletionInsert {
-  id?: string;
-  task_id: string;
-  user_id: string;
-  completed_at?: string;
-  photo_url?: string | null;
-  notes?: string | null;
-}
+export type TaskCompletionInsert = InsertTables<"task_completions">;
 
-/** Profile row from Phase 3 profiles table (simplified) */
+/** Profile row (simplified view used by hooks) */
 export interface ProfileRow {
   id: string;
   name: string;
   avatar_url: string | null;
   points: number;
   streak: number;
+  partner_id: string | null;
   created_at: string;
 }
 
-/** Update shape for Phase 3 profiles */
+/** Update shape for profiles (used by hooks) */
 export interface ProfileUpdate {
   name?: string;
   avatar_url?: string | null;
