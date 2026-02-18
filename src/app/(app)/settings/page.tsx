@@ -15,6 +15,7 @@ import {
   Save,
   Loader2,
   Camera,
+  Volume2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -29,6 +30,7 @@ import {
   type NotificationPrefs,
 } from "@/lib/notifications";
 import { toast } from "sonner";
+import { setSoundEnabled } from "@/hooks/useAppSound";
 
 // ============================================
 // Theme helpers
@@ -100,6 +102,9 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState(false);
   const [goldenTarget, setGoldenTarget] = useState(80);
 
+  // Sound state
+  const [soundEnabled, setSoundEnabledState] = useState(true);
+
   // Theme & Language
   const [theme, setTheme] = useState<Theme>("light");
   const [language, setLanguage] = useState<Language>("he");
@@ -122,6 +127,11 @@ export default function SettingsPage() {
     setNotifPermission(getNotificationPermission());
     setTheme(getStoredTheme());
     setLanguage(getStoredLanguage());
+    setSoundEnabledState(
+      typeof window !== "undefined"
+        ? localStorage.getItem("bayit-sound-enabled") !== "false"
+        : true
+    );
   }, []);
 
   // Save profile
@@ -390,6 +400,23 @@ export default function SettingsPage() {
             />
           </>
         )}
+      </section>
+
+      {/* Sounds */}
+      <section className="bg-surface rounded-2xl p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <Volume2 className="w-4 h-4 text-muted" />
+          <h2 className="font-semibold text-sm">צלילים</h2>
+        </div>
+        <ToggleRow
+          label="צלילי אפליקציה"
+          enabled={soundEnabled}
+          onToggle={() => {
+            const next = !soundEnabled;
+            setSoundEnabledState(next);
+            setSoundEnabled(next);
+          }}
+        />
       </section>
 
       {/* Theme */}

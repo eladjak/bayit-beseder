@@ -1,178 +1,139 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Phase 6 Complete!
+## Status: LIVE - Phase 7 In Progress
 ## Last Updated: 2026-02-18
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-6 complete. App LIVE at https://bayit-beseder.vercel.app. Database fully connected with real Supabase queries. All hooks use proper TypeScript types (no `as any`). Phase 6 adds dashboard analytics (DashboardStats component), task history page (/history), pure utility library (task-stats.ts), and 25 unit tests via Node built-in test runner.
+Phase 1-6 complete + Phase 7A (animations, sounds, haptics) implemented. App LIVE at https://bayit-beseder.vercel.app. Google OAuth working. Onboarding tutorial built. Comprehensive improvement plan from 4-agent research session.
 
-## What Was Done
-- [x] Next.js 15 project scaffolded with TypeScript, Tailwind, App Router
-- [x] Supabase client utilities (browser, server, middleware)
-- [x] Full database types (10 tables + Phase 3 simplified types)
-- [x] SQL migration with RLS and Realtime (original: supabase/migration.sql)
-- [x] Google OAuth login page
-- [x] OAuth callback with auto profile creation
-- [x] App shell with RTL layout, Heebo font, bottom navigation
-- [x] Dashboard page with GoldenRuleRing, task overview, streak, partner status
-- [x] Tasks page with category filtering
-- [x] Weekly coordination sync page (5-step with timer)
-- [x] Stats page with Recharts (bar chart, pie chart)
-- [x] Emergency mode page (simplified, calming)
-- [x] Settings page (profile, household, notifications, golden rule slider)
-- [x] Gamification: CelebrationOverlay with confetti, AchievementUnlock, CoachingBubble
-- [x] 50+ Hebrew coaching messages across 7 trigger types
-- [x] 15 achievement definitions
-- [x] 53 task templates from home maintenance plan v5.0
-- [x] Seed data with category helpers
-- [x] PWA manifest
-- [x] Build passes with zero TypeScript errors
-- [x] Deployed to Vercel (production)
-- [x] Vercel env vars configured (SUPABASE_URL + ANON_KEY)
-- [x] **Phase 3: Supabase migration (supabase/migrations/001_initial.sql)**
-- [x] **Phase 3: lib/supabase.ts singleton client utility**
-- [x] **Phase 3: useProfile hook (get/update user profile)**
-- [x] **Phase 3: useTasks hook (CRUD operations for tasks)**
-- [x] **Phase 3: useCompletions hook (mark complete, get history)**
-- [x] **Phase 3: Dashboard updated with Supabase hooks + mock data fallback**
-- [x] **Phase 3: Phase 3 types (ProfileRow, TaskRow, TaskCompletionRow, etc.)**
-- [x] **Phase 4: Auth library (src/lib/auth.ts)**
-- [x] **Phase 4: useAuth hook (src/hooks/useAuth.ts)**
-- [x] **Phase 4: Login page enhanced**
-- [x] **Phase 4: Registration page**
-- [x] **Phase 4: AuthGuard component**
-- [x] **Phase 4: Service worker + push notifications**
-- [x] **Phase 4: Settings page rewritten**
-- [x] **Phase 4: Dark mode CSS variables**
-- [x] **Phase 5: Migration 002 - partner_id, points/streak columns, Realtime on tasks**
-- [x] **Phase 5: Database types updated - tasks, categories, task_completions added to Database type**
-- [x] **Phase 5: All hooks rewritten - removed `as any` casts, proper TypeScript typing**
-- [x] **Phase 5: useCategories hook created - fetches categories, provides categoryMap**
-- [x] **Phase 5: useTasks hook - Supabase Realtime subscription for live task updates**
-- [x] **Phase 5: Dashboard uses categories for proper task labels on DB data**
-- [x] **Phase 5: Tasks page connected to Supabase - create/complete/delete real tasks**
-- [x] **Phase 5: lib/supabase.ts - added isSupabaseConfigured() helper**
-- [x] **Phase 5: Auto-increment points trigger on task completion**
-- [x] **Phase 5: Auto-update streak trigger when all daily tasks complete**
-- [x] **Phase 5: Mock data preserved as fallback (demo mode)**
-- [x] **Phase 6: DashboardStats component - summary cards, category breakdown bars, upcoming count, CSS bar chart**
-- [x] **Phase 6: task-stats.ts - pure utility functions (addDays, computeCategoryStats, computeMonthlyData, countUpcomingTasks, computeCompletionRate)**
-- [x] **Phase 6: Task History page (/history) - completed tasks list with search, category filter, date sort**
-- [x] **Phase 6: Stats page updated - DashboardStats shown when DB data available + history link**
-- [x] **Phase 6: 25 unit tests via Node built-in test runner (no new dependencies)**
-- [x] **Phase 6: npm test script added**
+## Phase 7: Animations, Sounds & Polish (CURRENT)
 
-## Phase 5 Details
+### Phase 7A - Animations & Polish [DONE]
+- [x] Staggered task list with spring variants (cascading waterfall effect)
+- [x] Animated check circle with ripple effect on task completion
+- [x] Bottom nav sliding indicator (framer-motion layoutId)
+- [x] Enhanced streak fire animation (multi-axis: scale + rotation + vertical movement)
+- [x] Partner activity pulse dot + staggered task entries
+- [x] "streak" confetti type in celebration overlay (fireworks-style burst)
+- [x] Achievement unlock slide-up from bottom with radial glow
+- [x] Golden rule ring glow pulse when target hit
+- [x] Loading skeleton components (TaskSkeleton, StatCardSkeleton, RingSkeleton)
+- [x] Shimmer + badge-pulse CSS animations in globals.css
+- [x] Touch press feedback (active:scale-[0.98])
 
-### Migration (supabase/migrations/002_phase5_connect_real_data.sql)
-- Adds `partner_id` column to profiles (uuid FK to self)
-- Adds `points` and `streak` columns to profiles (if not exist)
-- Enables Realtime on `tasks` and `task_completions` tables
-- Index on `profiles(partner_id)` for partner lookups
-- Trigger: `increment_points_on_completion` - auto-adds points when task completed
-- Trigger: `update_daily_streak` - increments streak when all daily tasks done
+### Phase 7B - Sounds & Haptics [DONE]
+- [x] `use-sound` library installed (lazy-loads howler.js)
+- [x] `useAppSound` hook with per-sound lazy loading
+- [x] `useReducedMotion` hook for accessibility
+- [x] `haptics.ts` utility with 5 patterns (tap, success, error, notification, celebration)
+- [x] 6 MP3 sound files generated (complete, achievement, streak, partner, error, tap) - 17KB total
+- [x] Sound toggle in Settings page
+- [x] Haptic feedback on task completion and celebrations
+- [x] AnimatedNumber component for dashboard stat counters
 
-### Database Types (src/lib/types/database.ts)
-- Added `categories`, `tasks`, `task_completions` to the `Database` type
-- Added `partner_id` to profiles type
-- Derived types: `TaskRow`, `TaskInsert`, `TaskUpdate`, `TaskCompletionRow`, etc. now come from `Tables<>` helpers
-- Removed duplicate Phase 3 interface definitions
+### Phase 7C - Onboarding [DONE - previous session]
+- [x] 5-step onboarding tutorial (Welcome, Tasks, Teamwork, Reminders, PWA Install)
+- [x] Platform-specific PWA install instructions (iPhone/Android)
+- [x] Shows once on first visit (localStorage flag)
 
-### Hooks Updated (src/hooks/)
-- **useProfile.ts**: Fetches partner_id, points, streak from DB; maps display_name to name
-- **useTasks.ts**: Removed all `as any` casts; added `realtime` option for live Postgres changes subscription; handles INSERT/UPDATE/DELETE events
-- **useCompletions.ts**: Removed all `as any` casts; fully typed Supabase queries
-- **useCategories.ts** (NEW): Fetches categories from DB; provides `categoryMap` (id->name) and `getCategoryById`
+## Comprehensive Improvement Roadmap
 
-### Dashboard Integration
-- Uses `useCategories` to resolve category_id to Hebrew category name for proper color/label display
-- Enables Realtime on tasks (`realtime: true`)
-- Maps Hebrew category names from DB to internal category keys for getCategoryColor/getCategoryLabel
+Based on 4-agent professional research session (Product Research, UX Design, Integrations Architecture, Motion Design):
 
-### Tasks Page Integration
-- Connected to `useTasks` with Realtime subscription
-- **Create**: Add task form with title input and category selection; creates task in DB with today's date
-- **Complete**: Toggle marks task complete via `useCompletions.markComplete`; also un-completes by setting status back to pending
-- **Delete**: Delete button per task, removes from DB
-- Category filter works on both DB tasks and mock tasks
-- Falls back to `TASK_TEMPLATES_SEED` mock data when no DB tasks available
-- UI design unchanged
+### Phase 8: WhatsApp + Auto-Scheduling (HIGH IMPACT)
+- [ ] WhatsApp daily brief via Green API (08:00 morning tasks, 20:00 summary)
+- [ ] Reply-to-complete: mark tasks done from WhatsApp
+- [ ] Auto-schedule from 53 task templates (kill the "project manager" burden)
+- [ ] Task rotation based on Golden Rule slider ratio
+- [ ] "We" framing on dashboard ("Together: 12/15 tasks" not individual scores)
+- [ ] Friday celebration message with weekly couple stats
 
-### lib/supabase.ts
-- Added `isSupabaseConfigured()` utility to check if env vars are set
+### Phase 9: Google Calendar + Room Conditions
+- [ ] Google Calendar two-way sync (OAuth2 + Calendar API)
+- [ ] Color-coded events: Elad = blue, Inbal = pink, Shared = purple
+- [ ] Room condition bars (Tody-style visual degradation: green → yellow → red)
+- [ ] "Biggest impact tasks first" prioritization
+- [ ] Energy-aware task selection (difficulty 1-3, "tired mode")
 
-## Phase 3 Details
+### Phase 10: Engagement & Gamification
+- [ ] Couple reward system (define meaningful rewards, cooperative unlocks)
+- [ ] Routine playlists with timer ("Kitchen Evening: 10 min total")
+- [ ] Enhanced weekly sync with auto-populated data
+- [ ] Adaptive coaching (track which messages lead to completions)
+- [ ] Seasonal/contextual tips (Pesach deep clean, Friday pre-Shabbat mode)
 
-### Migration (supabase/migrations/001_initial.sql)
-- profiles: id (uuid PK -> auth.users), name, avatar_url, points, streak, created_at
-- categories: id (uuid PK), name, icon, color (seeded with 8 Hebrew categories)
-- tasks: id (uuid PK), title, description, category_id, assigned_to, status, due_date, points, recurring, created_at
-- task_completions: id (uuid PK), task_id, user_id, completed_at, photo_url, notes
-- RLS policies for all 4 tables
-- Auto-create profile trigger on auth.users insert
-- Indexes for performance
+### Phase 11: Polish & Infrastructure
+- [ ] Web Push with VAPID keys (server-side notifications)
+- [ ] Partner invitation flow (WhatsApp link, not email)
+- [ ] Home inventory / shopping list
+- [ ] Avatar upload to Supabase Storage
+- [ ] English translation (i18n)
+- [ ] Full dark mode refinement
 
-## Phase 4 Details
+## Key Research Insights
 
-### Auth Integration
-- **src/lib/auth.ts**: signUp, signIn, signInWithGoogle, signOut, resetPassword, getCurrentUser
-- **src/hooks/useAuth.ts**: tracks user/session, listens for onAuthStateChange
-- **Login page**: email/password form + Google OAuth + inline password reset + demo mode entry
-- **Register page**: name/email/password/confirm + Google OAuth + email confirmation handling
-- **AuthGuard**: wraps app routes, allowDemo=true for mock data fallback
+### Why Couples Abandon Chore Apps (from market research):
+1. **"Project Manager" Burden** - One partner manages the app itself → it becomes another chore
+2. **Defensive Reactions to Data** - Imbalance data causes arguments, not motivation
+3. **No Buy-In from Less-Engaged Partner** - If one never opens it, system fails
+4. **Notification Fatigue** - Too many reminders feel like nagging
+5. **Gamification Novelty Wears Off** - Points exciting for 2 weeks, then fade
 
-### Push Notifications (PWA)
-- **public/sw.js**: Static caching, push handler (Hebrew RTL), notification click, periodic sync
-- **src/lib/notifications.ts**: Permission management, scheduled reminders
-- **NotificationBanner**: In-app prompt on first visit
-- **ServiceWorkerRegistrar**: Auto-registers SW on mount
+### What Sustains Long-Term Usage:
+- Both partners set up app together
+- Both choose their own tasks (not one assigning to other)
+- "We" framing, not scorekeeping
+- AI/automation handles scheduling (neither partner is "manager")
+- WhatsApp integration (98% open rate vs 3-5% for push)
+- Meaningful relationship-tied rewards
 
-### Settings Page
-- Profile editing with real useProfile data and Supabase save
-- Notification preferences with master + individual toggles (localStorage)
-- Theme toggle: Light / Dark / System
-- Language selector: Hebrew / English (stored, English marked "coming soon")
+### BayitBeSeder Unique Advantages:
+- Hebrew-first RTL (no competitor has this)
+- WhatsApp via existing Kami/Green API infrastructure
+- Couple-only focus (2 people, no kid/chore-chart bloat)
+- 53 task templates + Hebrew coaching messages already built
+- Culturally-aware (Shabbat, chagim, Israeli apartment layouts)
 
-## Completed Setup
-- [x] SQL migration run via Management API (12 tables + 8 categories seeded)
-- [x] Google OAuth enabled in Supabase
-- [x] Site URL set to https://bayit-beseder.vercel.app
-- [x] Redirect URLs configured
-- [x] RLS policies on all tables
-- [x] Realtime enabled on task_instances, households, streaks, tasks, task_completions
+## Phase History
 
-## Files Created (Phase 5)
-- src/hooks/useCategories.ts - Categories data hook
-- supabase/migrations/002_phase5_connect_real_data.sql - Phase 5 migration
+### Phase 1-4: Foundation, Auth, UI
+- Next.js 15, TypeScript, Tailwind, Supabase
+- Google OAuth, PWA manifest, push notifications
+- Dashboard, tasks, weekly sync, stats, settings, emergency mode
+- Gamification: confetti, achievements, coaching bubbles
 
-## Files Modified (Phase 5)
-- src/lib/types/database.ts - Added tasks/categories/task_completions to Database type, added partner_id
-- src/lib/supabase.ts - Added isSupabaseConfigured()
-- src/hooks/useProfile.ts - Fetches partner_id, points, streak; removed name fallback column
-- src/hooks/useTasks.ts - Rewritten: removed `as any`, added Realtime subscription
-- src/hooks/useCompletions.ts - Rewritten: removed `as any`, fully typed
-- src/app/(app)/dashboard/page.tsx - Uses useCategories for proper category resolution
-- src/app/(app)/tasks/page.tsx - Connected to Supabase: create/complete/delete tasks
+### Phase 5: Real Data Connection
+- All hooks rewritten with proper TypeScript (no `as any`)
+- Realtime subscriptions on tasks
+- Auto-increment points/streak triggers
+- Categories from Supabase DB
 
-## Future Steps
-1. Run migration 002 in Supabase SQL Editor
-2. Task instance generation logic (template -> daily instances)
-3. VAPID keys for server-side push notifications
-4. Partner status from real data (using partner_id)
-5. Avatar upload to Supabase Storage
-6. English translation (i18n)
-7. Full dark mode theme refinement
+### Phase 6: Analytics & Testing
+- DashboardStats component, task history page
+- Pure utility library (task-stats.ts)
+- 25 unit tests via Node test runner
 
-## Notes for Next Session
-- Phase 5 complete with 0 TypeScript errors and successful build
-- Migration 002 needs to be run in Supabase SQL Editor to add partner_id, points, streak columns
-- All hooks now use proper TypeScript types - no more `as any` casts
-- Realtime subscription enabled on useTasks with `realtime: true` option
-- Tasks page now supports creating, completing, and deleting tasks in DB mode
-- Categories are fetched from DB and mapped to internal keys for color/label display
-- Mock data fallback still works when no DB tasks or when in demo mode
-- The auto-increment points trigger fires on task_completions INSERT
-- The auto-update streak trigger checks if all daily tasks are done
+## Files Created (Phase 7)
+- src/hooks/useAppSound.ts - Sound effect hook (use-sound wrapper)
+- src/hooks/useReducedMotion.ts - Reduced motion accessibility hook
+- src/lib/haptics.ts - Haptic vibration patterns (5 patterns)
+- src/components/skeleton.tsx - Loading skeleton components
+- src/components/animated-number.tsx - Animated count-up display
+- src/components/Onboarding.tsx - 5-step onboarding tutorial
+- public/sounds/*.mp3 - 6 UI sound effects (17KB total)
+
+## Files Modified (Phase 7)
+- src/components/dashboard/today-overview.tsx - Staggered variants, animated check with ripple, haptic
+- src/components/bottom-nav.tsx - layoutId sliding indicator
+- src/components/dashboard/streak-display.tsx - Multi-axis flame animation
+- src/components/dashboard/partner-status.tsx - Pulse dot, staggered entries
+- src/components/dashboard/golden-rule-ring.tsx - Glow pulse on target hit
+- src/components/gamification/celebration-overlay.tsx - "streak" confetti type, haptic
+- src/components/gamification/achievement-unlock.tsx - Slide-up + radial glow, haptic
+- src/app/(app)/settings/page.tsx - Sound toggle section
+- src/app/(app)/layout.tsx - Onboarding component added
+- src/app/globals.css - Shimmer + badge-pulse animations
+- package.json - Added use-sound dependency

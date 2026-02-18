@@ -4,8 +4,9 @@ import { useEffect, useCallback } from "react";
 import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
+import { haptic } from "@/lib/haptics";
 
-type CelebrationType = "task" | "all_daily" | "golden_rule";
+type CelebrationType = "task" | "all_daily" | "golden_rule" | "streak";
 
 interface CelebrationOverlayProps {
   type: CelebrationType;
@@ -51,6 +52,24 @@ export function CelebrationOverlay({
         if (Date.now() < end) requestAnimationFrame(frame);
       };
       frame();
+    } else if (type === "streak") {
+      // Fireworks-style burst for streak milestones
+      const colors = ["#FF6B35", "#FF4500", "#FFD700", "#FFA500"];
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+          confetti({
+            particleCount: 25,
+            spread: 50,
+            startVelocity: 35,
+            origin: {
+              x: 0.2 + Math.random() * 0.6,
+              y: 0.4 + Math.random() * 0.3,
+            },
+            colors,
+            ticks: 100,
+          });
+        }, i * 300);
+      }
     } else {
       confetti({
         particleCount: 100,
@@ -64,6 +83,7 @@ export function CelebrationOverlay({
 
   useEffect(() => {
     if (visible) {
+      haptic("celebration");
       fireConfetti();
       const timer = setTimeout(onDismiss, 2500);
       return () => clearTimeout(timer);

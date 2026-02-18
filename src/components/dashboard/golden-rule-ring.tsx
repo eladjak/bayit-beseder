@@ -53,6 +53,28 @@ export function GoldenRuleRing({
             strokeLinecap="round"
             style={{ stroke: "var(--color-muted)", opacity: 0.5 }}
           />
+          {/* Glow pulse when target hit */}
+          {hitTarget && (
+            <motion.circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              fill="none"
+              stroke={color}
+              strokeWidth={strokeWidth + 4}
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={offset}
+              opacity={0}
+              animate={{ opacity: [0, 0.3, 0] }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              style={{ filter: "blur(4px)" }}
+            />
+          )}
           {/* Progress arc */}
           <motion.circle
             cx={size / 2}
