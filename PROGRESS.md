@@ -1,6 +1,6 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Phase 8 WhatsApp Integration In Progress
+## Status: LIVE - Phase 8 WhatsApp Integration ACTIVE
 ## Last Updated: 2026-02-18
 
 ## Live URL
@@ -53,7 +53,8 @@ Based on 4-agent professional research session (Product Research, UX Design, Int
 - [x] WhatsApp settings section in Settings page (toggle + phone input)
 - [x] vercel.json cron configuration
 - [x] .env.example with all required env vars
-- [ ] Set env vars in Vercel dashboard (GREEN_API_*, CRON_SECRET, SUPABASE_SERVICE_ROLE_KEY, WHATSAPP_PHONES)
+- [x] Env vars set in Vercel (GREEN_API_*, CRON_SECRET, SUPABASE_SERVICE_ROLE_KEY, WHATSAPP_PHONES)
+- [x] WhatsApp send tested successfully (idMessage: 3EB0DFAD8167AA65FF3B3E)
 - [ ] Reply-to-complete: mark tasks done from WhatsApp (needs dedicated Green API instance)
 - [ ] Auto-schedule from 53 task templates (kill the "project manager" burden)
 - [ ] Task rotation based on Golden Rule slider ratio
