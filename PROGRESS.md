@@ -1,13 +1,13 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Phase 7 Complete + Dashboard Analytics
+## Status: LIVE - Phase 8 WhatsApp Integration In Progress
 ## Last Updated: 2026-02-18
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-7 complete + Dashboard Analytics phase implemented. App LIVE at https://bayit-beseder.vercel.app. Google OAuth working. New features: monthly calendar view, weekly summary cards on dashboard, enhanced history page with relative timestamps + points badges, Recharts weekly completion trend with real data, and buildCalendarMonth/computeWeeklyTrend utility functions.
+Phase 1-7 complete + Dashboard Analytics + Phase 8 WhatsApp integration started. App LIVE at https://bayit-beseder.vercel.app. Google OAuth working. WhatsApp daily brief (08:00) and evening summary (20:00) via Green API + Vercel Cron. Settings page has WhatsApp toggle with phone input.
 
 ## Phase 7: Animations, Sounds & Polish (CURRENT)
 
@@ -43,13 +43,21 @@ Phase 1-7 complete + Dashboard Analytics phase implemented. App LIVE at https://
 
 Based on 4-agent professional research session (Product Research, UX Design, Integrations Architecture, Motion Design):
 
-### Phase 8: WhatsApp + Auto-Scheduling (HIGH IMPACT)
-- [ ] WhatsApp daily brief via Green API (08:00 morning tasks, 20:00 summary)
-- [ ] Reply-to-complete: mark tasks done from WhatsApp
+### Phase 8: WhatsApp + Auto-Scheduling (HIGH IMPACT) [IN PROGRESS]
+- [x] Green API client (src/lib/whatsapp.ts) - send-only, shared instance with Kami
+- [x] Hebrew message templates (src/lib/whatsapp-messages.ts) - morning brief, evening summary, Friday celebration
+- [x] API route: POST /api/whatsapp/send (protected by CRON_SECRET)
+- [x] Vercel Cron: GET /api/cron/daily-brief (08:00 Israel time)
+- [x] Vercel Cron: GET /api/cron/daily-summary (20:00 Israel time)
+- [x] Friday weekly celebration message with couple stats
+- [x] WhatsApp settings section in Settings page (toggle + phone input)
+- [x] vercel.json cron configuration
+- [x] .env.example with all required env vars
+- [ ] Set env vars in Vercel dashboard (GREEN_API_*, CRON_SECRET, SUPABASE_SERVICE_ROLE_KEY, WHATSAPP_PHONES)
+- [ ] Reply-to-complete: mark tasks done from WhatsApp (needs dedicated Green API instance)
 - [ ] Auto-schedule from 53 task templates (kill the "project manager" burden)
 - [ ] Task rotation based on Golden Rule slider ratio
-- [ ] "We" framing on dashboard ("Together: 12/15 tasks" not individual scores)
-- [ ] Friday celebration message with weekly couple stats
+- [x] "We" framing on dashboard ("Together: 12/15 tasks" not individual scores) - done in Phase 7
 
 ### Phase 9: Google Calendar + Room Conditions
 - [ ] Google Calendar two-way sync (OAuth2 + Calendar API)

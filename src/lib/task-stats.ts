@@ -180,6 +180,137 @@ export function countCompletedThisWeek(
   }).length;
 }
 
+/**
+ * Count tasks completed within the last 30 days (today inclusive).
+ */
+export function countCompletedThisMonth(
+  completions: TaskCompletionRow[],
+  today: string
+): number {
+  const monthAgo = addDays(today, -29);
+  return completions.filter((c) => {
+    const d = c.completed_at.slice(0, 10);
+    return d >= monthAgo && d <= today;
+  }).length;
+}
+
+// ============================================
+// Partner comparison
+// ============================================
+
+export interface PartnerComparison {
+  myCount: number;
+  partnerCount: number;
+  myUserId: string;
+  partnerUserId: string;
+}
+
+/**
+ * Compare completions between two users for the current week.
+ */
+export function computePartnerComparison(
+  completions: TaskCompletionRow[],
+  myUserId: string,
+  partnerUserId: string,
+  today: string
+): PartnerComparison {
+  const weekAgo = addDays(today, -6);
+  let myCount = 0;
+  let partnerCount = 0;
+
+  for (const c of completions) {
+    const d = c.completed_at.slice(0, 10);
+    if (d < weekAgo || d > today) continue;
+    if (c.user_id === myUserId) myCount += 1;
+    else if (c.user_id === partnerUserId) partnerCount += 1;
+  }
+
+  return { myCount, partnerCount, myUserId, partnerUserId };
+}
+
+// ============================================
+// Category breakdown from completions (real data)
+// ============================================
+
+export interface CategoryBreakdownItem {
+  name: string;
+  value: number;
+  category: string;
+}
+
+/**
+ * Compute category breakdown from completions + tasks.
+ * Returns percentage-based data suitable for pie chart.
+ */
+export function computeCategoryBreakdown(
+  completions: TaskCompletionRow[],
+  tasks: TaskRow[],
+  categoryIdToKey: Record<string, string>
+): CategoryBreakdownItem[] {
+  const taskById: Record<string, TaskRow> = {};
+  for (const t of tasks) {
+    taskById[t.id] = t;
+  }
+
+  const counts: Record<string, number> = {};
+  let total = 0;
+
+  for (const c of completions) {
+    const task = taskById[c.task_id];
+    if (!task) continue;
+    const key = task.category_id
+      ? (categoryIdToKey[task.category_id] ?? "general")
+      : "general";
+    counts[key] = (counts[key] ?? 0) + 1;
+    total += 1;
+  }
+
+  if (total === 0) return [];
+
+  return Object.entries(counts)
+    .map(([key, count]) => ({
+      name: getCategoryLabel(key),
+      value: Math.round((count / total) * 100),
+      category: key,
+    }))
+    .sort((a, b) => b.value - a.value);
+}
+
+// ============================================
+// Streak history (for visualization)
+// ============================================
+
+export interface StreakDay {
+  date: string;
+  hadActivity: boolean;
+}
+
+/**
+ * Build an array of the last N days showing whether there was a completion.
+ * Useful for streak visualization.
+ */
+export function buildStreakHistory(
+  completions: TaskCompletionRow[],
+  today: string,
+  days: number = 14
+): StreakDay[] {
+  const completionDates = new Set<string>();
+  for (const c of completions) {
+    completionDates.add(c.completed_at.slice(0, 10));
+  }
+
+  const result: StreakDay[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const date = addDays(today, -i);
+    result.push({
+      date,
+      hadActivity: completionDates.has(date),
+    });
+  }
+
+  return result;
+}
+
 // ============================================
 // Calendar data
 // ============================================

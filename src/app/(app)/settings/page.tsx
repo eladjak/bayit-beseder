@@ -16,6 +16,7 @@ import {
   Loader2,
   Camera,
   Volume2,
+  MessageCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -105,6 +106,10 @@ export default function SettingsPage() {
   // Sound state
   const [soundEnabled, setSoundEnabledState] = useState(true);
 
+  // WhatsApp state
+  const [whatsappEnabled, setWhatsappEnabled] = useState(false);
+  const [whatsappPhone, setWhatsappPhone] = useState("");
+
   // Theme & Language
   const [theme, setTheme] = useState<Theme>("light");
   const [language, setLanguage] = useState<Language>("he");
@@ -132,6 +137,10 @@ export default function SettingsPage() {
         ? localStorage.getItem("bayit-sound-enabled") !== "false"
         : true
     );
+    if (typeof window !== "undefined") {
+      setWhatsappEnabled(localStorage.getItem("bayit-whatsapp-enabled") === "true");
+      setWhatsappPhone(localStorage.getItem("bayit-whatsapp-phone") ?? "");
+    }
   }, []);
 
   // Save profile
@@ -417,6 +426,48 @@ export default function SettingsPage() {
             setSoundEnabled(next);
           }}
         />
+      </section>
+
+      {/* WhatsApp */}
+      <section className="bg-surface rounded-2xl p-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <MessageCircle className="w-4 h-4 text-muted" />
+          <h2 className="font-semibold text-sm">WhatsApp</h2>
+        </div>
+        <p className="text-xs text-muted">
+          קבלו סיכום יומי בוואטסאפ - תזכורת בוקר (08:00) וסיכום ערב (20:00)
+        </p>
+        <ToggleRow
+          label="הודעות וואטסאפ"
+          enabled={whatsappEnabled}
+          onToggle={() => {
+            const next = !whatsappEnabled;
+            setWhatsappEnabled(next);
+            localStorage.setItem("bayit-whatsapp-enabled", next ? "true" : "false");
+            if (next && !whatsappPhone) {
+              toast.info("הזינו מספר טלפון כדי להתחיל לקבל הודעות");
+            }
+          }}
+        />
+        {whatsappEnabled && (
+          <div>
+            <label className="text-xs text-muted block mb-1">מספר טלפון</label>
+            <input
+              type="tel"
+              value={whatsappPhone}
+              onChange={(e) => {
+                setWhatsappPhone(e.target.value);
+                localStorage.setItem("bayit-whatsapp-phone", e.target.value);
+              }}
+              placeholder="050-1234567"
+              dir="ltr"
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+            />
+            <p className="text-[10px] text-muted mt-1">
+              המספר ישמש לשליחת סיכומים יומיים בלבד
+            </p>
+          </div>
+        )}
       </section>
 
       {/* Theme */}
