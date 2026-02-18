@@ -1,13 +1,13 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Phase 5 Complete!
+## Status: LIVE - Phase 6 Complete!
 ## Last Updated: 2026-02-18
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-5 complete. App LIVE at https://bayit-beseder.vercel.app. Database fully connected with real Supabase queries. All hooks use proper TypeScript types (no `as any`). Supabase Realtime subscriptions active on tasks. Tasks page supports create/complete/delete with DB. Mock data fallback preserved for demo mode.
+Phase 1-6 complete. App LIVE at https://bayit-beseder.vercel.app. Database fully connected with real Supabase queries. All hooks use proper TypeScript types (no `as any`). Phase 6 adds dashboard analytics (DashboardStats component), task history page (/history), pure utility library (task-stats.ts), and 25 unit tests via Node built-in test runner.
 
 ## What Was Done
 - [x] Next.js 15 project scaffolded with TypeScript, Tailwind, App Router
@@ -58,6 +58,12 @@ Phase 1-5 complete. App LIVE at https://bayit-beseder.vercel.app. Database fully
 - [x] **Phase 5: Auto-increment points trigger on task completion**
 - [x] **Phase 5: Auto-update streak trigger when all daily tasks complete**
 - [x] **Phase 5: Mock data preserved as fallback (demo mode)**
+- [x] **Phase 6: DashboardStats component - summary cards, category breakdown bars, upcoming count, CSS bar chart**
+- [x] **Phase 6: task-stats.ts - pure utility functions (addDays, computeCategoryStats, computeMonthlyData, countUpcomingTasks, computeCompletionRate)**
+- [x] **Phase 6: Task History page (/history) - completed tasks list with search, category filter, date sort**
+- [x] **Phase 6: Stats page updated - DashboardStats shown when DB data available + history link**
+- [x] **Phase 6: 25 unit tests via Node built-in test runner (no new dependencies)**
+- [x] **Phase 6: npm test script added**
 
 ## Phase 5 Details
 
@@ -155,11 +161,10 @@ Phase 1-5 complete. App LIVE at https://bayit-beseder.vercel.app. Database fully
 1. Run migration 002 in Supabase SQL Editor
 2. Task instance generation logic (template -> daily instances)
 3. VAPID keys for server-side push notifications
-4. Connect Stats page to real Supabase data
-5. Partner status from real data (using partner_id)
-6. Avatar upload to Supabase Storage
-7. English translation (i18n)
-8. Full dark mode theme refinement
+4. Partner status from real data (using partner_id)
+5. Avatar upload to Supabase Storage
+6. English translation (i18n)
+7. Full dark mode theme refinement
 
 ## Notes for Next Session
 - Phase 5 complete with 0 TypeScript errors and successful build
