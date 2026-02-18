@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import {
   BarChart,
@@ -12,9 +14,25 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { Trophy } from "lucide-react";
+import { Trophy, History } from "lucide-react";
 import { ACHIEVEMENTS } from "@/lib/achievements";
 import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
+import { DashboardStats } from "@/components/dashboard/dashboard-stats";
+import { useTasks } from "@/hooks/useTasks";
+import { useCompletions } from "@/hooks/useCompletions";
+import { useCategories } from "@/hooks/useCategories";
+
+// Map Hebrew category names -> internal keys (same as dashboard)
+const CATEGORY_NAME_TO_KEY: Record<string, string> = {
+  "מטבח": "kitchen",
+  "אמבטיה": "bathroom",
+  "סלון": "living",
+  "חדר שינה": "bedroom",
+  "כביסה": "laundry",
+  "חוץ": "outdoor",
+  "חיות מחמד": "pets",
+  "כללי": "general",
+};
 
 const WEEKLY_DATA = [
   { day: "א׳", completed: 7, total: 10 },
@@ -38,9 +56,45 @@ const CATEGORY_DATA = [
 const UNLOCKED_ACHIEVEMENTS = ["first_task", "streak_3", "streak_7", "golden_rule_5"];
 
 export default function StatsPage() {
+  const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const { tasks } = useTasks({});
+  const { completions } = useCompletions({ limit: 200 });
+  const { categoryMap } = useCategories();
+
+  // Build category_id -> key mapping
+  const categoryIdToKey = useMemo(() => {
+    const result: Record<string, string> = {};
+    for (const [id, name] of Object.entries(categoryMap)) {
+      result[id] = CATEGORY_NAME_TO_KEY[name] ?? "general";
+    }
+    return result;
+  }, [categoryMap]);
+
+  const hasDbData = tasks.length > 0 || completions.length > 0;
+
   return (
     <div className="px-4 py-6 space-y-6">
-      <h1 className="text-xl font-bold text-foreground">סטטיסטיקה</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-foreground">סטטיסטיקה</h1>
+        <Link
+          href="/history"
+          className="flex items-center gap-1.5 text-xs text-primary bg-primary/10 px-3 py-1.5 rounded-full font-medium"
+          aria-label="עבור להיסטוריית משימות"
+        >
+          <History className="w-3.5 h-3.5" />
+          היסטוריה
+        </Link>
+      </div>
+
+      {/* Dashboard Analytics - shown when DB data is available */}
+      {hasDbData && (
+        <DashboardStats
+          tasks={tasks}
+          completions={completions}
+          categoryNameToKey={categoryIdToKey}
+          today={today}
+        />
+      )}
 
       {/* Weekly Chart */}
       <div className="bg-surface rounded-2xl p-4">
