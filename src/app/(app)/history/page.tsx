@@ -83,11 +83,40 @@ interface HistoryItemProps {
   categoryKey: string;
 }
 
+function getRelativeDate(completedAt: string): string {
+  const now = new Date();
+  const completed = new Date(completedAt);
+  const todayStr = now.toISOString().slice(0, 10);
+  const completedDateStr = completed.toISOString().slice(0, 10);
+
+  if (completedDateStr === todayStr) return "היום";
+
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (completedDateStr === yesterday.toISOString().slice(0, 10)) return "אתמול";
+
+  const diffMs = now.getTime() - completed.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays < 7) return `לפני ${diffDays} ימים`;
+  if (diffDays < 30) {
+    const weeks = Math.floor(diffDays / 7);
+    return weeks === 1 ? "לפני שבוע" : `לפני ${weeks} שבועות`;
+  }
+
+  return completed.toLocaleDateString("he-IL", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 function HistoryItem({ task, completion, categoryKey }: HistoryItemProps) {
   const color = getCategoryColor(categoryKey);
   const label = getCategoryLabel(categoryKey);
 
   const completedDate = new Date(completion.completed_at);
+  const relativeDate = getRelativeDate(completion.completed_at);
   const dateStr = completedDate.toLocaleDateString("he-IL", {
     day: "numeric",
     month: "long",
@@ -117,13 +146,19 @@ function HistoryItem({ task, completion, categoryKey }: HistoryItemProps) {
           >
             {label}
           </span>
-          <span className="text-[11px] text-muted">{dateStr}</span>
-          <span className="text-[11px] text-muted">{timeStr}</span>
+          <span className="text-[11px] font-medium text-primary/80">{relativeDate}</span>
+          <span className="text-[10px] text-muted" title={dateStr}>{timeStr}</span>
         </div>
         {completion.notes && (
           <p className="text-xs text-muted mt-1 italic">{completion.notes}</p>
         )}
       </div>
+      {/* Points badge */}
+      {task.points > 0 && (
+        <span className="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 mt-1">
+          +{task.points}
+        </span>
+      )}
     </div>
   );
 }

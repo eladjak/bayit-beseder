@@ -116,3 +116,144 @@ export function computeCompletionRate(tasks: TaskRow[]): number {
   const completed = tasks.filter((t) => t.status === "completed").length;
   return Math.round((completed / tasks.length) * 100);
 }
+
+// ============================================
+// Weekly trend data (for Recharts)
+// ============================================
+
+export interface WeeklyTrendPoint {
+  /** Hebrew day label like "א׳", "ב׳" */
+  day: string;
+  /** Number of completions on this day */
+  completed: number;
+  /** Number of tasks due/assigned on this day */
+  total: number;
+}
+
+const HEBREW_DAY_LABELS = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
+
+/**
+ * Compute daily completion counts for the current week (Sunday-Saturday).
+ * Returns 7 data points for Recharts bar chart.
+ */
+export function computeWeeklyTrend(
+  completions: TaskCompletionRow[],
+  tasks: TaskRow[],
+  today: string
+): WeeklyTrendPoint[] {
+  const todayDate = new Date(today);
+  const dayOfWeek = todayDate.getDay(); // 0=Sun, 6=Sat
+
+  // Find Sunday of this week
+  const sunday = addDays(today, -dayOfWeek);
+
+  const points: WeeklyTrendPoint[] = [];
+
+  for (let i = 0; i < 7; i++) {
+    const dateStr = addDays(sunday, i);
+    const completedCount = completions.filter(
+      (c) => c.completed_at.slice(0, 10) === dateStr
+    ).length;
+    const totalCount = tasks.filter((t) => t.due_date === dateStr).length;
+
+    points.push({
+      day: HEBREW_DAY_LABELS[i],
+      completed: completedCount,
+      total: Math.max(totalCount, completedCount),
+    });
+  }
+
+  return points;
+}
+
+/**
+ * Count tasks completed within the last 7 days (today inclusive).
+ */
+export function countCompletedThisWeek(
+  completions: TaskCompletionRow[],
+  today: string
+): number {
+  const weekAgo = addDays(today, -6);
+  return completions.filter((c) => {
+    const d = c.completed_at.slice(0, 10);
+    return d >= weekAgo && d <= today;
+  }).length;
+}
+
+// ============================================
+// Calendar data
+// ============================================
+
+export interface CalendarDay {
+  /** Date string (YYYY-MM-DD) */
+  date: string;
+  /** Day of month (1-31) */
+  dayOfMonth: number;
+  /** Whether this day is in the displayed month */
+  isCurrentMonth: boolean;
+  /** Whether this is today */
+  isToday: boolean;
+  /** Number of tasks due on this date */
+  dueCount: number;
+  /** Number of completions on this date */
+  completedCount: number;
+}
+
+/**
+ * Build calendar grid for a given month.
+ * Returns 6 weeks (42 days) to fill a standard calendar grid.
+ */
+export function buildCalendarMonth(
+  year: number,
+  month: number, // 0-indexed (0=Jan)
+  tasks: TaskRow[],
+  completions: TaskCompletionRow[],
+  today: string
+): CalendarDay[] {
+  const firstOfMonth = new Date(year, month, 1);
+  const startDay = firstOfMonth.getDay(); // 0=Sun
+
+  // Build completion counts by date
+  const completionsByDate: Record<string, number> = {};
+  for (const c of completions) {
+    const d = c.completed_at.slice(0, 10);
+    completionsByDate[d] = (completionsByDate[d] ?? 0) + 1;
+  }
+
+  // Build due counts by date
+  const dueByDate: Record<string, number> = {};
+  for (const t of tasks) {
+    if (t.due_date && t.status !== "completed" && t.status !== "skipped") {
+      dueByDate[t.due_date] = (dueByDate[t.due_date] ?? 0) + 1;
+    }
+  }
+
+  // Also count completed tasks by due_date for showing on calendar
+  for (const t of tasks) {
+    if (t.due_date && t.status === "completed") {
+      dueByDate[t.due_date] = (dueByDate[t.due_date] ?? 0) + 1;
+    }
+  }
+
+  const days: CalendarDay[] = [];
+
+  // Start from the Sunday before (or on) the 1st of the month
+  const calendarStart = new Date(year, month, 1 - startDay);
+
+  for (let i = 0; i < 42; i++) {
+    const current = new Date(calendarStart);
+    current.setDate(calendarStart.getDate() + i);
+    const dateStr = current.toISOString().slice(0, 10);
+
+    days.push({
+      date: dateStr,
+      dayOfMonth: current.getDate(),
+      isCurrentMonth: current.getMonth() === month,
+      isToday: dateStr === today,
+      dueCount: dueByDate[dateStr] ?? 0,
+      completedCount: completionsByDate[dateStr] ?? 0,
+    });
+  }
+
+  return days;
+}

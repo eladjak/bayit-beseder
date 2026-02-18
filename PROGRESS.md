@@ -1,13 +1,13 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Phase 7 In Progress
+## Status: LIVE - Phase 7 Complete + Dashboard Analytics
 ## Last Updated: 2026-02-18
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-6 complete + Phase 7A (animations, sounds, haptics) implemented. App LIVE at https://bayit-beseder.vercel.app. Google OAuth working. Onboarding tutorial built. Comprehensive improvement plan from 4-agent research session.
+Phase 1-7 complete + Dashboard Analytics phase implemented. App LIVE at https://bayit-beseder.vercel.app. Google OAuth working. New features: monthly calendar view, weekly summary cards on dashboard, enhanced history page with relative timestamps + points badges, Recharts weekly completion trend with real data, and buildCalendarMonth/computeWeeklyTrend utility functions.
 
 ## Phase 7: Animations, Sounds & Polish (CURRENT)
 
@@ -97,6 +97,16 @@ Based on 4-agent professional research session (Product Research, UX Design, Int
 - 53 task templates + Hebrew coaching messages already built
 - Culturally-aware (Shabbat, chagim, Israeli apartment layouts)
 
+### Dashboard Analytics Phase [DONE]
+- [x] Monthly calendar view component (`MonthlyCalendar`) with prev/next navigation, due date dots, completion dots, and legend
+- [x] Weekly summary cards (`WeeklySummaryCards`) on dashboard: tasks completed this week, upcoming tasks, streak count, completion rate
+- [x] Enhanced task history page with relative timestamps ("today", "yesterday", "3 days ago"), points badges per task
+- [x] Recharts weekly completion trend chart with real Supabase data (falls back to mock for demo)
+- [x] Tooltip on bar chart showing completion counts per day
+- [x] Pure utility functions: `computeWeeklyTrend`, `countCompletedThisWeek`, `buildCalendarMonth` in task-stats.ts
+- [x] Calendar data types: `CalendarDay`, `WeeklyTrendPoint`
+- [x] Build passes with zero TypeScript errors
+
 ## Phase History
 
 ### Phase 1-4: Foundation, Auth, UI
@@ -115,6 +125,16 @@ Based on 4-agent professional research session (Product Research, UX Design, Int
 - DashboardStats component, task history page
 - Pure utility library (task-stats.ts)
 - 25 unit tests via Node test runner
+
+## Files Created (Dashboard Analytics)
+- src/components/dashboard/monthly-calendar.tsx - Monthly calendar view with navigation, due/completed dots, legend
+- src/components/dashboard/weekly-summary-cards.tsx - 4 summary cards (completed this week, upcoming, streak, completion rate)
+
+## Files Modified (Dashboard Analytics)
+- src/lib/task-stats.ts - Added computeWeeklyTrend, countCompletedThisWeek, buildCalendarMonth, CalendarDay, WeeklyTrendPoint types
+- src/app/(app)/dashboard/page.tsx - Added WeeklySummaryCards between tasks and partner status, fetches all tasks + completions
+- src/app/(app)/stats/page.tsx - Real weekly trend data from Supabase, Recharts Tooltip, MonthlyCalendar, "real data" badge
+- src/app/(app)/history/page.tsx - Relative timestamps (today/yesterday/N days ago), points badge per completed task
 
 ## Files Created (Phase 7)
 - src/hooks/useAppSound.ts - Sound effect hook (use-sound wrapper)
