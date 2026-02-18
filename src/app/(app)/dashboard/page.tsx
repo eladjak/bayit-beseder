@@ -14,6 +14,9 @@ import { useProfile } from "@/hooks/useProfile";
 import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
+import { useAppSounds } from "@/hooks/useAppSound";
+import { TaskListSkeleton } from "@/components/skeleton";
+import { RingSkeleton } from "@/components/skeleton";
 
 // ============================================
 // Mock data (fallback when Supabase not connected)
@@ -70,6 +73,7 @@ export default function DashboardPage() {
   const { tasks: allDbTasks } = useTasks({});
   const { completions: allCompletions, markComplete } = useCompletions({ limit: 200 });
   const { categoryMap } = useCategories();
+  const { playComplete, playAchievement, playStreak } = useAppSounds();
 
   // ---- Determine if we should use DB data or mock ----
   const hasDbTasks = !tasksLoading && dbTasks.length > 0;
@@ -138,6 +142,7 @@ export default function DashboardPage() {
           message: msg.message,
           emoji: msg.emoji,
         });
+        playComplete();
         return;
       }
 
@@ -159,6 +164,7 @@ export default function DashboardPage() {
               message: msg.message,
               emoji: msg.emoji,
             });
+            playAchievement();
           } else if (newPct >= target && newPct - Math.round(((newCompleted - 1) / updated.length) * 100) > 0) {
             const prevPct = Math.round(((newCompleted - 1) / updated.length) * 100);
             if (prevPct < target) {
@@ -169,6 +175,7 @@ export default function DashboardPage() {
                 message: msg.message,
                 emoji: msg.emoji,
               });
+              playStreak();
             } else {
               const msg = getRandomMessage("task_complete");
               setCelebration({
@@ -177,6 +184,7 @@ export default function DashboardPage() {
                 message: msg.message,
                 emoji: msg.emoji,
               });
+              playComplete();
             }
           } else {
             const msg = getRandomMessage("task_complete");
@@ -186,13 +194,14 @@ export default function DashboardPage() {
               message: msg.message,
               emoji: msg.emoji,
             });
+            playComplete();
           }
         }
 
         return updated;
       });
     },
-    [target, hasDbTasks, profile, dbTasks, markComplete]
+    [target, hasDbTasks, profile, dbTasks, markComplete, playComplete, playAchievement, playStreak]
   );
 
   const dismissCelebration = useCallback(() => {
@@ -221,14 +230,22 @@ export default function DashboardPage() {
 
       {/* Golden Rule Ring */}
       <div className="flex justify-center">
-        <GoldenRuleRing percentage={percentage} target={target} />
+        {tasksLoading ? (
+          <RingSkeleton />
+        ) : (
+          <GoldenRuleRing percentage={percentage} target={target} />
+        )}
       </div>
 
       {/* Streak */}
       <StreakDisplay count={streakCount} bestCount={12} />
 
       {/* Today's Tasks */}
-      <TodayOverview tasks={tasks} onToggle={handleToggle} />
+      {tasksLoading ? (
+        <TaskListSkeleton count={5} />
+      ) : (
+        <TodayOverview tasks={tasks} onToggle={handleToggle} />
+      )}
 
       {/* Weekly Summary Cards */}
       <WeeklySummaryCards

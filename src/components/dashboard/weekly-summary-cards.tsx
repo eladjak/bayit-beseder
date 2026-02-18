@@ -8,6 +8,7 @@ import {
   countUpcomingTasks,
   computeCompletionRate,
 } from "@/lib/task-stats";
+import { AnimatedNumber } from "@/components/animated-number";
 import type { TaskRow, TaskCompletionRow } from "@/lib/types/database";
 
 interface WeeklySummaryCardsProps {
@@ -20,7 +21,8 @@ interface WeeklySummaryCardsProps {
 interface SummaryCardProps {
   icon: React.ReactNode;
   label: string;
-  value: string | number;
+  numericValue: number;
+  suffix?: string;
   subtitle: string;
   color: string;
   delay: number;
@@ -29,7 +31,8 @@ interface SummaryCardProps {
 function SummaryCard({
   icon,
   label,
-  value,
+  numericValue,
+  suffix = "",
   subtitle,
   color,
   delay,
@@ -50,7 +53,11 @@ function SummaryCard({
         </div>
         <span className="text-[11px] text-muted font-medium">{label}</span>
       </div>
-      <p className="text-xl font-bold text-foreground">{value}</p>
+      <AnimatedNumber
+        value={numericValue}
+        suffix={suffix}
+        className="text-xl font-bold text-foreground"
+      />
       <p className="text-[10px] text-muted mt-0.5">{subtitle}</p>
     </motion.div>
   );
@@ -82,7 +89,7 @@ export function WeeklySummaryCards({
       <SummaryCard
         icon={<CheckCircle2 className="w-4 h-4" style={{ color: "#22C55E" }} />}
         label="הושלמו השבוע"
-        value={completedThisWeek}
+        numericValue={completedThisWeek}
         subtitle={
           completedThisWeek === 0
             ? "עדיין לא התחלתם"
@@ -96,7 +103,7 @@ export function WeeklySummaryCards({
       <SummaryCard
         icon={<Clock className="w-4 h-4" style={{ color: "#F59E0B" }} />}
         label="ממתינות"
-        value={upcomingCount}
+        numericValue={upcomingCount}
         subtitle="7 ימים הבאים"
         color="#F59E0B"
         delay={0.05}
@@ -104,7 +111,7 @@ export function WeeklySummaryCards({
       <SummaryCard
         icon={<Flame className="w-4 h-4" style={{ color: "#EF4444" }} />}
         label="רצף"
-        value={streak}
+        numericValue={streak}
         subtitle={
           streak === 0
             ? "התחילו היום!"
@@ -118,7 +125,8 @@ export function WeeklySummaryCards({
       <SummaryCard
         icon={<TrendingUp className="w-4 h-4" style={{ color: "#4F46E5" }} />}
         label="אחוז השלמה"
-        value={`${completionRate}%`}
+        numericValue={completionRate}
+        suffix="%"
         subtitle={
           completionRate >= 80
             ? "מצוין!"
