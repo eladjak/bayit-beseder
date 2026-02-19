@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import {
   Home,
   CheckSquare,
+  ShoppingCart,
   Calendar,
   BarChart3,
   Settings,
@@ -14,6 +15,7 @@ import {
 const NAV_ITEMS = [
   { href: "/dashboard", label: "ראשי", icon: Home },
   { href: "/tasks", label: "משימות", icon: CheckSquare },
+  { href: "/shopping", label: "קניות", icon: ShoppingCart },
   { href: "/weekly", label: "שבועי", icon: Calendar },
   { href: "/stats", label: "סטטיסטיקה", icon: BarChart3 },
   { href: "/settings", label: "הגדרות", icon: Settings },

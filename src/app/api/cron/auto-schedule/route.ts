@@ -24,10 +24,10 @@ export async function GET(request: NextRequest) {
 
   const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey);
 
-  // Fetch all households
+  // Fetch all households (including golden_rule_target for weighted rotation)
   const { data: households, error: householdsError } = await supabase
     .from("households")
-    .select("id, name");
+    .select("id, name, golden_rule_target");
 
   if (householdsError) {
     return NextResponse.json(
@@ -57,7 +57,8 @@ export async function GET(request: NextRequest) {
       supabase,
       household.id,
       today,
-      endDate
+      endDate,
+      household.golden_rule_target ?? undefined
     );
 
     results.push({

@@ -2,6 +2,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, TaskTemplate, TaskInstance } from "@/lib/types/database";
 
 // ============================================
+// Difficulty weight constants
+// ============================================
+
+/** Difficulty weight mapping: 1=light (קל), 2=moderate (בינוני), 3=heavy (כבד) */
+export const DIFFICULTY_WEIGHT: Record<number, number> = { 1: 1, 2: 2, 3: 3 };
+
+// ============================================
 // Pure helper functions (exported for testing)
 // ============================================
 
@@ -83,17 +90,36 @@ export function getTemplatesDueOnDate(
 }
 
 /**
+ * Compute weighted load for a member based on assigned instances and their difficulty.
+ * Each instance contributes its difficulty weight (defaults to 2 if missing).
+ */
+export function computeWeightedLoad(
+  instances: Array<{ assigned_to: string | null; difficulty?: number }>,
+  memberId: string
+): number {
+  let load = 0;
+  for (const inst of instances) {
+    if (inst.assigned_to === memberId) {
+      const diff = inst.difficulty != null ? inst.difficulty : 2;
+      load += DIFFICULTY_WEIGHT[diff] ?? 2;
+    }
+  }
+  return load;
+}
+
+/**
  * Select who to assign a task to using rotation logic.
  *
  * 1. If template has default_assignee, use it
- * 2. Otherwise, look at recent instances and assign to the member who did it fewer times
- * 3. If tied or no history, alternate based on template index
+ * 2. If goldenRuleTarget is provided, use weighted load to balance toward target ratio
+ * 3. Otherwise, fall back to count-based rotation (original behavior)
  */
 export function selectAssignee(
   template: Pick<TaskTemplate, "default_assignee">,
   recentInstances: Pick<TaskInstance, "assigned_to">[],
   members: string[],
-  templateIndex: number
+  templateIndex: number,
+  goldenRuleTarget?: number
 ): string {
   if (members.length === 0) {
     return "";
@@ -104,7 +130,37 @@ export function selectAssignee(
     return template.default_assignee;
   }
 
-  // Count assignments per member from recent instances
+  // Golden rule path: use weighted loads
+  if (goldenRuleTarget != null && members.length === 2) {
+    const user1 = members[0];
+    const user2 = members[1];
+
+    const load1 = computeWeightedLoad(recentInstances as Array<{ assigned_to: string | null; difficulty?: number }>, user1);
+    const load2 = computeWeightedLoad(recentInstances as Array<{ assigned_to: string | null; difficulty?: number }>, user2);
+    const totalLoad = load1 + load2;
+
+    const targetRatio1 = goldenRuleTarget / 100;
+    const targetRatio2 = 1 - targetRatio1;
+
+    if (totalLoad === 0) {
+      // No history - alternate by index
+      return templateIndex % 2 === 0 ? user1 : user2;
+    }
+
+    const actualRatio1 = load1 / totalLoad;
+    const actualRatio2 = load2 / totalLoad;
+
+    // Assign to the member furthest below their target ratio
+    const gap1 = targetRatio1 - actualRatio1;
+    const gap2 = targetRatio2 - actualRatio2;
+
+    if (gap1 > gap2) return user1;
+    if (gap2 > gap1) return user2;
+    // If equal gaps, alternate by index
+    return templateIndex % 2 === 0 ? user1 : user2;
+  }
+
+  // Original count-based rotation (no golden rule)
   const counts: Record<string, number> = {};
   for (const m of members) {
     counts[m] = 0;
@@ -147,12 +203,14 @@ export interface ScheduleResult {
 /**
  * Generate task instances for a household over a date range.
  * Checks for existing instances to avoid duplicates.
+ * When goldenRuleTarget is provided, uses weighted difficulty for fair rotation.
  */
 export async function generateTaskInstances(
   supabase: SupabaseClient<Database>,
   householdId: string,
   startDate: Date,
-  endDate: Date
+  endDate: Date,
+  goldenRuleTarget?: number
 ): Promise<ScheduleResult> {
   const result: ScheduleResult = { created: 0, skipped: 0, errors: [] };
 
@@ -250,7 +308,7 @@ export async function generateTaskInstances(
       }
 
       const recentInstances = recentInstancesMap.get(template.id) ?? [];
-      const assignee = selectAssignee(template, recentInstances, memberIds, i);
+      const assignee = selectAssignee(template, recentInstances, memberIds, i, goldenRuleTarget);
 
       toInsert.push({
         template_id: template.id,

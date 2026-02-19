@@ -20,6 +20,7 @@ export interface TaskTemplate {
     | "monthly"
     | "quarterly"
     | "yearly";
+  difficulty: 1 | 2 | 3; // 1=קל (2-5 דק'), 2=בינוני (5-15 דק'), 3=כבד (15+ דק')
   tips: string[];
   sort_order: number;
 }
@@ -34,6 +35,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 15,
     is_emergency: true,
     recurrence_type: "daily",
+    difficulty: 2, // בינוני - 15 דק' עבודה סטנדרטית
     tips: [
       "שטפו כלים מיד אחרי האוכל - קל יותר לנקות",
       "הפעילו מדיח כשהוא מלא לחסוך מים וחשמל",
@@ -48,6 +50,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 5,
     is_emergency: true,
     recurrence_type: "daily",
+    difficulty: 1, // קל - 5 דק' ניגוב מהיר
     tips: [
       "השתמשו בחומר חיטוי מתאים למשטח",
       "נגבו שיירי מזון מיד למניעת חרקים",
@@ -62,6 +65,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 5,
     is_emergency: false,
     recurrence_type: "daily",
+    difficulty: 1, // קל - 5 דק' טאטוא מהיר
     tips: [
       "טאטאו מהפינות לכיוון המרכז",
       "שימו לב מתחת לשולחן ולארונות",
@@ -76,6 +80,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 5,
     is_emergency: true,
     recurrence_type: "daily",
+    difficulty: 1, // קל - 5 דק' החלפה מהירה
     tips: [
       "אל תחכו שהשקית תהיה מלאה מדי - קשה להוציא",
       "הפרידו פסולת אורגנית למיחזור",
@@ -90,6 +95,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 3,
     is_emergency: false,
     recurrence_type: "daily",
+    difficulty: 1, // קל - 3 דק' סידור מהיר
     tips: [
       "החזירו כל דבר למקומו הקבוע",
       "שיש נקי = מטבח שנראה מסודר",
@@ -104,6 +110,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 5,
     is_emergency: true,
     recurrence_type: "daily",
+    difficulty: 1, // קל - 5 דק' האכלה פשוטה
     tips: [
       "הקפידו על שעות קבועות לארוחות",
       "בדקו שהקערה נקייה לפני מילוי",
@@ -118,6 +125,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 5,
     is_emergency: true,
     recurrence_type: "daily",
+    difficulty: 1, // קל - 5 דק' האכלה פשוטה
     tips: [
       "שמרו על כמות מזון קבועה למניעת השמנה",
       "מזון רטוב לא צריך להישאר בחוץ יותר מ-30 דקות",
@@ -132,6 +140,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 2,
     is_emergency: true,
     recurrence_type: "daily",
+    difficulty: 1, // קל - 2 דק' החלפת מים
     tips: [
       "החליפו מים לפחות פעם ביום",
       "חתולים מעדיפים מים זורמים - שקלו מזרקת מים",
@@ -146,6 +155,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 5,
     is_emergency: true,
     recurrence_type: "daily",
+    difficulty: 1, // קל - 5 דק' ניקוי שגרתי
     tips: [
       "נקו לפחות פעם ביום",
       "החליפו חול לגמרי פעם בשבוע",
@@ -160,6 +170,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 3,
     is_emergency: false,
     recurrence_type: "daily",
+    difficulty: 1, // קל - 3 דק' איסוף מהיר
     tips: [
       "שימו סל כביסה בכל חדר שינה",
       "הפרידו צבעים מלבנים כבר בשלב האיסוף",
@@ -174,6 +185,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 5,
     is_emergency: false,
     recurrence_type: "daily",
+    difficulty: 1, // קל - 5 דק' סידור מהיר
     tips: [
       "הקדישו 5 דקות לפני השינה לסידור",
       "כל דבר צריך מקום קבוע - ככה קל לסדר",
@@ -188,6 +200,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 2,
     is_emergency: false,
     recurrence_type: "daily",
+    difficulty: 1, // קל - 2 דק' פתיחת חלונות
     tips: [
       "פתחו חלונות בבוקר ל-15 דקות לפחות",
       "איוורור צולב (חלונות מנגד) יעיל יותר",
@@ -204,6 +217,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 20,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 3, // כבד - 20 דק' ניקוי יסודי עם שפשוף
     tips: [
       "השתמשו בסודה לשתייה לכתמים קשים",
       "הסירו מבערים ושרו במים חמים עם סבון",
@@ -218,6 +232,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 10,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 2, // בינוני - 10 דק' ניגוב
     tips: [
       "השתמשו במטלית מיקרופייבר לחה",
       "נגבו גם את הידיות שנוגעים בהן הרבה",
@@ -232,6 +247,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 10,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 2, // בינוני - 10 דק' ניקוי עם חימום
     tips: [
       "חממו קערת מים עם לימון ל-3 דקות - הקיטור מרכך לכלוך",
       "נגבו מיד אחרי כל שימוש למניעת הצטברות",
@@ -246,6 +262,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 15,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 2, // בינוני - 15 דק' ארגון ובדיקה
     tips: [
       "שימו מוצרים ישנים קדימה (FIFO)",
       "השליכו מוצרים שפג תוקפם",
@@ -260,6 +277,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 15,
     is_emergency: true,
     recurrence_type: "weekly",
+    difficulty: 2, // בינוני - 15 דק' ניקוי וחיטוי
     tips: [
       "השתמשו בחומר חיטוי ייעודי לאסלה",
       "אל תשכחו לנקות מאחורי האסלה ובסיסה",
@@ -274,6 +292,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 15,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 2, // בינוני - 15 דק' שפשוף וניקוי
     tips: [
       "רססו חומר ניקוי והשאירו 5 דקות לפני שפשוף",
       "נגבו את המקלחת אחרי כל שימוש למניעת אבנית",
@@ -288,6 +307,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 10,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 2, // בינוני - 10 דק' ניקוי כיור
     tips: [
       "השתמשו בסודה לשתייה לכתמי אבנית",
       "נקו גם את הניקוז למניעת סתימות",
@@ -302,6 +322,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 5,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 1, // קל - 5 דק' החלפה פשוטה
     tips: [
       "החליפו מגבות כל 3-4 ימים לפחות",
       "תלו מגבות כך שיתייבשו טוב למניעת עובש",
@@ -316,6 +337,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 15,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 2, // בינוני - 15 דק' החלפה ופריסה
     tips: [
       "כבסו מצעים ב-60 מעלות להרג קרדית אבק",
       "החליפו כל שבוע לשמירה על היגיינה",
@@ -330,6 +352,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 10,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 2, // בינוני - 10 דק' ניגוב מדפים ורהיטים
     tips: [
       "השתמשו במטלית מיקרופייבר - אוספת אבק טוב יותר",
       "נקו מלמעלה למטה כך שהאבק נופל לרצפה",
@@ -344,6 +367,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 10,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 2, // בינוני - 10 דק' שאיבה כולל מתחת לרהיטים
     tips: [
       "שאבו גם מתחת למיטה ולארונות",
       "רוקנו את מיכל השואב לפני שהוא מלא",
@@ -358,6 +382,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 15,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 2, // בינוני - 15 דק' שאיבה או הכנה לרובוט
     tips: [
       "סדרו חפצים מהרצפה לפני הפעלת רובוט",
       "נקו מסננים של השואב באופן קבוע",
@@ -372,6 +397,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 20,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 3, // כבד - 20 דק' שטיפה עם מגב
     tips: [
       "טאטאו לפני שטיפה רטובה",
       "אל תשתמשו בהרבה מים על פרקט",
@@ -386,6 +412,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 10,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 2, // בינוני - 10 דק' ניגוב רהיטים
     tips: [
       "השתמשו בתרסיס ריהוט מתאים לסוג העץ",
       "אל תשכחו לנגב גם גב הטלוויזיה וציוד אלקטרוני",
@@ -400,6 +427,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 30,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 3, // כבד - 30 דק' הפרדה, טעינה, העברה
     tips: [
       "הפרידו לבנים מצבעוניים מכהים",
       "בדקו כיסים לפני הכנסה למכונה",
@@ -414,6 +442,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 20,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 3, // כבד - 20 דק' קיפול וסידור בארונות
     tips: [
       "קפלו מיד אחרי הייבוש למניעת קמטים",
       "שתפו את כל המשפחה במשימה",
@@ -428,6 +457,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 30,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 3, // כבד - 30 דק' גיהוץ ידני
     tips: [
       "גהצו כשהבגד עדיין לח קצת - קל יותר",
       "התחילו מבגדים שדורשים טמפרטורה נמוכה",
@@ -442,6 +472,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 10,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 1, // קל - 10 דק' אבל עבודה פשוטה
     tips: [
       "בדקו לחות אדמה לפני השקיה - לא כל צמח צריך מים כל שבוע",
       "השקו בבוקר או בערב, לא בשמש חזקה",
@@ -456,6 +487,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 5,
     is_emergency: false,
     recurrence_type: "weekly",
+    difficulty: 1, // קל - 5 דק' ריסוס וניגוב
     tips: [
       "השתמשו בנוזל חלונות ועיתון ישן לתוצאה ללא פסים",
       "נגבו בתנועות עגולות",
@@ -472,6 +504,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 30,
     is_emergency: false,
     recurrence_type: "biweekly",
+    difficulty: 3, // כבד - 30 דק' ניקוי עמוק עם חומרים
     tips: [
       "השתמשו בתכשיר ייעודי לתנור או סודה + חומץ",
       "חממו תנור ל-50 מעלות, כבו, ואז רססו - הניקוי קל יותר",
@@ -486,6 +519,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 20,
     is_emergency: false,
     recurrence_type: "biweekly",
+    difficulty: 3, // כבד - 20 דק' ריקון, ניקוי וסידור מחדש
     tips: [
       "הוציאו את כל המוצרים ונגבו מדפים במים וסבון",
       "שימו קופסת סודה פתוחה לספיגת ריחות",
@@ -500,6 +534,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 30,
     is_emergency: false,
     recurrence_type: "biweekly",
+    difficulty: 3, // כבד - 30 דק' ניקוי יסודי כולל פינות
     tips: [
       "השתמשו במברשת שיניים ישנה לפינות ומרווחים",
       "חומץ לבן מצוין נגד אבנית",
@@ -514,6 +549,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 20,
     is_emergency: false,
     recurrence_type: "biweekly",
+    difficulty: 3, // כבד - 20 דק' שפשוף רובה ואריחים
     tips: [
       "סודה + חומץ עובדים מצוין על רובה",
       "השתמשו במברשת קשיחה לרובה ורכה לאריחים",
@@ -528,6 +564,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 20,
     is_emergency: false,
     recurrence_type: "biweekly",
+    difficulty: 3, // כבד - 20 דק' ניקוי חלונות ומסגרות
     tips: [
       "נקו ביום מעונן - שמש גורמת לייבוש מהיר ופסים",
       "נגבו בתנועות אנכיות מצד אחד ואופקיות מהצד השני",
@@ -542,6 +579,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 30,
     is_emergency: false,
     recurrence_type: "biweekly",
+    difficulty: 3, // כבד - 30 דק' שטיפה יסודית של כל הבית
     tips: [
       "התחילו מהחדר הרחוק ביותר מהדלת",
       "שנו מים ניקוי כל חדר-שניים",
@@ -558,6 +596,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 5,
     is_emergency: false,
     recurrence_type: "monthly",
+    difficulty: 1, // קל - 5 דק' רק הפעלת מחזור
     tips: [
       "שימו כוס חומץ במדף העליון והפעילו מחזור חם",
       "נקו גם את המסנן בתחתית המדיח",
@@ -572,6 +611,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 30,
     is_emergency: false,
     recurrence_type: "monthly",
+    difficulty: 3, // כבד - 30 דק' ריקון, ניגוב וסידור
     tips: [
       "רוקנו ארון אחד בכל פעם ונגבו מדפים",
       "בדקו תאריכי תפוגה של תבלינים ומוצרים",
@@ -586,6 +626,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 15,
     is_emergency: false,
     recurrence_type: "monthly",
+    difficulty: 2, // בינוני - 15 דק' ניקוי בגובה
     tips: [
       "השתמשו בציפית כרית ישנה לניקוי כנפי מאוורר בלי לפזר אבק",
       "כבו מאוורר 10 דקות לפני ניקוי",
@@ -600,6 +641,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 10,
     is_emergency: false,
     recurrence_type: "monthly",
+    difficulty: 2, // בינוני - 10 דק' הוצאה, שטיפה, החזרה
     tips: [
       "שטפו מסננים במים פושרים ויבשו לפני החזרה",
       "מסנן נקי חוסך עד 15% חשמל",
@@ -614,6 +656,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 15,
     is_emergency: false,
     recurrence_type: "monthly",
+    difficulty: 2, // בינוני - 15 דק' חיטוי בכל הבית
     tips: [
       "השתמשו במגבון חיטוי או תרסיס אלכוהול",
       "אל תשכחו מתגי חשמל, שלטים ומעקות",
@@ -628,6 +671,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 10,
     is_emergency: false,
     recurrence_type: "monthly",
+    difficulty: 2, // בינוני - 10 דק' בדיקה והחלפה
     tips: [
       "עברו לנורות LED לחסכון בחשמל",
       "שמרו נורות רזרביות במלאי",
@@ -642,6 +686,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 20,
     is_emergency: false,
     recurrence_type: "monthly",
+    difficulty: 3, // כבד - 20 דק' טאטוא, שטיפה וסידור
     tips: [
       "שטפו עם מים וסבון ומגב",
       "בדקו שניקוז המרפסת תקין",
@@ -656,6 +701,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 15,
     is_emergency: false,
     recurrence_type: "monthly",
+    difficulty: 2, // בינוני - 15 דק' גיזום ודישון
     tips: [
       "גזמו ענפים יבשים ופרחים נובלים",
       "דשנו בהתאם לעונה ולסוג הצמח",
@@ -672,6 +718,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 30,
     is_emergency: false,
     recurrence_type: "quarterly",
+    difficulty: 3, // כבד - 30 דק' ניקוי חיצוני מורכב
     tips: [
       "השתמשו במגב מקצועי ודלי עם נוזל חלונות",
       "בקומות גבוהות - שקלו להזמין מנקה חלונות מקצועי",
@@ -686,6 +733,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 30,
     is_emergency: false,
     recurrence_type: "quarterly",
+    difficulty: 3, // כבד - 30 דק' שאיבה וטיפול בכתמים
     tips: [
       "שאבו עם ראש ריפודים ייעודי",
       "בדקו הוראות ניקוי של הבד לפני טיפול בכתמים",
@@ -700,6 +748,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 15,
     is_emergency: false,
     recurrence_type: "quarterly",
+    difficulty: 2, // בינוני - 15 דק' בדיקה ויזואלית
     tips: [
       "בדקו מתחת לכיורים ולאסלות סימני רטיבות",
       "טפטוף קטן יכול לבזבז אלפי ליטרים בשנה",
@@ -714,6 +763,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 45,
     is_emergency: false,
     recurrence_type: "quarterly",
+    difficulty: 3, // כבד - 45 דק' מיון, ארגון וסילוק
     tips: [
       "שיטת הערימות: שמור, תרום, זרוק",
       "סובבו בגדים עונתיים - קדימה מה שרלוונטי עכשיו",
@@ -728,6 +778,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 60,
     is_emergency: false,
     recurrence_type: "quarterly",
+    difficulty: 3, // כבד - 60 דק' ארגון מלא של מחסן
     tips: [
       "השתמשו בקופסאות שקופות עם תוויות",
       "שמרו חפצים כבדים למטה וקלים למעלה",
@@ -742,6 +793,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 15,
     is_emergency: false,
     recurrence_type: "quarterly",
+    difficulty: 2, // בינוני - 15 דק' בדיקה ויזואלית
     tips: [
       "שפכו מים רותחים עם סודה בניקוזים למניעת סתימות",
       "בדקו לחץ מים בכל הברזים",
@@ -756,6 +808,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 15,
     is_emergency: false,
     recurrence_type: "quarterly",
+    difficulty: 2, // בינוני - 15 דק' בדיקת שקעים ומפסקים
     tips: [
       "בדקו שמפסק פחת עובד - לחצו כפתור בדיקה",
       "אם שקע מתחמם - הזמינו חשמלאי מיד",
@@ -770,6 +823,7 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
     estimated_minutes: 30,
     is_emergency: false,
     recurrence_type: "quarterly",
+    difficulty: 3, // כבד - 30 דק' ניקוי עמוק ובדיקת תפקוד
     tips: [
       "הזמינו טכנאי מזגנים פעם בשנה לפחות",
       "נקו מסננים וכנפיות עם מברשת רכה ומים",

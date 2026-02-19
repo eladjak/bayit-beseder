@@ -77,7 +77,7 @@ Phase 1-9 complete + Phase 10 (Auto-Schedule Engine, Room Conditions, Couple Rew
 
 Based on 4-agent professional research session (Product Research, UX Design, Integrations Architecture, Motion Design):
 
-### Phase 8: WhatsApp + Auto-Scheduling (HIGH IMPACT) [IN PROGRESS]
+### Phase 8: WhatsApp Integration [DONE]
 - [x] Green API client (src/lib/whatsapp.ts) - send-only, shared instance with Kami
 - [x] Hebrew message templates (src/lib/whatsapp-messages.ts) - morning brief, evening summary, Friday celebration
 - [x] API route: POST /api/whatsapp/send (protected by CRON_SECRET)
@@ -86,29 +86,16 @@ Based on 4-agent professional research session (Product Research, UX Design, Int
 - [x] Friday weekly celebration message with couple stats
 - [x] WhatsApp settings section in Settings page (toggle + phone input)
 - [x] vercel.json cron configuration
-- [x] .env.example with all required env vars
 - [x] Env vars set in Vercel (GREEN_API_*, CRON_SECRET, SUPABASE_SERVICE_ROLE_KEY, WHATSAPP_PHONES)
-- [x] WhatsApp send tested successfully (idMessage: 3EB0DFAD8167AA65FF3B3E)
-- [ ] Reply-to-complete: mark tasks done from WhatsApp (needs dedicated Green API instance)
-- [ ] Auto-schedule from 53 task templates (kill the "project manager" burden)
-- [ ] Task rotation based on Golden Rule slider ratio
+- [x] WhatsApp send tested successfully
 - [x] "We" framing on dashboard ("Together: 12/15 tasks" not individual scores) - done in Phase 7
 
-### Phase 9: Google Calendar + Room Conditions
+### Remaining Roadmap
 - [ ] Google Calendar two-way sync (OAuth2 + Calendar API)
-- [ ] Color-coded events: Elad = blue, Inbal = pink, Shared = purple
-- [ ] Room condition bars (Tody-style visual degradation: green → yellow → red)
-- [ ] "Biggest impact tasks first" prioritization
-- [ ] Energy-aware task selection (difficulty 1-3, "tired mode")
-
-### Phase 10: Engagement & Gamification
-- [ ] Couple reward system (define meaningful rewards, cooperative unlocks)
+- [ ] Reply-to-complete: mark tasks done from WhatsApp (needs dedicated Green API instance)
+- [ ] Task rotation based on Golden Rule slider ratio
 - [ ] Routine playlists with timer ("Kitchen Evening: 10 min total")
-- [ ] Enhanced weekly sync with auto-populated data
 - [ ] Adaptive coaching (track which messages lead to completions)
-- [ ] Seasonal/contextual tips (Pesach deep clean, Friday pre-Shabbat mode)
-
-### Phase 11: Polish & Infrastructure
 - [ ] Web Push with VAPID keys (server-side notifications)
 - [ ] Partner invitation flow (WhatsApp link, not email)
 - [ ] Home inventory / shopping list

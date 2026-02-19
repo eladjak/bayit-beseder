@@ -14,9 +14,12 @@ import { StreakTracker } from "@/components/gamification/streak-tracker";
 import { WeeklyChallenge } from "@/components/gamification/weekly-challenge";
 import { CoupleRewards } from "@/components/gamification/couple-rewards";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { EnergyModeToggle } from "@/components/dashboard/energy-mode-toggle";
 import { getRandomMessage } from "@/lib/coaching-messages";
 import { computeRoomHealth, getHealthColor } from "@/lib/room-health";
 import { computeRewardsProgress } from "@/lib/rewards";
+import { filterTasksByEnergy, getEnergyDescription } from "@/lib/energy-filter";
+import type { EnergyLevel } from "@/lib/energy-filter";
 import { useProfile } from "@/hooks/useProfile";
 import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
@@ -121,6 +124,20 @@ export default function DashboardPage() {
   const tasks = hasDbTasks ? dbTaskItems : mockTasks;
 
   const [emergencyMode, setEmergencyMode] = useState(false);
+  const [energyLevel, setEnergyLevel] = useState<EnergyLevel>(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("bayit-energy-mode") as EnergyLevel) || "all";
+    }
+    return "all";
+  });
+
+  const cycleEnergyLevel = useCallback(() => {
+    setEnergyLevel((prev) => {
+      const next = prev === "all" ? "moderate" : prev === "moderate" ? "light" : "all";
+      localStorage.setItem("bayit-energy-mode", next);
+      return next;
+    });
+  }, []);
   const [celebration, setCelebration] = useState<{
     visible: boolean;
     type: "task" | "all_daily" | "golden_rule";
@@ -133,8 +150,14 @@ export default function DashboardPage() {
     emoji: string;
   }>({ visible: false, message: "", emoji: "" });
 
-  const completedCount = tasks.filter((t) => t.completed).length;
-  const percentage = Math.round((completedCount / tasks.length) * 100);
+  // Apply energy filter to tasks
+  const filteredTasks = useMemo(
+    () => filterTasksByEnergy(tasks, energyLevel),
+    [tasks, energyLevel]
+  );
+
+  const completedCount = filteredTasks.filter((t) => t.completed).length;
+  const percentage = filteredTasks.length > 0 ? Math.round((completedCount / filteredTasks.length) * 100) : 0;
   const target = emergencyMode ? 50 : 80;
 
   const streakCount = profile?.streak ?? 5;
@@ -294,12 +317,12 @@ export default function DashboardPage() {
         </div>
         <h1 className="text-xl font-bold text-foreground">{greeting}</h1>
         <p className="text-sm text-muted">{getHebrewDate()}</p>
-        {tasks.length > 0 && (
+        {filteredTasks.length > 0 && (
           <p className="text-xs text-muted mt-1">
-            {completedCount === tasks.length
+            {completedCount === filteredTasks.length
               ? "יום מושלם! סיימתם הכל ביחד"
               : completedCount > 0
-                ? `ביחד סיימתם ${completedCount} מתוך ${tasks.length} משימות`
+                ? `ביחד סיימתם ${completedCount} מתוך ${filteredTasks.length} משימות`
                 : subtitle}
           </p>
         )}
@@ -331,11 +354,21 @@ export default function DashboardPage() {
         target={5}
       />
 
+      {/* Energy Mode Toggle */}
+      <div className="flex items-center justify-between">
+        <EnergyModeToggle energyLevel={energyLevel} onToggle={cycleEnergyLevel} />
+        {energyLevel !== "all" && (
+          <span className="text-[11px] text-muted">
+            {filteredTasks.length} מתוך {tasks.length} משימות
+          </span>
+        )}
+      </div>
+
       {/* Today's Tasks */}
       {tasksLoading ? (
         <TaskListSkeleton count={5} />
       ) : (
-        <TodayOverview tasks={tasks} onToggle={handleToggle} />
+        <TodayOverview tasks={filteredTasks} onToggle={handleToggle} />
       )}
 
       {/* Weekly Summary Cards */}
