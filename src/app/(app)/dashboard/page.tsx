@@ -323,11 +323,11 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="px-4 py-6 space-y-5">
-      {/* Header - Time-aware greeting + Notification Bell */}
-      <div className="relative text-center">
+    <div className="space-y-5">
+      {/* Header - Gradient hero area */}
+      <div className="relative gradient-hero rounded-b-3xl px-4 pt-6 pb-8 -mx-0">
         {/* Notification bell - positioned top-left (RTL: visually top-right) */}
-        <div className="absolute top-0 left-0">
+        <div className="absolute top-4 left-4">
           <NotificationCenter
             notifications={notifications}
             unreadCount={unreadCount}
@@ -336,96 +336,101 @@ export default function DashboardPage() {
             dismiss={dismiss}
           />
         </div>
-        <h1 className="text-xl font-bold text-foreground">{greeting}</h1>
-        <p className="text-sm text-muted">{getHebrewDate()}</p>
-        {filteredTasks.length > 0 && (
-          <p className="text-xs text-muted mt-1">
-            {completedCount === filteredTasks.length
-              ? "יום מושלם! סיימתם הכל ביחד"
-              : completedCount > 0
-                ? `ביחד סיימתם ${completedCount} מתוך ${filteredTasks.length} משימות`
-                : subtitle}
-          </p>
-        )}
+        <div className="text-center">
+          <h1 className="text-xl font-bold text-white">{greeting}</h1>
+          <p className="text-sm text-white/70">{getHebrewDate()}</p>
+          {filteredTasks.length > 0 && (
+            <p className="text-xs text-white/60 mt-1">
+              {completedCount === filteredTasks.length
+                ? "יום מושלם! סיימתם הכל ביחד"
+                : completedCount > 0
+                  ? `ביחד סיימתם ${completedCount} מתוך ${filteredTasks.length} משימות`
+                  : subtitle}
+            </p>
+          )}
+        </div>
       </div>
 
-      {/* Golden Rule Ring */}
-      <div className="flex justify-center">
+      {/* Content area with padding */}
+      <div className="px-4 space-y-5 -mt-4">
+        {/* Golden Rule Ring - overlapping the header */}
+        <div className="flex justify-center card-elevated p-5 -mt-2">
+          {tasksLoading ? (
+            <RingSkeleton />
+          ) : (
+            <GoldenRuleRing percentage={percentage} target={target} />
+          )}
+        </div>
+
+        {/* Streak */}
+        <StreakDisplay count={streakCount} bestCount={12} />
+
+        {/* Streak Tracker - consecutive day tracking */}
+        <StreakTracker
+          completionDates={completionDates}
+          today={todayStr}
+          bestStreak={12}
+        />
+
+        {/* Weekly Challenge */}
+        <WeeklyChallenge
+          completionDates={completionDates}
+          today={todayStr}
+          target={5}
+        />
+
+        {/* Energy Mode Toggle */}
+        <div className="flex items-center justify-between">
+          <EnergyModeToggle energyLevel={energyLevel} onToggle={cycleEnergyLevel} />
+          {energyLevel !== "all" && (
+            <span className="text-[11px] text-muted">
+              {filteredTasks.length} מתוך {tasks.length} משימות
+            </span>
+          )}
+        </div>
+
+        {/* Today's Tasks */}
         {tasksLoading ? (
-          <RingSkeleton />
+          <TaskListSkeleton count={5} />
         ) : (
-          <GoldenRuleRing percentage={percentage} target={target} />
+          <TodayOverview tasks={filteredTasks} onToggle={handleToggle} />
         )}
-      </div>
 
-      {/* Streak */}
-      <StreakDisplay count={streakCount} bestCount={12} />
+        {/* Weekly Summary Cards */}
+        <WeeklySummaryCards
+          tasks={allDbTasks}
+          completions={allCompletions}
+          streak={streakCount}
+          today={todayStr}
+        />
 
-      {/* Streak Tracker - consecutive day tracking */}
-      <StreakTracker
-        completionDates={completionDates}
-        today={todayStr}
-        bestStreak={12}
-      />
+        {/* Room Conditions */}
+        <RoomConditions categoryHealthData={categoryHealthData} />
 
-      {/* Weekly Challenge */}
-      <WeeklyChallenge
-        completionDates={completionDates}
-        today={todayStr}
-        target={5}
-      />
+        {/* Partner Status */}
+        <div>
+          <h2 className="font-semibold text-foreground px-1 mb-2">ענבל</h2>
+          <PartnerStatus
+            name="ענבל"
+            completedCount={3}
+            totalCount={8}
+            recentTasks={[
+              "החלפת מצעים",
+              "כביסה",
+              "ניקוי כיור אמבטיה",
+            ]}
+          />
+        </div>
 
-      {/* Energy Mode Toggle */}
-      <div className="flex items-center justify-between">
-        <EnergyModeToggle energyLevel={energyLevel} onToggle={cycleEnergyLevel} />
-        {energyLevel !== "all" && (
-          <span className="text-[11px] text-muted">
-            {filteredTasks.length} מתוך {tasks.length} משימות
-          </span>
-        )}
-      </div>
+        {/* Couple Rewards */}
+        <CoupleRewards rewardsProgress={rewardsProgress} />
 
-      {/* Today's Tasks */}
-      {tasksLoading ? (
-        <TaskListSkeleton count={5} />
-      ) : (
-        <TodayOverview tasks={filteredTasks} onToggle={handleToggle} />
-      )}
-
-      {/* Weekly Summary Cards */}
-      <WeeklySummaryCards
-        tasks={allDbTasks}
-        completions={allCompletions}
-        streak={streakCount}
-        today={todayStr}
-      />
-
-      {/* Room Conditions */}
-      <RoomConditions categoryHealthData={categoryHealthData} />
-
-      {/* Partner Status */}
-      <div>
-        <h2 className="font-semibold text-foreground px-1 mb-2">השותף/ה</h2>
-        <PartnerStatus
-          name="אינבל"
-          completedCount={3}
-          totalCount={8}
-          recentTasks={[
-            "החלפת מצעים",
-            "כביסה",
-            "ניקוי כיור אמבטיה",
-          ]}
+        {/* Emergency Toggle */}
+        <EmergencyToggle
+          active={emergencyMode}
+          onToggle={() => setEmergencyMode((prev) => !prev)}
         />
       </div>
-
-      {/* Couple Rewards */}
-      <CoupleRewards rewardsProgress={rewardsProgress} />
-
-      {/* Emergency Toggle */}
-      <EmergencyToggle
-        active={emergencyMode}
-        onToggle={() => setEmergencyMode((prev) => !prev)}
-      />
 
       {/* Celebration Overlay */}
       <CelebrationOverlay

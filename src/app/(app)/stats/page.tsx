@@ -90,7 +90,7 @@ function StreakVisualization({
   const hebrewDayNames = ["א", "ב", "ג", "ד", "ה", "ו", "ש"];
 
   return (
-    <div className="bg-surface rounded-2xl p-4">
+    <div className="card-elevated p-4">
       <div className="flex items-center justify-between mb-3">
         <h2 className="font-semibold text-sm">רצף פעילות</h2>
         <div className="flex items-center gap-3">
@@ -166,7 +166,7 @@ function PartnerComparisonSection({
   const partnerPct = total > 0 ? 100 - myPct : 50;
 
   return (
-    <div className="bg-surface rounded-2xl p-4">
+    <div className="card-elevated p-4">
       <div className="flex items-center gap-2 mb-3">
         <Users className="w-4 h-4 text-primary" />
         <h2 className="font-semibold text-sm">השוואה השבוע</h2>
@@ -306,18 +306,23 @@ export default function StatsPage() {
   );
 
   return (
-    <div className="px-4 py-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-foreground">סטטיסטיקה</h1>
-        <Link
-          href="/history"
-          className="flex items-center gap-1.5 text-xs text-primary bg-primary/10 px-3 py-1.5 rounded-full font-medium"
-          aria-label="עבור להיסטוריית משימות"
-        >
-          <History className="w-3.5 h-3.5" />
-          היסטוריה
-        </Link>
+    <div className="space-y-5" dir="rtl">
+      {/* Header with gradient */}
+      <div className="gradient-primary rounded-b-3xl px-4 pt-6 pb-5">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-white">סטטיסטיקה</h1>
+          <Link
+            href="/history"
+            className="flex items-center gap-1.5 text-xs text-white bg-white/15 px-3 py-1.5 rounded-full font-medium backdrop-blur-sm"
+            aria-label="עבור להיסטוריית משימות"
+          >
+            <History className="w-3.5 h-3.5" />
+            היסטוריה
+          </Link>
+        </div>
       </div>
+
+      <div className="px-4 space-y-5">
 
       {/* Dashboard Analytics - shown when DB data is available */}
       {hasDbData && (
@@ -337,7 +342,7 @@ export default function StatsPage() {
       />
 
       {/* Weekly Completion Trend Chart */}
-      <div className="bg-surface rounded-2xl p-4">
+      <div className="card-elevated p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-sm">מגמת השלמה שבועית</h2>
           <span className="text-[10px] text-muted bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
@@ -362,7 +367,7 @@ export default function StatsPage() {
               />
               <Bar
                 dataKey="completed"
-                fill="#4F46E5"
+                fill="#6366F1"
                 radius={[4, 4, 0, 0]}
                 name="הושלמו"
               />
@@ -375,7 +380,7 @@ export default function StatsPage() {
       <MonthlyCalendar tasks={tasks} completions={completions} today={today} />
 
       {/* Category Breakdown - now uses real data when available */}
-      <div className="bg-surface rounded-2xl p-4">
+      <div className="card-elevated p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-sm">חלוקה לפי קטגוריה</h2>
           {hasDbData && (
@@ -432,7 +437,7 @@ export default function StatsPage() {
         myCount={partnerComparison.myCount}
         partnerCount={partnerComparison.partnerCount}
         myName={profile?.name ?? "אני"}
-        partnerName="השותף/ה"
+        partnerName="ענבל"
         weeklyCompletedTotal={weeklyTotal}
         monthlyCompletedTotal={monthlyTotal}
       />
@@ -454,7 +459,7 @@ export default function StatsPage() {
             return (
               <motion.div
                 key={achievement.code}
-                className={`bg-surface rounded-xl p-3 text-center ${
+                className={`card-elevated p-3 text-center ${
                   unlocked ? "" : "opacity-40 grayscale"
                 }`}
                 whileTap={unlocked ? { scale: 0.95 } : undefined}
@@ -467,6 +472,7 @@ export default function StatsPage() {
             );
           })}
         </div>
+      </div>
       </div>
     </div>
   );

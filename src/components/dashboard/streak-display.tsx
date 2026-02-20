@@ -11,7 +11,10 @@ export function StreakDisplay({ count, bestCount }: StreakDisplayProps) {
   const fireSize = Math.min(count * 4 + 20, 48);
 
   return (
-    <div className="bg-surface rounded-2xl p-4 flex items-center gap-4">
+    <div className="card-elevated p-4 flex items-center gap-4 relative overflow-hidden">
+      {/* Subtle warm gradient accent on the right edge */}
+      <div className="absolute right-0 top-0 bottom-0 w-1 rounded-r-full bg-gradient-to-b from-amber-400 to-orange-500" />
+
       <motion.span
         className="block"
         style={{ fontSize: fireSize }}

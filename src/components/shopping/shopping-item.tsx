@@ -19,7 +19,7 @@ export function ShoppingItemCard({ item, onToggle, onRemove }: ShoppingItemProps
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9, height: 0, marginBottom: 0 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className={`bg-surface rounded-xl p-3 flex items-center gap-3 ${
+      className={`card-elevated p-3 flex items-center gap-3 relative overflow-hidden ${
         item.checked ? "opacity-50" : ""
       }`}
     >

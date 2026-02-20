@@ -25,8 +25,8 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-30 bg-surface border-t border-border">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-30 glass-nav">
+      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-1">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -34,7 +34,7 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-colors relative ${
+              className={`flex flex-col items-center gap-0.5 px-2.5 py-1.5 rounded-xl transition-all relative ${
                 isActive
                   ? "text-primary"
                   : "text-muted hover:text-foreground"
@@ -43,7 +43,7 @@ export function BottomNav() {
               {isActive && (
                 <motion.div
                   layoutId="nav-indicator"
-                  className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-primary rounded-full"
+                  className="absolute inset-0 bg-primary/8 rounded-xl"
                   transition={{
                     type: "spring",
                     stiffness: 500,
@@ -51,8 +51,13 @@ export function BottomNav() {
                   }}
                 />
               )}
-              <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <Icon
+                className={`w-5 h-5 relative z-10 transition-transform ${isActive ? "scale-110" : ""}`}
+                strokeWidth={isActive ? 2.5 : 1.8}
+              />
+              <span className={`text-[10px] relative z-10 ${isActive ? "font-semibold" : "font-medium"}`}>
+                {item.label}
+              </span>
             </Link>
           );
         })}

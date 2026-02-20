@@ -1,7 +1,7 @@
 # BayitBeSeder (בית בסדר) - Shared Home Maintenance App
 
 ## Project Overview
-Home maintenance management app for 2 users (Elad & Inbal). Hebrew RTL, mobile-first PWA with gamification.
+Home maintenance management app for 2 users (Elad & Inbal/ענבל). Hebrew RTL, mobile-first PWA with gamification.
 
 ## Tech Stack
 - **Framework:** Next.js 15 (App Router)

@@ -25,7 +25,7 @@ export function RoomConditions({
 
   return (
     <motion.div
-      className="bg-surface rounded-2xl p-4 space-y-3"
+      className="card-elevated p-4 space-y-3"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}

@@ -202,31 +202,36 @@ export default function TasksPage() {
   );
 
   return (
-    <div className="px-4 py-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-foreground">משימות</h1>
-        <div className="flex items-center gap-2">
-          {hasDbTasks && (
-            <button
-              onClick={() => setShowAddForm((prev) => !prev)}
-              className="p-2 rounded-lg hover:bg-surface-hover text-primary"
-              aria-label="הוספת משימה"
-            >
-              <Plus className="w-5 h-5" />
+    <div className="space-y-4" dir="rtl">
+      {/* Header with gradient */}
+      <div className="gradient-primary rounded-b-3xl px-4 pt-6 pb-5">
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-white">משימות</h1>
+          <div className="flex items-center gap-2">
+            {hasDbTasks && (
+              <button
+                onClick={() => setShowAddForm((prev) => !prev)}
+                className="p-2 rounded-lg hover:bg-white/10 text-white/80"
+                aria-label="הוספת משימה"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            )}
+            <button className="p-2 rounded-lg hover:bg-white/10 text-white/60">
+              <Filter className="w-5 h-5" />
             </button>
-          )}
-          <button className="p-2 rounded-lg hover:bg-surface-hover text-muted">
-            <Filter className="w-5 h-5" />
-          </button>
+          </div>
         </div>
       </div>
+
+      <div className="px-4 space-y-4">
 
       {/* Add Task Form (DB mode only) */}
       {showAddForm && hasDbTasks && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="bg-surface rounded-xl p-4 space-y-3"
+          className="card-elevated p-4 space-y-3"
         >
           <input
             type="text"
@@ -260,7 +265,7 @@ export default function TasksPage() {
             <button
               onClick={handleAddTask}
               disabled={!newTaskTitle.trim()}
-              className="flex-1 py-2 rounded-lg bg-primary text-white text-sm font-medium disabled:opacity-50"
+              className="flex-1 py-2 rounded-xl gradient-primary text-white text-sm font-medium disabled:opacity-50 shadow-md shadow-primary/20"
             >
               הוסף משימה
             </button>
@@ -283,10 +288,10 @@ export default function TasksPage() {
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
+            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
               activeCategory === cat
-                ? "bg-primary text-white"
-                : "bg-surface text-muted hover:bg-surface-hover border border-border"
+                ? "gradient-primary text-white shadow-md shadow-primary/20"
+                : "bg-surface text-muted hover:bg-surface-hover card-elevated"
             }`}
           >
             {CATEGORY_LABELS[cat]}
@@ -367,7 +372,7 @@ export default function TasksPage() {
                     layout
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`bg-surface rounded-xl p-3 flex items-start gap-3 ${
+                    className={`card-elevated p-3 flex items-start gap-3 relative overflow-hidden ${
                       isCompleted ? "opacity-60" : ""
                     }`}
                   >
@@ -425,6 +430,7 @@ export default function TasksPage() {
                 );
               })}
         </AnimatePresence>
+      </div>
       </div>
     </div>
   );

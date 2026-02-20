@@ -39,7 +39,7 @@ function SummaryCard({
 }: SummaryCardProps) {
   return (
     <motion.div
-      className="bg-surface rounded-2xl p-3.5"
+      className="card-elevated p-3.5"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.3 }}

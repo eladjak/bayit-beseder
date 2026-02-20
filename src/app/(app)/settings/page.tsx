@@ -283,8 +283,13 @@ export default function SettingsPage() {
   const emailDisplay = user?.email ?? "demo@example.com";
 
   return (
-    <div className="px-4 py-6 space-y-6">
-      <h1 className="text-xl font-bold text-foreground">הגדרות</h1>
+    <div className="space-y-5" dir="rtl">
+      {/* Header with gradient */}
+      <div className="gradient-primary rounded-b-3xl px-4 pt-6 pb-5 text-center">
+        <h1 className="text-xl font-bold text-white">הגדרות</h1>
+      </div>
+
+      <div className="px-4 space-y-5">
 
       {/* Demo Mode Indicator */}
       {isDemo && (
@@ -301,7 +306,7 @@ export default function SettingsPage() {
       )}
 
       {/* Profile */}
-      <section className="bg-surface rounded-2xl p-4 space-y-4">
+      <section className="card-elevated p-4 space-y-4">
         <div className="flex items-center gap-2 mb-1">
           <User className="w-4 h-4 text-muted" />
           <h2 className="font-semibold text-sm">פרופיל</h2>
@@ -352,7 +357,7 @@ export default function SettingsPage() {
         <button
           onClick={handleSaveProfile}
           disabled={profileSaving || isDemo}
-          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary-dark transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 gradient-primary text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 shadow-md shadow-primary/20"
         >
           {profileSaving ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -364,7 +369,7 @@ export default function SettingsPage() {
       </section>
 
       {/* Household */}
-      <section className="bg-surface rounded-2xl p-4 space-y-4">
+      <section className="card-elevated p-4 space-y-4">
         <div className="flex items-center gap-2">
           <Home className="w-4 h-4 text-muted" />
           <h2 className="font-semibold text-sm">בית</h2>
@@ -373,7 +378,7 @@ export default function SettingsPage() {
           <label className="text-xs text-muted block mb-1">שם הבית</label>
           <input
             type="text"
-            defaultValue="הבית של אלעד ואינבל"
+            defaultValue="הבית של אלעד וענבל"
             className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
           />
         </div>
@@ -416,7 +421,7 @@ export default function SettingsPage() {
       </section>
 
       {/* Notifications */}
-      <section className="bg-surface rounded-2xl p-4 space-y-3">
+      <section className="card-elevated p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Bell className="w-4 h-4 text-muted" />
           <h2 className="font-semibold text-sm">התראות</h2>
@@ -433,7 +438,7 @@ export default function SettingsPage() {
             {notifPermission === "default" && (
               <button
                 onClick={enableNotifications}
-                className="px-3 py-1.5 bg-primary text-white rounded-lg text-xs font-medium"
+                className="px-3 py-1.5 gradient-primary text-white rounded-lg text-xs font-medium shadow-sm shadow-primary/20"
               >
                 הפעלת התראות
               </button>
@@ -484,7 +489,7 @@ export default function SettingsPage() {
       </section>
 
       {/* Sounds */}
-      <section className="bg-surface rounded-2xl p-4 space-y-3">
+      <section className="card-elevated p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Volume2 className="w-4 h-4 text-muted" />
           <h2 className="font-semibold text-sm">צלילים</h2>
@@ -501,7 +506,7 @@ export default function SettingsPage() {
       </section>
 
       {/* WhatsApp */}
-      <section className="bg-surface rounded-2xl p-4 space-y-3">
+      <section className="card-elevated p-4 space-y-3">
         <div className="flex items-center gap-2">
           <MessageCircle className="w-4 h-4 text-muted" />
           <h2 className="font-semibold text-sm">WhatsApp</h2>
@@ -543,7 +548,7 @@ export default function SettingsPage() {
       </section>
 
       {/* Theme */}
-      <section className="bg-surface rounded-2xl p-4 space-y-3">
+      <section className="card-elevated p-4 space-y-3">
         <div className="flex items-center gap-2">
           {theme === "dark" ? (
             <Moon className="w-4 h-4 text-muted" />
@@ -578,7 +583,7 @@ export default function SettingsPage() {
       </section>
 
       {/* Language */}
-      <section className="bg-surface rounded-2xl p-4 space-y-3">
+      <section className="card-elevated p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Globe className="w-4 h-4 text-muted" />
           <h2 className="font-semibold text-sm">שפה</h2>
@@ -586,9 +591,9 @@ export default function SettingsPage() {
         <div className="flex gap-2">
           <button
             onClick={() => handleLanguageChange("he")}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
               language === "he"
-                ? "bg-primary text-white"
+                ? "gradient-primary text-white shadow-md shadow-primary/20"
                 : "bg-background border border-border text-foreground hover:bg-surface-hover"
             }`}
           >
@@ -596,9 +601,9 @@ export default function SettingsPage() {
           </button>
           <button
             onClick={() => handleLanguageChange("en")}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
               language === "en"
-                ? "bg-primary text-white"
+                ? "gradient-primary text-white shadow-md shadow-primary/20"
                 : "bg-background border border-border text-foreground hover:bg-surface-hover"
             }`}
           >
@@ -614,7 +619,7 @@ export default function SettingsPage() {
       </section>
 
       {/* Emergency */}
-      <section className="bg-surface rounded-2xl p-4">
+      <section className="card-elevated p-4">
         <div className="flex items-center gap-2 mb-2">
           <AlertTriangle className="w-4 h-4 text-muted" />
           <h2 className="font-semibold text-sm">מצב חירום</h2>
@@ -639,6 +644,7 @@ export default function SettingsPage() {
       <p className="text-center text-[10px] text-muted pb-4">
         בית בסדר v1.0
       </p>
+      </div>
     </div>
   );
 }
@@ -696,9 +702,9 @@ function ThemeButton({
   return (
     <button
       onClick={() => onSelect(value)}
-      className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
+      className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
         isActive
-          ? "bg-primary text-white"
+          ? "gradient-primary text-white shadow-md shadow-primary/20"
           : "bg-background border border-border text-foreground hover:bg-surface-hover"
       }`}
     >

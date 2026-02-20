@@ -12,7 +12,7 @@ interface PartnerData {
 }
 
 const MOCK_PARTNER: PartnerData = {
-  name: "השותף/ה",
+  name: "ענבל",
   avatarUrl: null,
   completedCount: 3,
   totalCount: 8,

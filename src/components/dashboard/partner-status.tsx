@@ -19,7 +19,7 @@ export function PartnerStatus({
   recentTasks,
 }: PartnerStatusProps) {
   return (
-    <div className="bg-surface rounded-2xl p-4">
+    <div className="card-elevated p-4 relative overflow-hidden">
       <div className="flex items-center gap-3 mb-3">
         <div className="relative">
           {avatarUrl ? (

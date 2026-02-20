@@ -53,29 +53,34 @@ export default function WeeklyPage() {
   const allDone = completedSteps.size === STEPS.length;
 
   return (
-    <div className="px-4 py-6 space-y-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-foreground">סנכרון שבועי</h1>
-          <p className="text-sm text-muted">10 דקות ביחד לשבוע טוב יותר</p>
+    <div className="space-y-5" dir="rtl">
+      {/* Header with gradient */}
+      <div className="gradient-primary rounded-b-3xl px-4 pt-6 pb-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-white">סנכרון שבועי</h1>
+            <p className="text-sm text-white/60">10 דקות ביחד לשבוע טוב יותר</p>
+          </div>
+          <button
+            onClick={() => setTimerActive((prev) => !prev)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+              timerActive
+                ? "bg-white text-primary shadow-md"
+                : "bg-white/15 text-white/80 backdrop-blur-sm"
+            }`}
+          >
+            <Timer className="w-4 h-4" />
+            {formatTime(elapsed)}
+          </button>
         </div>
-        <button
-          onClick={() => setTimerActive((prev) => !prev)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${
-            timerActive
-              ? "bg-primary text-white"
-              : "bg-surface border border-border text-muted"
-          }`}
-        >
-          <Timer className="w-4 h-4" />
-          {formatTime(elapsed)}
-        </button>
       </div>
 
+      <div className="px-4 space-y-5">
+
       {/* Progress Bar */}
-      <div className="h-2 bg-border rounded-full overflow-hidden">
+      <div className="h-2 bg-border/30 rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-primary rounded-full"
+          className="h-full gradient-primary rounded-full"
           initial={{ width: 0 }}
           animate={{
             width: `${(completedSteps.size / STEPS.length) * 100}%`,
@@ -96,12 +101,12 @@ export default function WeeklyPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className={`bg-surface rounded-xl p-4 border transition-colors ${
+              className={`card-elevated p-4 transition-all ${
                 isCurrent
-                  ? "border-primary shadow-sm"
+                  ? "ring-2 ring-primary/30 shadow-lg shadow-primary/10"
                   : isCompleted
-                    ? "border-success/30"
-                    : "border-border"
+                    ? "ring-1 ring-success/20"
+                    : ""
               }`}
             >
               <div className="flex items-center gap-3">
@@ -133,7 +138,7 @@ export default function WeeklyPage() {
                 {!isCompleted && isCurrent && (
                   <button
                     onClick={() => completeStep(i)}
-                    className="px-3 py-1 rounded-lg bg-primary text-white text-xs font-medium"
+                    className="px-3 py-1 rounded-lg gradient-primary text-white text-xs font-medium shadow-sm shadow-primary/20"
                   >
                     סיום
                   </button>
@@ -151,14 +156,14 @@ export default function WeeklyPage() {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="הערות לשבוע הקרוב..."
-          className="w-full bg-surface border border-border rounded-xl p-3 text-sm resize-none h-24 focus:outline-none focus:border-primary"
+          className="w-full bg-background border border-border rounded-xl p-3 text-sm resize-none h-24 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
           dir="rtl"
         />
       </div>
 
       {allDone && (
         <motion.div
-          className="bg-success/10 rounded-xl p-4 text-center"
+          className="card-elevated bg-success/10 p-4 text-center"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
         >
@@ -169,6 +174,7 @@ export default function WeeklyPage() {
           </p>
         </motion.div>
       )}
+      </div>
     </div>
   );
 }

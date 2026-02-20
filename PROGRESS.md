@@ -7,7 +7,7 @@
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-13 + Supabase hooks complete. App LIVE on Vercel. 160 tests passing. All hooks use real Supabase with mock fallback. Partner + household hooks added to dashboard. Ready to share with Inbal!
+Phase 1-13 + Supabase hooks complete. App LIVE on Vercel. 160 tests passing. All hooks use real Supabase with mock fallback. Partner + household hooks added to dashboard. Ready to share with ענבל!
 
 ## Supabase Integration Summary (Complete)
 ### Hooks with Supabase + Mock Fallback

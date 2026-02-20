@@ -79,19 +79,20 @@ export default function ShoppingPage() {
   }
 
   return (
-    <div className="px-4 py-6 space-y-4" dir="rtl">
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-xl font-bold text-foreground">
+    <div className="space-y-4" dir="rtl">
+      {/* Header with gradient */}
+      <div className="gradient-primary rounded-b-3xl px-4 pt-6 pb-5 text-center">
+        <h1 className="text-xl font-bold text-white">
           רשימת קניות 🛒
         </h1>
         {totalCount > 0 && (
-          <p className="text-sm text-muted mt-1">
+          <p className="text-sm text-white/70 mt-1">
             {checkedCount}/{totalCount} פריטים סומנו
           </p>
         )}
       </div>
 
+      <div className="px-4 space-y-4">
       {/* Category filter chips */}
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
         {FILTER_OPTIONS.map((cat) => {
@@ -100,10 +101,10 @@ export default function ShoppingPage() {
             <button
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all ${
                 isActive
-                  ? "bg-primary text-white"
-                  : "bg-surface text-muted hover:text-foreground"
+                  ? "gradient-primary text-white shadow-md shadow-primary/20"
+                  : "bg-surface text-muted hover:text-foreground card-elevated"
               }`}
               style={
                 !isActive && cat !== "הכל"
@@ -121,7 +122,7 @@ export default function ShoppingPage() {
       {filteredItems.unchecked.length === 0 &&
         filteredItems.checked.length === 0 && (
           <motion.div
-            className="bg-surface rounded-2xl p-8 text-center"
+            className="card-elevated p-8 text-center"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
@@ -204,7 +205,7 @@ export default function ShoppingPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="bg-surface rounded-2xl p-4 space-y-3"
+            className="card-elevated p-4 space-y-3"
           >
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-foreground text-sm">
@@ -251,7 +252,7 @@ export default function ShoppingPage() {
             <button
               onClick={handleAdd}
               disabled={!newTitle.trim()}
-              className="w-full py-2.5 rounded-xl bg-primary text-white font-medium text-sm disabled:opacity-40 transition-opacity"
+              className="w-full py-2.5 rounded-xl gradient-primary text-white font-medium text-sm disabled:opacity-40 transition-opacity shadow-md shadow-primary/20"
             >
               הוסיפו
             </button>
@@ -269,11 +270,12 @@ export default function ShoppingPage() {
             haptic("tap");
             setShowForm(true);
           }}
-          className="fixed bottom-20 left-4 w-14 h-14 rounded-full bg-primary text-white shadow-lg flex items-center justify-center z-20"
+          className="fixed bottom-20 left-4 w-14 h-14 rounded-full gradient-primary text-white shadow-lg shadow-primary/30 flex items-center justify-center z-20"
         >
           <Plus className="w-6 h-6" />
         </motion.button>
       )}
+      </div>
     </div>
   );
 }

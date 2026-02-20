@@ -30,7 +30,21 @@ export function GoldenRuleRing({
   return (
     <div className="flex flex-col items-center gap-3">
       <div className="relative" style={{ width: size, height: size }}>
+        {/* Outer glow when target hit */}
+        {hitTarget && (
+          <div
+            className="absolute inset-0 rounded-full glow-pulse"
+            style={{ filter: "blur(0px)" }}
+          />
+        )}
         <svg width={size} height={size} className="-rotate-90">
+          <defs>
+            <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#6366F1" />
+              <stop offset="50%" stopColor="#8B5CF6" />
+              <stop offset="100%" stopColor="#10B981" />
+            </linearGradient>
+          </defs>
           {/* Background circle */}
           <circle
             cx={size / 2}
@@ -39,6 +53,7 @@ export function GoldenRuleRing({
             fill="none"
             stroke="var(--color-border)"
             strokeWidth={strokeWidth}
+            opacity={0.5}
           />
           {/* Target marker */}
           <circle
@@ -51,7 +66,7 @@ export function GoldenRuleRing({
             strokeDasharray={`2 ${circumference - 2}`}
             strokeDashoffset={targetOffset}
             strokeLinecap="round"
-            style={{ stroke: "var(--color-muted)", opacity: 0.5 }}
+            style={{ stroke: "var(--color-muted)", opacity: 0.4 }}
           />
           {/* Glow pulse when target hit */}
           {hitTarget && (
@@ -61,27 +76,27 @@ export function GoldenRuleRing({
               r={radius}
               fill="none"
               stroke={color}
-              strokeWidth={strokeWidth + 4}
+              strokeWidth={strokeWidth + 6}
               strokeLinecap="round"
               strokeDasharray={circumference}
               strokeDashoffset={offset}
               opacity={0}
-              animate={{ opacity: [0, 0.3, 0] }}
+              animate={{ opacity: [0, 0.25, 0] }}
               transition={{
                 duration: 2,
                 repeat: Infinity,
                 ease: "easeInOut",
               }}
-              style={{ filter: "blur(4px)" }}
+              style={{ filter: "blur(6px)" }}
             />
           )}
-          {/* Progress arc */}
+          {/* Progress arc - gradient when high progress */}
           <motion.circle
             cx={size / 2}
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke={color}
+            stroke={progress >= 70 ? "url(#ring-gradient)" : color}
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -101,22 +116,22 @@ export function GoldenRuleRing({
           >
             {Math.round(progress)}%
           </motion.span>
-          {hitTarget && (
+          {hitTarget ? (
             <motion.span
-              className="text-sm font-medium text-success"
+              className="text-sm font-semibold gradient-text"
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
               בית בסדר!
             </motion.span>
+          ) : (
+            <span className="text-xs text-muted">כלל הזהב</span>
           )}
         </div>
       </div>
-      <div className="flex items-center gap-2 text-sm text-muted">
-        <span>יעד: {target}%</span>
-        <span>•</span>
-        <span>כלל הזהב</span>
+      <div className="flex items-center gap-2 text-xs text-muted">
+        <span className="px-2 py-0.5 bg-primary/8 rounded-full">יעד: {target}%</span>
       </div>
     </div>
   );
