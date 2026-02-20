@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase";
 import type {
   TaskCompletionRow,
@@ -10,10 +10,15 @@ import type {
 interface UseCompletionsOptions {
   /** Filter by task id */
   taskId?: string;
-  /** Filter by user id */
+  /** Filter by user id (completed_by or legacy user_id) */
   userId?: string;
   /** Maximum number of completions to fetch */
   limit?: number;
+}
+
+interface LeaderboardEntry {
+  userId: string;
+  completionCount: number;
 }
 
 interface UseCompletionsReturn {
@@ -23,16 +28,20 @@ interface UseCompletionsReturn {
   markComplete: (params: {
     taskId: string;
     userId: string;
+    householdId?: string;
     photoUrl?: string;
     notes?: string;
   }) => Promise<TaskCompletionRow | null>;
   getHistory: (taskId: string) => Promise<TaskCompletionRow[]>;
+  /** Leaderboard data: completion count per user, sorted descending */
+  leaderboard: LeaderboardEntry[];
   refetch: () => Promise<void>;
 }
 
 /**
- * Hook for task completion operations.
+ * Hook for task completion operations with leaderboard data.
  * Returns empty array (no error) when Supabase is not connected or table doesn't exist.
+ * Falls back gracefully - both completed_by (new) and user_id (legacy) columns are supported.
  */
 export function useCompletions(
   options: UseCompletionsOptions = {}
@@ -82,10 +91,23 @@ export function useCompletions(
     fetchCompletions();
   }, [fetchCompletions]);
 
+  // Compute leaderboard from completions
+  const leaderboard = useMemo((): LeaderboardEntry[] => {
+    const counts: Record<string, number> = {};
+    for (const c of completions) {
+      const uid = c.completed_by ?? c.user_id;
+      counts[uid] = (counts[uid] ?? 0) + 1;
+    }
+    return Object.entries(counts)
+      .map(([userId, completionCount]) => ({ userId, completionCount }))
+      .sort((a, b) => b.completionCount - a.completionCount);
+  }, [completions]);
+
   const markComplete = useCallback(
     async (params: {
       taskId: string;
       userId: string;
+      householdId?: string;
       photoUrl?: string;
       notes?: string;
     }): Promise<TaskCompletionRow | null> => {
@@ -95,6 +117,8 @@ export function useCompletions(
         const insertion: TaskCompletionInsert = {
           task_id: params.taskId,
           user_id: params.userId,
+          completed_by: params.userId,
+          household_id: params.householdId ?? null,
           photo_url: params.photoUrl ?? null,
           notes: params.notes ?? null,
         };
@@ -154,6 +178,7 @@ export function useCompletions(
     error,
     markComplete,
     getHistory,
+    leaderboard,
     refetch: fetchCompletions,
   };
 }

@@ -15,18 +15,21 @@ export type Database = {
           name: string;
           icon: string | null;
           color: string | null;
+          created_at: string;
         };
         Insert: {
           id?: string;
           name: string;
           icon?: string | null;
           color?: string | null;
+          created_at?: string;
         };
         Update: {
           id?: string;
           name?: string;
           icon?: string | null;
           color?: string | null;
+          created_at?: string;
         };
         Relationships: [];
       };
@@ -36,6 +39,7 @@ export type Database = {
           title: string;
           description: string | null;
           category_id: string | null;
+          frequency: "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
           assigned_to: string | null;
           status: "pending" | "in_progress" | "completed" | "skipped";
           due_date: string | null;
@@ -48,6 +52,7 @@ export type Database = {
           title: string;
           description?: string | null;
           category_id?: string | null;
+          frequency?: "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
           assigned_to?: string | null;
           status?: "pending" | "in_progress" | "completed" | "skipped";
           due_date?: string | null;
@@ -60,6 +65,7 @@ export type Database = {
           title?: string;
           description?: string | null;
           category_id?: string | null;
+          frequency?: "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
           assigned_to?: string | null;
           status?: "pending" | "in_progress" | "completed" | "skipped";
           due_date?: string | null;
@@ -87,26 +93,35 @@ export type Database = {
         Row: {
           id: string;
           task_id: string;
+          completed_by: string;
+          household_id: string | null;
           user_id: string;
           completed_at: string;
           photo_url: string | null;
           notes: string | null;
+          created_at: string;
         };
         Insert: {
           id?: string;
           task_id: string;
-          user_id: string;
-          completed_at?: string;
-          photo_url?: string | null;
-          notes?: string | null;
-        };
-        Update: {
-          id?: string;
-          task_id?: string;
+          completed_by?: string;
+          household_id?: string | null;
           user_id?: string;
           completed_at?: string;
           photo_url?: string | null;
           notes?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          task_id?: string;
+          completed_by?: string;
+          household_id?: string | null;
+          user_id?: string;
+          completed_at?: string;
+          photo_url?: string | null;
+          notes?: string | null;
+          created_at?: string;
         };
         Relationships: [
           {
@@ -119,6 +134,13 @@ export type Database = {
           {
             foreignKeyName: "task_completions_user_id_fkey";
             columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "task_completions_completed_by_fkey";
+            columns: ["completed_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
@@ -750,6 +772,7 @@ export type StreakType = Streak["streak_type"];
 export type AchievementCategory = Achievement["category"];
 export type MemberRole = HouseholdMember["role"];
 export type CoachingTrigger = CoachingMessage["trigger_type"];
+export type TaskFrequency = TaskRow["frequency"];
 export type NotificationPreferences = NonNullable<
   Profile["notification_preferences"]
 >;
@@ -787,6 +810,7 @@ export interface ProfileRow {
   household_id: string | null;
   notification_preferences: NotificationPreferences | null;
   created_at: string;
+  updated_at?: string;
 }
 
 /** Update shape for profiles (used by hooks) */

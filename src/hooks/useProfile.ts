@@ -58,6 +58,7 @@ export function useProfile(): UseProfileReturn {
           household_id: data.household_id ?? null,
           notification_preferences: data.notification_preferences ?? null,
           created_at: data.created_at,
+          updated_at: data.updated_at,
         });
       }
     } catch {
