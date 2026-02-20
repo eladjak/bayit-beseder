@@ -1,13 +1,31 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Phase 12 Web Push Notifications DONE
-## Last Updated: 2026-02-19
+## Status: LIVE - Phase 13 Supabase Seed Integration DONE
+## Last Updated: 2026-02-20
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-12 complete. App LIVE. 160 tests passing. Web Push notifications with VAPID keys, server-side push via web-push library, subscription management, and cron integration (morning brief + evening summary send push alongside WhatsApp).
+Phase 1-13 complete. App LIVE. 160 tests passing. Supabase has real data: 15 Hebrew tasks seeded, 8 categories, 3 profiles, 2 auth users. Dashboard auto-seeds tasks on first authenticated login.
+
+## Phase 13: Supabase Seed Integration [DONE]
+### Auto-Seed on First Login
+- [x] `src/app/api/seed/route.ts` - POST route creates 15 Hebrew tasks (11 today + 4 tomorrow) for authenticated users
+- [x] Dashboard auto-calls `/api/seed` when user is authenticated but no tasks exist
+- [x] Seed respects RLS - only works for authenticated users
+- [x] Categories FK references resolved automatically from categories table
+- [x] `scripts/check-and-seed.mjs` - Diagnostic script to check Supabase tables and seed with service role key
+
+### Shopping Items Migration
+- [x] `supabase/migrations/003_shopping_items.sql` - Creates shopping_items table with RLS policies
+- [ ] Migration needs to be run in Supabase SQL Editor (DDL can't run via REST API)
+
+### Supabase Data Status
+- 3 profiles (auto-created from auth trigger)
+- 8 categories (Hebrew, seeded)
+- 15 tasks (11 today + 4 tomorrow, seeded via service role key)
+- 2 auth users: eladjak@gmail.com, eladhiteclearning@gmail.com
 
 ## Phase 12: Web Push Notifications [DONE]
 ### Server-Side Push Infrastructure
