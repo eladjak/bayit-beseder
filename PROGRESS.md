@@ -7,7 +7,30 @@
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-13 + visual facelift + Phase 3 Supabase schema consolidation complete. App LIVE on Vercel. 160 tests passing. Premium design system with gradient headers, glass morphism navigation, elevated cards. All hooks use real Supabase with mock fallback. Name fixed: ענבל (not אינבל). Ready to share!
+Phase 1-13 + visual facelift + Phase 3 Supabase schema consolidation + Vercel deployment prep complete. App LIVE on Vercel. 160 tests passing. Premium design system with gradient headers, glass morphism navigation, elevated cards. All hooks use real Supabase with mock fallback. Name fixed: ענבל (not אינבל). Deployment-ready!
+
+## Vercel Deployment Preparation (Feb 20, 2026) [DONE]
+### Configuration Files
+- [x] `vercel.json` - Added `framework: nextjs` for proper framework detection
+- [x] `next.config.ts` - Added Supabase storage image domains (*.supabase.co)
+- [x] `.env.example` - Already complete with all required env vars (11 total)
+- [x] `src/middleware.ts` - Already exists with auth redirect + demo mode support
+### Verification
+- [x] Build passes: `npx next build` - 22 routes compile successfully
+- [x] TypeScript passes: `npx tsc --noEmit` - zero errors
+- [x] Mock data fallback intact - app works without Supabase connection
+- [x] Auth middleware allows unauthenticated access to all pages (demo mode)
+### Environment Variables Required for Production
+1. `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
+2. `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key (client-side)
+3. `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key (server-side)
+4. `GREEN_API_INSTANCE_ID` - WhatsApp instance ID (shared with Kami)
+5. `GREEN_API_TOKEN` - WhatsApp token
+6. `WHATSAPP_PHONES` - Comma-separated phone numbers (Israeli format)
+7. `CRON_SECRET` - Vercel Cron authorization secret
+8. `NEXT_PUBLIC_VAPID_PUBLIC_KEY` - Web push public key
+9. `VAPID_PRIVATE_KEY` - Web push private key
+10. `VAPID_SUBJECT` - Web push subject (mailto: URL)
 
 ## Phase 3 Supabase Schema Consolidation (Feb 20, 2026) [DONE]
 ### New Migration: 001_initial_schema.sql
