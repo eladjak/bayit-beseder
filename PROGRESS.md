@@ -1,13 +1,39 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Full Supabase Integration Complete
+## Status: LIVE - Visual Facelift + Full Supabase Integration
 ## Last Updated: 2026-02-20
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-13 + Supabase hooks complete. App LIVE on Vercel. 160 tests passing. All hooks use real Supabase with mock fallback. Partner + household hooks added to dashboard. Ready to share with ענבל!
+Phase 1-13 + visual facelift complete. App LIVE on Vercel. 160 tests passing. Premium design system with gradient headers, glass morphism navigation, elevated cards. All hooks use real Supabase with mock fallback. Name fixed: ענבל (not אינבל). Ready to share!
+
+## Visual Facelift (Feb 20, 2026) [DONE]
+### Design System Upgrade
+- [x] New primary color: #6366F1 (Indigo) with accent #8B5CF6 (Purple)
+- [x] Glass morphism bottom nav (backdrop-blur-20px)
+- [x] Card-elevated pattern (purple-tinted shadows + border)
+- [x] Gradient utilities: gradient-primary, gradient-hero, gradient-text
+- [x] New animations: float, glow-pulse, gradient-shift, bounce-in
+### Pages Upgraded (all 6 + login)
+- [x] Login - Animated gradient background, glass card, floating shapes
+- [x] Dashboard - Gradient hero header, elevated golden rule ring
+- [x] Tasks - Gradient header, elevated task cards
+- [x] Shopping - Gradient header, elevated filter chips + item cards
+- [x] Stats - Gradient header, elevated charts + achievements
+- [x] Weekly - Gradient header, elevated step cards + progress bar
+- [x] Settings - Gradient header, elevated sections
+### Components Upgraded
+- [x] Bottom nav - frosted glass, pill-shaped active indicator
+- [x] Today overview - category accent bars, glow checkmarks
+- [x] Golden rule ring - SVG gradient stroke, glow pulse
+- [x] Streak display - gradient accent bar
+- [x] Partner status, Room conditions, Weekly summary cards, Shopping item
+### Name Fix
+- [x] Fixed "אינבל" → "ענבל" across all source files
+- [x] Fixed "Inbal" → "Inbal/ענבל" in docs
+- [x] Fixed partner mock name to "ענבל"
 
 ## Supabase Integration Summary (Complete)
 ### Hooks with Supabase + Mock Fallback
