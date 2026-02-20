@@ -28,6 +28,9 @@ import {
   getNotificationPermission,
   requestNotificationPermission,
   isNotificationSupported,
+  subscribeToPush,
+  unsubscribeFromPush,
+  isPushSubscribed,
   type NotificationPrefs,
 } from "@/lib/notifications";
 import { toast } from "sonner";
@@ -106,6 +109,9 @@ export default function SettingsPage() {
   // Sound state
   const [soundEnabled, setSoundEnabledState] = useState(true);
 
+  // Push state
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+
   // WhatsApp state
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [whatsappPhone, setWhatsappPhone] = useState("");
@@ -119,6 +125,18 @@ export default function SettingsPage() {
     if (profile) {
       setDisplayName(profile.name);
       setAvatarUrl(profile.avatar_url ?? "");
+
+      // Seed notification toggles from Supabase profile if available
+      if (profile.notification_preferences) {
+        const np = profile.notification_preferences;
+        setNotifPrefs((prev) => ({
+          ...prev,
+          morning: np.morning,
+          midday: np.midday,
+          evening: np.evening,
+          partnerActivity: np.partner_activity,
+        }));
+      }
     } else if (user) {
       setDisplayName(
         user.user_metadata?.full_name ?? user.email?.split("@")[0] ?? ""
@@ -141,6 +159,8 @@ export default function SettingsPage() {
       setWhatsappEnabled(localStorage.getItem("bayit-whatsapp-enabled") === "true");
       setWhatsappPhone(localStorage.getItem("bayit-whatsapp-phone") ?? "");
     }
+    // Check push subscription status
+    isPushSubscribed().then(setPushSubscribed);
   }, []);
 
   // Save profile
@@ -173,11 +193,29 @@ export default function SettingsPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
+  // Keys that map to the Supabase notification_preferences JSON column
+  const supabaseNotifKeys = new Set<string>(["morning", "midday", "evening", "partnerActivity"]);
+
   // Toggle notification preference
   function toggleNotifPref(key: keyof NotificationPrefs) {
     setNotifPrefs((prev) => {
       const updated = { ...prev, [key]: !prev[key] };
+
+      // Always persist to localStorage (offline fallback)
       saveNotificationPrefs(updated);
+
+      // Sync the four schedule/partner toggles to Supabase profile
+      if (supabaseNotifKeys.has(key)) {
+        updateProfile({
+          notification_preferences: {
+            morning: updated.morning,
+            midday: updated.midday,
+            evening: updated.evening,
+            partner_activity: updated.partnerActivity,
+          },
+        });
+      }
+
       return updated;
     });
   }
@@ -187,9 +225,34 @@ export default function SettingsPage() {
     const result = await requestNotificationPermission();
     setNotifPermission(result);
     if (result === "granted") {
+      // Subscribe to push
+      if (user?.id) {
+        const sub = await subscribeToPush(user.id);
+        setPushSubscribed(sub !== null);
+      }
       toast.success("התראות הופעלו!");
     } else if (result === "denied") {
       toast.error("ההתראות נחסמו. שנו את ההגדרה בדפדפן.");
+    }
+  }
+
+  // Toggle push subscription
+  async function togglePushSubscription() {
+    if (!user?.id) return;
+    if (pushSubscribed) {
+      const ok = await unsubscribeFromPush(user.id);
+      if (ok) {
+        setPushSubscribed(false);
+        toast.success("התראות Push בוטלו");
+      }
+    } else {
+      const sub = await subscribeToPush(user.id);
+      if (sub) {
+        setPushSubscribed(true);
+        toast.success("התראות Push הופעלו!");
+      } else {
+        toast.error("לא ניתן להפעיל התראות Push");
+      }
     }
   }
 
@@ -384,6 +447,15 @@ export default function SettingsPage() {
           enabled={notifPrefs.enabled}
           onToggle={() => toggleNotifPref("enabled")}
         />
+
+        {/* Push subscription toggle */}
+        {notifPrefs.enabled && notifPermission === "granted" && (
+          <ToggleRow
+            label="התראות Push (גם כשהאפליקציה סגורה)"
+            enabled={pushSubscribed}
+            onToggle={togglePushSubscription}
+          />
+        )}
 
         {notifPrefs.enabled && (
           <>

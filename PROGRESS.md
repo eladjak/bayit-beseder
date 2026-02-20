@@ -1,13 +1,65 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Phase 10 Auto-Schedule + Room Conditions + Couple Rewards DONE
-## Last Updated: 2026-02-18
+## Status: LIVE - Phase 12 Web Push Notifications DONE
+## Last Updated: 2026-02-19
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-9 complete + Phase 10 (Auto-Schedule Engine, Room Conditions, Couple Rewards) done. App LIVE. 107 tests passing. Auto-scheduler cron runs daily at 01:00 Israel time, generates task_instances from 53 templates with rotation assignment. Room condition bars show health per category (green→red degradation). Couple rewards system with 10 Hebrew rewards unlockable through cooperative gameplay.
+Phase 1-12 complete. App LIVE. 160 tests passing. Web Push notifications with VAPID keys, server-side push via web-push library, subscription management, and cron integration (morning brief + evening summary send push alongside WhatsApp).
+
+## Phase 12: Web Push Notifications [DONE]
+### Server-Side Push Infrastructure
+- [x] `web-push` npm package installed with TypeScript types
+- [x] `src/lib/push.ts` - VAPID configuration, sendPushNotification, sendPushToAll with expired subscription cleanup
+- [x] `src/app/api/push/subscribe/route.ts` - POST (save subscription) + DELETE (remove subscription) to Supabase profiles.push_subscription
+- [x] `src/app/api/push/send/route.ts` - Protected push sender (CRON_SECRET auth), fetches all subscribed profiles, auto-cleans expired
+- [x] VAPID key generator script (`scripts/generate-vapid-keys.mjs`)
+
+### Client-Side Push Subscription
+- [x] `subscribeToPush()` - Subscribes browser to push via PushManager, saves to server
+- [x] `unsubscribeFromPush()` - Unsubscribes and removes from server
+- [x] `isPushSubscribed()` - Check current subscription status
+- [x] `urlBase64ToUint8Array()` - VAPID key conversion utility
+- [x] NotificationBanner auto-subscribes to push after permission granted
+- [x] Settings page push toggle (on/off with real subscription management)
+
+### Cron Integration
+- [x] Morning brief cron (`/api/cron/daily-brief`) sends push: "בוקר טוב! יש לכם X משימות להיום"
+- [x] Evening summary cron (`/api/cron/daily-summary`) sends push: "סיכום יומי - השלמתם X/Y משימות (Z%)"
+- [x] Both crons auto-clean expired push subscriptions from Supabase
+
+### Tests
+- [x] 19 tests: subscription validation (8), sendPushToAll logic (4), urlBase64ToUint8Array (3), payload builder (4)
+- [x] Total: 160 tests passing (was 141)
+
+### Environment Variables (add to Vercel)
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY` - Public VAPID key (client-side)
+- `VAPID_PRIVATE_KEY` - Private VAPID key (server-side only)
+- `VAPID_SUBJECT` - mailto: URL for VAPID identification
+
+## Phase 11: Golden Rule Rotation + Shopping List + Tired Mode [DONE]
+### Golden Rule Task Rotation
+- [x] Difficulty levels (1=light, 2=moderate, 3=heavy) added to all 53 task templates in seed data
+- [x] `computeWeightedLoad()` - weighted task load calculation per member
+- [x] `selectAssignee()` updated with optional `goldenRuleTarget` parameter
+- [x] Weighted rotation: golden_rule_target ratio controls task distribution
+- [x] Cron route fetches household golden_rule_target and passes to scheduler
+- [x] 15 tests for golden rule rotation + difficulty weights
+
+### Shopping List
+- [x] `useShoppingList` hook with CRUD operations + mock data (9 Hebrew items)
+- [x] `ShoppingItemCard` component with check animation, category color dots, quantity badges
+- [x] `/shopping` page with category filter chips, collapsible checked section, floating add button
+- [x] Bottom nav updated: 6 tabs (added קניות with ShoppingCart icon)
+- [x] SQL migration prepared as comment (shopping_items table)
+
+### Tired Mode (Energy Filter)
+- [x] `energy-filter.ts` - inferDifficulty (Hebrew keywords + estimated_minutes), filterTasksByEnergy, getEnergyLabel/Emoji/Description
+- [x] `EnergyModeToggle` pill component - cycles all→moderate→light with color transitions
+- [x] Dashboard integration: filtered task list, count indicator, localStorage persistence
+- [x] 16 tests for energy filter functions
 
 ## Phase 10: Auto-Schedule + Room Conditions + Couple Rewards [DONE]
 ### Auto-Schedule Engine
@@ -96,7 +148,7 @@ Based on 4-agent professional research session (Product Research, UX Design, Int
 - [ ] Task rotation based on Golden Rule slider ratio
 - [ ] Routine playlists with timer ("Kitchen Evening: 10 min total")
 - [ ] Adaptive coaching (track which messages lead to completions)
-- [ ] Web Push with VAPID keys (server-side notifications)
+- [x] Web Push with VAPID keys (server-side notifications) - Phase 12
 - [ ] Partner invitation flow (WhatsApp link, not email)
 - [ ] Home inventory / shopping list
 - [ ] Avatar upload to Supabase Storage

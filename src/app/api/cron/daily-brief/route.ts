@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
 import { buildMorningBrief, type DailyBriefData } from "@/lib/whatsapp-messages";
+import { sendPushToAll, type PushSubscriptionData } from "@/lib/push";
 
 /**
  * GET /api/cron/daily-brief
@@ -91,10 +92,44 @@ export async function GET(request: NextRequest) {
 
   const failed = results.filter((r) => !r.success);
 
+  // Also send push notifications
+  let pushResult = { sent: 0, failed: 0, expired: [] as string[] };
+  const { data: pushProfiles } = await supabase
+    .from("profiles")
+    .select("id, push_subscription")
+    .not("push_subscription", "is", null);
+
+  if (pushProfiles && pushProfiles.length > 0) {
+    const subs = pushProfiles
+      .map((p) => p.push_subscription as PushSubscriptionData | null)
+      .filter((s): s is PushSubscriptionData => s !== null && !!s.endpoint);
+
+    pushResult = await sendPushToAll(subs, {
+      title: "בוקר טוב! ☀️",
+      body: `יש לכם ${tasks.length} משימות להיום`,
+      tag: "morning-brief",
+      url: "/dashboard",
+    });
+
+    // Clean up expired subscriptions
+    if (pushResult.expired.length > 0) {
+      for (const profile of pushProfiles) {
+        const sub = profile.push_subscription as PushSubscriptionData | null;
+        if (sub && pushResult.expired.includes(sub.endpoint)) {
+          await supabase
+            .from("profiles")
+            .update({ push_subscription: null })
+            .eq("id", profile.id);
+        }
+      }
+    }
+  }
+
   return NextResponse.json({
     success: failed.length === 0,
     sent: results.length,
     failed: failed.length,
     taskCount: tasks.length,
+    push: { sent: pushResult.sent, failed: pushResult.failed },
   });
 }

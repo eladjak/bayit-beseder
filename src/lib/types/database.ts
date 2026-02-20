@@ -610,6 +610,57 @@ export type Database = {
           },
         ];
       };
+      shopping_items: {
+        Row: {
+          id: string;
+          household_id: string;
+          title: string;
+          quantity: number;
+          unit: string | null;
+          category: string;
+          checked: boolean;
+          added_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          title: string;
+          quantity?: number;
+          unit?: string | null;
+          category?: string;
+          checked?: boolean;
+          added_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          household_id?: string;
+          title?: string;
+          quantity?: number;
+          unit?: string | null;
+          category?: string;
+          checked?: boolean;
+          added_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "shopping_items_household_id_fkey";
+            columns: ["household_id"];
+            isOneToOne: false;
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "shopping_items_added_by_fkey";
+            columns: ["added_by"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       coaching_messages: {
         Row: {
           id: string;
@@ -687,6 +738,9 @@ export type Achievement = Tables<"achievements">;
 export type UserAchievement = Tables<"user_achievements">;
 export type WeeklySync = Tables<"weekly_syncs">;
 export type CoachingMessage = Tables<"coaching_messages">;
+export type ShoppingItemRow = Tables<"shopping_items">;
+export type ShoppingItemInsert = InsertTables<"shopping_items">;
+export type ShoppingItemUpdate = UpdateTables<"shopping_items">;
 
 // Enum-like types extracted from the schema
 export type TaskCategory = TaskTemplate["category"];
@@ -730,6 +784,7 @@ export interface ProfileRow {
   points: number;
   streak: number;
   partner_id: string | null;
+  notification_preferences: NotificationPreferences | null;
   created_at: string;
 }
 
@@ -739,4 +794,5 @@ export interface ProfileUpdate {
   avatar_url?: string | null;
   points?: number;
   streak?: number;
+  notification_preferences?: NotificationPreferences | null;
 }

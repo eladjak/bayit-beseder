@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { GoldenRuleRing } from "@/components/dashboard/golden-rule-ring";
 import { TodayOverview, type TaskItem } from "@/components/dashboard/today-overview";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
@@ -76,12 +76,12 @@ export default function DashboardPage() {
   // ---- Supabase hooks ----
   const { profile } = useProfile();
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
-  const { tasks: dbTasks, loading: tasksLoading } = useTasks({
+  const { tasks: dbTasks, loading: tasksLoading, refetch: refetchTodayTasks } = useTasks({
     dueDate: todayStr,
     realtime: true,
   });
   // Fetch all tasks (no date filter) for summary cards
-  const { tasks: allDbTasks } = useTasks({});
+  const { tasks: allDbTasks, refetch: refetchAllTasks } = useTasks({});
   const { completions: allCompletions, markComplete } = useCompletions({ limit: 200 });
   const { categoryMap } = useCategories();
   const { playComplete, playAchievement, playStreak } = useAppSounds();
@@ -92,6 +92,25 @@ export default function DashboardPage() {
     markAllAsRead,
     dismiss,
   } = useNotifications();
+
+  // ---- Auto-seed tasks for authenticated users on first visit ----
+  const seedAttempted = useRef(false);
+  useEffect(() => {
+    if (seedAttempted.current || tasksLoading || dbTasks.length > 0 || !profile) return;
+    seedAttempted.current = true;
+
+    fetch("/api/seed", { method: "POST" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.seeded) {
+          refetchTodayTasks();
+          refetchAllTasks();
+        }
+      })
+      .catch(() => {
+        // Seed failed - will use mock data fallback
+      });
+  }, [tasksLoading, dbTasks.length, profile, refetchTodayTasks, refetchAllTasks]);
 
   // ---- Determine if we should use DB data or mock ----
   const hasDbTasks = !tasksLoading && dbTasks.length > 0;

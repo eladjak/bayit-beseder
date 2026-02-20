@@ -7,7 +7,9 @@ import {
   getNotificationPermission,
   requestNotificationPermission,
   registerServiceWorker,
+  subscribeToPush,
 } from "@/lib/notifications";
+import { useAuth } from "@/hooks/useAuth";
 
 /**
  * In-app banner that asks the user to enable push notifications.
@@ -17,6 +19,7 @@ import {
 export function NotificationBanner() {
   const [visible, setVisible] = useState(false);
   const [requesting, setRequesting] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     // Don't show if not supported or already granted/denied
@@ -45,6 +48,10 @@ export function NotificationBanner() {
     setRequesting(false);
 
     if (result === "granted") {
+      // Subscribe to push notifications if user is logged in
+      if (user?.id) {
+        subscribeToPush(user.id);
+      }
       setVisible(false);
       localStorage.setItem("bayit-notification-banner-dismissed", "true");
     } else {

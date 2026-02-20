@@ -39,7 +39,7 @@ export function useProfile(): UseProfileReturn {
 
       const { data, error: fetchError } = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url, points, streak, partner_id, household_id, created_at, updated_at")
+        .select("id, display_name, avatar_url, points, streak, partner_id, household_id, notification_preferences, created_at, updated_at")
         .eq("id", user.id)
         .single();
 
@@ -55,6 +55,7 @@ export function useProfile(): UseProfileReturn {
           points: data.points ?? 0,
           streak: data.streak ?? 0,
           partner_id: data.partner_id ?? null,
+          notification_preferences: data.notification_preferences ?? null,
           created_at: data.created_at,
         });
       }
@@ -86,6 +87,8 @@ export function useProfile(): UseProfileReturn {
         if (updates.name !== undefined) dbUpdates.display_name = updates.name;
         if (updates.avatar_url !== undefined)
           dbUpdates.avatar_url = updates.avatar_url;
+        if (updates.notification_preferences !== undefined)
+          dbUpdates.notification_preferences = updates.notification_preferences;
 
         const { error: updateError } = await supabase
           .from("profiles")
@@ -111,6 +114,9 @@ export function useProfile(): UseProfileReturn {
                   : {}),
                 ...(updates.streak !== undefined
                   ? { streak: updates.streak }
+                  : {}),
+                ...(updates.notification_preferences !== undefined
+                  ? { notification_preferences: updates.notification_preferences }
                   : {}),
               }
             : null

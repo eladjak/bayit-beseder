@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --test src/__tests__/task-stats.test.mjs src/__tests__/notifications.test.mjs src/__tests__/auto-scheduler.test.mjs src/__tests__/room-health.test.mjs src/__tests__/rewards.test.mjs src/__tests__/golden-rule-rotation.test.mjs src/__tests__/energy-filter.test.mjs"
+    "test": "node --test src/__tests__/task-stats.test.mjs src/__tests__/notifications.test.mjs src/__tests__/auto-scheduler.test.mjs src/__tests__/room-health.test.mjs src/__tests__/rewards.test.mjs src/__tests__/golden-rule-rotation.test.mjs src/__tests__/energy-filter.test.mjs src/__tests__/push-notifications.test.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -25,6 +25,7 @@
     "recharts": "^3.7.0",
     "sonner": "^2.0.7",
     "use-sound": "^5.0.0",
+    "web-push": "^3.6.7",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -33,6 +34,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
