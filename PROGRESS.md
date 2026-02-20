@@ -1,13 +1,35 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Phase 13 Supabase Seed Integration DONE
+## Status: LIVE - Full Supabase Integration Complete
 ## Last Updated: 2026-02-20
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-13 complete. App LIVE. 160 tests passing. Supabase has real data: 15 Hebrew tasks seeded, 8 categories, 3 profiles, 2 auth users. Dashboard auto-seeds tasks on first authenticated login.
+Phase 1-13 + Supabase hooks complete. App LIVE on Vercel. 160 tests passing. All hooks use real Supabase with mock fallback. Partner + household hooks added to dashboard. Ready to share with Inbal!
+
+## Supabase Integration Summary (Complete)
+### Hooks with Supabase + Mock Fallback
+- [x] `useProfile` - Profile CRUD from profiles table (includes household_id, partner_id)
+- [x] `useTasks` - Tasks CRUD with Realtime subscription
+- [x] `useCompletions` - Task completions with markComplete (updates task status too)
+- [x] `useCategories` - Categories from DB, categoryMap lookup
+- [x] `usePartner` - Partner profile + today's tasks from Supabase
+- [x] `useHousehold` - Household data with golden rule target update
+- [x] `useShoppingList` - Full CRUD with Realtime + optimistic updates
+- [x] `useNotifications` - Notifications with mock data blend
+
+### Migration SQL (3 files + main schema)
+- [x] `001_initial.sql` - profiles, categories, tasks, task_completions + RLS + seed categories + auto-profile trigger
+- [x] `002_phase5_connect_real_data.sql` - partner_id, points, streak, Realtime, point/streak triggers
+- [x] `003_shopping_items.sql` - shopping_items table + RLS policies
+- [x] `migration.sql` - Full schema: households, task_templates, task_instances, streaks, achievements, etc.
+
+### RLS Policies (all tables)
+- [x] profiles, categories, tasks, task_completions (001_initial.sql)
+- [x] households, household_members, task_templates, task_instances, streaks, achievements, user_achievements, weekly_syncs, coaching_messages (migration.sql)
+- [x] shopping_items (003_shopping_items.sql)
 
 ## Phase 13: Supabase Seed Integration [DONE]
 ### Auto-Seed on First Login
