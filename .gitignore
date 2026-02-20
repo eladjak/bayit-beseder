@@ -41,4 +41,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
+# screenshots (dev artifacts)
+screenshot-*.png
+test-*.png
+
+# one-off migration scripts
+scripts/migrate-*.mjs
+scripts/run-*.mjs
+scripts/try-*.mjs
+
+# claude code local config
+.claude/
