@@ -55,6 +55,7 @@ export function useProfile(): UseProfileReturn {
           points: data.points ?? 0,
           streak: data.streak ?? 0,
           partner_id: data.partner_id ?? null,
+          household_id: data.household_id ?? null,
           notification_preferences: data.notification_preferences ?? null,
           created_at: data.created_at,
         });

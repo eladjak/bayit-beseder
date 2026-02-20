@@ -784,6 +784,7 @@ export interface ProfileRow {
   points: number;
   streak: number;
   partner_id: string | null;
+  household_id: string | null;
   notification_preferences: NotificationPreferences | null;
   created_at: string;
 }

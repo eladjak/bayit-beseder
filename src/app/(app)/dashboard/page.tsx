@@ -26,6 +26,7 @@ import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
 import { useAppSounds } from "@/hooks/useAppSound";
 import { useNotifications } from "@/hooks/useNotifications";
+import { usePartner } from "@/hooks/usePartner";
 import { TaskListSkeleton } from "@/components/skeleton";
 import { RingSkeleton } from "@/components/skeleton";
 
@@ -92,6 +93,7 @@ export default function DashboardPage() {
     markAllAsRead,
     dismiss,
   } = useNotifications();
+  const { partner } = usePartner(profile?.partner_id, todayStr);
 
   // ---- Auto-seed tasks for authenticated users on first visit ----
   const seedAttempted = useRef(false);
