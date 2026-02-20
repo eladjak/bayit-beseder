@@ -7,7 +7,35 @@
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-13 + visual facelift complete. App LIVE on Vercel. 160 tests passing. Premium design system with gradient headers, glass morphism navigation, elevated cards. All hooks use real Supabase with mock fallback. Name fixed: ענבל (not אינבל). Ready to share!
+Phase 1-13 + visual facelift + Phase 3 Supabase schema consolidation complete. App LIVE on Vercel. 160 tests passing. Premium design system with gradient headers, glass morphism navigation, elevated cards. All hooks use real Supabase with mock fallback. Name fixed: ענבל (not אינבל). Ready to share!
+
+## Phase 3 Supabase Schema Consolidation (Feb 20, 2026) [DONE]
+### New Migration: 001_initial_schema.sql
+- [x] `profiles` table: id (uuid PK -> auth.users), display_name, avatar_url, partner_id, points, created_at, updated_at
+- [x] `categories` table: id (uuid PK), name, icon, color, created_at
+- [x] `tasks` table: id (uuid PK), category_id (FK), title, description, frequency (daily/weekly/monthly/quarterly/yearly), points, created_at
+- [x] `task_completions` table: id (uuid PK), task_id (FK), completed_by (FK), household_id, notes, photo_url, completed_at, created_at
+- [x] RLS policies for all 4 tables (own data + partner/household scoping)
+- [x] Category seeds (8 Hebrew categories)
+- [x] Auto-create profile trigger on signup
+- [x] Updated_at trigger on profiles
+### Hook Updates
+- [x] `useCompletions` - Added leaderboard data computation (completion count per user, sorted desc)
+- [x] `useCompletions` - Now sets both `completed_by` and `user_id` for backward compatibility
+- [x] `useCompletions` - Supports optional `householdId` param in `markComplete`
+- [x] `useProfile` - Now returns `updated_at` field
+### Type Updates
+- [x] `database.ts` - Added `frequency` to tasks type (daily/weekly/monthly/quarterly/yearly)
+- [x] `database.ts` - Added `completed_by`, `household_id`, `created_at` to task_completions type
+- [x] `database.ts` - Added `created_at` to categories type
+- [x] `database.ts` - Added `TaskFrequency` convenience type
+- [x] `database.ts` - ProfileRow updated with optional `updated_at`
+### Mock Data Fixes
+- [x] `history/page.tsx` - Mock tasks now include `frequency` field
+- [x] `history/page.tsx` - Mock completions now include `completed_by`, `household_id`, `created_at`
+### Verification
+- [x] `npx tsc --noEmit` passes with zero errors
+- [x] `npx next build` passes - all routes compile
 
 ## Visual Facelift (Feb 20, 2026) [DONE]
 ### Design System Upgrade
