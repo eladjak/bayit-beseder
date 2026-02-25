@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { useShoppingList, CATEGORY_COLORS } from "@/hooks/useShoppingList";
 import type { ShoppingCategory } from "@/hooks/useShoppingList";
 import { ShoppingItemCard } from "@/components/shopping/shopping-item";
@@ -46,6 +47,7 @@ export default function ShoppingPage() {
     if (!newTitle.trim()) return;
     addItem(newTitle.trim(), newCategory);
     haptic("success");
+    toast.success("הפריט נוסף לרשימה");
     setNewTitle("");
     setShowForm(false);
   }
@@ -53,16 +55,21 @@ export default function ShoppingPage() {
   function handleToggle(id: string) {
     haptic("tap");
     toggleItem(id);
+    // No toast for toggle - too noisy
   }
 
   function handleRemove(id: string) {
     haptic("tap");
     removeItem(id);
+    toast.info("הפריט הוסר מהרשימה");
   }
 
   function handleClearChecked() {
+    const count = items.filter((i) => i.checked).length;
+    if (count === 0) return;
     haptic("success");
     clearChecked();
+    toast.success(`${count} פריטים נוקו מהרשימה`);
   }
 
   if (loading) {

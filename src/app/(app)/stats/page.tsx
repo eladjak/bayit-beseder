@@ -33,6 +33,7 @@ import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
 import { useProfile } from "@/hooks/useProfile";
 import { AnimatedNumber } from "@/components/animated-number";
+import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
 
 // Map Hebrew category names -> internal keys (same as dashboard)
 const CATEGORY_NAME_TO_KEY: Record<string, string> = {
@@ -65,12 +66,47 @@ const MOCK_CATEGORY_DATA = [
   { name: "כללי", value: 5, category: "general" },
 ];
 
-const MOCK_UNLOCKED_ACHIEVEMENTS = [
-  "first_task",
-  "streak_3",
-  "streak_7",
-  "golden_rule_5",
-];
+// Compute unlocked achievements from real data
+function computeUnlockedAchievements(
+  completions: TaskCompletionRow[],
+  streak: number,
+  tasks: TaskRow[]
+): Set<string> {
+  const unlocked = new Set<string>();
+
+  // first_task - completed at least 1 task
+  if (completions.length >= 1) {
+    unlocked.add("first_task");
+  }
+
+  // streak achievements
+  if (streak >= 3) unlocked.add("streak_3");
+  if (streak >= 7) unlocked.add("streak_7");
+  if (streak >= 30) unlocked.add("streak_30");
+
+  // kitchen_master - 50 kitchen tasks completed
+  const kitchenCompletions = completions.filter((c) => {
+    const task = tasks.find((t) => t.id === c.task_id);
+    return task?.title.includes("מטבח") || task?.title.includes("כלים");
+  }).length;
+  if (kitchenCompletions >= 50) {
+    unlocked.add("kitchen_master");
+  }
+
+  // all_daily_10 - completed all daily tasks 10+ times
+  // Simplified: if total completions > 100, assume this is unlocked
+  if (completions.length >= 100) {
+    unlocked.add("all_daily_10");
+  }
+
+  // golden_rule_5 - met golden rule target 5+ times
+  // Simplified: if completions > 50, assume golden rule hit multiple times
+  if (completions.length >= 50) {
+    unlocked.add("golden_rule_5");
+  }
+
+  return unlocked;
+}
 
 // ============================================
 // Streak Visualization Component
@@ -305,6 +341,19 @@ export default function StatsPage() {
     [completions, today]
   );
 
+  // Compute unlocked achievements from real data
+  const unlockedAchievements = useMemo(() => {
+    if (!hasDbData) {
+      // Mock data for demo
+      return new Set(["first_task", "streak_3", "streak_7", "golden_rule_5"]);
+    }
+    return computeUnlockedAchievements(
+      completions,
+      profile?.streak ?? 0,
+      tasks
+    );
+  }, [hasDbData, completions, profile?.streak, tasks]);
+
   return (
     <div className="space-y-5" dir="rtl">
       {/* Header with gradient */}
@@ -326,23 +375,40 @@ export default function StatsPage() {
 
       {/* Dashboard Analytics - shown when DB data is available */}
       {hasDbData && (
-        <DashboardStats
-          tasks={tasks}
-          completions={completions}
-          categoryNameToKey={categoryIdToKey}
-          today={today}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <DashboardStats
+            tasks={tasks}
+            completions={completions}
+            categoryNameToKey={categoryIdToKey}
+            today={today}
+          />
+        </motion.div>
       )}
 
       {/* Streak Visualization */}
-      <StreakVisualization
-        streakDays={streakHistory}
-        currentStreak={profile?.streak ?? 5}
-        bestStreak={12}
-      />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
+        <StreakVisualization
+          streakDays={streakHistory}
+          currentStreak={profile?.streak ?? 5}
+          bestStreak={12}
+        />
+      </motion.div>
 
       {/* Weekly Completion Trend Chart */}
-      <div className="card-elevated p-4">
+      <motion.div
+        className="card-elevated p-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+      >
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-sm">מגמת השלמה שבועית</h2>
           <span className="text-[10px] text-muted bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
@@ -374,13 +440,24 @@ export default function StatsPage() {
             </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
+      </motion.div>
 
       {/* Monthly Calendar */}
-      <MonthlyCalendar tasks={tasks} completions={completions} today={today} />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.3 }}
+      >
+        <MonthlyCalendar tasks={tasks} completions={completions} today={today} />
+      </motion.div>
 
       {/* Category Breakdown - now uses real data when available */}
-      <div className="card-elevated p-4">
+      <motion.div
+        className="card-elevated p-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.4 }}
+      >
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-sm">חלוקה לפי קטגוריה</h2>
           {hasDbData && (
@@ -430,10 +507,15 @@ export default function StatsPage() {
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Partner Comparison - now uses real data when available */}
-      <PartnerComparisonSection
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.5 }}
+      >
+        <PartnerComparisonSection
         myCount={partnerComparison.myCount}
         partnerCount={partnerComparison.partnerCount}
         myName={profile?.name ?? "אני"}
@@ -441,28 +523,36 @@ export default function StatsPage() {
         weeklyCompletedTotal={weeklyTotal}
         monthlyCompletedTotal={monthlyTotal}
       />
+      </motion.div>
 
       {/* Achievements */}
-      <div>
+      <motion.div
+        className="card-elevated p-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.6 }}
+      >
         <div className="flex items-center gap-2 mb-3">
           <Trophy className="w-5 h-5 text-amber-500" />
           <h2 className="font-semibold text-sm">הישגים</h2>
           <span className="text-xs text-muted">
-            {MOCK_UNLOCKED_ACHIEVEMENTS.length}/{ACHIEVEMENTS.length}
+            {unlockedAchievements.size}/{ACHIEVEMENTS.length}
           </span>
         </div>
         <div className="grid grid-cols-3 gap-3">
-          {ACHIEVEMENTS.map((achievement) => {
-            const unlocked = MOCK_UNLOCKED_ACHIEVEMENTS.includes(
-              achievement.code
-            );
+          {ACHIEVEMENTS.map((achievement, idx) => {
+            const unlocked = unlockedAchievements.has(achievement.code);
             return (
               <motion.div
                 key={achievement.code}
                 className={`card-elevated p-3 text-center ${
                   unlocked ? "" : "opacity-40 grayscale"
                 }`}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2, delay: 0.7 + idx * 0.05 }}
                 whileTap={unlocked ? { scale: 0.95 } : undefined}
+                title={achievement.description}
               >
                 <span className="text-2xl block mb-1">{achievement.icon}</span>
                 <p className="text-[10px] font-medium text-foreground leading-tight">
@@ -472,7 +562,7 @@ export default function StatsPage() {
             );
           })}
         </div>
-      </div>
+      </motion.div>
       </div>
     </div>
   );

@@ -1,13 +1,34 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Visual Facelift + Full Supabase Integration
-## Last Updated: 2026-02-20
+## Status: LIVE - Tasks & Shopping Pages Improved
+## Last Updated: 2026-02-25
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-13 + visual facelift + Phase 3 Supabase schema consolidation + Vercel deployment prep complete. App LIVE on Vercel. 160 tests passing. Premium design system with gradient headers, glass morphism navigation, elevated cards. All hooks use real Supabase with mock fallback. Name fixed: ענבל (not אינבל). Deployment-ready!
+Phase 1-13 + visual facelift + Phase 3 Supabase schema consolidation + Vercel deployment prep complete. App LIVE on Vercel. 160 tests passing. Premium design system with gradient headers, glass morphism navigation, elevated cards. All hooks use real Supabase with mock fallback. Name fixed: ענבל (not אינבל). **Tasks & Shopping pages improved with toast notifications, localStorage persistence, overdue highlighting, and proper empty states.** Deployment-ready!
+
+## Tasks & Shopping Pages Improvements (Feb 25, 2026) [DONE]
+### Tasks Page Improvements
+- [x] Added Sonner toast notifications for all CRUD operations (add, complete, delete)
+- [x] Added empty states with different messages for filtered vs all tasks
+- [x] Added overdue task highlighting (red ring, badge, text color)
+- [x] Improved task completion flow with proper success feedback
+- [x] All operations persist to Supabase with realtime updates
+### Shopping Page Improvements
+- [x] Added localStorage persistence for mock mode (key: `bayit-beseder-shopping-list`)
+- [x] Added Sonner toast notifications for all operations (add, remove, clear)
+- [x] Items now persist across navigation and page refresh
+- [x] Immutable state updates throughout
+- [x] Clear completed shows count in toast
+### Hook Updates
+- [x] `useShoppingList.ts` - Added loadFromLocalStorage/saveToLocalStorage functions
+- [x] All CRUD operations now save to localStorage after mutations
+- [x] Graceful error handling for storage quota/disabled scenarios
+### Documentation
+- [x] Created `TASKS-SHOPPING-IMPROVEMENTS.md` with full technical details
+- [x] Updated `PROGRESS.md` with completion status
 
 ## Vercel Deployment Preparation (Feb 20, 2026) [DONE]
 ### Configuration Files

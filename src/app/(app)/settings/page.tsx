@@ -105,6 +105,7 @@ export default function SettingsPage() {
   // Household state
   const [copied, setCopied] = useState(false);
   const [goldenTarget, setGoldenTarget] = useState(80);
+  const [householdName, setHouseholdName] = useState("הבית של אלעד וענבל");
 
   // Sound state
   const [soundEnabled, setSoundEnabledState] = useState(true);
@@ -158,6 +159,18 @@ export default function SettingsPage() {
     if (typeof window !== "undefined") {
       setWhatsappEnabled(localStorage.getItem("bayit-whatsapp-enabled") === "true");
       setWhatsappPhone(localStorage.getItem("bayit-whatsapp-phone") ?? "");
+
+      // Load golden rule target from localStorage
+      const savedTarget = localStorage.getItem("bayit-golden-target");
+      if (savedTarget) {
+        setGoldenTarget(Number(savedTarget));
+      }
+
+      // Load household name from localStorage
+      const savedHouseholdName = localStorage.getItem("bayit-household-name");
+      if (savedHouseholdName) {
+        setHouseholdName(savedHouseholdName);
+      }
     }
     // Check push subscription status
     isPushSubscribed().then(setPushSubscribed);
@@ -279,6 +292,28 @@ export default function SettingsPage() {
     router.push("/login");
   }
 
+  // Clear local data
+  function handleClearLocalData() {
+    if (
+      confirm(
+        "האם אתם בטוחים? פעולה זו תמחק את כל הנתונים המקומיים (העדפות, הגדרות)."
+      )
+    ) {
+      // Clear all bayit-* localStorage keys
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith("bayit-")) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
+      toast.success("הנתונים המקומיים נמחקו");
+      // Reload to reset state
+      setTimeout(() => window.location.reload(), 500);
+    }
+  }
+
   const isDemo = !user;
   const emailDisplay = user?.email ?? "demo@example.com";
 
@@ -378,7 +413,11 @@ export default function SettingsPage() {
           <label className="text-xs text-muted block mb-1">שם הבית</label>
           <input
             type="text"
-            defaultValue="הבית של אלעד וענבל"
+            value={householdName}
+            onChange={(e) => {
+              setHouseholdName(e.target.value);
+              localStorage.setItem("bayit-household-name", e.target.value);
+            }}
             className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
           />
         </div>
@@ -410,13 +449,24 @@ export default function SettingsPage() {
             min={50}
             max={100}
             value={goldenTarget}
-            onChange={(e) => setGoldenTarget(Number(e.target.value))}
+            onChange={(e) => {
+              const newTarget = Number(e.target.value);
+              setGoldenTarget(newTarget);
+              localStorage.setItem("bayit-golden-target", String(newTarget));
+            }}
             className="w-full accent-primary"
           />
           <div className="flex justify-between text-[10px] text-muted mt-1">
             <span>50%</span>
             <span>100%</span>
           </div>
+          <p className="text-[10px] text-muted mt-2">
+            {goldenTarget === 50
+              ? "חלוקה שווה לחלוטין"
+              : goldenTarget >= 80
+                ? "יעד גבוה לשיתוף פעולה"
+                : "יעד מאוזן"}
+          </p>
         </div>
       </section>
 
@@ -632,6 +682,40 @@ export default function SettingsPage() {
         </button>
       </section>
 
+      {/* About & Data Management */}
+      <section className="card-elevated p-4 space-y-4">
+        <div>
+          <h2 className="font-semibold text-sm mb-2">אודות</h2>
+          <div className="space-y-2 text-xs text-muted">
+            <div className="flex justify-between">
+              <span>גרסה</span>
+              <span className="text-foreground font-medium">1.0.0</span>
+            </div>
+            <div className="flex justify-between">
+              <span>פותח על ידי</span>
+              <span className="text-foreground font-medium">אלעד</span>
+            </div>
+            <div className="flex justify-between">
+              <span>עם ❤️ ו-Claude</span>
+              <span className="text-foreground font-medium">בית בסדר</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-border pt-4">
+          <h2 className="font-semibold text-sm mb-2">ניהול נתונים</h2>
+          <p className="text-xs text-muted mb-3">
+            מחיקת נתונים מקומיים תאפס את כל ההעדפות וההגדרות שלכם
+          </p>
+          <button
+            onClick={handleClearLocalData}
+            className="w-full py-2.5 rounded-xl border border-danger/30 text-sm font-medium text-danger hover:bg-danger/5 transition-colors"
+          >
+            מחיקת נתונים מקומיים
+          </button>
+        </div>
+      </section>
+
       {/* Logout */}
       <button
         onClick={handleLogout}
@@ -641,9 +725,7 @@ export default function SettingsPage() {
         {isDemo ? "חזרה לדף ההתחברות" : "התנתקות"}
       </button>
 
-      <p className="text-center text-[10px] text-muted pb-4">
-        בית בסדר v1.0
-      </p>
+      <div className="pb-4" />
       </div>
     </div>
   );

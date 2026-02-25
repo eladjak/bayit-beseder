@@ -130,19 +130,28 @@ export function useCompletions(
           .single();
 
         if (insertError) {
+          console.error("Failed to insert task completion:", insertError);
           setError(insertError.message);
           return null;
         }
 
         // Also update the task status to completed
-        await supabase
+        const { error: updateError } = await supabase
           .from("tasks")
           .update({ status: "completed" as const })
           .eq("id", params.taskId);
 
+        if (updateError) {
+          console.error("Failed to update task status:", updateError);
+          setError(updateError.message);
+          return null;
+        }
+
         setCompletions((prev) => [data, ...prev]);
         return data;
-      } catch {
+      } catch (err) {
+        console.error("Unexpected error in markComplete:", err);
+        setError(err instanceof Error ? err.message : "שגיאה לא צפויה");
         return null;
       }
     },

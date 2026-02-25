@@ -17,7 +17,7 @@ export interface TaskItem {
 
 interface TodayOverviewProps {
   tasks: TaskItem[];
-  onToggle: (taskId: string) => void;
+  onToggle: (taskId: string) => Promise<void>;
 }
 
 const listVariants = {
@@ -52,14 +52,37 @@ const itemVariants = {
 
 export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
   const [completing, setCompleting] = useState<string | null>(null);
+  const [optimisticCompleted, setOptimisticCompleted] = useState<Set<string>>(new Set());
 
-  function handleToggle(taskId: string) {
+  async function handleToggle(taskId: string) {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task) return;
+
+    // Optimistic UI update
+    const wasCompleted = task.completed || optimisticCompleted.has(taskId);
+    const newOptimistic = new Set(optimisticCompleted);
+
+    if (wasCompleted) {
+      newOptimistic.delete(taskId);
+    } else {
+      newOptimistic.add(taskId);
+    }
+
+    setOptimisticCompleted(newOptimistic);
     setCompleting(taskId);
     haptic("success");
-    setTimeout(() => {
-      onToggle(taskId);
-      setCompleting(null);
-    }, 200);
+
+    try {
+      // Wait for the parent handler to complete
+      await onToggle(taskId);
+      // Success - keep the optimistic state
+    } catch (error) {
+      // Rollback on failure
+      setOptimisticCompleted(optimisticCompleted);
+      console.error("Failed to toggle task:", error);
+    } finally {
+      setTimeout(() => setCompleting(null), 200);
+    }
   }
 
   if (tasks.length === 0) {
@@ -96,6 +119,9 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
         <AnimatePresence mode="popLayout">
           {tasks.map((task) => {
             const catColor = getCategoryColor(task.category);
+            const isCompleted = task.completed || optimisticCompleted.has(task.id);
+            const isLoading = completing === task.id;
+
             return (
               <motion.div
                 key={task.id}
@@ -103,8 +129,8 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
                 variants={itemVariants}
                 exit="exit"
                 className={`card-elevated p-3.5 flex items-center gap-3 active:scale-[0.98] transition-transform duration-100 overflow-hidden relative ${
-                  task.completed ? "opacity-60" : ""
-                }`}
+                  isCompleted ? "opacity-60" : ""
+                } ${isLoading ? "pointer-events-none" : ""}`}
               >
                 {/* Category accent bar */}
                 <div
@@ -115,23 +141,25 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
                 {/* Animated check button */}
                 <button
                   onClick={() => handleToggle(task.id)}
-                  className="w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 relative overflow-hidden transition-all"
+                  disabled={isLoading}
+                  className="w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 relative overflow-hidden transition-all disabled:cursor-wait"
                   style={{
-                    borderColor: task.completed
+                    borderColor: isCompleted
                       ? "var(--color-success)"
-                      : completing === task.id
+                      : isLoading
                         ? "var(--color-success)"
                         : "var(--color-border)",
-                    backgroundColor: task.completed
+                    backgroundColor: isCompleted
                       ? "var(--color-success)"
-                      : completing === task.id
+                      : isLoading
                         ? "rgba(16, 185, 129, 0.2)"
                         : "transparent",
-                    boxShadow: task.completed ? "0 0 8px rgba(16, 185, 129, 0.3)" : "none",
+                    boxShadow: isCompleted ? "0 0 8px rgba(16, 185, 129, 0.3)" : "none",
+                    opacity: isLoading ? 0.7 : 1,
                   }}
                 >
                   <AnimatePresence>
-                    {completing === task.id && !task.completed && (
+                    {isLoading && !isCompleted && (
                       <motion.div
                         className="absolute inset-0 rounded-full bg-success/20"
                         initial={{ scale: 0 }}
@@ -142,7 +170,7 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
                     )}
                   </AnimatePresence>
                   <AnimatePresence>
-                    {task.completed && (
+                    {isCompleted && (
                       <motion.div
                         initial={{ scale: 0, rotate: -45 }}
                         animate={{ scale: 1, rotate: 0 }}
@@ -165,7 +193,7 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
                 <div className="flex-1 min-w-0">
                   <p
                     className={`text-sm font-medium ${
-                      task.completed
+                      isCompleted
                         ? "line-through text-muted"
                         : "text-foreground"
                     }`}

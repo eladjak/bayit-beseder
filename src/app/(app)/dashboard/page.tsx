@@ -29,6 +29,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { usePartner } from "@/hooks/usePartner";
 import { TaskListSkeleton } from "@/components/skeleton";
 import { RingSkeleton } from "@/components/skeleton";
+import { toast } from "sonner";
 
 // ============================================
 // Mock data (fallback when Supabase not connected)
@@ -141,8 +142,26 @@ export default function DashboardPage() {
   // ---- Local state for mock tasks (fallback mode) ----
   const [mockTasks, setMockTasks] = useState(MOCK_TASKS);
 
-  // The actual tasks list shown in the UI
-  const tasks = hasDbTasks ? dbTaskItems : mockTasks;
+  // Load completed task IDs from localStorage for mock mode
+  const [mockCompletedIds, setMockCompletedIds] = useState<Set<string>>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("bayit-completed-tasks");
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    }
+    return new Set();
+  });
+
+  // Sync mockCompletedIds to localStorage
+  useEffect(() => {
+    if (!hasDbTasks) {
+      localStorage.setItem("bayit-completed-tasks", JSON.stringify([...mockCompletedIds]));
+    }
+  }, [mockCompletedIds, hasDbTasks]);
+
+  // The actual tasks list shown in the UI (apply mock completed state)
+  const tasks = hasDbTasks
+    ? dbTaskItems
+    : mockTasks.map(t => ({ ...t, completed: mockCompletedIds.has(t.id) }));
 
   const [emergencyMode, setEmergencyMode] = useState(false);
   const [energyLevel, setEnergyLevel] = useState<EnergyLevel>(() => {
@@ -186,65 +205,71 @@ export default function DashboardPage() {
   const { greeting, subtitle } = getTimeGreeting(displayName);
 
   const handleToggle = useCallback(
-    (taskId: string) => {
+    async (taskId: string) => {
       // If using DB tasks, update via Supabase
       if (hasDbTasks && profile) {
         const task = dbTasks.find((t) => t.id === taskId);
         if (task && task.status !== "completed") {
-          markComplete({ taskId, userId: profile.id });
+          // Call markComplete and await the result
+          const result = await markComplete({ taskId, userId: profile.id });
+
+          if (result === null) {
+            // Mark complete failed - show error toast
+            toast.error("לא ניתן לסמן את המשימה כהושלמה. נסה שוב.");
+            return;
+          }
+
+          // Success! Trigger celebration
+          const msg = getRandomMessage("task_complete");
+          setCelebration({
+            visible: true,
+            type: "task",
+            message: msg.message,
+            emoji: msg.emoji,
+          });
+          playComplete();
         }
-        // Trigger celebration for DB mode too
-        const msg = getRandomMessage("task_complete");
-        setCelebration({
-          visible: true,
-          type: "task",
-          message: msg.message,
-          emoji: msg.emoji,
-        });
-        playComplete();
         return;
       }
 
-      // Fallback: local mock toggle
-      setMockTasks((prev) => {
-        const updated = prev.map((t) =>
-          t.id === taskId ? { ...t, completed: !t.completed } : t
-        );
-        const newCompleted = updated.filter((t) => t.completed).length;
-        const newPct = Math.round((newCompleted / updated.length) * 100);
-        const wasCompleting = !prev.find((t) => t.id === taskId)?.completed;
+      // Fallback: local mock toggle with localStorage persistence
+      const isCurrentlyCompleted = mockCompletedIds.has(taskId);
+      const newCompletedIds = new Set(mockCompletedIds);
 
-        if (wasCompleting) {
-          if (newCompleted === updated.length) {
-            const msg = getRandomMessage("all_daily_done");
+      if (isCurrentlyCompleted) {
+        newCompletedIds.delete(taskId);
+      } else {
+        newCompletedIds.add(taskId);
+      }
+
+      setMockCompletedIds(newCompletedIds);
+
+      // Calculate completion stats
+      const newCompleted = newCompletedIds.size;
+      const newPct = Math.round((newCompleted / mockTasks.length) * 100);
+      const wasCompleting = !isCurrentlyCompleted;
+
+      if (wasCompleting) {
+        if (newCompleted === mockTasks.length) {
+          const msg = getRandomMessage("all_daily_done");
+          setCelebration({
+            visible: true,
+            type: "all_daily",
+            message: msg.message,
+            emoji: msg.emoji,
+          });
+          playAchievement();
+        } else if (newPct >= target && newPct - Math.round(((newCompleted - 1) / mockTasks.length) * 100) > 0) {
+          const prevPct = Math.round(((newCompleted - 1) / mockTasks.length) * 100);
+          if (prevPct < target) {
+            const msg = getRandomMessage("golden_rule_hit");
             setCelebration({
               visible: true,
-              type: "all_daily",
+              type: "golden_rule",
               message: msg.message,
               emoji: msg.emoji,
             });
-            playAchievement();
-          } else if (newPct >= target && newPct - Math.round(((newCompleted - 1) / updated.length) * 100) > 0) {
-            const prevPct = Math.round(((newCompleted - 1) / updated.length) * 100);
-            if (prevPct < target) {
-              const msg = getRandomMessage("golden_rule_hit");
-              setCelebration({
-                visible: true,
-                type: "golden_rule",
-                message: msg.message,
-                emoji: msg.emoji,
-              });
-              playStreak();
-            } else {
-              const msg = getRandomMessage("task_complete");
-              setCelebration({
-                visible: true,
-                type: "task",
-                message: msg.message,
-                emoji: msg.emoji,
-              });
-              playComplete();
-            }
+            playStreak();
           } else {
             const msg = getRandomMessage("task_complete");
             setCelebration({
@@ -255,12 +280,19 @@ export default function DashboardPage() {
             });
             playComplete();
           }
+        } else {
+          const msg = getRandomMessage("task_complete");
+          setCelebration({
+            visible: true,
+            type: "task",
+            message: msg.message,
+            emoji: msg.emoji,
+          });
+          playComplete();
         }
-
-        return updated;
-      });
+      }
     },
-    [target, hasDbTasks, profile, dbTasks, markComplete, playComplete, playAchievement, playStreak]
+    [target, hasDbTasks, profile, dbTasks, markComplete, playComplete, playAchievement, playStreak, mockCompletedIds, mockTasks.length]
   );
 
   const dismissCelebration = useCallback(() => {

@@ -43,7 +43,7 @@ export const CATEGORY_COLORS: Record<ShoppingCategory, string> = {
   "אחר": "#6B7280",
 };
 
-const MOCK_ITEMS: ShoppingItem[] = [
+const DEFAULT_MOCK_ITEMS: ShoppingItem[] = [
   { id: "s1", title: "חלב", category: "מזון", checked: false, added_by: "elad", created_at: "2026-02-19T08:00:00Z" },
   { id: "s2", title: "לחם", category: "מזון", checked: false, added_by: "elad", created_at: "2026-02-19T08:01:00Z" },
   { id: "s3", title: "ביצים", quantity: 12, unit: "יח׳", category: "מזון", checked: false, added_by: "ענבל", created_at: "2026-02-19T08:02:00Z" },
@@ -54,6 +54,8 @@ const MOCK_ITEMS: ShoppingItem[] = [
   { id: "s8", title: "חול לארגז", category: "חיות", checked: false, added_by: "ענבל", created_at: "2026-02-19T10:01:00Z" },
   { id: "s9", title: "נורות", quantity: 4, unit: "יח׳", category: "בית", checked: false, added_by: "elad", created_at: "2026-02-19T11:00:00Z" },
 ];
+
+const STORAGE_KEY = "bayit-beseder-shopping-list";
 
 interface UseShoppingListReturn {
   items: ShoppingItem[];
@@ -92,11 +94,37 @@ export function useShoppingList(): UseShoppingListReturn {
   const [loading, setLoading] = useState(true);
   const usingMockRef = useRef(false);
 
-  // ---- Fetch items from Supabase (or fall back to mock) ----
+  // ---- Load from localStorage or use defaults ----
+  const loadFromLocalStorage = useCallback((): ShoppingItem[] => {
+    if (typeof window === "undefined") return DEFAULT_MOCK_ITEMS;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return Array.isArray(parsed) ? parsed : DEFAULT_MOCK_ITEMS;
+      }
+    } catch {
+      // Invalid JSON in storage
+    }
+    return DEFAULT_MOCK_ITEMS;
+  }, []);
+
+  // ---- Save to localStorage ----
+  const saveToLocalStorage = useCallback((items: ShoppingItem[]) => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch {
+      // Storage quota exceeded or disabled
+    }
+  }, []);
+
+  // ---- Fetch items from Supabase (or fall back to localStorage mock) ----
   const fetchItems = useCallback(async () => {
     if (!isSupabaseConfigured()) {
       usingMockRef.current = true;
-      setItems(MOCK_ITEMS);
+      const localItems = loadFromLocalStorage();
+      setItems(localItems);
       setLoading(false);
       return;
     }
@@ -109,9 +137,10 @@ export function useShoppingList(): UseShoppingListReturn {
         .order("created_at", { ascending: false });
 
       if (error) {
-        // Table may not exist yet -- fall back to mock
+        // Table may not exist yet -- fall back to localStorage mock
         usingMockRef.current = true;
-        setItems(MOCK_ITEMS);
+        const localItems = loadFromLocalStorage();
+        setItems(localItems);
       } else {
         usingMockRef.current = false;
         setItems((data ?? []).map(toShoppingItem));
@@ -119,11 +148,12 @@ export function useShoppingList(): UseShoppingListReturn {
     } catch {
       // Supabase not reachable
       usingMockRef.current = true;
-      setItems(MOCK_ITEMS);
+      const localItems = loadFromLocalStorage();
+      setItems(localItems);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loadFromLocalStorage]);
 
   useEffect(() => {
     fetchItems();
@@ -198,7 +228,11 @@ export function useShoppingList(): UseShoppingListReturn {
           added_by: "elad",
           created_at: new Date().toISOString(),
         };
-        setItems((prev) => [newItem, ...prev]);
+        setItems((prev) => {
+          const updated = [newItem, ...prev];
+          saveToLocalStorage(updated);
+          return updated;
+        });
         return;
       }
 
@@ -238,19 +272,25 @@ export function useShoppingList(): UseShoppingListReturn {
           added_by: "elad",
           created_at: new Date().toISOString(),
         };
-        setItems((prev) => [newItem, ...prev]);
+        setItems((prev) => {
+          const updated = [newItem, ...prev];
+          saveToLocalStorage(updated);
+          return updated;
+        });
       }
     },
-    []
+    [saveToLocalStorage]
   );
 
   const toggleItem = useCallback(async (id: string) => {
     if (usingMockRef.current) {
-      setItems((prev) =>
-        prev.map((item) =>
+      setItems((prev) => {
+        const updated = prev.map((item) =>
           item.id === id ? { ...item, checked: !item.checked } : item
-        )
-      );
+        );
+        saveToLocalStorage(updated);
+        return updated;
+      });
       return;
     }
 
@@ -287,11 +327,15 @@ export function useShoppingList(): UseShoppingListReturn {
         )
       );
     }
-  }, [items]);
+  }, [items, saveToLocalStorage]);
 
   const removeItem = useCallback(async (id: string) => {
     if (usingMockRef.current) {
-      setItems((prev) => prev.filter((item) => item.id !== id));
+      setItems((prev) => {
+        const updated = prev.filter((item) => item.id !== id);
+        saveToLocalStorage(updated);
+        return updated;
+      });
       return;
     }
 
@@ -312,11 +356,15 @@ export function useShoppingList(): UseShoppingListReturn {
     } catch {
       setItems(previousItems);
     }
-  }, [items]);
+  }, [items, saveToLocalStorage]);
 
   const clearChecked = useCallback(async () => {
     if (usingMockRef.current) {
-      setItems((prev) => prev.filter((item) => !item.checked));
+      setItems((prev) => {
+        const updated = prev.filter((item) => !item.checked);
+        saveToLocalStorage(updated);
+        return updated;
+      });
       return;
     }
 
@@ -357,7 +405,7 @@ export function useShoppingList(): UseShoppingListReturn {
     } catch {
       setItems(previousItems);
     }
-  }, [items]);
+  }, [items, saveToLocalStorage]);
 
   return { items, loading, addItem, toggleItem, removeItem, clearChecked };
 }

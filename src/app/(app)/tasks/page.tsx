@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Clock, Filter, Plus, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import {
   getCategoryColor,
   getCategoryLabel,
@@ -71,6 +72,8 @@ interface DbTaskView {
   tips: string[];
   isEmergency: boolean;
   recurrenceLabel: string;
+  dueDate?: string;
+  isOverdue: boolean;
 }
 
 export default function TasksPage() {
@@ -103,6 +106,13 @@ export default function TasksPage() {
           ? (CATEGORY_NAME_TO_KEY[categoryName] ?? "general")
           : "general";
 
+        // Check if task is overdue (due date is in the past and not completed)
+        const today = new Date().toISOString().slice(0, 10);
+        const isOverdue =
+          t.due_date &&
+          t.due_date < today &&
+          t.status !== "completed";
+
         return {
           id: t.id,
           title: t.title,
@@ -111,7 +121,9 @@ export default function TasksPage() {
           isCompleted: t.status === "completed",
           tips: [],
           isEmergency: false,
-          recurrenceLabel: "יומי",
+          recurrenceLabel: t.recurring ? "חוזר" : "חד-פעמי",
+          dueDate: t.due_date ?? undefined,
+          isOverdue: !!isOverdue,
         };
       }),
     [dbTasks, categoryMap]
@@ -152,7 +164,7 @@ export default function TasksPage() {
 
   // Toggle for DB tasks
   const toggleDbTask = useCallback(
-    (taskId: string) => {
+    async (taskId: string) => {
       if (!profile) return;
 
       const task = dbTasks.find((t) => t.id === taskId);
@@ -160,10 +172,16 @@ export default function TasksPage() {
 
       if (task.status === "completed") {
         // Un-complete: set back to pending
-        updateTask(taskId, { status: "pending" });
+        const success = await updateTask(taskId, { status: "pending" });
+        if (success) {
+          toast.info("המשימה סומנה כלא הושלמה");
+        }
       } else {
         // Complete the task
-        markComplete({ taskId, userId: profile.id });
+        const result = await markComplete({ taskId, userId: profile.id });
+        if (result) {
+          toast.success("כל הכבוד! המשימה הושלמה 🎉");
+        }
       }
     },
     [dbTasks, profile, markComplete, updateTask]
@@ -179,7 +197,7 @@ export default function TasksPage() {
 
     const todayStr = new Date().toISOString().slice(0, 10);
 
-    await createTask({
+    const result = await createTask({
       title: newTaskTitle.trim(),
       category_id: category?.id ?? null,
       assigned_to: profile?.id ?? null,
@@ -189,14 +207,24 @@ export default function TasksPage() {
       recurring: false,
     });
 
-    setNewTaskTitle("");
-    setShowAddForm(false);
+    if (result) {
+      toast.success("המשימה נוספה בהצלחה!");
+      setNewTaskTitle("");
+      setShowAddForm(false);
+    } else {
+      toast.error("שגיאה בהוספת המשימה");
+    }
   }, [newTaskTitle, newTaskCategory, categories, profile, createTask]);
 
   // Delete task from DB
   const handleDeleteTask = useCallback(
-    (taskId: string) => {
-      deleteTask(taskId);
+    async (taskId: string) => {
+      const success = await deleteTask(taskId);
+      if (success) {
+        toast.success("המשימה נמחקה");
+      } else {
+        toast.error("שגיאה במחיקת המשימה");
+      }
     },
     [deleteTask]
   );
@@ -301,6 +329,29 @@ export default function TasksPage() {
 
       {/* Task List */}
       <div className="space-y-2">
+        {/* Empty state for DB tasks */}
+        {hasDbTasks && filteredDbTasks.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="card-elevated p-8 text-center"
+          >
+            <span className="text-4xl mb-3 block">
+              {activeCategory === "all" ? "🎉" : "✨"}
+            </span>
+            <p className="font-medium text-foreground">
+              {activeCategory === "all"
+                ? "אין משימות - הכל בסדר!"
+                : "אין משימות בקטגוריה זו"}
+            </p>
+            <p className="text-sm text-muted mt-1">
+              {activeCategory === "all"
+                ? "הוסיפו משימה חדשה להתחיל"
+                : "נסו לבחור קטגוריה אחרת"}
+            </p>
+          </motion.div>
+        )}
+
         <AnimatePresence mode="popLayout">
           {hasDbTasks
             ? /* ---- DB Tasks ---- */
@@ -310,15 +361,27 @@ export default function TasksPage() {
                   layout
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`bg-surface rounded-xl p-3 flex items-start gap-3 ${
+                  className={`bg-surface rounded-xl p-3 flex items-start gap-3 relative ${
                     task.isCompleted ? "opacity-60" : ""
+                  } ${
+                    task.isOverdue && !task.isCompleted
+                      ? "ring-2 ring-red-500/30 bg-red-50/30"
+                      : ""
                   }`}
                 >
+                  {/* Overdue indicator */}
+                  {task.isOverdue && !task.isCompleted && (
+                    <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                      מאחר
+                    </div>
+                  )}
                   <button
                     onClick={() => toggleDbTask(task.id)}
                     className={`mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                       task.isCompleted
                         ? "bg-success border-success"
+                        : task.isOverdue
+                        ? "border-red-500 hover:border-red-600"
                         : "border-border hover:border-primary"
                     }`}
                   >
@@ -331,6 +394,8 @@ export default function TasksPage() {
                       className={`text-sm font-medium ${
                         task.isCompleted
                           ? "line-through text-muted"
+                          : task.isOverdue
+                          ? "text-red-700"
                           : "text-foreground"
                       }`}
                     >
