@@ -418,13 +418,15 @@ export default function StatsPage() {
         <div className="h-48" dir="ltr">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={weeklyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E7E5E4" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
               <XAxis dataKey="day" fontSize={12} />
               <YAxis fontSize={12} allowDecimals={false} />
               <Tooltip
                 contentStyle={{
                   borderRadius: 12,
-                  border: "1px solid #E7E5E4",
+                  border: "1px solid var(--color-border)",
+                  background: "var(--color-surface)",
+                  color: "var(--color-foreground)",
                   fontSize: 12,
                   direction: "rtl",
                 }}

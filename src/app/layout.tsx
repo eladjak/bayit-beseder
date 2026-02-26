@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Heebo } from "next/font/google";
 import { Toaster } from "sonner";
+import { ThemeProvider, ThemeScript } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -34,15 +35,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl">
+      <head>
+        <ThemeScript />
+      </head>
       <body className={`${heebo.variable} font-sans antialiased`}>
-        {children}
-        <Toaster
-          position="top-center"
-          dir="rtl"
-          toastOptions={{
-            className: "font-sans",
-          }}
-        />
+        <ThemeProvider>
+          {children}
+          <Toaster
+            position="top-center"
+            dir="rtl"
+            toastOptions={{
+              className: "font-sans",
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import Link from "next/link";
 import { GoldenRuleRing } from "@/components/dashboard/golden-rule-ring";
 import { TodayOverview, type TaskItem } from "@/components/dashboard/today-overview";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
@@ -427,6 +428,19 @@ export default function DashboardPage() {
         ) : (
           <TodayOverview tasks={filteredTasks} onToggle={handleToggle} />
         )}
+
+        {/* Playlist Quick Action */}
+        <Link
+          href="/playlists"
+          className="card-elevated flex items-center gap-3 px-4 py-3 active:scale-[0.98] transition-transform"
+        >
+          <span className="text-2xl">🎵</span>
+          <div className="flex-1 text-right">
+            <p className="font-semibold text-foreground text-sm">פלייליסטים</p>
+            <p className="text-xs text-muted">שגרות ניקיון מודרכות עם טיימר</p>
+          </div>
+          <span className="text-muted text-xs">←</span>
+        </Link>
 
         {/* Weekly Summary Cards */}
         <WeeklySummaryCards

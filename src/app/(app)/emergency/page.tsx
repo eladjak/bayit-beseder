@@ -30,24 +30,24 @@ export default function EmergencyPage() {
     <div className="px-4 py-6 space-y-5">
       {/* Header Banner */}
       <motion.div
-        className="bg-blue-50 border border-blue-200 rounded-2xl p-4 text-center"
+        className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 rounded-2xl p-4 text-center"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Shield className="w-8 h-8 text-blue-500 mx-auto mb-2" />
-        <h1 className="text-lg font-bold text-blue-700">מצב חירום פעיל</h1>
-        <p className="text-sm text-blue-600 mt-1">
+        <Shield className="w-8 h-8 text-blue-500 dark:text-blue-400 mx-auto mb-2" />
+        <h1 className="text-lg font-bold text-blue-700 dark:text-blue-300">מצב חירום פעיל</h1>
+        <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
           מתמקדים רק בחשוב. הכל בסדר, צעד אחד בכל פעם.
         </p>
       </motion.div>
 
       {/* Simplified Progress */}
-      <div className="bg-white rounded-2xl p-4 text-center">
-        <div className="text-3xl font-bold text-blue-600 mb-1">
+      <div className="bg-surface dark:bg-[#1a1730] rounded-2xl p-4 text-center">
+        <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
           {completedCount}/{totalCount}
         </div>
         <p className="text-sm text-muted">משימות חיוניות הושלמו</p>
-        <div className="h-2 bg-blue-100 rounded-full mt-3 overflow-hidden">
+        <div className="h-2 bg-blue-100 dark:bg-blue-900/40 rounded-full mt-3 overflow-hidden">
           <motion.div
             className="h-full bg-blue-500 rounded-full"
             animate={{ width: `${percentage}%` }}
@@ -58,9 +58,9 @@ export default function EmergencyPage() {
       </div>
 
       {/* Coaching Message */}
-      <div className="bg-blue-50/50 rounded-xl p-3 flex items-center gap-3">
+      <div className="bg-blue-50/50 dark:bg-blue-950/20 rounded-xl p-3 flex items-center gap-3">
         <span className="text-xl">🫂</span>
-        <p className="text-sm text-blue-700">
+        <p className="text-sm text-blue-700 dark:text-blue-300">
           תקופה קשה? בסדר גמור. רק הבסיס, בלי לחץ.
         </p>
       </div>
@@ -78,7 +78,7 @@ export default function EmergencyPage() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className={`bg-white rounded-xl p-3 flex items-center gap-3 ${
+              className={`bg-surface dark:bg-[#1a1730] rounded-xl p-3 flex items-center gap-3 ${
                 isCompleted ? "opacity-60" : ""
               }`}
             >

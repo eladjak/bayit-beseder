@@ -94,7 +94,7 @@ function RewardCard({
       className={`relative rounded-2xl p-3 text-right space-y-2 transition-colors ${
         unlocked
           ? "bg-yellow-50 border-2 border-yellow-400 dark:bg-yellow-950/20 dark:border-yellow-500/50"
-          : "bg-surface border border-border/50"
+          : "card-elevated border border-border/50"
       } ${!unlocked ? "opacity-70" : ""}`}
       variants={cardVariants}
       custom={index}

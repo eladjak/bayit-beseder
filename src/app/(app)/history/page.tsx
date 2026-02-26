@@ -155,7 +155,7 @@ function HistoryItem({ task, completion, categoryKey }: HistoryItemProps) {
       </div>
       {/* Points badge */}
       {task.points > 0 && (
-        <span className="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 mt-1">
+        <span className="text-[10px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded-full font-medium flex-shrink-0 mt-1">
           +{task.points}
         </span>
       )}

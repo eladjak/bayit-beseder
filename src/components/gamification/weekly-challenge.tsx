@@ -46,7 +46,7 @@ export function WeeklyChallenge({
       className={`rounded-2xl p-4 space-y-3 ${
         isCompleted
           ? "bg-success/10 border border-success/20"
-          : "bg-surface"
+          : "card-elevated"
       }`}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}

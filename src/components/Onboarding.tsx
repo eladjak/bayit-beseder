@@ -188,7 +188,7 @@ export function Onboarding() {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-      <div className="w-full max-w-sm bg-background rounded-2xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <div className="w-full max-w-sm bg-background dark:bg-[#1a1730] rounded-2xl shadow-2xl dark:shadow-black/60 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
         {/* Header with skip */}
         <div className="flex items-center justify-between px-4 pt-4">
           <div className="flex items-center gap-1.5">

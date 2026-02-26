@@ -35,6 +35,16 @@ function LoginContent() {
   const errorParam = searchParams.get("error");
   const resetDone = searchParams.get("reset") === "true";
 
+  function getPostLoginRedirect(): string {
+    if (typeof window !== "undefined") {
+      const pendingInvite = localStorage.getItem("bayit-pending-invite");
+      if (pendingInvite) {
+        return `/invite/${pendingInvite}`;
+      }
+    }
+    return "/dashboard";
+  }
+
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
     if (!email || !password) return;
@@ -48,12 +58,18 @@ function LoginContent() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push(getPostLoginRedirect());
   }
 
   async function handleGoogleLogin() {
     setGoogleLoading(true);
-    const result = await signInWithGoogle();
+    const pendingInvite =
+      typeof window !== "undefined"
+        ? localStorage.getItem("bayit-pending-invite")
+        : null;
+    const result = await signInWithGoogle(
+      pendingInvite ? `/invite/${pendingInvite}` : undefined
+    );
     if (result.error) {
       toast.error(result.error);
       setGoogleLoading(false);
@@ -111,7 +127,7 @@ function LoginContent() {
         </div>
 
         {/* Glass Card */}
-        <div className="w-full rounded-2xl bg-white/90 backdrop-blur-xl p-6 shadow-xl shadow-black/10 border border-white/50 space-y-4">
+        <div className="w-full rounded-2xl bg-white/90 dark:bg-[#1a1730]/95 backdrop-blur-xl p-6 shadow-xl shadow-black/10 dark:shadow-black/40 border border-white/50 dark:border-[#2d2a45] space-y-4">
           {/* Error / Success Messages */}
           {errorParam === "auth" && (
             <div className="w-full bg-danger/10 border border-danger/20 text-danger text-sm rounded-xl px-4 py-3 text-center">
@@ -140,7 +156,7 @@ function LoginContent() {
                   placeholder="אימייל"
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
-                  className="w-full bg-background/60 border border-border rounded-xl pr-10 pl-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pr-10 pl-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                   dir="ltr"
                 />
               </div>
@@ -174,7 +190,7 @@ function LoginContent() {
                     placeholder="אימייל"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-background/60 border border-border rounded-xl pr-10 pl-4 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pr-10 pl-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     dir="ltr"
                     autoComplete="email"
                   />
@@ -186,7 +202,7 @@ function LoginContent() {
                     placeholder="סיסמה"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-background/60 border border-border rounded-xl pr-10 pl-10 py-3 text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pr-10 pl-10 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     dir="ltr"
                     autoComplete="current-password"
                   />
@@ -236,7 +252,7 @@ function LoginContent() {
               <button
                 onClick={handleGoogleLogin}
                 disabled={googleLoading}
-                className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white border border-border rounded-xl font-medium text-foreground hover:bg-surface-hover transition-all disabled:opacity-50 text-sm shadow-sm"
+                className="w-full flex items-center justify-center gap-3 px-6 py-3 bg-white dark:bg-surface border border-border rounded-xl font-medium text-foreground hover:bg-surface-hover transition-all disabled:opacity-50 text-sm shadow-sm"
               >
                 {googleLoading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -266,7 +282,7 @@ function LoginContent() {
               {/* Demo Mode */}
               <button
                 onClick={handleDemoMode}
-                className="w-full py-2.5 bg-background/60 border border-border rounded-xl text-sm text-muted hover:text-foreground hover:bg-surface-hover transition-all"
+                className="w-full py-2.5 bg-background/60 dark:bg-surface/60 border border-border rounded-xl text-sm text-muted hover:text-foreground hover:bg-surface-hover transition-all"
               >
                 כניסה במצב דמו (ללא הרשמה)
               </button>

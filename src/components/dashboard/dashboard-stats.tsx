@@ -100,21 +100,21 @@ export function DashboardStats({
     <div className="space-y-4">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-surface rounded-2xl p-4">
+        <div className="card-elevated rounded-2xl p-4">
           <p className="text-xs text-muted mb-1">סה״כ משימות</p>
           <p className="text-2xl font-bold text-foreground">{totalTasks}</p>
           <div className="flex gap-2 mt-1">
-            <span className="text-[11px] text-emerald-600">
+            <span className="text-[11px] text-emerald-600 dark:text-emerald-400">
               {completedTasks} הושלמו
             </span>
             <span className="text-[11px] text-muted">·</span>
-            <span className="text-[11px] text-amber-600">
+            <span className="text-[11px] text-amber-600 dark:text-amber-400">
               {pendingTasks} ממתינות
             </span>
           </div>
         </div>
 
-        <div className="bg-surface rounded-2xl p-4">
+        <div className="card-elevated rounded-2xl p-4">
           <p className="text-xs text-muted mb-1">אחוז השלמה</p>
           <p className="text-2xl font-bold text-primary">{completionRate}%</p>
           <div className="mt-2 bg-border rounded-full h-1.5 overflow-hidden">
@@ -127,7 +127,7 @@ export function DashboardStats({
       </div>
 
       {/* Upcoming Tasks */}
-      <div className="bg-surface rounded-2xl p-4">
+      <div className="bg-surface dark:bg-[#1a1730] rounded-2xl p-4">
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold text-foreground">משימות קרובות</p>
           <span className="text-xs text-muted">7 ימים הבאים</span>
@@ -144,7 +144,7 @@ export function DashboardStats({
 
       {/* Category Breakdown */}
       {categoryStats.length > 0 && (
-        <div className="bg-surface rounded-2xl p-4">
+        <div className="card-elevated rounded-2xl p-4">
           <p className="text-sm font-semibold text-foreground mb-3">
             לפי קטגוריה
           </p>
@@ -187,7 +187,7 @@ export function DashboardStats({
       )}
 
       {/* Monthly Completion Chart */}
-      <div className="bg-surface rounded-2xl p-4">
+      <div className="bg-surface dark:bg-[#1a1730] rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-semibold text-foreground">
             30 יום אחרונים

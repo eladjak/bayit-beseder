@@ -36,7 +36,7 @@ export function PartnerStatus({
           {/* Online/active pulse dot */}
           {completedCount > 0 && (
             <motion.div
-              className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-success rounded-full border-2 border-surface"
+              className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-success rounded-full border-2 border-surface dark:border-[#1a1730]"
               animate={{
                 scale: [1, 1.3, 1],
                 opacity: [1, 0.7, 1],

@@ -74,14 +74,18 @@ export async function signIn(
 /**
  * Sign in with Google OAuth.
  * Redirects the browser to Google's login page.
+ * @param next - Optional path to redirect to after login (default: /dashboard)
  */
-export async function signInWithGoogle(): Promise<AuthResult> {
+export async function signInWithGoogle(next?: string): Promise<AuthResult> {
   try {
     const supabase = createClient();
+    const redirectTo = next
+      ? `${window.location.origin}/callback?next=${encodeURIComponent(next)}`
+      : `${window.location.origin}/callback`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/callback`,
+        redirectTo,
       },
     });
 

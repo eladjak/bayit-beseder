@@ -365,7 +365,7 @@ export default function TasksPage() {
                     task.isCompleted ? "opacity-60" : ""
                   } ${
                     task.isOverdue && !task.isCompleted
-                      ? "ring-2 ring-red-500/30 bg-red-50/30"
+                      ? "ring-2 ring-red-500/30 bg-red-50/30 dark:bg-red-950/20"
                       : ""
                   }`}
                 >
@@ -395,7 +395,7 @@ export default function TasksPage() {
                         task.isCompleted
                           ? "line-through text-muted"
                           : task.isOverdue
-                          ? "text-red-700"
+                          ? "text-red-700 dark:text-red-400"
                           : "text-foreground"
                       }`}
                     >
@@ -421,7 +421,7 @@ export default function TasksPage() {
                   </div>
                   <button
                     onClick={() => handleDeleteTask(task.id)}
-                    className="p-1 rounded hover:bg-red-50 text-muted hover:text-red-500 transition-colors"
+                    className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/30 text-muted hover:text-red-500 transition-colors"
                     aria-label="מחיקת משימה"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -480,7 +480,7 @@ export default function TasksPage() {
                           {task.estimated_minutes} דק׳
                         </span>
                         {task.is_emergency && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-50 text-red-600 font-medium">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-medium">
                             חירום
                           </span>
                         )}

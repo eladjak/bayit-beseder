@@ -59,7 +59,7 @@ export function StreakTracker({
       : 100;
 
   return (
-    <div className="bg-surface rounded-2xl p-4 space-y-3">
+    <div className="card-elevated rounded-2xl p-4 space-y-3">
       {/* Header row */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">

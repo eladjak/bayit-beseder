@@ -89,7 +89,7 @@ export function NotificationCenter({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute top-full left-0 right-auto mt-2 w-80 max-h-96 bg-surface rounded-2xl shadow-xl border border-border overflow-hidden z-50"
+            className="absolute top-full left-0 right-auto mt-2 w-80 max-h-96 bg-surface dark:bg-[#1a1730] rounded-2xl shadow-xl dark:shadow-black/50 border border-border overflow-hidden z-50"
             style={{ minWidth: "300px" }}
             role="menu"
             aria-label="רשימת התראות"

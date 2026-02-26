@@ -124,12 +124,12 @@ export function MonthlyCalendar({
     year === todayDate.getFullYear() && month === todayDate.getMonth();
 
   return (
-    <div className="bg-surface rounded-2xl p-4">
+    <div className="card-elevated rounded-2xl p-4">
       {/* Header with navigation */}
       <div className="flex items-center justify-between mb-4">
         <button
           onClick={goToNextMonth}
-          className="p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
+          className="p-1.5 rounded-lg hover:bg-surface-hover text-foreground transition-colors"
           aria-label="חודש הבא"
         >
           <ChevronRight className="w-4 h-4 text-muted" />
@@ -151,7 +151,7 @@ export function MonthlyCalendar({
 
         <button
           onClick={goToPrevMonth}
-          className="p-1.5 rounded-lg hover:bg-surface-hover transition-colors"
+          className="p-1.5 rounded-lg hover:bg-surface-hover text-foreground transition-colors"
           aria-label="חודש קודם"
         >
           <ChevronLeft className="w-4 h-4 text-muted" />

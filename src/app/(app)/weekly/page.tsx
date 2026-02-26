@@ -206,7 +206,7 @@ export default function WeeklyPage() {
   return (
     <div className="space-y-5" dir="rtl">
       {/* Header with gradient */}
-      <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 rounded-b-3xl px-4 pt-6 pb-5">
+      <div className="gradient-primary rounded-b-3xl px-4 pt-6 pb-5">
         <div className="flex items-center justify-between mb-3">
           <div>
             <h1 className="text-xl font-bold text-white">תכנון שבועי</h1>
@@ -246,14 +246,14 @@ export default function WeeklyPage() {
       <div className="px-4 space-y-5">
         {/* Smart Suggestions Panel */}
         {suggestions.length > 0 && (
-          <div className="card-elevated bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100/50 overflow-hidden">
+          <div className="card-elevated bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 border border-purple-100/50 dark:border-purple-800/30 overflow-hidden">
             <button
               onClick={() => setShowSuggestions(!showSuggestions)}
               className="w-full flex items-center justify-between p-4"
             >
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                  <Lightbulb className="w-4 h-4 text-purple-600" />
+                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
+                  <Lightbulb className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div className="text-right">
                   <div className="font-semibold text-foreground">
@@ -284,12 +284,12 @@ export default function WeeklyPage() {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    className={`p-3 rounded-xl bg-white/60 backdrop-blur-sm border ${
+                    className={`p-3 rounded-xl bg-white/60 dark:bg-surface/80 backdrop-blur-sm border ${
                       suggestion.priority === "high"
-                        ? "border-red-200"
+                        ? "border-red-200 dark:border-red-800/50"
                         : suggestion.priority === "medium"
-                          ? "border-amber-200"
-                          : "border-slate-200"
+                          ? "border-amber-200 dark:border-amber-800/50"
+                          : "border-slate-200 dark:border-slate-700/50"
                     }`}
                   >
                     <div className="flex items-start gap-2">
@@ -394,9 +394,9 @@ function DayCard({ dayLoad, index }: DayCardProps) {
   const [expanded, setExpanded] = useState(false);
 
   const difficultyColors = {
-    light: "bg-green-100 text-green-700",
-    moderate: "bg-amber-100 text-amber-700",
-    heavy: "bg-red-100 text-red-700",
+    light: "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400",
+    moderate: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400",
+    heavy: "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400",
   };
 
   const difficultyLabels = {
@@ -412,8 +412,8 @@ function DayCard({ dayLoad, index }: DayCardProps) {
       transition={{ delay: index * 0.05 }}
       className={`card-elevated overflow-hidden ${
         dayLoad.isHeavy
-          ? "ring-2 ring-red-200 shadow-lg shadow-red-500/10"
-          : "shadow-lg shadow-purple-500/10 border border-purple-100/50"
+          ? "ring-2 ring-red-200 dark:ring-red-800/50 shadow-lg shadow-red-500/10"
+          : "shadow-lg shadow-purple-500/10 border border-purple-100/50 dark:border-purple-800/30"
       }`}
     >
       <button
@@ -475,7 +475,7 @@ function DayCard({ dayLoad, index }: DayCardProps) {
             return (
               <div
                 key={task.id}
-                className="flex items-center gap-2 p-2 rounded-lg bg-background/50"
+                className="flex items-center gap-2 p-2 rounded-lg bg-background/50 dark:bg-background/30"
               >
                 <div
                   className={`${CATEGORY_COLORS[category]} w-3 h-3 rounded-full flex-shrink-0`}

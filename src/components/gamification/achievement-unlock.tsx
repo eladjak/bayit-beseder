@@ -44,7 +44,7 @@ export function AchievementUnlock({
           onClick={onDismiss}
         >
           <motion.div
-            className="bg-surface rounded-3xl p-8 mx-6 max-w-sm w-full shadow-xl text-center relative overflow-hidden"
+            className="bg-surface dark:bg-[#1a1730] rounded-3xl p-8 mx-6 max-w-sm w-full shadow-xl dark:shadow-black/50 text-center relative overflow-hidden"
             initial={{ y: 200, opacity: 0, scale: 0.9 }}
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 200, opacity: 0, scale: 0.9 }}

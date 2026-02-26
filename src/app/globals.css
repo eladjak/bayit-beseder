@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable Tailwind dark mode using the 'dark' class on <html> */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --color-primary: #6366F1;
   --color-primary-light: #818CF8;
@@ -35,11 +38,11 @@ body {
 .dark body,
 .dark {
   --color-background: #0F0D1A;
-  --color-surface: #1A1726;
-  --color-surface-hover: #252236;
-  --color-foreground: #F0EEFF;
-  --color-muted: #9CA3AF;
-  --color-border: #2D2A3E;
+  --color-surface: #1A1730;
+  --color-surface-hover: #252240;
+  --color-foreground: #E2E0F0;
+  --color-muted: #9894B0;
+  --color-border: #2D2A45;
 }
 
 ::-webkit-scrollbar {
@@ -70,11 +73,21 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+.dark .glass {
+  background: rgba(26, 23, 48, 0.82);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+}
+
 .glass-nav {
   background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(20px) saturate(200%);
   -webkit-backdrop-filter: blur(20px) saturate(200%);
   border-top: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.dark .glass-nav {
+  background: rgba(15, 13, 26, 0.88);
+  border-top: 1px solid rgba(99, 102, 241, 0.2);
 }
 
 .card-elevated {
@@ -86,10 +99,23 @@ body {
   border: 1px solid rgba(99, 102, 241, 0.06);
 }
 
+.dark .card-elevated {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--color-border);
+}
+
 .card-elevated:hover {
   box-shadow:
     0 2px 6px rgba(99, 102, 241, 0.06),
     0 8px 24px rgba(99, 102, 241, 0.08);
+}
+
+.dark .card-elevated:hover {
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.3),
+    0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 /* ============================================
@@ -138,6 +164,16 @@ body {
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.dark .shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    rgba(99, 102, 241, 0.12) 50%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
 }
 
 /* Badge pulse for notifications */

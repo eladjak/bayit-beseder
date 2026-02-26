@@ -35,15 +35,18 @@ import {
 } from "@/lib/notifications";
 import { toast } from "sonner";
 import { setSoundEnabled } from "@/hooks/useAppSound";
+import { InvitePartner } from "@/components/invite-partner";
 
 // ============================================
 // Theme helpers
 // ============================================
 type Theme = "light" | "dark" | "system";
 
+const THEME_KEY = "bayit-beseder-theme";
+
 function getStoredTheme(): Theme {
-  if (typeof window === "undefined") return "light";
-  return (localStorage.getItem("bayit-theme") as Theme) ?? "light";
+  if (typeof window === "undefined") return "system";
+  return (localStorage.getItem(THEME_KEY) as Theme) ?? "system";
 }
 
 function applyTheme(theme: Theme) {
@@ -61,7 +64,7 @@ function applyTheme(theme: Theme) {
     root.classList.remove("dark");
   }
 
-  localStorage.setItem("bayit-theme", theme);
+  localStorage.setItem(THEME_KEY, theme);
 }
 
 // ============================================
@@ -118,7 +121,7 @@ export default function SettingsPage() {
   const [whatsappPhone, setWhatsappPhone] = useState("");
 
   // Theme & Language
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>("system");
   const [language, setLanguage] = useState<Language>("he");
 
   // Initialize from profile and localStorage
@@ -318,7 +321,7 @@ export default function SettingsPage() {
   const emailDisplay = user?.email ?? "demo@example.com";
 
   return (
-    <div className="space-y-5" dir="rtl">
+    <div className="space-y-5 bg-background min-h-dvh" dir="rtl">
       {/* Header with gradient */}
       <div className="gradient-primary rounded-b-3xl px-4 pt-6 pb-5 text-center">
         <h1 className="text-xl font-bold text-white">הגדרות</h1>
@@ -384,7 +387,7 @@ export default function SettingsPage() {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="השם שלכם"
-            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+            className="w-full bg-background dark:bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
           />
         </div>
 
@@ -418,18 +421,18 @@ export default function SettingsPage() {
               setHouseholdName(e.target.value);
               localStorage.setItem("bayit-household-name", e.target.value);
             }}
-            className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+            className="w-full bg-background dark:bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
           />
         </div>
         <div>
           <label className="text-xs text-muted block mb-1">קוד הזמנה</label>
           <div className="flex items-center gap-2">
-            <code className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm font-mono">
+            <code className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm font-mono text-foreground">
               BAYIT-ABC123
             </code>
             <button
               onClick={copyInviteCode}
-              className="p-2 rounded-lg bg-background border border-border hover:bg-surface-hover"
+              className="p-2 rounded-lg bg-background border border-border hover:bg-surface-hover text-muted"
               aria-label="העתקת קוד הזמנה"
             >
               {copied ? (
@@ -469,6 +472,9 @@ export default function SettingsPage() {
           </p>
         </div>
       </section>
+
+      {/* Invite Partner */}
+      <InvitePartner />
 
       {/* Notifications */}
       <section className="card-elevated p-4 space-y-3">
@@ -588,7 +594,7 @@ export default function SettingsPage() {
               }}
               placeholder="050-1234567"
               dir="ltr"
-              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
+              className="w-full bg-background dark:bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
             />
             <p className="text-[10px] text-muted mt-1">
               המספר ישמש לשליחת סיכומים יומיים בלבד
@@ -644,7 +650,7 @@ export default function SettingsPage() {
             className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
               language === "he"
                 ? "gradient-primary text-white shadow-md shadow-primary/20"
-                : "bg-background border border-border text-foreground hover:bg-surface-hover"
+                : "bg-surface border border-border text-foreground hover:bg-surface-hover"
             }`}
           >
             עברית
@@ -654,7 +660,7 @@ export default function SettingsPage() {
             className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
               language === "en"
                 ? "gradient-primary text-white shadow-md shadow-primary/20"
-                : "bg-background border border-border text-foreground hover:bg-surface-hover"
+                : "bg-surface border border-border text-foreground hover:bg-surface-hover"
             }`}
           >
             English
@@ -677,7 +683,7 @@ export default function SettingsPage() {
         <p className="text-xs text-muted mb-3">
           במצב חירום, רק משימות קריטיות מוצגות (מטבח, שירותים, חתולים)
         </p>
-        <button className="w-full py-2.5 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-surface-hover transition-colors">
+        <button className="w-full py-2.5 rounded-xl border border-border bg-surface text-sm font-medium text-foreground hover:bg-surface-hover transition-colors">
           הפעלת מצב חירום
         </button>
       </section>
@@ -787,7 +793,7 @@ function ThemeButton({
       className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
         isActive
           ? "gradient-primary text-white shadow-md shadow-primary/20"
-          : "bg-background border border-border text-foreground hover:bg-surface-hover"
+          : "bg-surface border border-border text-foreground hover:bg-surface-hover"
       }`}
     >
       {icon}
