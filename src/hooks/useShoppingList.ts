@@ -249,10 +249,21 @@ export function useShoppingList(): UseShoppingListReturn {
           .eq("id", user.id)
           .single();
 
-        if (!profile?.household_id) return;
+        let householdId = profile?.household_id as string | null;
+
+        // Auto-create household if user doesn't have one yet
+        if (!householdId) {
+          const res = await fetch("/api/invite", { method: "POST" });
+          if (res.ok) {
+            const invite = await res.json();
+            householdId = invite.householdId as string;
+          }
+        }
+
+        if (!householdId) return;
 
         await supabase.from("shopping_items").insert({
-          household_id: profile.household_id,
+          household_id: householdId,
           title,
           category,
           quantity: quantity ?? 1,
