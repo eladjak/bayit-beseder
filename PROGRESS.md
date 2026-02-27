@@ -1,13 +1,63 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Tasks & Shopping Pages Improved
-## Last Updated: 2026-02-25
+## Status: LIVE - Phase 14 Complete (Dark Mode + Partner Invite + Playlists + Shopping Supabase)
+## Last Updated: 2026-02-27
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-13 + visual facelift + Phase 3 Supabase schema consolidation + Vercel deployment prep complete. App LIVE on Vercel. 160 tests passing. Premium design system with gradient headers, glass morphism navigation, elevated cards. All hooks use real Supabase with mock fallback. Name fixed: ענבל (not אינבל). **Tasks & Shopping pages improved with toast notifications, localStorage persistence, overdue highlighting, and proper empty states.** Deployment-ready!
+Phase 1-14 complete. App LIVE on Vercel with 3 major new features deployed. 160 tests passing. Zero TypeScript errors.
+
+## Phase 14: Dark Mode + Partner Invitation + Routine Playlists + Shopping Supabase (Feb 27, 2026) [DONE]
+
+### Dark Mode (12 files modified)
+- [x] ThemeProvider with system preference detection + no-flash script
+- [x] Toggle in Settings: בהיר / כהה / מערכת (localStorage persistence)
+- [x] Dark variants across all pages and components
+- [x] Color palette: #0f0d1a bg, #1a1730 cards, #e2e0f0 text, #2d2a45 borders
+- [x] Glass morphism nav works in dark mode
+- [x] Files: ThemeProvider.tsx, globals.css, layout.tsx + 9 components + all pages
+
+### Partner Invitation Flow (6 new files)
+- [x] POST /api/invite - creates household + 8-char invite code
+- [x] GET /api/invite?code=X - validates invite code, returns household info
+- [x] POST /api/invite/join - joins household, links partner_id both ways
+- [x] Public invite page /invite/[code] with confetti on success
+- [x] InvitePartner component in Settings: WhatsApp share + copy link + invite code display
+- [x] Guards: prevent self-join, already-in-household, invalid codes
+- [x] Auto-generates household name "הבית של [שם]"
+
+### Routine Playlists (4 new files)
+- [x] 6 Hebrew playlists: שגרת בוקר מטבח (10 min), שגרת ערב סלון (8 min), חדר אמבטיה (12 min), חדר שינה (7 min), ניקיון מהיר לפני אורחים (15 min), שגרת שישי (20 min)
+- [x] usePlaylistTimer hook: start/pause/resume/skip/stop, auto-advance, haptic feedback
+- [x] PlaylistPlayer: full-screen overlay, SVG countdown ring, progress dots, framer-motion transitions
+- [x] Playlists page: grid of cards with icon/name/time/task count
+- [x] Quick action card on dashboard linking to /playlists
+
+### Shopping List → Supabase Connection
+- [x] useShoppingList hook now reads/writes from shopping_items table
+- [x] Auto-creates household via /api/invite when user doesn't have one
+- [x] Optimistic updates with rollback on failure
+- [x] Realtime subscription for partner sync
+- [x] Falls back to localStorage when Supabase unavailable or table doesn't exist
+
+### Supabase Status (verified Feb 27)
+- [x] avatars storage bucket: EXISTS, public, 2MB limit
+- [ ] shopping_items table: NOT YET CREATED - user needs to run SQL migration
+- [ ] Realtime for shopping_items: NOT YET ENABLED - enable in Supabase Dashboard → Database → Replication
+
+### Commits
+- `d68d7a4` feat: add dark mode, partner invitation, and routine playlists (32 files, +1974 lines)
+- `75dbe07` feat: connect shopping list to Supabase with auto-household creation
+
+### Pending User Tasks (see SETUP-INSTRUCTIONS.html)
+1. Run 003_shopping_items.sql in Supabase SQL Editor (1 min)
+2. Enable Realtime for shopping_items (30 sec)
+3. Google Calendar API credentials (5 min, optional)
+4. Green API separate instance for reply-to-complete (5 min, optional)
+
+## What Was Done Previously
 
 ## Tasks & Shopping Pages Improvements (Feb 25, 2026) [DONE]
 ### Tasks Page Improvements
