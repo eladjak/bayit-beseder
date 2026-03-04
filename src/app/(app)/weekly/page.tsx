@@ -102,6 +102,7 @@ function generateMockWeeklyTasks(): TaskRow[] {
         due_date: dateStr,
         points: 10,
         recurring: true,
+        google_event_id: null,
         created_at: new Date().toISOString(),
       });
     }

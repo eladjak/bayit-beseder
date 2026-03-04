@@ -45,6 +45,7 @@ export type Database = {
           due_date: string | null;
           points: number;
           recurring: boolean;
+          google_event_id: string | null;
           created_at: string;
         };
         Insert: {
@@ -58,6 +59,7 @@ export type Database = {
           due_date?: string | null;
           points?: number;
           recurring?: boolean;
+          google_event_id?: string | null;
           created_at?: string;
         };
         Update: {
@@ -71,6 +73,7 @@ export type Database = {
           due_date?: string | null;
           points?: number;
           recurring?: boolean;
+          google_event_id?: string | null;
         };
         Relationships: [
           {
@@ -163,6 +166,8 @@ export type Database = {
             partner_activity: boolean;
           } | null;
           household_id: string | null;
+          google_calendar_tokens: Json | null;
+          google_calendar_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -181,6 +186,8 @@ export type Database = {
             partner_activity: boolean;
           } | null;
           household_id?: string | null;
+          google_calendar_tokens?: Json | null;
+          google_calendar_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -199,6 +206,8 @@ export type Database = {
             partner_activity: boolean;
           } | null;
           household_id?: string | null;
+          google_calendar_tokens?: Json | null;
+          google_calendar_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };

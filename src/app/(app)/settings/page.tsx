@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import {
   User,
   Home,
@@ -36,6 +36,7 @@ import {
 import { toast } from "sonner";
 import { setSoundEnabled } from "@/hooks/useAppSound";
 import { InvitePartner } from "@/components/invite-partner";
+import { CalendarSettings } from "@/components/calendar-settings";
 
 // ============================================
 // Theme helpers
@@ -475,6 +476,11 @@ export default function SettingsPage() {
 
       {/* Invite Partner */}
       <InvitePartner />
+
+      {/* Google Calendar */}
+      <Suspense fallback={null}>
+        <CalendarSettings />
+      </Suspense>
 
       {/* Notifications */}
       <section className="card-elevated p-4 space-y-3">

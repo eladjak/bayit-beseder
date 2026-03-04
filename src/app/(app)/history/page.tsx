@@ -183,14 +183,14 @@ function buildMockHistory(): MockHistoryEntry[] {
   };
 
   const mockTasks: TaskRow[] = [
-    { id: "m1", title: "שטיפת כלים", description: null, category_id: "cat-kitchen", frequency: "daily", assigned_to: null, status: "completed", due_date: null, points: 10, recurring: true, created_at: makeDate(10) },
-    { id: "m2", title: "ניקוי אמבטיה", description: null, category_id: "cat-bathroom", frequency: "weekly", assigned_to: null, status: "completed", due_date: null, points: 15, recurring: false, created_at: makeDate(9) },
-    { id: "m3", title: "כביסה", description: null, category_id: "cat-laundry", frequency: "daily", assigned_to: null, status: "completed", due_date: null, points: 10, recurring: true, created_at: makeDate(7) },
-    { id: "m4", title: "האכלת חתולים", description: null, category_id: "cat-pets", frequency: "daily", assigned_to: null, status: "completed", due_date: null, points: 5, recurring: true, created_at: makeDate(5) },
-    { id: "m5", title: "ניקוי סלון", description: null, category_id: "cat-living", frequency: "weekly", assigned_to: null, status: "completed", due_date: null, points: 20, recurring: false, created_at: makeDate(3) },
-    { id: "m6", title: "הוצאת אשפה", description: null, category_id: "cat-kitchen", frequency: "daily", assigned_to: null, status: "completed", due_date: null, points: 5, recurring: true, created_at: makeDate(2) },
-    { id: "m7", title: "ניקוי מקרר", description: null, category_id: "cat-kitchen", frequency: "monthly", assigned_to: null, status: "completed", due_date: null, points: 25, recurring: false, created_at: makeDate(1) },
-    { id: "m8", title: "ניקוי חדר שינה", description: null, category_id: "cat-bedroom", frequency: "weekly", assigned_to: null, status: "completed", due_date: null, points: 15, recurring: false, created_at: makeDate(0, 14) },
+    { id: "m1", title: "שטיפת כלים", description: null, category_id: "cat-kitchen", frequency: "daily", assigned_to: null, status: "completed", due_date: null, points: 10, recurring: true, google_event_id: null, created_at: makeDate(10) },
+    { id: "m2", title: "ניקוי אמבטיה", description: null, category_id: "cat-bathroom", frequency: "weekly", assigned_to: null, status: "completed", due_date: null, points: 15, recurring: false, google_event_id: null, created_at: makeDate(9) },
+    { id: "m3", title: "כביסה", description: null, category_id: "cat-laundry", frequency: "daily", assigned_to: null, status: "completed", due_date: null, points: 10, recurring: true, google_event_id: null, created_at: makeDate(7) },
+    { id: "m4", title: "האכלת חתולים", description: null, category_id: "cat-pets", frequency: "daily", assigned_to: null, status: "completed", due_date: null, points: 5, recurring: true, google_event_id: null, created_at: makeDate(5) },
+    { id: "m5", title: "ניקוי סלון", description: null, category_id: "cat-living", frequency: "weekly", assigned_to: null, status: "completed", due_date: null, points: 20, recurring: false, google_event_id: null, created_at: makeDate(3) },
+    { id: "m6", title: "הוצאת אשפה", description: null, category_id: "cat-kitchen", frequency: "daily", assigned_to: null, status: "completed", due_date: null, points: 5, recurring: true, google_event_id: null, created_at: makeDate(2) },
+    { id: "m7", title: "ניקוי מקרר", description: null, category_id: "cat-kitchen", frequency: "monthly", assigned_to: null, status: "completed", due_date: null, points: 25, recurring: false, google_event_id: null, created_at: makeDate(1) },
+    { id: "m8", title: "ניקוי חדר שינה", description: null, category_id: "cat-bedroom", frequency: "weekly", assigned_to: null, status: "completed", due_date: null, points: 15, recurring: false, google_event_id: null, created_at: makeDate(0, 14) },
   ];
 
   const categoryMap: Record<string, string> = {
