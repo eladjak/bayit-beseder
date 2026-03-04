@@ -1,13 +1,34 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Phase 14 Complete (Dark Mode + Partner Invite + Playlists + Shopping Supabase)
-## Last Updated: 2026-02-27
+## Status: LIVE - Phase 15 Complete (Google Calendar + All Migrations Done)
+## Last Updated: 2026-03-04
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-14 complete. App LIVE on Vercel with 3 major new features deployed. 160 tests passing. Zero TypeScript errors.
+Phase 1-15 complete. App LIVE on Vercel. All Supabase SQL migrations executed. Google Calendar OAuth2 integration built and deployed. 160 tests passing. Zero TypeScript errors.
+
+## Phase 15: Google Calendar OAuth2 Integration (Feb 27, 2026) [DONE]
+
+### Google Calendar Features (6 new files, 4 modified)
+- [x] `src/lib/google-calendar.ts` - OAuth2 URL generator, token exchange/refresh, Calendar CRUD (list/create/update/delete events)
+- [x] `src/app/api/auth/callback/google-calendar/route.ts` - OAuth callback, exchanges code for tokens, stores in profiles
+- [x] `src/app/api/calendar/connect/route.ts` - Redirects to Google OAuth consent screen
+- [x] `src/app/api/calendar/sync/route.ts` - POST: sync tasks↔calendar, GET: connection status
+- [x] `src/app/api/calendar/disconnect/route.ts` - Revokes token + clears from profile
+- [x] `src/components/calendar-settings.tsx` - Hebrew RTL UI, connected/disconnected states, sync/disconnect buttons
+- [x] Settings page updated with CalendarSettings component (Suspense wrapped)
+- [x] Database types updated: profiles.google_calendar_tokens, profiles.google_calendar_id, tasks.google_event_id
+
+### All Supabase SQL Migrations Executed [DONE]
+- [x] shopping_items table created with RLS policies
+- [x] profiles: google_calendar_tokens (jsonb), google_calendar_id (text) columns added
+- [x] tasks: google_event_id (text) column added
+- [x] All tables verified via Supabase REST API
+
+### Commits
+- `6924207` feat: add Google Calendar OAuth2 integration (10 files, +1060 lines)
 
 ## Phase 14: Dark Mode + Partner Invitation + Routine Playlists + Shopping Supabase (Feb 27, 2026) [DONE]
 
@@ -42,20 +63,21 @@ Phase 1-14 complete. App LIVE on Vercel with 3 major new features deployed. 160 
 - [x] Realtime subscription for partner sync
 - [x] Falls back to localStorage when Supabase unavailable or table doesn't exist
 
-### Supabase Status (verified Feb 27)
+### Supabase Status (verified Mar 4)
 - [x] avatars storage bucket: EXISTS, public, 2MB limit
-- [ ] shopping_items table: NOT YET CREATED - user needs to run SQL migration
-- [ ] Realtime for shopping_items: NOT YET ENABLED - enable in Supabase Dashboard → Database → Replication
+- [x] shopping_items table: CREATED with RLS policies
+- [x] Google Calendar columns: profiles.google_calendar_tokens, profiles.google_calendar_id, tasks.google_event_id
+- [ ] Realtime for shopping_items: NOT YET ENABLED - enable in Supabase Dashboard → Database → Publications
 
 ### Commits
 - `d68d7a4` feat: add dark mode, partner invitation, and routine playlists (32 files, +1974 lines)
 - `75dbe07` feat: connect shopping list to Supabase with auto-household creation
 
-### Pending User Tasks (see SETUP-INSTRUCTIONS.html)
-1. Run 003_shopping_items.sql in Supabase SQL Editor (1 min)
-2. Enable Realtime for shopping_items (30 sec)
-3. Google Calendar API credentials (5 min, optional)
-4. Green API separate instance for reply-to-complete (5 min, optional)
+### Pending User Tasks
+1. ~~Run shopping_items SQL migration~~ [DONE]
+2. Enable Realtime for shopping_items (Database → Publications → add shopping_items)
+3. ~~Google Calendar API credentials~~ [DONE - credentials saved]
+4. Green API separate instance for reply-to-complete (user working on it)
 
 ## What Was Done Previously
 
@@ -331,17 +353,18 @@ Based on 4-agent professional research session (Product Research, UX Design, Int
 - [x] "We" framing on dashboard ("Together: 12/15 tasks" not individual scores) - done in Phase 7
 
 ### Remaining Roadmap
-- [ ] Google Calendar two-way sync (OAuth2 + Calendar API)
-- [ ] Reply-to-complete: mark tasks done from WhatsApp (needs dedicated Green API instance)
+- [x] Google Calendar two-way sync (OAuth2 + Calendar API) - Phase 15
+- [ ] Reply-to-complete: mark tasks done from WhatsApp (needs dedicated Green API instance - user working on it)
 - [ ] Task rotation based on Golden Rule slider ratio
-- [ ] Routine playlists with timer ("Kitchen Evening: 10 min total")
+- [x] Routine playlists with timer - Phase 14
 - [ ] Adaptive coaching (track which messages lead to completions)
 - [x] Web Push with VAPID keys (server-side notifications) - Phase 12
-- [ ] Partner invitation flow (WhatsApp link, not email)
-- [ ] Home inventory / shopping list
-- [ ] Avatar upload to Supabase Storage
+- [x] Partner invitation flow (WhatsApp link) - Phase 14
+- [x] Shopping list with Supabase - Phase 14
+- [ ] Avatar upload component (storage bucket ready)
 - [ ] English translation (i18n)
-- [ ] Full dark mode refinement
+- [x] Dark mode - Phase 14
+- [ ] Enable Realtime for shopping_items (user action needed)
 
 ## Key Research Insights
 

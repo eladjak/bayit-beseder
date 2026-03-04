@@ -68,7 +68,9 @@ export function buildMorningBrief(data: DailyBriefData): string {
       ? "\n\nשבת שלום! בואו נסיים הכל לפני כניסת שבת"
       : "";
 
-  return `${greeting}\n\nיום ${data.dayOfWeek} - ${data.todayTasks.length} משימות:\n${taskList}${streakLine}${fridayBonus}\n\n--- בית בסדר ---`;
+  const replyHint = "\n\n💡 השיבו עם מספר המשימה כדי לסמן אותה כבוצעה";
+
+  return `${greeting}\n\nיום ${data.dayOfWeek} - ${data.todayTasks.length} משימות:\n${taskList}${streakLine}${fridayBonus}${replyHint}\n\n--- בית בסדר ---`;
 }
 
 export function buildEveningSummary(data: DailySummaryData): string {

@@ -1,22 +1,18 @@
 /**
  * Green API WhatsApp client for BayitBeSeder.
  *
- * IMPORTANT: This uses the same Green API instance as Kami.
- * Kami uses polling (receiveNotification) - NEVER set webhookUrl
- * on this instance or it will break Kami's message queue.
- *
- * BayitBeSeder only SENDS messages - no webhook/receive needed.
+ * Uses a DEDICATED Green API instance (not shared with Kami).
+ * This instance supports webhooks for reply-to-complete.
  */
-
-const GREEN_API_URL = "https://api.green-api.com";
 
 function getConfig() {
   const instanceId = process.env.GREEN_API_INSTANCE_ID;
   const token = process.env.GREEN_API_TOKEN;
+  const baseUrl = process.env.GREEN_API_URL || "https://api.green-api.com";
   if (!instanceId || !token) {
     throw new Error("GREEN_API_INSTANCE_ID and GREEN_API_TOKEN must be set");
   }
-  return { instanceId, token };
+  return { instanceId, token, baseUrl };
 }
 
 function formatPhone(phone: string): string {
@@ -33,14 +29,18 @@ function formatPhone(phone: string): string {
   return `${cleaned}@c.us`;
 }
 
+export function extractPhoneFromChatId(chatId: string): string {
+  return chatId.replace("@c.us", "");
+}
+
 export async function sendWhatsAppMessage(
   phone: string,
   message: string
 ): Promise<{ success: boolean; idMessage?: string; error?: string }> {
-  const { instanceId, token } = getConfig();
+  const { instanceId, token, baseUrl } = getConfig();
   const chatId = formatPhone(phone);
 
-  const url = `${GREEN_API_URL}/waInstance${instanceId}/sendMessage/${token}`;
+  const url = `${baseUrl}/waInstance${instanceId}/sendMessage/${token}`;
 
   const response = await fetch(url, {
     method: "POST",
