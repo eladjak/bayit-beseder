@@ -28,6 +28,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useAppSounds } from "@/hooks/useAppSound";
 import { useNotifications } from "@/hooks/useNotifications";
 import { usePartner } from "@/hooks/usePartner";
+import { TaskCompletionModal } from "@/components/task-completion-modal";
 import { TaskListSkeleton } from "@/components/skeleton";
 import { RingSkeleton } from "@/components/skeleton";
 import { toast } from "sonner";
@@ -179,6 +180,13 @@ export default function DashboardPage() {
       return next;
     });
   }, []);
+  // Task completion feedback modal
+  const [completionModal, setCompletionModal] = useState<{
+    isOpen: boolean;
+    taskId: string;
+    taskTitle: string;
+  }>({ isOpen: false, taskId: "", taskTitle: "" });
+
   const [celebration, setCelebration] = useState<{
     visible: boolean;
     type: "task" | "all_daily" | "golden_rule";
@@ -215,12 +223,14 @@ export default function DashboardPage() {
           const result = await markComplete({ taskId, userId: profile.id });
 
           if (result === null) {
-            // Mark complete failed - show error toast
             toast.error("לא ניתן לסמן את המשימה כהושלמה. נסה שוב.");
             return;
           }
 
-          // Success! Trigger celebration
+          // Show completion feedback modal
+          setCompletionModal({ isOpen: true, taskId, taskTitle: task.title });
+
+          // Trigger celebration
           const msg = getRandomMessage("task_complete");
           setCelebration({
             visible: true,
@@ -294,6 +304,55 @@ export default function DashboardPage() {
       }
     },
     [target, hasDbTasks, profile, dbTasks, markComplete, playComplete, playAchievement, playStreak, mockCompletedIds, mockTasks.length]
+  );
+
+  // Handle task completion feedback submission
+  const handleCompletionFeedback = useCallback(
+    async (feedback: { rating: number; notes: string; photoFile: File | null }) => {
+      if (!profile) return;
+
+      try {
+        const supabase = (await import("@/lib/supabase")).createClient();
+
+        // Save rating/notes to the task completion record
+        const updates: Record<string, unknown> = {};
+        if (feedback.notes) updates.notes = feedback.notes;
+
+        // Upload photo if provided
+        if (feedback.photoFile) {
+          const { uploadTaskPhoto } = await import("@/lib/storage");
+          const photoResult = await uploadTaskPhoto(profile.id, completionModal.taskId, feedback.photoFile);
+          if ("url" in photoResult) {
+            updates.photo_url = photoResult.url;
+          }
+        }
+
+        if (Object.keys(updates).length > 0) {
+          await supabase
+            .from("task_completions")
+            .update(updates)
+            .eq("task_id", completionModal.taskId)
+            .eq("completed_by", profile.id);
+        }
+
+        // Save rating to task (if we have one)
+        if (feedback.rating > 0) {
+          // Store rating in localStorage as a simple approach
+          const ratings = JSON.parse(localStorage.getItem("bayit-task-ratings") ?? "{}");
+          ratings[completionModal.taskId] = { rating: feedback.rating, date: new Date().toISOString() };
+          localStorage.setItem("bayit-task-ratings", JSON.stringify(ratings));
+        }
+
+        if (feedback.rating > 0 || feedback.notes || feedback.photoFile) {
+          toast.success("המשוב נשמר!");
+        }
+      } catch {
+        toast.error("שגיאה בשמירת המשוב");
+      }
+
+      setCompletionModal({ isOpen: false, taskId: "", taskTitle: "" });
+    },
+    [profile, completionModal.taskId]
   );
 
   const dismissCelebration = useCallback(() => {
@@ -370,6 +429,17 @@ export default function DashboardPage() {
           />
         </div>
         <div className="text-center">
+          {/* User avatar in header */}
+          {profile?.avatar_url && (
+            <div className="flex justify-center mb-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={profile.avatar_url}
+                alt={displayName}
+                className="w-12 h-12 rounded-full border-2 border-white/30 object-cover"
+              />
+            </div>
+          )}
           <h1 className="text-xl font-bold text-white">{greeting}</h1>
           <p className="text-sm text-white/70">{getHebrewDate()}</p>
           {filteredTasks.length > 0 && (
@@ -493,6 +563,14 @@ export default function DashboardPage() {
         message={coaching.message}
         emoji={coaching.emoji}
         onDismiss={() => setCoaching((prev) => ({ ...prev, visible: false }))}
+      />
+
+      {/* Task Completion Feedback Modal */}
+      <TaskCompletionModal
+        taskTitle={completionModal.taskTitle}
+        isOpen={completionModal.isOpen}
+        onClose={() => setCompletionModal({ isOpen: false, taskId: "", taskTitle: "" })}
+        onSubmit={handleCompletionFeedback}
       />
     </div>
   );

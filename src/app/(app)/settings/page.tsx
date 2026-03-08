@@ -14,7 +14,6 @@ import {
   Globe,
   Save,
   Loader2,
-  Camera,
   Volume2,
   MessageCircle,
 } from "lucide-react";
@@ -22,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { signOut } from "@/lib/auth";
+import { AvatarUpload } from "@/components/avatar-upload";
 import {
   getNotificationPrefs,
   saveNotificationPrefs,
@@ -196,12 +196,14 @@ export default function SettingsPage() {
     }
   }, [displayName, avatarUrl, updateProfile]);
 
-  // Avatar upload placeholder
-  const handleAvatarChange = useCallback(async () => {
-    // In a full implementation, this would open a file picker
-    // and upload to Supabase Storage. For now, show a toast.
-    toast.info("העלאת תמונה תהיה זמינה בקרוב!");
-  }, []);
+  // Avatar uploaded callback
+  const handleAvatarUploaded = useCallback(
+    async (url: string) => {
+      setAvatarUrl(url);
+      await updateProfile({ avatar_url: url });
+    },
+    [updateProfile]
+  );
 
   // Copy invite code
   function copyInviteCode() {
@@ -352,33 +354,12 @@ export default function SettingsPage() {
         </div>
 
         {/* Avatar */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleAvatarChange}
-            className="relative w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden group"
-            aria-label="שינוי תמונת פרופיל"
-          >
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatarUrl}
-                alt="תמונת פרופיל"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <User className="w-7 h-7 text-primary" />
-            )}
-            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Camera className="w-5 h-5 text-white" />
-            </div>
-          </button>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-foreground truncate">
-              {displayName || "משתמש"}
-            </p>
-            <p className="text-xs text-muted truncate">{emailDisplay}</p>
-          </div>
-        </div>
+        <AvatarUpload
+          currentUrl={avatarUrl || null}
+          userId={user?.id ?? null}
+          displayName={displayName || "משתמש"}
+          onUploaded={handleAvatarUploaded}
+        />
 
         {/* Name edit */}
         <div>

@@ -136,10 +136,24 @@ create index idx_task_templates_household on public.task_templates(household_id)
 create index idx_household_members_user on public.household_members(user_id);
 create index idx_streaks_user on public.streaks(user_id, household_id);
 
+-- 11. Shopping Items
+create table public.shopping_items (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid not null references public.households(id) on delete cascade,
+  title text not null,
+  quantity smallint default 1,
+  unit text,
+  category text default 'אחר' check (category in ('מזון', 'ניקיון', 'חיות', 'בית', 'אחר')),
+  checked boolean default false,
+  added_by uuid references public.profiles(id),
+  created_at timestamptz default now()
+);
+
 -- Enable Realtime
 alter publication supabase_realtime add table public.task_instances;
 alter publication supabase_realtime add table public.households;
 alter publication supabase_realtime add table public.streaks;
+alter publication supabase_realtime add table public.shopping_items;
 
 -- Row Level Security
 alter table public.profiles enable row level security;
@@ -152,6 +166,7 @@ alter table public.achievements enable row level security;
 alter table public.user_achievements enable row level security;
 alter table public.weekly_syncs enable row level security;
 alter table public.coaching_messages enable row level security;
+alter table public.shopping_items enable row level security;
 
 -- RLS Policies
 
@@ -251,6 +266,17 @@ create policy "Members can create syncs" on public.weekly_syncs
 -- Coaching Messages: anyone can read
 create policy "Anyone can view coaching" on public.coaching_messages
   for select using (true);
+
+-- Shopping Items: household members can manage
+create policy "Members can view shopping items" on public.shopping_items
+  for select using (
+    household_id in (select household_id from public.household_members where user_id = auth.uid())
+  );
+
+create policy "Members can manage shopping items" on public.shopping_items
+  for all using (
+    household_id in (select household_id from public.household_members where user_id = auth.uid())
+  );
 
 -- Updated_at trigger function
 create or replace function public.handle_updated_at()

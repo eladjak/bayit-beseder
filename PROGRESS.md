@@ -1,13 +1,40 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Phase 16 Complete (WhatsApp Reply-to-Complete)
-## Last Updated: 2026-03-04
+## Status: LIVE - Phase 17 Complete (Avatar Upload + Task Feedback)
+## Last Updated: 2026-03-08
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-15 complete. App LIVE on Vercel. All Supabase SQL migrations executed. Google Calendar OAuth2 integration built and deployed. 160 tests passing. Zero TypeScript errors.
+Phase 1-17 complete. App LIVE on Vercel. All Supabase SQL migrations executed. Zero TypeScript errors. Build passes.
+
+## Phase 17: Avatar Upload + Task Completion Feedback (Mar 8, 2026) [DONE]
+
+### Avatar Upload (3 new files, 1 modified)
+- [x] `src/lib/storage.ts` - Image compression via canvas (resize to 400px, WebP 85%), upload to Supabase Storage "avatars" bucket, auto-cleanup of old avatars
+- [x] `src/components/avatar-upload.tsx` - File picker with instant preview, upload progress indicator, animated transitions (framer-motion)
+- [x] Settings page: replaced placeholder toast with real AvatarUpload component, auto-saves URL to profile
+- [x] Dashboard: shows user avatar in gradient header when available
+
+### Task Completion Feedback Modal (1 new file, 1 modified)
+- [x] `src/components/task-completion-modal.tsx` - Bottom sheet modal with:
+  - Star rating (1-5) with Hebrew labels (גרוע/לא טוב/סביר/טוב/מעולה)
+  - Notes text area
+  - Photo capture/upload (camera + gallery) with preview
+  - Skip/Save actions
+  - Haptic feedback on interactions
+- [x] Dashboard: modal triggers after successful task completion
+- [x] Saves rating to localStorage, notes + photo to task_completions table
+- [x] Photo upload uses same compression pipeline as avatars (WebP, max 2MB)
+
+### Photo Upload Infrastructure
+- [x] `uploadTaskPhoto()` in storage.ts - uploads to "task-photos" bucket
+- [x] Compression: canvas resize + WebP conversion before upload
+- [x] Cleanup: auto-removes old avatars when new one uploaded
+
+### Commits
+- Phase 17: 5 new/modified files
 
 ## Phase 15: Google Calendar OAuth2 Integration (Feb 27, 2026) [DONE]
 
