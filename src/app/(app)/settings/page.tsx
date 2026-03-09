@@ -20,6 +20,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useHousehold } from "@/hooks/useHousehold";
 import { signOut } from "@/lib/auth";
 import { AvatarUpload } from "@/components/avatar-upload";
 import {
@@ -90,6 +91,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
+  const { household, updateHousehold } = useHousehold(profile?.household_id ?? null);
 
   // Profile state
   const [displayName, setDisplayName] = useState("");
@@ -110,6 +112,7 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState(false);
   const [goldenTarget, setGoldenTarget] = useState(80);
   const [householdName, setHouseholdName] = useState("הבית של אלעד וענבל");
+  const [householdSaving, setHouseholdSaving] = useState(false);
 
   // Sound state
   const [soundEnabled, setSoundEnabledState] = useState(true);
@@ -150,6 +153,17 @@ export default function SettingsPage() {
     }
   }, [profile, user]);
 
+  // Sync household data from Supabase (overrides localStorage when available)
+  useEffect(() => {
+    if (household) {
+      setHouseholdName(household.name);
+      setGoldenTarget(household.goldenRuleTarget);
+      // Keep localStorage in sync as offline fallback
+      localStorage.setItem("bayit-household-name", household.name);
+      localStorage.setItem("bayit-golden-target", String(household.goldenRuleTarget));
+    }
+  }, [household]);
+
   useEffect(() => {
     setNotifPrefs(getNotificationPrefs());
     setNotifPermission(getNotificationPermission());
@@ -164,13 +178,13 @@ export default function SettingsPage() {
       setWhatsappEnabled(localStorage.getItem("bayit-whatsapp-enabled") === "true");
       setWhatsappPhone(localStorage.getItem("bayit-whatsapp-phone") ?? "");
 
-      // Load golden rule target from localStorage
+      // Load golden rule target from localStorage as fallback (will be overridden by Supabase)
       const savedTarget = localStorage.getItem("bayit-golden-target");
       if (savedTarget) {
         setGoldenTarget(Number(savedTarget));
       }
 
-      // Load household name from localStorage
+      // Load household name from localStorage as fallback
       const savedHouseholdName = localStorage.getItem("bayit-household-name");
       if (savedHouseholdName) {
         setHouseholdName(savedHouseholdName);
@@ -205,12 +219,38 @@ export default function SettingsPage() {
     [updateProfile]
   );
 
-  // Copy invite code
+  // Copy invite code from household data
   function copyInviteCode() {
-    navigator.clipboard.writeText("BAYIT-ABC123");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    void navigator.clipboard.writeText(household.inviteCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   }
+
+  // Save household settings (name + golden rule target) to Supabase + localStorage
+  const handleSaveHousehold = useCallback(async () => {
+    // Always persist to localStorage as offline fallback
+    localStorage.setItem("bayit-household-name", householdName);
+    localStorage.setItem("bayit-golden-target", String(goldenTarget));
+
+    if (!profile?.household_id) {
+      toast.success("ההגדרות נשמרו מקומית");
+      return;
+    }
+
+    setHouseholdSaving(true);
+    const success = await updateHousehold({
+      name: householdName,
+      goldenRuleTarget: goldenTarget,
+    });
+    setHouseholdSaving(false);
+
+    if (success) {
+      toast.success("הגדרות הבית עודכנו!");
+    } else {
+      toast.error("שגיאה בשמירת הגדרות הבית");
+    }
+  }, [householdName, goldenTarget, profile?.household_id, updateHousehold]);
 
   // Keys that map to the Supabase notification_preferences JSON column
   const supabaseNotifKeys = new Set<string>(["morning", "midday", "evening", "partnerActivity"]);
@@ -399,10 +439,7 @@ export default function SettingsPage() {
           <input
             type="text"
             value={householdName}
-            onChange={(e) => {
-              setHouseholdName(e.target.value);
-              localStorage.setItem("bayit-household-name", e.target.value);
-            }}
+            onChange={(e) => setHouseholdName(e.target.value)}
             className="w-full bg-background dark:bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
           />
         </div>
@@ -410,7 +447,7 @@ export default function SettingsPage() {
           <label className="text-xs text-muted block mb-1">קוד הזמנה</label>
           <div className="flex items-center gap-2">
             <code className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm font-mono text-foreground">
-              BAYIT-ABC123
+              {household.inviteCode}
             </code>
             <button
               onClick={copyInviteCode}
@@ -434,11 +471,7 @@ export default function SettingsPage() {
             min={50}
             max={100}
             value={goldenTarget}
-            onChange={(e) => {
-              const newTarget = Number(e.target.value);
-              setGoldenTarget(newTarget);
-              localStorage.setItem("bayit-golden-target", String(newTarget));
-            }}
+            onChange={(e) => setGoldenTarget(Number(e.target.value))}
             className="w-full accent-primary"
           />
           <div className="flex justify-between text-[10px] text-muted mt-1">
@@ -453,6 +486,19 @@ export default function SettingsPage() {
                 : "יעד מאוזן"}
           </p>
         </div>
+        {/* Save household button */}
+        <button
+          onClick={handleSaveHousehold}
+          disabled={householdSaving}
+          className="flex items-center gap-2 px-4 py-2 gradient-primary text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 shadow-md shadow-primary/20"
+        >
+          {householdSaving ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Save className="w-4 h-4" />
+          )}
+          {householdSaving ? "שומר..." : "שמירת הגדרות הבית"}
+        </button>
       </section>
 
       {/* Invite Partner */}

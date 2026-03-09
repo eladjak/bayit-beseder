@@ -1,15 +1,81 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { X, SkipForward, Pause, Play, Square } from "lucide-react";
 import { toast } from "sonner";
+import { createClient } from "@/lib/supabase";
 import type { PlaylistTimerState, PlaylistTimerActions } from "@/hooks/usePlaylistTimer";
 
 interface PlaylistPlayerProps
   extends PlaylistTimerState,
     PlaylistTimerActions {}
+
+/**
+ * Records a playlist completion in the task_completions table.
+ * Creates (or reuses) a synthetic task row for the playlist, then inserts a completion record.
+ */
+async function recordPlaylistCompletion(playlistId: string, playlistName: string) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Use a deterministic synthetic task title so we can look it up
+    const syntheticTitle = `[פלייליסט] ${playlistName}`;
+
+    // Try to find existing task for this playlist
+    const { data: existing } = await supabase
+      .from("tasks")
+      .select("id")
+      .eq("title", syntheticTitle)
+      .eq("assigned_to", user.id)
+      .maybeSingle();
+
+    let taskId: string;
+
+    if (existing?.id) {
+      taskId = existing.id;
+    } else {
+      // Create a synthetic task row for this playlist
+      const { data: created, error: createError } = await supabase
+        .from("tasks")
+        .insert({
+          title: syntheticTitle,
+          description: `פלייליסט ניקיון: ${playlistName}`,
+          frequency: "daily" as const,
+          assigned_to: user.id,
+          status: "pending" as const,
+          recurring: true,
+          points: 10,
+        })
+        .select("id")
+        .single();
+
+      if (createError || !created) return;
+      taskId = created.id;
+    }
+
+    // Get user's household_id
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("household_id")
+      .eq("id", user.id)
+      .single();
+
+    // Insert completion record
+    await supabase.from("task_completions").insert({
+      task_id: taskId,
+      user_id: user.id,
+      completed_by: user.id,
+      household_id: profile?.household_id ?? null,
+      notes: `הושלם פלייליסט: ${playlistName}`,
+    });
+  } catch {
+    // Silently fail - completion recording is non-critical
+  }
+}
 
 export function PlaylistPlayer({
   currentPlaylist,
@@ -24,6 +90,8 @@ export function PlaylistPlayer({
   skip,
   stop,
 }: PlaylistPlayerProps) {
+  const completionRecordedRef = useRef(false);
+
   // Fire confetti when playlist completes
   const fireCompletion = useCallback(() => {
     const duration = 2500;
@@ -49,13 +117,21 @@ export function PlaylistPlayer({
   }, []);
 
   useEffect(() => {
-    if (isComplete) {
+    if (isComplete && currentPlaylist && !completionRecordedRef.current) {
+      completionRecordedRef.current = true;
       fireCompletion();
       toast.success("הפלייליסט הושלם! כל הכבוד! 🎉", {
         duration: 4000,
       });
+      // Persist the completion to Supabase
+      recordPlaylistCompletion(currentPlaylist.id, currentPlaylist.name);
     }
-  }, [isComplete, fireCompletion]);
+  }, [isComplete, currentPlaylist, fireCompletion]);
+
+  // Reset completion flag when playlist changes
+  useEffect(() => {
+    completionRecordedRef.current = false;
+  }, [currentPlaylist?.id]);
 
   if (!currentPlaylist) return null;
 

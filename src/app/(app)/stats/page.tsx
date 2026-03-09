@@ -27,25 +27,16 @@ import {
   buildStreakHistory,
   countCompletedThisWeek,
   countCompletedThisMonth,
+  computeBestStreak,
 } from "@/lib/task-stats";
 import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
 import { useProfile } from "@/hooks/useProfile";
+import { useUserAchievements } from "@/hooks/useUserAchievements";
 import { AnimatedNumber } from "@/components/animated-number";
 import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
-
-// Map Hebrew category names -> internal keys (same as dashboard)
-const CATEGORY_NAME_TO_KEY: Record<string, string> = {
-  "מטבח": "kitchen",
-  "אמבטיה": "bathroom",
-  "סלון": "living",
-  "חדר שינה": "bedroom",
-  "כביסה": "laundry",
-  "חוץ": "outdoor",
-  "חיות מחמד": "pets",
-  "כללי": "general",
-};
+import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
 
 const MOCK_WEEKLY_DATA = [
   { day: "א׳", completed: 7, total: 10 },
@@ -283,6 +274,7 @@ export default function StatsPage() {
   const { completions } = useCompletions({ limit: 500 });
   const { categoryMap } = useCategories();
   const { profile } = useProfile();
+  const { dbUnlockedCodes, hasDbData: hasAchievementsDbData } = useUserAchievements();
 
   // Build category_id -> key mapping
   const categoryIdToKey = useMemo(() => {
@@ -331,6 +323,12 @@ export default function StatsPage() {
     [completions, today]
   );
 
+  // Best streak computed from completion history (0 when no data)
+  const bestStreak = useMemo(
+    () => computeBestStreak(completions),
+    [completions]
+  );
+
   // Weekly and monthly totals
   const weeklyTotal = useMemo(
     () => countCompletedThisWeek(completions, today),
@@ -341,18 +339,26 @@ export default function StatsPage() {
     [completions, today]
   );
 
-  // Compute unlocked achievements from real data
+  // Compute unlocked achievements:
+  // 1. Try DB (user_achievements table) first
+  // 2. Fall back to client-side computation from completions/streaks
+  // 3. Fall back to mock data for demo
   const unlockedAchievements = useMemo(() => {
+    if (hasAchievementsDbData && dbUnlockedCodes.size > 0) {
+      // DB data available - use it as the source of truth
+      return dbUnlockedCodes;
+    }
     if (!hasDbData) {
       // Mock data for demo
       return new Set(["first_task", "streak_3", "streak_7", "golden_rule_5"]);
     }
+    // Client-side computation as fallback when DB has no achievement records yet
     return computeUnlockedAchievements(
       completions,
       profile?.streak ?? 0,
       tasks
     );
-  }, [hasDbData, completions, profile?.streak, tasks]);
+  }, [hasAchievementsDbData, dbUnlockedCodes, hasDbData, completions, profile?.streak, tasks]);
 
   return (
     <div className="space-y-5" dir="rtl">
@@ -397,8 +403,8 @@ export default function StatsPage() {
       >
         <StreakVisualization
           streakDays={streakHistory}
-          currentStreak={profile?.streak ?? 5}
-          bestStreak={12}
+          currentStreak={profile?.streak ?? 0}
+          bestStreak={bestStreak}
         />
       </motion.div>
 
