@@ -112,6 +112,8 @@ export default function ShoppingPage() {
             <button
               key={cat}
               onClick={() => setFilter(cat)}
+              aria-label={`סנן לפי ${cat}`}
+              aria-pressed={isActive}
               className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all ${
                 isActive
                   ? "gradient-primary text-white shadow-md shadow-primary/20"
@@ -138,7 +140,12 @@ export default function ShoppingPage() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
           >
-            <span className="text-4xl mb-3 block">🛒</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/illustrations/empty-shopping.jpg"
+              alt="רשימת קניות ריקה"
+              className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
+            />
             <p className="font-medium text-foreground">הרשימה ריקה!</p>
             <p className="text-sm text-muted mt-1">הוסיפו פריט ראשון</p>
           </motion.div>
@@ -160,6 +167,8 @@ export default function ShoppingPage() {
         <div className="space-y-2">
           <button
             onClick={() => setShowChecked((prev) => !prev)}
+            aria-label={showChecked ? "הסתרת פריטים מסומנים" : "הצגת פריטים מסומנים"}
+            aria-expanded={showChecked}
             className="flex items-center gap-1.5 text-sm text-muted hover:text-foreground transition-colors"
           >
             {showChecked ? (
@@ -175,9 +184,10 @@ export default function ShoppingPage() {
           <AnimatePresence>
             {showChecked && (
               <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                exit={{ opacity: 0, height: 0 }}
+                initial={{ opacity: 0, scaleY: 0 }}
+                animate={{ opacity: 1, scaleY: 1 }}
+                exit={{ opacity: 0, scaleY: 0 }}
+                style={{ transformOrigin: "top" }}
                 className="space-y-1.5 overflow-hidden"
               >
                 <AnimatePresence mode="popLayout">
@@ -202,6 +212,7 @@ export default function ShoppingPage() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           onClick={handleClearChecked}
+          aria-label={`נקה ${checkedCount} פריטים מסומנים`}
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-danger/10 text-danger text-sm font-medium hover:bg-danger/20 transition-colors"
         >
           <Trash2 className="w-4 h-4" />
@@ -224,6 +235,7 @@ export default function ShoppingPage() {
               </h3>
               <button
                 onClick={() => setShowForm(false)}
+                aria-label="סגירת טופס הוספת פריט"
                 className="p-1 rounded-lg text-muted hover:text-foreground"
               >
                 <X className="w-4 h-4" />
@@ -281,6 +293,7 @@ export default function ShoppingPage() {
             haptic("tap");
             setShowForm(true);
           }}
+          aria-label="הוספת פריט לרשימת קניות"
           className="fixed bottom-24 left-4 w-13 h-13 rounded-2xl gradient-primary text-white shadow-lg shadow-primary/30 flex items-center justify-center z-20 border border-white/20"
         >
           <Plus className="w-6 h-6" />

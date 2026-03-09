@@ -185,7 +185,7 @@ export default function EmergencyPage() {
     <div className="px-4 py-6 space-y-5">
       {/* Header Banner */}
       <motion.div
-        className={`border rounded-2xl p-4 text-center ${
+        className={`border rounded-2xl overflow-hidden text-center ${
           emergencyMode
             ? "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/50"
             : "bg-surface dark:bg-[#1a1730] border-border"
@@ -193,6 +193,13 @@ export default function EmergencyPage() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/illustrations/emergency-mode.jpg"
+          alt="מצב חירום"
+          className="w-full h-36 object-cover"
+        />
+        <div className="p-4">
         {emergencyMode ? (
           <>
             <Shield className="w-8 h-8 text-blue-500 dark:text-blue-400 mx-auto mb-2" />
@@ -214,6 +221,7 @@ export default function EmergencyPage() {
         <button
           onClick={toggleEmergencyMode}
           disabled={togglingEmergency}
+          aria-label={emergencyMode ? "ביטול מצב חירום" : "הפעלת מצב חירום"}
           className={`mt-3 px-5 py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 ${
             emergencyMode
               ? "bg-blue-500 text-white hover:bg-blue-600"
@@ -228,6 +236,7 @@ export default function EmergencyPage() {
             "הפעלת מצב חירום"
           )}
         </button>
+        </div>
       </motion.div>
 
       {emergencyMode && (

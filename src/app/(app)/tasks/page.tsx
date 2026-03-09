@@ -242,8 +242,9 @@ export default function TasksPage() {
       {/* Add Task Form (DB mode only) */}
       {showAddForm && hasDbTasks && (
         <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
+          initial={{ opacity: 0, scaleY: 0 }}
+          animate={{ opacity: 1, scaleY: 1 }}
+          style={{ transformOrigin: "top" }}
           className="card-elevated p-4 space-y-3"
         >
           <input
@@ -301,6 +302,8 @@ export default function TasksPage() {
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
+            aria-label={`סנן לפי קטגוריה: ${CATEGORY_LABELS[cat]}`}
+            aria-pressed={activeCategory === cat}
             className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
               activeCategory === cat
                 ? "gradient-primary text-white shadow-md shadow-primary/20"
@@ -321,9 +324,12 @@ export default function TasksPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="card-elevated p-8 text-center"
           >
-            <span className="text-4xl mb-3 block">
-              {activeCategory === "all" ? "🎉" : "✨"}
-            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={activeCategory === "all" ? "/illustrations/tasks-done.jpg" : "/illustrations/empty-tasks.jpg"}
+              alt={activeCategory === "all" ? "כל המשימות הושלמו" : "אין משימות בקטגוריה זו"}
+              className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
+            />
             <p className="font-medium text-foreground">
               {activeCategory === "all"
                 ? "אין משימות - הכל בסדר!"
@@ -371,6 +377,8 @@ export default function TasksPage() {
                   )}
                   <button
                     onClick={() => toggleDbTask(task.id)}
+                    aria-label={task.isCompleted ? `בטל השלמה: ${task.title}` : `סמן כהושלם: ${task.title}`}
+                    aria-pressed={task.isCompleted}
                     className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                       task.isCompleted
                         ? "bg-success border-success"
@@ -437,6 +445,8 @@ export default function TasksPage() {
                   >
                     <button
                       onClick={() => toggleMockTask(i)}
+                      aria-label={isCompleted ? `בטל השלמה: ${task.title}` : `סמן כהושלם: ${task.title}`}
+                      aria-pressed={isCompleted}
                       className={`mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                         isCompleted
                           ? "bg-success border-success"

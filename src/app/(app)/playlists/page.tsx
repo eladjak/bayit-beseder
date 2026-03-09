@@ -32,8 +32,14 @@ export default function PlaylistsPage() {
   return (
     <div className="space-y-5">
       {/* Gradient header */}
-      <div className="gradient-hero rounded-b-3xl px-4 pt-10 pb-8">
-        <div className="text-center">
+      <div className="gradient-hero rounded-b-3xl overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/illustrations/playlist-cleaning.jpg"
+          alt="פלייליסטים לניקיון"
+          className="w-full h-36 object-cover opacity-60"
+        />
+        <div className="text-center px-4 pt-4 pb-8 -mt-4 relative z-10">
           <h1 className="text-2xl font-bold text-white">פלייליסטים 🎵</h1>
           <p className="text-sm text-white/70 mt-1">
             שגרות ניקיון מודרכות עם טיימר

@@ -3,7 +3,7 @@
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Home, Loader2, Mail, Lock, Eye, EyeOff, Sparkles } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles } from "lucide-react";
 import { signIn, signInWithGoogle, resetPassword } from "@/lib/auth";
 import { toast } from "sonner";
 
@@ -111,9 +111,12 @@ function LoginContent() {
       <div className="w-full max-w-sm flex flex-col items-center gap-5 relative z-10">
         {/* Logo & Title */}
         <div className="flex flex-col items-center gap-3 mb-2">
-          <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-xl flex items-center justify-center shadow-lg shadow-black/10 border border-white/30">
-            <Home className="w-10 h-10 text-white" />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/illustrations/welcome-home.jpg"
+            alt="ברוכים הבאים לבית בסדר"
+            className="w-24 h-24 rounded-2xl object-cover shadow-lg shadow-black/20 border-2 border-white/30"
+          />
           <h1 className="text-3xl font-bold text-white">בית בסדר</h1>
           <p className="text-white/80 text-center text-sm">
             ניהול תחזוקת הבית המשותף
