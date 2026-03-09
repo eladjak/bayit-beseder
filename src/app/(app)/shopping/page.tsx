@@ -4,13 +4,12 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { useShoppingList, CATEGORY_COLORS } from "@/hooks/useShoppingList";
+import { useShoppingList, CATEGORY_COLORS, SHOPPING_CATEGORY_ICONS, SHOPPING_CATEGORY_ILLUSTRATIONS } from "@/hooks/useShoppingList";
 import type { ShoppingCategory } from "@/hooks/useShoppingList";
 import { ShoppingItemCard } from "@/components/shopping/shopping-item";
 import { haptic } from "@/lib/haptics";
 
-const ALL_CATEGORIES: ShoppingCategory[] = ["מזון", "ניקיון", "חיות", "בית", "אחר"];
-const FILTER_OPTIONS: Array<ShoppingCategory | "הכל"> = ["הכל", ...ALL_CATEGORIES];
+const ALL_CATEGORIES: ShoppingCategory[] = ["מזון", "ניקיון", "חיות", "בית", "טיפוח", "תרופות", "תינוק", "אחר"];
 
 export default function ShoppingPage() {
   const { items, loading, addItem, toggleItem, removeItem, clearChecked } =
@@ -104,9 +103,21 @@ export default function ShoppingPage() {
       </div>
 
       <div className="px-4 space-y-4">
-      {/* Category filter chips */}
-      <div className="flex gap-2 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
-        {FILTER_OPTIONS.map((cat) => {
+      {/* Category filter - illustrated cards */}
+      <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+        <button
+          onClick={() => setFilter("הכל")}
+          aria-label="הצג הכל"
+          aria-pressed={filter === "הכל"}
+          className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+            filter === "הכל"
+              ? "gradient-primary text-white shadow-md shadow-primary/20"
+              : "bg-surface text-muted hover:text-foreground card-elevated"
+          }`}
+        >
+          📋 הכל
+        </button>
+        {ALL_CATEGORIES.map((cat) => {
           const isActive = filter === cat;
           return (
             <button
@@ -114,18 +125,15 @@ export default function ShoppingPage() {
               onClick={() => setFilter(cat)}
               aria-label={`סנן לפי ${cat}`}
               aria-pressed={isActive}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-full text-sm font-medium transition-all ${
+              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
                 isActive
-                  ? "gradient-primary text-white shadow-md shadow-primary/20"
+                  ? "text-white shadow-md"
                   : "bg-surface text-muted hover:text-foreground card-elevated"
               }`}
-              style={
-                !isActive && cat !== "הכל"
-                  ? { borderRight: `3px solid ${CATEGORY_COLORS[cat]}` }
-                  : undefined
-              }
+              style={isActive ? { backgroundColor: CATEGORY_COLORS[cat] } : undefined}
             >
-              {cat}
+              <span>{SHOPPING_CATEGORY_ICONS[cat]}</span>
+              <span>{cat}</span>
             </button>
           );
         })}
@@ -252,12 +260,12 @@ export default function ShoppingPage() {
               className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary transition-colors"
               autoFocus
             />
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {ALL_CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setNewCategory(cat)}
-                  className={`flex-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                     newCategory === cat
                       ? "text-white"
                       : "bg-surface-hover text-muted"
@@ -268,7 +276,8 @@ export default function ShoppingPage() {
                       : undefined
                   }
                 >
-                  {cat}
+                  <span>{SHOPPING_CATEGORY_ICONS[cat]}</span>
+                  <span>{cat}</span>
                 </button>
               ))}
             </div>

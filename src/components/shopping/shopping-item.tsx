@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Check, Trash2 } from "lucide-react";
 import type { ShoppingItem as ShoppingItemType } from "@/hooks/useShoppingList";
-import { CATEGORY_COLORS } from "@/hooks/useShoppingList";
+import { CATEGORY_COLORS, SHOPPING_CATEGORY_ICONS } from "@/hooks/useShoppingList";
 
 interface ShoppingItemProps {
   item: ShoppingItemType;
@@ -52,11 +52,8 @@ export function ShoppingItemCard({ item, onToggle, onRemove }: ShoppingItemProps
         )}
       </button>
 
-      {/* Category color dot */}
-      <div
-        className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-        style={{ backgroundColor: CATEGORY_COLORS[item.category] }}
-      />
+      {/* Category icon + color dot */}
+      <span className="text-sm flex-shrink-0" aria-hidden>{SHOPPING_CATEGORY_ICONS[item.category]}</span>
 
       {/* Title */}
       <span

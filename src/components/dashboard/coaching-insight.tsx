@@ -115,8 +115,45 @@ export function CoachingInsight() {
     };
   }, []);
 
-  // Don't render while loading or if there's not enough data
-  if (loading || !data || !data.hasData) return null;
+  // Don't render while loading
+  if (loading) return null;
+
+  // Onboarding card when there's no coaching data yet (cold start)
+  if (!data || !data.hasData) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl bg-card border border-border p-4 shadow-sm"
+        dir="rtl"
+        aria-label="מערכת אימון"
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xl">🧠</span>
+          <div>
+            <p className="text-sm font-semibold text-foreground">מערכת אימון חכמה</p>
+            <p className="text-xs text-muted">לומדת את הסגנון שעובד הכי טוב עבורכם</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {STYLE_ORDER.map((style) => (
+            <div
+              key={style}
+              className="flex flex-col items-center gap-1 p-2 rounded-xl bg-surface"
+            >
+              <span className="text-lg">{COACHING_STYLE_EMOJIS[style]}</span>
+              <span className="text-[10px] text-muted text-center leading-tight">
+                {COACHING_STYLE_LABELS[style]}
+              </span>
+            </div>
+          ))}
+        </div>
+        <p className="text-[11px] text-muted mt-3 text-center">
+          המערכת תתחיל להתאים הודעות אחרי מספר ימי שימוש
+        </p>
+      </motion.div>
+    );
+  }
 
   const bestLabel = COACHING_STYLE_LABELS[data.bestStyle];
   const bestEmoji = COACHING_STYLE_EMOJIS[data.bestStyle];

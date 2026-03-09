@@ -1,13 +1,56 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Improvement Sprint Complete (40+ items) + Component Split + Adaptive Coaching
+## Status: LIVE - UX Overhaul Complete (4 waves)
 ## Last Updated: 2026-03-09
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-17 + Improvement Sprint + B8 (component split) + Adaptive Coaching complete. 8 parallel agents executed 40+ improvements. RLS migration v3 fixed for actual production schema. Build passes, pushed to master.
+UX Overhaul complete (4 waves via 4 parallel agents + Gemini illustration generation). All 4 broken/confusing areas fixed: Tasks auto-seed, Shopping expanded categories, Weekly clarity, Coaching visibility. 16 new Gemini illustrations generated. Zero TypeScript errors, production build passes.
+
+## UX Overhaul (Mar 9, 2026) [DONE]
+
+### Wave 0: Foundation
+- [x] Consolidated `src/lib/categories.ts` as single source of truth (colors, labels, icons, BG classes, illustrations, helpers)
+- [x] Removed duplicate category maps from tasks/page, weekly/page, dashboard/page, seed-data
+- [x] Created shared `CategoryCard` component (`src/components/category-card.tsx`)
+- [x] Generated 16 Gemini illustrations (8 task categories + 8 shopping categories)
+
+### Wave 1: Fix Tasks Page
+- [x] Auto-seed for authenticated users (copies dashboard pattern)
+- [x] Mock mode login prompt banner ("מצב תצוגה בלבד")
+- [x] Replaced text filter tabs with illustrated CategoryCards
+- [x] Updated add-task form with category icons
+
+### Wave 2: Shopping Page Upgrade
+- [x] Expanded ShoppingCategory type with 3 new categories (טיפוח, תרופות, תינוק)
+- [x] Added SHOPPING_CATEGORY_ICONS and SHOPPING_CATEGORY_ILLUSTRATIONS maps
+- [x] Created migration 007_expand_shopping_categories.sql
+- [x] Illustrated category filters with emoji icons
+- [x] Category emoji icons in ShoppingItemCard
+
+### Wave 3: Weekly Page Clarity
+- [x] Clear purpose header + weekly-plan illustration
+- [x] Mock mode login prompt banner
+- [x] Removed local duplicate category maps (imports from categories.ts)
+- [x] Auto-seed for authenticated users
+- [x] Illustrated category badges (emoji icons) on task cards
+
+### Wave 4: Coaching Visibility
+- [x] CoachingInsight cold start fix (shows onboarding card instead of null)
+- [x] Created CoachingTips always-visible widget (`src/components/dashboard/coaching-tips.tsx`)
+- [x] Added CoachingTips to dashboard
+- [x] Coaching bubble display increased from 3s to 5s
+
+### New Files
+- `src/components/category-card.tsx`
+- `src/components/dashboard/coaching-tips.tsx`
+- `supabase/migrations/007_expand_shopping_categories.sql`
+- 16 illustration JPGs in `public/illustrations/` (category-* and shopping-*)
+
+### New Migration (user must run)
+- `007_expand_shopping_categories.sql` - drops CHECK constraint for new shopping categories
 
 ## Improvement Sprint (Mar 9, 2026) [DONE]
 

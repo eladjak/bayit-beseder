@@ -22,7 +22,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase";
 
-export type ShoppingCategory = "מזון" | "ניקיון" | "חיות" | "בית" | "אחר";
+export type ShoppingCategory = "מזון" | "ניקיון" | "חיות" | "בית" | "אחר" | "טיפוח" | "תרופות" | "תינוק";
 
 export interface ShoppingItem {
   id: string;
@@ -41,6 +41,31 @@ export const CATEGORY_COLORS: Record<ShoppingCategory, string> = {
   "חיות": "#F97316",
   "בית": "#8B5CF6",
   "אחר": "#6B7280",
+  "טיפוח": "#EC4899",
+  "תרופות": "#EF4444",
+  "תינוק": "#06B6D4",
+};
+
+export const SHOPPING_CATEGORY_ICONS: Record<ShoppingCategory, string> = {
+  "מזון": "🛒",
+  "ניקיון": "🧹",
+  "חיות": "🐾",
+  "בית": "🏠",
+  "אחר": "📦",
+  "טיפוח": "💄",
+  "תרופות": "💊",
+  "תינוק": "👶",
+};
+
+export const SHOPPING_CATEGORY_ILLUSTRATIONS: Record<ShoppingCategory, string> = {
+  "מזון": "/illustrations/shopping-food.jpg",
+  "ניקיון": "/illustrations/shopping-cleaning.jpg",
+  "חיות": "/illustrations/shopping-pets.jpg",
+  "בית": "/illustrations/shopping-home.jpg",
+  "אחר": "/illustrations/empty-shopping.jpg",
+  "טיפוח": "/illustrations/shopping-beauty.jpg",
+  "תרופות": "/illustrations/shopping-pharmacy.jpg",
+  "תינוק": "/illustrations/shopping-baby.jpg",
 };
 
 const DEFAULT_MOCK_ITEMS: ShoppingItem[] = [

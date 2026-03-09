@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useRef, useCallback } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,
@@ -27,31 +27,12 @@ import {
 } from "@/lib/smart-scheduler";
 import type { TaskRow, TaskInsert } from "@/lib/types/database";
 import { haptic } from "@/lib/haptics";
-
-// Category colors (consistent with other pages)
-const CATEGORY_COLORS: Record<string, string> = {
-  kitchen: "bg-amber-500",
-  bathroom: "bg-cyan-500",
-  living: "bg-emerald-500",
-  bedroom: "bg-violet-500",
-  laundry: "bg-blue-500",
-  outdoor: "bg-lime-500",
-  pets: "bg-orange-500",
-  general: "bg-slate-500",
-};
-
-const CATEGORY_LABELS: Record<string, string> = {
-  kitchen: "מטבח",
-  bathroom: "אמבטיה",
-  living: "סלון",
-  bedroom: "חדר שינה",
-  laundry: "כביסה",
-  outdoor: "חיצוני",
-  pets: "חיות",
-  general: "כללי",
-};
-
-const CATEGORY_KEYS = Object.keys(CATEGORY_LABELS) as (keyof typeof CATEGORY_LABELS)[];
+import {
+  CATEGORY_BG_CLASSES,
+  CATEGORY_LABELS,
+  CATEGORY_KEYS,
+  CATEGORY_ICONS,
+} from "@/lib/categories";
 
 // Mock data for when Supabase is not connected
 function generateMockWeeklyTasks(): TaskRow[] {
@@ -155,6 +136,22 @@ export default function WeeklyPage() {
 
   // Fetch tasks for this week with write capability
   const { tasks, loading, createTask, updateTask } = useTasks({});
+
+  // Auto-seed tasks for authenticated users on first visit
+  const seedAttempted = useRef(false);
+  useEffect(() => {
+    if (seedAttempted.current || loading || tasks.length > 0 || !profile) return;
+    seedAttempted.current = true;
+    fetch("/api/seed", { method: "POST" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.seeded) {
+          // Force page reload to get fresh data
+          window.location.reload();
+        }
+      })
+      .catch(() => {});
+  }, [loading, tasks.length, profile]);
 
   // Whether we're in real-data mode (Supabase connected and returned tasks)
   const isRealData = !loading && tasks.length > 0;
@@ -280,6 +277,7 @@ export default function WeeklyPage() {
           <div>
             <h1 className="text-xl font-bold text-white tracking-tight">תכנון שבועי</h1>
             <p className="text-sm text-white/60 mt-0.5">{weekRange}</p>
+            <p className="text-xs text-white/70 mt-1">פריסת המשימות שלכם לכל השבוע עם המלצות לאיזון</p>
           </div>
           <div className="flex items-center gap-2 px-3.5 py-1.5 bg-white/12 backdrop-blur-sm rounded-xl border border-white/10">
             <Calendar className="w-4 h-4 text-white" />
@@ -313,6 +311,25 @@ export default function WeeklyPage() {
       </div>
 
       <div className="px-4 space-y-5">
+        {/* Weekly planning illustration */}
+        <div className="card-elevated overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/illustrations/weekly-plan.jpg"
+            alt="תכנון שבועי"
+            className="w-full h-32 object-cover"
+          />
+        </div>
+
+        {/* Mock mode banner - login prompt when not authenticated */}
+        {!isRealData && !loading && (
+          <div className="card-elevated p-4 text-center bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 rounded-xl">
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">מצב תצוגה בלבד</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">התחברו כדי לעדכן ולנהל משימות</p>
+            <a href="/login" className="inline-block mt-2 px-4 py-1.5 rounded-lg gradient-primary text-white text-xs font-medium">התחברו עכשיו</a>
+          </div>
+        )}
+
         {/* Smart Suggestions Panel */}
         {suggestions.length > 0 && (
           <div className="card-elevated bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 border border-purple-100/50 dark:border-purple-800/30 overflow-hidden">
@@ -562,10 +579,7 @@ function DayCard({ dayLoad, index, isRealData, onAddTask, onToggleComplete }: Da
               )
                 .slice(0, 4)
                 .map((category) => (
-                  <div
-                    key={category}
-                    className={`${CATEGORY_COLORS[category]} w-2 h-2 rounded-full`}
-                  />
+                  <span key={category} className="text-xs">{CATEGORY_ICONS[category] ?? "🏠"}</span>
                 ))}
               {dayLoad.tasks.length > 4 && (
                 <div className="text-xs text-muted">+{dayLoad.tasks.length - 4}</div>
@@ -633,7 +647,7 @@ function DayCard({ dayLoad, index, isRealData, onAddTask, onToggleComplete }: Da
                     }`}
                   >
                     <span
-                      className={`w-2 h-2 rounded-full flex-shrink-0 ${CATEGORY_COLORS[cat]}`}
+                      className={`w-2 h-2 rounded-full flex-shrink-0 ${CATEGORY_BG_CLASSES[cat]}`}
                     />
                     {CATEGORY_LABELS[cat]}
                   </button>
@@ -707,9 +721,7 @@ function DayCard({ dayLoad, index, isRealData, onAddTask, onToggleComplete }: Da
                       {isCompleted && <Check className="w-3 h-3" />}
                     </button>
 
-                    <div
-                      className={`${CATEGORY_COLORS[category]} w-3 h-3 rounded-full flex-shrink-0`}
-                    />
+                    <span className="text-sm flex-shrink-0">{CATEGORY_ICONS[category] ?? "🏠"}</span>
                     <div className="flex-1">
                       <div
                         className={`text-sm transition-all ${

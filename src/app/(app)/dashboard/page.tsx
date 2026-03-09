@@ -28,12 +28,13 @@ import { usePartner } from "@/hooks/usePartner";
 import { TaskCompletionModal } from "@/components/task-completion-modal";
 import { TaskListSkeleton } from "@/components/skeleton";
 import { toast } from "sonner";
-import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
+import { CATEGORY_NAME_TO_KEY, CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS } from "@/lib/categories";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { GoldenRuleSection } from "@/components/dashboard/golden-rule-section";
 import { PlaylistCard } from "@/components/dashboard/playlist-card";
 import { EnergyModeSection } from "@/components/dashboard/energy-mode-section";
 import { CoachingInsight } from "@/components/dashboard/coaching-insight";
+import { CoachingTips } from "@/components/dashboard/coaching-tips";
 
 // ============================================
 // Mock data (fallback when Supabase not connected)
@@ -66,16 +67,13 @@ function getTimeGreeting(name: string): { greeting: string; subtitle: string } {
   return { greeting: `לילה טוב, ${name}`, subtitle: "יום מצוין מאחוריכם" };
 }
 
-const CATEGORY_INFO: Record<string, { label: string; icon: string; color: string }> = {
-  kitchen: { label: "מטבח", icon: "🍽️", color: "#F59E0B" },
-  bathroom: { label: "אמבטיה", icon: "🚿", color: "#3B82F6" },
-  living: { label: "סלון", icon: "🛋️", color: "#8B5CF6" },
-  bedroom: { label: "חדר שינה", icon: "🛏️", color: "#EC4899" },
-  laundry: { label: "כביסה", icon: "👕", color: "#06B6D4" },
-  outdoor: { label: "חוץ", icon: "🌿", color: "#84CC16" },
-  pets: { label: "חיות מחמד", icon: "🐱", color: "#F97316" },
-  general: { label: "כללי", icon: "🏠", color: "#10B981" },
-};
+// CATEGORY_INFO derived from shared categories.ts
+const CATEGORY_INFO = Object.fromEntries(
+  Object.keys(CATEGORY_COLORS).map((key) => [
+    key,
+    { label: CATEGORY_LABELS[key] ?? key, icon: CATEGORY_ICONS[key] ?? "🏠", color: CATEGORY_COLORS[key] },
+  ])
+) as Record<string, { label: string; icon: string; color: string }>;
 
 export default function DashboardPage() {
   // ---- Supabase hooks ----
@@ -293,7 +291,7 @@ export default function DashboardPage() {
     setCelebration((prev) => ({ ...prev, visible: false }));
     const msg = getRandomMessage("task_complete");
     setCoaching({ visible: true, message: msg.message, emoji: msg.emoji });
-    setTimeout(() => setCoaching((prev) => ({ ...prev, visible: false })), 3000);
+    setTimeout(() => setCoaching((prev) => ({ ...prev, visible: false })), 5000);
   }, []);
 
   const completionDates = useMemo(
@@ -402,6 +400,8 @@ export default function DashboardPage() {
         )}
 
         <CoupleRewards rewardsProgress={rewardsProgress} />
+
+        <CoachingTips completedCount={completedCount} totalCount={filteredTasks.length} />
 
         <CoachingInsight />
 

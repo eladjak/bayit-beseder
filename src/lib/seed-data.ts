@@ -832,33 +832,9 @@ export const TASK_TEMPLATES_SEED: TaskTemplate[] = [
   },
 ];
 
-export function getCategoryColor(category: string): string {
-  const colors: Record<string, string> = {
-    kitchen: "#F59E0B",
-    bathroom: "#3B82F6",
-    living: "#8B5CF6",
-    bedroom: "#EC4899",
-    laundry: "#06B6D4",
-    outdoor: "#84CC16",
-    pets: "#F97316",
-    general: "#10B981",
-  };
-  return colors[category] ?? "#6B7280";
-}
-
-export function getCategoryLabel(category: string): string {
-  const labels: Record<string, string> = {
-    kitchen: "מטבח",
-    bathroom: "אמבטיה",
-    living: "סלון",
-    bedroom: "חדר שינה",
-    laundry: "כביסה",
-    outdoor: "חיצוני",
-    pets: "חיות",
-    general: "כללי",
-  };
-  return labels[category] ?? category;
-}
+// getCategoryColor and getCategoryLabel moved to @/lib/categories.ts
+// Re-export for backward compatibility
+export { getCategoryColor, getCategoryLabel } from "./categories";
 
 export function getRecurrenceLabel(type: string): string {
   const labels: Record<string, string> = {

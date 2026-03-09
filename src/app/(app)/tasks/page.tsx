@@ -1,44 +1,29 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Clock, Filter, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  getCategoryColor,
-  getCategoryLabel,
   getRecurrenceLabel,
   TASK_TEMPLATES_SEED,
 } from "@/lib/seed-data";
+import {
+  CATEGORY_FILTER_KEYS,
+  CATEGORY_KEYS,
+  CATEGORY_LABELS,
+  CATEGORY_ICONS,
+  CATEGORY_ILLUSTRATIONS,
+  CATEGORY_NAME_TO_KEY,
+  CATEGORY_KEY_TO_NAME,
+  getCategoryColor,
+  getCategoryLabel,
+} from "@/lib/categories";
+import { CategoryCard } from "@/components/category-card";
 import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useProfile } from "@/hooks/useProfile";
 import { useCategories } from "@/hooks/useCategories";
-import { CATEGORY_NAME_TO_KEY, CATEGORY_KEY_TO_NAME } from "@/lib/categories";
-
-const CATEGORIES = [
-  "all",
-  "kitchen",
-  "bathroom",
-  "living",
-  "bedroom",
-  "laundry",
-  "outdoor",
-  "pets",
-  "general",
-] as const;
-
-const CATEGORY_LABELS: Record<string, string> = {
-  all: "הכל",
-  kitchen: "מטבח",
-  bathroom: "אמבטיה",
-  living: "סלון",
-  bedroom: "חדר שינה",
-  laundry: "כביסה",
-  outdoor: "חיצוני",
-  pets: "חיות",
-  general: "כללי",
-};
 
 
 interface DbTaskView {
@@ -68,9 +53,27 @@ export default function TasksPage() {
     createTask,
     deleteTask,
     updateTask,
+    refetch: refetchTasks,
   } = useTasks({ realtime: true });
   const { markComplete } = useCompletions();
   const { categories, categoryMap } = useCategories();
+
+  // ---- Auto-seed tasks for authenticated users on first visit ----
+  const seedAttempted = useRef(false);
+  useEffect(() => {
+    if (seedAttempted.current || tasksLoading || dbTasks.length > 0 || !profile) return;
+    seedAttempted.current = true;
+    fetch("/api/seed", { method: "POST" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.seeded) {
+          refetchTasks();
+        }
+      })
+      .catch(() => {
+        // Seed failed - will use mock data fallback
+      });
+  }, [tasksLoading, dbTasks.length, profile, refetchTasks]);
 
   // Determine if we should use DB data or mock
   const hasDbTasks = !tasksLoading && dbTasks.length > 0;
@@ -239,6 +242,15 @@ export default function TasksPage() {
 
       <div className="px-4 space-y-4">
 
+      {/* Mock mode: login prompt banner */}
+      {!hasDbTasks && !tasksLoading && (
+        <div className="card-elevated p-4 text-center bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 rounded-xl">
+          <p className="text-sm font-medium text-amber-800 dark:text-amber-200">מצב תצוגה בלבד</p>
+          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">התחברו כדי לשמור משימות ולעקוב אחרי ההתקדמות</p>
+          <a href="/login" className="inline-block mt-2 px-4 py-1.5 rounded-lg gradient-primary text-white text-xs font-medium">התחברו עכשיו</a>
+        </div>
+      )}
+
       {/* Add Task Form (DB mode only) */}
       {showAddForm && hasDbTasks && (
         <motion.div
@@ -256,7 +268,7 @@ export default function TasksPage() {
             dir="rtl"
           />
           <div className="flex gap-2 flex-wrap">
-            {CATEGORIES.filter((c) => c !== "all").map((cat) => (
+            {CATEGORY_KEYS.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setNewTaskCategory(cat)}
@@ -271,7 +283,7 @@ export default function TasksPage() {
                     : undefined
                 }
               >
-                {CATEGORY_LABELS[cat]}
+                {CATEGORY_ICONS[cat]} {CATEGORY_LABELS[cat]}
               </button>
             ))}
           </div>
@@ -296,22 +308,19 @@ export default function TasksPage() {
         </motion.div>
       )}
 
-      {/* Category Filter Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
-        {CATEGORIES.map((cat) => (
-          <button
+      {/* Category Filter Cards */}
+      <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
+        {CATEGORY_FILTER_KEYS.map((cat) => (
+          <CategoryCard
             key={cat}
+            categoryKey={cat}
+            label={CATEGORY_LABELS[cat] ?? cat}
+            illustration={cat !== "all" ? CATEGORY_ILLUSTRATIONS[cat] : undefined}
+            icon={cat !== "all" ? CATEGORY_ICONS[cat] : "📋"}
+            isActive={activeCategory === cat}
             onClick={() => setActiveCategory(cat)}
-            aria-label={`סנן לפי קטגוריה: ${CATEGORY_LABELS[cat]}`}
-            aria-pressed={activeCategory === cat}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
-              activeCategory === cat
-                ? "gradient-primary text-white shadow-md shadow-primary/20"
-                : "bg-surface text-muted hover:bg-surface-hover card-elevated"
-            }`}
-          >
-            {CATEGORY_LABELS[cat]}
-          </button>
+            size="sm"
+          />
         ))}
       </div>
 
