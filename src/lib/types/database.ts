@@ -168,6 +168,7 @@ export type Database = {
           household_id: string | null;
           google_calendar_tokens: Json | null;
           google_calendar_id: string | null;
+          whatsapp_phone: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -188,6 +189,7 @@ export type Database = {
           household_id?: string | null;
           google_calendar_tokens?: Json | null;
           google_calendar_id?: string | null;
+          whatsapp_phone?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -208,6 +210,7 @@ export type Database = {
           household_id?: string | null;
           google_calendar_tokens?: Json | null;
           google_calendar_id?: string | null;
+          whatsapp_phone?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -818,6 +821,7 @@ export interface ProfileRow {
   partner_id: string | null;
   household_id: string | null;
   notification_preferences: NotificationPreferences | null;
+  whatsapp_phone?: string | null;
   created_at: string;
   updated_at?: string;
 }
@@ -829,4 +833,5 @@ export interface ProfileUpdate {
   points?: number;
   streak?: number;
   notification_preferences?: NotificationPreferences | null;
+  whatsapp_phone?: string | null;
 }

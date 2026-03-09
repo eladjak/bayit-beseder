@@ -123,6 +123,7 @@ export default function SettingsPage() {
   // WhatsApp state
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
   const [whatsappPhone, setWhatsappPhone] = useState("");
+  const [whatsappPhoneSaving, setWhatsappPhoneSaving] = useState(false);
 
   // Theme & Language
   const [theme, setTheme] = useState<Theme>("system");
@@ -144,6 +145,12 @@ export default function SettingsPage() {
           evening: np.evening,
           partnerActivity: np.partner_activity,
         }));
+      }
+
+      // Seed WhatsApp phone from Supabase profile (overrides localStorage)
+      if (profile.whatsapp_phone) {
+        setWhatsappPhone(profile.whatsapp_phone);
+        localStorage.setItem("bayit-whatsapp-phone", profile.whatsapp_phone);
       }
     } else if (user) {
       setDisplayName(
@@ -209,6 +216,27 @@ export default function SettingsPage() {
       toast.error("שגיאה בעדכון הפרופיל.");
     }
   }, [displayName, avatarUrl, updateProfile]);
+
+  // Save WhatsApp phone to Supabase + localStorage
+  const handleSaveWhatsappPhone = useCallback(async () => {
+    // Always persist to localStorage as offline fallback
+    localStorage.setItem("bayit-whatsapp-phone", whatsappPhone);
+
+    if (!user) {
+      toast.success("מספר הטלפון נשמר מקומית");
+      return;
+    }
+
+    setWhatsappPhoneSaving(true);
+    const success = await updateProfile({ whatsapp_phone: whatsappPhone || null });
+    setWhatsappPhoneSaving(false);
+
+    if (success) {
+      toast.success("מספר הטלפון עודכן!");
+    } else {
+      toast.error("שגיאה בשמירת מספר הטלפון");
+    }
+  }, [whatsappPhone, user, updateProfile]);
 
   // Avatar uploaded callback
   const handleAvatarUploaded = useCallback(
@@ -616,22 +644,31 @@ export default function SettingsPage() {
           }}
         />
         {whatsappEnabled && (
-          <div>
+          <div className="space-y-2">
             <label className="text-xs text-muted block mb-1">מספר טלפון</label>
             <input
               type="tel"
               value={whatsappPhone}
-              onChange={(e) => {
-                setWhatsappPhone(e.target.value);
-                localStorage.setItem("bayit-whatsapp-phone", e.target.value);
-              }}
+              onChange={(e) => setWhatsappPhone(e.target.value)}
               placeholder="050-1234567"
               dir="ltr"
               className="w-full bg-background dark:bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
             />
-            <p className="text-[10px] text-muted mt-1">
-              המספר ישמש לשליחת סיכומים יומיים בלבד
+            <p className="text-[10px] text-muted">
+              המספר ישמש לזיהוי בעת השלמת משימות דרך WhatsApp
             </p>
+            <button
+              onClick={handleSaveWhatsappPhone}
+              disabled={whatsappPhoneSaving || isDemo}
+              className="flex items-center gap-2 px-4 py-2 gradient-primary text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 shadow-md shadow-primary/20"
+            >
+              {whatsappPhoneSaving ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              {whatsappPhoneSaving ? "שומר..." : "שמירת מספר"}
+            </button>
           </div>
         )}
       </section>

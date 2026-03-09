@@ -39,7 +39,7 @@ export function useProfile(): UseProfileReturn {
 
       const { data, error: fetchError } = await supabase
         .from("profiles")
-        .select("id, display_name, avatar_url, points, streak, partner_id, household_id, notification_preferences, created_at, updated_at")
+        .select("id, display_name, avatar_url, points, streak, partner_id, household_id, notification_preferences, whatsapp_phone, created_at, updated_at")
         .eq("id", user.id)
         .single();
 
@@ -57,6 +57,7 @@ export function useProfile(): UseProfileReturn {
           partner_id: data.partner_id ?? null,
           household_id: data.household_id ?? null,
           notification_preferences: data.notification_preferences ?? null,
+          whatsapp_phone: data.whatsapp_phone ?? null,
           created_at: data.created_at,
           updated_at: data.updated_at,
         });
@@ -91,6 +92,8 @@ export function useProfile(): UseProfileReturn {
           dbUpdates.avatar_url = updates.avatar_url;
         if (updates.notification_preferences !== undefined)
           dbUpdates.notification_preferences = updates.notification_preferences;
+        if (updates.whatsapp_phone !== undefined)
+          dbUpdates.whatsapp_phone = updates.whatsapp_phone;
 
         const { error: updateError } = await supabase
           .from("profiles")
@@ -119,6 +122,9 @@ export function useProfile(): UseProfileReturn {
                   : {}),
                 ...(updates.notification_preferences !== undefined
                   ? { notification_preferences: updates.notification_preferences }
+                  : {}),
+                ...(updates.whatsapp_phone !== undefined
+                  ? { whatsapp_phone: updates.whatsapp_phone }
                   : {}),
               }
             : null
