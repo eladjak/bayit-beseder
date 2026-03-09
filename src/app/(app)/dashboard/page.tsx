@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
-import Link from "next/link";
-import { GoldenRuleRing } from "@/components/dashboard/golden-rule-ring";
 import { TodayOverview, type TaskItem } from "@/components/dashboard/today-overview";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { PartnerStatus } from "@/components/dashboard/partner-status";
@@ -14,13 +12,11 @@ import { CoachingBubble } from "@/components/gamification/coaching-bubble";
 import { StreakTracker } from "@/components/gamification/streak-tracker";
 import { WeeklyChallenge } from "@/components/gamification/weekly-challenge";
 import { CoupleRewards } from "@/components/gamification/couple-rewards";
-import { NotificationCenter } from "@/components/notifications/NotificationCenter";
-import { EnergyModeToggle } from "@/components/dashboard/energy-mode-toggle";
 import { getRandomMessage } from "@/lib/coaching-messages";
-import { computeRoomHealth, getHealthColor } from "@/lib/room-health";
+import { computeRoomHealth } from "@/lib/room-health";
 import { computeRewardsProgress } from "@/lib/rewards";
 import { computeBestStreak } from "@/lib/task-stats";
-import { filterTasksByEnergy, getEnergyDescription } from "@/lib/energy-filter";
+import { filterTasksByEnergy } from "@/lib/energy-filter";
 import type { EnergyLevel } from "@/lib/energy-filter";
 import { useProfile } from "@/hooks/useProfile";
 import { useTasks } from "@/hooks/useTasks";
@@ -31,9 +27,12 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { usePartner } from "@/hooks/usePartner";
 import { TaskCompletionModal } from "@/components/task-completion-modal";
 import { TaskListSkeleton } from "@/components/skeleton";
-import { RingSkeleton } from "@/components/skeleton";
 import { toast } from "sonner";
 import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { GoldenRuleSection } from "@/components/dashboard/golden-rule-section";
+import { PlaylistCard } from "@/components/dashboard/playlist-card";
+import { EnergyModeSection } from "@/components/dashboard/energy-mode-section";
 
 // ============================================
 // Mock data (fallback when Supabase not connected)
@@ -66,6 +65,17 @@ function getTimeGreeting(name: string): { greeting: string; subtitle: string } {
   return { greeting: `לילה טוב, ${name}`, subtitle: "יום מצוין מאחוריכם" };
 }
 
+const CATEGORY_INFO: Record<string, { label: string; icon: string; color: string }> = {
+  kitchen: { label: "מטבח", icon: "🍽️", color: "#F59E0B" },
+  bathroom: { label: "אמבטיה", icon: "🚿", color: "#3B82F6" },
+  living: { label: "סלון", icon: "🛋️", color: "#8B5CF6" },
+  bedroom: { label: "חדר שינה", icon: "🛏️", color: "#EC4899" },
+  laundry: { label: "כביסה", icon: "👕", color: "#06B6D4" },
+  outdoor: { label: "חוץ", icon: "🌿", color: "#84CC16" },
+  pets: { label: "חיות מחמד", icon: "🐱", color: "#F97316" },
+  general: { label: "כללי", icon: "🏠", color: "#10B981" },
+};
+
 export default function DashboardPage() {
   // ---- Supabase hooks ----
   const { profile } = useProfile();
@@ -74,18 +84,11 @@ export default function DashboardPage() {
     dueDate: todayStr,
     realtime: true,
   });
-  // Fetch all tasks (no date filter) for summary cards
   const { tasks: allDbTasks, refetch: refetchAllTasks } = useTasks({});
   const { completions: allCompletions, markComplete } = useCompletions({ limit: 200 });
   const { categoryMap } = useCategories();
   const { playComplete, playAchievement, playStreak } = useAppSounds();
-  const {
-    notifications,
-    unreadCount,
-    markAsRead,
-    markAllAsRead,
-    dismiss,
-  } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
   const { partner } = usePartner(profile?.partner_id, todayStr);
 
   // ---- Auto-seed tasks for authenticated users on first visit ----
@@ -93,7 +96,6 @@ export default function DashboardPage() {
   useEffect(() => {
     if (seedAttempted.current || tasksLoading || dbTasks.length > 0 || !profile) return;
     seedAttempted.current = true;
-
     fetch("/api/seed", { method: "POST" })
       .then((res) => res.json())
       .then((data) => {
@@ -107,19 +109,15 @@ export default function DashboardPage() {
       });
   }, [tasksLoading, dbTasks.length, profile, refetchTodayTasks, refetchAllTasks]);
 
-  // ---- Determine if we should use DB data or mock ----
   const hasDbTasks = !tasksLoading && dbTasks.length > 0;
 
-  // Convert DB tasks to TaskItem shape for TodayOverview
   const dbTaskItems: TaskItem[] = useMemo(
     () =>
       dbTasks.map((t) => {
-        // Resolve category name from category_id using the categories table
         const categoryName = t.category_id ? categoryMap[t.category_id] : null;
         const categoryKey = categoryName
           ? (CATEGORY_NAME_TO_KEY[categoryName] ?? "general")
           : "general";
-
         return {
           id: t.id,
           title: t.title,
@@ -131,10 +129,7 @@ export default function DashboardPage() {
     [dbTasks, categoryMap]
   );
 
-  // ---- Local state for mock tasks (fallback mode) ----
-  const [mockTasks, setMockTasks] = useState(MOCK_TASKS);
-
-  // Load completed task IDs from localStorage for mock mode
+  const [mockTasks] = useState(MOCK_TASKS);
   const [mockCompletedIds, setMockCompletedIds] = useState<Set<string>>(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("bayit-completed-tasks");
@@ -143,14 +138,12 @@ export default function DashboardPage() {
     return new Set();
   });
 
-  // Sync mockCompletedIds to localStorage
   useEffect(() => {
     if (!hasDbTasks) {
       localStorage.setItem("bayit-completed-tasks", JSON.stringify([...mockCompletedIds]));
     }
   }, [mockCompletedIds, hasDbTasks]);
 
-  // The actual tasks list shown in the UI (apply mock completed state)
   const tasks = hasDbTasks
     ? dbTaskItems
     : mockTasks.map(t => ({ ...t, completed: mockCompletedIds.has(t.id) }));
@@ -170,7 +163,7 @@ export default function DashboardPage() {
       return next;
     });
   }, []);
-  // Task completion feedback modal
+
   const [completionModal, setCompletionModal] = useState<{
     isOpen: boolean;
     taskId: string;
@@ -183,13 +176,13 @@ export default function DashboardPage() {
     message: string;
     emoji: string;
   }>({ visible: false, type: "task", message: "", emoji: "" });
+
   const [coaching, setCoaching] = useState<{
     visible: boolean;
     message: string;
     emoji: string;
   }>({ visible: false, message: "", emoji: "" });
 
-  // Apply energy filter to tasks
   const filteredTasks = useMemo(
     () => filterTasksByEnergy(tasks, energyLevel),
     [tasks, energyLevel]
@@ -205,47 +198,31 @@ export default function DashboardPage() {
 
   const handleToggle = useCallback(
     async (taskId: string) => {
-      // If using DB tasks, update via Supabase
       if (hasDbTasks && profile) {
         const task = dbTasks.find((t) => t.id === taskId);
         if (task && task.status !== "completed") {
-          // Call markComplete and await the result
           const result = await markComplete({ taskId, userId: profile.id });
-
           if (result === null) {
             toast.error("לא ניתן לסמן את המשימה כהושלמה. נסה שוב.");
             return;
           }
-
-          // Show completion feedback modal
           setCompletionModal({ isOpen: true, taskId, taskTitle: task.title });
-
-          // Trigger celebration
           const msg = getRandomMessage("task_complete");
-          setCelebration({
-            visible: true,
-            type: "task",
-            message: msg.message,
-            emoji: msg.emoji,
-          });
+          setCelebration({ visible: true, type: "task", message: msg.message, emoji: msg.emoji });
           playComplete();
         }
         return;
       }
 
-      // Fallback: local mock toggle with localStorage persistence
       const isCurrentlyCompleted = mockCompletedIds.has(taskId);
       const newCompletedIds = new Set(mockCompletedIds);
-
       if (isCurrentlyCompleted) {
         newCompletedIds.delete(taskId);
       } else {
         newCompletedIds.add(taskId);
       }
-
       setMockCompletedIds(newCompletedIds);
 
-      // Calculate completion stats
       const newCompleted = newCompletedIds.size;
       const newPct = Math.round((newCompleted / mockTasks.length) * 100);
       const wasCompleting = !isCurrentlyCompleted;
@@ -253,42 +230,22 @@ export default function DashboardPage() {
       if (wasCompleting) {
         if (newCompleted === mockTasks.length) {
           const msg = getRandomMessage("all_daily_done");
-          setCelebration({
-            visible: true,
-            type: "all_daily",
-            message: msg.message,
-            emoji: msg.emoji,
-          });
+          setCelebration({ visible: true, type: "all_daily", message: msg.message, emoji: msg.emoji });
           playAchievement();
-        } else if (newPct >= target && newPct - Math.round(((newCompleted - 1) / mockTasks.length) * 100) > 0) {
+        } else if (newPct >= target) {
           const prevPct = Math.round(((newCompleted - 1) / mockTasks.length) * 100);
           if (prevPct < target) {
             const msg = getRandomMessage("golden_rule_hit");
-            setCelebration({
-              visible: true,
-              type: "golden_rule",
-              message: msg.message,
-              emoji: msg.emoji,
-            });
+            setCelebration({ visible: true, type: "golden_rule", message: msg.message, emoji: msg.emoji });
             playStreak();
           } else {
             const msg = getRandomMessage("task_complete");
-            setCelebration({
-              visible: true,
-              type: "task",
-              message: msg.message,
-              emoji: msg.emoji,
-            });
+            setCelebration({ visible: true, type: "task", message: msg.message, emoji: msg.emoji });
             playComplete();
           }
         } else {
           const msg = getRandomMessage("task_complete");
-          setCelebration({
-            visible: true,
-            type: "task",
-            message: msg.message,
-            emoji: msg.emoji,
-          });
+          setCelebration({ visible: true, type: "task", message: msg.message, emoji: msg.emoji });
           playComplete();
         }
       }
@@ -296,27 +253,18 @@ export default function DashboardPage() {
     [target, hasDbTasks, profile, dbTasks, markComplete, playComplete, playAchievement, playStreak, mockCompletedIds, mockTasks.length]
   );
 
-  // Handle task completion feedback submission
   const handleCompletionFeedback = useCallback(
     async (feedback: { rating: number; notes: string; photoFile: File | null }) => {
       if (!profile) return;
-
       try {
         const supabase = (await import("@/lib/supabase")).createClient();
-
-        // Save rating/notes to the task completion record
         const updates: Record<string, unknown> = {};
         if (feedback.notes) updates.notes = feedback.notes;
-
-        // Upload photo if provided
         if (feedback.photoFile) {
           const { uploadTaskPhoto } = await import("@/lib/storage");
           const photoResult = await uploadTaskPhoto(profile.id, completionModal.taskId, feedback.photoFile);
-          if ("url" in photoResult) {
-            updates.photo_url = photoResult.url;
-          }
+          if ("url" in photoResult) updates.photo_url = photoResult.url;
         }
-
         if (Object.keys(updates).length > 0) {
           await supabase
             .from("task_completions")
@@ -324,22 +272,17 @@ export default function DashboardPage() {
             .eq("task_id", completionModal.taskId)
             .eq("completed_by", profile.id);
         }
-
-        // Save rating to task (if we have one)
         if (feedback.rating > 0) {
-          // Store rating in localStorage as a simple approach
           const ratings = JSON.parse(localStorage.getItem("bayit-task-ratings") ?? "{}");
           ratings[completionModal.taskId] = { rating: feedback.rating, date: new Date().toISOString() };
           localStorage.setItem("bayit-task-ratings", JSON.stringify(ratings));
         }
-
         if (feedback.rating > 0 || feedback.notes || feedback.photoFile) {
           toast.success("המשוב נשמר!");
         }
       } catch {
         toast.error("שגיאה בשמירת המשוב");
       }
-
       setCompletionModal({ isOpen: false, taskId: "", taskTitle: "" });
     },
     [profile, completionModal.taskId]
@@ -352,47 +295,24 @@ export default function DashboardPage() {
     setTimeout(() => setCoaching((prev) => ({ ...prev, visible: false })), 3000);
   }, []);
 
-  // Build completion dates array for streak tracker + weekly challenge
   const completionDates = useMemo(
     () => allCompletions.map((c) => c.completed_at),
     [allCompletions]
   );
 
-  // Compute best streak from completion history (0 when no data)
-  const bestStreak = useMemo(
-    () => computeBestStreak(allCompletions),
-    [allCompletions]
-  );
-
-  // Room conditions - compute health per category from task completions
-  const CATEGORY_INFO: Record<string, { label: string; icon: string; color: string }> = {
-    kitchen: { label: "מטבח", icon: "🍽️", color: "#F59E0B" },
-    bathroom: { label: "אמבטיה", icon: "🚿", color: "#3B82F6" },
-    living: { label: "סלון", icon: "🛋️", color: "#8B5CF6" },
-    bedroom: { label: "חדר שינה", icon: "🛏️", color: "#EC4899" },
-    laundry: { label: "כביסה", icon: "👕", color: "#06B6D4" },
-    outdoor: { label: "חוץ", icon: "🌿", color: "#84CC16" },
-    pets: { label: "חיות מחמד", icon: "🐱", color: "#F97316" },
-    general: { label: "כללי", icon: "🏠", color: "#10B981" },
-  };
+  const bestStreak = useMemo(() => computeBestStreak(allCompletions), [allCompletions]);
 
   const categoryHealthData = useMemo(() => {
-    // Compute health for each category based on completed tasks
     const now = new Date();
     const categoriesWithData = new Set<string>();
     const latestByCategory: Record<string, Date> = {};
-
-    // Find latest completion per category from tasks
     for (const t of tasks) {
       categoriesWithData.add(t.category);
       if (t.completed) {
         const existing = latestByCategory[t.category];
-        if (!existing || now > existing) {
-          latestByCategory[t.category] = now;
-        }
+        if (!existing || now > existing) latestByCategory[t.category] = now;
       }
     }
-
     return Object.entries(CATEGORY_INFO)
       .filter(([key]) => categoriesWithData.has(key) || key === "kitchen" || key === "bathroom" || key === "living")
       .map(([key, info]) => ({
@@ -404,7 +324,6 @@ export default function DashboardPage() {
       }));
   }, [tasks]);
 
-  // Couple rewards progress
   const rewardsProgress = useMemo(
     () => computeRewardsProgress([], { user1Streak: streakCount, user2Streak: Math.max(streakCount - 2, 0) }, 0, [], todayStr),
     [streakCount, todayStr]
@@ -412,117 +331,54 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header - Gradient hero area */}
-      <div className="relative gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-10 -mx-0 overflow-hidden">
-        {/* Notification bell - positioned top-left (RTL: visually top-right) */}
-        <div className="absolute top-4 left-4 z-10">
-          <NotificationCenter
-            notifications={notifications}
-            unreadCount={unreadCount}
-            markAsRead={markAsRead}
-            markAllAsRead={markAllAsRead}
-            dismiss={dismiss}
-          />
-        </div>
-        <div className="text-center relative z-10">
-          {/* User avatar in header */}
-          <div className="flex justify-center mb-3">
-            {profile?.avatar_url ? (
-              <div className="relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={profile.avatar_url}
-                  alt={displayName}
-                  className="w-14 h-14 rounded-2xl border-2 border-white/30 object-cover shadow-lg shadow-black/10"
-                />
-                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success rounded-full border-2 border-white" />
-              </div>
-            ) : (
-              <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-lg shadow-black/10">
-                <span className="text-xl">
-                  {displayName.charAt(0)}
-                </span>
-              </div>
-            )}
-          </div>
-          <h1 className="text-xl font-bold text-white tracking-tight">{greeting}</h1>
-          <p className="text-sm text-white/60 font-medium mt-0.5">{getHebrewDate()}</p>
-          {filteredTasks.length > 0 && (
-            <div className="mt-3 inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3.5 py-1.5 border border-white/10">
-              <div className={`w-1.5 h-1.5 rounded-full ${completedCount === filteredTasks.length ? "bg-green-400" : "bg-white/60 animate-soft-pulse"}`} />
-              <p className="text-xs text-white/90 font-medium">
-                {completedCount === filteredTasks.length
-                  ? "יום מושלם! סיימתם הכל ביחד"
-                  : completedCount > 0
-                    ? `${completedCount} מתוך ${filteredTasks.length} משימות הושלמו`
-                    : subtitle}
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
+      <DashboardHeader
+        displayName={displayName}
+        greeting={greeting}
+        subtitle={subtitle}
+        hebrewDate={getHebrewDate()}
+        avatarUrl={profile?.avatar_url}
+        completedCount={completedCount}
+        totalCount={filteredTasks.length}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        markAsRead={markAsRead}
+        markAllAsRead={markAllAsRead}
+        dismiss={dismiss}
+      />
 
       {/* Content area with padding */}
       <div className="px-4 space-y-4 -mt-6">
-        {/* Golden Rule Ring - overlapping the header */}
-        <div className="flex justify-center card-premium p-5 shadow-lg shadow-primary/8">
-          {tasksLoading ? (
-            <RingSkeleton />
-          ) : (
-            <GoldenRuleRing percentage={percentage} target={target} />
-          )}
-        </div>
+        <GoldenRuleSection percentage={percentage} target={target} loading={tasksLoading} />
 
-        {/* Streak */}
         <StreakDisplay count={streakCount} bestCount={bestStreak} />
 
-        {/* Streak Tracker - consecutive day tracking */}
         <StreakTracker
           completionDates={completionDates}
           today={todayStr}
           bestStreak={bestStreak}
         />
 
-        {/* Weekly Challenge */}
         <WeeklyChallenge
           completionDates={completionDates}
           today={todayStr}
           target={5}
         />
 
-        {/* Energy Mode Toggle */}
-        <div className="flex items-center justify-between">
-          <EnergyModeToggle energyLevel={energyLevel} onToggle={cycleEnergyLevel} />
-          {energyLevel !== "all" && (
-            <span className="text-[11px] text-muted">
-              {filteredTasks.length} מתוך {tasks.length} משימות
-            </span>
-          )}
-        </div>
+        <EnergyModeSection
+          energyLevel={energyLevel}
+          onToggle={cycleEnergyLevel}
+          filteredCount={filteredTasks.length}
+          totalCount={tasks.length}
+        />
 
-        {/* Today's Tasks */}
         {tasksLoading ? (
           <TaskListSkeleton count={5} />
         ) : (
           <TodayOverview tasks={filteredTasks} onToggle={handleToggle} />
         )}
 
-        {/* Playlist Quick Action */}
-        <Link
-          href="/playlists"
-          className="card-elevated flex items-center gap-3 px-4 py-3.5 active:scale-[0.98] transition-transform group"
-        >
-          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md shadow-primary/20">
-            <span className="text-lg">🎵</span>
-          </div>
-          <div className="flex-1 text-right">
-            <p className="font-semibold text-foreground text-sm">פלייליסטים</p>
-            <p className="text-[11px] text-muted">שגרות ניקיון מודרכות עם טיימר</p>
-          </div>
-          <span className="text-muted text-xs group-hover:text-primary transition-colors">←</span>
-        </Link>
+        <PlaylistCard />
 
-        {/* Weekly Summary Cards */}
         <WeeklySummaryCards
           tasks={allDbTasks}
           completions={allCompletions}
@@ -530,10 +386,8 @@ export default function DashboardPage() {
           today={todayStr}
         />
 
-        {/* Room Conditions */}
         <RoomConditions categoryHealthData={categoryHealthData} />
 
-        {/* Partner Status - only show when partner data is available */}
         {profile?.partner_id && (
           <div>
             <h2 className="font-semibold text-foreground px-1 mb-2">{partner.name}</h2>
@@ -546,17 +400,14 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Couple Rewards */}
         <CoupleRewards rewardsProgress={rewardsProgress} />
 
-        {/* Emergency Toggle */}
         <EmergencyToggle
           active={emergencyMode}
           onToggle={() => setEmergencyMode((prev) => !prev)}
         />
       </div>
 
-      {/* Celebration Overlay */}
       <CelebrationOverlay
         type={celebration.type}
         message={celebration.message}
@@ -565,7 +416,6 @@ export default function DashboardPage() {
         onDismiss={dismissCelebration}
       />
 
-      {/* Coaching Bubble */}
       <CoachingBubble
         visible={coaching.visible}
         message={coaching.message}
@@ -573,7 +423,6 @@ export default function DashboardPage() {
         onDismiss={() => setCoaching((prev) => ({ ...prev, visible: false }))}
       />
 
-      {/* Task Completion Feedback Modal */}
       <TaskCompletionModal
         taskTitle={completionModal.taskTitle}
         isOpen={completionModal.isOpen}

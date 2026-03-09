@@ -1,48 +1,36 @@
 "use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
-import {
-  User,
-  Home,
-  Bell,
-  AlertTriangle,
-  Copy,
-  Check,
-  LogOut,
-  Moon,
-  Sun,
-  Globe,
-  Save,
-  Loader2,
-  Volume2,
-  MessageCircle,
-} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useHousehold } from "@/hooks/useHousehold";
 import { signOut } from "@/lib/auth";
-import { AvatarUpload } from "@/components/avatar-upload";
 import {
   getNotificationPrefs,
   saveNotificationPrefs,
   getNotificationPermission,
   requestNotificationPermission,
-  isNotificationSupported,
+  isPushSubscribed,
   subscribeToPush,
   unsubscribeFromPush,
-  isPushSubscribed,
   type NotificationPrefs,
 } from "@/lib/notifications";
 import { toast } from "sonner";
 import { setSoundEnabled } from "@/hooks/useAppSound";
 import { InvitePartner } from "@/components/invite-partner";
 import { CalendarSettings } from "@/components/calendar-settings";
+import { ProfileSection } from "@/components/settings/profile-section";
+import { HouseholdSection } from "@/components/settings/household-section";
+import { NotificationSettings } from "@/components/settings/notification-settings";
+import { AppearanceSettings, WhatsAppSettings } from "@/components/settings/appearance-settings";
+import { DangerZone } from "@/components/settings/danger-zone";
 
 // ============================================
 // Theme helpers
 // ============================================
 type Theme = "light" | "dark" | "system";
+type Language = "he" | "en";
 
 const THEME_KEY = "bayit-beseder-theme";
 
@@ -53,26 +41,18 @@ function getStoredTheme(): Theme {
 
 function applyTheme(theme: Theme) {
   if (typeof window === "undefined") return;
-
   const root = document.documentElement;
   const isDark =
     theme === "dark" ||
     (theme === "system" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches);
-
   if (isDark) {
     root.classList.add("dark");
   } else {
     root.classList.remove("dark");
   }
-
   localStorage.setItem(THEME_KEY, theme);
 }
-
-// ============================================
-// Language helpers
-// ============================================
-type Language = "he" | "en";
 
 function getStoredLanguage(): Language {
   if (typeof window === "undefined") return "he";
@@ -134,8 +114,6 @@ export default function SettingsPage() {
     if (profile) {
       setDisplayName(profile.name);
       setAvatarUrl(profile.avatar_url ?? "");
-
-      // Seed notification toggles from Supabase profile if available
       if (profile.notification_preferences) {
         const np = profile.notification_preferences;
         setNotifPrefs((prev) => ({
@@ -146,8 +124,6 @@ export default function SettingsPage() {
           partnerActivity: np.partner_activity,
         }));
       }
-
-      // Seed WhatsApp phone from Supabase profile (overrides localStorage)
       if (profile.whatsapp_phone) {
         setWhatsappPhone(profile.whatsapp_phone);
         localStorage.setItem("bayit-whatsapp-phone", profile.whatsapp_phone);
@@ -160,12 +136,10 @@ export default function SettingsPage() {
     }
   }, [profile, user]);
 
-  // Sync household data from Supabase (overrides localStorage when available)
   useEffect(() => {
     if (household) {
       setHouseholdName(household.name);
       setGoldenTarget(household.goldenRuleTarget);
-      // Keep localStorage in sync as offline fallback
       localStorage.setItem("bayit-household-name", household.name);
       localStorage.setItem("bayit-golden-target", String(household.goldenRuleTarget));
     }
@@ -184,32 +158,18 @@ export default function SettingsPage() {
     if (typeof window !== "undefined") {
       setWhatsappEnabled(localStorage.getItem("bayit-whatsapp-enabled") === "true");
       setWhatsappPhone(localStorage.getItem("bayit-whatsapp-phone") ?? "");
-
-      // Load golden rule target from localStorage as fallback (will be overridden by Supabase)
       const savedTarget = localStorage.getItem("bayit-golden-target");
-      if (savedTarget) {
-        setGoldenTarget(Number(savedTarget));
-      }
-
-      // Load household name from localStorage as fallback
+      if (savedTarget) setGoldenTarget(Number(savedTarget));
       const savedHouseholdName = localStorage.getItem("bayit-household-name");
-      if (savedHouseholdName) {
-        setHouseholdName(savedHouseholdName);
-      }
+      if (savedHouseholdName) setHouseholdName(savedHouseholdName);
     }
-    // Check push subscription status
     isPushSubscribed().then(setPushSubscribed);
   }, []);
 
-  // Save profile
   const handleSaveProfile = useCallback(async () => {
     setProfileSaving(true);
-    const success = await updateProfile({
-      name: displayName,
-      avatar_url: avatarUrl || null,
-    });
+    const success = await updateProfile({ name: displayName, avatar_url: avatarUrl || null });
     setProfileSaving(false);
-
     if (success) {
       toast.success("הפרופיל עודכן בהצלחה!");
     } else {
@@ -217,20 +177,15 @@ export default function SettingsPage() {
     }
   }, [displayName, avatarUrl, updateProfile]);
 
-  // Save WhatsApp phone to Supabase + localStorage
   const handleSaveWhatsappPhone = useCallback(async () => {
-    // Always persist to localStorage as offline fallback
     localStorage.setItem("bayit-whatsapp-phone", whatsappPhone);
-
     if (!user) {
       toast.success("מספר הטלפון נשמר מקומית");
       return;
     }
-
     setWhatsappPhoneSaving(true);
     const success = await updateProfile({ whatsapp_phone: whatsappPhone || null });
     setWhatsappPhoneSaving(false);
-
     if (success) {
       toast.success("מספר הטלפון עודכן!");
     } else {
@@ -238,7 +193,6 @@ export default function SettingsPage() {
     }
   }, [whatsappPhone, user, updateProfile]);
 
-  // Avatar uploaded callback
   const handleAvatarUploaded = useCallback(
     async (url: string) => {
       setAvatarUrl(url);
@@ -247,7 +201,6 @@ export default function SettingsPage() {
     [updateProfile]
   );
 
-  // Copy invite code from household data
   function copyInviteCode() {
     void navigator.clipboard.writeText(household.inviteCode).then(() => {
       setCopied(true);
@@ -255,24 +208,16 @@ export default function SettingsPage() {
     });
   }
 
-  // Save household settings (name + golden rule target) to Supabase + localStorage
   const handleSaveHousehold = useCallback(async () => {
-    // Always persist to localStorage as offline fallback
     localStorage.setItem("bayit-household-name", householdName);
     localStorage.setItem("bayit-golden-target", String(goldenTarget));
-
     if (!profile?.household_id) {
       toast.success("ההגדרות נשמרו מקומית");
       return;
     }
-
     setHouseholdSaving(true);
-    const success = await updateHousehold({
-      name: householdName,
-      goldenRuleTarget: goldenTarget,
-    });
+    const success = await updateHousehold({ name: householdName, goldenRuleTarget: goldenTarget });
     setHouseholdSaving(false);
-
     if (success) {
       toast.success("הגדרות הבית עודכנו!");
     } else {
@@ -280,18 +225,12 @@ export default function SettingsPage() {
     }
   }, [householdName, goldenTarget, profile?.household_id, updateHousehold]);
 
-  // Keys that map to the Supabase notification_preferences JSON column
   const supabaseNotifKeys = new Set<string>(["morning", "midday", "evening", "partnerActivity"]);
 
-  // Toggle notification preference
   function toggleNotifPref(key: keyof NotificationPrefs) {
     setNotifPrefs((prev) => {
       const updated = { ...prev, [key]: !prev[key] };
-
-      // Always persist to localStorage (offline fallback)
       saveNotificationPrefs(updated);
-
-      // Sync the four schedule/partner toggles to Supabase profile
       if (supabaseNotifKeys.has(key)) {
         updateProfile({
           notification_preferences: {
@@ -302,17 +241,14 @@ export default function SettingsPage() {
           },
         });
       }
-
       return updated;
     });
   }
 
-  // Enable notifications
   async function enableNotifications() {
     const result = await requestNotificationPermission();
     setNotifPermission(result);
     if (result === "granted") {
-      // Subscribe to push
       if (user?.id) {
         const sub = await subscribeToPush(user.id);
         setPushSubscribed(sub !== null);
@@ -323,7 +259,6 @@ export default function SettingsPage() {
     }
   }
 
-  // Toggle push subscription
   async function togglePushSubscription() {
     if (!user?.id) return;
     if (pushSubscribed) {
@@ -343,13 +278,11 @@ export default function SettingsPage() {
     }
   }
 
-  // Theme toggle
   function handleThemeChange(newTheme: Theme) {
     setTheme(newTheme);
     applyTheme(newTheme);
   }
 
-  // Language change
   function handleLanguageChange(newLang: Language) {
     setLanguage(newLang);
     setStoredLanguage(newLang);
@@ -360,36 +293,25 @@ export default function SettingsPage() {
     );
   }
 
-  // Logout
   async function handleLogout() {
     await signOut();
     router.push("/login");
   }
 
-  // Clear local data
   function handleClearLocalData() {
-    if (
-      confirm(
-        "האם אתם בטוחים? פעולה זו תמחק את כל הנתונים המקומיים (העדפות, הגדרות)."
-      )
-    ) {
-      // Clear all bayit-* localStorage keys
+    if (confirm("האם אתם בטוחים? פעולה זו תמחק את כל הנתונים המקומיים (העדפות, הגדרות).")) {
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
-        if (key?.startsWith("bayit-")) {
-          keysToRemove.push(key);
-        }
+        if (key?.startsWith("bayit-")) keysToRemove.push(key);
       }
       keysToRemove.forEach((key) => localStorage.removeItem(key));
       toast.success("הנתונים המקומיים נמחקו");
-      // Reload to reset state
       setTimeout(() => window.location.reload(), 500);
     }
   }
 
   const isDemo = !user;
-  const emailDisplay = user?.email ?? "demo@example.com";
 
   return (
     <div className="space-y-5 bg-background min-h-dvh" dir="rtl">
@@ -399,241 +321,73 @@ export default function SettingsPage() {
       </div>
 
       <div className="px-4 space-y-5">
+        {/* Demo Mode Indicator */}
+        {isDemo && (
+          <div className="bg-warning/10 border border-warning/20 text-warning rounded-xl px-4 py-3 text-sm text-center">
+            אתם במצב דמו.{" "}
+            <button onClick={() => router.push("/login")} className="underline font-medium">
+              התחברו
+            </button>{" "}
+            כדי לשמור נתונים.
+          </div>
+        )}
 
-      {/* Demo Mode Indicator */}
-      {isDemo && (
-        <div className="bg-warning/10 border border-warning/20 text-warning rounded-xl px-4 py-3 text-sm text-center">
-          אתם במצב דמו.{" "}
-          <button
-            onClick={() => router.push("/login")}
-            className="underline font-medium"
-          >
-            התחברו
-          </button>{" "}
-          כדי לשמור נתונים.
-        </div>
-      )}
-
-      {/* Profile */}
-      <section className="card-elevated p-4 space-y-4">
-        <div className="flex items-center gap-2 mb-1">
-          <User className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm">פרופיל</h2>
-        </div>
-
-        {/* Avatar */}
-        <AvatarUpload
-          currentUrl={avatarUrl || null}
+        <ProfileSection
+          displayName={displayName}
+          avatarUrl={avatarUrl}
+          profileSaving={profileSaving}
+          isDemo={isDemo}
           userId={user?.id ?? null}
-          displayName={displayName || "משתמש"}
-          onUploaded={handleAvatarUploaded}
+          onNameChange={setDisplayName}
+          onAvatarUploaded={handleAvatarUploaded}
+          onSave={handleSaveProfile}
         />
 
-        {/* Name edit */}
-        <div>
-          <label className="text-xs text-muted block mb-1">שם תצוגה</label>
-          <input
-            type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="השם שלכם"
-            className="w-full bg-background dark:bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
-          />
-        </div>
-
-        {/* Save button */}
-        <button
-          onClick={handleSaveProfile}
-          disabled={profileSaving || isDemo}
-          className="flex items-center gap-2 px-4 py-2 gradient-primary text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 shadow-md shadow-primary/20"
-        >
-          {profileSaving ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Save className="w-4 h-4" />
-          )}
-          {profileSaving ? "שומר..." : "שמירת שינויים"}
-        </button>
-      </section>
-
-      {/* Household */}
-      <section className="card-elevated p-4 space-y-4">
-        <div className="flex items-center gap-2">
-          <Home className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm">בית</h2>
-        </div>
-        <div>
-          <label className="text-xs text-muted block mb-1">שם הבית</label>
-          <input
-            type="text"
-            value={householdName}
-            onChange={(e) => setHouseholdName(e.target.value)}
-            className="w-full bg-background dark:bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
-          />
-        </div>
-        <div>
-          <label className="text-xs text-muted block mb-1">קוד הזמנה</label>
-          <div className="flex items-center gap-2">
-            <code className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm font-mono text-foreground">
-              {household.inviteCode}
-            </code>
-            <button
-              onClick={copyInviteCode}
-              className="p-2 rounded-lg bg-background border border-border hover:bg-surface-hover text-muted"
-              aria-label="העתקת קוד הזמנה"
-            >
-              {copied ? (
-                <Check className="w-4 h-4 text-success" />
-              ) : (
-                <Copy className="w-4 h-4 text-muted" />
-              )}
-            </button>
-          </div>
-        </div>
-        <div>
-          <label className="text-xs text-muted block mb-2">
-            יעד כלל הזהב: {goldenTarget}%
-          </label>
-          <input
-            type="range"
-            min={50}
-            max={100}
-            value={goldenTarget}
-            onChange={(e) => setGoldenTarget(Number(e.target.value))}
-            className="w-full accent-primary"
-          />
-          <div className="flex justify-between text-[10px] text-muted mt-1">
-            <span>50%</span>
-            <span>100%</span>
-          </div>
-          <p className="text-[10px] text-muted mt-2">
-            {goldenTarget === 50
-              ? "חלוקה שווה לחלוטין"
-              : goldenTarget >= 80
-                ? "יעד גבוה לשיתוף פעולה"
-                : "יעד מאוזן"}
-          </p>
-        </div>
-        {/* Save household button */}
-        <button
-          onClick={handleSaveHousehold}
-          disabled={householdSaving}
-          className="flex items-center gap-2 px-4 py-2 gradient-primary text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 shadow-md shadow-primary/20"
-        >
-          {householdSaving ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Save className="w-4 h-4" />
-          )}
-          {householdSaving ? "שומר..." : "שמירת הגדרות הבית"}
-        </button>
-      </section>
-
-      {/* Invite Partner */}
-      <InvitePartner />
-
-      {/* Google Calendar */}
-      <Suspense fallback={null}>
-        <CalendarSettings />
-      </Suspense>
-
-      {/* Notifications */}
-      <section className="card-elevated p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          <Bell className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm">התראות</h2>
-        </div>
-
-        {/* Permission status */}
-        {isNotificationSupported() && notifPermission !== "granted" && (
-          <div className="bg-primary/5 border border-primary/10 rounded-xl p-3">
-            <p className="text-xs text-muted mb-2">
-              {notifPermission === "denied"
-                ? "ההתראות חסומות. שנו את ההגדרה בהגדרות הדפדפן."
-                : "הפעילו התראות כדי לקבל תזכורות על משימות."}
-            </p>
-            {notifPermission === "default" && (
-              <button
-                onClick={enableNotifications}
-                className="px-3 py-1.5 gradient-primary text-white rounded-lg text-xs font-medium shadow-sm shadow-primary/20"
-              >
-                הפעלת התראות
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Master toggle */}
-        <ToggleRow
-          label="התראות מופעלות"
-          enabled={notifPrefs.enabled}
-          onToggle={() => toggleNotifPref("enabled")}
+        <HouseholdSection
+          householdName={householdName}
+          goldenTarget={goldenTarget}
+          inviteCode={household.inviteCode}
+          copied={copied}
+          householdSaving={householdSaving}
+          onNameChange={setHouseholdName}
+          onTargetChange={setGoldenTarget}
+          onCopyInviteCode={copyInviteCode}
+          onSave={handleSaveHousehold}
         />
 
-        {/* Push subscription toggle */}
-        {notifPrefs.enabled && notifPermission === "granted" && (
-          <ToggleRow
-            label="התראות Push (גם כשהאפליקציה סגורה)"
-            enabled={pushSubscribed}
-            onToggle={togglePushSubscription}
-          />
-        )}
+        <InvitePartner />
 
-        {notifPrefs.enabled && (
-          <>
-            <ToggleRow
-              label="תזכורת בוקר (08:00)"
-              enabled={notifPrefs.morning}
-              onToggle={() => toggleNotifPref("morning")}
-            />
-            <ToggleRow
-              label="בדיקת צהריים (14:00)"
-              enabled={notifPrefs.midday}
-              onToggle={() => toggleNotifPref("midday")}
-            />
-            <ToggleRow
-              label="סיכום ערב (20:00)"
-              enabled={notifPrefs.evening}
-              onToggle={() => toggleNotifPref("evening")}
-            />
-            <ToggleRow
-              label="פעילות השותף/ה"
-              enabled={notifPrefs.partnerActivity}
-              onToggle={() => toggleNotifPref("partnerActivity")}
-            />
-          </>
-        )}
-      </section>
+        <Suspense fallback={null}>
+          <CalendarSettings />
+        </Suspense>
 
-      {/* Sounds */}
-      <section className="card-elevated p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          <Volume2 className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm">צלילים</h2>
-        </div>
-        <ToggleRow
-          label="צלילי אפליקציה"
-          enabled={soundEnabled}
-          onToggle={() => {
+        <NotificationSettings
+          notifPrefs={notifPrefs}
+          notifPermission={notifPermission}
+          pushSubscribed={pushSubscribed}
+          onTogglePref={toggleNotifPref}
+          onEnableNotifications={enableNotifications}
+          onTogglePushSubscription={togglePushSubscription}
+        />
+
+        <AppearanceSettings
+          theme={theme}
+          language={language}
+          soundEnabled={soundEnabled}
+          onThemeChange={handleThemeChange}
+          onLanguageChange={handleLanguageChange}
+          onSoundToggle={() => {
             const next = !soundEnabled;
             setSoundEnabledState(next);
             setSoundEnabled(next);
           }}
         />
-      </section>
 
-      {/* WhatsApp */}
-      <section className="card-elevated p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          <MessageCircle className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm">WhatsApp</h2>
-        </div>
-        <p className="text-xs text-muted">
-          קבלו סיכום יומי בוואטסאפ - תזכורת בוקר (08:00) וסיכום ערב (20:00)
-        </p>
-        <ToggleRow
-          label="הודעות וואטסאפ"
-          enabled={whatsappEnabled}
+        <WhatsAppSettings
+          whatsappEnabled={whatsappEnabled}
+          whatsappPhone={whatsappPhone}
+          whatsappPhoneSaving={whatsappPhoneSaving}
+          isDemo={isDemo}
           onToggle={() => {
             const next = !whatsappEnabled;
             setWhatsappEnabled(next);
@@ -642,232 +396,18 @@ export default function SettingsPage() {
               toast.info("הזינו מספר טלפון כדי להתחיל לקבל הודעות");
             }
           }}
+          onPhoneChange={setWhatsappPhone}
+          onSavePhone={handleSaveWhatsappPhone}
         />
-        {whatsappEnabled && (
-          <div className="space-y-2">
-            <label className="text-xs text-muted block mb-1">מספר טלפון</label>
-            <input
-              type="tel"
-              value={whatsappPhone}
-              onChange={(e) => setWhatsappPhone(e.target.value)}
-              placeholder="050-1234567"
-              dir="ltr"
-              className="w-full bg-background dark:bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
-            />
-            <p className="text-[10px] text-muted">
-              המספר ישמש לזיהוי בעת השלמת משימות דרך WhatsApp
-            </p>
-            <button
-              onClick={handleSaveWhatsappPhone}
-              disabled={whatsappPhoneSaving || isDemo}
-              className="flex items-center gap-2 px-4 py-2 gradient-primary text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 shadow-md shadow-primary/20"
-            >
-              {whatsappPhoneSaving ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4" />
-              )}
-              {whatsappPhoneSaving ? "שומר..." : "שמירת מספר"}
-            </button>
-          </div>
-        )}
-      </section>
 
-      {/* Theme */}
-      <section className="card-elevated p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          {theme === "dark" ? (
-            <Moon className="w-4 h-4 text-muted" />
-          ) : (
-            <Sun className="w-4 h-4 text-muted" />
-          )}
-          <h2 className="font-semibold text-sm">מראה</h2>
-        </div>
-        <div className="flex gap-2">
-          <ThemeButton
-            label="בהיר"
-            value="light"
-            current={theme}
-            icon={<Sun className="w-4 h-4" />}
-            onSelect={handleThemeChange}
-          />
-          <ThemeButton
-            label="כהה"
-            value="dark"
-            current={theme}
-            icon={<Moon className="w-4 h-4" />}
-            onSelect={handleThemeChange}
-          />
-          <ThemeButton
-            label="מערכת"
-            value="system"
-            current={theme}
-            icon={<Globe className="w-4 h-4" />}
-            onSelect={handleThemeChange}
-          />
-        </div>
-      </section>
+        <DangerZone
+          isDemo={isDemo}
+          onLogout={handleLogout}
+          onClearLocalData={handleClearLocalData}
+        />
 
-      {/* Language */}
-      <section className="card-elevated p-4 space-y-3">
-        <div className="flex items-center gap-2">
-          <Globe className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm">שפה</h2>
-        </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleLanguageChange("he")}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
-              language === "he"
-                ? "gradient-primary text-white shadow-md shadow-primary/20"
-                : "bg-surface border border-border text-foreground hover:bg-surface-hover"
-            }`}
-          >
-            עברית
-          </button>
-          <button
-            onClick={() => handleLanguageChange("en")}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
-              language === "en"
-                ? "gradient-primary text-white shadow-md shadow-primary/20"
-                : "bg-surface border border-border text-foreground hover:bg-surface-hover"
-            }`}
-          >
-            English
-          </button>
-        </div>
-        {language === "en" && (
-          <p className="text-xs text-muted">
-            English translation is coming soon. The app will remain in Hebrew
-            for now.
-          </p>
-        )}
-      </section>
-
-      {/* Emergency */}
-      <section className="card-elevated p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <AlertTriangle className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm">מצב חירום</h2>
-        </div>
-        <p className="text-xs text-muted mb-3">
-          במצב חירום, רק משימות קריטיות מוצגות (מטבח, שירותים, חתולים)
-        </p>
-        <button className="w-full py-2.5 rounded-xl border border-border bg-surface text-sm font-medium text-foreground hover:bg-surface-hover transition-colors">
-          הפעלת מצב חירום
-        </button>
-      </section>
-
-      {/* About & Data Management */}
-      <section className="card-elevated p-4 space-y-4">
-        <div>
-          <h2 className="font-semibold text-sm mb-2">אודות</h2>
-          <div className="space-y-2 text-xs text-muted">
-            <div className="flex justify-between">
-              <span>גרסה</span>
-              <span className="text-foreground font-medium">1.0.0</span>
-            </div>
-            <div className="flex justify-between">
-              <span>פותח על ידי</span>
-              <span className="text-foreground font-medium">אלעד</span>
-            </div>
-            <div className="flex justify-between">
-              <span>עם ❤️ ו-Claude</span>
-              <span className="text-foreground font-medium">בית בסדר</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="border-t border-border pt-4">
-          <h2 className="font-semibold text-sm mb-2">ניהול נתונים</h2>
-          <p className="text-xs text-muted mb-3">
-            מחיקת נתונים מקומיים תאפס את כל ההעדפות וההגדרות שלכם
-          </p>
-          <button
-            onClick={handleClearLocalData}
-            className="w-full py-2.5 rounded-xl border border-danger/30 text-sm font-medium text-danger hover:bg-danger/5 transition-colors"
-          >
-            מחיקת נתונים מקומיים
-          </button>
-        </div>
-      </section>
-
-      {/* Logout */}
-      <button
-        onClick={handleLogout}
-        className="w-full flex items-center justify-center gap-2 py-3 text-danger text-sm font-medium"
-      >
-        <LogOut className="w-4 h-4" />
-        {isDemo ? "חזרה לדף ההתחברות" : "התנתקות"}
-      </button>
-
-      <div className="pb-4" />
+        <div className="pb-4" />
       </div>
     </div>
-  );
-}
-
-// ============================================
-// Reusable toggle row component
-// ============================================
-function ToggleRow({
-  label,
-  enabled,
-  onToggle,
-}: {
-  label: string;
-  enabled: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-sm text-foreground">{label}</span>
-      <button
-        onClick={onToggle}
-        role="switch"
-        aria-checked={enabled}
-        className={`w-10 h-6 rounded-full transition-colors relative ${
-          enabled ? "bg-primary" : "bg-border"
-        }`}
-      >
-        <span
-          className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-            enabled ? "translate-x-0.5" : "translate-x-[18px]"
-          }`}
-        />
-      </button>
-    </div>
-  );
-}
-
-// ============================================
-// Theme button component
-// ============================================
-function ThemeButton({
-  label,
-  value,
-  current,
-  icon,
-  onSelect,
-}: {
-  label: string;
-  value: Theme;
-  current: Theme;
-  icon: React.ReactNode;
-  onSelect: (theme: Theme) => void;
-}) {
-  const isActive = current === value;
-  return (
-    <button
-      onClick={() => onSelect(value)}
-      className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-        isActive
-          ? "gradient-primary text-white shadow-md shadow-primary/20"
-          : "bg-surface border border-border text-foreground hover:bg-surface-hover"
-      }`}
-    >
-      {icon}
-      {label}
-    </button>
   );
 }
