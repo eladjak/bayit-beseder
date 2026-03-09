@@ -1,5 +1,9 @@
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+// 3 requests per minute — seeding is a one-time action; very strict limit.
+const limiter = rateLimit({ windowMs: 60_000, max: 3 });
 
 /**
  * POST /api/seed
@@ -7,7 +11,19 @@ import { NextResponse } from "next/server";
  * Only inserts if the tasks table is empty (prevents duplicate seeding).
  * Called automatically from the dashboard on first authenticated visit.
  */
-export async function POST() {
+export async function POST(request: NextRequest) {
+  // A6: Rate limiting — prevent repeated seed attempts.
+  const rateLimitResult = limiter.check(getClientIp(request));
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil(rateLimitResult.reset / 1000)) },
+      }
+    );
+  }
+
   const supabase = await createClient();
 
   // Verify authenticated user

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+// 10 requests per minute — prevents repeated subscription spam.
+const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 
 /**
  * POST /api/push/subscribe
@@ -9,6 +13,18 @@ import { createClient } from "@/lib/supabase/server";
  * Body: { userId: string, subscription: PushSubscriptionJSON }
  */
 export async function POST(request: NextRequest) {
+  // A6: Rate limiting.
+  const rateLimitResult = limiter.check(getClientIp(request));
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil(rateLimitResult.reset / 1000)) },
+      }
+    );
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 

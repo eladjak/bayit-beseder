@@ -3,6 +3,10 @@ import { randomBytes } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+// 10 requests per minute for household creation / retrieval.
+const postLimiter = rateLimit({ windowMs: 60_000, max: 10 });
 
 /**
  * Generates a cryptographically-secure random 8-character uppercase hex invite code.
@@ -17,7 +21,19 @@ function generateInviteCode(): string {
  * Creates or retrieves the household for the current user.
  * Returns the invite code and a shareable link.
  */
-export async function POST(_request: NextRequest) {
+export async function POST(request: NextRequest) {
+  // A6: Rate limiting — prevent spam household creation.
+  const rateLimitResult = postLimiter.check(getClientIp(request));
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil(rateLimitResult.reset / 1000)) },
+      }
+    );
+  }
+
   const supabase = await createClient();
 
   const {

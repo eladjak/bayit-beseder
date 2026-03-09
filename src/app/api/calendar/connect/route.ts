@@ -1,6 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { buildOAuthUrl } from "@/lib/google-calendar";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+// 5 requests per minute — OAuth initiations should be rare; tight limit
+// prevents token-generation spam.
+const limiter = rateLimit({ windowMs: 60_000, max: 5 });
 
 /**
  * GET /api/calendar/connect
@@ -12,7 +17,19 @@ import { buildOAuthUrl } from "@/lib/google-calendar";
  * httpOnly cookie, and includes it as the OAuth `state` parameter so
  * the callback can verify the round-trip.
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // A6: Rate limiting — prevent OAuth-initiation spam.
+  const rateLimitResult = limiter.check(getClientIp(request));
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil(rateLimitResult.reset / 1000)) },
+      }
+    );
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+// 5 requests per minute — brute-force protection on invite code submission.
+const limiter = rateLimit({ windowMs: 60_000, max: 5 });
 
 /**
  * POST /api/invite/join
@@ -11,6 +15,18 @@ import type { Database } from "@/lib/types/database";
  * Body: { code: string }
  */
 export async function POST(request: NextRequest) {
+  // A6: Rate limiting — strict limit to prevent invite-code brute-forcing.
+  const rateLimitResult = limiter.check(getClientIp(request));
+  if (!rateLimitResult.success) {
+    return NextResponse.json(
+      { error: "Too many requests" },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil(rateLimitResult.reset / 1000)) },
+      }
+    );
+  }
+
   const supabase = await createClient();
 
   const {
