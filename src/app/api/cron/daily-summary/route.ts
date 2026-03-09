@@ -6,12 +6,21 @@ import {
   buildFridayCelebration,
   type DailySummaryData,
 } from "@/lib/whatsapp-messages";
+import {
+  buildAdaptiveEveningSummary,
+  type EveningTemplateVars,
+} from "@/lib/coaching-messages-adaptive";
+import {
+  getBestCoachingStyle,
+  recordCoachingSent,
+} from "@/lib/coaching-tracker";
 import { sendPushToAll, type PushSubscriptionData } from "@/lib/push";
 
 /**
  * GET /api/cron/daily-summary
  * Vercel Cron: Runs at 20:00 Israel time.
  * Sends evening summary via WhatsApp. On Fridays, also sends weekly celebration.
+ * Uses adaptive coaching style based on past effectiveness.
  */
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -57,26 +66,75 @@ export async function GET(request: NextRequest) {
 
   const streak = streaks?.[0]?.current_count ?? 0;
 
-  const summaryData: DailySummaryData = {
-    names: ["אלעד", "ענבל"],
-    completedCount: completed.length,
-    totalCount: allTasks.length,
-    completedTasks: completed.map((t) => t.title),
-    remainingTasks: remaining.map((t) => t.title),
-    streak,
-    topPerformer: null, // "We" framing - no individual scores
-  };
+  // Determine household_id for coaching style lookup
+  let householdId: string | null = null;
+  {
+    const { data: anyProfile } = await supabase
+      .from("profiles")
+      .select("household_id")
+      .not("household_id", "is", null)
+      .limit(1)
+      .single();
+    householdId = anyProfile?.household_id ?? null;
+  }
 
-  const message = buildEveningSummary(summaryData);
+  // Determine coaching style
+  const coachingStyle = householdId
+    ? await getBestCoachingStyle(householdId)
+    : "encouraging";
+
+  let message: string;
+  const pct =
+    allTasks.length > 0
+      ? Math.round((completed.length / allTasks.length) * 100)
+      : 0;
+
+  if (householdId) {
+    const vars: EveningTemplateVars = {
+      completedCount: completed.length,
+      totalCount: allTasks.length,
+      pct,
+      streak,
+      remainingCount: remaining.length,
+    };
+    message = buildAdaptiveEveningSummary(
+      coachingStyle,
+      vars,
+      completed.map((t) => t.title),
+      remaining.map((t) => t.title)
+    );
+  } else {
+    const summaryData: DailySummaryData = {
+      names: ["אלעד", "ענבל"],
+      completedCount: completed.length,
+      totalCount: allTasks.length,
+      completedTasks: completed.map((t) => t.title),
+      remainingTasks: remaining.map((t) => t.title),
+      streak,
+      topPerformer: null, // "We" framing - no individual scores
+    };
+    message = buildEveningSummary(summaryData);
+  }
 
   // Send daily summary
+  const sentAt = new Date().toISOString();
   const results = await Promise.all(
     phones.map((phone) => sendWhatsAppMessage(phone.trim(), message))
   );
 
+  // Record coaching event
+  if (householdId) {
+    await recordCoachingSent({
+      household_id: householdId,
+      message_type: "evening_summary",
+      coaching_style: coachingStyle,
+      message_text: message,
+      sent_at: sentAt,
+    });
+  }
+
   // On Fridays, also send weekly celebration
   if (isFriday) {
-    // Get this week's tasks
     const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - weekStart.getDay());
     const weekStartStr = weekStart.toISOString().slice(0, 10);
@@ -94,6 +152,17 @@ export async function GET(request: NextRequest) {
       await Promise.all(
         phones.map((phone) => sendWhatsAppMessage(phone.trim(), fridayMsg))
       );
+
+      // Record the celebration as well
+      if (householdId) {
+        await recordCoachingSent({
+          household_id: householdId,
+          message_type: "celebration",
+          coaching_style: coachingStyle,
+          message_text: fridayMsg,
+          sent_at: new Date().toISOString(),
+        });
+      }
     }
   }
 
@@ -111,12 +180,9 @@ export async function GET(request: NextRequest) {
       .map((p) => p.push_subscription as PushSubscriptionData | null)
       .filter((s): s is PushSubscriptionData => s !== null && !!s.endpoint);
 
-    const completionPct = Math.round(
-      (completed.length / allTasks.length) * 100
-    );
     pushResult = await sendPushToAll(subs, {
       title: "סיכום יומי 🌙",
-      body: `השלמתם ${completed.length}/${allTasks.length} משימות (${completionPct}%)`,
+      body: `השלמתם ${completed.length}/${allTasks.length} משימות (${pct}%)`,
       tag: "evening-summary",
       url: "/stats",
     });
@@ -142,6 +208,7 @@ export async function GET(request: NextRequest) {
     completedCount: completed.length,
     totalCount: allTasks.length,
     isFriday,
+    coachingStyle,
     push: { sent: pushResult.sent, failed: pushResult.failed },
   });
 }

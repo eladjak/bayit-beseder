@@ -2,12 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
 import { buildMorningBrief, type DailyBriefData } from "@/lib/whatsapp-messages";
+import {
+  buildAdaptiveMorningBrief,
+  type MorningTemplateVars,
+} from "@/lib/coaching-messages-adaptive";
+import {
+  getBestCoachingStyle,
+  recordCoachingSent,
+} from "@/lib/coaching-tracker";
 import { sendPushToAll, type PushSubscriptionData } from "@/lib/push";
 
 /**
  * GET /api/cron/daily-brief
  * Vercel Cron: Runs at 08:00 Israel time.
  * Sends morning task brief via WhatsApp to household members.
+ * Uses adaptive coaching style based on past effectiveness.
  */
 export async function GET(request: NextRequest) {
   // Verify Vercel Cron authorization
@@ -44,6 +53,15 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ message: "No tasks today, skipping" });
   }
 
+  // Get overdue tasks (before today, not completed)
+  const { data: overdueTasks } = await supabase
+    .from("tasks")
+    .select("id")
+    .lt("due_date", today)
+    .neq("status", "completed");
+
+  const overdueCount = overdueTasks?.length ?? 0;
+
   // Get profiles for assigned_to names
   const assignedIds = [...new Set(tasks.map((t) => t.assigned_to).filter(Boolean))];
   const profileMap: Record<string, string> = {};
@@ -73,24 +91,75 @@ export async function GET(request: NextRequest) {
   const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
   const dayOfWeek = days[new Date().getDay()];
 
-  const briefData: DailyBriefData = {
-    names: ["אלעד", "ענבל"],
-    todayTasks: tasks.map((t) => ({
-      title: t.title,
-      assignedTo: t.assigned_to ? (profileMap[t.assigned_to] ?? null) : null,
-    })),
-    streak,
-    dayOfWeek,
-  };
+  // Determine household_id for coaching style lookup
+  // Use the first available profile's household_id, or null if unavailable
+  let householdId: string | null = null;
+  {
+    const { data: anyProfile } = await supabase
+      .from("profiles")
+      .select("household_id")
+      .not("household_id", "is", null)
+      .limit(1)
+      .single();
+    householdId = anyProfile?.household_id ?? null;
+  }
 
-  const message = buildMorningBrief(briefData);
+  // Determine coaching style: adaptive if we have a household, else default
+  const coachingStyle = householdId
+    ? await getBestCoachingStyle(householdId)
+    : "encouraging";
+
+  // Build task list string (shared by both message builders)
+  const taskListStr = tasks
+    .map((t, i) => {
+      const assignee = t.assigned_to ? ` (${profileMap[t.assigned_to] ?? ""})` : "";
+      return `${i + 1}. ${t.title}${assignee}`;
+    })
+    .join("\n");
+
+  let message: string;
+
+  if (householdId) {
+    // Adaptive message
+    const vars: MorningTemplateVars = {
+      count: tasks.length,
+      firstTask: tasks[0]?.title ?? "",
+      streak,
+      overdueCount,
+    };
+    message = buildAdaptiveMorningBrief(coachingStyle, vars, taskListStr, dayOfWeek);
+  } else {
+    // Fallback to classic message builder
+    const briefData: DailyBriefData = {
+      names: ["אלעד", "ענבל"],
+      todayTasks: tasks.map((t) => ({
+        title: t.title,
+        assignedTo: t.assigned_to ? (profileMap[t.assigned_to] ?? null) : null,
+      })),
+      streak,
+      dayOfWeek,
+    };
+    message = buildMorningBrief(briefData);
+  }
 
   // Send to all configured phones
+  const sentAt = new Date().toISOString();
   const results = await Promise.all(
     phones.map((phone) => sendWhatsAppMessage(phone.trim(), message))
   );
 
   const failed = results.filter((r) => !r.success);
+
+  // Record coaching event for effectiveness tracking
+  if (householdId) {
+    await recordCoachingSent({
+      household_id: householdId,
+      message_type: "morning_brief",
+      coaching_style: coachingStyle,
+      message_text: message,
+      sent_at: sentAt,
+    });
+  }
 
   // Also send push notifications
   let pushResult = { sent: 0, failed: 0, expired: [] as string[] };
@@ -130,6 +199,7 @@ export async function GET(request: NextRequest) {
     sent: results.length,
     failed: failed.length,
     taskCount: tasks.length,
+    coachingStyle,
     push: { sent: pushResult.sent, failed: pushResult.failed },
   });
 }

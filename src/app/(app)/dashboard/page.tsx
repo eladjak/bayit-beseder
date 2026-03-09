@@ -33,6 +33,7 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { GoldenRuleSection } from "@/components/dashboard/golden-rule-section";
 import { PlaylistCard } from "@/components/dashboard/playlist-card";
 import { EnergyModeSection } from "@/components/dashboard/energy-mode-section";
+import { CoachingInsight } from "@/components/dashboard/coaching-insight";
 
 // ============================================
 // Mock data (fallback when Supabase not connected)
@@ -401,6 +402,8 @@ export default function DashboardPage() {
         )}
 
         <CoupleRewards rewardsProgress={rewardsProgress} />
+
+        <CoachingInsight />
 
         <EmergencyToggle
           active={emergencyMode}

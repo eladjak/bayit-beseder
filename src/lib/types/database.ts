@@ -737,6 +737,68 @@ export type Database = {
         };
         Relationships: [];
       };
+      coaching_events: {
+        Row: {
+          id: string;
+          household_id: string;
+          message_type:
+            | "morning_brief"
+            | "evening_summary"
+            | "nudge"
+            | "celebration";
+          coaching_style:
+            | "encouraging"
+            | "factual"
+            | "playful"
+            | "urgent";
+          message_text: string;
+          sent_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          message_type:
+            | "morning_brief"
+            | "evening_summary"
+            | "nudge"
+            | "celebration";
+          coaching_style:
+            | "encouraging"
+            | "factual"
+            | "playful"
+            | "urgent";
+          message_text: string;
+          sent_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          household_id?: string;
+          message_type?:
+            | "morning_brief"
+            | "evening_summary"
+            | "nudge"
+            | "celebration";
+          coaching_style?:
+            | "encouraging"
+            | "factual"
+            | "playful"
+            | "urgent";
+          message_text?: string;
+          sent_at?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "coaching_events_household_id_fkey";
+            columns: ["household_id"];
+            isOneToOne: false;
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
