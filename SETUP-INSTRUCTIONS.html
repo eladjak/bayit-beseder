@@ -167,95 +167,71 @@
 <!-- STEP 1 -->
 <div class="step" data-step="שלב 1 - קריטי">
 <h2><span class="badge badge-critical">קריטי</span> תיקון הרשאות RLS</h2>
-<p>הRLS policies הנוכחיים ב-Supabase חושפים את כל הפרופילים והמשימות לכל משתמש מאומת. המיגרציה הזו מחליפה אותם בהרשאות מבוססות household.</p>
+<p>תיקון v3: הרצה קודמת תיקנה את הפרופילים. הסקריפט הזה משחזר את policies של tasks (שנמחק בטעות), מוסיף scoping ל-completions לפי household, ומוודא categories עובד. בטוח להריץ כמה פעמים.</p>
 
 <p><strong>נווט ל:</strong></p>
 <span class="url">https://supabase.com/dashboard &rarr; SQL Editor &rarr; New query</span>
 
 <p><strong>הדבק והרץ את ה-SQL הבא:</strong></p>
-<div class="sql-block" id="sql1">-- BayitBeSeder - Fix Overly Permissive RLS Policies
--- Migration 004 (uses household_id, not partner_id)
+<div class="sql-block" id="sql1">-- BayitBeSeder - Fix RLS Policies (v3 - Safe)
+-- Run after previous partial migration.
+-- Profiles already fixed. This fixes tasks, completions, categories.
+-- Idempotent - safe to run multiple times.
 
--- 1. PROFILES
-drop policy if exists "Anyone can view profiles" on public.profiles;
-drop policy if exists "Users can view own profile" on public.profiles;
-create policy "Users can view own profile"
-  on public.profiles for select
-  using (auth.uid() = id);
-
-drop policy if exists "Users can view household members" on public.profiles;
-create policy "Users can view household members"
-  on public.profiles for select
-  using (
-    household_id is not null
-    and household_id in (
-      select household_id from public.profiles where id = auth.uid()
-    )
-  );
-
--- 2. TASKS
+-- 2. TASKS - Shared catalog, keep public read
 drop policy if exists "Anyone can view tasks" on public.tasks;
 drop policy if exists "Household members can view tasks" on public.tasks;
-create policy "Household members can view tasks"
-  on public.tasks for select
-  using (
-    assigned_to = auth.uid()
-    or household_id in (
-      select household_id from public.profiles where id = auth.uid()
-    )
-    or assigned_to is null
-  );
+drop policy if exists "tasks_select_all" on public.tasks;
+create policy "Anyone can view tasks"
+  on public.tasks for select using (true);
 
 drop policy if exists "Authenticated users can insert tasks" on public.tasks;
+drop policy if exists "tasks_insert_auth" on public.tasks;
 create policy "Authenticated users can insert tasks"
   on public.tasks for insert
   with check (auth.role() = 'authenticated');
 
 drop policy if exists "Authenticated users can update tasks" on public.tasks;
-create policy "Household members can update tasks"
+drop policy if exists "Household members can update tasks" on public.tasks;
+drop policy if exists "tasks_update_auth" on public.tasks;
+create policy "Authenticated users can update tasks"
   on public.tasks for update
-  using (
-    auth.role() = 'authenticated'
-    and (
-      assigned_to = auth.uid()
-      or household_id in (
-        select household_id from public.profiles where id = auth.uid()
-      )
-      or assigned_to is null
-    )
-  );
+  using (auth.role() = 'authenticated');
 
 drop policy if exists "Authenticated users can delete tasks" on public.tasks;
-create policy "Household members can delete tasks"
+drop policy if exists "Household members can delete tasks" on public.tasks;
+drop policy if exists "tasks_delete_auth" on public.tasks;
+create policy "Authenticated users can delete tasks"
   on public.tasks for delete
-  using (
-    auth.role() = 'authenticated'
-    and (
-      assigned_to = auth.uid()
-      or household_id in (
-        select household_id from public.profiles where id = auth.uid()
-      )
-      or assigned_to is null
-    )
-  );
+  using (auth.role() = 'authenticated');
 
--- 3. TASK_COMPLETIONS
+-- 3. TASK_COMPLETIONS - Own + household members
 drop policy if exists "Anyone can view completions" on public.task_completions;
 drop policy if exists "Household members can view completions" on public.task_completions;
-create policy "Household members can view completions"
+drop policy if exists "completions_select_own" on public.task_completions;
+drop policy if exists "completions_select_household" on public.task_completions;
+drop policy if exists "Users can view own completions" on public.task_completions;
+drop policy if exists "Household can view completions" on public.task_completions;
+
+create policy "Users can view own completions"
+  on public.task_completions for select
+  using (user_id = auth.uid());
+
+create policy "Household can view completions"
   on public.task_completions for select
   using (
-    user_id = auth.uid()
-    or household_id in (
-      select household_id from public.profiles where id = auth.uid()
+    user_id in (
+      select p2.id from public.profiles p1
+      join public.profiles p2 on p1.household_id = p2.household_id
+      where p1.id = auth.uid() and p1.household_id is not null
     )
   );
 
--- 4. CATEGORIES (keep public read)
+-- 4. CATEGORIES
 drop policy if exists "Anyone can view categories" on public.categories;
+drop policy if exists "categories_select_all" on public.categories;
 create policy "Anyone can view categories"
-  on public.categories for select
-  using (true);</div>
+  on public.categories for select using (true);</div>
 <button class="copy-btn" onclick="copySQL('sql1', this)">העתק SQL</button>
 
 <div class="warning">
