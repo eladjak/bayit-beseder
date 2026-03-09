@@ -8,11 +8,17 @@ import type { Json } from "@/lib/types/database";
  *
  * Google redirects here after the user grants calendar access.
  * We exchange the ?code= for tokens and store them in the profile.
+ *
+ * A4: Validates the `state` query parameter against the `google_oauth_state`
+ *     cookie to prevent CSRF attacks.
+ * A7: Sanitises the OAuth `error` parameter before including it in a redirect
+ *     URL to prevent open-redirect / reflected-XSS attacks.
  */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const error = searchParams.get("error");
+  const stateParam = searchParams.get("state");
 
   // Build the base URL for redirect
   const appUrl =
@@ -23,8 +29,21 @@ export async function GET(request: NextRequest) {
 
   if (error || !code) {
     console.error("[google-calendar callback] OAuth error:", error);
+    // A7: Encode the error value before embedding it in a redirect URL
+    const safeReason = encodeURIComponent(error ?? "no_code");
     return NextResponse.redirect(
-      `${appUrl}/settings?calendar=error&reason=${error ?? "no_code"}`
+      `${appUrl}/settings?calendar=error&reason=${safeReason}`
+    );
+  }
+
+  // A4: Validate CSRF state token
+  const stateCookie = request.cookies.get("google_oauth_state")?.value;
+  if (!stateCookie || stateCookie !== stateParam) {
+    console.error(
+      "[google-calendar callback] State mismatch — possible CSRF attack"
+    );
+    return NextResponse.redirect(
+      `${appUrl}/settings?calendar=error&reason=state_mismatch`
     );
   }
 
@@ -60,7 +79,18 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.redirect(`${appUrl}/settings?calendar=connected`);
+    // Clear the CSRF state cookie now that it has been consumed
+    const successResponse = NextResponse.redirect(
+      `${appUrl}/settings?calendar=connected`
+    );
+    successResponse.cookies.set("google_oauth_state", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 0,
+      path: "/",
+    });
+    return successResponse;
   } catch (err) {
     console.error("[google-calendar callback] Unexpected error:", err);
     return NextResponse.redirect(

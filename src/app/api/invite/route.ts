@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { randomBytes } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
 
 /**
- * Generates a random 8-character uppercase alphanumeric invite code.
+ * Generates a cryptographically-secure random 8-character uppercase hex invite code.
+ * A5: Uses crypto.randomBytes instead of Math.random() to prevent predictable codes.
  */
 function generateInviteCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
+  return randomBytes(4).toString("hex").toUpperCase();
 }
 
 /**

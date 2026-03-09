@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 
 /**
  * POST /api/push/subscribe
@@ -18,6 +19,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // A2: Authenticate the caller via session cookie
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   let body: { userId?: string; subscription?: unknown };
   try {
     body = await request.json();
@@ -34,6 +45,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // A2: Verify the userId in the request body matches the authenticated user
+  if (userId !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   // Validate subscription shape
   const sub = subscription as Record<string, unknown>;
   if (
@@ -48,9 +64,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  const serviceClient = createServiceClient(supabaseUrl, supabaseServiceKey);
 
-  const { error } = await supabase
+  const { error } = await serviceClient
     .from("profiles")
     .update({ push_subscription: subscription })
     .eq("id", userId);
@@ -83,6 +99,16 @@ export async function DELETE(request: NextRequest) {
     );
   }
 
+  // A2: Authenticate the caller via session cookie
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   let body: { userId?: string };
   try {
     body = await request.json();
@@ -95,9 +121,14 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Missing userId" }, { status: 400 });
   }
 
-  const supabase = createClient(supabaseUrl, supabaseServiceKey);
+  // A2: Verify the userId in the request body matches the authenticated user
+  if (userId !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
-  const { error } = await supabase
+  const serviceClient = createServiceClient(supabaseUrl, supabaseServiceKey);
+
+  const { error } = await serviceClient
     .from("profiles")
     .update({ push_subscription: null })
     .eq("id", userId);

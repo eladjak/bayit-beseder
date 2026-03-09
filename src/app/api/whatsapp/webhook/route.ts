@@ -16,6 +16,15 @@ import { sendWhatsAppMessage, extractPhoneFromChatId } from "@/lib/whatsapp";
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
+  // A1: Validate that this webhook originates from our Green API instance
+  const expectedInstance = process.env.GREEN_API_INSTANCE_ID;
+  if (expectedInstance) {
+    const receivedInstance = body.instanceData?.idInstance?.toString();
+    if (receivedInstance !== expectedInstance) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  }
+
   // Green API webhook payload
   const type = body.typeWebhook;
   if (type !== "incomingMessageReceived") {
@@ -94,11 +103,8 @@ export async function POST(request: NextRequest) {
 
   await sendReply(chatId, confirmMsg);
 
-  return NextResponse.json({
-    ok: true,
-    completed: task.title,
-    remaining,
-  });
+  // A8: Minimize response data — never echo task details back to caller
+  return NextResponse.json({ ok: true });
 }
 
 function parseTaskNumber(text: string): number | null {
