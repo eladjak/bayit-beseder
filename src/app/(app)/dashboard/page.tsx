@@ -19,6 +19,7 @@ import { EnergyModeToggle } from "@/components/dashboard/energy-mode-toggle";
 import { getRandomMessage } from "@/lib/coaching-messages";
 import { computeRoomHealth, getHealthColor } from "@/lib/room-health";
 import { computeRewardsProgress } from "@/lib/rewards";
+import { computeBestStreak } from "@/lib/task-stats";
 import { filterTasksByEnergy, getEnergyDescription } from "@/lib/energy-filter";
 import type { EnergyLevel } from "@/lib/energy-filter";
 import { useProfile } from "@/hooks/useProfile";
@@ -32,6 +33,7 @@ import { TaskCompletionModal } from "@/components/task-completion-modal";
 import { TaskListSkeleton } from "@/components/skeleton";
 import { RingSkeleton } from "@/components/skeleton";
 import { toast } from "sonner";
+import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
 
 // ============================================
 // Mock data (fallback when Supabase not connected)
@@ -46,18 +48,6 @@ const MOCK_TASKS: TaskItem[] = [
   { id: "7", title: "ניקוי ארגז חול", category: "pets", estimated_minutes: 5, completed: false },
   { id: "8", title: "איוורור הבית", category: "general", estimated_minutes: 2, completed: true },
 ];
-
-// Map Hebrew category names to internal category keys for color/label lookups
-const CATEGORY_NAME_TO_KEY: Record<string, string> = {
-  "מטבח": "kitchen",
-  "אמבטיה": "bathroom",
-  "סלון": "living",
-  "חדר שינה": "bedroom",
-  "כביסה": "laundry",
-  "חוץ": "outdoor",
-  "חיות מחמד": "pets",
-  "כללי": "general",
-};
 
 function getHebrewDate(): string {
   return new Date().toLocaleDateString("he-IL", {
@@ -368,6 +358,12 @@ export default function DashboardPage() {
     [allCompletions]
   );
 
+  // Compute best streak from completion history (0 when no data)
+  const bestStreak = useMemo(
+    () => computeBestStreak(allCompletions),
+    [allCompletions]
+  );
+
   // Room conditions - compute health per category from task completions
   const CATEGORY_INFO: Record<string, { label: string; icon: string; color: string }> = {
     kitchen: { label: "מטבח", icon: "🍽️", color: "#F59E0B" },
@@ -478,13 +474,13 @@ export default function DashboardPage() {
         </div>
 
         {/* Streak */}
-        <StreakDisplay count={streakCount} bestCount={12} />
+        <StreakDisplay count={streakCount} bestCount={bestStreak} />
 
         {/* Streak Tracker - consecutive day tracking */}
         <StreakTracker
           completionDates={completionDates}
           today={todayStr}
-          bestStreak={12}
+          bestStreak={bestStreak}
         />
 
         {/* Weekly Challenge */}
@@ -537,20 +533,18 @@ export default function DashboardPage() {
         {/* Room Conditions */}
         <RoomConditions categoryHealthData={categoryHealthData} />
 
-        {/* Partner Status */}
-        <div>
-          <h2 className="font-semibold text-foreground px-1 mb-2">ענבל</h2>
-          <PartnerStatus
-            name="ענבל"
-            completedCount={3}
-            totalCount={8}
-            recentTasks={[
-              "החלפת מצעים",
-              "כביסה",
-              "ניקוי כיור אמבטיה",
-            ]}
-          />
-        </div>
+        {/* Partner Status - only show when partner data is available */}
+        {profile?.partner_id && (
+          <div>
+            <h2 className="font-semibold text-foreground px-1 mb-2">{partner.name}</h2>
+            <PartnerStatus
+              name={partner.name}
+              completedCount={partner.completedCount}
+              totalCount={partner.totalCount}
+              recentTasks={partner.recentTasks}
+            />
+          </div>
+        )}
 
         {/* Couple Rewards */}
         <CoupleRewards rewardsProgress={rewardsProgress} />

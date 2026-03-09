@@ -277,6 +277,49 @@ export function computeCategoryBreakdown(
 }
 
 // ============================================
+// Best streak computation
+// ============================================
+
+/**
+ * Compute the longest consecutive streak of days with at least one completion.
+ * Returns 0 when there are no completions.
+ */
+export function computeBestStreak(completions: TaskCompletionRow[]): number {
+  if (completions.length === 0) return 0;
+
+  // Collect unique dates with completions
+  const datesWithActivity = new Set<string>();
+  for (const c of completions) {
+    datesWithActivity.add(c.completed_at.slice(0, 10));
+  }
+
+  // Sort dates ascending
+  const sortedDates = Array.from(datesWithActivity).sort();
+  if (sortedDates.length === 0) return 0;
+
+  let bestStreak = 1;
+  let currentStreak = 1;
+
+  for (let i = 1; i < sortedDates.length; i++) {
+    const prev = new Date(sortedDates[i - 1]);
+    const curr = new Date(sortedDates[i]);
+    const diffMs = curr.getTime() - prev.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1) {
+      currentStreak += 1;
+      if (currentStreak > bestStreak) {
+        bestStreak = currentStreak;
+      }
+    } else {
+      currentStreak = 1;
+    }
+  }
+
+  return bestStreak;
+}
+
+// ============================================
 // Streak history (for visualization)
 // ============================================
 

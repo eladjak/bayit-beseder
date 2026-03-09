@@ -14,6 +14,7 @@ import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useProfile } from "@/hooks/useProfile";
 import { useCategories } from "@/hooks/useCategories";
+import { CATEGORY_NAME_TO_KEY, CATEGORY_KEY_TO_NAME } from "@/lib/categories";
 
 const CATEGORIES = [
   "all",
@@ -39,29 +40,6 @@ const CATEGORY_LABELS: Record<string, string> = {
   general: "כללי",
 };
 
-// Map Hebrew category names (from DB) to internal keys
-const CATEGORY_NAME_TO_KEY: Record<string, string> = {
-  "מטבח": "kitchen",
-  "אמבטיה": "bathroom",
-  "סלון": "living",
-  "חדר שינה": "bedroom",
-  "כביסה": "laundry",
-  "חוץ": "outdoor",
-  "חיות מחמד": "pets",
-  "כללי": "general",
-};
-
-// Map category key to Hebrew name for DB lookup
-const CATEGORY_KEY_TO_NAME: Record<string, string> = {
-  kitchen: "מטבח",
-  bathroom: "אמבטיה",
-  living: "סלון",
-  bedroom: "חדר שינה",
-  laundry: "כביסה",
-  outdoor: "חוץ",
-  pets: "חיות מחמד",
-  general: "כללי",
-};
 
 interface DbTaskView {
   id: string;

@@ -7,20 +7,7 @@ import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
 import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
 import type { TaskRow, TaskCompletionRow } from "@/lib/types/database";
-
-// ============================================
-// Map Hebrew category names -> internal keys
-// ============================================
-const CATEGORY_NAME_TO_KEY: Record<string, string> = {
-  "מטבח": "kitchen",
-  "אמבטיה": "bathroom",
-  "סלון": "living",
-  "חדר שינה": "bedroom",
-  "כביסה": "laundry",
-  "חוץ": "outdoor",
-  "חיות מחמד": "pets",
-  "כללי": "general",
-};
+import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
 
 // ============================================
 // Category Filter Bar
