@@ -93,6 +93,9 @@ export function useShoppingList(): UseShoppingListReturn {
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const usingMockRef = useRef(false);
+  // Keep a ref that always reflects the latest items so async callbacks
+  // (e.g. toggleItem) never capture a stale closure value.
+  const itemsRef = useRef<ShoppingItem[]>([]);
 
   // ---- Load from localStorage or use defaults ----
   const loadFromLocalStorage = useCallback((): ShoppingItem[] => {
@@ -314,7 +317,8 @@ export function useShoppingList(): UseShoppingListReturn {
 
     try {
       const supabase = createClient();
-      const current = items.find((item) => item.id === id);
+      // Read current state from the ref to avoid stale closure issues on rapid toggles
+      const current = itemsRef.current.find((item) => item.id === id);
       if (!current) return;
 
       const { error } = await supabase
@@ -338,7 +342,7 @@ export function useShoppingList(): UseShoppingListReturn {
         )
       );
     }
-  }, [items, saveToLocalStorage]);
+  }, [saveToLocalStorage]);
 
   const removeItem = useCallback(async (id: string) => {
     if (usingMockRef.current) {
@@ -417,6 +421,9 @@ export function useShoppingList(): UseShoppingListReturn {
       setItems(previousItems);
     }
   }, [items, saveToLocalStorage]);
+
+  // Keep ref in sync with state so async callbacks read the latest value
+  itemsRef.current = items;
 
   return { items, loading, addItem, toggleItem, removeItem, clearChecked };
 }

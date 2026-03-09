@@ -37,25 +37,25 @@ export function usePartner(partnerId: string | null | undefined, todayStr: strin
     try {
       const supabase = createClient();
 
-      // Fetch partner profile
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("display_name, avatar_url")
-        .eq("id", partnerId)
-        .single();
+      // Fetch partner profile and today's tasks in parallel
+      const [{ data: profileData }, { data: partnerTasks }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("display_name, avatar_url")
+          .eq("id", partnerId)
+          .single(),
+        supabase
+          .from("tasks")
+          .select("id, title, status")
+          .eq("assigned_to", partnerId)
+          .eq("due_date", todayStr),
+      ]);
 
       if (!profileData) {
         setPartner(MOCK_PARTNER);
         setLoading(false);
         return;
       }
-
-      // Fetch partner's tasks for today
-      const { data: partnerTasks } = await supabase
-        .from("tasks")
-        .select("id, title, status")
-        .eq("assigned_to", partnerId)
-        .eq("due_date", todayStr);
 
       const tasks = partnerTasks ?? [];
       const completedTasks = tasks.filter((t) => t.status === "completed");
