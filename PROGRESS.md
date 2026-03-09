@@ -136,10 +136,11 @@ UX Overhaul complete (4 waves via 4 parallel agents + Gemini illustration genera
 - `72d2c13` feat: adaptive coaching system with effectiveness tracking
 - `ba8d88a` fix: RLS migration v3 - correct for actual production schema
 
-### Pending User Actions
+### Pending User Actions (IMPORTANT - run after restart)
 - [ ] Run UPDATED `004_fix_rls_policies.sql` (v3) in Supabase SQL Editor - CRITICAL: restores tasks SELECT policy
 - [x] Run `005_whatsapp_phone.sql` in Supabase SQL Editor ✅ (user confirmed)
 - [ ] Run `006_coaching_tracking.sql` in Supabase SQL Editor (for adaptive coaching)
+- [ ] Run `007_expand_shopping_categories.sql` in Supabase SQL Editor (for new shopping categories: טיפוח, תרופות, תינוק)
 - [ ] Enable Realtime for shopping_items in Supabase Dashboard
 
 ## Phase 17: Avatar Upload + Task Completion Feedback (Mar 8, 2026) [DONE]
