@@ -1,13 +1,79 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Phase 17 Complete (Avatar Upload + Task Feedback)
-## Last Updated: 2026-03-08
+## Status: LIVE - Improvement Sprint Complete (35 items across 5 phases)
+## Last Updated: 2026-03-09
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-17 complete. App LIVE on Vercel. All Supabase SQL migrations executed. Zero TypeScript errors. Build passes.
+Phase 1-17 + Improvement Sprint complete. 5 parallel agents executed 35 improvements across security, architecture, features, UI/UX, and code quality. Build passes. Deployed to Vercel.
+
+## Improvement Sprint (Mar 9, 2026) [DONE]
+
+### Phase A: Security Hardening (6 items)
+- [x] A1: WhatsApp webhook validates GREEN_API_INSTANCE_ID
+- [x] A2: Push subscribe verifies authenticated userId (fixes IDOR)
+- [x] A4: Google Calendar OAuth CSRF protection (state cookie)
+- [x] A5: Invite codes use crypto.randomBytes (not Math.random)
+- [x] A7: OAuth error parameter sanitized (encodeURIComponent)
+- [x] A8: Webhook returns only { ok: true } (no data leakage)
+
+### Phase B: Architecture Cleanup (6 items)
+- [x] B1: Unified Supabase client (deleted src/lib/supabase/client.ts, updated 4 imports)
+- [x] B2: Shared src/lib/categories.ts (extracted from 4 duplicate files)
+- [x] B3: Partner status wired to real usePartner hook data
+- [x] B4: Settings shows real invite code from household (not hardcoded)
+- [x] B5: bestStreak computed from completions (not hardcoded 12)
+- [x] B7: Error boundaries (src/app/error.tsx + src/app/(app)/error.tsx)
+
+### Phase C: Feature Completeness (4 items)
+- [x] C1: Emergency page connected to Supabase (real tasks, toggle emergency_mode)
+- [x] C2: Settings save to Supabase (household name, golden rule target, invite code)
+- [x] C4: Playlist completions persist to task_completions table
+- [x] C5: Achievements read from user_achievements table (fallback to client computation)
+
+### Phase D: UI/UX & Accessibility (9 items)
+- [x] D1: 7 illustrations integrated into empty states (all pages)
+- [x] D2: Task completion modal RTL fix (close button left→right)
+- [x] D3: Hebrew aria-labels on 15+ interactive elements
+- [x] D4: Global focus-visible indicators (outline + offset)
+- [x] D5: Height animations converted to scaleY transforms
+- [x] D6: Standardized space-y-4 across all pages
+- [x] D7: Keyboard support for star rating (radiogroup + arrow keys)
+- [x] D8: Manifest theme_color fixed (#4F46E5→#6366F1)
+- [x] D9: Service worker caches all routes with version string
+
+### Phase E: Code Quality (7 items)
+- [x] E1: Fixed stale closure in useShoppingList (itemsRef pattern)
+- [x] E2: Dynamic timezone for Google Calendar (Intl.DateTimeFormat)
+- [x] E3: SSR hydration fix in weekly page (useRef for mock data)
+- [x] E4: NotificationBanner useCallback dependency fix
+- [x] E5: Notification IDs use crypto.randomUUID()
+- [x] E7: Console.log cleanup in production code
+- [x] E8: usePartner queries parallelized with Promise.all
+
+### Wave 2 - Remaining Items (Mar 9, 2026) [DONE]
+- [x] A3: RLS policy fix migration (004_fix_rls_policies.sql) - drops permissive policies, adds household-scoped ones
+- [x] A6: Rate limiting on 6 API endpoints (in-memory sliding window)
+- [x] B6: Orphaned tables documented in migration.sql header
+- [x] C3: WhatsApp webhook user scoping (phone→profile mapping, household filter)
+- [x] C6: Weekly page write capability (quick-add tasks per day, completion toggles)
+
+### All Commits
+- `a36ced5` fix: security hardening for API routes (A1,A2,A4,A5,A7,A8)
+- `ad50b54` + `2accd2f` refactor: architecture cleanup (B1,B2,B3,B4,B5,B7)
+- `af92eeb` feat: connect features to Supabase (C1,C2,C4,C5)
+- `ddf460c` fix: code quality improvements (E1,E2,E3,E4,E5,E7,E8)
+- `33414de` feat: UI/UX accessibility and illustrations (D1-D9)
+- `2ae70ae` fix: add RLS policy fixes and rate limiting (A3,A6)
+- `82bb590` feat: weekly page write capability and orphan table docs (B6,C6)
+- `0395e87` feat: WhatsApp webhook user scoping (C3)
+
+### Pending User Actions
+- [ ] Run `004_fix_rls_policies.sql` in Supabase SQL Editor
+- [ ] Run `005_whatsapp_phone.sql` in Supabase SQL Editor
+- [ ] Enable Realtime for shopping_items in Supabase Dashboard
 
 ## Phase 17: Avatar Upload + Task Completion Feedback (Mar 8, 2026) [DONE]
 
