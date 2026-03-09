@@ -151,7 +151,7 @@
 <div class="container">
 
 <h1>BayitBeSeder - הנחיות הגדרה</h1>
-<p class="subtitle">מקצה שיפורים - 9 במרץ 2026 | 3 פעולות ידניות נדרשות</p>
+<p class="subtitle">מקצה שיפורים - 9 במרץ 2026 | 4 פעולות ידניות נדרשות</p>
 
 <div class="summary-grid">
   <div class="summary-card">
@@ -159,7 +159,7 @@
     <div class="label">שיפורים בוצעו</div>
   </div>
   <div class="summary-card">
-    <div class="num">3</div>
+    <div class="num">4</div>
     <div class="label">פעולות ידניות</div>
   </div>
 </div>
@@ -287,14 +287,66 @@ CREATE INDEX IF NOT EXISTS idx_profiles_whatsapp_phone
 </div>
 </div>
 
+<!-- STEP 4 -->
+<div class="step" data-step="שלב 4">
+<h2><span class="badge badge-normal">רגיל</span> מערכת אימון אדפטיבית</h2>
+<p>יוצר טבלה למעקב אחר הודעות אימון שנשלחות ב-WhatsApp, כדי ללמוד איזה סגנון יעיל יותר.</p>
+
+<p><strong>נווט ל:</strong></p>
+<span class="url">https://supabase.com/dashboard &rarr; SQL Editor &rarr; New query</span>
+
+<p><strong>הדבק והרץ:</strong></p>
+<div class="sql-block" id="sql4">-- Migration 006: Coaching Events Tracking
+create table if not exists public.coaching_events (
+  id           uuid primary key default uuid_generate_v4(),
+  household_id uuid not null references public.households(id) on delete cascade,
+  message_type text not null check (message_type in ('morning_brief', 'evening_summary', 'nudge', 'celebration')),
+  coaching_style text not null check (coaching_style in ('encouraging', 'factual', 'playful', 'urgent')),
+  message_text text not null,
+  sent_at      timestamptz not null default now(),
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists coaching_events_household_sent_at
+  on public.coaching_events (household_id, sent_at desc);
+
+alter table public.coaching_events enable row level security;
+
+create policy "Members can view household coaching events"
+  on public.coaching_events for select
+  using (
+    exists (
+      select 1 from public.household_members hm
+      where hm.household_id = coaching_events.household_id
+        and hm.user_id = auth.uid()
+    )
+  );
+
+create policy "Members can insert coaching events"
+  on public.coaching_events for insert
+  with check (
+    exists (
+      select 1 from public.household_members hm
+      where hm.household_id = coaching_events.household_id
+        and hm.user_id = auth.uid()
+    )
+  );</div>
+<button class="copy-btn" onclick="copySQL('sql4', this)">העתק SQL</button>
+
+<div class="success">
+  <strong>אופציונלי:</strong> טבלה זו משמשת את ויג'ט האימון בדאשבורד. ללא הטבלה, הויג'ט פשוט לא יופיע.
+</div>
+</div>
+
 <hr>
 
 <h2 style="margin-bottom: 1rem;">רשימת בדיקה</h2>
 <ul class="checklist">
-  <li>הרצת 004_fix_rls_policies.sql ובדקת שהאפליקציה עובדת</li>
-  <li>הרצת 005_whatsapp_phone.sql</li>
+  <li>הרצת 004_fix_rls_policies.sql (v3) ובדקת שהאפליקציה עובדת</li>
+  <li>הרצת 005_whatsapp_phone.sql ✅</li>
   <li>הזנת מספר WhatsApp בהגדרות ולחצת "שמירת מספר"</li>
   <li>הפעלת Realtime ל-shopping_items</li>
+  <li>הרצת 006_coaching_tracking.sql (אופציונלי)</li>
   <li>בדקת שרשימת הקניות מסתנכרנת בין שני מכשירים</li>
 </ul>
 

@@ -1,13 +1,13 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE - Improvement Sprint Complete (35 items across 5 phases)
+## Status: LIVE - Improvement Sprint Complete (40+ items) + Component Split + Adaptive Coaching
 ## Last Updated: 2026-03-09
 
 ## Live URL
 **https://bayit-beseder.vercel.app**
 
 ## Current State
-Phase 1-17 + Improvement Sprint complete. 5 parallel agents executed 35 improvements across security, architecture, features, UI/UX, and code quality. Build passes. Deployed to Vercel.
+Phase 1-17 + Improvement Sprint + B8 (component split) + Adaptive Coaching complete. 8 parallel agents executed 40+ improvements. RLS migration v3 fixed for actual production schema. Build passes, pushed to master.
 
 ## Improvement Sprint (Mar 9, 2026) [DONE]
 
@@ -70,9 +70,33 @@ Phase 1-17 + Improvement Sprint complete. 5 parallel agents executed 35 improvem
 - `82bb590` feat: weekly page write capability and orphan table docs (B6,C6)
 - `0395e87` feat: WhatsApp webhook user scoping (C3)
 
+### Wave 3 - Final Agents (Mar 9, 2026) [DONE]
+- [x] B8: Dashboard split into 4 sub-components (590→260 lines), Settings split into 5 sub-components (790→280 lines)
+- [x] Adaptive coaching system: coaching-tracker.ts, coaching-messages-adaptive.ts, 006_coaching_tracking.sql, coaching-insight.tsx dashboard widget, /api/cron/coaching-update endpoint
+
+### RLS Migration Fix (v3) [DONE]
+- Previous run partially succeeded (profiles fixed) but dropped tasks SELECT policy
+- v3 correctly treats tasks as shared catalog (no household_id on tasks table)
+- Completions scoped via profiles JOIN (not task_completions.household_id which may not exist)
+- Commit: `ba8d88a`
+
+### All Commits
+- `a36ced5` fix: security hardening for API routes (A1,A2,A4,A5,A7,A8)
+- `ad50b54` + `2accd2f` refactor: architecture cleanup (B1,B2,B3,B4,B5,B7)
+- `af92eeb` feat: connect features to Supabase (C1,C2,C4,C5)
+- `ddf460c` fix: code quality improvements (E1,E2,E3,E4,E5,E7,E8)
+- `33414de` feat: UI/UX accessibility and illustrations (D1-D9)
+- `2ae70ae` fix: add RLS policy fixes and rate limiting (A3,A6)
+- `82bb590` feat: weekly page write capability and orphan table docs (B6,C6)
+- `0395e87` feat: WhatsApp webhook user scoping (C3)
+- `b73fbcc` refactor: split dashboard and settings into sub-components (B8)
+- `72d2c13` feat: adaptive coaching system with effectiveness tracking
+- `ba8d88a` fix: RLS migration v3 - correct for actual production schema
+
 ### Pending User Actions
-- [ ] Run `004_fix_rls_policies.sql` in Supabase SQL Editor
-- [ ] Run `005_whatsapp_phone.sql` in Supabase SQL Editor
+- [ ] Run UPDATED `004_fix_rls_policies.sql` (v3) in Supabase SQL Editor - CRITICAL: restores tasks SELECT policy
+- [x] Run `005_whatsapp_phone.sql` in Supabase SQL Editor ✅ (user confirmed)
+- [ ] Run `006_coaching_tracking.sql` in Supabase SQL Editor (for adaptive coaching)
 - [ ] Enable Realtime for shopping_items in Supabase Dashboard
 
 ## Phase 17: Avatar Upload + Task Completion Feedback (Mar 8, 2026) [DONE]
