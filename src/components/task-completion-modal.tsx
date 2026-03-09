@@ -101,7 +101,7 @@ export function TaskCompletionModal({
             {/* Close button */}
             <button
               onClick={handleSkip}
-              className="absolute top-4 left-4 p-1 rounded-full text-muted hover:text-foreground transition-colors"
+              className="absolute top-4 right-4 p-1 rounded-full text-muted hover:text-foreground transition-colors"
               aria-label="סגירה"
             >
               <X className="w-5 h-5" />
@@ -116,16 +116,37 @@ export function TaskCompletionModal({
             {/* Star Rating */}
             <div className="text-center space-y-2">
               <p className="text-sm text-muted">איך היה?</p>
-              <div className="flex justify-center gap-1.5">
+              <div
+                className="flex justify-center gap-1.5"
+                role="radiogroup"
+                aria-label="דירוג המשימה"
+              >
                 {[1, 2, 3, 4, 5].map((star) => {
                   const isFilled =
                     star <= (hoveredStar > 0 ? hoveredStar : rating);
                   return (
                     <motion.button
                       key={star}
+                      role="radio"
+                      aria-checked={rating === star}
+                      tabIndex={rating === star || (rating === 0 && star === 1) ? 0 : -1}
                       onClick={() => handleStarClick(star)}
                       onMouseEnter={() => setHoveredStar(star)}
                       onMouseLeave={() => setHoveredStar(0)}
+                      onKeyDown={(e) => {
+                        if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+                          e.preventDefault();
+                          const next = Math.max(1, star - 1);
+                          handleStarClick(next);
+                        } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
+                          e.preventDefault();
+                          const next = Math.min(5, star + 1);
+                          handleStarClick(next);
+                        } else if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          handleStarClick(star);
+                        }
+                      }}
                       whileTap={{ scale: 1.3 }}
                       className="p-1"
                       aria-label={`דירוג ${star} כוכבים`}

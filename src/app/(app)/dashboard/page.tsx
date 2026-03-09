@@ -415,7 +415,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {/* Header - Gradient hero area */}
       <div className="relative gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-10 -mx-0 overflow-hidden">
         {/* Notification bell - positioned top-left (RTL: visually top-right) */}
@@ -467,7 +467,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Content area with padding */}
-      <div className="px-4 space-y-5 -mt-6">
+      <div className="px-4 space-y-4 -mt-6">
         {/* Golden Rule Ring - overlapping the header */}
         <div className="flex justify-center card-premium p-5 shadow-lg shadow-primary/8">
           {tasksLoading ? (

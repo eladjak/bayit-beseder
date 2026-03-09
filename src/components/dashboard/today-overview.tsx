@@ -93,7 +93,12 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
       >
-        <span className="text-3xl mb-2 block">🎉</span>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/illustrations/empty-tasks.jpg"
+          alt="אין משימות להיום"
+          className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
+        />
         <p className="font-medium text-foreground">אין משימות להיום!</p>
         <p className="text-sm text-muted">יום חופשי מגיע לכם</p>
       </motion.div>
@@ -142,6 +147,8 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
                 <button
                   onClick={() => handleToggle(task.id)}
                   disabled={isLoading}
+                  aria-label={isCompleted ? `בטל השלמה: ${task.title}` : `סמן כהושלם: ${task.title}`}
+                  aria-pressed={isCompleted}
                   className="w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 relative overflow-hidden transition-all disabled:cursor-wait"
                   style={{
                     borderColor: isCompleted

@@ -29,6 +29,8 @@ export function ShoppingItemCard({ item, onToggle, onRemove }: ShoppingItemProps
       {/* Checkbox */}
       <button
         onClick={() => onToggle(item.id)}
+        aria-label={item.checked ? `בטל סימון: ${item.title}` : `סמן כנרכש: ${item.title}`}
+        aria-pressed={item.checked}
         className="w-6 h-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors"
         style={{
           borderColor: item.checked
@@ -75,6 +77,7 @@ export function ShoppingItemCard({ item, onToggle, onRemove }: ShoppingItemProps
       {/* Delete button */}
       <button
         onClick={() => onRemove(item.id)}
+        aria-label={`מחיקת פריט: ${item.title}`}
         className="p-1.5 rounded-lg text-muted hover:text-danger hover:bg-danger/10 transition-colors"
       >
         <Trash2 className="w-4 h-4" />

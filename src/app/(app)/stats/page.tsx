@@ -355,7 +355,7 @@ export default function StatsPage() {
   }, [hasDbData, completions, profile?.streak, tasks]);
 
   return (
-    <div className="space-y-5" dir="rtl">
+    <div className="space-y-4" dir="rtl">
       {/* Header with gradient */}
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
         <div className="flex items-center justify-between relative z-10">
@@ -371,7 +371,7 @@ export default function StatsPage() {
         </div>
       </div>
 
-      <div className="px-4 space-y-5">
+      <div className="px-4 space-y-4">
 
       {/* Dashboard Analytics - shown when DB data is available */}
       {hasDbData && (
@@ -541,6 +541,12 @@ export default function StatsPage() {
             {unlockedAchievements.size}/{ACHIEVEMENTS.length}
           </span>
         </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/illustrations/stats-achievements.jpg"
+          alt="הישגים ופרסים"
+          className="w-full h-32 object-cover rounded-xl mb-3"
+        />
         <div className="grid grid-cols-3 gap-3">
           {ACHIEVEMENTS.map((achievement, idx) => {
             const unlocked = unlockedAchievements.has(achievement.code);

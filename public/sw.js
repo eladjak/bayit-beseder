@@ -1,7 +1,19 @@
 /// <reference lib="webworker" />
 
-const CACHE_NAME = "bayit-beseder-v1";
-const STATIC_ASSETS = ["/", "/dashboard", "/manifest.json"];
+const CACHE_VERSION = "v2";
+const CACHE_NAME = `bayit-beseder-${CACHE_VERSION}`;
+const STATIC_ASSETS = [
+  "/",
+  "/dashboard",
+  "/tasks",
+  "/shopping",
+  "/weekly",
+  "/stats",
+  "/settings",
+  "/emergency",
+  "/playlists",
+  "/manifest.json",
+];
 
 // ============================================
 // Install: cache static assets

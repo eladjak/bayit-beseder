@@ -30,15 +30,23 @@ export default function EmergencyPage() {
     <div className="px-4 py-6 space-y-5">
       {/* Header Banner */}
       <motion.div
-        className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 rounded-2xl p-4 text-center"
+        className="bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800/50 rounded-2xl overflow-hidden text-center"
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Shield className="w-8 h-8 text-blue-500 dark:text-blue-400 mx-auto mb-2" />
-        <h1 className="text-lg font-bold text-blue-700 dark:text-blue-300">מצב חירום פעיל</h1>
-        <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
-          מתמקדים רק בחשוב. הכל בסדר, צעד אחד בכל פעם.
-        </p>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/illustrations/emergency-mode.jpg"
+          alt="מצב חירום"
+          className="w-full h-36 object-cover"
+        />
+        <div className="p-4">
+          <Shield className="w-8 h-8 text-blue-500 dark:text-blue-400 mx-auto mb-2" />
+          <h1 className="text-lg font-bold text-blue-700 dark:text-blue-300">מצב חירום פעיל</h1>
+          <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
+            מתמקדים רק בחשוב. הכל בסדר, צעד אחד בכל פעם.
+          </p>
+        </div>
       </motion.div>
 
       {/* Simplified Progress */}
@@ -84,6 +92,8 @@ export default function EmergencyPage() {
             >
               <button
                 onClick={() => toggleTask(i)}
+                aria-label={isCompleted ? `בטל סימון: ${task.title}` : `סמן כהושלם: ${task.title}`}
+                aria-pressed={isCompleted}
                 className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                   isCompleted
                     ? "bg-blue-500 border-blue-500"
