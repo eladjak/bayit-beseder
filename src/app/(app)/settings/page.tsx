@@ -326,8 +326,8 @@ export default function SettingsPage() {
   return (
     <div className="space-y-5 bg-background min-h-dvh" dir="rtl">
       {/* Header with gradient */}
-      <div className="gradient-primary rounded-b-3xl px-4 pt-6 pb-5 text-center">
-        <h1 className="text-xl font-bold text-white">הגדרות</h1>
+      <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 text-center overflow-hidden">
+        <h1 className="text-xl font-bold text-white tracking-tight relative z-10">הגדרות</h1>
       </div>
 
       <div className="px-4 space-y-5">

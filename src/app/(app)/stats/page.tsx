@@ -357,12 +357,12 @@ export default function StatsPage() {
   return (
     <div className="space-y-5" dir="rtl">
       {/* Header with gradient */}
-      <div className="gradient-primary rounded-b-3xl px-4 pt-6 pb-5">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-white">סטטיסטיקה</h1>
+      <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
+        <div className="flex items-center justify-between relative z-10">
+          <h1 className="text-xl font-bold text-white tracking-tight">סטטיסטיקה</h1>
           <Link
             href="/history"
-            className="flex items-center gap-1.5 text-xs text-white bg-white/15 px-3 py-1.5 rounded-full font-medium backdrop-blur-sm"
+            className="flex items-center gap-1.5 text-xs text-white bg-white/12 px-3.5 py-1.5 rounded-xl font-medium backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-colors"
             aria-label="עבור להיסטוריית משימות"
           >
             <History className="w-3.5 h-3.5" />

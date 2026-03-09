@@ -417,9 +417,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-5">
       {/* Header - Gradient hero area */}
-      <div className="relative gradient-hero rounded-b-3xl px-4 pt-6 pb-8 -mx-0">
+      <div className="relative gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-10 -mx-0 overflow-hidden">
         {/* Notification bell - positioned top-left (RTL: visually top-right) */}
-        <div className="absolute top-4 left-4">
+        <div className="absolute top-4 left-4 z-10">
           <NotificationCenter
             notifications={notifications}
             unreadCount={unreadCount}
@@ -428,36 +428,48 @@ export default function DashboardPage() {
             dismiss={dismiss}
           />
         </div>
-        <div className="text-center">
+        <div className="text-center relative z-10">
           {/* User avatar in header */}
-          {profile?.avatar_url && (
-            <div className="flex justify-center mb-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={profile.avatar_url}
-                alt={displayName}
-                className="w-12 h-12 rounded-full border-2 border-white/30 object-cover"
-              />
-            </div>
-          )}
-          <h1 className="text-xl font-bold text-white">{greeting}</h1>
-          <p className="text-sm text-white/70">{getHebrewDate()}</p>
+          <div className="flex justify-center mb-3">
+            {profile?.avatar_url ? (
+              <div className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={profile.avatar_url}
+                  alt={displayName}
+                  className="w-14 h-14 rounded-2xl border-2 border-white/30 object-cover shadow-lg shadow-black/10"
+                />
+                <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success rounded-full border-2 border-white" />
+              </div>
+            ) : (
+              <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-lg shadow-black/10">
+                <span className="text-xl">
+                  {displayName.charAt(0)}
+                </span>
+              </div>
+            )}
+          </div>
+          <h1 className="text-xl font-bold text-white tracking-tight">{greeting}</h1>
+          <p className="text-sm text-white/60 font-medium mt-0.5">{getHebrewDate()}</p>
           {filteredTasks.length > 0 && (
-            <p className="text-xs text-white/60 mt-1">
-              {completedCount === filteredTasks.length
-                ? "יום מושלם! סיימתם הכל ביחד"
-                : completedCount > 0
-                  ? `ביחד סיימתם ${completedCount} מתוך ${filteredTasks.length} משימות`
-                  : subtitle}
-            </p>
+            <div className="mt-3 inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3.5 py-1.5 border border-white/10">
+              <div className={`w-1.5 h-1.5 rounded-full ${completedCount === filteredTasks.length ? "bg-green-400" : "bg-white/60 animate-soft-pulse"}`} />
+              <p className="text-xs text-white/90 font-medium">
+                {completedCount === filteredTasks.length
+                  ? "יום מושלם! סיימתם הכל ביחד"
+                  : completedCount > 0
+                    ? `${completedCount} מתוך ${filteredTasks.length} משימות הושלמו`
+                    : subtitle}
+              </p>
+            </div>
           )}
         </div>
       </div>
 
       {/* Content area with padding */}
-      <div className="px-4 space-y-5 -mt-4">
+      <div className="px-4 space-y-5 -mt-6">
         {/* Golden Rule Ring - overlapping the header */}
-        <div className="flex justify-center card-elevated p-5 -mt-2">
+        <div className="flex justify-center card-premium p-5 shadow-lg shadow-primary/8">
           {tasksLoading ? (
             <RingSkeleton />
           ) : (
@@ -502,14 +514,16 @@ export default function DashboardPage() {
         {/* Playlist Quick Action */}
         <Link
           href="/playlists"
-          className="card-elevated flex items-center gap-3 px-4 py-3 active:scale-[0.98] transition-transform"
+          className="card-elevated flex items-center gap-3 px-4 py-3.5 active:scale-[0.98] transition-transform group"
         >
-          <span className="text-2xl">🎵</span>
+          <div className="w-10 h-10 rounded-xl gradient-primary flex items-center justify-center shadow-md shadow-primary/20">
+            <span className="text-lg">🎵</span>
+          </div>
           <div className="flex-1 text-right">
             <p className="font-semibold text-foreground text-sm">פלייליסטים</p>
-            <p className="text-xs text-muted">שגרות ניקיון מודרכות עם טיימר</p>
+            <p className="text-[11px] text-muted">שגרות ניקיון מודרכות עם טיימר</p>
           </div>
-          <span className="text-muted text-xs">←</span>
+          <span className="text-muted text-xs group-hover:text-primary transition-colors">←</span>
         </Link>
 
         {/* Weekly Summary Cards */}

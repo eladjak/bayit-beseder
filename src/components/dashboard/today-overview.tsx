@@ -106,7 +106,7 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
     <div className="space-y-2">
       <div className="flex items-center justify-between px-1">
         <h2 className="font-semibold text-foreground">משימות להיום</h2>
-        <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary">
+        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-primary/10 text-primary">
           {completed}/{tasks.length}
         </span>
       </div>
@@ -134,7 +134,7 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
               >
                 {/* Category accent bar */}
                 <div
-                  className="absolute right-0 top-0 bottom-0 w-1 rounded-r-full"
+                  className="absolute right-0 top-2 bottom-2 w-[3px] rounded-full"
                   style={{ backgroundColor: catColor }}
                 />
 
@@ -202,7 +202,7 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span
-                      className="text-[10px] px-1.5 py-0.5 rounded-full text-white font-medium"
+                      className="text-[10px] px-2 py-0.5 rounded-md text-white font-medium"
                       style={{
                         backgroundColor: catColor,
                       }}

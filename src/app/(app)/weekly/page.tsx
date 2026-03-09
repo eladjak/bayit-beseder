@@ -207,13 +207,13 @@ export default function WeeklyPage() {
   return (
     <div className="space-y-5" dir="rtl">
       {/* Header with gradient */}
-      <div className="gradient-primary rounded-b-3xl px-4 pt-6 pb-5">
-        <div className="flex items-center justify-between mb-3">
+      <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
+        <div className="flex items-center justify-between mb-3 relative z-10">
           <div>
-            <h1 className="text-xl font-bold text-white">תכנון שבועי</h1>
-            <p className="text-sm text-white/70">{weekRange}</p>
+            <h1 className="text-xl font-bold text-white tracking-tight">תכנון שבועי</h1>
+            <p className="text-sm text-white/60 mt-0.5">{weekRange}</p>
           </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-white/15 backdrop-blur-sm rounded-full">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 bg-white/12 backdrop-blur-sm rounded-xl border border-white/10">
             <Calendar className="w-4 h-4 text-white" />
             <span className="text-xs font-medium text-white">
               {stats.total} משימות

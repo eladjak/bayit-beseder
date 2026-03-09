@@ -232,21 +232,28 @@ export default function TasksPage() {
   return (
     <div className="space-y-4" dir="rtl">
       {/* Header with gradient */}
-      <div className="gradient-primary rounded-b-3xl px-4 pt-6 pb-5">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-white">משימות</h1>
-          <div className="flex items-center gap-2">
+      <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
+        <div className="flex items-center justify-between relative z-10">
+          <div>
+            <h1 className="text-xl font-bold text-white tracking-tight">משימות</h1>
+            {hasDbTasks && (
+              <p className="text-xs text-white/60 mt-0.5">
+                {filteredDbTasks.filter(t => t.isCompleted).length}/{filteredDbTasks.length} הושלמו
+              </p>
+            )}
+          </div>
+          <div className="flex items-center gap-1">
             {hasDbTasks && (
               <button
                 onClick={() => setShowAddForm((prev) => !prev)}
-                className="p-2 rounded-lg hover:bg-white/10 text-white/80"
+                className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
                 aria-label="הוספת משימה"
               >
-                <Plus className="w-5 h-5" />
+                <Plus className="w-4.5 h-4.5" />
               </button>
             )}
-            <button className="p-2 rounded-lg hover:bg-white/10 text-white/60">
-              <Filter className="w-5 h-5" />
+            <button className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white/70 transition-colors border border-white/10">
+              <Filter className="w-4.5 h-4.5" />
             </button>
           </div>
         </div>
@@ -361,13 +368,22 @@ export default function TasksPage() {
                   layout
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`bg-surface rounded-xl p-3 flex items-start gap-3 relative ${
-                    task.isCompleted ? "opacity-60" : ""
+                  className={`card-elevated p-3.5 flex items-start gap-3 relative overflow-hidden ${
+                    task.isCompleted ? "opacity-50" : ""
                   } ${
                     task.isOverdue && !task.isCompleted
-                      ? "ring-2 ring-red-500/30 bg-red-50/30 dark:bg-red-950/20"
+                      ? "ring-1 ring-red-500/20"
                       : ""
                   }`}
+                  style={{
+                    borderRight: `3px solid ${
+                      task.isOverdue && !task.isCompleted
+                        ? "#EF4444"
+                        : task.isCompleted
+                          ? "#10B981"
+                          : getCategoryColor(task.categoryKey)
+                    }`,
+                  }}
                 >
                   {/* Overdue indicator */}
                   {task.isOverdue && !task.isCompleted && (
@@ -377,12 +393,12 @@ export default function TasksPage() {
                   )}
                   <button
                     onClick={() => toggleDbTask(task.id)}
-                    className={`mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                    className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                       task.isCompleted
                         ? "bg-success border-success"
                         : task.isOverdue
-                        ? "border-red-500 hover:border-red-600"
-                        : "border-border hover:border-primary"
+                        ? "border-red-400 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                        : "border-border hover:border-primary hover:bg-primary/5"
                     }`}
                   >
                     {task.isCompleted && (
@@ -391,7 +407,7 @@ export default function TasksPage() {
                   </button>
                   <div className="flex-1 min-w-0">
                     <p
-                      className={`text-sm font-medium ${
+                      className={`text-sm font-medium leading-snug ${
                         task.isCompleted
                           ? "line-through text-muted"
                           : task.isOverdue
@@ -401,16 +417,16 @@ export default function TasksPage() {
                     >
                       {task.title}
                     </p>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full text-white font-medium"
+                        className="text-[10px] px-2 py-0.5 rounded-md text-white font-medium"
                         style={{
                           backgroundColor: getCategoryColor(task.categoryKey),
                         }}
                       >
                         {getCategoryLabel(task.categoryKey)}
                       </span>
-                      <span className="text-[10px] text-muted px-1.5 py-0.5 rounded-full bg-background">
+                      <span className="text-[10px] text-muted px-2 py-0.5 rounded-md bg-background border border-border/50">
                         {task.recurrenceLabel}
                       </span>
                       <span className="text-[10px] text-muted flex items-center gap-0.5">
@@ -421,10 +437,10 @@ export default function TasksPage() {
                   </div>
                   <button
                     onClick={() => handleDeleteTask(task.id)}
-                    className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-950/30 text-muted hover:text-red-500 transition-colors"
+                    className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors"
                     aria-label="מחיקת משימה"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </motion.div>
               ))

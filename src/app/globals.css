@@ -32,6 +32,8 @@ body {
   font-family: var(--font-sans);
   background-color: var(--color-background);
   color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Dark mode overrides */
@@ -59,7 +61,7 @@ body {
 }
 
 .pb-safe {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
 }
 
 /* ============================================
@@ -79,43 +81,85 @@ body {
 }
 
 .glass-nav {
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(20px) saturate(200%);
-  -webkit-backdrop-filter: blur(20px) saturate(200%);
-  border-top: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 -4px 24px rgba(99, 102, 241, 0.06),
+    0 -1px 8px rgba(0, 0, 0, 0.04);
 }
 
 .dark .glass-nav {
-  background: rgba(15, 13, 26, 0.88);
-  border-top: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(15, 13, 26, 0.92);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  box-shadow:
+    0 -4px 24px rgba(0, 0, 0, 0.3),
+    0 -1px 8px rgba(0, 0, 0, 0.2);
 }
 
 .card-elevated {
   background: var(--color-surface);
-  border-radius: 1rem;
+  border-radius: 1.125rem;
   box-shadow:
-    0 1px 3px rgba(99, 102, 241, 0.04),
-    0 4px 12px rgba(99, 102, 241, 0.06);
+    0 1px 2px rgba(99, 102, 241, 0.03),
+    0 2px 8px rgba(99, 102, 241, 0.05),
+    0 8px 24px rgba(99, 102, 241, 0.04);
   border: 1px solid rgba(99, 102, 241, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
 .dark .card-elevated {
   box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.2),
-    0 4px 12px rgba(0, 0, 0, 0.3);
+    0 1px 2px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.2),
+    0 8px 24px rgba(0, 0, 0, 0.15);
   border: 1px solid var(--color-border);
 }
 
 .card-elevated:hover {
   box-shadow:
-    0 2px 6px rgba(99, 102, 241, 0.06),
-    0 8px 24px rgba(99, 102, 241, 0.08);
+    0 2px 4px rgba(99, 102, 241, 0.05),
+    0 4px 16px rgba(99, 102, 241, 0.08),
+    0 12px 32px rgba(99, 102, 241, 0.06);
 }
 
 .dark .card-elevated:hover {
   box-shadow:
-    0 2px 6px rgba(0, 0, 0, 0.3),
-    0 8px 24px rgba(0, 0, 0, 0.4);
+    0 2px 4px rgba(0, 0, 0, 0.2),
+    0 4px 16px rgba(0, 0, 0, 0.3),
+    0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* Premium card with gradient border */
+.card-premium {
+  background: var(--color-surface);
+  border-radius: 1.125rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-premium::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(139, 92, 246, 0.15), rgba(167, 139, 250, 0.3));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+}
+
+.card-premium::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #6366F1, #8B5CF6, #A78BFA);
 }
 
 /* ============================================
@@ -127,7 +171,9 @@ body {
 }
 
 .gradient-hero {
-  background: linear-gradient(135deg, #4F46E5 0%, #6366F1 30%, #8B5CF6 60%, #C084FC 100%);
+  background: linear-gradient(135deg, #4338CA 0%, #6366F1 30%, #8B5CF6 55%, #A78BFA 80%, #C4B5FD 100%);
+  background-size: 200% 200%;
+  animation: gradient-shift 12s ease infinite;
 }
 
 .gradient-warm {
@@ -227,4 +273,66 @@ body {
 
 .animate-bounce-in {
   animation: bounce-in 0.4s ease-out;
+}
+
+/* Smooth slide-up entrance */
+@keyframes slide-up {
+  0% { transform: translateY(12px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.35s ease-out;
+}
+
+/* Subtle pulse for active states */
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 2s ease-in-out infinite;
+}
+
+/* Task card accent strip */
+.task-card {
+  position: relative;
+  padding-right: 1rem;
+}
+
+.task-card::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  right: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--accent-color, var(--color-primary));
+}
+
+/* Scrollbar hide utility */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Header mesh overlay for premium look */
+.mesh-overlay {
+  position: relative;
+}
+
+.mesh-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.12) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.08) 0%, transparent 40%);
+  pointer-events: none;
 }

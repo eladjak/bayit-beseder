@@ -22,6 +22,9 @@ export function ShoppingItemCard({ item, onToggle, onRemove }: ShoppingItemProps
       className={`card-elevated p-3 flex items-center gap-3 relative overflow-hidden ${
         item.checked ? "opacity-50" : ""
       }`}
+      style={{
+        borderRight: `3px solid ${item.checked ? "var(--color-success)" : CATEGORY_COLORS[item.category]}`,
+      }}
     >
       {/* Checkbox */}
       <button

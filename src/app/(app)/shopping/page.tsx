@@ -88,15 +88,19 @@ export default function ShoppingPage() {
   return (
     <div className="space-y-4" dir="rtl">
       {/* Header with gradient */}
-      <div className="gradient-primary rounded-b-3xl px-4 pt-6 pb-5 text-center">
-        <h1 className="text-xl font-bold text-white">
-          רשימת קניות 🛒
-        </h1>
-        {totalCount > 0 && (
-          <p className="text-sm text-white/70 mt-1">
-            {checkedCount}/{totalCount} פריטים סומנו
-          </p>
-        )}
+      <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 text-center overflow-hidden">
+        <div className="relative z-10">
+          <h1 className="text-xl font-bold text-white tracking-tight">
+            רשימת קניות
+          </h1>
+          {totalCount > 0 && (
+            <div className="mt-2 inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 border border-white/10">
+              <span className="text-xs text-white/90 font-medium">
+                {checkedCount}/{totalCount} פריטים סומנו
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="px-4 space-y-4">
@@ -277,7 +281,7 @@ export default function ShoppingPage() {
             haptic("tap");
             setShowForm(true);
           }}
-          className="fixed bottom-20 left-4 w-14 h-14 rounded-full gradient-primary text-white shadow-lg shadow-primary/30 flex items-center justify-center z-20"
+          className="fixed bottom-24 left-4 w-13 h-13 rounded-2xl gradient-primary text-white shadow-lg shadow-primary/30 flex items-center justify-center z-20 border border-white/20"
         >
           <Plus className="w-6 h-6" />
         </motion.button>
