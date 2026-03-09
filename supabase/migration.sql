@@ -1,6 +1,36 @@
 -- BayitBeSeder (בית בסדר) - Database Schema
 -- Run this in Supabase SQL Editor
 
+-- ============================================================
+-- TABLE USAGE STATUS (updated 2026-03-09)
+-- ============================================================
+-- ACTIVE (read/write by app UI):
+--   households     - created on invite/join; read by all pages
+--   profiles       - user profile, household link, calendar tokens
+--   tasks          - main task list (dashboard, tasks page, weekly page)
+--   task_completions - records each completion event (stats, streaks)
+--   shopping_items - shopping list page (Supabase + Realtime)
+--   categories     - task categories (referenced by tasks.category_id)
+--   achievements   - achievement definitions (stats page)
+--   user_achievements - per-user unlocked achievements (stats page)
+--
+-- ACTIVE (auto-scheduler cron only, not directly shown in UI):
+--   task_templates  - template definitions used by /api/cron/auto-schedule
+--   task_instances  - generated instances written by auto-schedule cron
+--
+-- RESERVED (schema ready, not yet wired to UI):
+--   household_members  - profiles.household_id is used instead for
+--                        membership lookup; this table is maintained for
+--                        RLS policies but not queried by the app directly
+--   streaks            - streak counts are computed client-side from
+--                        task_completions; this table exists for a future
+--                        server-side streak-persistence feature
+--   weekly_syncs       - planned for the weekly review / sync feature;
+--                        schema is ready but UI is not yet implemented
+--   coaching_messages  - planned for adaptive coaching feature;
+--                        coaching_messages.ts (local) is used instead
+-- ============================================================
+
 -- Enable UUID extension
 create extension if not exists "uuid-ossp";
 
