@@ -151,10 +151,8 @@ const CATEGORY_ICONS: Record<string, string> = {
 // Utility: generate unique ID
 // ============================================
 
-let idCounter = 100;
 function generateId(): string {
-  idCounter += 1;
-  return `n${idCounter}`;
+  return crypto.randomUUID();
 }
 
 // ============================================

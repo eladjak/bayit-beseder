@@ -379,11 +379,31 @@ export function taskToCalendarEvent(task: TaskLike): CalendarEvent {
 }
 
 /**
+ * Returns the current UTC offset for the Asia/Jerusalem timezone as a string
+ * like "+02:00" or "+03:00" (depends on whether DST is active).
+ */
+function getJerusalemOffset(): string {
+  // Extract the longOffset representation, e.g. "GMT+3" or "GMT+2"
+  const parts = new Intl.DateTimeFormat("en", {
+    timeZone: TIMEZONE,
+    timeZoneName: "longOffset",
+  }).formatToParts(new Date());
+  const offsetPart = parts.find((p) => p.type === "timeZoneName")?.value ?? "GMT+2";
+  // offsetPart is like "GMT+3" or "GMT+2" — convert to ±HH:MM
+  const match = offsetPart.match(/GMT([+-]\d+)/);
+  if (!match) return "+02:00";
+  const hours = parseInt(match[1], 10);
+  const sign = hours >= 0 ? "+" : "-";
+  return `${sign}${String(Math.abs(hours)).padStart(2, "0")}:00`;
+}
+
+/**
  * Adds `minutes` minutes to an ISO local datetime string ("YYYY-MM-DDTHH:mm:ss").
  */
 function offsetDateTime(localDatetime: string, minutes: number): string {
-  const date = new Date(`${localDatetime}+03:00`); // Israel standard offset
+  const offset = getJerusalemOffset(); // dynamically resolve DST-aware offset
+  const date = new Date(`${localDatetime}${offset}`);
   date.setMinutes(date.getMinutes() + minutes);
   // Return in local format (strip the timezone part)
-  return date.toISOString().replace(/\.\d{3}Z$/, "").replace(/\+\d{2}:\d{2}$/, "");
+  return date.toISOString().replace(/\.\d{3}Z$/, "").replace(/[+-]\d{2}:\d{2}$/, "");
 }

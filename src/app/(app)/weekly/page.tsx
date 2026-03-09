@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   Calendar,
@@ -123,6 +123,11 @@ export default function WeeklyPage() {
   const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
   const { partner } = usePartner(profile?.partner_id, todayStr);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  // Generate mock data once (client-side only) to avoid SSR/client Math.random() mismatch.
+  const mockTasksRef = useRef<ReturnType<typeof generateMockWeeklyTasks> | null>(null);
+  if (mockTasksRef.current === null) {
+    mockTasksRef.current = generateMockWeeklyTasks();
+  }
 
   // Get start of week (Sunday)
   const startOfWeek = useMemo(() => {
@@ -149,8 +154,8 @@ export default function WeeklyPage() {
     if (loading) return [];
 
     if (tasks.length === 0) {
-      // No Supabase data - use mock
-      return generateMockWeeklyTasks();
+      // No Supabase data - use stable mock (generated once to avoid SSR/client mismatch)
+      return mockTasksRef.current ?? [];
     }
 
     const startStr = startOfWeek.toISOString().split("T")[0];

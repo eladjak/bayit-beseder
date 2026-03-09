@@ -59,7 +59,7 @@ export function NotificationBanner() {
       setVisible(false);
       localStorage.setItem("bayit-notification-banner-dismissed", "true");
     }
-  }, []);
+  }, [user]);
 
   const handleDismiss = useCallback(() => {
     setVisible(false);
