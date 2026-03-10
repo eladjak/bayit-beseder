@@ -22,7 +22,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase";
 
-export type ShoppingCategory = "מזון" | "ניקיון" | "חיות" | "בית" | "אחר" | "טיפוח" | "תרופות" | "תינוק";
+export type ShoppingCategory = "מזון" | "ניקיון" | "חיות" | "בית" | "אחר" | "טיפוח" | "תרופות";
 
 export interface ShoppingItem {
   id: string;
@@ -43,7 +43,6 @@ export const CATEGORY_COLORS: Record<ShoppingCategory, string> = {
   "אחר": "#6B7280",
   "טיפוח": "#EC4899",
   "תרופות": "#EF4444",
-  "תינוק": "#06B6D4",
 };
 
 export const SHOPPING_CATEGORY_ICONS: Record<ShoppingCategory, string> = {
@@ -54,7 +53,6 @@ export const SHOPPING_CATEGORY_ICONS: Record<ShoppingCategory, string> = {
   "אחר": "📦",
   "טיפוח": "💄",
   "תרופות": "💊",
-  "תינוק": "👶",
 };
 
 export const SHOPPING_CATEGORY_ILLUSTRATIONS: Record<ShoppingCategory, string> = {
@@ -65,7 +63,6 @@ export const SHOPPING_CATEGORY_ILLUSTRATIONS: Record<ShoppingCategory, string> =
   "אחר": "/illustrations/empty-shopping.jpg",
   "טיפוח": "/illustrations/shopping-beauty.jpg",
   "תרופות": "/illustrations/shopping-pharmacy.jpg",
-  "תינוק": "/illustrations/shopping-baby.jpg",
 };
 
 const DEFAULT_MOCK_ITEMS: ShoppingItem[] = [

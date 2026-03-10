@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell } from "lucide-react";
+import { Bell, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { isNotificationSupported } from "@/lib/notifications";
 import type { NotificationPrefs } from "@/lib/notifications";
 
@@ -28,6 +28,26 @@ function ToggleRow({ label, enabled, onToggle }: ToggleRowProps) {
           }`}
         />
       </button>
+    </div>
+  );
+}
+
+function StatusRow({ label, status, detail }: { label: string; status: "active" | "inactive" | "error"; detail: string }) {
+  return (
+    <div className="flex items-center justify-between text-xs">
+      <span className="text-muted">{label}</span>
+      <div className="flex items-center gap-1">
+        {status === "active" ? (
+          <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+        ) : status === "error" ? (
+          <XCircle className="w-3.5 h-3.5 text-danger" />
+        ) : (
+          <AlertCircle className="w-3.5 h-3.5 text-muted" />
+        )}
+        <span className={status === "active" ? "text-success" : status === "error" ? "text-danger" : "text-muted"}>
+          {detail}
+        </span>
+      </div>
     </div>
   );
 }
@@ -115,6 +135,29 @@ export function NotificationSettings({
           />
         </>
       )}
+
+      {/* Notification Status Indicators */}
+      <div className="border-t border-border pt-3 mt-3 space-y-2">
+        <p className="text-xs text-muted font-medium">סטטוס התראות</p>
+        <div className="space-y-1.5">
+          <StatusRow
+            label="הרשאת דפדפן"
+            status={
+              notifPermission === "granted" ? "active" :
+              notifPermission === "denied" ? "error" : "inactive"
+            }
+            detail={
+              notifPermission === "granted" ? "מאושר" :
+              notifPermission === "denied" ? "חסום" : "לא הופעל"
+            }
+          />
+          <StatusRow
+            label="Push (רקע)"
+            status={pushSubscribed ? "active" : "inactive"}
+            detail={pushSubscribed ? "פעיל" : "לא פעיל"}
+          />
+        </div>
+      </div>
     </section>
   );
 }

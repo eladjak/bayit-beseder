@@ -84,7 +84,7 @@ export default function DashboardPage() {
     realtime: true,
   });
   const { tasks: allDbTasks, refetch: refetchAllTasks } = useTasks({});
-  const { completions: allCompletions, markComplete } = useCompletions({ limit: 200 });
+  const { completions: allCompletions, markComplete, isCompletedToday } = useCompletions({ limit: 500 });
   const { categoryMap } = useCategories();
   const { playComplete, playAchievement, playStreak } = useAppSounds();
   const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
@@ -117,15 +117,20 @@ export default function DashboardPage() {
         const categoryKey = categoryName
           ? (CATEGORY_NAME_TO_KEY[categoryName] ?? "general")
           : "general";
+        // Recurring tasks: check today's completions for daily reset.
+        // One-time tasks: use permanent status.
+        const completed = t.recurring
+          ? isCompletedToday(t.id)
+          : t.status === "completed";
         return {
           id: t.id,
           title: t.title,
           category: categoryKey,
           estimated_minutes: 10,
-          completed: t.status === "completed",
+          completed,
         };
       }),
-    [dbTasks, categoryMap]
+    [dbTasks, categoryMap, isCompletedToday]
   );
 
   const [mockTasks] = useState(MOCK_TASKS);
@@ -199,8 +204,12 @@ export default function DashboardPage() {
     async (taskId: string) => {
       if (hasDbTasks && profile) {
         const task = dbTasks.find((t) => t.id === taskId);
-        if (task && task.status !== "completed") {
-          const result = await markComplete({ taskId, userId: profile.id });
+        // For recurring tasks, check today's completions; for one-time, check status
+        const alreadyDone = task?.recurring
+          ? isCompletedToday(taskId)
+          : task?.status === "completed";
+        if (task && !alreadyDone) {
+          const result = await markComplete({ taskId, userId: profile.id, recurring: !!task.recurring });
           if (result === null) {
             toast.error("לא ניתן לסמן את המשימה כהושלמה. נסה שוב.");
             return;
@@ -249,7 +258,7 @@ export default function DashboardPage() {
         }
       }
     },
-    [target, hasDbTasks, profile, dbTasks, markComplete, playComplete, playAchievement, playStreak, mockCompletedIds, mockTasks.length]
+    [target, hasDbTasks, profile, dbTasks, markComplete, isCompletedToday, playComplete, playAchievement, playStreak, mockCompletedIds, mockTasks.length]
   );
 
   const handleCompletionFeedback = useCallback(

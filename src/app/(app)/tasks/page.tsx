@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Clock, Filter, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { haptic } from "@/lib/haptics";
 import {
   getRecurrenceLabel,
   TASK_TEMPLATES_SEED,
@@ -55,7 +56,7 @@ export default function TasksPage() {
     updateTask,
     refetch: refetchTasks,
   } = useTasks({ realtime: true });
-  const { markComplete } = useCompletions();
+  const { markComplete, isCompletedToday } = useCompletions({ limit: 500 });
   const { categories, categoryMap } = useCategories();
 
   // ---- Auto-seed tasks for authenticated users on first visit ----
@@ -78,6 +79,10 @@ export default function TasksPage() {
   // Determine if we should use DB data or mock
   const hasDbTasks = !tasksLoading && dbTasks.length > 0;
 
+  // Optimistic state: track tasks completed in this session before DB confirms
+  const [optimisticCompleted, setOptimisticCompleted] = useState<Set<string>>(new Set());
+  const [optimisticUncompleted, setOptimisticUncompleted] = useState<Set<string>>(new Set());
+
   // Convert DB tasks to a display-friendly shape
   const dbTaskViews: DbTaskView[] = useMemo(
     () =>
@@ -94,12 +99,23 @@ export default function TasksPage() {
           t.due_date < today &&
           t.status !== "completed";
 
+        // For recurring tasks, use today's completions instead of permanent status.
+        // One-time tasks use permanent status as before.
+        const dbCompleted = t.recurring
+          ? isCompletedToday(t.id)
+          : t.status === "completed";
+        const isCompleted = optimisticCompleted.has(t.id)
+          ? true
+          : optimisticUncompleted.has(t.id)
+            ? false
+            : dbCompleted;
+
         return {
           id: t.id,
           title: t.title,
           categoryKey,
           estimated_minutes: 10,
-          isCompleted: t.status === "completed",
+          isCompleted,
           tips: [],
           isEmergency: false,
           recurrenceLabel: t.recurring ? "חוזר" : "חד-פעמי",
@@ -107,7 +123,7 @@ export default function TasksPage() {
           isOverdue: !!isOverdue,
         };
       }),
-    [dbTasks, categoryMap]
+    [dbTasks, categoryMap, optimisticCompleted, optimisticUncompleted, isCompletedToday]
   );
 
   // ---- Mock tasks (fallback mode) ----
@@ -143,7 +159,7 @@ export default function TasksPage() {
     });
   }
 
-  // Toggle for DB tasks
+  // Toggle for DB tasks – optimistic UI with rollback
   const toggleDbTask = useCallback(
     async (taskId: string) => {
       if (!profile) return;
@@ -151,21 +167,60 @@ export default function TasksPage() {
       const task = dbTasks.find((t) => t.id === taskId);
       if (!task) return;
 
-      if (task.status === "completed") {
-        // Un-complete: set back to pending
+      // Determine current visual state (including optimistic overrides)
+      const isCurrentlyCompleted = optimisticCompleted.has(taskId)
+        ? true
+        : optimisticUncompleted.has(taskId)
+          ? false
+          : task.status === "completed";
+
+      if (isCurrentlyCompleted) {
+        // Un-complete: optimistic → pending
+        haptic("tap");
+        setOptimisticUncompleted((prev) => new Set(prev).add(taskId));
+        setOptimisticCompleted((prev) => {
+          const next = new Set(prev);
+          next.delete(taskId);
+          return next;
+        });
+
         const success = await updateTask(taskId, { status: "pending" });
+        // Clear optimistic state — DB + realtime will take over
+        setOptimisticUncompleted((prev) => {
+          const next = new Set(prev);
+          next.delete(taskId);
+          return next;
+        });
         if (success) {
           toast.info("המשימה סומנה כלא הושלמה");
+        } else {
+          toast.error("שגיאה בעדכון המשימה");
         }
       } else {
-        // Complete the task
-        const result = await markComplete({ taskId, userId: profile.id });
+        // Complete: optimistic → completed
+        haptic("success");
+        setOptimisticCompleted((prev) => new Set(prev).add(taskId));
+        setOptimisticUncompleted((prev) => {
+          const next = new Set(prev);
+          next.delete(taskId);
+          return next;
+        });
+
+        const result = await markComplete({ taskId, userId: profile.id, recurring: !!task.recurring });
+        // Clear optimistic state
+        setOptimisticCompleted((prev) => {
+          const next = new Set(prev);
+          next.delete(taskId);
+          return next;
+        });
         if (result) {
           toast.success("כל הכבוד! המשימה הושלמה 🎉");
+        } else {
+          toast.error("שגיאה בהשלמת המשימה");
         }
       }
     },
-    [dbTasks, profile, markComplete, updateTask]
+    [dbTasks, profile, markComplete, updateTask, optimisticCompleted, optimisticUncompleted]
   );
 
   // Add new task to DB
@@ -200,6 +255,7 @@ export default function TasksPage() {
   // Delete task from DB
   const handleDeleteTask = useCallback(
     async (taskId: string) => {
+      haptic("tap");
       const success = await deleteTask(taskId);
       if (success) {
         toast.success("המשימה נמחקה");

@@ -31,10 +31,15 @@ interface UseCompletionsReturn {
     householdId?: string;
     photoUrl?: string;
     notes?: string;
+    recurring?: boolean;
   }) => Promise<TaskCompletionRow | null>;
   getHistory: (taskId: string) => Promise<TaskCompletionRow[]>;
   /** Leaderboard data: completion count per user, sorted descending */
   leaderboard: LeaderboardEntry[];
+  /** Set of task IDs that were completed today */
+  todayCompletionIds: Set<string>;
+  /** Check if a specific task was completed today */
+  isCompletedToday: (taskId: string) => boolean;
   refetch: () => Promise<void>;
 }
 
@@ -91,6 +96,24 @@ export function useCompletions(
     fetchCompletions();
   }, [fetchCompletions]);
 
+  // Compute today's completion IDs (task IDs completed today)
+  const todayCompletionIds = useMemo((): Set<string> => {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const ids = new Set<string>();
+    for (const c of completions) {
+      if (new Date(c.completed_at).getTime() >= startOfDay.getTime()) {
+        ids.add(c.task_id);
+      }
+    }
+    return ids;
+  }, [completions]);
+
+  const isCompletedToday = useCallback(
+    (taskId: string): boolean => todayCompletionIds.has(taskId),
+    [todayCompletionIds]
+  );
+
   // Compute leaderboard from completions
   const leaderboard = useMemo((): LeaderboardEntry[] => {
     const counts: Record<string, number> = {};
@@ -110,6 +133,8 @@ export function useCompletions(
       householdId?: string;
       photoUrl?: string;
       notes?: string;
+      /** If true, don't permanently change the task status (for recurring tasks) */
+      recurring?: boolean;
     }): Promise<TaskCompletionRow | null> => {
       try {
         const supabase = createClient();
@@ -135,16 +160,20 @@ export function useCompletions(
           return null;
         }
 
-        // Also update the task status to completed
-        const { error: updateError } = await supabase
-          .from("tasks")
-          .update({ status: "completed" as const })
-          .eq("id", params.taskId);
+        // Only update the permanent task status for non-recurring tasks.
+        // Recurring tasks reset daily — their "completed" state is derived
+        // from today's task_completions entries.
+        if (!params.recurring) {
+          const { error: updateError } = await supabase
+            .from("tasks")
+            .update({ status: "completed" as const })
+            .eq("id", params.taskId);
 
-        if (updateError) {
-          console.error("Failed to update task status:", updateError);
-          setError(updateError.message);
-          return null;
+          if (updateError) {
+            console.error("Failed to update task status:", updateError);
+            setError(updateError.message);
+            return null;
+          }
         }
 
         setCompletions((prev) => [data, ...prev]);
@@ -188,6 +217,8 @@ export function useCompletions(
     markComplete,
     getHistory,
     leaderboard,
+    todayCompletionIds,
+    isCompletedToday,
     refetch: fetchCompletions,
   };
 }

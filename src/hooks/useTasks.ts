@@ -133,16 +133,15 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
           return null;
         }
 
-        // If not using realtime, update local state
-        if (!options.realtime) {
-          setTasks((prev) => [data, ...prev]);
-        }
+        // Always update local state immediately (optimistic).
+        // Realtime will deduplicate via the UPDATE handler.
+        setTasks((prev) => [data, ...prev]);
         return data;
       } catch {
         return null;
       }
     },
-    [options.realtime]
+    []
   );
 
   const updateTask = useCallback(
@@ -159,19 +158,17 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
           return false;
         }
 
-        // If not using realtime, update local state immutably
-        if (!options.realtime) {
-          setTasks((prev) =>
-            prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
-          );
-        }
+        // Always update local state immediately (optimistic).
+        setTasks((prev) =>
+          prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
+        );
 
         return true;
       } catch {
         return false;
       }
     },
-    [options.realtime]
+    []
   );
 
   const deleteTask = useCallback(
@@ -188,16 +185,14 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
           return false;
         }
 
-        // If not using realtime, update local state
-        if (!options.realtime) {
-          setTasks((prev) => prev.filter((t) => t.id !== id));
-        }
+        // Always update local state immediately (optimistic).
+        setTasks((prev) => prev.filter((t) => t.id !== id));
         return true;
       } catch {
         return false;
       }
     },
-    [options.realtime]
+    []
   );
 
   return {

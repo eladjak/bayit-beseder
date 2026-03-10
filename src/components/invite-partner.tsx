@@ -10,6 +10,10 @@ import {
   Loader2,
   MessageCircle,
   Link as LinkIcon,
+  ChevronDown,
+  Send,
+  Users,
+  Home,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -34,8 +38,9 @@ export function InvitePartner() {
   const [inviteData, setInviteData] = useState<InviteData | null>(null);
   const [partnerInfo, setPartnerInfo] = useState<PartnerInfo | null>(null);
   const [loading, setLoading] = useState(false);
-  const [codeCopied, setCodeCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [showCode, setShowCode] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   // Fetch partner info if profile has a partner_id
   useEffect(() => {
@@ -152,57 +157,97 @@ export function InvitePartner() {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="space-y-3"
+            className="space-y-4"
           >
-            <p className="text-xs text-muted">
-              שתפו את הקוד או הקישור עם השותף/ה שלכם כדי לנהל את הבית יחד
-            </p>
-
-            {/* Invite code display */}
-            <div>
-              <label className="text-xs text-muted block mb-1">
-                קוד הזמנה
-              </label>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 bg-background border border-border rounded-lg px-3 py-2.5 text-base font-mono font-bold tracking-widest text-primary text-center">
-                  {inviteData.inviteCode}
-                </code>
-                <button
-                  onClick={handleCopyCode}
-                  className="p-2.5 rounded-lg bg-background border border-border hover:bg-surface-hover transition-colors"
-                  aria-label="העתק קוד הזמנה"
-                >
-                  {codeCopied ? (
-                    <Check className="w-4 h-4 text-success" />
-                  ) : (
-                    <Copy className="w-4 h-4 text-muted" />
-                  )}
-                </button>
+            {/* 3-step visual guide */}
+            <div className="flex items-center justify-between px-2 py-3 bg-primary/5 rounded-xl border border-primary/10">
+              <div className="flex flex-col items-center gap-1 flex-1">
+                <div className="w-8 h-8 rounded-full bg-[#25D366]/10 flex items-center justify-center">
+                  <Send className="w-4 h-4 text-[#25D366]" />
+                </div>
+                <span className="text-[10px] text-muted font-medium">שלחו הזמנה</span>
+              </div>
+              <div className="text-muted/30 text-lg">&larr;</div>
+              <div className="flex flex-col items-center gap-1 flex-1">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Users className="w-4 h-4 text-primary" />
+                </div>
+                <span className="text-[10px] text-muted font-medium">הצטרפות</span>
+              </div>
+              <div className="text-muted/30 text-lg">&larr;</div>
+              <div className="flex flex-col items-center gap-1 flex-1">
+                <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
+                  <Home className="w-4 h-4 text-success" />
+                </div>
+                <span className="text-[10px] text-muted font-medium">ביחד!</span>
               </div>
             </div>
 
-            {/* Share buttons */}
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={handleWhatsAppShare}
-                className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#25D366] text-white text-sm font-medium hover:opacity-90 transition-opacity active:scale-95 transition-transform shadow-sm"
-              >
-                <MessageCircle className="w-4 h-4" />
-                שתף בוואטסאפ
-              </button>
-
-              <button
-                onClick={handleCopyLink}
-                className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm font-medium hover:bg-surface-hover transition-colors active:scale-95 transition-transform"
-              >
-                {linkCopied ? (
-                  <Check className="w-4 h-4 text-success" />
-                ) : (
-                  <LinkIcon className="w-4 h-4 text-muted" />
-                )}
-                {linkCopied ? "הועתק!" : "העתק קישור"}
-              </button>
+            {/* Step-by-step instructions */}
+            <div className="space-y-1.5 text-xs text-muted">
+              <p>1. לחצו &quot;שתף בוואטסאפ&quot; כדי לשלוח הזמנה לשותף/ה</p>
+              <p>2. השותף/ה ילחץ על הקישור ויצטרף אוטומטית</p>
+              <p>3. אחרי ההצטרפות תוכלו לנהל את הבית יחד!</p>
             </div>
+
+            {/* Primary: WhatsApp share (full width, prominent) */}
+            <button
+              onClick={handleWhatsAppShare}
+              className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition-opacity active:scale-[0.98] transition-transform shadow-md shadow-[#25D366]/20"
+            >
+              <MessageCircle className="w-5 h-5" />
+              שתפו בוואטסאפ
+            </button>
+
+            {/* Secondary: Copy link */}
+            <button
+              onClick={handleCopyLink}
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm font-medium hover:bg-surface-hover transition-colors active:scale-[0.98] transition-transform"
+            >
+              {linkCopied ? (
+                <Check className="w-4 h-4 text-success" />
+              ) : (
+                <LinkIcon className="w-4 h-4 text-muted" />
+              )}
+              {linkCopied ? "הקישור הועתק!" : "העתקת קישור הזמנה"}
+            </button>
+
+            {/* Tertiary: Show code (collapsed) */}
+            <button
+              onClick={() => setShowCode((prev) => !prev)}
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs text-muted hover:text-foreground transition-colors"
+            >
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showCode ? "rotate-180" : ""}`} />
+              {showCode ? "הסתר קוד" : "הצג קוד הזמנה"}
+            </button>
+
+            <AnimatePresence>
+              {showCode && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="flex items-center gap-2">
+                    <code className="flex-1 bg-background border border-border rounded-lg px-3 py-2.5 text-base font-mono font-bold tracking-widest text-primary text-center">
+                      {inviteData.inviteCode}
+                    </code>
+                    <button
+                      onClick={handleCopyCode}
+                      className="p-2.5 rounded-lg bg-background border border-border hover:bg-surface-hover transition-colors"
+                      aria-label="העתק קוד הזמנה"
+                    >
+                      {codeCopied ? (
+                        <Check className="w-4 h-4 text-success" />
+                      ) : (
+                        <Copy className="w-4 h-4 text-muted" />
+                      )}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         ) : (
           <motion.div

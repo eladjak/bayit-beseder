@@ -2,24 +2,59 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { Plus, X, ChevronDown, ChevronUp, Trash2, Settings } from "lucide-react";
 import { toast } from "sonner";
-import { useShoppingList, CATEGORY_COLORS, SHOPPING_CATEGORY_ICONS, SHOPPING_CATEGORY_ILLUSTRATIONS } from "@/hooks/useShoppingList";
+import { useShoppingList, CATEGORY_COLORS, SHOPPING_CATEGORY_ICONS } from "@/hooks/useShoppingList";
 import type { ShoppingCategory } from "@/hooks/useShoppingList";
+import { useShoppingCategories } from "@/hooks/useShoppingCategories";
 import { ShoppingItemCard } from "@/components/shopping/shopping-item";
+import { CategoryManager } from "@/components/shopping/category-manager";
 import { haptic } from "@/lib/haptics";
 
-const ALL_CATEGORIES: ShoppingCategory[] = ["מזון", "ניקיון", "חיות", "בית", "טיפוח", "תרופות", "תינוק", "אחר"];
+const FALLBACK_CATEGORIES: ShoppingCategory[] = ["מזון", "ניקיון", "חיות", "בית", "טיפוח", "תרופות", "אחר"];
 
 export default function ShoppingPage() {
   const { items, loading, addItem, toggleItem, removeItem, clearChecked } =
     useShoppingList();
+  const {
+    categories: dynamicCategories,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+    reorderCategories,
+  } = useShoppingCategories();
 
-  const [filter, setFilter] = useState<ShoppingCategory | "הכל">("הכל");
+  const [filter, setFilter] = useState<string>("הכל");
   const [showForm, setShowForm] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newCategory, setNewCategory] = useState<ShoppingCategory>("מזון");
   const [showChecked, setShowChecked] = useState(true);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
+
+  // Use dynamic categories if available, fallback to hardcoded
+  const categoryNames = useMemo(() => {
+    if (dynamicCategories.length > 0 && dynamicCategories[0].household_id !== "mock") {
+      return dynamicCategories.map((c) => c.name);
+    }
+    return FALLBACK_CATEGORIES as string[];
+  }, [dynamicCategories]);
+
+  // Build icon/color maps from dynamic categories
+  const categoryIconMap = useMemo(() => {
+    const map: Record<string, string> = { ...SHOPPING_CATEGORY_ICONS };
+    for (const c of dynamicCategories) {
+      map[c.name] = c.icon;
+    }
+    return map;
+  }, [dynamicCategories]);
+
+  const categoryColorMap = useMemo(() => {
+    const map: Record<string, string> = { ...CATEGORY_COLORS };
+    for (const c of dynamicCategories) {
+      map[c.name] = c.color;
+    }
+    return map;
+  }, [dynamicCategories]);
 
   const filteredItems = useMemo(() => {
     const filtered =
@@ -54,7 +89,6 @@ export default function ShoppingPage() {
   function handleToggle(id: string) {
     haptic("tap");
     toggleItem(id);
-    // No toast for toggle - too noisy
   }
 
   function handleRemove(id: string) {
@@ -87,23 +121,32 @@ export default function ShoppingPage() {
   return (
     <div className="space-y-4" dir="rtl">
       {/* Header with gradient */}
-      <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 text-center overflow-hidden">
-        <div className="relative z-10">
-          <h1 className="text-xl font-bold text-white tracking-tight">
-            רשימת קניות
-          </h1>
-          {totalCount > 0 && (
-            <div className="mt-2 inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 border border-white/10">
-              <span className="text-xs text-white/90 font-medium">
-                {checkedCount}/{totalCount} פריטים סומנו
-              </span>
-            </div>
-          )}
+      <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
+        <div className="flex items-center justify-between relative z-10">
+          <div className="text-center flex-1">
+            <h1 className="text-xl font-bold text-white tracking-tight">
+              רשימת קניות
+            </h1>
+            {totalCount > 0 && (
+              <div className="mt-2 inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 border border-white/10">
+                <span className="text-xs text-white/90 font-medium">
+                  {checkedCount}/{totalCount} פריטים סומנו
+                </span>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={() => setShowCategoryManager(true)}
+            className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
+            aria-label="ניהול קטגוריות"
+          >
+            <Settings className="w-4.5 h-4.5" />
+          </button>
         </div>
       </div>
 
       <div className="px-4 space-y-4">
-      {/* Category filter - illustrated cards */}
+      {/* Category filter */}
       <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
         <button
           onClick={() => setFilter("הכל")}
@@ -117,7 +160,7 @@ export default function ShoppingPage() {
         >
           📋 הכל
         </button>
-        {ALL_CATEGORIES.map((cat) => {
+        {categoryNames.map((cat) => {
           const isActive = filter === cat;
           return (
             <button
@@ -130,16 +173,16 @@ export default function ShoppingPage() {
                   ? "text-white shadow-md"
                   : "bg-surface text-muted hover:text-foreground card-elevated"
               }`}
-              style={isActive ? { backgroundColor: CATEGORY_COLORS[cat] } : undefined}
+              style={isActive ? { backgroundColor: categoryColorMap[cat] ?? "#6B7280" } : undefined}
             >
-              <span>{SHOPPING_CATEGORY_ICONS[cat]}</span>
+              <span>{categoryIconMap[cat] ?? "📦"}</span>
               <span>{cat}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Unchecked items */}
+      {/* Empty state */}
       {filteredItems.unchecked.length === 0 &&
         filteredItems.checked.length === 0 && (
           <motion.div
@@ -228,7 +271,7 @@ export default function ShoppingPage() {
         </motion.button>
       )}
 
-      {/* Add item form (slide up) */}
+      {/* Add item form */}
       <AnimatePresence>
         {showForm && (
           <motion.div
@@ -261,10 +304,10 @@ export default function ShoppingPage() {
               autoFocus
             />
             <div className="flex flex-wrap gap-2">
-              {ALL_CATEGORIES.map((cat) => (
+              {categoryNames.map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => setNewCategory(cat)}
+                  onClick={() => setNewCategory(cat as ShoppingCategory)}
                   className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                     newCategory === cat
                       ? "text-white"
@@ -272,11 +315,11 @@ export default function ShoppingPage() {
                   }`}
                   style={
                     newCategory === cat
-                      ? { backgroundColor: CATEGORY_COLORS[cat] }
+                      ? { backgroundColor: categoryColorMap[cat] ?? "#6B7280" }
                       : undefined
                   }
                 >
-                  <span>{SHOPPING_CATEGORY_ICONS[cat]}</span>
+                  <span>{categoryIconMap[cat] ?? "📦"}</span>
                   <span>{cat}</span>
                 </button>
               ))}
@@ -309,6 +352,20 @@ export default function ShoppingPage() {
         </motion.button>
       )}
       </div>
+
+      {/* Category Manager Modal */}
+      <AnimatePresence>
+        {showCategoryManager && (
+          <CategoryManager
+            categories={dynamicCategories}
+            onAdd={addCategory}
+            onUpdate={updateCategory}
+            onDelete={deleteCategory}
+            onReorder={reorderCategories}
+            onClose={() => setShowCategoryManager(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
