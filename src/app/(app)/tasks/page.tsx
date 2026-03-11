@@ -56,7 +56,7 @@ export default function TasksPage() {
     updateTask,
     refetch: refetchTasks,
   } = useTasks({ realtime: true });
-  const { markComplete, isCompletedToday } = useCompletions({ limit: 500 });
+  const { markComplete, isCompletedToday, refetch: refetchCompletions } = useCompletions({ limit: 500 });
   const { categories, categoryMap } = useCategories();
 
   // ---- Auto-seed tasks for authenticated users on first visit ----
@@ -168,11 +168,15 @@ export default function TasksPage() {
       if (!task) return;
 
       // Determine current visual state (including optimistic overrides)
+      // For recurring tasks, use isCompletedToday (not task.status which stays "pending")
+      const dbCompleted = task.recurring
+        ? isCompletedToday(task.id)
+        : task.status === "completed";
       const isCurrentlyCompleted = optimisticCompleted.has(taskId)
         ? true
         : optimisticUncompleted.has(taskId)
           ? false
-          : task.status === "completed";
+          : dbCompleted;
 
       if (isCurrentlyCompleted) {
         // Un-complete: optimistic → pending
@@ -184,17 +188,43 @@ export default function TasksPage() {
           return next;
         });
 
-        const success = await updateTask(taskId, { status: "pending" });
-        // Clear optimistic state — DB + realtime will take over
-        setOptimisticUncompleted((prev) => {
-          const next = new Set(prev);
-          next.delete(taskId);
-          return next;
-        });
-        if (success) {
-          toast.info("המשימה סומנה כלא הושלמה");
+        if (task.recurring) {
+          // For recurring tasks: delete today's completion record
+          const supabase = (await import("@/lib/supabase")).createClient();
+          const startOfDay = new Date();
+          startOfDay.setHours(0, 0, 0, 0);
+          const { error: delError } = await supabase
+            .from("task_completions")
+            .delete()
+            .eq("task_id", taskId)
+            .eq("user_id", profile.id)
+            .gte("completed_at", startOfDay.toISOString());
+
+          setOptimisticUncompleted((prev) => {
+            const next = new Set(prev);
+            next.delete(taskId);
+            return next;
+          });
+
+          if (!delError) {
+            await refetchCompletions();
+            toast.info("המשימה סומנה כלא הושלמה");
+          } else {
+            toast.error("שגיאה בעדכון המשימה");
+          }
         } else {
-          toast.error("שגיאה בעדכון המשימה");
+          // For one-time tasks: revert task status to pending
+          const success = await updateTask(taskId, { status: "pending" });
+          setOptimisticUncompleted((prev) => {
+            const next = new Set(prev);
+            next.delete(taskId);
+            return next;
+          });
+          if (success) {
+            toast.info("המשימה סומנה כלא הושלמה");
+          } else {
+            toast.error("שגיאה בעדכון המשימה");
+          }
         }
       } else {
         // Complete: optimistic → completed
@@ -220,7 +250,7 @@ export default function TasksPage() {
         }
       }
     },
-    [dbTasks, profile, markComplete, updateTask, optimisticCompleted, optimisticUncompleted]
+    [dbTasks, profile, markComplete, updateTask, optimisticCompleted, optimisticUncompleted, isCompletedToday, refetchCompletions]
   );
 
   // Add new task to DB
