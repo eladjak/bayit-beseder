@@ -220,21 +220,24 @@ async function fetchNotificationsFromSupabase(): Promise<SupabaseNotificationDat
         // Get partner display name
         supabase
           .from("profiles")
-          .select("display_name, partner_id")
+          .select("display_name, household_id")
           .eq("id", user.id)
           .single(),
       ]);
 
-    // Determine partner name
+    // Determine partner name via household members
     let partnerName = "השותף/ה";
-    if (profileResult.data?.partner_id) {
-      const { data: partnerProfile } = await supabase
+    const hId = profileResult.data?.household_id;
+    if (hId) {
+      const { data: members } = await supabase
         .from("profiles")
         .select("display_name")
-        .eq("id", profileResult.data.partner_id)
+        .eq("household_id", hId)
+        .neq("id", user.id)
+        .limit(1)
         .single();
-      if (partnerProfile?.display_name) {
-        partnerName = partnerProfile.display_name;
+      if (members?.display_name) {
+        partnerName = members.display_name;
       }
     }
 
