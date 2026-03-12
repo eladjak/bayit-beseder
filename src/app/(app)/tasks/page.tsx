@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Clock, Filter, Plus, Trash2 } from "lucide-react";
+import { Check, Clock, Filter, Plus, Settings, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
 import {
@@ -10,21 +10,17 @@ import {
   TASK_TEMPLATES_SEED,
 } from "@/lib/seed-data";
 import {
-  CATEGORY_FILTER_KEYS,
-  CATEGORY_KEYS,
-  CATEGORY_LABELS,
-  CATEGORY_ICONS,
-  CATEGORY_ILLUSTRATIONS,
-  CATEGORY_NAME_TO_KEY,
   CATEGORY_KEY_TO_NAME,
   getCategoryColor,
   getCategoryLabel,
 } from "@/lib/categories";
 import { CategoryCard } from "@/components/category-card";
+import { TaskCategoryManager } from "@/components/tasks/task-category-manager";
 import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useProfile } from "@/hooks/useProfile";
 import { useCategories } from "@/hooks/useCategories";
+import { useTaskCategories } from "@/hooks/useTaskCategories";
 
 
 interface DbTaskView {
@@ -43,6 +39,7 @@ interface DbTaskView {
 export default function TasksPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskCategory, setNewTaskCategory] = useState("general");
 
@@ -58,6 +55,13 @@ export default function TasksPage() {
   } = useTasks({ realtime: true });
   const { markComplete, isCompletedToday, refetch: refetchCompletions } = useCompletions({ limit: 500 });
   const { categories, categoryMap } = useCategories();
+  const {
+    taskCategories,
+    addTaskCategory,
+    updateTaskCategory,
+    deleteTaskCategory,
+    reorderTaskCategories,
+  } = useTaskCategories();
 
   // ---- Auto-seed tasks for authenticated users on first visit ----
   const seedAttempted = useRef(false);
@@ -83,13 +87,26 @@ export default function TasksPage() {
   const [optimisticCompleted, setOptimisticCompleted] = useState<Set<string>>(new Set());
   const [optimisticUncompleted, setOptimisticUncompleted] = useState<Set<string>>(new Set());
 
+  // Build a name→key lookup from dynamic task categories
+  // Dynamic categories use their name as the key (since they have no legacy key).
+  // For backward compat the 8 hardcoded names still map to the legacy keys via categories.ts.
+  const dynamicCategoryNameToKey = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const tc of taskCategories) {
+      // Use the category id as key for dynamic categories so it's always unique
+      map[tc.name] = tc.id;
+    }
+    return map;
+  }, [taskCategories]);
+
   // Convert DB tasks to a display-friendly shape
   const dbTaskViews: DbTaskView[] = useMemo(
     () =>
       dbTasks.map((t) => {
         const categoryName = t.category_id ? categoryMap[t.category_id] : null;
+        // Prefer dynamic category id lookup, fall back to hardcoded key
         const categoryKey = categoryName
-          ? (CATEGORY_NAME_TO_KEY[categoryName] ?? "general")
+          ? (dynamicCategoryNameToKey[categoryName] ?? CATEGORY_KEY_TO_NAME[categoryName] ?? "general")
           : "general";
 
         // Check if task is overdue (due date is in the past and not completed)
@@ -100,7 +117,6 @@ export default function TasksPage() {
           t.status !== "completed";
 
         // For recurring tasks, use today's completions instead of permanent status.
-        // One-time tasks use permanent status as before.
         const dbCompleted = t.recurring
           ? isCompletedToday(t.id)
           : t.status === "completed";
@@ -123,7 +139,7 @@ export default function TasksPage() {
           isOverdue: !!isOverdue,
         };
       }),
-    [dbTasks, categoryMap, optimisticCompleted, optimisticUncompleted, isCompletedToday]
+    [dbTasks, categoryMap, dynamicCategoryNameToKey, optimisticCompleted, optimisticUncompleted, isCompletedToday]
   );
 
   // ---- Mock tasks (fallback mode) ----
@@ -178,8 +194,6 @@ export default function TasksPage() {
       const task = dbTasks.find((t) => t.id === taskId);
       if (!task) return;
 
-      // Determine current visual state (including optimistic overrides)
-      // For recurring tasks, use isCompletedToday (not task.status which stays "pending")
       const dbCompleted = task.recurring
         ? isCompletedToday(task.id)
         : task.status === "completed";
@@ -190,7 +204,6 @@ export default function TasksPage() {
           : dbCompleted;
 
       if (isCurrentlyCompleted) {
-        // Un-complete: optimistic → pending
         haptic("tap");
         setOptimisticUncompleted((prev) => new Set(prev).add(taskId));
         setOptimisticCompleted((prev) => {
@@ -200,7 +213,6 @@ export default function TasksPage() {
         });
 
         if (task.recurring) {
-          // For recurring tasks: delete today's completion record
           const supabase = (await import("@/lib/supabase")).createClient();
           const startOfDay = new Date();
           startOfDay.setHours(0, 0, 0, 0);
@@ -224,7 +236,6 @@ export default function TasksPage() {
             toast.error("שגיאה בעדכון המשימה");
           }
         } else {
-          // For one-time tasks: revert task status to pending
           const success = await updateTask(taskId, { status: "pending" });
           setOptimisticUncompleted((prev) => {
             const next = new Set(prev);
@@ -238,7 +249,6 @@ export default function TasksPage() {
           }
         }
       } else {
-        // Complete: optimistic → completed
         haptic("success");
         setOptimisticCompleted((prev) => new Set(prev).add(taskId));
         setOptimisticUncompleted((prev) => {
@@ -248,7 +258,6 @@ export default function TasksPage() {
         });
 
         const result = await markComplete({ taskId, userId: profile.id, recurring: !!task.recurring });
-        // Clear optimistic state
         setOptimisticCompleted((prev) => {
           const next = new Set(prev);
           next.delete(taskId);
@@ -269,7 +278,7 @@ export default function TasksPage() {
     if (!newTaskTitle.trim()) return;
 
     // Find category_id from categories table
-    const categoryName = CATEGORY_KEY_TO_NAME[newTaskCategory] ?? "כללי";
+    const categoryName = CATEGORY_KEY_TO_NAME[newTaskCategory] ?? newTaskCategory;
     const category = categories.find((c) => c.name === categoryName);
 
     const todayStr = new Date().toISOString().slice(0, 10);
@@ -305,6 +314,29 @@ export default function TasksPage() {
       }
     },
     [deleteTask]
+  );
+
+  // Resolve display label/color/icon for a categoryKey that may be either a
+  // legacy string key ("kitchen") or a dynamic UUID from task_categories.
+  const resolveCategoryDisplay = useCallback(
+    (key: string) => {
+      // Check if it matches a dynamic task category by id
+      const dynamicCat = taskCategories.find((tc) => tc.id === key);
+      if (dynamicCat) {
+        return {
+          label: dynamicCat.name,
+          color: dynamicCat.color,
+          icon: dynamicCat.icon,
+        };
+      }
+      // Fall back to hardcoded helpers
+      return {
+        label: getCategoryLabel(key),
+        color: getCategoryColor(key),
+        icon: null,
+      };
+    },
+    [taskCategories]
   );
 
   return (
@@ -378,22 +410,22 @@ export default function TasksPage() {
             dir="rtl"
           />
           <div className="flex gap-2 flex-wrap">
-            {CATEGORY_KEYS.map((cat) => (
+            {taskCategories.map((tc) => (
               <button
-                key={cat}
-                onClick={() => setNewTaskCategory(cat)}
+                key={tc.id}
+                onClick={() => setNewTaskCategory(tc.name)}
                 className={`px-2 py-1 rounded-full text-[10px] font-medium transition-colors ${
-                  newTaskCategory === cat
+                  newTaskCategory === tc.name
                     ? "text-white"
                     : "bg-background text-muted border border-border"
                 }`}
                 style={
-                  newTaskCategory === cat
-                    ? { backgroundColor: getCategoryColor(cat) }
+                  newTaskCategory === tc.name
+                    ? { backgroundColor: tc.color }
                     : undefined
                 }
               >
-                {CATEGORY_ICONS[cat]} {CATEGORY_LABELS[cat]}
+                {tc.icon} {tc.name}
               </button>
             ))}
           </div>
@@ -418,20 +450,41 @@ export default function TasksPage() {
         </motion.div>
       )}
 
-      {/* Category Filter Cards */}
-      <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
-        {CATEGORY_FILTER_KEYS.map((cat) => (
+      {/* Category Filter Cards + gear icon */}
+      <div className="flex items-center gap-2">
+        <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-0 flex-1 scrollbar-none">
+          {/* "All" card */}
           <CategoryCard
-            key={cat}
-            categoryKey={cat}
-            label={CATEGORY_LABELS[cat] ?? cat}
-            illustration={cat !== "all" ? CATEGORY_ILLUSTRATIONS[cat] : undefined}
-            icon={cat !== "all" ? CATEGORY_ICONS[cat] : "📋"}
-            isActive={activeCategory === cat}
-            onClick={() => setActiveCategory(cat)}
+            categoryKey="all"
+            label="הכל"
+            icon="📋"
+            isActive={activeCategory === "all"}
+            onClick={() => setActiveCategory("all")}
             size="sm"
           />
-        ))}
+          {/* Dynamic task categories */}
+          {taskCategories.map((tc) => (
+            <CategoryCard
+              key={tc.id}
+              categoryKey={tc.id}
+              label={tc.name}
+              icon={tc.icon}
+              isActive={activeCategory === tc.id}
+              onClick={() => setActiveCategory(tc.id)}
+              size="sm"
+            />
+          ))}
+        </div>
+        {/* Manage categories button */}
+        {hasDbTasks && (
+          <button
+            onClick={() => setShowCategoryManager(true)}
+            className="flex-shrink-0 p-2 rounded-xl bg-surface border border-border text-muted hover:text-foreground hover:bg-surface-hover transition-colors mb-2"
+            aria-label="ניהול קטגוריות"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Task List */}
@@ -465,90 +518,91 @@ export default function TasksPage() {
         <AnimatePresence mode="popLayout">
           {hasDbTasks
             ? /* ---- DB Tasks ---- */
-              filteredDbTasks.map((task) => (
-                <motion.div
-                  key={task.id}
-                  layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`card-elevated p-3.5 flex items-start gap-3 relative overflow-hidden ${
-                    task.isCompleted ? "opacity-50" : ""
-                  } ${
-                    task.isOverdue && !task.isCompleted
-                      ? "ring-1 ring-red-500/20"
-                      : ""
-                  }`}
-                  style={{
-                    borderRight: `3px solid ${
+              filteredDbTasks.map((task) => {
+                const display = resolveCategoryDisplay(task.categoryKey);
+                return (
+                  <motion.div
+                    key={task.id}
+                    layout
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`card-elevated p-3.5 flex items-start gap-3 relative overflow-hidden ${
+                      task.isCompleted ? "opacity-50" : ""
+                    } ${
                       task.isOverdue && !task.isCompleted
-                        ? "#EF4444"
-                        : task.isCompleted
-                          ? "#10B981"
-                          : getCategoryColor(task.categoryKey)
-                    }`,
-                  }}
-                >
-                  {/* Overdue indicator */}
-                  {task.isOverdue && !task.isCompleted && (
-                    <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
-                      מאחר
-                    </div>
-                  )}
-                  <button
-                    onClick={() => toggleDbTask(task.id)}
-                    aria-label={task.isCompleted ? `בטל השלמה: ${task.title}` : `סמן כהושלם: ${task.title}`}
-                    aria-pressed={task.isCompleted}
-                    className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                      task.isCompleted
-                        ? "bg-success border-success"
-                        : task.isOverdue
-                        ? "border-red-400 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
-                        : "border-border hover:border-primary hover:bg-primary/5"
+                        ? "ring-1 ring-red-500/20"
+                        : ""
                     }`}
+                    style={{
+                      borderRight: `3px solid ${
+                        task.isOverdue && !task.isCompleted
+                          ? "#EF4444"
+                          : task.isCompleted
+                            ? "#10B981"
+                            : display.color
+                      }`,
+                    }}
                   >
-                    {task.isCompleted && (
-                      <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                    {/* Overdue indicator */}
+                    {task.isOverdue && !task.isCompleted && (
+                      <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                        מאחר
+                      </div>
                     )}
-                  </button>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={`text-sm font-medium leading-snug ${
+                    <button
+                      onClick={() => toggleDbTask(task.id)}
+                      aria-label={task.isCompleted ? `בטל השלמה: ${task.title}` : `סמן כהושלם: ${task.title}`}
+                      aria-pressed={task.isCompleted}
+                      className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                         task.isCompleted
-                          ? "line-through text-muted"
+                          ? "bg-success border-success"
                           : task.isOverdue
-                          ? "text-red-700 dark:text-red-400"
-                          : "text-foreground"
+                          ? "border-red-400 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                          : "border-border hover:border-primary hover:bg-primary/5"
                       }`}
                     >
-                      {task.title}
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                      <span
-                        className="text-[10px] px-2 py-0.5 rounded-md text-white font-medium"
-                        style={{
-                          backgroundColor: getCategoryColor(task.categoryKey),
-                        }}
+                      {task.isCompleted && (
+                        <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                      )}
+                    </button>
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={`text-sm font-medium leading-snug ${
+                          task.isCompleted
+                            ? "line-through text-muted"
+                            : task.isOverdue
+                            ? "text-red-700 dark:text-red-400"
+                            : "text-foreground"
+                        }`}
                       >
-                        {getCategoryLabel(task.categoryKey)}
-                      </span>
-                      <span className="text-[10px] text-muted px-2 py-0.5 rounded-md bg-background border border-border/50">
-                        {task.recurrenceLabel}
-                      </span>
-                      <span className="text-[10px] text-muted flex items-center gap-0.5">
-                        <Clock className="w-3 h-3" />
-                        {task.estimated_minutes} דק׳
-                      </span>
+                        {task.title}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                        <span
+                          className="text-[10px] px-2 py-0.5 rounded-md text-white font-medium"
+                          style={{ backgroundColor: display.color }}
+                        >
+                          {display.icon ? `${display.icon} ` : ""}{display.label}
+                        </span>
+                        <span className="text-[10px] text-muted px-2 py-0.5 rounded-md bg-background border border-border/50">
+                          {task.recurrenceLabel}
+                        </span>
+                        <span className="text-[10px] text-muted flex items-center gap-0.5">
+                          <Clock className="w-3 h-3" />
+                          {task.estimated_minutes} דק׳
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteTask(task.id)}
-                    className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors"
-                    aria-label="מחיקת משימה"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </motion.div>
-              ))
+                    <button
+                      onClick={() => handleDeleteTask(task.id)}
+                      className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors"
+                      aria-label="מחיקת משימה"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </motion.div>
+                );
+              })
             : /* ---- Mock Tasks (fallback) ---- */
               filteredMockTasks.map((task, i) => {
                 const isCompleted = completedIds.has(`task-${i}`);
@@ -620,6 +674,20 @@ export default function TasksPage() {
         </AnimatePresence>
       </div>
       </div>
+
+      {/* Task Category Manager modal */}
+      <AnimatePresence>
+        {showCategoryManager && (
+          <TaskCategoryManager
+            categories={taskCategories}
+            onAdd={addTaskCategory}
+            onUpdate={updateTaskCategory}
+            onDelete={deleteTaskCategory}
+            onReorder={reorderTaskCategories}
+            onClose={() => setShowCategoryManager(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
