@@ -1,6 +1,14 @@
 {
   "name": "bayit-beseder",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Shared home maintenance app for couples — Hebrew RTL, mobile-first PWA with gamification",
+  "keywords": ["nextjs", "pwa", "supabase", "hebrew", "rtl", "home-management", "couples", "gamification"],
+  "homepage": "https://bayit-beseder.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eladjak/bayit-beseder"
+  },
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev",

@@ -12,12 +12,33 @@ const heebo = Heebo({
 
 export const metadata: Metadata = {
   title: "בית בסדר - ניהול תחזוקת הבית",
-  description: "אפליקציה לניהול תחזוקת הבית המשותף",
+  description:
+    "אפליקציה לניהול תחזוקת הבית המשותף לזוגות — תכנון שבועי, גיימיפיקציה, Google Calendar ו-WhatsApp",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "בית בסדר",
+  },
+  icons: {
+    apple: "/icons/apple-touch-icon.png",
+  },
+  openGraph: {
+    title: "בית בסדר - ניהול תחזוקת הבית",
+    description:
+      "אפליקציה לניהול תחזוקת הבית המשותף לזוגות — תכנון שבועי חכם, גיימיפיקציה, Google Calendar ו-WhatsApp",
+    url: "https://bayit-beseder.vercel.app",
+    siteName: "בית בסדר",
+    images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
+    locale: "he_IL",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "בית בסדר - ניהול תחזוקת הבית",
+    description:
+      "אפליקציה לניהול תחזוקת הבית המשותף לזוגות — תכנון שבועי חכם, גיימיפיקציה, Google Calendar ו-WhatsApp",
+    images: ["/og-image.jpg"],
   },
 };
 

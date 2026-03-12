@@ -9,6 +9,15 @@ App is fully functional. All migrations applied, all features connected to Supab
 
 ## Recent Work
 
+### Wave F: Weekly Calendar Integration (Mar 12) [DONE]
+- **Google Calendar connected** - OAuth flow working in production
+- **New API route** `/api/calendar/events` - fetches user's Google Calendar events
+- **useCalendarEvents hook** - client-side fetching with date grouping
+- **CalendarEventItem component** - RTL blue accent cards for calendar events
+- **Smart scheduler extended** - calendar-aware load analysis + suggestions (busy_calendar_day, free_slot)
+- **Weekly page integrated** - events shown per day, connection prompt, header stats, collapsed badges
+- 6 files changed, 526 insertions
+
 ### UX Overhaul (Mar 9) [DONE]
 - **Wave 0**: Consolidated `categories.ts` as single source of truth, `CategoryCard` component
 - **Wave 1**: Tasks page auto-seed, login banner, illustrated category scroll
@@ -47,6 +56,7 @@ App is fully functional. All migrations applied, all features connected to Supab
 - **Phase 17**: Avatar upload, task completion feedback modal
 
 ## Remaining Roadmap
+- Google OAuth Verification (for sharing with friends - guide created)
 - Reply-to-complete from WhatsApp (needs dedicated Green API instance)
 - i18n (English support)
 - Performance optimization
