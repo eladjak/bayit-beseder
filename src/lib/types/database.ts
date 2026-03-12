@@ -108,7 +108,6 @@ export type Database = {
           completed_at?: string;
           photo_url?: string | null;
           notes?: string | null;
-          household_id?: string | null;
         };
         Update: {
           id?: string;

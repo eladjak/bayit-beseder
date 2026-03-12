@@ -68,7 +68,6 @@ async function recordPlaylistCompletion(playlistId: string, playlistName: string
     await supabase.from("task_completions").insert({
       task_id: taskId,
       user_id: user.id,
-      household_id: profile?.household_id ?? null,
       notes: `הושלם פלייליסט: ${playlistName}`,
     });
   } catch {

@@ -127,7 +127,6 @@ export async function measureEffectiveness(
     const { data: completions, error: completionsError } = await supabase
       .from("task_completions")
       .select("completed_at")
-      .eq("household_id", householdId)
       .gte("completed_at", since);
 
     if (completionsError) {

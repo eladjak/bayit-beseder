@@ -142,7 +142,6 @@ export function useCompletions(
         const insertion: TaskCompletionInsert = {
           task_id: params.taskId,
           user_id: params.userId,
-          household_id: params.householdId ?? null,
           photo_url: params.photoUrl ?? null,
           notes: params.notes ?? null,
         };
