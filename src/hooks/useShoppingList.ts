@@ -22,7 +22,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase";
 
-export type ShoppingCategory = "מזון" | "ניקיון" | "חיות" | "בית" | "אחר" | "טיפוח" | "תרופות";
+// ShoppingCategory is now an open string type to support custom categories
+export type ShoppingCategory = string;
 
 export interface ShoppingItem {
   id: string;
@@ -35,7 +36,8 @@ export interface ShoppingItem {
   created_at: string;
 }
 
-export const CATEGORY_COLORS: Record<ShoppingCategory, string> = {
+// Fallback color/icon maps for categories that don't have dynamic data yet
+export const CATEGORY_COLORS: Record<string, string> = {
   "מזון": "#22C55E",
   "ניקיון": "#3B82F6",
   "חיות": "#F97316",
@@ -45,7 +47,7 @@ export const CATEGORY_COLORS: Record<ShoppingCategory, string> = {
   "תרופות": "#EF4444",
 };
 
-export const SHOPPING_CATEGORY_ICONS: Record<ShoppingCategory, string> = {
+export const SHOPPING_CATEGORY_ICONS: Record<string, string> = {
   "מזון": "🛒",
   "ניקיון": "🧹",
   "חיות": "🐾",
@@ -55,7 +57,7 @@ export const SHOPPING_CATEGORY_ICONS: Record<ShoppingCategory, string> = {
   "תרופות": "💊",
 };
 
-export const SHOPPING_CATEGORY_ILLUSTRATIONS: Record<ShoppingCategory, string> = {
+export const SHOPPING_CATEGORY_ILLUSTRATIONS: Record<string, string> = {
   "מזון": "/illustrations/shopping-food.jpg",
   "ניקיון": "/illustrations/shopping-cleaning.jpg",
   "חיות": "/illustrations/shopping-pets.jpg",
@@ -66,15 +68,15 @@ export const SHOPPING_CATEGORY_ILLUSTRATIONS: Record<ShoppingCategory, string> =
 };
 
 const DEFAULT_MOCK_ITEMS: ShoppingItem[] = [
-  { id: "s1", title: "חלב", category: "מזון", checked: false, added_by: "elad", created_at: "2026-02-19T08:00:00Z" },
-  { id: "s2", title: "לחם", category: "מזון", checked: false, added_by: "elad", created_at: "2026-02-19T08:01:00Z" },
-  { id: "s3", title: "ביצים", quantity: 12, unit: "יח׳", category: "מזון", checked: false, added_by: "ענבל", created_at: "2026-02-19T08:02:00Z" },
-  { id: "s4", title: "גבינה צהובה", category: "מזון", checked: true, added_by: "ענבל", created_at: "2026-02-19T07:00:00Z" },
-  { id: "s5", title: "סבון כלים", category: "ניקיון", checked: false, added_by: "elad", created_at: "2026-02-19T09:00:00Z" },
-  { id: "s6", title: "אקונומיקה", category: "ניקיון", checked: false, added_by: "ענבל", created_at: "2026-02-19T09:01:00Z" },
-  { id: "s7", title: "אוכל לחתולים", quantity: 2, unit: "ק״ג", category: "חיות", checked: false, added_by: "elad", created_at: "2026-02-19T10:00:00Z" },
-  { id: "s8", title: "חול לארגז", category: "חיות", checked: false, added_by: "ענבל", created_at: "2026-02-19T10:01:00Z" },
-  { id: "s9", title: "נורות", quantity: 4, unit: "יח׳", category: "בית", checked: false, added_by: "elad", created_at: "2026-02-19T11:00:00Z" },
+  { id: "s1", title: "חלב", category: "חלב", checked: false, added_by: "elad", created_at: "2026-02-19T08:00:00Z" },
+  { id: "s2", title: "לחם", category: "מאפים ודגנים", checked: false, added_by: "elad", created_at: "2026-02-19T08:01:00Z" },
+  { id: "s3", title: "ביצים", quantity: 12, unit: "יח׳", category: "בשר, ביצים ודגים", checked: false, added_by: "ענבל", created_at: "2026-02-19T08:02:00Z" },
+  { id: "s4", title: "גבינה צהובה", category: "מוצרי חלב", checked: true, added_by: "ענבל", created_at: "2026-02-19T07:00:00Z" },
+  { id: "s5", title: "סבון כלים", category: "ניקיון וכביסה", checked: false, added_by: "elad", created_at: "2026-02-19T09:00:00Z" },
+  { id: "s6", title: "אקונומיקה", category: "ניקיון וכביסה", checked: false, added_by: "ענבל", created_at: "2026-02-19T09:01:00Z" },
+  { id: "s7", title: "אוכל לחתולים", quantity: 2, unit: "ק״ג", category: "ג'ינו ורוג'ר 🐱", checked: false, added_by: "elad", created_at: "2026-02-19T10:00:00Z" },
+  { id: "s8", title: "חול לארגז", category: "ג'ינו ורוג'ר 🐱", checked: false, added_by: "ענבל", created_at: "2026-02-19T10:01:00Z" },
+  { id: "s9", title: "נורות", quantity: 4, unit: "יח׳", category: "שונות", checked: false, added_by: "elad", created_at: "2026-02-19T11:00:00Z" },
 ];
 
 const STORAGE_KEY = "bayit-beseder-shopping-list";
@@ -104,7 +106,7 @@ function toShoppingItem(row: {
     title: row.title,
     quantity: row.quantity === 1 ? undefined : row.quantity,
     unit: row.unit ?? undefined,
-    category: row.category as ShoppingCategory,
+    category: row.category,
     checked: row.checked,
     added_by: row.added_by ?? "unknown",
     created_at: row.created_at,

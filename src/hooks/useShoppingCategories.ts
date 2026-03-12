@@ -15,13 +15,28 @@ export interface ShoppingCategoryRow {
 
 /** Default categories seeded when a household has none */
 const DEFAULT_CATEGORIES: Omit<ShoppingCategoryRow, "id" | "household_id" | "created_at">[] = [
-  { name: "מזון", icon: "🛒", color: "#22C55E", sort_order: 0 },
-  { name: "ניקיון", icon: "🧹", color: "#3B82F6", sort_order: 1 },
-  { name: "חיות", icon: "🐾", color: "#F97316", sort_order: 2 },
-  { name: "בית", icon: "🏠", color: "#8B5CF6", sort_order: 3 },
-  { name: "טיפוח", icon: "💄", color: "#EC4899", sort_order: 4 },
-  { name: "תרופות", icon: "💊", color: "#EF4444", sort_order: 5 },
-  { name: "אחר", icon: "📦", color: "#6B7280", sort_order: 6 },
+  { name: "ירקות", icon: "🥬", color: "#22C55E", sort_order: 0 },
+  { name: "פירות", icon: "🍎", color: "#F97316", sort_order: 1 },
+  { name: "עשבי תיבול", icon: "🌿", color: "#84CC16", sort_order: 2 },
+  { name: "מוצרי בסיס", icon: "🧂", color: "#F59E0B", sort_order: 3 },
+  { name: "מוצרי חלב", icon: "🧈", color: "#FCD34D", sort_order: 4 },
+  { name: "חלב", icon: "🥛", color: "#BFDBFE", sort_order: 5 },
+  { name: "בשר, ביצים ודגים", icon: "🥩", color: "#EF4444", sort_order: 6 },
+  { name: "קטניות ותוספות", icon: "🫘", color: "#A78BFA", sort_order: 7 },
+  { name: "מאפים ודגנים", icon: "🍞", color: "#D97706", sort_order: 8 },
+  { name: "אגוזים", icon: "🥜", color: "#92400E", sort_order: 9 },
+  { name: "קפואים", icon: "🧊", color: "#06B6D4", sort_order: 10 },
+  { name: "שימורים", icon: "🥫", color: "#DC2626", sort_order: 11 },
+  { name: "תבלינים", icon: "🌶️", color: "#B45309", sort_order: 12 },
+  { name: "ממרחים", icon: "🫙", color: "#78716C", sort_order: 13 },
+  { name: "מטבלים ורטבים", icon: "🫕", color: "#16A34A", sort_order: 14 },
+  { name: "משקאות", icon: "🥤", color: "#3B82F6", sort_order: 15 },
+  { name: "חטיפים ומתוקים", icon: "🍬", color: "#EC4899", sort_order: 16 },
+  { name: "מצרכים לאפייה", icon: "🎂", color: "#F472B6", sort_order: 17 },
+  { name: "ניקיון וכביסה", icon: "🧹", color: "#60A5FA", sort_order: 18 },
+  { name: "תרופות", icon: "💊", color: "#F87171", sort_order: 19 },
+  { name: "ג'ינו ורוג'ר 🐱", icon: "🐱", color: "#FB923C", sort_order: 20 },
+  { name: "שונות", icon: "📦", color: "#6B7280", sort_order: 21 },
 ];
 
 interface UseShoppingCategoriesReturn {

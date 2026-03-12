@@ -69,8 +69,8 @@ export function NotificationBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 p-3">
-      <div className="max-w-lg mx-auto bg-primary text-white rounded-2xl p-4 shadow-lg">
+    <div className="fixed top-0 left-0 right-0 z-40 p-3 pointer-events-none">
+      <div className="max-w-lg mx-auto bg-primary text-white rounded-2xl p-4 shadow-lg pointer-events-auto">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
             <Bell className="w-5 h-5" />

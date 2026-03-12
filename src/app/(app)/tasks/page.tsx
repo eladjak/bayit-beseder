@@ -148,6 +148,7 @@ export default function TasksPage() {
   // Toggle for mock tasks
   function toggleMockTask(index: number) {
     const key = `task-${index}`;
+    const isCurrentlyCompleted = completedIds.has(key);
     setCompletedIds((prev) => {
       const next = new Set(prev);
       if (next.has(key)) {
@@ -157,12 +158,22 @@ export default function TasksPage() {
       }
       return next;
     });
+    if (isCurrentlyCompleted) {
+      haptic("tap");
+      toast("המשימה סומנה כלא הושלמה");
+    } else {
+      haptic("success");
+      toast.success("המשימה הושלמה! 🎉");
+    }
   }
 
   // Toggle for DB tasks – optimistic UI with rollback
   const toggleDbTask = useCallback(
     async (taskId: string) => {
-      if (!profile) return;
+      if (!profile) {
+        toast.error("יש להתחבר כדי לסמן משימות");
+        return;
+      }
 
       const task = dbTasks.find((t) => t.id === taskId);
       if (!task) return;
@@ -310,15 +321,19 @@ export default function TasksPage() {
             )}
           </div>
           <div className="flex items-center gap-1">
-            {hasDbTasks && (
-              <button
-                onClick={() => setShowAddForm((prev) => !prev)}
-                className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
-                aria-label="הוספת משימה"
-              >
-                <Plus className="w-4.5 h-4.5" />
-              </button>
-            )}
+            <button
+              onClick={() => {
+                if (hasDbTasks) {
+                  setShowAddForm((prev) => !prev);
+                } else {
+                  toast("התחברו כדי להוסיף משימות");
+                }
+              }}
+              className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
+              aria-label="הוספת משימה"
+            >
+              <Plus className="w-4.5 h-4.5" />
+            </button>
             <button className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white/70 transition-colors border border-white/10">
               <Filter className="w-4.5 h-4.5" />
             </button>
@@ -330,10 +345,19 @@ export default function TasksPage() {
 
       {/* Mock mode: login prompt banner */}
       {!hasDbTasks && !tasksLoading && (
-        <div className="card-elevated p-4 text-center bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 rounded-xl">
-          <p className="text-sm font-medium text-amber-800 dark:text-amber-200">מצב תצוגה בלבד</p>
-          <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">התחברו כדי לשמור משימות ולעקוב אחרי ההתקדמות</p>
-          <a href="/login" className="inline-block mt-2 px-4 py-1.5 rounded-lg gradient-primary text-white text-xs font-medium">התחברו עכשיו</a>
+        <div className="rounded-xl overflow-hidden border-2 border-amber-300/70 dark:border-amber-700/50 shadow-md shadow-amber-100/50 dark:shadow-amber-950/20">
+          <div className="bg-amber-50 dark:bg-amber-950/30 p-4 text-center">
+            <p className="text-base font-bold text-amber-900 dark:text-amber-100">👋 מצב תצוגה בלבד</p>
+            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+              אלו משימות לדוגמה. התחברו כדי לנהל את המשימות הבייתיות שלכם ולעקוב אחרי ההתקדמות.
+            </p>
+            <a
+              href="/login"
+              className="inline-block mt-3 px-6 py-2 rounded-xl gradient-primary text-white text-sm font-semibold shadow-md shadow-primary/25 active:scale-95 transition-transform"
+            >
+              התחברות / הרשמה
+            </a>
+          </div>
         </div>
       )}
 

@@ -9,9 +9,19 @@ interface ShoppingItemProps {
   item: ShoppingItemType;
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
+  /** Override color for the left border — takes precedence over CATEGORY_COLORS fallback */
+  categoryColor?: string;
+  /** Override icon for the item — takes precedence over SHOPPING_CATEGORY_ICONS fallback */
+  categoryIcon?: string;
 }
 
-export function ShoppingItemCard({ item, onToggle, onRemove }: ShoppingItemProps) {
+export function ShoppingItemCard({ item, onToggle, onRemove, categoryColor, categoryIcon }: ShoppingItemProps) {
+  const borderColor = item.checked
+    ? "var(--color-success)"
+    : (categoryColor ?? CATEGORY_COLORS[item.category] ?? "#6B7280");
+
+  const icon = categoryIcon ?? SHOPPING_CATEGORY_ICONS[item.category] ?? "📦";
+
   return (
     <motion.div
       layout
@@ -23,7 +33,7 @@ export function ShoppingItemCard({ item, onToggle, onRemove }: ShoppingItemProps
         item.checked ? "opacity-50" : ""
       }`}
       style={{
-        borderRight: `3px solid ${item.checked ? "var(--color-success)" : CATEGORY_COLORS[item.category]}`,
+        borderRight: `3px solid ${borderColor}`,
       }}
     >
       {/* Checkbox */}
@@ -52,8 +62,8 @@ export function ShoppingItemCard({ item, onToggle, onRemove }: ShoppingItemProps
         )}
       </button>
 
-      {/* Category icon + color dot */}
-      <span className="text-sm flex-shrink-0" aria-hidden>{SHOPPING_CATEGORY_ICONS[item.category]}</span>
+      {/* Category icon */}
+      <span className="text-sm flex-shrink-0" aria-hidden>{icon}</span>
 
       {/* Title */}
       <span

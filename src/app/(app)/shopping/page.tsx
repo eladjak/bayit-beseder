@@ -11,8 +11,6 @@ import { ShoppingItemCard } from "@/components/shopping/shopping-item";
 import { CategoryManager } from "@/components/shopping/category-manager";
 import { haptic } from "@/lib/haptics";
 
-const FALLBACK_CATEGORIES: ShoppingCategory[] = ["מזון", "ניקיון", "חיות", "בית", "טיפוח", "תרופות", "אחר"];
-
 export default function ShoppingPage() {
   const { items, loading, addItem, toggleItem, removeItem, clearChecked } =
     useShoppingList();
@@ -24,22 +22,19 @@ export default function ShoppingPage() {
     reorderCategories,
   } = useShoppingCategories();
 
-  const [filter, setFilter] = useState<string>("הכל");
+  // Add-item form state
   const [showForm, setShowForm] = useState(false);
   const [newTitle, setNewTitle] = useState("");
-  const [newCategory, setNewCategory] = useState<ShoppingCategory>("מזון");
-  const [showChecked, setShowChecked] = useState(true);
+  const [newCategory, setNewCategory] = useState<ShoppingCategory>("שונות");
+  // Which category section triggered the add form (pre-selects category)
+  const [formPresetCategory, setFormPresetCategory] = useState<string | null>(null);
+
+  // Collapsed state per category name
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+
   const [showCategoryManager, setShowCategoryManager] = useState(false);
 
-  // Use dynamic categories if available, fallback to hardcoded
-  const categoryNames = useMemo(() => {
-    if (dynamicCategories.length > 0 && dynamicCategories[0].household_id !== "mock") {
-      return dynamicCategories.map((c) => c.name);
-    }
-    return FALLBACK_CATEGORIES as string[];
-  }, [dynamicCategories]);
-
-  // Build icon/color maps from dynamic categories
+  // Build icon/color maps from dynamic categories (with fallback to static maps)
   const categoryIconMap = useMemo(() => {
     const map: Record<string, string> = { ...SHOPPING_CATEGORY_ICONS };
     for (const c of dynamicCategories) {
@@ -56,26 +51,66 @@ export default function ShoppingPage() {
     return map;
   }, [dynamicCategories]);
 
-  const filteredItems = useMemo(() => {
-    const filtered =
-      filter === "הכל" ? items : items.filter((i) => i.category === filter);
-    const unchecked = filtered
-      .filter((i) => !i.checked)
-      .sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-    const checked = filtered
-      .filter((i) => i.checked)
-      .sort(
-        (a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-    return { unchecked, checked };
-  }, [items, filter]);
+  // Ordered category names from dynamic categories
+  const orderedCategoryNames = useMemo(() => {
+    if (dynamicCategories.length > 0) {
+      return dynamicCategories.map((c) => c.name);
+    }
+    return Object.keys(SHOPPING_CATEGORY_ICONS);
+  }, [dynamicCategories]);
+
+  // Group items by category, keeping category order from orderedCategoryNames
+  const groupedItems = useMemo(() => {
+    const groups: { categoryName: string; items: typeof items }[] = [];
+
+    // Categories in defined order that actually have items
+    const categoriesWithItems = new Set(items.map((i) => i.category));
+
+    for (const catName of orderedCategoryNames) {
+      if (!categoriesWithItems.has(catName)) continue;
+      const catItems = items.filter((i) => i.category === catName);
+      // Sort: unchecked first (by creation date desc), then checked (by creation date desc)
+      const unchecked = catItems
+        .filter((i) => !i.checked)
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      const checked = catItems
+        .filter((i) => i.checked)
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      groups.push({ categoryName: catName, items: [...unchecked, ...checked] });
+    }
+
+    // Any items in categories not in orderedCategoryNames go to a fallback group
+    const knownCatNames = new Set(orderedCategoryNames);
+    const unknownItems = items.filter((i) => !knownCatNames.has(i.category));
+    if (unknownItems.length > 0) {
+      groups.push({ categoryName: "שונות", items: unknownItems });
+    }
+
+    return groups;
+  }, [items, orderedCategoryNames]);
 
   const totalCount = items.length;
   const checkedCount = items.filter((i) => i.checked).length;
+
+  function toggleCollapse(categoryName: string) {
+    setCollapsedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(categoryName)) {
+        next.delete(categoryName);
+      } else {
+        next.add(categoryName);
+      }
+      return next;
+    });
+  }
+
+  function openAddForm(presetCategory?: string) {
+    haptic("tap");
+    const cat = presetCategory ?? orderedCategoryNames[orderedCategoryNames.length - 1] ?? "שונות";
+    setNewCategory(cat);
+    setFormPresetCategory(presetCategory ?? null);
+    setShowForm(true);
+  }
 
   function handleAdd() {
     if (!newTitle.trim()) return;
@@ -84,6 +119,7 @@ export default function ShoppingPage() {
     toast.success("הפריט נוסף לרשימה");
     setNewTitle("");
     setShowForm(false);
+    setFormPresetCategory(null);
   }
 
   function handleToggle(id: string) {
@@ -109,17 +145,14 @@ export default function ShoppingPage() {
     return (
       <div className="px-4 py-6 space-y-3" dir="rtl">
         {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className="bg-surface rounded-xl p-3 h-12 shimmer"
-          />
+          <div key={i} className="bg-surface rounded-xl p-3 h-12 shimmer" />
         ))}
       </div>
     );
   }
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4 pb-28" dir="rtl">
       {/* Header with gradient */}
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
         <div className="flex items-center justify-between relative z-10">
@@ -135,56 +168,35 @@ export default function ShoppingPage() {
               </div>
             )}
           </div>
-          <button
-            onClick={() => setShowCategoryManager(true)}
-            className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
-            aria-label="ניהול קטגוריות"
-          >
-            <Settings className="w-4.5 h-4.5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Clear checked */}
+            {checkedCount > 0 && (
+              <motion.button
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                onClick={handleClearChecked}
+                aria-label={`נקה ${checkedCount} פריטים מסומנים`}
+                className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
+              >
+                <Trash2 className="w-4 h-4" />
+              </motion.button>
+            )}
+            {/* Category manager */}
+            <button
+              onClick={() => setShowCategoryManager(true)}
+              className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
+              aria-label="ניהול קטגוריות"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="px-4 space-y-4">
-      {/* Category filter */}
-      <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-        <button
-          onClick={() => setFilter("הכל")}
-          aria-label="הצג הכל"
-          aria-pressed={filter === "הכל"}
-          className={`flex-shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-            filter === "הכל"
-              ? "gradient-primary text-white shadow-md shadow-primary/20"
-              : "bg-surface text-muted hover:text-foreground card-elevated"
-          }`}
-        >
-          📋 הכל
-        </button>
-        {categoryNames.map((cat) => {
-          const isActive = filter === cat;
-          return (
-            <button
-              key={cat}
-              onClick={() => setFilter(cat)}
-              aria-label={`סנן לפי ${cat}`}
-              aria-pressed={isActive}
-              className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all ${
-                isActive
-                  ? "text-white shadow-md"
-                  : "bg-surface text-muted hover:text-foreground card-elevated"
-              }`}
-              style={isActive ? { backgroundColor: categoryColorMap[cat] ?? "#6B7280" } : undefined}
-            >
-              <span>{categoryIconMap[cat] ?? "📦"}</span>
-              <span>{cat}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Empty state */}
-      {filteredItems.unchecked.length === 0 &&
-        filteredItems.checked.length === 0 && (
+      <div className="px-4 space-y-3">
+        {/* ---- Empty state ---- */}
+        {items.length === 0 && (
           <motion.div
             className="card-elevated p-8 text-center"
             initial={{ opacity: 0, scale: 0.95 }}
@@ -202,136 +214,196 @@ export default function ShoppingPage() {
           </motion.div>
         )}
 
-      <AnimatePresence mode="popLayout">
-        {filteredItems.unchecked.map((item) => (
-          <ShoppingItemCard
-            key={item.id}
-            item={item}
-            onToggle={handleToggle}
-            onRemove={handleRemove}
-          />
-        ))}
-      </AnimatePresence>
+        {/* ---- Grouped category sections ---- */}
+        <AnimatePresence initial={false}>
+          {groupedItems.map(({ categoryName, items: catItems }) => {
+            const isCollapsed = collapsedCategories.has(categoryName);
+            const color = categoryColorMap[categoryName] ?? "#6B7280";
+            const icon = categoryIconMap[categoryName] ?? "📦";
+            const checkedInCat = catItems.filter((i) => i.checked).length;
+            const totalInCat = catItems.length;
 
-      {/* Checked items section */}
-      {filteredItems.checked.length > 0 && (
-        <div className="space-y-2">
-          <button
-            onClick={() => setShowChecked((prev) => !prev)}
-            aria-label={showChecked ? "הסתרת פריטים מסומנים" : "הצגת פריטים מסומנים"}
-            aria-expanded={showChecked}
-            className="flex items-center gap-1.5 text-sm text-muted hover:text-foreground transition-colors"
-          >
-            {showChecked ? (
-              <ChevronUp className="w-4 h-4" />
-            ) : (
-              <ChevronDown className="w-4 h-4" />
-            )}
-            <span>
-              סומנו ({filteredItems.checked.length})
-            </span>
-          </button>
-
-          <AnimatePresence>
-            {showChecked && (
+            return (
               <motion.div
-                initial={{ opacity: 0, scaleY: 0 }}
-                animate={{ opacity: 1, scaleY: 1 }}
-                exit={{ opacity: 0, scaleY: 0 }}
-                style={{ transformOrigin: "top" }}
-                className="space-y-1.5 overflow-hidden"
+                key={categoryName}
+                layout
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                className="card-elevated overflow-hidden"
               >
-                <AnimatePresence mode="popLayout">
-                  {filteredItems.checked.map((item) => (
-                    <ShoppingItemCard
-                      key={item.id}
-                      item={item}
-                      onToggle={handleToggle}
-                      onRemove={handleRemove}
-                    />
-                  ))}
+                {/* Category header */}
+                <div
+                  className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none"
+                  onClick={() => toggleCollapse(categoryName)}
+                  role="button"
+                  aria-expanded={!isCollapsed}
+                  aria-label={`${categoryName} - ${totalInCat} פריטים`}
+                >
+                  {/* Color dot + icon */}
+                  <span
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-base flex-shrink-0"
+                    style={{ backgroundColor: `${color}22` }}
+                    aria-hidden
+                  >
+                    {icon}
+                  </span>
+
+                  {/* Category name */}
+                  <span className="flex-1 text-sm font-semibold text-foreground">
+                    {categoryName}
+                  </span>
+
+                  {/* Item count badge */}
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: `${color}22`, color }}>
+                    {checkedInCat > 0 ? `${checkedInCat}/${totalInCat}` : totalInCat}
+                  </span>
+
+                  {/* Add to this category button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openAddForm(categoryName);
+                    }}
+                    aria-label={`הוסף פריט ל${categoryName}`}
+                    className="p-1.5 rounded-lg text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Collapse chevron */}
+                  <span className="text-muted" aria-hidden>
+                    {isCollapsed ? (
+                      <ChevronDown className="w-4 h-4" />
+                    ) : (
+                      <ChevronUp className="w-4 h-4" />
+                    )}
+                  </span>
+                </div>
+
+                {/* Colored divider line */}
+                <div className="h-px mx-3" style={{ backgroundColor: `${color}40` }} />
+
+                {/* Items list */}
+                <AnimatePresence initial={false}>
+                  {!isCollapsed && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ type: "tween", duration: 0.18, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="p-2 space-y-1.5">
+                        <AnimatePresence mode="popLayout">
+                          {catItems.map((item) => (
+                            <ShoppingItemCard
+                              key={item.id}
+                              item={item}
+                              onToggle={handleToggle}
+                              onRemove={handleRemove}
+                              categoryColor={color}
+                              categoryIcon={icon}
+                            />
+                          ))}
+                        </AnimatePresence>
+                      </div>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
+            );
+          })}
+        </AnimatePresence>
 
-      {/* Clear checked button */}
-      {checkedCount > 0 && (
-        <motion.button
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          onClick={handleClearChecked}
-          aria-label={`נקה ${checkedCount} פריטים מסומנים`}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-danger/10 text-danger text-sm font-medium hover:bg-danger/20 transition-colors"
+        {/* Manage categories link */}
+        <button
+          onClick={() => setShowCategoryManager(true)}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border text-muted text-sm font-medium hover:border-primary hover:text-primary transition-colors"
         >
-          <Trash2 className="w-4 h-4" />
-          נקו פריטים מסומנים ({checkedCount})
-        </motion.button>
-      )}
+          <Settings className="w-4 h-4" />
+          ניהול קטגוריות
+        </button>
+      </div>
 
-      {/* Add item form */}
+      {/* ---- Add item form (bottom sheet style) ---- */}
       <AnimatePresence>
         {showForm && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="card-elevated p-4 space-y-3"
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-foreground text-sm">
-                פריט חדש
-              </h3>
-              <button
-                onClick={() => setShowForm(false)}
-                aria-label="סגירת טופס הוספת פריט"
-                className="p-1 rounded-lg text-muted hover:text-foreground"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <input
-              type="text"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleAdd();
-              }}
-              placeholder="הוסיפו פריט..."
-              className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary transition-colors"
-              autoFocus
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-30 bg-black/30 backdrop-blur-sm"
+              onClick={() => setShowForm(false)}
             />
-            <div className="flex flex-wrap gap-2">
-              {categoryNames.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setNewCategory(cat as ShoppingCategory)}
-                  className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                    newCategory === cat
-                      ? "text-white"
-                      : "bg-surface-hover text-muted"
-                  }`}
-                  style={
-                    newCategory === cat
-                      ? { backgroundColor: categoryColorMap[cat] ?? "#6B7280" }
-                      : undefined
-                  }
-                >
-                  <span>{categoryIconMap[cat] ?? "📦"}</span>
-                  <span>{cat}</span>
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={handleAdd}
-              disabled={!newTitle.trim()}
-              className="w-full py-2.5 rounded-xl gradient-primary text-white font-medium text-sm disabled:opacity-40 transition-opacity shadow-md shadow-primary/20"
+            {/* Sheet */}
+            <motion.div
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 z-40 bg-surface rounded-t-2xl px-4 pt-4 pb-10 shadow-xl max-w-lg mx-auto"
+              dir="rtl"
             >
-              הוסיפו
-            </button>
-          </motion.div>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-foreground text-sm">
+                  {formPresetCategory ? `הוסיפו ל${formPresetCategory}` : "פריט חדש"}
+                </h3>
+                <button
+                  onClick={() => setShowForm(false)}
+                  aria-label="סגירת טופס הוספת פריט"
+                  className="p-1 rounded-lg text-muted hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <input
+                type="text"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleAdd();
+                }}
+                placeholder="הוסיפו פריט..."
+                className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary transition-colors mb-3"
+                autoFocus
+              />
+
+              {/* Category selector */}
+              <div className="flex flex-wrap gap-1.5 mb-3 max-h-36 overflow-y-auto">
+                {orderedCategoryNames.map((cat) => {
+                  const catColor = categoryColorMap[cat] ?? "#6B7280";
+                  const catIcon = categoryIconMap[cat] ?? "📦";
+                  const isSelected = newCategory === cat;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setNewCategory(cat)}
+                      className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        isSelected ? "text-white" : "bg-surface-hover text-muted"
+                      }`}
+                      style={isSelected ? { backgroundColor: catColor } : undefined}
+                    >
+                      <span>{catIcon}</span>
+                      <span>{cat}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={handleAdd}
+                disabled={!newTitle.trim()}
+                className="w-full py-2.5 rounded-xl gradient-primary text-white font-medium text-sm disabled:opacity-40 transition-opacity shadow-md shadow-primary/20"
+              >
+                הוסיפו
+              </button>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
@@ -341,17 +413,13 @@ export default function ShoppingPage() {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           whileTap={{ scale: 0.9 }}
-          onClick={() => {
-            haptic("tap");
-            setShowForm(true);
-          }}
+          onClick={() => openAddForm()}
           aria-label="הוספת פריט לרשימת קניות"
           className="fixed bottom-24 left-4 w-13 h-13 rounded-2xl gradient-primary text-white shadow-lg shadow-primary/30 flex items-center justify-center z-20 border border-white/20"
         >
           <Plus className="w-6 h-6" />
         </motion.button>
       )}
-      </div>
 
       {/* Category Manager Modal */}
       <AnimatePresence>
