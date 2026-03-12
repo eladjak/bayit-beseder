@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase";
 import type { TaskRow, TaskInsert, TaskUpdate } from "@/lib/types/database";
 
@@ -35,9 +35,13 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
   const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const initialLoadDone = useRef(false);
 
   const fetchTasks = useCallback(async () => {
-    setLoading(true);
+    // Only show loading spinner on initial fetch — refetches keep current data visible
+    if (!initialLoadDone.current) {
+      setLoading(true);
+    }
     setError(null);
 
     try {
@@ -75,6 +79,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
       setError(null);
     } finally {
       setLoading(false);
+      initialLoadDone.current = true;
     }
   }, [options.assignedTo, options.status, options.dueDate, options.categoryId]);
 

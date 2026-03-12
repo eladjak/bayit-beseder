@@ -80,8 +80,13 @@ export default function TasksPage() {
       });
   }, [tasksLoading, dbTasks.length, profile, refetchTasks]);
 
-  // Determine if we should use DB data or mock
-  const hasDbTasks = !tasksLoading && dbTasks.length > 0;
+  // Determine if we should use DB data or mock.
+  // "Sticky" — once we see real DB tasks, don't flip back to mock during refetches.
+  const sawDbTasks = useRef(false);
+  if (!tasksLoading && dbTasks.length > 0) {
+    sawDbTasks.current = true;
+  }
+  const hasDbTasks = sawDbTasks.current || (!tasksLoading && dbTasks.length > 0);
 
   // Optimistic state: track tasks completed in this session before DB confirms
   const [optimisticCompleted, setOptimisticCompleted] = useState<Set<string>>(new Set());
