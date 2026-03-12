@@ -166,6 +166,16 @@ export default function TasksPage() {
     [activeCategory, dbTaskViews]
   );
 
+  const pendingDbTasks = useMemo(
+    () => filteredDbTasks.filter((t) => !t.isCompleted),
+    [filteredDbTasks]
+  );
+  const completedDbTasks = useMemo(
+    () => filteredDbTasks.filter((t) => t.isCompleted),
+    [filteredDbTasks]
+  );
+  const [showCompleted, setShowCompleted] = useState(true);
+
   // Toggle for mock tasks
   function toggleMockTask(index: number) {
     const key = `task-${index}`;
@@ -522,8 +532,8 @@ export default function TasksPage() {
 
         <AnimatePresence mode="popLayout">
           {hasDbTasks
-            ? /* ---- DB Tasks ---- */
-              filteredDbTasks.map((task) => {
+            ? /* ---- DB Tasks (pending) ---- */
+              pendingDbTasks.map((task) => {
                 const display = resolveCategoryDisplay(task.categoryKey);
                 return (
                   <motion.div
@@ -532,54 +542,37 @@ export default function TasksPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`card-elevated p-3.5 flex items-start gap-3 relative overflow-hidden ${
-                      task.isCompleted ? "opacity-50" : ""
-                    } ${
-                      task.isOverdue && !task.isCompleted
+                      task.isOverdue
                         ? "ring-1 ring-red-500/20"
                         : ""
                     }`}
                     style={{
                       borderRight: `3px solid ${
-                        task.isOverdue && !task.isCompleted
+                        task.isOverdue
                           ? "#EF4444"
-                          : task.isCompleted
-                            ? "#10B981"
-                            : display.color
+                          : display.color
                       }`,
                     }}
                   >
-                    {/* Overdue indicator */}
-                    {task.isOverdue && !task.isCompleted && (
+                    {task.isOverdue && (
                       <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
                         מאחר
                       </div>
                     )}
                     <button
                       onClick={() => toggleDbTask(task.id)}
-                      aria-label={task.isCompleted ? `בטל השלמה: ${task.title}` : `סמן כהושלם: ${task.title}`}
-                      aria-pressed={task.isCompleted}
+                      aria-label={`סמן כהושלם: ${task.title}`}
+                      aria-pressed={false}
                       className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                        task.isCompleted
-                          ? "bg-success border-success"
-                          : task.isOverdue
+                        task.isOverdue
                           ? "border-red-400 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
                           : "border-border hover:border-primary hover:bg-primary/5"
                       }`}
-                    >
-                      {task.isCompleted && (
-                        <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
-                      )}
-                    </button>
+                    />
                     <div className="flex-1 min-w-0">
-                      <p
-                        className={`text-sm font-medium leading-snug ${
-                          task.isCompleted
-                            ? "line-through text-muted"
-                            : task.isOverdue
-                            ? "text-red-700 dark:text-red-400"
-                            : "text-foreground"
-                        }`}
-                      >
+                      <p className={`text-sm font-medium leading-snug ${
+                        task.isOverdue ? "text-red-700 dark:text-red-400" : "text-foreground"
+                      }`}>
                         {task.title}
                       </p>
                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
@@ -677,6 +670,61 @@ export default function TasksPage() {
                 );
               })}
         </AnimatePresence>
+
+        {/* ---- Completed Tasks Section ---- */}
+        {hasDbTasks && completedDbTasks.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={() => setShowCompleted((prev) => !prev)}
+              className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors w-full"
+            >
+              <div className="h-px flex-1 bg-border" />
+              <span className="font-medium px-2">
+                {showCompleted ? "▾" : "▸"} הושלמו ({completedDbTasks.length})
+              </span>
+              <div className="h-px flex-1 bg-border" />
+            </button>
+            {showCompleted && (
+              <div className="space-y-2 mt-2">
+                {completedDbTasks.map((task) => {
+                  const display = resolveCategoryDisplay(task.categoryKey);
+                  return (
+                    <motion.div
+                      key={task.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="card-elevated p-3 flex items-start gap-3 opacity-50"
+                      style={{ borderRight: `3px solid #10B981` }}
+                    >
+                      <button
+                        onClick={() => toggleDbTask(task.id)}
+                        aria-label={`בטל השלמה: ${task.title}`}
+                        aria-pressed={true}
+                        className="mt-0.5 w-6 h-6 rounded-lg border-2 bg-success border-success flex items-center justify-center flex-shrink-0"
+                      >
+                        <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium line-through text-muted">{task.title}</p>
+                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                          <span
+                            className="text-[10px] px-2 py-0.5 rounded-md text-white/80 font-medium"
+                            style={{ backgroundColor: display.color }}
+                          >
+                            {display.icon ? `${display.icon} ` : ""}{display.label}
+                          </span>
+                          <span className="text-[10px] text-muted px-2 py-0.5 rounded-md bg-background border border-border/50">
+                            {task.recurrenceLabel}
+                          </span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       </div>
 

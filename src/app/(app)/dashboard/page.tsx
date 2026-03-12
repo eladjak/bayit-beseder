@@ -78,16 +78,14 @@ const CATEGORY_INFO = Object.fromEntries(
 export default function DashboardPage() {
   // ---- Supabase hooks ----
   const { profile } = useProfile();
-  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
-  const { tasks: dbTasks, loading: tasksLoading, refetch: refetchTodayTasks } = useTasks({
-    dueDate: todayStr,
+  const { tasks: dbTasks, loading: tasksLoading, refetch: refetchTasks } = useTasks({
     realtime: true,
   });
-  const { tasks: allDbTasks, refetch: refetchAllTasks } = useTasks({});
   const { completions: allCompletions, markComplete, isCompletedToday } = useCompletions({ limit: 500 });
   const { categoryMap } = useCategories();
   const { playComplete, playAchievement, playStreak } = useAppSounds();
   const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
+  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const { partner } = usePartner(profile?.partner_id, todayStr);
 
   // ---- Auto-seed tasks for authenticated users on first visit ----
@@ -99,14 +97,13 @@ export default function DashboardPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.seeded) {
-          refetchTodayTasks();
-          refetchAllTasks();
+          refetchTasks();
         }
       })
       .catch(() => {
         // Seed failed - will use mock data fallback
       });
-  }, [tasksLoading, dbTasks.length, profile, refetchTodayTasks, refetchAllTasks]);
+  }, [tasksLoading, dbTasks.length, profile, refetchTasks]);
 
   const hasDbTasks = !tasksLoading && dbTasks.length > 0;
 
@@ -388,7 +385,7 @@ export default function DashboardPage() {
         <PlaylistCard />
 
         <WeeklySummaryCards
-          tasks={allDbTasks}
+          tasks={dbTasks}
           completions={allCompletions}
           streak={streakCount}
           today={todayStr}

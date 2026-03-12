@@ -74,9 +74,9 @@ export async function POST(request: NextRequest) {
     { title: "ניקוי כיור אמבטיה", category_id: catMap["אמבטיה"], due_date: today, points: 8, recurring: true },
     // Tomorrow
     { title: "כביסה - מכונה + תליה", category_id: catMap["כביסה"], due_date: tomorrow, points: 15, recurring: true },
-    { title: "שאיבת אבק סלון וחדרים", category_id: catMap["סלון"], due_date: tomorrow, points: 15 },
-    { title: "החלפת מצעים", category_id: catMap["חדר שינה"], due_date: tomorrow, points: 15 },
-    { title: "ניקוי מקלחת", category_id: catMap["אמבטיה"], due_date: tomorrow, points: 15 },
+    { title: "שאיבת אבק סלון וחדרים", category_id: catMap["סלון"], due_date: tomorrow, points: 15, recurring: true },
+    { title: "החלפת מצעים", category_id: catMap["חדר שינה"], due_date: tomorrow, points: 15, recurring: true },
+    { title: "ניקוי מקלחת", category_id: catMap["אמבטיה"], due_date: tomorrow, points: 15, recurring: true },
   ];
 
   const { error } = await supabase.from("tasks").insert(tasks);
