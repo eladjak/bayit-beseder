@@ -18,13 +18,18 @@ import { toast } from "sonner";
 import { useTasks } from "@/hooks/useTasks";
 import { useProfile } from "@/hooks/useProfile";
 import { usePartner } from "@/hooks/usePartner";
+import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import {
   analyzeDailyLoad,
+  analyzeDailyLoadWithCalendar,
   generateSmartSuggestions,
+  generateCalendarAwareSuggestions,
   getWeekRange,
   type DayLoad,
+  type DayLoadWithCalendar,
   type Suggestion,
 } from "@/lib/smart-scheduler";
+import type { ClientCalendarEvent } from "@/lib/types/calendar";
 import type { TaskRow, TaskInsert } from "@/lib/types/database";
 import { haptic } from "@/lib/haptics";
 import {
@@ -33,6 +38,7 @@ import {
   CATEGORY_KEYS,
   CATEGORY_ICONS,
 } from "@/lib/categories";
+import { CalendarEventItem } from "@/components/weekly/calendar-event-item";
 
 // Mock data for when Supabase is not connected
 function generateMockWeeklyTasks(): TaskRow[] {
@@ -134,6 +140,18 @@ export default function WeeklyPage() {
     return end;
   }, [startOfWeek]);
 
+  // Fetch calendar events for this week
+  const {
+    events: calendarEvents,
+    eventsByDate,
+    loading: calendarLoading,
+    connected: calendarConnected,
+  } = useCalendarEvents({
+    timeMin: startOfWeek.toISOString(),
+    timeMax: new Date(endOfWeek.getTime() + 86400000).toISOString(),
+    enabled: !!profile,
+  });
+
   // Fetch tasks for this week with write capability
   const { tasks, loading, createTask, updateTask } = useTasks({});
 
@@ -174,16 +192,22 @@ export default function WeeklyPage() {
     });
   }, [tasks, loading, startOfWeek, endOfWeek]);
 
-  // Analyze daily loads
+  // Analyze daily loads (with calendar if connected)
   const dailyLoads = useMemo(
-    () => analyzeDailyLoad(weekTasks, startOfWeek),
-    [weekTasks, startOfWeek]
+    () =>
+      calendarConnected
+        ? analyzeDailyLoadWithCalendar(weekTasks, calendarEvents, startOfWeek)
+        : analyzeDailyLoad(weekTasks, startOfWeek),
+    [weekTasks, calendarEvents, calendarConnected, startOfWeek]
   );
 
-  // Generate smart suggestions
+  // Generate smart suggestions (calendar-aware when connected)
   const suggestions = useMemo(
-    () => generateSmartSuggestions(weekTasks),
-    [weekTasks]
+    () =>
+      calendarConnected
+        ? generateCalendarAwareSuggestions(weekTasks, calendarEvents)
+        : generateSmartSuggestions(weekTasks),
+    [weekTasks, calendarEvents, calendarConnected]
   );
 
   // Calculate summary stats
@@ -288,7 +312,7 @@ export default function WeeklyPage() {
         </div>
 
         {/* Week summary */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className={`grid gap-2 ${calendarConnected ? "grid-cols-4" : "grid-cols-3"}`}>
           <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
             <div className="text-xs text-white/70 mb-0.5">סיום</div>
             <div className="text-lg font-bold text-white">
@@ -307,6 +331,14 @@ export default function WeeklyPage() {
               {stats.partnerTasks}
             </div>
           </div>
+          {calendarConnected && (
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
+              <div className="text-xs text-white/70 mb-0.5">יומן</div>
+              <div className="text-lg font-bold text-white">
+                {calendarEvents.length}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -320,6 +352,25 @@ export default function WeeklyPage() {
             className="w-full h-32 object-cover"
           />
         </div>
+
+        {/* Calendar connection prompt */}
+        {profile && !calendarConnected && !calendarLoading && (
+          <div className="card-elevated p-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200/50 dark:border-blue-800/30 rounded-xl flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center flex-shrink-0">
+              <Calendar className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">חברו Google Calendar</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">ראו פגישות לצד המשימות לתכנון חכם יותר</p>
+            </div>
+            <a
+              href="/settings"
+              className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors flex-shrink-0"
+            >
+              חיבור
+            </a>
+          </div>
+        )}
 
         {/* Mock mode banner - login prompt when not authenticated */}
         {!isRealData && !loading && (
@@ -412,6 +463,7 @@ export default function WeeklyPage() {
               dayLoad={dayLoad}
               index={idx}
               isRealData={isRealData}
+              calendarEvents={eventsByDate.get(dayLoad.date) ?? []}
               onAddTask={handleAddTask}
               onToggleComplete={handleToggleComplete}
             />
@@ -449,12 +501,25 @@ export default function WeeklyPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-muted" />
-                <span className="text-sm text-foreground">זמן כולל</span>
+                <span className="text-sm text-foreground">זמן משימות</span>
               </div>
               <div className="text-sm font-medium text-foreground">
                 {dailyLoads.reduce((sum, d) => sum + d.totalMinutes, 0)} דקות
               </div>
             </div>
+
+            {/* Calendar busyness */}
+            {calendarConnected && calendarEvents.length > 0 && (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-blue-500" />
+                  <span className="text-sm text-foreground">פגישות ביומן</span>
+                </div>
+                <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                  {calendarEvents.length} אירועים
+                </div>
+              </div>
+            )}
 
             {/* Completion rate */}
             <div className="flex items-center justify-between">
@@ -479,14 +544,15 @@ export default function WeeklyPage() {
 }
 
 interface DayCardProps {
-  dayLoad: DayLoad;
+  dayLoad: DayLoad | DayLoadWithCalendar;
   index: number;
   isRealData: boolean;
+  calendarEvents: ClientCalendarEvent[];
   onAddTask: (dueDate: string, title: string, categoryId: string) => Promise<boolean>;
   onToggleComplete: (task: TaskRow) => Promise<void>;
 }
 
-function DayCard({ dayLoad, index, isRealData, onAddTask, onToggleComplete }: DayCardProps) {
+function DayCard({ dayLoad, index, isRealData, calendarEvents, onAddTask, onToggleComplete }: DayCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -571,7 +637,12 @@ function DayCard({ dayLoad, index, isRealData, onAddTask, onToggleComplete }: Da
 
           {/* Category badges preview */}
           {!expanded && (
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1 items-center">
+              {calendarEvents.length > 0 && (
+                <span className="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-full">
+                  {calendarEvents.length} פגישות
+                </span>
+              )}
               {Array.from(
                 new Set(
                   dayLoad.tasks.map((t) => getCategoryFromId(t.category_id))
@@ -690,9 +761,22 @@ function DayCard({ dayLoad, index, isRealData, onAddTask, onToggleComplete }: Da
             className="overflow-hidden"
           >
             <div className="px-4 pb-4 space-y-2">
-              {dayLoad.tasks.length === 0 && (
+              {/* Calendar events */}
+              {calendarEvents.length > 0 && (
+                <div className="space-y-1.5 mb-2">
+                  <div className="text-xs font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    פגישות ביומן ({calendarEvents.length})
+                  </div>
+                  {calendarEvents.map((event, eventIdx) => (
+                    <CalendarEventItem key={event.id} event={event} index={eventIdx} />
+                  ))}
+                </div>
+              )}
+
+              {dayLoad.tasks.length === 0 && calendarEvents.length === 0 && (
                 <div className="text-xs text-muted text-center py-2">
-                  אין משימות ליום זה
+                  אין משימות או פגישות ליום זה
                 </div>
               )}
               {dayLoad.tasks.map((task) => {

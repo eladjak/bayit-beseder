@@ -1,4 +1,5 @@
 import type { TaskRow } from "./types/database";
+import type { ClientCalendarEvent } from "./types/calendar";
 
 export interface DayLoad {
   date: string; // ISO date string (YYYY-MM-DD)
@@ -9,8 +10,15 @@ export interface DayLoad {
   isHeavy: boolean;
 }
 
+export interface DayLoadWithCalendar extends DayLoad {
+  calendarEvents: ClientCalendarEvent[];
+  calendarBusyMinutes: number;
+  combinedMinutes: number;
+  isOverloaded: boolean;
+}
+
 export interface Suggestion {
-  type: "room_batch" | "heavy_day" | "empty_day" | "energy_tip";
+  type: "room_batch" | "heavy_day" | "empty_day" | "energy_tip" | "busy_calendar_day" | "free_slot";
   priority: "high" | "medium" | "low";
   title: string;
   description: string;
@@ -243,4 +251,119 @@ export function getWeekRange(startOfWeek: Date): string {
   const month = startOfWeek.toLocaleDateString("he-IL", { month: "long" });
 
   return `${startDay}-${endDay} ${month}`;
+}
+
+/**
+ * Calculate the duration of a calendar event in minutes
+ */
+function calcEventMinutes(event: ClientCalendarEvent): number {
+  if (event.isAllDay) return 480; // 8 hours for all-day events
+  try {
+    const start = new Date(event.startTime).getTime();
+    const end = new Date(event.endTime).getTime();
+    return Math.max(0, Math.round((end - start) / 60000));
+  } catch {
+    return 60; // fallback
+  }
+}
+
+/**
+ * Analyze daily load combining tasks and calendar events
+ */
+export function analyzeDailyLoadWithCalendar(
+  tasks: TaskRow[],
+  calendarEvents: ClientCalendarEvent[],
+  startOfWeek: Date
+): DayLoadWithCalendar[] {
+  const baseDays = analyzeDailyLoad(tasks, startOfWeek);
+
+  // Group calendar events by date
+  const eventsByDate = new Map<string, ClientCalendarEvent[]>();
+  for (const event of calendarEvents) {
+    const existing = eventsByDate.get(event.date) ?? [];
+    existing.push(event);
+    eventsByDate.set(event.date, existing);
+  }
+
+  return baseDays.map((day) => {
+    const dayEvents = eventsByDate.get(day.date) ?? [];
+    const calendarBusyMinutes = dayEvents.reduce(
+      (sum, e) => sum + calcEventMinutes(e),
+      0
+    );
+    const combinedMinutes = day.totalMinutes + calendarBusyMinutes;
+
+    return {
+      ...day,
+      calendarEvents: dayEvents,
+      calendarBusyMinutes,
+      combinedMinutes,
+      isOverloaded: combinedMinutes > 90,
+    };
+  });
+}
+
+/**
+ * Generate calendar-aware suggestions in Hebrew
+ */
+export function generateCalendarAwareSuggestions(
+  weekTasks: TaskRow[],
+  calendarEvents: ClientCalendarEvent[]
+): Suggestion[] {
+  // Get base suggestions
+  const suggestions = generateSmartSuggestions(weekTasks);
+
+  if (calendarEvents.length === 0) return suggestions;
+
+  // Group events by date
+  const eventsByDate = new Map<string, ClientCalendarEvent[]>();
+  for (const event of calendarEvents) {
+    const existing = eventsByDate.get(event.date) ?? [];
+    existing.push(event);
+    eventsByDate.set(event.date, existing);
+  }
+
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - dayOfWeek);
+  startOfWeek.setHours(0, 0, 0, 0);
+
+  const dailyLoads = analyzeDailyLoad(weekTasks, startOfWeek);
+
+  // Busy calendar day warnings
+  for (const dayLoad of dailyLoads) {
+    const dayEvents = eventsByDate.get(dayLoad.date) ?? [];
+    if (dayEvents.length === 0) continue;
+
+    const busyMinutes = dayEvents.reduce((s, e) => s + calcEventMinutes(e), 0);
+    const busyHours = Math.round(busyMinutes / 60);
+
+    if (busyMinutes >= 180 && dayLoad.totalMinutes > 15) {
+      // 3+ hours of meetings AND has tasks
+      suggestions.push({
+        type: "busy_calendar_day",
+        priority: "high",
+        title: `${dayLoad.dayName} עמוס בפגישות (${busyHours} שעות)`,
+        description: "כדאי להעביר משימות ליום פחות עמוס",
+        affectedDates: [dayLoad.date],
+      });
+    }
+  }
+
+  // Free slot suggestions - find days with no meetings and no tasks
+  for (const dayLoad of dailyLoads) {
+    const dayEvents = eventsByDate.get(dayLoad.date) ?? [];
+    if (dayEvents.length === 0 && dayLoad.tasks.length === 0) {
+      suggestions.push({
+        type: "free_slot",
+        priority: "medium",
+        title: `${dayLoad.dayName} פנוי לגמרי`,
+        description: "הזדמנות מצוינת לבצע משימות כבדות או לנוח",
+        affectedDates: [dayLoad.date],
+      });
+    }
+  }
+
+  return suggestions;
 }
