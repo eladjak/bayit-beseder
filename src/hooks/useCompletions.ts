@@ -118,7 +118,7 @@ export function useCompletions(
   const leaderboard = useMemo((): LeaderboardEntry[] => {
     const counts: Record<string, number> = {};
     for (const c of completions) {
-      const uid = c.completed_by ?? c.user_id;
+      const uid = c.user_id;
       counts[uid] = (counts[uid] ?? 0) + 1;
     }
     return Object.entries(counts)
@@ -142,7 +142,6 @@ export function useCompletions(
         const insertion: TaskCompletionInsert = {
           task_id: params.taskId,
           user_id: params.userId,
-          completed_by: params.userId,
           household_id: params.householdId ?? null,
           photo_url: params.photoUrl ?? null,
           notes: params.notes ?? null,

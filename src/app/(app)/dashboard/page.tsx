@@ -278,7 +278,7 @@ export default function DashboardPage() {
             .from("task_completions")
             .update(updates)
             .eq("task_id", completionModal.taskId)
-            .eq("completed_by", profile.id);
+            .eq("user_id", profile.id);
         }
         if (feedback.rating > 0) {
           const ratings = JSON.parse(localStorage.getItem("bayit-task-ratings") ?? "{}");

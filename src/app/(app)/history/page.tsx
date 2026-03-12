@@ -194,13 +194,10 @@ function buildMockHistory(): MockHistoryEntry[] {
     completion: {
       id: `mc${i}`,
       task_id: task.id,
-      completed_by: "demo-user",
-      household_id: null,
       user_id: "demo-user",
       completed_at: makeDate(mockTasks.length - 1 - i, 9 + i),
       photo_url: null,
       notes: null,
-      created_at: makeDate(mockTasks.length - 1 - i, 9 + i),
     },
     categoryKey: categoryMap[task.category_id ?? ""] ?? "general",
   }));

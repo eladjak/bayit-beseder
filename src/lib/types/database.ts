@@ -96,35 +96,27 @@ export type Database = {
         Row: {
           id: string;
           task_id: string;
-          completed_by: string;
-          household_id: string | null;
           user_id: string;
           completed_at: string;
           photo_url: string | null;
           notes: string | null;
-          created_at: string;
         };
         Insert: {
           id?: string;
           task_id: string;
-          completed_by?: string;
-          household_id?: string | null;
-          user_id?: string;
+          user_id: string;
           completed_at?: string;
           photo_url?: string | null;
           notes?: string | null;
-          created_at?: string;
+          household_id?: string | null;
         };
         Update: {
           id?: string;
           task_id?: string;
-          completed_by?: string;
-          household_id?: string | null;
           user_id?: string;
           completed_at?: string;
           photo_url?: string | null;
           notes?: string | null;
-          created_at?: string;
         };
         Relationships: [
           {
@@ -137,13 +129,6 @@ export type Database = {
           {
             foreignKeyName: "task_completions_user_id_fkey";
             columns: ["user_id"];
-            isOneToOne: false;
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "task_completions_completed_by_fkey";
-            columns: ["completed_by"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
