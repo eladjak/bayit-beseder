@@ -13,12 +13,15 @@ import {
   Plus,
   Check,
   X,
+  Wand2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTasks } from "@/hooks/useTasks";
 import { useProfile } from "@/hooks/useProfile";
 import { usePartner } from "@/hooks/usePartner";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
+import { useWeeklyGenerator } from "@/hooks/useWeeklyGenerator";
+import { WeeklyGeneratorModal } from "@/components/weekly/weekly-generator-modal";
 import {
   analyzeDailyLoad,
   analyzeDailyLoadWithCalendar,
@@ -153,7 +156,50 @@ export default function WeeklyPage() {
   });
 
   // Fetch tasks for this week with write capability
-  const { tasks, loading, createTask, updateTask } = useTasks({});
+  const { tasks, loading, createTask, updateTask, refetch } = useTasks({});
+
+  // Weekly generator wizard
+  const wizard = useWeeklyGenerator();
+  const [showWizard, setShowWizard] = useState(false);
+
+  const handleOpenWizard = useCallback(() => {
+    if (!profile) {
+      toast.error("יש להתחבר כדי להשתמש באשף");
+      return;
+    }
+    const memberIds = [profile.id];
+    if (profile.partner_id) memberIds.push(profile.partner_id);
+
+    const startStr = startOfWeek.toISOString().split("T")[0];
+    const endStr = endOfWeek.toISOString().split("T")[0];
+    const weekTasksForWizard = tasks.filter(
+      (t) => t.due_date && t.due_date >= startStr && t.due_date <= endStr
+    );
+
+    wizard.generate(weekTasksForWizard, memberIds, startOfWeek);
+    setShowWizard(true);
+    haptic("tap");
+  }, [profile, partner, tasks, startOfWeek, endOfWeek, wizard]);
+
+  const wizardMembers = useMemo(() => {
+    const m: Array<{ id: string; name: string }> = [];
+    if (profile) m.push({ id: profile.id, name: profile.name });
+    if (profile?.partner_id && partner) {
+      m.push({ id: profile.partner_id, name: partner.name });
+    }
+    return m;
+  }, [profile, partner]);
+
+  const handleApplyWizard = useCallback(async () => {
+    const created = await wizard.applyPlan(createTask);
+    if (created > 0) {
+      toast.success(`${created} משימות חדשות נוספו!`);
+      haptic("success");
+      await refetch();
+    } else {
+      toast.info("אין משימות חדשות להוספה");
+    }
+  }, [wizard, createTask, refetch]);
 
   // Auto-seed tasks for authenticated users on first visit
   const seedAttempted = useRef(false);
@@ -303,11 +349,21 @@ export default function WeeklyPage() {
             <p className="text-sm text-white/60 mt-0.5">{weekRange}</p>
             <p className="text-xs text-white/70 mt-1">פריסת המשימות שלכם לכל השבוע עם המלצות לאיזון</p>
           </div>
-          <div className="flex items-center gap-2 px-3.5 py-1.5 bg-white/12 backdrop-blur-sm rounded-xl border border-white/10">
-            <Calendar className="w-4 h-4 text-white" />
-            <span className="text-xs font-medium text-white">
-              {stats.total} משימות
-            </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleOpenWizard}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/30 transition-colors active:scale-95"
+              title="אשף שבועי"
+            >
+              <Wand2 className="w-4 h-4 text-white" />
+              <span className="text-xs font-medium text-white">אשף</span>
+            </button>
+            <div className="flex items-center gap-2 px-3.5 py-1.5 bg-white/12 backdrop-blur-sm rounded-xl border border-white/10">
+              <Calendar className="w-4 h-4 text-white" />
+              <span className="text-xs font-medium text-white">
+                {stats.total} משימות
+              </span>
+            </div>
           </div>
         </div>
 
@@ -539,6 +595,23 @@ export default function WeeklyPage() {
           </div>
         </div>
       </div>
+
+      {/* Weekly Generator Modal */}
+      <WeeklyGeneratorModal
+        open={showWizard}
+        onClose={() => setShowWizard(false)}
+        plan={wizard.plan}
+        state={wizard.state}
+        applyProgress={wizard.applyProgress}
+        members={wizardMembers}
+        onStartEditing={wizard.startEditing}
+        onMoveTask={wizard.moveTask}
+        onRemoveTask={wizard.removeTask}
+        onAddTask={wizard.addTask}
+        onReassignTask={wizard.reassignTask}
+        onApply={handleApplyWizard}
+        onReset={wizard.reset}
+      />
     </div>
   );
 }

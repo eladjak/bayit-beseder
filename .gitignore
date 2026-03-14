@@ -52,3 +52,15 @@ scripts/try-*.mjs
 
 # claude code local config
 .claude/
+
+# disk guardian
+.npmrc
+
+# one-off HTML guides (dev artifacts)
+*.guide.html
+deployment-guide.html
+google-calendar-debug.html
+google-verification-guide.html
+migration-guide.html
+run-this-sql.html
+strategy-2026.html
