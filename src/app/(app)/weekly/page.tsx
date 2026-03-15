@@ -14,6 +14,8 @@ import {
   Check,
   X,
   Wand2,
+  GripVertical,
+  ArrowLeftRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTasks } from "@/hooks/useTasks";
@@ -42,6 +44,19 @@ import {
   CATEGORY_ICONS,
 } from "@/lib/categories";
 import { CalendarEventItem } from "@/components/weekly/calendar-event-item";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+  DragOverlay,
+  useDroppable,
+} from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
 
 // Mock data for when Supabase is not connected
 function generateMockWeeklyTasks(): TaskRow[] {
@@ -289,6 +304,123 @@ export default function WeeklyPage() {
     };
   }, [weekTasks, profile?.id]);
 
+  // Build member name lookup for assignee display
+  const memberNames = useMemo(() => {
+    const map: Record<string, string> = {};
+    if (profile) map[profile.id] = profile.name;
+    if (profile?.partner_id && partner) map[profile.partner_id] = partner.name;
+    return map;
+  }, [profile, partner]);
+
+  // All member IDs for reassignment toggle
+  const memberIds = useMemo(() => {
+    const ids: string[] = [];
+    if (profile) ids.push(profile.id);
+    if (profile?.partner_id) ids.push(profile.partner_id);
+    return ids;
+  }, [profile]);
+
+  // Reassign a task to a different user
+  const handleReassignTask = useCallback(
+    async (taskId: string, newUserId: string) => {
+      if (taskId.startsWith("mock-")) return;
+      haptic("tap");
+      const ok = await updateTask(taskId, { assigned_to: newUserId });
+      if (ok) {
+        toast.success("המשימה הועברה");
+      } else {
+        toast.error("שגיאה בהעברת המשימה");
+      }
+    },
+    [updateTask]
+  );
+
+  // Move a task to a different day (for D&D)
+  const handleMoveTaskToDay = useCallback(
+    async (taskId: string, newDate: string) => {
+      if (taskId.startsWith("mock-")) return;
+      haptic("success");
+      const ok = await updateTask(taskId, { due_date: newDate });
+      if (ok) {
+        toast.success("המשימה הועברה ליום אחר");
+      } else {
+        toast.error("שגיאה בהעברת המשימה");
+      }
+    },
+    [updateTask]
+  );
+
+  // Apply a suggestion (move task from heavy day to lighter day)
+  const handleApplySuggestion = useCallback(
+    async (suggestion: Suggestion) => {
+      if (!suggestion.affectedDates || suggestion.affectedDates.length < 2) return;
+      if (!isRealData) {
+        toast.info("יש להתחבר כדי ליישם המלצות");
+        return;
+      }
+
+      const [sourceDate, targetDate] = suggestion.type === "empty_day"
+        ? [suggestion.affectedDates[1], suggestion.affectedDates[0]] // heavy → empty
+        : [suggestion.affectedDates[0], suggestion.affectedDates[1]]; // heavy → next day
+
+      // Find the last non-completed task on the source day
+      const sourceTasks = weekTasks.filter(
+        (t) => t.due_date === sourceDate && t.status !== "completed"
+      );
+      if (sourceTasks.length === 0) {
+        toast.info("אין משימות להעביר");
+        return;
+      }
+
+      const taskToMove = sourceTasks[sourceTasks.length - 1];
+      haptic("tap");
+      const ok = await updateTask(taskToMove.id, { due_date: targetDate });
+      if (ok) {
+        toast.success(`"${taskToMove.title}" הועברה בהצלחה`);
+      } else {
+        toast.error("שגיאה בהעברת המשימה");
+      }
+    },
+    [weekTasks, updateTask, isRealData]
+  );
+
+  // D&D state for dragging tasks between day cards
+  const [activeDragTask, setActiveDragTask] = useState<{
+    task: TaskRow;
+    fromDate: string;
+  } | null>(null);
+
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } })
+  );
+
+  const handleDndDragStart = useCallback((event: DragStartEvent) => {
+    const data = event.active.data.current;
+    if (data?.task && data?.fromDate) {
+      setActiveDragTask({ task: data.task as TaskRow, fromDate: data.fromDate as string });
+      haptic("tap");
+    }
+  }, []);
+
+  const handleDndDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      setActiveDragTask(null);
+
+      if (!over || !active.data.current) return;
+
+      const taskId = active.data.current.taskId as string;
+      const fromDate = active.data.current.fromDate as string;
+      const toDate = over.id as string;
+
+      if (fromDate !== toDate && !taskId.startsWith("mock-")) {
+        handleMoveTaskToDay(taskId, toDate);
+      }
+    },
+    [handleMoveTaskToDay]
+  );
+
   const weekRange = getWeekRange(startOfWeek);
 
   // Handle adding a task for a specific day
@@ -475,60 +607,97 @@ export default function WeeklyPage() {
                 exit={{ height: 0, opacity: 0 }}
                 className="px-4 pb-4 space-y-2"
               >
-                {suggestions.map((suggestion: Suggestion, idx: number) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.05 }}
-                    className={`p-3 rounded-xl bg-white/60 dark:bg-surface/80 backdrop-blur-sm border ${
-                      suggestion.priority === "high"
-                        ? "border-red-200 dark:border-red-800/50"
-                        : suggestion.priority === "medium"
-                          ? "border-amber-200 dark:border-amber-800/50"
-                          : "border-slate-200 dark:border-slate-700/50"
-                    }`}
-                  >
-                    <div className="flex items-start gap-2">
-                      <div
-                        className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
-                          suggestion.priority === "high"
-                            ? "bg-red-500"
-                            : suggestion.priority === "medium"
-                              ? "bg-amber-500"
-                              : "bg-slate-400"
-                        }`}
-                      />
-                      <div className="flex-1">
-                        <div className="font-medium text-sm text-foreground">
-                          {suggestion.title}
-                        </div>
-                        <div className="text-xs text-muted mt-0.5">
-                          {suggestion.description}
+                {suggestions.map((suggestion: Suggestion, idx: number) => {
+                  const isActionable =
+                    (suggestion.type === "heavy_day" || suggestion.type === "empty_day" || suggestion.type === "busy_calendar_day") &&
+                    suggestion.affectedDates &&
+                    suggestion.affectedDates.length >= 2;
+
+                  return (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className={`p-3 rounded-xl bg-white/60 dark:bg-surface/80 backdrop-blur-sm border ${
+                        suggestion.priority === "high"
+                          ? "border-red-200 dark:border-red-800/50"
+                          : suggestion.priority === "medium"
+                            ? "border-amber-200 dark:border-amber-800/50"
+                            : "border-slate-200 dark:border-slate-700/50"
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <div
+                          className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
+                            suggestion.priority === "high"
+                              ? "bg-red-500"
+                              : suggestion.priority === "medium"
+                                ? "bg-amber-500"
+                                : "bg-slate-400"
+                          }`}
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium text-sm text-foreground">
+                            {suggestion.title}
+                          </div>
+                          <div className="text-xs text-muted mt-0.5">
+                            {suggestion.description}
+                          </div>
+                          {isActionable && isRealData && (
+                            <button
+                              onClick={() => handleApplySuggestion(suggestion)}
+                              className="mt-2 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors active:scale-95"
+                            >
+                              <ArrowLeftRight className="w-3 h-3" />
+                              העבר משימה
+                            </button>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  );
+                })}
               </motion.div>
             )}
           </div>
         )}
 
-        {/* Day-by-Day View */}
-        <div className="space-y-3">
-          {dailyLoads.map((dayLoad, idx) => (
-            <DayCard
-              key={dayLoad.date}
-              dayLoad={dayLoad}
-              index={idx}
-              isRealData={isRealData}
-              calendarEvents={eventsByDate.get(dayLoad.date) ?? []}
-              onAddTask={handleAddTask}
-              onToggleComplete={handleToggleComplete}
-            />
-          ))}
-        </div>
+        {/* Day-by-Day View with D&D */}
+        <DndContext
+          sensors={dndSensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDndDragStart}
+          onDragEnd={handleDndDragEnd}
+        >
+          <div className="space-y-3">
+            {dailyLoads.map((dayLoad, idx) => (
+              <DayCard
+                key={dayLoad.date}
+                dayLoad={dayLoad}
+                index={idx}
+                isRealData={isRealData}
+                calendarEvents={eventsByDate.get(dayLoad.date) ?? []}
+                memberNames={memberNames}
+                memberIds={memberIds}
+                isDragTarget={activeDragTask !== null && activeDragTask.fromDate !== dayLoad.date}
+                onAddTask={handleAddTask}
+                onToggleComplete={handleToggleComplete}
+                onReassignTask={handleReassignTask}
+              />
+            ))}
+          </div>
+
+          {/* Drag overlay */}
+          <DragOverlay>
+            {activeDragTask && (
+              <div className="bg-primary/15 rounded-lg px-3 py-2 text-xs shadow-lg border-2 border-primary opacity-90 text-foreground">
+                <span className="ml-1">{CATEGORY_ICONS[getCategoryFromId(activeDragTask.task.category_id)] ?? "🏠"}</span>
+                {activeDragTask.task.title}
+              </div>
+            )}
+          </DragOverlay>
+        </DndContext>
 
         {/* This Week's Summary */}
         <div className="card-elevated p-4">
@@ -625,11 +794,15 @@ interface DayCardProps {
   index: number;
   isRealData: boolean;
   calendarEvents: ClientCalendarEvent[];
+  memberNames: Record<string, string>;
+  memberIds: string[];
+  isDragTarget: boolean;
   onAddTask: (dueDate: string, title: string, categoryId: string) => Promise<boolean>;
   onToggleComplete: (task: TaskRow) => Promise<void>;
+  onReassignTask: (taskId: string, newUserId: string) => Promise<void>;
 }
 
-function DayCard({ dayLoad, index, isRealData, calendarEvents, onAddTask, onToggleComplete }: DayCardProps) {
+function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memberIds, isDragTarget, onAddTask, onToggleComplete, onReassignTask }: DayCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -661,6 +834,9 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, onAddTask, onTogg
     }
   };
 
+  // Make this DayCard a droppable zone for D&D
+  const { isOver, setNodeRef: setDropRef } = useDroppable({ id: dayLoad.date });
+
   const handleAddButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     haptic("tap");
@@ -677,13 +853,22 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, onAddTask, onTogg
 
   return (
     <motion.div
+      ref={setDropRef}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05 }}
-      className={`card-elevated overflow-hidden ${
-        dayLoad.isHeavy
+      className={`card-elevated overflow-hidden transition-all ${
+        isOver
+          ? "ring-2 ring-primary bg-primary/5"
+          : isDragTarget
+            ? "ring-1 ring-primary/30"
+            : ""
+      } ${
+        dayLoad.isHeavy && !isOver
           ? "ring-2 ring-red-200 dark:ring-red-800/50 shadow-lg shadow-red-500/10"
-          : "shadow-lg shadow-purple-500/10 border border-purple-100/50 dark:border-purple-800/30"
+          : !isOver
+            ? "shadow-lg shadow-purple-500/10 border border-purple-100/50 dark:border-purple-800/30"
+            : ""
       }`}
     >
       {/* Day header row */}
@@ -856,54 +1041,137 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, onAddTask, onTogg
                   אין משימות או פגישות ליום זה
                 </div>
               )}
-              {dayLoad.tasks.map((task) => {
-                const category = getCategoryFromId(task.category_id);
-                const isMock = task.id.startsWith("mock-");
-                const isCompleted = task.status === "completed";
-
-                return (
-                  <div
-                    key={task.id}
-                    className="flex items-center gap-2 p-2 rounded-lg bg-background/50 dark:bg-background/30"
-                  >
-                    {/* Completion checkbox */}
-                    <button
-                      onClick={() => onToggleComplete(task)}
-                      disabled={isMock}
-                      className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        isCompleted
-                          ? "bg-green-500 border-green-500 text-white"
-                          : isMock
-                            ? "border-border/30 opacity-40 cursor-not-allowed"
-                            : "border-border/50 hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
-                      }`}
-                      title={isCompleted ? "סמן כלא הושלם" : "סמן כהושלם"}
-                    >
-                      {isCompleted && <Check className="w-3 h-3" />}
-                    </button>
-
-                    <span className="text-sm flex-shrink-0">{CATEGORY_ICONS[category] ?? "🏠"}</span>
-                    <div className="flex-1">
-                      <div
-                        className={`text-sm transition-all ${
-                          isCompleted
-                            ? "line-through text-muted"
-                            : "text-foreground"
-                        }`}
-                      >
-                        {task.title}
-                      </div>
-                      <div className="text-xs text-muted">
-                        {CATEGORY_LABELS[category]}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {dayLoad.tasks.map((task) => (
+                <DraggableWeekTask
+                  key={task.id}
+                  task={task}
+                  date={dayLoad.date}
+                  memberNames={memberNames}
+                  memberIds={memberIds}
+                  onToggleComplete={onToggleComplete}
+                  onReassignTask={onReassignTask}
+                />
+              ))}
             </div>
           </motion.div>
         )}
       </AnimatePresence>
     </motion.div>
+  );
+}
+
+// ============================================
+// Draggable Task Item for Weekly D&D
+// ============================================
+
+function DraggableWeekTask({
+  task,
+  date,
+  memberNames,
+  memberIds,
+  onToggleComplete,
+  onReassignTask,
+}: {
+  task: TaskRow;
+  date: string;
+  memberNames: Record<string, string>;
+  memberIds: string[];
+  onToggleComplete: (task: TaskRow) => Promise<void>;
+  onReassignTask: (taskId: string, newUserId: string) => Promise<void>;
+}) {
+  const category = getCategoryFromId(task.category_id);
+  const isMock = task.id.startsWith("mock-");
+  const isCompleted = task.status === "completed";
+
+  // Make this task draggable (only for real DB tasks)
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: task.id,
+    data: { task, fromDate: date, taskId: task.id },
+    disabled: isMock,
+  });
+
+  const style = {
+    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
+    transition,
+  };
+
+  const assigneeName = task.assigned_to ? memberNames[task.assigned_to] : null;
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-2 p-2 rounded-lg bg-background/50 dark:bg-background/30 transition-opacity ${
+        isDragging ? "opacity-40" : ""
+      }`}
+    >
+      {/* D&D handle */}
+      {!isMock && (
+        <button
+          {...attributes}
+          {...listeners}
+          className="p-0.5 rounded touch-none cursor-grab active:cursor-grabbing text-muted/40 hover:text-muted flex-shrink-0"
+          aria-label="גרור להעברה ליום אחר"
+        >
+          <GripVertical className="w-3.5 h-3.5" />
+        </button>
+      )}
+
+      {/* Completion checkbox */}
+      <button
+        onClick={() => onToggleComplete(task)}
+        disabled={isMock}
+        className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+          isCompleted
+            ? "bg-green-500 border-green-500 text-white"
+            : isMock
+              ? "border-border/30 opacity-40 cursor-not-allowed"
+              : "border-border/50 hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
+        }`}
+        title={isCompleted ? "סמן כלא הושלם" : "סמן כהושלם"}
+      >
+        {isCompleted && <Check className="w-3 h-3" />}
+      </button>
+
+      <span className="text-sm flex-shrink-0">{CATEGORY_ICONS[category] ?? "🏠"}</span>
+      <div className="flex-1 min-w-0">
+        <div
+          className={`text-sm transition-all ${
+            isCompleted ? "line-through text-muted" : "text-foreground"
+          }`}
+        >
+          {task.title}
+        </div>
+        <div className="text-xs text-muted">
+          {CATEGORY_LABELS[category]}
+        </div>
+      </div>
+
+      {/* Assignee badge — click to toggle between members */}
+      {assigneeName && memberIds.length === 2 && !isMock && (
+        <button
+          onClick={() => {
+            const otherId = memberIds.find((id) => id !== task.assigned_to);
+            if (otherId) onReassignTask(task.id, otherId);
+          }}
+          className="px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors whitespace-nowrap flex-shrink-0"
+          title="החלף שותף"
+        >
+          {assigneeName}
+        </button>
+      )}
+      {assigneeName && memberIds.length < 2 && (
+        <span className="px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary/70 font-medium whitespace-nowrap flex-shrink-0">
+          {assigneeName}
+        </span>
+      )}
+    </div>
   );
 }

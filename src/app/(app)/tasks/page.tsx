@@ -11,6 +11,8 @@ import {
 } from "@/lib/seed-data";
 import {
   CATEGORY_KEY_TO_NAME,
+  CATEGORY_NAME_TO_KEY,
+  CATEGORY_ILLUSTRATIONS,
   getCategoryColor,
   getCategoryLabel,
 } from "@/lib/categories";
@@ -478,17 +480,21 @@ export default function TasksPage() {
             size="sm"
           />
           {/* Dynamic task categories */}
-          {taskCategories.map((tc) => (
-            <CategoryCard
-              key={tc.id}
-              categoryKey={tc.id}
-              label={tc.name}
-              icon={tc.icon}
-              isActive={activeCategory === tc.id}
-              onClick={() => setActiveCategory(tc.id)}
-              size="sm"
-            />
-          ))}
+          {taskCategories.map((tc) => {
+            const staticKey = CATEGORY_NAME_TO_KEY[tc.name];
+            return (
+              <CategoryCard
+                key={tc.id}
+                categoryKey={tc.id}
+                label={tc.name}
+                icon={tc.icon}
+                illustration={staticKey ? CATEGORY_ILLUSTRATIONS[staticKey] : undefined}
+                isActive={activeCategory === tc.id}
+                onClick={() => setActiveCategory(tc.id)}
+                size="sm"
+              />
+            );
+          })}
         </div>
         {/* Manage categories button */}
         {hasDbTasks && (

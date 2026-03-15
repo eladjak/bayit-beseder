@@ -149,7 +149,13 @@ export function WeeklyGeneratorModal({
               {/* Content — scrollable */}
               <div className="flex-1 overflow-y-auto overscroll-contain bg-background">
                 {state === "preview" && (
-                  <PreviewStep plan={plan} members={members} />
+                  <PreviewStep
+                    plan={plan}
+                    members={members}
+                    onMoveTask={onMoveTask}
+                    onRemoveTask={onRemoveTask}
+                    onReassignTask={onReassignTask}
+                  />
                 )}
                 {state === "editing" && (
                   <EditStep
@@ -262,9 +268,15 @@ function StepDot({
 function PreviewStep({
   plan,
   members,
+  onMoveTask,
+  onRemoveTask,
+  onReassignTask,
 }: {
   plan: WeekPlan;
   members: Array<{ id: string; name: string }>;
+  onMoveTask: (fromDate: string, taskIndex: number, toDate: string) => void;
+  onRemoveTask: (date: string, taskIndex: number) => void;
+  onReassignTask: (date: string, taskIndex: number, newUserId: string) => void;
 }) {
   const totalNew = plan.reduce(
     (sum, day) => sum + day.tasks.filter((t) => !t.isExisting).length,
@@ -289,72 +301,163 @@ function PreviewStep({
     return stats;
   }, [plan, members]);
 
+  // D&D support in preview
+  const [activeDrag, setActiveDrag] = useState<{
+    task: PlannedTask;
+    fromDate: string;
+    taskIndex: number;
+  } | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } })
+  );
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const data = event.active.data.current;
+    if (data) {
+      setActiveDrag({
+        task: data.task as PlannedTask,
+        fromDate: data.fromDate as string,
+        taskIndex: data.taskIndex as number,
+      });
+      haptic("tap");
+    }
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      setActiveDrag(null);
+
+      if (!over || !active.data.current) return;
+
+      const fromDate = active.data.current.fromDate as string;
+      const taskIndex = active.data.current.taskIndex as number;
+      const toDate = over.id as string;
+
+      if (fromDate !== toDate) {
+        onMoveTask(fromDate, taskIndex, toDate);
+        haptic("success");
+      }
+    },
+    [onMoveTask]
+  );
+
   return (
-    <div className="p-4 space-y-3">
-      {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-2">
-        <div className="card-elevated p-3 text-center">
-          <div className="text-2xl font-bold text-primary">{totalNew}</div>
-          <div className="text-[11px] text-muted">משימות חדשות</div>
-        </div>
-        <div className="card-elevated p-3 text-center">
-          <div className="text-2xl font-bold text-success">{totalMinutes}</div>
-          <div className="text-[11px] text-muted">דקות סה״כ</div>
-        </div>
-        <div className="card-elevated p-3 text-center">
-          <div className="text-2xl font-bold text-warning">
-            {plan.filter((d) => d.tasks.length > 0).length}
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="p-4 space-y-3">
+        {/* Summary cards */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="card-elevated p-3 text-center">
+            <div className="text-2xl font-bold text-primary">{totalNew}</div>
+            <div className="text-[11px] text-muted">משימות חדשות</div>
           </div>
-          <div className="text-[11px] text-muted">ימים פעילים</div>
+          <div className="card-elevated p-3 text-center">
+            <div className="text-2xl font-bold text-success">{totalMinutes}</div>
+            <div className="text-[11px] text-muted">דקות סה״כ</div>
+          </div>
+          <div className="card-elevated p-3 text-center">
+            <div className="text-2xl font-bold text-warning">
+              {plan.filter((d) => d.tasks.length > 0).length}
+            </div>
+            <div className="text-[11px] text-muted">ימים פעילים</div>
+          </div>
         </div>
-      </div>
 
-      {/* Per-member balance */}
-      {members.length === 2 && (
-        <div className="card-elevated p-3">
-          <div className="flex items-center gap-2 mb-2">
-            <Users className="w-4 h-4 text-muted" />
-            <span className="text-sm font-medium text-foreground">חלוקה בין השותפים</span>
-          </div>
-          <div className="flex gap-2">
-            {members.map((m) => {
-              const s = memberStats.get(m.id);
-              return (
-                <div key={m.id} className="flex-1 bg-background rounded-lg p-2">
-                  <div className="text-sm font-medium text-foreground truncate">{m.name}</div>
-                  <div className="text-xs text-muted">
-                    {s?.tasks ?? 0} משימות · {s?.minutes ?? 0} דק׳
+        {/* Per-member balance */}
+        {members.length === 2 && (
+          <div className="card-elevated p-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="w-4 h-4 text-muted" />
+              <span className="text-sm font-medium text-foreground">חלוקה בין השותפים</span>
+            </div>
+            <div className="flex gap-2">
+              {members.map((m) => {
+                const s = memberStats.get(m.id);
+                return (
+                  <div key={m.id} className="flex-1 bg-background rounded-lg p-2">
+                    <div className="text-sm font-medium text-foreground truncate">{m.name}</div>
+                    <div className="text-xs text-muted">
+                      {s?.tasks ?? 0} משימות · {s?.minutes ?? 0} דק׳
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Day columns */}
-      <div className="space-y-2">
-        {plan.map((day) => (
-          <DayPreviewCard key={day.date} day={day} members={members} />
-        ))}
+        {/* D&D hint */}
+        <div className="text-xs text-center text-muted/60 flex items-center justify-center gap-1">
+          <GripVertical className="w-3 h-3" />
+          גררו משימות בין ימים לשינוי התוכנית
+        </div>
+
+        {/* Day columns */}
+        <div className="space-y-2">
+          {plan.map((day) => (
+            <DayPreviewCard
+              key={day.date}
+              day={day}
+              members={members}
+              isDragTarget={activeDrag !== null && activeDrag.fromDate !== day.date}
+              onRemoveTask={onRemoveTask}
+              onReassignTask={onReassignTask}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+
+      {/* Drag overlay */}
+      <DragOverlay>
+        {activeDrag && (
+          <div className="bg-primary/15 rounded-lg px-3 py-2 text-xs shadow-lg border-2 border-primary opacity-90 text-foreground">
+            <span className="ml-1">{CATEGORY_ICONS[activeDrag.task.category] ?? "🏠"}</span>
+            {activeDrag.task.title}
+          </div>
+        )}
+      </DragOverlay>
+    </DndContext>
   );
 }
 
 function DayPreviewCard({
   day,
   members,
+  isDragTarget,
+  onRemoveTask,
+  onReassignTask,
 }: {
   day: WeekPlan[number];
   members: Array<{ id: string; name: string }>;
+  isDragTarget: boolean;
+  onRemoveTask: (date: string, taskIndex: number) => void;
+  onReassignTask: (date: string, taskIndex: number, newUserId: string) => void;
 }) {
   const newCount = day.tasks.filter((t) => !t.isExisting).length;
   const getMemberName = (id: string | null) =>
     members.find((m) => m.id === id)?.name ?? "—";
 
+  // Make this card a droppable target
+  const { isOver, setNodeRef } = useDroppable({ id: day.date });
+
   return (
-    <div className="card-elevated p-3">
+    <div
+      ref={setNodeRef}
+      className={`card-elevated p-3 transition-all ${
+        isOver
+          ? "ring-2 ring-primary bg-primary/5"
+          : isDragTarget
+            ? "ring-1 ring-primary/30"
+            : ""
+      }`}
+    >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="font-medium text-sm text-foreground">{day.dayName}</span>
@@ -376,25 +479,128 @@ function DayPreviewCard({
       {day.tasks.length === 0 ? (
         <div className="text-xs text-muted text-center py-2">אין משימות</div>
       ) : (
-        <div className="space-y-1">
-          {day.tasks.map((task, i) => (
-            <div
-              key={`${day.date}-${i}`}
-              className={`flex items-center gap-2 py-1.5 px-2 rounded-lg text-xs ${
-                task.isExisting
-                  ? "bg-background text-muted"
-                  : "bg-primary/5 text-foreground"
-              }`}
-            >
-              <span>{CATEGORY_ICONS[task.category] ?? "🏠"}</span>
-              <span className="flex-1 truncate min-w-0">{task.title}</span>
-              <span className="text-muted whitespace-nowrap text-[10px]">
-                {getMemberName(task.assignee)}
-              </span>
-              <span className="text-muted text-[10px]">{task.estimated_minutes}′</span>
-            </div>
-          ))}
-        </div>
+        <SortableContext items={day.tasks.map((_, i) => `preview-${day.date}-${i}`)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-1">
+            {day.tasks.map((task, i) => (
+              <PreviewDraggableTask
+                key={`preview-${day.date}-${i}`}
+                id={`preview-${day.date}-${i}`}
+                task={task}
+                taskIndex={i}
+                date={day.date}
+                members={members}
+                getMemberName={getMemberName}
+                onRemove={() => {
+                  onRemoveTask(day.date, i);
+                  haptic("tap");
+                }}
+                onReassign={(newId) => {
+                  onReassignTask(day.date, i, newId);
+                  haptic("tap");
+                }}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      )}
+    </div>
+  );
+}
+
+function PreviewDraggableTask({
+  id,
+  task,
+  taskIndex,
+  date,
+  members,
+  getMemberName,
+  onRemove,
+  onReassign,
+}: {
+  id: string;
+  task: PlannedTask;
+  taskIndex: number;
+  date: string;
+  members: Array<{ id: string; name: string }>;
+  getMemberName: (id: string | null) => string;
+  onRemove: () => void;
+  onReassign: (newUserId: string) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id,
+    data: { task, fromDate: date, taskIndex },
+    disabled: task.isExisting,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-2 py-1.5 px-2 rounded-lg text-xs transition-opacity ${
+        isDragging ? "opacity-40" : ""
+      } ${
+        task.isExisting
+          ? "bg-background text-muted"
+          : "bg-primary/5 text-foreground"
+      }`}
+    >
+      {/* Drag handle for new tasks */}
+      {!task.isExisting && (
+        <button
+          {...attributes}
+          {...listeners}
+          className="p-0.5 rounded touch-none cursor-grab active:cursor-grabbing text-muted/40 hover:text-muted flex-shrink-0"
+          aria-label="גרור להעברה"
+        >
+          <GripVertical className="w-3 h-3" />
+        </button>
+      )}
+
+      <span>{CATEGORY_ICONS[task.category] ?? "🏠"}</span>
+      <span className="flex-1 truncate min-w-0">{task.title}</span>
+
+      {/* Assignee toggle */}
+      {members.length === 2 && !task.isExisting ? (
+        <button
+          onClick={() => {
+            const other = members.find((m) => m.id !== task.assignee);
+            if (other) onReassign(other.id);
+          }}
+          className="px-2 py-0.5 rounded bg-border/30 text-[10px] hover:bg-border/50 transition-colors whitespace-nowrap text-foreground"
+          title="החלף שותף"
+        >
+          {getMemberName(task.assignee)}
+        </button>
+      ) : (
+        <span className="text-muted whitespace-nowrap text-[10px]">
+          {getMemberName(task.assignee)}
+        </span>
+      )}
+
+      <span className="text-muted text-[10px]">{task.estimated_minutes}′</span>
+
+      {/* Remove button for new tasks */}
+      {!task.isExisting && (
+        <button
+          onClick={onRemove}
+          className="p-1 rounded hover:bg-danger/10 text-danger/40 hover:text-danger transition-colors"
+          title="הסר"
+          aria-label="הסר משימה"
+        >
+          <Trash2 className="w-3 h-3" />
+        </button>
       )}
     </div>
   );
