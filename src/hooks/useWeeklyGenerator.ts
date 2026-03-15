@@ -132,15 +132,17 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
         const hebrewName = CATEGORY_KEY_TO_NAME[task.category] ?? task.category;
         const categoryUuid = catMap[hebrewName] ?? null;
 
-        // Direct Supabase insert — no callback indirection, full error visibility
+        // Direct Supabase insert — only columns that exist in production DB
+        // Production schema (001_initial.sql): id, title, description, category_id,
+        // assigned_to, status, due_date, points, recurring, created_at
+        // NOTE: 'frequency' and 'google_event_id' do NOT exist in production
         const { error } = await supabase
           .from("tasks")
           .insert({
             title: task.title,
             category_id: categoryUuid,
             due_date: date,
-            status: "pending" as const,
-            frequency: "weekly" as const,
+            status: "pending",
             points: task.difficulty * 5,
             recurring: true,
             assigned_to: task.assignee,

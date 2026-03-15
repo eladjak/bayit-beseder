@@ -44,9 +44,8 @@ async function recordPlaylistCompletion(playlistId: string, playlistName: string
         .insert({
           title: syntheticTitle,
           description: `פלייליסט ניקיון: ${playlistName}`,
-          frequency: "daily" as const,
           assigned_to: user.id,
-          status: "pending" as const,
+          status: "pending",
           recurring: true,
           points: 10,
         })

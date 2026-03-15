@@ -152,12 +152,6 @@ export async function POST() {
 
       const createdEvent = await createEvent(accessToken, calendarId, eventBody);
 
-      // Store the Google event ID in the task row to avoid future duplicates
-      await supabase
-        .from("tasks")
-        .update({ google_event_id: createdEvent.id })
-        .eq("id", task.id);
-
       existingTitles.add(task.title);
       created++;
     } catch (err) {

@@ -93,13 +93,11 @@ function generateMockWeeklyTasks(): TaskRow[] {
         title: template.title,
         description: null,
         category_id: template.category,
-        frequency: "weekly",
         assigned_to: Math.random() > 0.5 ? "user1" : "user2",
         status: Math.random() > 0.7 ? "completed" : "pending",
         due_date: dateStr,
         points: 10,
         recurring: true,
-        google_event_id: null,
         created_at: new Date().toISOString(),
       });
     }
@@ -306,7 +304,6 @@ export default function WeeklyPage() {
         category_id: categoryId,
         due_date: dueDate,
         status: "pending",
-        frequency: "weekly",
         points: 10,
         recurring: false,
       };

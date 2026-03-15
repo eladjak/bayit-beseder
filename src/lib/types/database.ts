@@ -39,13 +39,11 @@ export type Database = {
           title: string;
           description: string | null;
           category_id: string | null;
-          frequency: "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
           assigned_to: string | null;
           status: "pending" | "in_progress" | "completed" | "skipped";
           due_date: string | null;
           points: number;
           recurring: boolean;
-          google_event_id: string | null;
           created_at: string;
         };
         Insert: {
@@ -53,13 +51,11 @@ export type Database = {
           title: string;
           description?: string | null;
           category_id?: string | null;
-          frequency?: "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
           assigned_to?: string | null;
           status?: "pending" | "in_progress" | "completed" | "skipped";
           due_date?: string | null;
           points?: number;
           recurring?: boolean;
-          google_event_id?: string | null;
           created_at?: string;
         };
         Update: {
@@ -67,13 +63,11 @@ export type Database = {
           title?: string;
           description?: string | null;
           category_id?: string | null;
-          frequency?: "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
           assigned_to?: string | null;
           status?: "pending" | "in_progress" | "completed" | "skipped";
           due_date?: string | null;
           points?: number;
           recurring?: boolean;
-          google_event_id?: string | null;
         };
         Relationships: [
           {
@@ -830,7 +824,6 @@ export type StreakType = Streak["streak_type"];
 export type AchievementCategory = Achievement["category"];
 export type MemberRole = HouseholdMember["role"];
 export type CoachingTrigger = CoachingMessage["trigger_type"];
-export type TaskFrequency = TaskRow["frequency"];
 export type NotificationPreferences = NonNullable<
   Profile["notification_preferences"]
 >;
