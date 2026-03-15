@@ -389,29 +389,30 @@ function findAlternativeDay(
 }
 
 /**
- * Rebalance task assignments between 2 members to improve fairness.
+ * Rebalance task assignments between members to improve fairness.
  * Only reassigns NEW tasks (isExisting=false).
+ * Supports any number of members (2+).
  */
 function rebalanceAssignments(plan: WeekPlan, members: string[]): void {
-  const [m0, m1] = members;
+  if (members.length < 2) return;
 
   for (let pass = 0; pass < 3; pass++) {
-    const load0 = memberLoad(plan, m0);
-    const load1 = memberLoad(plan, m1);
-    const diff = Math.abs(load0 - load1);
+    // Find most and least loaded members
+    const loads = members.map((m) => ({ id: m, load: memberLoad(plan, m) }));
+    loads.sort((a, b) => b.load - a.load);
+    const overloaded = loads[0];
+    const underloaded = loads[loads.length - 1];
+    const diff = overloaded.load - underloaded.load;
 
     // If reasonably balanced, stop
     if (diff <= 2) break;
-
-    const overloaded = load0 > load1 ? m0 : m1;
-    const underloaded = load0 > load1 ? m1 : m0;
 
     // Find a new task assigned to the overloaded member and reassign
     let swapped = false;
     for (const day of plan) {
       for (const task of day.tasks) {
-        if (!task.isExisting && task.assignee === overloaded) {
-          task.assignee = underloaded;
+        if (!task.isExisting && task.assignee === overloaded.id) {
+          task.assignee = underloaded.id;
           swapped = true;
           break;
         }

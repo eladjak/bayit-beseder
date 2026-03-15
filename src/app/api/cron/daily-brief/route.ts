@@ -131,7 +131,7 @@ export async function GET(request: NextRequest) {
   } else {
     // Fallback to classic message builder
     const briefData: DailyBriefData = {
-      names: ["אלעד", "ענבל"],
+      names: Object.values(profileMap).filter(Boolean),
       todayTasks: tasks.map((t) => ({
         title: t.title,
         assignedTo: t.assigned_to ? (profileMap[t.assigned_to] ?? null) : null,

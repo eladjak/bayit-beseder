@@ -5,14 +5,14 @@
  */
 
 export interface DailyBriefData {
-  names: [string, string]; // [user, partner]
+  names: string[]; // household member names
   todayTasks: { title: string; assignedTo: string | null }[];
   streak: number;
   dayOfWeek: string;
 }
 
 export interface DailySummaryData {
-  names: [string, string];
+  names: string[];
   completedCount: number;
   totalCount: number;
   completedTasks: string[];

@@ -68,15 +68,15 @@ export const SHOPPING_CATEGORY_ILLUSTRATIONS: Record<string, string> = {
 };
 
 const DEFAULT_MOCK_ITEMS: ShoppingItem[] = [
-  { id: "s1", title: "חלב", category: "חלב", checked: false, added_by: "elad", created_at: "2026-02-19T08:00:00Z" },
-  { id: "s2", title: "לחם", category: "מאפים ודגנים", checked: false, added_by: "elad", created_at: "2026-02-19T08:01:00Z" },
-  { id: "s3", title: "ביצים", quantity: 12, unit: "יח׳", category: "בשר, ביצים ודגים", checked: false, added_by: "ענבל", created_at: "2026-02-19T08:02:00Z" },
-  { id: "s4", title: "גבינה צהובה", category: "מוצרי חלב", checked: true, added_by: "ענבל", created_at: "2026-02-19T07:00:00Z" },
-  { id: "s5", title: "סבון כלים", category: "ניקיון וכביסה", checked: false, added_by: "elad", created_at: "2026-02-19T09:00:00Z" },
-  { id: "s6", title: "אקונומיקה", category: "ניקיון וכביסה", checked: false, added_by: "ענבל", created_at: "2026-02-19T09:01:00Z" },
-  { id: "s7", title: "אוכל לחתולים", quantity: 2, unit: "ק״ג", category: "ג'ינו ורוג'ר 🐱", checked: false, added_by: "elad", created_at: "2026-02-19T10:00:00Z" },
-  { id: "s8", title: "חול לארגז", category: "ג'ינו ורוג'ר 🐱", checked: false, added_by: "ענבל", created_at: "2026-02-19T10:01:00Z" },
-  { id: "s9", title: "נורות", quantity: 4, unit: "יח׳", category: "שונות", checked: false, added_by: "elad", created_at: "2026-02-19T11:00:00Z" },
+  { id: "s1", title: "חלב", category: "חלב", checked: false, added_by: "אני", created_at: "2026-02-19T08:00:00Z" },
+  { id: "s2", title: "לחם", category: "מאפים ודגנים", checked: false, added_by: "אני", created_at: "2026-02-19T08:01:00Z" },
+  { id: "s3", title: "ביצים", quantity: 12, unit: "יח׳", category: "בשר, ביצים ודגים", checked: false, added_by: "השותף/ה", created_at: "2026-02-19T08:02:00Z" },
+  { id: "s4", title: "גבינה צהובה", category: "מוצרי חלב", checked: true, added_by: "השותף/ה", created_at: "2026-02-19T07:00:00Z" },
+  { id: "s5", title: "סבון כלים", category: "ניקיון וכביסה", checked: false, added_by: "אני", created_at: "2026-02-19T09:00:00Z" },
+  { id: "s6", title: "אקונומיקה", category: "ניקיון וכביסה", checked: false, added_by: "השותף/ה", created_at: "2026-02-19T09:01:00Z" },
+  { id: "s7", title: "אוכל לחיות", quantity: 2, unit: "ק״ג", category: "חיות מחמד", checked: false, added_by: "אני", created_at: "2026-02-19T10:00:00Z" },
+  { id: "s8", title: "חול לארגז", category: "חיות מחמד", checked: false, added_by: "השותף/ה", created_at: "2026-02-19T10:01:00Z" },
+  { id: "s9", title: "נורות", quantity: 4, unit: "יח׳", category: "שונות", checked: false, added_by: "אני", created_at: "2026-02-19T11:00:00Z" },
 ];
 
 const STORAGE_KEY = "bayit-beseder-shopping-list";
@@ -252,7 +252,7 @@ export function useShoppingList(): UseShoppingListReturn {
           unit,
           category,
           checked: false,
-          added_by: "elad",
+          added_by: "אני",
           created_at: new Date().toISOString(),
         };
         setItems((prev) => {
@@ -307,7 +307,7 @@ export function useShoppingList(): UseShoppingListReturn {
           unit,
           category,
           checked: false,
-          added_by: "elad",
+          added_by: "אני",
           created_at: new Date().toISOString(),
         };
         setItems((prev) => {

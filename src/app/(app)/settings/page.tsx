@@ -91,7 +91,7 @@ export default function SettingsPage() {
   // Household state
   const [copied, setCopied] = useState(false);
   const [goldenTarget, setGoldenTarget] = useState(80);
-  const [householdName, setHouseholdName] = useState("הבית של אלעד וענבל");
+  const [householdName, setHouseholdName] = useState("הבית שלנו");
   const [householdSaving, setHouseholdSaving] = useState(false);
 
   // Sound state

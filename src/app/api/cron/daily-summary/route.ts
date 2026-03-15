@@ -104,8 +104,16 @@ export async function GET(request: NextRequest) {
       remaining.map((t) => t.title)
     );
   } else {
+    // Fetch member names dynamically
+    const { data: memberProfiles } = await supabase
+      .from("profiles")
+      .select("display_name")
+      .not("display_name", "is", null)
+      .limit(10);
+    const memberNames = (memberProfiles ?? []).map((p) => p.display_name).filter(Boolean) as string[];
+
     const summaryData: DailySummaryData = {
-      names: ["אלעד", "ענבל"],
+      names: memberNames.length > 0 ? memberNames : ["משתמש"],
       completedCount: completed.length,
       totalCount: allTasks.length,
       completedTasks: completed.map((t) => t.title),

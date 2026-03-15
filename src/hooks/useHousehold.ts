@@ -10,7 +10,7 @@ interface HouseholdData {
 }
 
 const MOCK_HOUSEHOLD: HouseholdData = {
-  name: "הבית של אלעד וענבל",
+  name: "הבית שלנו",
   inviteCode: "BAYIT-ABC123",
   goldenRuleTarget: 80,
 };

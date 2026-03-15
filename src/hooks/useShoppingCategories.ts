@@ -35,7 +35,7 @@ const DEFAULT_CATEGORIES: Omit<ShoppingCategoryRow, "id" | "household_id" | "cre
   { name: "מצרכים לאפייה", icon: "🎂", color: "#F472B6", sort_order: 17 },
   { name: "ניקיון וכביסה", icon: "🧹", color: "#60A5FA", sort_order: 18 },
   { name: "תרופות", icon: "💊", color: "#F87171", sort_order: 19 },
-  { name: "ג'ינו ורוג'ר 🐱", icon: "🐱", color: "#FB923C", sort_order: 20 },
+  { name: "חיות מחמד", icon: "🐾", color: "#FB923C", sort_order: 20 },
   { name: "שונות", icon: "📦", color: "#6B7280", sort_order: 21 },
 ];
 

@@ -33,6 +33,7 @@ import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
 import { useProfile } from "@/hooks/useProfile";
+import { usePartner } from "@/hooks/usePartner";
 import { useUserAchievements } from "@/hooks/useUserAchievements";
 import { AnimatedNumber } from "@/components/animated-number";
 import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
@@ -274,6 +275,7 @@ export default function StatsPage() {
   const { completions } = useCompletions({ limit: 500 });
   const { categoryMap } = useCategories();
   const { profile } = useProfile();
+  const { partner } = usePartner(profile?.partner_id, today);
   const { dbUnlockedCodes, hasDbData: hasAchievementsDbData } = useUserAchievements();
 
   // Build category_id -> key mapping
@@ -527,7 +529,7 @@ export default function StatsPage() {
         myCount={partnerComparison.myCount}
         partnerCount={partnerComparison.partnerCount}
         myName={profile?.name ?? "אני"}
-        partnerName="ענבל"
+        partnerName={partner.name}
         weeklyCompletedTotal={weeklyTotal}
         monthlyCompletedTotal={monthlyTotal}
       />

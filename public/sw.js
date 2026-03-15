@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
 const CACHE_NAME = `bayit-beseder-${CACHE_VERSION}`;
 const STATIC_ASSETS = [
   "/",
@@ -48,8 +48,11 @@ self.addEventListener("fetch", (event) => {
   // Skip non-GET requests
   if (event.request.method !== "GET") return;
 
-  // Skip API calls and auth-related requests
+  // Only handle http(s) requests (skip chrome-extension://, etc.)
   const url = new URL(event.request.url);
+  if (!url.protocol.startsWith("http")) return;
+
+  // Skip API calls and auth-related requests
   if (url.pathname.startsWith("/api") || url.pathname.startsWith("/auth")) {
     return;
   }
@@ -61,7 +64,9 @@ self.addEventListener("fetch", (event) => {
         if (response.ok) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, clone);
+            cache.put(event.request, clone).catch(() => {
+              // Silently ignore cache errors (e.g. opaque responses, quota exceeded)
+            });
           });
         }
         return response;
