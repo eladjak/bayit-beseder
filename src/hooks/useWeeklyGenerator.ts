@@ -12,9 +12,14 @@ import {
 } from "@/lib/weekly-generator";
 import { createClient } from "@/lib/supabase";
 import { CATEGORY_KEY_TO_NAME } from "@/lib/categories";
-import type { TaskRow, TaskInsert } from "@/lib/types/database";
+import type { TaskRow } from "@/lib/types/database";
 
 type WizardState = "idle" | "preview" | "editing" | "applying" | "done";
+
+interface ApplyResult {
+  created: number;
+  errors: string[];
+}
 
 interface UseWeeklyGeneratorReturn {
   state: WizardState;
@@ -26,10 +31,7 @@ interface UseWeeklyGeneratorReturn {
   addTask: (date: string, task: PlannedTask) => void;
   reassignTask: (date: string, taskIndex: number, newUserId: string) => void;
   startEditing: () => void;
-  applyPlan: (
-    createTask: (task: TaskInsert) => Promise<TaskRow | null>,
-    getError: () => string | null
-  ) => Promise<{ created: number; firstError: string | null }>;
+  applyPlan: () => Promise<ApplyResult>;
   reset: () => void;
 }
 
@@ -94,14 +96,13 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
   }, []);
 
   const applyPlan = useCallback(
-    async (
-      createTask: (task: TaskInsert) => Promise<TaskRow | null>,
-      getError: () => string | null
-    ): Promise<{ created: number; firstError: string | null }> => {
-      if (!plan) return { created: 0, firstError: null };
+    async (): Promise<ApplyResult> => {
+      if (!plan) return { created: 0, errors: [] };
 
       setState("applying");
       setApplyProgress(0);
+
+      const supabase = createClient();
 
       // Fetch category UUID map from Supabase
       const catMap = await buildCategoryMap();
@@ -118,11 +119,11 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
 
       if (newTasks.length === 0) {
         setState("done");
-        return { created: 0, firstError: null };
+        return { created: 0, errors: [] };
       }
 
       let created = 0;
-      let firstError: string | null = null;
+      const errors: string[] = [];
 
       for (let i = 0; i < newTasks.length; i++) {
         const { task, date } = newTasks[i];
@@ -131,30 +132,33 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
         const hebrewName = CATEGORY_KEY_TO_NAME[task.category] ?? task.category;
         const categoryUuid = catMap[hebrewName] ?? null;
 
-        const taskData: TaskInsert = {
-          title: task.title,
-          category_id: categoryUuid,
-          due_date: date,
-          status: "pending",
-          frequency: "weekly",
-          points: task.difficulty * 5,
-          recurring: true,
-          assigned_to: task.assignee,
-        };
+        // Direct Supabase insert — no callback indirection, full error visibility
+        const { error } = await supabase
+          .from("tasks")
+          .insert({
+            title: task.title,
+            category_id: categoryUuid,
+            due_date: date,
+            status: "pending" as const,
+            frequency: "weekly" as const,
+            points: task.difficulty * 5,
+            recurring: true,
+            assigned_to: task.assignee,
+          })
+          .select()
+          .single();
 
-        const result = await createTask(taskData);
-        if (result) {
+        if (error) {
+          errors.push(`${task.title}: ${error.message}`);
+        } else {
           created++;
-        } else if (!firstError) {
-          // Capture the first error from the useTasks hook
-          firstError = getError();
         }
 
         setApplyProgress(Math.round(((i + 1) / newTasks.length) * 100));
       }
 
       setState("done");
-      return { created, firstError };
+      return { created, errors };
     },
     [plan]
   );

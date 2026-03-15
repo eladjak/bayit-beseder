@@ -156,7 +156,7 @@ export default function WeeklyPage() {
   });
 
   // Fetch tasks for this week with write capability
-  const { tasks, loading, error: taskError, createTask, updateTask, refetch } = useTasks({});
+  const { tasks, loading, createTask, updateTask, refetch } = useTasks({});
 
   // Weekly generator wizard
   const wizard = useWeeklyGenerator();
@@ -191,20 +191,22 @@ export default function WeeklyPage() {
   }, [profile, partner]);
 
   const handleApplyWizard = useCallback(async () => {
-    const { created, firstError } = await wizard.applyPlan(
-      createTask,
-      () => taskError
-    );
+    const { created, errors } = await wizard.applyPlan();
     if (created > 0) {
       toast.success(`${created} משימות חדשות נוספו!`);
       haptic("success");
       await refetch();
-    } else if (firstError) {
-      toast.error(`שגיאה בהוספת משימות: ${firstError}`);
-    } else {
+    }
+    if (errors.length > 0) {
+      // Show the actual Supabase error so we can diagnose the issue
+      toast.error(`שגיאה ב-${errors.length} משימות: ${errors[0]}`, {
+        duration: 10000,
+      });
+    }
+    if (created === 0 && errors.length === 0) {
       toast.info("אין משימות חדשות להוספה");
     }
-  }, [wizard, createTask, refetch, taskError]);
+  }, [wizard, refetch]);
 
   // Auto-seed tasks for authenticated users on first visit
   const seedAttempted = useRef(false);
