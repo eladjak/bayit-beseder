@@ -2,7 +2,16 @@
   "name": "bayit-beseder",
   "version": "1.0.0",
   "description": "Shared home maintenance app for couples — Hebrew RTL, mobile-first PWA with gamification",
-  "keywords": ["nextjs", "pwa", "supabase", "hebrew", "rtl", "home-management", "couples", "gamification"],
+  "keywords": [
+    "nextjs",
+    "pwa",
+    "supabase",
+    "hebrew",
+    "rtl",
+    "home-management",
+    "couples",
+    "gamification"
+  ],
   "homepage": "https://bayit-beseder.vercel.app",
   "repository": {
     "type": "git",
@@ -18,6 +27,9 @@
     "test": "node --test src/__tests__/task-stats.test.mjs src/__tests__/notifications.test.mjs src/__tests__/auto-scheduler.test.mjs src/__tests__/room-health.test.mjs src/__tests__/rewards.test.mjs src/__tests__/golden-rule-rotation.test.mjs src/__tests__/energy-filter.test.mjs src/__tests__/push-notifications.test.mjs"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
     "@hookform/resolvers": "^5.2.2",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.95.3",

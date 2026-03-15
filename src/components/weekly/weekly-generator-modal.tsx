@@ -8,7 +8,7 @@ import {
   ChevronDown,
   ChevronUp,
   Trash2,
-  ArrowRightLeft,
+  GripVertical,
   Plus,
   Check,
   Loader2,
@@ -16,7 +16,24 @@ import {
   Users,
   Sparkles,
 } from "lucide-react";
-import { toast } from "sonner";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+  type DragStartEvent,
+  DragOverlay,
+  useDroppable,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { haptic } from "@/lib/haptics";
 import {
   CATEGORY_BG_CLASSES,
@@ -25,7 +42,6 @@ import {
   CATEGORY_KEYS,
 } from "@/lib/categories";
 import type { WeekPlan, PlannedTask } from "@/lib/weekly-generator";
-import type { TaskRow, TaskInsert } from "@/lib/types/database";
 import type { TaskTemplate } from "@/lib/seed-data";
 
 // ============================================
@@ -97,7 +113,8 @@ export function WeeklyGeneratorModal({
                 onReset();
                 onClose();
               }}
-              className="p-2 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors"
+              className="p-2 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="סגור"
             >
               <X className="w-5 h-5" />
             </button>
@@ -113,7 +130,7 @@ export function WeeklyGeneratorModal({
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto overscroll-contain">
             {state === "preview" && (
               <PreviewStep plan={plan} members={members} />
             )}
@@ -143,30 +160,28 @@ export function WeeklyGeneratorModal({
               <div className="flex gap-2">
                 <button
                   onClick={onStartEditing}
-                  className="flex-1 py-3 rounded-xl bg-indigo-500 text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                  className="flex-1 py-3 rounded-xl bg-indigo-500 text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
                 >
                   <Sparkles className="w-4 h-4" />
-                  ערוך תוכנית
+                  <span className="truncate">ערוך תוכנית</span>
                 </button>
                 <button
                   onClick={onApply}
-                  className="flex-1 py-3 rounded-xl bg-emerald-500 text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                  className="flex-1 py-3 rounded-xl bg-emerald-500 text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
                 >
                   <Check className="w-4 h-4" />
-                  החל ישירות
+                  <span className="truncate">החל ישירות</span>
                 </button>
               </div>
             )}
             {state === "editing" && (
-              <div className="flex gap-2">
-                <button
-                  onClick={onApply}
-                  className="flex-1 py-3 rounded-xl bg-emerald-500 text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
-                >
-                  <Check className="w-4 h-4" />
-                  החל תוכנית ({totalNew} משימות חדשות)
-                </button>
-              </div>
+              <button
+                onClick={onApply}
+                className="w-full py-3 rounded-xl bg-emerald-500 text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
+              >
+                <Check className="w-4 h-4" />
+                <span className="truncate">החל תוכנית ({totalNew} משימות חדשות)</span>
+              </button>
             )}
             {state === "done" && (
               <button
@@ -174,7 +189,7 @@ export function WeeklyGeneratorModal({
                   onReset();
                   onClose();
                 }}
-                className="w-full py-3 rounded-xl bg-indigo-500 text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
+                className="w-full py-3 rounded-xl bg-indigo-500 text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
               >
                 <Check className="w-4 h-4" />
                 סיום
@@ -203,7 +218,7 @@ function StepDot({
   return (
     <div className="flex flex-col items-center gap-0.5">
       <div
-        className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
           done
             ? "bg-emerald-500 text-white"
             : active
@@ -214,7 +229,7 @@ function StepDot({
         {done ? <Check className="w-3.5 h-3.5" /> : null}
       </div>
       <span
-        className={`text-[10px] ${
+        className={`text-[11px] ${
           active || done ? "text-stone-900 dark:text-stone-100 font-medium" : "text-stone-400"
         }`}
       >
@@ -241,7 +256,6 @@ function PreviewStep({
   );
   const totalMinutes = plan.reduce((sum, day) => sum + day.totalMinutes, 0);
 
-  // Per-member stats
   const memberStats = useMemo(() => {
     const stats = new Map<string, { tasks: number; minutes: number }>();
     for (const m of members) {
@@ -260,22 +274,22 @@ function PreviewStep({
   }, [plan, members]);
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 space-y-3">
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-2">
         <div className="bg-white dark:bg-stone-800 rounded-xl p-3 text-center">
           <div className="text-2xl font-bold text-indigo-500">{totalNew}</div>
-          <div className="text-xs text-stone-500">משימות חדשות</div>
+          <div className="text-[11px] text-stone-500">משימות חדשות</div>
         </div>
         <div className="bg-white dark:bg-stone-800 rounded-xl p-3 text-center">
           <div className="text-2xl font-bold text-emerald-500">{totalMinutes}</div>
-          <div className="text-xs text-stone-500">דקות סה״כ</div>
+          <div className="text-[11px] text-stone-500">דקות סה״כ</div>
         </div>
         <div className="bg-white dark:bg-stone-800 rounded-xl p-3 text-center">
           <div className="text-2xl font-bold text-amber-500">
             {plan.filter((d) => d.tasks.length > 0).length}
           </div>
-          <div className="text-xs text-stone-500">ימים פעילים</div>
+          <div className="text-[11px] text-stone-500">ימים פעילים</div>
         </div>
       </div>
 
@@ -350,18 +364,18 @@ function DayPreviewCard({
           {day.tasks.map((task, i) => (
             <div
               key={`${day.date}-${i}`}
-              className={`flex items-center gap-2 py-1 px-2 rounded-lg text-xs ${
+              className={`flex items-center gap-2 py-1.5 px-2 rounded-lg text-xs ${
                 task.isExisting
                   ? "bg-stone-50 dark:bg-stone-700/50 text-stone-500"
                   : "bg-indigo-50 dark:bg-indigo-900/20 text-stone-700 dark:text-stone-300"
               }`}
             >
               <span>{CATEGORY_ICONS[task.category] ?? "🏠"}</span>
-              <span className="flex-1 truncate">{task.title}</span>
-              <span className="text-stone-400 whitespace-nowrap">
+              <span className="flex-1 truncate min-w-0">{task.title}</span>
+              <span className="text-stone-400 whitespace-nowrap text-[10px]">
                 {getMemberName(task.assignee)}
               </span>
-              <span className="text-stone-400">{task.estimated_minutes}′</span>
+              <span className="text-stone-400 text-[10px]">{task.estimated_minutes}′</span>
             </div>
           ))}
         </div>
@@ -371,7 +385,7 @@ function DayPreviewCard({
 }
 
 // ============================================
-// Edit Step
+// Edit Step with Drag & Drop
 // ============================================
 
 function EditStep({
@@ -390,36 +404,95 @@ function EditStep({
   onReassignTask: (date: string, taskIndex: number, newUserId: string) => void;
 }) {
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
+  const [activeDrag, setActiveDrag] = useState<{
+    task: PlannedTask;
+    fromDate: string;
+    taskIndex: number;
+  } | null>(null);
+
+  // dnd-kit sensors: touch has delay to prevent conflict with scroll
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } })
+  );
+
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    const data = event.active.data.current;
+    if (data) {
+      setActiveDrag({
+        task: data.task as PlannedTask,
+        fromDate: data.fromDate as string,
+        taskIndex: data.taskIndex as number,
+      });
+      haptic("tap");
+    }
+  }, []);
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      setActiveDrag(null);
+
+      if (!over || !active.data.current) return;
+
+      const fromDate = active.data.current.fromDate as string;
+      const taskIndex = active.data.current.taskIndex as number;
+      const toDate = over.id as string;
+
+      if (fromDate !== toDate) {
+        onMoveTask(fromDate, taskIndex, toDate);
+        haptic("success");
+      }
+    },
+    [onMoveTask]
+  );
 
   return (
-    <div className="p-4 space-y-2">
-      {/* Summary bar */}
-      <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-3 flex items-center justify-between">
-        <span className="text-sm text-indigo-700 dark:text-indigo-300">
-          {plan.reduce((s, d) => s + d.tasks.filter((t) => !t.isExisting).length, 0)} משימות חדשות
-        </span>
-        <span className="text-sm text-indigo-700 dark:text-indigo-300">
-          {plan.reduce((s, d) => s + d.totalMinutes, 0)} דק׳ סה״כ
-        </span>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="p-4 space-y-2">
+        {/* Summary bar */}
+        <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-3 flex items-center justify-between gap-2">
+          <span className="text-xs sm:text-sm text-indigo-700 dark:text-indigo-300">
+            {plan.reduce((s, d) => s + d.tasks.filter((t) => !t.isExisting).length, 0)} משימות חדשות
+          </span>
+          <span className="text-xs sm:text-sm text-indigo-700 dark:text-indigo-300">
+            {plan.reduce((s, d) => s + d.totalMinutes, 0)} דק׳ סה״כ
+          </span>
+        </div>
+
+        {plan.map((day) => (
+          <DayEditCard
+            key={day.date}
+            day={day}
+            plan={plan}
+            members={members}
+            expanded={expandedDay === day.date}
+            isDragTarget={activeDrag !== null && activeDrag.fromDate !== day.date}
+            onToggle={() =>
+              setExpandedDay((prev) => (prev === day.date ? null : day.date))
+            }
+            onRemoveTask={onRemoveTask}
+            onAddTask={onAddTask}
+            onReassignTask={onReassignTask}
+          />
+        ))}
       </div>
 
-      {plan.map((day) => (
-        <DayEditCard
-          key={day.date}
-          day={day}
-          plan={plan}
-          members={members}
-          expanded={expandedDay === day.date}
-          onToggle={() =>
-            setExpandedDay((prev) => (prev === day.date ? null : day.date))
-          }
-          onMoveTask={onMoveTask}
-          onRemoveTask={onRemoveTask}
-          onAddTask={onAddTask}
-          onReassignTask={onReassignTask}
-        />
-      ))}
-    </div>
+      {/* Drag overlay */}
+      <DragOverlay>
+        {activeDrag && (
+          <div className="bg-indigo-100 dark:bg-indigo-800 rounded-lg px-3 py-2 text-xs shadow-lg border-2 border-indigo-400 opacity-90">
+            <span className="ml-1">{CATEGORY_ICONS[activeDrag.task.category] ?? "🏠"}</span>
+            {activeDrag.task.title}
+          </div>
+        )}
+      </DragOverlay>
+    </DndContext>
   );
 }
 
@@ -428,8 +501,8 @@ function DayEditCard({
   plan,
   members,
   expanded,
+  isDragTarget,
   onToggle,
-  onMoveTask,
   onRemoveTask,
   onAddTask,
   onReassignTask,
@@ -438,8 +511,8 @@ function DayEditCard({
   plan: WeekPlan;
   members: Array<{ id: string; name: string }>;
   expanded: boolean;
+  isDragTarget: boolean;
   onToggle: () => void;
-  onMoveTask: (fromDate: string, taskIndex: number, toDate: string) => void;
   onRemoveTask: (date: string, taskIndex: number) => void;
   onAddTask: (date: string, task: PlannedTask) => void;
   onReassignTask: (date: string, taskIndex: number, newUserId: string) => void;
@@ -447,6 +520,9 @@ function DayEditCard({
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newCategory, setNewCategory] = useState<string>("general");
+
+  // Make this day card a drop target
+  const { isOver, setNodeRef } = useDroppable({ id: day.date });
 
   const handleAdd = () => {
     if (!newTitle.trim()) return;
@@ -466,14 +542,19 @@ function DayEditCard({
   const getMemberName = (id: string | null) =>
     members.find((m) => m.id === id)?.name ?? "—";
 
-  const otherDays = plan.filter((d) => d.date !== day.date);
+  const taskIds = day.tasks.map((_, i) => `${day.date}-${i}`);
 
   return (
-    <div className="bg-white dark:bg-stone-800 rounded-xl overflow-hidden">
+    <div
+      ref={setNodeRef}
+      className={`bg-white dark:bg-stone-800 rounded-xl overflow-hidden transition-colors ${
+        isOver ? "ring-2 ring-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/20" : ""
+      } ${isDragTarget ? "ring-1 ring-indigo-200 dark:ring-indigo-800" : ""}`}
+    >
       {/* Day header */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-3 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors"
+        className="w-full flex items-center justify-between p-3 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors min-h-[48px]"
       >
         <div className="flex items-center gap-2">
           <span className="font-medium text-sm">{day.dayName}</span>
@@ -500,48 +581,46 @@ function DayEditCard({
             className="overflow-hidden"
           >
             <div className="px-3 pb-3 space-y-1">
-              {day.tasks.map((task, i) => (
-                <TaskEditRow
-                  key={`${day.date}-${i}`}
-                  task={task}
-                  taskIndex={i}
-                  date={day.date}
-                  members={members}
-                  otherDays={otherDays}
-                  getMemberName={getMemberName}
-                  onMove={(toDate) => {
-                    onMoveTask(day.date, i, toDate);
-                    haptic("tap");
-                  }}
-                  onRemove={() => {
-                    onRemoveTask(day.date, i);
-                    haptic("tap");
-                  }}
-                  onReassign={(newId) => {
-                    onReassignTask(day.date, i, newId);
-                    haptic("tap");
-                  }}
-                />
-              ))}
+              <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+                {day.tasks.map((task, i) => (
+                  <DraggableTaskRow
+                    key={`${day.date}-${i}`}
+                    id={`${day.date}-${i}`}
+                    task={task}
+                    taskIndex={i}
+                    date={day.date}
+                    members={members}
+                    getMemberName={getMemberName}
+                    onRemove={() => {
+                      onRemoveTask(day.date, i);
+                      haptic("tap");
+                    }}
+                    onReassign={(newId) => {
+                      onReassignTask(day.date, i, newId);
+                      haptic("tap");
+                    }}
+                  />
+                ))}
+              </SortableContext>
 
               {/* Add task form */}
               {showAddForm ? (
-                <div className="mt-2 space-y-2 bg-stone-50 dark:bg-stone-700/50 p-2 rounded-lg">
+                <div className="mt-2 space-y-2 bg-stone-50 dark:bg-stone-700/50 p-3 rounded-lg">
                   <input
                     type="text"
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="שם המשימה..."
-                    className="w-full px-3 py-2 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2.5 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
                     onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                     autoFocus
                   />
-                  <div className="flex gap-1 flex-wrap">
+                  <div className="flex gap-1.5 flex-wrap">
                     {CATEGORY_KEYS.map((key) => (
                       <button
                         key={key}
                         onClick={() => setNewCategory(key)}
-                        className={`px-2 py-1 rounded text-xs transition-colors ${
+                        className={`px-2 py-1.5 rounded text-xs transition-colors min-h-[32px] ${
                           newCategory === key
                             ? `${CATEGORY_BG_CLASSES[key]} text-white`
                             : "bg-stone-200 dark:bg-stone-600 text-stone-600 dark:text-stone-300"
@@ -555,13 +634,13 @@ function DayEditCard({
                     <button
                       onClick={handleAdd}
                       disabled={!newTitle.trim()}
-                      className="flex-1 py-1.5 rounded-lg bg-indigo-500 text-white text-xs font-medium disabled:opacity-50"
+                      className="flex-1 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium disabled:opacity-50 min-h-[40px]"
                     >
                       הוסף
                     </button>
                     <button
                       onClick={() => setShowAddForm(false)}
-                      className="px-3 py-1.5 rounded-lg bg-stone-200 dark:bg-stone-600 text-xs"
+                      className="px-4 py-2 rounded-lg bg-stone-200 dark:bg-stone-600 text-sm min-h-[40px]"
                     >
                       ביטול
                     </button>
@@ -570,9 +649,9 @@ function DayEditCard({
               ) : (
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="w-full flex items-center justify-center gap-1 py-2 text-xs text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors mt-1"
+                  className="w-full flex items-center justify-center gap-1 py-2.5 text-xs text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors mt-1 min-h-[40px]"
                 >
-                  <Plus className="w-3 h-3" />
+                  <Plus className="w-3.5 h-3.5" />
                   הוסף משימה
                 </button>
               )}
@@ -584,39 +663,73 @@ function DayEditCard({
   );
 }
 
-function TaskEditRow({
+// ============================================
+// Draggable Task Row
+// ============================================
+
+function DraggableTaskRow({
+  id,
   task,
   taskIndex,
   date,
   members,
-  otherDays,
   getMemberName,
-  onMove,
   onRemove,
   onReassign,
 }: {
+  id: string;
   task: PlannedTask;
   taskIndex: number;
   date: string;
   members: Array<{ id: string; name: string }>;
-  otherDays: Array<{ date: string; dayName: string }>;
   getMemberName: (id: string | null) => string;
-  onMove: (toDate: string) => void;
   onRemove: () => void;
   onReassign: (newUserId: string) => void;
 }) {
-  const [showMoveMenu, setShowMoveMenu] = useState(false);
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id,
+    data: { task, fromDate: date, taskIndex },
+    disabled: task.isExisting,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   return (
     <div
-      className={`flex items-center gap-1.5 py-1.5 px-2 rounded-lg text-xs ${
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center gap-2 py-2 px-2 rounded-lg text-xs transition-colors ${
+        isDragging ? "opacity-40" : ""
+      } ${
         task.isExisting
           ? "bg-stone-50 dark:bg-stone-700/30 text-stone-500"
           : "bg-indigo-50 dark:bg-indigo-900/20"
       }`}
     >
+      {/* Drag handle */}
+      {!task.isExisting && (
+        <button
+          {...attributes}
+          {...listeners}
+          className="p-1 rounded touch-none cursor-grab active:cursor-grabbing text-stone-400 hover:text-stone-600 min-w-[28px] min-h-[28px] flex items-center justify-center"
+          aria-label="גרור להעברה"
+        >
+          <GripVertical className="w-3.5 h-3.5" />
+        </button>
+      )}
+
       <span className="text-sm">{CATEGORY_ICONS[task.category] ?? "🏠"}</span>
-      <span className="flex-1 truncate">{task.title}</span>
+      <span className="flex-1 truncate min-w-0">{task.title}</span>
 
       {/* Assignee toggle */}
       {members.length === 2 && !task.isExisting && (
@@ -625,50 +738,22 @@ function TaskEditRow({
             const other = members.find((m) => m.id !== task.assignee);
             if (other) onReassign(other.id);
           }}
-          className="px-1.5 py-0.5 rounded bg-stone-200 dark:bg-stone-600 text-[10px] hover:bg-stone-300 dark:hover:bg-stone-500 transition-colors whitespace-nowrap"
+          className="px-2 py-1 rounded bg-stone-200 dark:bg-stone-600 text-[11px] hover:bg-stone-300 dark:hover:bg-stone-500 transition-colors whitespace-nowrap min-h-[28px]"
           title="החלף שותף"
         >
           {getMemberName(task.assignee)}
         </button>
       )}
 
-      {/* Move to day */}
-      {!task.isExisting && (
-        <div className="relative">
-          <button
-            onClick={() => setShowMoveMenu(!showMoveMenu)}
-            className="p-1 rounded hover:bg-stone-200 dark:hover:bg-stone-600 transition-colors"
-            title="העבר ליום אחר"
-          >
-            <ArrowRightLeft className="w-3 h-3" />
-          </button>
-          {showMoveMenu && (
-            <div className="absolute left-0 top-full mt-1 bg-white dark:bg-stone-700 rounded-lg shadow-lg border border-stone-200 dark:border-stone-600 z-10 py-1 min-w-[120px]">
-              {otherDays.map((d) => (
-                <button
-                  key={d.date}
-                  onClick={() => {
-                    onMove(d.date);
-                    setShowMoveMenu(false);
-                  }}
-                  className="w-full text-right px-3 py-1.5 text-xs hover:bg-stone-100 dark:hover:bg-stone-600 transition-colors"
-                >
-                  {d.dayName}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
       {/* Remove */}
       {!task.isExisting && (
         <button
           onClick={onRemove}
-          className="p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-red-400 hover:text-red-500 transition-colors"
+          className="p-1.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-red-400 hover:text-red-500 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
           title="הסר"
+          aria-label="הסר משימה"
         >
-          <Trash2 className="w-3 h-3" />
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       )}
     </div>
@@ -691,7 +776,7 @@ function ApplyStep({
   isDone: boolean;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center p-8 min-h-[300px]">
+    <div className="flex flex-col items-center justify-center p-6 min-h-[250px]">
       {isDone ? (
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}

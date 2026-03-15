@@ -10,6 +10,8 @@ import {
   type WeekPlan,
   type PlannedTask,
 } from "@/lib/weekly-generator";
+import { createClient } from "@/lib/supabase";
+import { CATEGORY_KEY_TO_NAME } from "@/lib/categories";
 import type { TaskRow, TaskInsert } from "@/lib/types/database";
 
 type WizardState = "idle" | "preview" | "editing" | "applying" | "done";
@@ -28,6 +30,24 @@ interface UseWeeklyGeneratorReturn {
     createTask: (task: TaskInsert) => Promise<TaskRow | null>
   ) => Promise<number>;
   reset: () => void;
+}
+
+/**
+ * Fetches categories from Supabase and builds a map from category key (e.g. "kitchen")
+ * to UUID. Falls back to null if the category is not found.
+ */
+async function buildCategoryMap(): Promise<Record<string, string>> {
+  const supabase = createClient();
+  const { data } = await supabase.from("categories").select("id, name");
+
+  const map: Record<string, string> = {};
+  if (!data) return map;
+
+  for (const cat of data) {
+    // Map by Hebrew name → UUID
+    map[cat.name] = cat.id;
+  }
+  return map;
 }
 
 export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
@@ -81,6 +101,9 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
       setState("applying");
       setApplyProgress(0);
 
+      // Fetch category UUID map from Supabase
+      const catMap = await buildCategoryMap();
+
       // Collect all new tasks to insert
       const newTasks: Array<{ task: PlannedTask; date: string }> = [];
       for (const day of plan) {
@@ -99,9 +122,14 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
       let created = 0;
       for (let i = 0; i < newTasks.length; i++) {
         const { task, date } = newTasks[i];
+
+        // Resolve category key ("kitchen") → Hebrew name ("מטבח") → UUID
+        const hebrewName = CATEGORY_KEY_TO_NAME[task.category] ?? task.category;
+        const categoryUuid = catMap[hebrewName] ?? null;
+
         const taskData: TaskInsert = {
           title: task.title,
-          category_id: task.category,
+          category_id: categoryUuid,
           due_date: date,
           status: "pending",
           frequency: "weekly",
