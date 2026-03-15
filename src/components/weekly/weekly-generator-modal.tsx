@@ -94,109 +94,125 @@ export function WeeklyGeneratorModal({
   return (
     <AnimatePresence>
       {open && (
-        <motion.div
-          className="fixed inset-0 z-50 flex flex-col bg-stone-50 dark:bg-stone-900"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.2 }}
-          dir="rtl"
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700 safe-top">
-            <div className="flex items-center gap-2">
-              <Wand2 className="w-5 h-5 text-indigo-500" />
-              <h2 className="text-lg font-bold">אשף שבועי</h2>
-            </div>
-            <button
-              onClick={() => {
-                onReset();
-                onClose();
-              }}
-              className="p-2 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-700 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label="סגור"
+        <>
+          {/* Backdrop */}
+          <motion.div
+            className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => { onReset(); onClose(); }}
+          />
+
+          {/* Modal container — centered, max-w-lg like the app */}
+          <motion.div
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="pointer-events-auto w-full max-w-lg flex flex-col bg-background rounded-t-2xl sm:rounded-2xl max-h-[92dvh] sm:max-h-[85dvh] sm:mx-4 overflow-hidden"
+              initial={{ y: 40, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 40, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              dir="rtl"
+              onClick={(e) => e.stopPropagation()}
             >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+              {/* Header — gradient-hero to match app */}
+              <div className="gradient-hero mesh-overlay relative px-4 pt-4 pb-3 safe-top">
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-2">
+                    <Wand2 className="w-5 h-5 text-white" />
+                    <h2 className="text-lg font-bold text-white">אשף שבועי</h2>
+                  </div>
+                  <button
+                    onClick={() => { onReset(); onClose(); }}
+                    className="p-2 rounded-xl bg-white/15 hover:bg-white/25 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                    aria-label="סגור"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
 
-          {/* Step indicator */}
-          <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-stone-800 border-b border-stone-200 dark:border-stone-700">
-            <StepDot active={state === "preview"} done={state === "editing" || state === "applying" || state === "done"} label="תצוגה" />
-            <div className="flex-1 h-px bg-stone-200 dark:bg-stone-700" />
-            <StepDot active={state === "editing"} done={state === "applying" || state === "done"} label="עריכה" />
-            <div className="flex-1 h-px bg-stone-200 dark:bg-stone-700" />
-            <StepDot active={state === "applying" || state === "done"} done={state === "done"} label="החלה" />
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto overscroll-contain">
-            {state === "preview" && (
-              <PreviewStep plan={plan} members={members} />
-            )}
-            {state === "editing" && (
-              <EditStep
-                plan={plan}
-                members={members}
-                onMoveTask={onMoveTask}
-                onRemoveTask={onRemoveTask}
-                onAddTask={onAddTask}
-                onReassignTask={onReassignTask}
-              />
-            )}
-            {(state === "applying" || state === "done") && (
-              <ApplyStep
-                totalNew={totalNew}
-                totalMinutes={totalMinutes}
-                progress={applyProgress}
-                isDone={state === "done"}
-              />
-            )}
-          </div>
-
-          {/* Footer actions */}
-          <div className="px-4 py-3 bg-white dark:bg-stone-800 border-t border-stone-200 dark:border-stone-700 safe-bottom">
-            {state === "preview" && (
-              <div className="flex gap-2">
-                <button
-                  onClick={onStartEditing}
-                  className="flex-1 py-3 rounded-xl bg-indigo-500 text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  <span className="truncate">ערוך תוכנית</span>
-                </button>
-                <button
-                  onClick={onApply}
-                  className="flex-1 py-3 rounded-xl bg-emerald-500 text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
-                >
-                  <Check className="w-4 h-4" />
-                  <span className="truncate">החל ישירות</span>
-                </button>
+                {/* Step indicator */}
+                <div className="flex items-center gap-2 mt-3 relative z-10">
+                  <StepDot active={state === "preview"} done={state === "editing" || state === "applying" || state === "done"} label="תצוגה" />
+                  <div className="flex-1 h-px bg-white/20" />
+                  <StepDot active={state === "editing"} done={state === "applying" || state === "done"} label="עריכה" />
+                  <div className="flex-1 h-px bg-white/20" />
+                  <StepDot active={state === "applying" || state === "done"} done={state === "done"} label="החלה" />
+                </div>
               </div>
-            )}
-            {state === "editing" && (
-              <button
-                onClick={onApply}
-                className="w-full py-3 rounded-xl bg-emerald-500 text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
-              >
-                <Check className="w-4 h-4" />
-                <span className="truncate">החל תוכנית ({totalNew} משימות חדשות)</span>
-              </button>
-            )}
-            {state === "done" && (
-              <button
-                onClick={() => {
-                  onReset();
-                  onClose();
-                }}
-                className="w-full py-3 rounded-xl bg-indigo-500 text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
-              >
-                <Check className="w-4 h-4" />
-                סיום
-              </button>
-            )}
-          </div>
-        </motion.div>
+
+              {/* Content — scrollable */}
+              <div className="flex-1 overflow-y-auto overscroll-contain bg-background">
+                {state === "preview" && (
+                  <PreviewStep plan={plan} members={members} />
+                )}
+                {state === "editing" && (
+                  <EditStep
+                    plan={plan}
+                    members={members}
+                    onMoveTask={onMoveTask}
+                    onRemoveTask={onRemoveTask}
+                    onAddTask={onAddTask}
+                    onReassignTask={onReassignTask}
+                  />
+                )}
+                {(state === "applying" || state === "done") && (
+                  <ApplyStep
+                    totalNew={totalNew}
+                    totalMinutes={totalMinutes}
+                    progress={applyProgress}
+                    isDone={state === "done"}
+                  />
+                )}
+              </div>
+
+              {/* Footer actions — elevated surface */}
+              <div className="px-4 py-3 bg-surface border-t border-border safe-bottom">
+                {state === "preview" && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={onStartEditing}
+                      className="flex-1 py-3 rounded-xl bg-primary/10 text-primary font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span className="truncate">ערוך תוכנית</span>
+                    </button>
+                    <button
+                      onClick={onApply}
+                      className="flex-1 py-3 rounded-xl gradient-primary text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
+                    >
+                      <Check className="w-4 h-4" />
+                      <span className="truncate">החל ישירות</span>
+                    </button>
+                  </div>
+                )}
+                {state === "editing" && (
+                  <button
+                    onClick={onApply}
+                    className="w-full py-3 rounded-xl gradient-primary text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
+                  >
+                    <Check className="w-4 h-4" />
+                    <span className="truncate">החל תוכנית ({totalNew} משימות חדשות)</span>
+                  </button>
+                )}
+                {state === "done" && (
+                  <button
+                    onClick={() => { onReset(); onClose(); }}
+                    className="w-full py-3 rounded-xl gradient-primary text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
+                  >
+                    <Check className="w-4 h-4" />
+                    סיום
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        </>
       )}
     </AnimatePresence>
   );
@@ -220,17 +236,17 @@ function StepDot({
       <div
         className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
           done
-            ? "bg-emerald-500 text-white"
+            ? "bg-white text-primary"
             : active
-              ? "bg-indigo-500 text-white"
-              : "bg-stone-200 dark:bg-stone-700 text-stone-400"
+              ? "bg-white/90 text-primary"
+              : "bg-white/20 text-white/60"
         }`}
       >
         {done ? <Check className="w-3.5 h-3.5" /> : null}
       </div>
       <span
         className={`text-[11px] ${
-          active || done ? "text-stone-900 dark:text-stone-100 font-medium" : "text-stone-400"
+          active || done ? "text-white font-medium" : "text-white/50"
         }`}
       >
         {label}
@@ -277,36 +293,36 @@ function PreviewStep({
     <div className="p-4 space-y-3">
       {/* Summary cards */}
       <div className="grid grid-cols-3 gap-2">
-        <div className="bg-white dark:bg-stone-800 rounded-xl p-3 text-center">
-          <div className="text-2xl font-bold text-indigo-500">{totalNew}</div>
-          <div className="text-[11px] text-stone-500">משימות חדשות</div>
+        <div className="card-elevated p-3 text-center">
+          <div className="text-2xl font-bold text-primary">{totalNew}</div>
+          <div className="text-[11px] text-muted">משימות חדשות</div>
         </div>
-        <div className="bg-white dark:bg-stone-800 rounded-xl p-3 text-center">
-          <div className="text-2xl font-bold text-emerald-500">{totalMinutes}</div>
-          <div className="text-[11px] text-stone-500">דקות סה״כ</div>
+        <div className="card-elevated p-3 text-center">
+          <div className="text-2xl font-bold text-success">{totalMinutes}</div>
+          <div className="text-[11px] text-muted">דקות סה״כ</div>
         </div>
-        <div className="bg-white dark:bg-stone-800 rounded-xl p-3 text-center">
-          <div className="text-2xl font-bold text-amber-500">
+        <div className="card-elevated p-3 text-center">
+          <div className="text-2xl font-bold text-warning">
             {plan.filter((d) => d.tasks.length > 0).length}
           </div>
-          <div className="text-[11px] text-stone-500">ימים פעילים</div>
+          <div className="text-[11px] text-muted">ימים פעילים</div>
         </div>
       </div>
 
       {/* Per-member balance */}
       {members.length === 2 && (
-        <div className="bg-white dark:bg-stone-800 rounded-xl p-3">
+        <div className="card-elevated p-3">
           <div className="flex items-center gap-2 mb-2">
-            <Users className="w-4 h-4 text-stone-500" />
-            <span className="text-sm font-medium">חלוקה בין השותפים</span>
+            <Users className="w-4 h-4 text-muted" />
+            <span className="text-sm font-medium text-foreground">חלוקה בין השותפים</span>
           </div>
           <div className="flex gap-2">
             {members.map((m) => {
               const s = memberStats.get(m.id);
               return (
-                <div key={m.id} className="flex-1 bg-stone-50 dark:bg-stone-700 rounded-lg p-2">
-                  <div className="text-sm font-medium truncate">{m.name}</div>
-                  <div className="text-xs text-stone-500">
+                <div key={m.id} className="flex-1 bg-background rounded-lg p-2">
+                  <div className="text-sm font-medium text-foreground truncate">{m.name}</div>
+                  <div className="text-xs text-muted">
                     {s?.tasks ?? 0} משימות · {s?.minutes ?? 0} דק׳
                   </div>
                 </div>
@@ -338,19 +354,19 @@ function DayPreviewCard({
     members.find((m) => m.id === id)?.name ?? "—";
 
   return (
-    <div className="bg-white dark:bg-stone-800 rounded-xl p-3">
+    <div className="card-elevated p-3">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <span className="font-medium text-sm">{day.dayName}</span>
-          <span className="text-xs text-stone-400">{day.date.slice(5)}</span>
+          <span className="font-medium text-sm text-foreground">{day.dayName}</span>
+          <span className="text-xs text-muted">{day.date.slice(5)}</span>
         </div>
         <div className="flex items-center gap-2">
           {newCount > 0 && (
-            <span className="text-[10px] px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-full font-medium">
+            <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded-full font-medium">
               +{newCount} חדש
             </span>
           )}
-          <div className="flex items-center gap-1 text-xs text-stone-500">
+          <div className="flex items-center gap-1 text-xs text-muted">
             <Clock className="w-3 h-3" />
             {day.totalMinutes} דק׳
           </div>
@@ -358,7 +374,7 @@ function DayPreviewCard({
       </div>
 
       {day.tasks.length === 0 ? (
-        <div className="text-xs text-stone-400 text-center py-2">אין משימות</div>
+        <div className="text-xs text-muted text-center py-2">אין משימות</div>
       ) : (
         <div className="space-y-1">
           {day.tasks.map((task, i) => (
@@ -366,16 +382,16 @@ function DayPreviewCard({
               key={`${day.date}-${i}`}
               className={`flex items-center gap-2 py-1.5 px-2 rounded-lg text-xs ${
                 task.isExisting
-                  ? "bg-stone-50 dark:bg-stone-700/50 text-stone-500"
-                  : "bg-indigo-50 dark:bg-indigo-900/20 text-stone-700 dark:text-stone-300"
+                  ? "bg-background text-muted"
+                  : "bg-primary/5 text-foreground"
               }`}
             >
               <span>{CATEGORY_ICONS[task.category] ?? "🏠"}</span>
               <span className="flex-1 truncate min-w-0">{task.title}</span>
-              <span className="text-stone-400 whitespace-nowrap text-[10px]">
+              <span className="text-muted whitespace-nowrap text-[10px]">
                 {getMemberName(task.assignee)}
               </span>
-              <span className="text-stone-400 text-[10px]">{task.estimated_minutes}′</span>
+              <span className="text-muted text-[10px]">{task.estimated_minutes}′</span>
             </div>
           ))}
         </div>
@@ -456,11 +472,11 @@ function EditStep({
     >
       <div className="p-4 space-y-2">
         {/* Summary bar */}
-        <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-xl p-3 flex items-center justify-between gap-2">
-          <span className="text-xs sm:text-sm text-indigo-700 dark:text-indigo-300">
+        <div className="bg-primary/5 rounded-xl p-3 flex items-center justify-between gap-2 border border-primary/10">
+          <span className="text-xs sm:text-sm text-primary font-medium">
             {plan.reduce((s, d) => s + d.tasks.filter((t) => !t.isExisting).length, 0)} משימות חדשות
           </span>
-          <span className="text-xs sm:text-sm text-indigo-700 dark:text-indigo-300">
+          <span className="text-xs sm:text-sm text-primary font-medium">
             {plan.reduce((s, d) => s + d.totalMinutes, 0)} דק׳ סה״כ
           </span>
         </div>
@@ -486,7 +502,7 @@ function EditStep({
       {/* Drag overlay */}
       <DragOverlay>
         {activeDrag && (
-          <div className="bg-indigo-100 dark:bg-indigo-800 rounded-lg px-3 py-2 text-xs shadow-lg border-2 border-indigo-400 opacity-90">
+          <div className="bg-primary/15 rounded-lg px-3 py-2 text-xs shadow-lg border-2 border-primary opacity-90 text-foreground">
             <span className="ml-1">{CATEGORY_ICONS[activeDrag.task.category] ?? "🏠"}</span>
             {activeDrag.task.title}
           </div>
@@ -547,25 +563,25 @@ function DayEditCard({
   return (
     <div
       ref={setNodeRef}
-      className={`bg-white dark:bg-stone-800 rounded-xl overflow-hidden transition-colors ${
-        isOver ? "ring-2 ring-indigo-400 bg-indigo-50/50 dark:bg-indigo-900/20" : ""
-      } ${isDragTarget ? "ring-1 ring-indigo-200 dark:ring-indigo-800" : ""}`}
+      className={`card-elevated overflow-hidden transition-all ${
+        isOver ? "ring-2 ring-primary bg-primary/5" : ""
+      } ${isDragTarget ? "ring-1 ring-primary/30" : ""}`}
     >
       {/* Day header */}
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-3 hover:bg-stone-50 dark:hover:bg-stone-700/50 transition-colors min-h-[48px]"
+        className="w-full flex items-center justify-between p-3 hover:bg-surface-hover transition-colors min-h-[48px]"
       >
         <div className="flex items-center gap-2">
-          <span className="font-medium text-sm">{day.dayName}</span>
-          <span className="text-xs text-stone-400">{day.tasks.length} משימות</span>
+          <span className="font-medium text-sm text-foreground">{day.dayName}</span>
+          <span className="text-xs text-muted">{day.tasks.length} משימות</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-stone-500">{day.totalMinutes} דק׳</span>
+          <span className="text-xs text-muted">{day.totalMinutes} דק׳</span>
           {expanded ? (
-            <ChevronUp className="w-4 h-4 text-stone-400" />
+            <ChevronUp className="w-4 h-4 text-muted" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-stone-400" />
+            <ChevronDown className="w-4 h-4 text-muted" />
           )}
         </div>
       </button>
@@ -605,13 +621,13 @@ function DayEditCard({
 
               {/* Add task form */}
               {showAddForm ? (
-                <div className="mt-2 space-y-2 bg-stone-50 dark:bg-stone-700/50 p-3 rounded-lg">
+                <div className="mt-2 space-y-2 bg-background p-3 rounded-lg border border-border/50">
                   <input
                     type="text"
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="שם המשימה..."
-                    className="w-full px-3 py-2.5 rounded-lg bg-white dark:bg-stone-800 border border-stone-200 dark:border-stone-600 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2.5 rounded-lg bg-surface border border-border text-sm outline-none focus:ring-2 focus:ring-primary/30 text-foreground placeholder:text-muted"
                     onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                     autoFocus
                   />
@@ -623,7 +639,7 @@ function DayEditCard({
                         className={`px-2 py-1.5 rounded text-xs transition-colors min-h-[32px] ${
                           newCategory === key
                             ? `${CATEGORY_BG_CLASSES[key]} text-white`
-                            : "bg-stone-200 dark:bg-stone-600 text-stone-600 dark:text-stone-300"
+                            : "bg-border/30 text-muted hover:bg-border/50"
                         }`}
                       >
                         {CATEGORY_ICONS[key]} {CATEGORY_LABELS[key]}
@@ -634,13 +650,13 @@ function DayEditCard({
                     <button
                       onClick={handleAdd}
                       disabled={!newTitle.trim()}
-                      className="flex-1 py-2 rounded-lg bg-indigo-500 text-white text-sm font-medium disabled:opacity-50 min-h-[40px]"
+                      className="flex-1 py-2 rounded-lg gradient-primary text-white text-sm font-medium disabled:opacity-50 min-h-[40px]"
                     >
                       הוסף
                     </button>
                     <button
                       onClick={() => setShowAddForm(false)}
-                      className="px-4 py-2 rounded-lg bg-stone-200 dark:bg-stone-600 text-sm min-h-[40px]"
+                      className="px-4 py-2 rounded-lg bg-border/30 text-foreground text-sm min-h-[40px] hover:bg-border/50 transition-colors"
                     >
                       ביטול
                     </button>
@@ -649,7 +665,7 @@ function DayEditCard({
               ) : (
                 <button
                   onClick={() => setShowAddForm(true)}
-                  className="w-full flex items-center justify-center gap-1 py-2.5 text-xs text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-colors mt-1 min-h-[40px]"
+                  className="w-full flex items-center justify-center gap-1 py-2.5 text-xs text-primary hover:bg-primary/5 rounded-lg transition-colors mt-1 min-h-[40px]"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   הוסף משימה
@@ -712,8 +728,8 @@ function DraggableTaskRow({
         isDragging ? "opacity-40" : ""
       } ${
         task.isExisting
-          ? "bg-stone-50 dark:bg-stone-700/30 text-stone-500"
-          : "bg-indigo-50 dark:bg-indigo-900/20"
+          ? "bg-background text-muted"
+          : "bg-primary/5 text-foreground"
       }`}
     >
       {/* Drag handle */}
@@ -721,7 +737,7 @@ function DraggableTaskRow({
         <button
           {...attributes}
           {...listeners}
-          className="p-1 rounded touch-none cursor-grab active:cursor-grabbing text-stone-400 hover:text-stone-600 min-w-[28px] min-h-[28px] flex items-center justify-center"
+          className="p-1 rounded touch-none cursor-grab active:cursor-grabbing text-muted hover:text-foreground min-w-[28px] min-h-[28px] flex items-center justify-center"
           aria-label="גרור להעברה"
         >
           <GripVertical className="w-3.5 h-3.5" />
@@ -738,7 +754,7 @@ function DraggableTaskRow({
             const other = members.find((m) => m.id !== task.assignee);
             if (other) onReassign(other.id);
           }}
-          className="px-2 py-1 rounded bg-stone-200 dark:bg-stone-600 text-[11px] hover:bg-stone-300 dark:hover:bg-stone-500 transition-colors whitespace-nowrap min-h-[28px]"
+          className="px-2 py-1 rounded bg-border/30 text-[11px] hover:bg-border/50 transition-colors whitespace-nowrap min-h-[28px] text-foreground"
           title="החלף שותף"
         >
           {getMemberName(task.assignee)}
@@ -749,7 +765,7 @@ function DraggableTaskRow({
       {!task.isExisting && (
         <button
           onClick={onRemove}
-          className="p-1.5 rounded hover:bg-red-100 dark:hover:bg-red-900/30 text-red-400 hover:text-red-500 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
+          className="p-1.5 rounded hover:bg-danger/10 text-danger/60 hover:text-danger transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
           title="הסר"
           aria-label="הסר משימה"
         >
@@ -783,35 +799,35 @@ function ApplyStep({
           animate={{ scale: 1, opacity: 1 }}
           className="text-center space-y-4"
         >
-          <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mx-auto">
-            <Check className="w-8 h-8 text-emerald-500" />
+          <div className="w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mx-auto">
+            <Check className="w-8 h-8 text-success" />
           </div>
           <div>
-            <h3 className="text-lg font-bold">התוכנית הוחלה!</h3>
-            <p className="text-sm text-stone-500 mt-1">
+            <h3 className="text-lg font-bold text-foreground">התוכנית הוחלה!</h3>
+            <p className="text-sm text-muted mt-1">
               {totalNew} משימות חדשות נוספו · {totalMinutes} דקות סה״כ
             </p>
           </div>
         </motion.div>
       ) : (
         <div className="text-center space-y-4 w-full max-w-xs">
-          <Loader2 className="w-8 h-8 text-indigo-500 animate-spin mx-auto" />
+          <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto" />
           <div>
-            <h3 className="text-lg font-bold">מוסיף משימות...</h3>
-            <p className="text-sm text-stone-500 mt-1">
+            <h3 className="text-lg font-bold text-foreground">מוסיף משימות...</h3>
+            <p className="text-sm text-muted mt-1">
               {totalNew} משימות חדשות
             </p>
           </div>
           {/* Progress bar */}
-          <div className="w-full h-2 bg-stone-200 dark:bg-stone-700 rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-border/30 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-indigo-500 rounded-full"
+              className="h-full gradient-primary rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.2 }}
             />
           </div>
-          <span className="text-xs text-stone-500">{progress}%</span>
+          <span className="text-xs text-muted">{progress}%</span>
         </div>
       )}
     </div>

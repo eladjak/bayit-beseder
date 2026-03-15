@@ -27,8 +27,9 @@ interface UseWeeklyGeneratorReturn {
   reassignTask: (date: string, taskIndex: number, newUserId: string) => void;
   startEditing: () => void;
   applyPlan: (
-    createTask: (task: TaskInsert) => Promise<TaskRow | null>
-  ) => Promise<number>;
+    createTask: (task: TaskInsert) => Promise<TaskRow | null>,
+    getError: () => string | null
+  ) => Promise<{ created: number; firstError: string | null }>;
   reset: () => void;
 }
 
@@ -94,9 +95,10 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
 
   const applyPlan = useCallback(
     async (
-      createTask: (task: TaskInsert) => Promise<TaskRow | null>
-    ): Promise<number> => {
-      if (!plan) return 0;
+      createTask: (task: TaskInsert) => Promise<TaskRow | null>,
+      getError: () => string | null
+    ): Promise<{ created: number; firstError: string | null }> => {
+      if (!plan) return { created: 0, firstError: null };
 
       setState("applying");
       setApplyProgress(0);
@@ -116,10 +118,12 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
 
       if (newTasks.length === 0) {
         setState("done");
-        return 0;
+        return { created: 0, firstError: null };
       }
 
       let created = 0;
+      let firstError: string | null = null;
+
       for (let i = 0; i < newTasks.length; i++) {
         const { task, date } = newTasks[i];
 
@@ -139,13 +143,18 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
         };
 
         const result = await createTask(taskData);
-        if (result) created++;
+        if (result) {
+          created++;
+        } else if (!firstError) {
+          // Capture the first error from the useTasks hook
+          firstError = getError();
+        }
 
         setApplyProgress(Math.round(((i + 1) / newTasks.length) * 100));
       }
 
       setState("done");
-      return created;
+      return { created, firstError };
     },
     [plan]
   );

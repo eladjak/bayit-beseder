@@ -156,7 +156,7 @@ export default function WeeklyPage() {
   });
 
   // Fetch tasks for this week with write capability
-  const { tasks, loading, createTask, updateTask, refetch } = useTasks({});
+  const { tasks, loading, error: taskError, createTask, updateTask, refetch } = useTasks({});
 
   // Weekly generator wizard
   const wizard = useWeeklyGenerator();
@@ -191,15 +191,20 @@ export default function WeeklyPage() {
   }, [profile, partner]);
 
   const handleApplyWizard = useCallback(async () => {
-    const created = await wizard.applyPlan(createTask);
+    const { created, firstError } = await wizard.applyPlan(
+      createTask,
+      () => taskError
+    );
     if (created > 0) {
       toast.success(`${created} משימות חדשות נוספו!`);
       haptic("success");
       await refetch();
+    } else if (firstError) {
+      toast.error(`שגיאה בהוספת משימות: ${firstError}`);
     } else {
       toast.info("אין משימות חדשות להוספה");
     }
-  }, [wizard, createTask, refetch]);
+  }, [wizard, createTask, refetch, taskError]);
 
   // Auto-seed tasks for authenticated users on first visit
   const seedAttempted = useRef(false);
