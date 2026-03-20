@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { createHmac, timingSafeEqual } from "crypto";
 import { sendWhatsAppMessage, extractPhoneFromChatId } from "@/lib/whatsapp";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
@@ -31,7 +32,39 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = await request.json();
+  // A2: Webhook signature verification — HMAC-SHA256.
+  // When WHATSAPP_WEBHOOK_SECRET is set, the caller must send a matching
+  // signature in the X-Webhook-Signature header (hex-encoded HMAC-SHA256 of
+  // the raw request body).  In development (no secret configured) we log a
+  // warning and continue so the endpoint remains functional.
+  const rawBody = await request.text();
+  const webhookSecret = process.env.WHATSAPP_WEBHOOK_SECRET;
+
+  if (webhookSecret) {
+    const signatureHeader = request.headers.get("x-webhook-signature") ?? "";
+    const expectedSig = createHmac("sha256", webhookSecret)
+      .update(rawBody)
+      .digest("hex");
+
+    // Constant-time comparison to prevent timing attacks.
+    const sigBuffer = Buffer.from(signatureHeader, "hex");
+    const expectedBuffer = Buffer.from(expectedSig, "hex");
+
+    if (
+      sigBuffer.length !== expectedBuffer.length ||
+      !timingSafeEqual(sigBuffer, expectedBuffer)
+    ) {
+      console.warn("[webhook] Invalid signature — request rejected");
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+  } else {
+    console.warn(
+      "[webhook] WHATSAPP_WEBHOOK_SECRET is not set — skipping signature verification. " +
+        "Set this env var in production!"
+    );
+  }
+
+  const body = JSON.parse(rawBody);
 
   // A1: Validate that this webhook originates from our Green API instance
   const expectedInstance = process.env.GREEN_API_INSTANCE_ID;
