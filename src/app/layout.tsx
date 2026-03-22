@@ -21,13 +21,17 @@ export const metadata: Metadata = {
     title: "בית בסדר",
   },
   icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
     apple: "/icons/apple-touch-icon.png",
   },
   openGraph: {
     title: "בית בסדר - ניהול תחזוקת הבית",
     description:
       "אפליקציה לניהול תחזוקת הבית המשותף לזוגות — תכנון שבועי חכם, גיימיפיקציה, Google Calendar ו-WhatsApp",
-    url: "https://bayit-beseder.vercel.app",
+    url: "https://www.bayitbeseder.com",
     siteName: "בית בסדר",
     images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
     locale: "he_IL",

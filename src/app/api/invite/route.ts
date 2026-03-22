@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://bayit-beseder.vercel.app";
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.bayitbeseder.com";
     return NextResponse.json({
       inviteCode: household.invite_code,
       link: `${baseUrl}/invite/${household.invite_code}`,
@@ -137,7 +137,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://bayit-beseder.vercel.app";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://www.bayitbeseder.com";
   return NextResponse.json({
     inviteCode: newHousehold.invite_code,
     link: `${baseUrl}/invite/${newHousehold.invite_code}`,
