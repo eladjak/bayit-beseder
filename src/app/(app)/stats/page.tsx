@@ -37,7 +37,8 @@ import { usePartner } from "@/hooks/usePartner";
 import { useUserAchievements } from "@/hooks/useUserAchievements";
 import { AnimatedNumber } from "@/components/animated-number";
 import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
-import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
+import { CATEGORY_NAME_TO_KEY, CATEGORY_LABELS, CATEGORY_ICONS } from "@/lib/categories";
+import { WeeklyShareCard } from "@/components/gamification/weekly-share-card";
 
 const MOCK_WEEKLY_DATA = [
   { day: "א׳", completed: 7, total: 10 },
@@ -380,6 +381,20 @@ export default function StatsPage() {
       </div>
 
       <div className="px-4 space-y-4">
+
+      {/* Weekly share card */}
+      <WeeklyShareCard
+        weekRange={`${new Date().toLocaleDateString("he-IL", { day: "numeric", month: "short" })}`}
+        completedTasks={weeklyTotal}
+        totalTasks={tasks.length > 0 ? Math.min(tasks.length, weeklyTotal + 10) : 44}
+        streakDays={profile?.streak ?? 0}
+        topCategory={categoryData.length > 0 ? {
+          name: categoryData[0].name,
+          icon: CATEGORY_ICONS[categoryData[0].category] ?? "🏠",
+          count: categoryData[0].value,
+        } : null}
+        householdName="הבית שלנו"
+      />
 
       {/* Empty state illustration - shown when no real data yet */}
       {!hasDbData && (
