@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בית בסדר - דוח איטרציה 2026-03-22</title>
+<style>
+  :root {
+    --bg-primary: #0f1117;
+    --bg-secondary: #1a1d2e;
+    --bg-card: #222640;
+    --bg-card-hover: #2a2f4a;
+    --text-primary: #e8eaf0;
+    --text-secondary: #9ca3b8;
+    --text-muted: #6b7280;
+    --accent-blue: #60a5fa;
+    --accent-purple: #a78bfa;
+    --accent-green: #34d399;
+    --accent-amber: #fbbf24;
+    --accent-red: #f87171;
+    --accent-orange: #fb923c;
+    --border-color: #2d3348;
+    --gradient-start: #3b82f6;
+    --gradient-end: #8b5cf6;
+    --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 30px rgba(96, 165, 250, 0.1);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --font-sans: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --font-hebrew: 'Heebo', 'Segoe UI', system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --text-primary: #1e293b;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --border-color: #e2e8f0;
+      --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.08);
+      --shadow-glow: 0 0 30px rgba(96, 165, 250, 0.05);
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-hebrew);
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    padding: 48px 32px;
+    background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+    border-radius: var(--radius);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .header h1 { font-size: 2rem; font-weight: 800; color: #fff; margin-bottom: 8px; letter-spacing: -0.02em; }
+  .header .subtitle { font-size: 1.1rem; color: rgba(255,255,255,0.85); font-weight: 400; }
+  .header .version-badge {
+    display: inline-block; margin-top: 16px; padding: 4px 16px;
+    background: rgba(255,255,255,0.2); border-radius: 999px;
+    font-size: 0.85rem; color: #fff; font-weight: 600; backdrop-filter: blur(4px);
+  }
+
+  .section { margin-bottom: 32px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius); box-shadow: var(--shadow-card); overflow: hidden; }
+  .section-header { display: flex; align-items: center; gap: 12px; padding: 20px 24px; cursor: pointer; user-select: none; transition: background 0.15s ease; }
+  .section-header:hover { background: var(--bg-card-hover); }
+  .section-header .icon { font-size: 1.3rem; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); flex-shrink: 0; }
+  .section-header h2 { font-size: 1.1rem; font-weight: 700; flex: 1; }
+  .section-header .chevron { font-size: 0.8rem; color: var(--text-muted); transition: transform 0.2s ease; }
+  .section.collapsed .chevron { transform: rotate(90deg); }
+  .section-body { padding: 0 24px 24px; overflow: hidden; transition: max-height 0.3s ease, opacity 0.2s ease; }
+  .section.collapsed .section-body { max-height: 0 !important; padding-top: 0; padding-bottom: 0; opacity: 0; }
+
+  .icon-done { background: rgba(52, 211, 153, 0.15); color: var(--accent-green); }
+  .icon-stats { background: rgba(96, 165, 250, 0.15); color: var(--accent-blue); }
+  .icon-issues { background: rgba(248, 113, 113, 0.15); color: var(--accent-red); }
+  .icon-questions { background: rgba(251, 191, 36, 0.15); color: var(--accent-amber); }
+  .icon-next { background: rgba(167, 139, 250, 0.15); color: var(--accent-purple); }
+  .icon-timeline { background: rgba(251, 146, 60, 0.15); color: var(--accent-orange); }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+  .stat-card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 20px; text-align: center; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow); }
+  .stat-value { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .stat-label { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
+  .stat-sub { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+  .task-list { list-style: none; }
+  .task-list li { padding: 10px 0; border-bottom: 1px solid var(--border-color); display: flex; align-items: flex-start; gap: 10px; font-size: 0.95rem; }
+  .task-list li:last-child { border-bottom: none; }
+  .task-list .bullet { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-green); flex-shrink: 0; margin-top: 8px; }
+
+  .issues-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  .issues-table th { text-align: start; padding: 12px 16px; background: var(--bg-secondary); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); border-bottom: 2px solid var(--border-color); }
+  .issues-table td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); vertical-align: top; }
+  .issues-table tr:last-child td { border-bottom: none; }
+  .priority-badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+  .priority-critical { background: rgba(248,113,113,0.2); color: var(--accent-red); }
+  .priority-important { background: rgba(251,146,60,0.2); color: var(--accent-orange); }
+  .priority-improvement { background: rgba(251,191,36,0.2); color: var(--accent-amber); }
+  .priority-minor { background: rgba(96,165,250,0.2); color: var(--accent-blue); }
+
+  .questions-list { list-style: none; }
+  .questions-list li { padding: 14px 18px; margin-bottom: 10px; background: rgba(251, 191, 36, 0.08); border: 1px solid rgba(251, 191, 36, 0.25); border-radius: var(--radius-sm); font-size: 0.95rem; line-height: 1.6; display: flex; align-items: flex-start; gap: 10px; }
+  .questions-list li:last-child { margin-bottom: 0; }
+  .question-icon { color: var(--accent-amber); font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  .next-steps-list { list-style: none; counter-reset: steps; }
+  .next-steps-list li { counter-increment: steps; padding: 12px 0; border-bottom: 1px solid var(--border-color); display: flex; align-items: flex-start; gap: 14px; font-size: 0.95rem; }
+  .next-steps-list li:last-child { border-bottom: none; }
+  .next-steps-list li::before { content: counter(steps); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end)); color: #fff; border-radius: 50%; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+  .timeline { position: relative; padding: 0; }
+  .timeline::before { content: ''; position: absolute; top: 0; bottom: 0; right: 14px; width: 3px; background: linear-gradient(180deg, var(--gradient-start), var(--gradient-end)); border-radius: 999px; }
+  .timeline-item { position: relative; padding-bottom: 24px; display: flex; align-items: flex-start; gap: 20px; padding-right: 44px; }
+  .timeline-item:last-child { padding-bottom: 0; }
+  .timeline-dot { position: absolute; top: 4px; right: 9px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent-blue); border: 3px solid var(--bg-card); z-index: 1; }
+  .timeline-dot.current { background: var(--accent-green); box-shadow: 0 0 10px rgba(52, 211, 153, 0.4); }
+  .timeline-content { flex: 1; }
+  .timeline-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; margin-bottom: 2px; }
+  .timeline-title { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+  .timeline-desc { font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px; }
+
+  .footer { text-align: center; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.8rem; }
+  .footer a { color: var(--accent-blue); text-decoration: none; }
+
+  @media print {
+    :root { --bg-primary: #fff; --bg-secondary: #f9f9f9; --bg-card: #fff; --text-primary: #111; --text-secondary: #444; --border-color: #ddd; }
+    body { background: #fff; }
+    .header { background: #333 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .section { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; }
+    .section.collapsed .section-body { max-height: none !important; opacity: 1 !important; padding-bottom: 24px !important; }
+    .chevron { display: none; }
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 20px 16px 60px; }
+    .header { padding: 32px 20px; }
+    .header h1 { font-size: 1.5rem; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat-value { font-size: 1.5rem; }
+    .section-header { padding: 16px 18px; }
+    .section-body { padding: 0 18px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h1>בית בסדר</h1>
+    <div class="subtitle">דוח סיכום איטרציה - 2026-03-22</div>
+    <div class="version-badge">Phase 18 - Pesach + Facelift</div>
+  </div>
+
+  <!-- מה בוצע -->
+  <div class="section" id="section-done">
+    <div class="section-header" onclick="toggleSection('section-done')">
+      <div class="icon icon-done">&#10003;</div>
+      <h2>מה בוצע</h2>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <ul class="task-list">
+        <li><span class="bullet"></span><span><strong>מצב פסח</strong> — מערכת תבניות עונתיות שלמה: 37 משימות ניקיון ב-4 שלבים, 25 פריטי קניות, באנר ספירה לאחור, מודל הפעלה תלת-שלבי, תזמון מודע לשבת</span></li>
+        <li><span class="bullet"></span><span><strong>אבטחה</strong> — אימות HMAC-SHA256 ל-webhook, הדרי אבטחה (HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy), הסרת X-Powered-By</span></li>
+        <li><span class="bullet"></span><span><strong>מתיחת פנים UI</strong> — תיקון ניגודיות dark mode (#B0ACCC), תכונות ARIA למודלים, 3 איורי Gemini חדשים</span></li>
+        <li><span class="bullet"></span><span><strong>אודיט UI/UX</strong> — ביקורת מקיפה ב-14 סעיפים (ציון כולל 7.5/10) — נגישות, צבעים, אנימציות, RTL, spacing</span></li>
+        <li><span class="bullet"></span><span><strong>תכנון אזורים</strong> — הרעיון של ענבל: ארגון לוח שבועי לפי אזורים בבית במקום משימות בודדות (בתכנון)</span></li>
+        <li><span class="bullet"></span><span><strong>Commit + Push</strong> — 6 commits שנדחפו, 35 קבצים, +1,359 / -103 שורות</span></li>
+        <li><span class="bullet"></span><span><strong>זיכרון</strong> — עדכון MEMORY.md + שמירת feedback על רעיון האזורים</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- נתונים -->
+  <div class="section" id="section-stats">
+    <div class="section-header" onclick="toggleSection('section-stats')">
+      <div class="icon icon-stats">&#9776;</div>
+      <h2>נתונים</h2>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">136</div>
+          <div class="stat-label">קבצי מקור</div>
+          <div class="stat-sub">TypeScript + TSX</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">13,493</div>
+          <div class="stat-label">שורות קוד</div>
+          <div class="stat-sub">src/ בלבד</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">50</div>
+          <div class="stat-label">קומפוננטות</div>
+          <div class="stat-sub">React Components</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">26</div>
+          <div class="stat-label">איורים</div>
+          <div class="stat-sub">Gemini Generated</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">0</div>
+          <div class="stat-label">TODO/FIXME</div>
+          <div class="stat-sub">קוד נקי!</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">6</div>
+          <div class="stat-label">Commits</div>
+          <div class="stat-sub">באיטרציה זו</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">+1,359</div>
+          <div class="stat-label">שורות נוספו</div>
+          <div class="stat-sub">35 קבצים שונו</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">7.5</div>
+          <div class="stat-label">ציון UI/UX</div>
+          <div class="stat-sub">מתוך 10</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- בעיות שנמצאו -->
+  <div class="section" id="section-issues">
+    <div class="section-header" onclick="toggleSection('section-issues')">
+      <div class="icon icon-issues">&#9888;</div>
+      <h2>בעיות שנמצאו</h2>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <table class="issues-table">
+        <thead>
+          <tr><th>עדיפות</th><th>תיאור</th><th>סטטוס</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="priority-badge priority-critical">קריטי</span></td>
+            <td>מיגרציות SQL (004-009) עדיין לא הורצו ב-Supabase — עמוד Tasks מראה mock data בלבד</td>
+            <td>ממתין לאלעד</td>
+          </tr>
+          <tr>
+            <td><span class="priority-badge priority-important">חשוב</span></td>
+            <td>ניגודיות dark mode של טקסט muted הייתה 3.2:1 (צריך 4.5:1 לפחות)</td>
+            <td>תוקן (#B0ACCC)</td>
+          </tr>
+          <tr>
+            <td><span class="priority-badge priority-important">חשוב</span></td>
+            <td>מודלים חסרים role="dialog" ו-aria-modal — בעיית נגישות</td>
+            <td>תוקן</td>
+          </tr>
+          <tr>
+            <td><span class="priority-badge priority-improvement">שיפור</span></td>
+            <td>צבעי confetti hardcoded (לא מ-CSS variables)</td>
+            <td>ממתין</td>
+          </tr>
+          <tr>
+            <td><span class="priority-badge priority-minor">מינורי</span></td>
+            <td>spacing לא אחיד בין קומפוננטות (p-3 / p-3.5 / p-4 / p-6)</td>
+            <td>ממתין</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- שאלות -->
+  <div class="section" id="section-questions">
+    <div class="section-header" onclick="toggleSection('section-questions')">
+      <div class="icon icon-questions">&#63;</div>
+      <h2>שאלות להחלטת אלעד</h2>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <ul class="questions-list">
+        <li><span class="question-icon">&#10067;</span><span><strong>מיגרציות SQL</strong> — האם הרצת את consolidated-pending-migrations.sql + 009? בלי זה Tasks מציג mock בלבד</span></li>
+        <li><span class="question-icon">&#10067;</span><span><strong>רעיון האזורים</strong> — ענבל הציעה ארגון לפי אזורים. האם זה מחליף את התצוגה הנוכחית לגמרי, או תצוגה נוספת (toggle)?</span></li>
+        <li><span class="question-icon">&#10067;</span><span><strong>מצב פסח</strong> — האם לבדוק את הפיצ'ר בלייב? צריך להיכנס עם חשבון ולהפעיל</span></li>
+        <li><span class="question-icon">&#10067;</span><span><strong>דומיין</strong> — האם רכשת bayitbeseder.co.il? זה הדומיין המומלץ</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- הצעדים הבאים -->
+  <div class="section" id="section-next">
+    <div class="section-header" onclick="toggleSection('section-next')">
+      <div class="icon icon-next">&#10140;</div>
+      <h2>הצעדים הבאים</h2>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <ol class="next-steps-list">
+        <li><span><strong>הרצת מיגרציות</strong> — consolidated-pending-migrations.sql + 009 ב-Supabase SQL Editor (בלי זה Tasks לא עובד!)</span></li>
+        <li><span><strong>יישום תזמון לפי אזורים</strong> — הרעיון של ענבל: "יום ראשון = מטבח + אמבטיה", "יום שני = סלון + חדרי שינה" וכו'</span></li>
+        <li><span><strong>המשך מתיחת פנים</strong> — spacing אחיד, confetti colors מ-CSS vars, skeleton loaders משופרים</span></li>
+        <li><span><strong>בדיקת מצב פסח בלייב</strong> — הפעלה, יצירת משימות, רשימת קניות, ביטול</span></li>
+        <li><span><strong>נגישות</strong> — focus management, keyboard navigation, ניגודיות צבעים בכל הקומפוננטות</span></li>
+        <li><span><strong>Google OAuth Verification</strong> — לאפשר שיתוף עם חברים (guide כבר קיים)</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ציר זמן -->
+  <div class="section" id="section-timeline">
+    <div class="section-header" onclick="toggleSection('section-timeline')">
+      <div class="icon icon-timeline">&#9202;</div>
+      <h2>ציר זמן</h2>
+      <span class="chevron">&#9660;</span>
+    </div>
+    <div class="section-body">
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot current"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">22 במרץ 2026</div>
+            <div class="timeline-title">Phase 18: Pesach + Facelift + Security</div>
+            <div class="timeline-desc">מצב פסח (37 משימות), אבטחה, מתיחת פנים, תכנון אזורים</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">15 במרץ 2026</div>
+            <div class="timeline-title">Phase 17: Weekly Wizard + D&D + Generalization</div>
+            <div class="timeline-desc">אשף שבועי, Drag & Drop, גנרליזציה לכל משתמש</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">12 במרץ 2026</div>
+            <div class="timeline-title">Phase 16: Pre-Launch Sprint</div>
+            <div class="timeline-desc">שופינג Google Keep, קטגוריות מותאמות, שיתוף, OG metadata</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">12 במרץ 2026</div>
+            <div class="timeline-title">Phase 15: Google Calendar Integration</div>
+            <div class="timeline-desc">OAuth, אירועי לוח שנה, ניתוח עומס חכם</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">9 במרץ 2026</div>
+            <div class="timeline-title">Phase 14: UX Overhaul</div>
+            <div class="timeline-desc">16 איורים, Dark mode, אוטו-seed, coaching אדפטיבי</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <div class="timeline-date">9 במרץ 2026</div>
+            <div class="timeline-title">Phase 13: Security + Architecture</div>
+            <div class="timeline-desc">RLS, CSRF, rate limiting, unified Supabase, error boundaries</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Generated on 2026-03-22T15:15:00Z by Claude Code iteration-report skill
+  </div>
+
+</div>
+
+<script>
+  function toggleSection(id) {
+    document.getElementById(id).classList.toggle('collapsed');
+  }
+</script>
+</body>
+</html>

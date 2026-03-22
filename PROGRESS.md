@@ -1,15 +1,23 @@
 # BayitBeSeder (בית בסדר) - Progress
 
 ## Status: LIVE
-## Last Updated: 2026-03-15
+## Last Updated: 2026-03-22
 ## URL: https://bayit-beseder.vercel.app
 
 ## Current State
-App is fully functional. All migrations applied, all features connected to Supabase, 16 illustrated categories, adaptive coaching, dark mode, PWA with push notifications. Vercel auto-deploys from master.
+App is fully functional with Pesach mode, seasonal templates, security hardening, and UI facelift. Vercel auto-deploys from master. Zone-based scheduling planned (Inbal's idea).
 
 ## Recent Work
 
-### Wizard Modal Redesign + Error Surfacing (Mar 15) [IN PROGRESS]
+### Iteration: 2026-03-22 [DONE]
+- **Pesach Mode**: Full seasonal template system — 37 cleaning tasks in 4 phases, 25 shopping items, countdown banner, 3-step activation modal, Shabbat-aware scheduling
+- **Security Hardening**: HMAC-SHA256 webhook verification, security headers (HSTS, X-Frame-Options, CSP, Referrer-Policy), X-Powered-By removed
+- **UI Facelift**: Dark mode contrast fix (#B0ACCC), ARIA attributes on modals, 3 new Gemini illustrations (pesach-mode, empty-weekly, empty-stats)
+- **Zone-Based Scheduling**: Planning phase for Inbal's idea — organize weekly by house zones instead of individual tasks
+- **UI Audit**: Comprehensive 14-section audit completed (7.5/10 overall)
+- **Commits**: 6 commits, 35 files changed, +1,359 / -103 lines
+
+### Wizard Modal Redesign + Error Surfacing (Mar 15) [DONE]
 - **Full modal rewrite**: matches app design system (gradient-hero header, card-elevated cards, CSS variables)
 - **Error surfacing**: applyPlan now returns actual Supabase error instead of silent swallowing
 - **Layout fix**: bottom-sheet on mobile, centered max-w-lg modal on desktop (was full-viewport fixed inset-0)
