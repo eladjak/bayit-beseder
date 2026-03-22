@@ -1,6 +1,8 @@
 import { TASK_TEMPLATES_SEED, type TaskTemplate } from "./seed-data";
 import { isTemplateDueOnDate, formatDate, DIFFICULTY_WEIGHT } from "./auto-scheduler";
 import type { TaskRow } from "./types/database";
+import { type ZoneDayMapping, DEFAULT_ZONE_MAPPINGS, getPreferredDay } from "./zones";
+import type { CategoryKey } from "./categories";
 
 // ============================================
 // Types
@@ -29,6 +31,10 @@ interface GenerateOptions {
   existingTasks: TaskRow[];
   members: string[]; // user ids (1 or 2)
   weekStartDate: Date; // Sunday
+  /** Enable zone-first scheduling (group tasks by house zones) */
+  zoneMode?: boolean;
+  /** Custom zone-to-day mappings (defaults to DEFAULT_ZONE_MAPPINGS) */
+  zoneMappings?: ZoneDayMapping[];
 }
 
 // ============================================
@@ -131,7 +137,8 @@ function memberLoad(plan: WeekPlan, memberId: string): number {
  * 6. Group same-category tasks on same day when possible
  */
 export function generateWeekPlan(options: GenerateOptions): WeekPlan {
-  const { existingTasks, members, weekStartDate } = options;
+  const { existingTasks, members, weekStartDate, zoneMode, zoneMappings } = options;
+  const effectiveZoneMappings = zoneMappings ?? DEFAULT_ZONE_MAPPINGS;
 
   // Initialize 7-day plan
   const plan: WeekPlan = [];
@@ -261,14 +268,20 @@ export function generateWeekPlan(options: GenerateOptions): WeekPlan {
     }
   }
 
-  // Non-daily tasks: place on their due day if capacity allows
+  // Non-daily tasks: place on their due day (or zone-preferred day in zone mode)
   for (const { template, dayIndex } of nonDailyCandidates) {
     if (addedTitles.has(template.title)) continue;
 
-    const cap = getDayCap(dayIndex);
-    if (plan[dayIndex].totalMinutes + template.estimated_minutes > cap) {
+    // In zone mode, override dayIndex with the zone's preferred day
+    const targetDay = zoneMode
+      ? getPreferredDay(template.category as CategoryKey, effectiveZoneMappings)
+      : dayIndex;
+    const effectiveDay = targetDay >= 0 && targetDay < 6 ? targetDay : dayIndex;
+
+    const cap = getDayCap(effectiveDay);
+    if (plan[effectiveDay].totalMinutes + template.estimated_minutes > cap) {
       // Try to find another day with same category and capacity (room batching)
-      const altDay = findAlternativeDay(plan, template, dayIndex);
+      const altDay = findAlternativeDay(plan, template, effectiveDay);
       if (altDay !== -1) {
         const assignee = pickAssignee(plan, members);
         plan[altDay].tasks.push({
@@ -286,7 +299,7 @@ export function generateWeekPlan(options: GenerateOptions): WeekPlan {
     }
 
     const assignee = pickAssignee(plan, members);
-    plan[dayIndex].tasks.push({
+    plan[effectiveDay].tasks.push({
       title: template.title,
       category: template.category,
       assignee,
@@ -294,7 +307,7 @@ export function generateWeekPlan(options: GenerateOptions): WeekPlan {
       difficulty: template.difficulty,
       isExisting: false,
     });
-    plan[dayIndex].totalMinutes += template.estimated_minutes;
+    plan[effectiveDay].totalMinutes += template.estimated_minutes;
     addedTitles.add(template.title);
   }
 

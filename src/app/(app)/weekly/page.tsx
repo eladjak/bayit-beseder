@@ -199,7 +199,7 @@ export default function WeeklyPage() {
       (t) => t.due_date && t.due_date >= startStr && t.due_date <= endStr
     );
 
-    wizard.generate(weekTasksForWizard, memberIds, startOfWeek);
+    wizard.generate(weekTasksForWizard, memberIds, startOfWeek, zoneConfig.zoneMode);
     setShowWizard(true);
     haptic("tap");
   }, [profile, partner, tasks, startOfWeek, endOfWeek, wizard]);
