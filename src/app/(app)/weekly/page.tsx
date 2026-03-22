@@ -16,8 +16,15 @@ import {
   Wand2,
   GripVertical,
   ArrowLeftRight,
+  LayoutGrid,
+  List,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useZoneConfig } from "@/hooks/useZoneConfig";
+import { ZoneGroupCard } from "@/components/weekly/zone-group";
+import { ZoneDaySummary } from "@/components/weekly/zone-day-summary";
+import { getZoneInfo, type ZoneGroup } from "@/lib/zones";
+import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
 import { useTasks } from "@/hooks/useTasks";
 import { useProfile } from "@/hooks/useProfile";
 import { usePartner } from "@/hooks/usePartner";
@@ -170,6 +177,9 @@ export default function WeeklyPage() {
 
   // Fetch tasks for this week with write capability
   const { tasks, loading, createTask, updateTask, refetch } = useTasks({});
+
+  // Zone-based view
+  const zoneConfig = useZoneConfig();
 
   // Weekly generator wizard
   const wizard = useWeeklyGenerator();
@@ -486,6 +496,25 @@ export default function WeeklyPage() {
             <p className="text-xs text-white/70 mt-1">פריסת המשימות שלכם לכל השבוע עם המלצות לאיזון</p>
           </div>
           <div className="flex items-center gap-2">
+            {/* Zone view toggle */}
+            <button
+              onClick={zoneConfig.toggleZoneMode}
+              className={`flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-sm rounded-xl border transition-colors active:scale-95 ${
+                zoneConfig.zoneMode
+                  ? "bg-white/30 border-white/30"
+                  : "bg-white/12 border-white/10 hover:bg-white/20"
+              }`}
+              title={zoneConfig.zoneMode ? "תצוגת רשימה" : "תצוגת אזורים"}
+            >
+              {zoneConfig.zoneMode ? (
+                <LayoutGrid className="w-4 h-4 text-white" />
+              ) : (
+                <List className="w-4 h-4 text-white" />
+              )}
+              <span className="text-xs font-medium text-white">
+                {zoneConfig.zoneMode ? "אזורים" : "רשימה"}
+              </span>
+            </button>
             <button
               onClick={handleOpenWizard}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/30 transition-colors active:scale-95"
@@ -663,6 +692,11 @@ export default function WeeklyPage() {
           </div>
         )}
 
+        {/* Zone summary bar (when zone mode active) */}
+        {zoneConfig.zoneMode && (
+          <ZoneDaySummary summary={zoneConfig.zoneDaySummary} />
+        )}
+
         {/* Day-by-Day View with D&D */}
         <DndContext
           sensors={dndSensors}
@@ -684,6 +718,7 @@ export default function WeeklyPage() {
                 onAddTask={handleAddTask}
                 onToggleComplete={handleToggleComplete}
                 onReassignTask={handleReassignTask}
+                zoneMode={zoneConfig.zoneMode}
               />
             ))}
           </div>
@@ -800,9 +835,10 @@ interface DayCardProps {
   onAddTask: (dueDate: string, title: string, categoryId: string) => Promise<boolean>;
   onToggleComplete: (task: TaskRow) => Promise<void>;
   onReassignTask: (taskId: string, newUserId: string) => Promise<void>;
+  zoneMode?: boolean;
 }
 
-function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memberIds, isDragTarget, onAddTask, onToggleComplete, onReassignTask }: DayCardProps) {
+function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memberIds, isDragTarget, onAddTask, onToggleComplete, onReassignTask, zoneMode }: DayCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -1041,7 +1077,55 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
                   אין משימות או פגישות ליום זה
                 </div>
               )}
-              {dayLoad.tasks.map((task) => (
+
+              {/* Zone-grouped view */}
+              {zoneMode && dayLoad.tasks.length > 0 && (() => {
+                // Group tasks by category (= zone)
+                const zoneGroups = new Map<string, TaskRow[]>();
+                for (const task of dayLoad.tasks) {
+                  const catKey = getCategoryFromId(task.category_id);
+                  const existing = zoneGroups.get(catKey) ?? [];
+                  existing.push(task);
+                  zoneGroups.set(catKey, existing);
+                }
+
+                return Array.from(zoneGroups.entries()).map(([catKey, zoneTasks]) => {
+                  const info = getZoneInfo(catKey as import("@/lib/categories").CategoryKey);
+                  const zoneData: ZoneGroup = {
+                    zone: catKey as import("@/lib/categories").CategoryKey,
+                    label: info.label,
+                    icon: info.icon,
+                    color: info.color,
+                    tasks: zoneTasks.map((t) => ({
+                      title: t.title,
+                      assignee: t.assigned_to,
+                      estimated_minutes: 10,
+                      completed: t.status === "completed",
+                      taskId: t.id,
+                    })),
+                    totalMinutes: zoneTasks.length * 10,
+                  };
+
+                  return (
+                    <ZoneGroupCard key={catKey} zone={zoneData}>
+                      {zoneTasks.map((task) => (
+                        <DraggableWeekTask
+                          key={task.id}
+                          task={task}
+                          date={dayLoad.date}
+                          memberNames={memberNames}
+                          memberIds={memberIds}
+                          onToggleComplete={onToggleComplete}
+                          onReassignTask={onReassignTask}
+                        />
+                      ))}
+                    </ZoneGroupCard>
+                  );
+                });
+              })()}
+
+              {/* Flat view (default) */}
+              {!zoneMode && dayLoad.tasks.map((task) => (
                 <DraggableWeekTask
                   key={task.id}
                   task={task}
