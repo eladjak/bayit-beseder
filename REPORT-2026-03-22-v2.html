@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בית בסדר — דוח איטרציה 2026-03-22</title>
+<style>
+  :root {
+    --bg-primary: #0a0b14;
+    --bg-secondary: #12152a;
+    --bg-card: #1a1e38;
+    --bg-card-hover: #222850;
+    --text-primary: #e8eaf6;
+    --text-secondary: #9ca3c4;
+    --text-muted: #6b7294;
+    --accent-blue: #60a5fa;
+    --accent-purple: #a78bfa;
+    --accent-green: #34d399;
+    --accent-amber: #fbbf24;
+    --accent-red: #f87171;
+    --accent-orange: #fb923c;
+    --accent-pink: #f472b6;
+    --border-color: #2a2f50;
+    --gradient-start: #6366f1;
+    --gradient-mid: #8b5cf6;
+    --gradient-end: #d946ef;
+    --shadow-card: 0 8px 32px rgba(0,0,0,0.4);
+    --shadow-glow: 0 0 40px rgba(99,102,241,0.15);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --font-hebrew: 'Heebo','Segoe UI',system-ui,sans-serif;
+  }
+  .light-mode {
+    --bg-primary: #f0f2f8;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f5f3ff;
+    --text-primary: #1e1b4b;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border-color: #e2e8f0;
+    --shadow-card: 0 4px 24px rgba(0,0,0,0.08);
+    --shadow-glow: 0 0 20px rgba(99,102,241,0.06);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:var(--font-hebrew);background:var(--bg-primary);color:var(--text-primary);line-height:1.7;min-height:100vh}
+  /* Mesh background */
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 0%,rgba(99,102,241,0.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 100%,rgba(217,70,239,0.06) 0%,transparent 50%);pointer-events:none;z-index:0}
+  .container{max-width:960px;margin:0 auto;padding:40px 24px 80px;position:relative;z-index:1}
+  /* Animated gradient header */
+  .header{text-align:center;margin-bottom:48px;padding:56px 32px;background:linear-gradient(-45deg,#6366f1,#8b5cf6,#d946ef,#ec4899);background-size:400% 400%;animation:gradientShift 8s ease infinite;border-radius:var(--radius);position:relative;overflow:hidden;box-shadow:0 20px 60px rgba(99,102,241,0.3)}
+  @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  .header::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 50%,rgba(255,255,255,0.12) 0%,transparent 60%),radial-gradient(circle at 70% 20%,rgba(255,255,255,0.08) 0%,transparent 40%);pointer-events:none}
+  .header h1{font-size:2.2rem;font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-0.02em;text-shadow:0 2px 10px rgba(0,0,0,0.2)}
+  .header .subtitle{font-size:1.1rem;color:rgba(255,255,255,0.85)}
+  .header .version-badge{display:inline-block;margin-top:16px;padding:6px 20px;background:rgba(255,255,255,0.2);border-radius:999px;font-size:0.85rem;color:#fff;font-weight:600;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.15)}
+  /* Theme toggle */
+  .theme-toggle{position:fixed;top:16px;left:16px;z-index:100;width:44px;height:44px;border-radius:50%;border:2px solid var(--border-color);background:var(--bg-card);color:var(--text-primary);cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-card);transition:all .2s}
+  .theme-toggle:hover{transform:scale(1.1);box-shadow:var(--shadow-glow)}
+  /* Glassmorphism sections */
+  .section{margin-bottom:28px;background:var(--bg-card);backdrop-filter:blur(12px);border:1px solid var(--border-color);border-radius:var(--radius);box-shadow:var(--shadow-card);overflow:hidden;opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease}
+  .section.visible{opacity:1;transform:translateY(0)}
+  .section-header{display:flex;align-items:center;gap:12px;padding:20px 24px;cursor:pointer;user-select:none;transition:background .15s}
+  .section-header:hover{background:var(--bg-card-hover)}
+  .section-header .icon{font-size:1.3rem;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);flex-shrink:0}
+  .section-header h2{font-size:1.1rem;font-weight:700;flex:1}
+  .section-header .chevron{font-size:.8rem;color:var(--text-muted);transition:transform .2s}
+  .section.collapsed .chevron{transform:rotate(90deg)}
+  .section-body{padding:0 24px 24px;overflow:hidden;transition:max-height .3s,opacity .2s}
+  .section.collapsed .section-body{max-height:0!important;padding:0;opacity:0}
+  .icon-done{background:rgba(52,211,153,.15);color:var(--accent-green)}
+  .icon-stats{background:rgba(96,165,250,.15);color:var(--accent-blue)}
+  .icon-issues{background:rgba(248,113,113,.15);color:var(--accent-red)}
+  .icon-questions{background:rgba(251,191,36,.15);color:var(--accent-amber)}
+  .icon-next{background:rgba(167,139,250,.15);color:var(--accent-purple)}
+  .icon-timeline{background:rgba(251,146,60,.15);color:var(--accent-orange)}
+  .icon-growth{background:rgba(244,114,182,.15);color:var(--accent-pink)}
+  .icon-tools{background:rgba(52,211,153,.15);color:var(--accent-green)}
+  /* Stats grid with animated counters */
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px}
+  .stat-card{background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:18px;text-align:center;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden}
+  .stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-glow)}
+  .stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gradient-start),var(--gradient-end));opacity:.6}
+  .stat-value{font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .stat-label{font-size:.82rem;color:var(--text-secondary);margin-top:4px;font-weight:500}
+  .stat-sub{font-size:.72rem;color:var(--text-muted);margin-top:2px}
+  /* Rainbow progress bar */
+  .progress-bar-container{margin-top:16px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:16px 20px}
+  .progress-label{display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:8px;font-weight:600}
+  .progress-label span:last-child{color:var(--accent-green)}
+  .progress-track{height:12px;background:var(--bg-primary);border-radius:999px;overflow:hidden}
+  .progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#6366f1,#8b5cf6,#d946ef,#34d399);background-size:200%;animation:rainbowBar 3s linear infinite;transition:width 1.5s ease}
+  @keyframes rainbowBar{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+  /* Lists */
+  .task-list{list-style:none}
+  .task-list li{padding:10px 0;border-bottom:1px solid var(--border-color);display:flex;align-items:flex-start;gap:10px;font-size:.93rem}
+  .task-list li:last-child{border-bottom:none}
+  .task-list .bullet{width:8px;height:8px;border-radius:50%;background:var(--accent-green);flex-shrink:0;margin-top:8px;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  /* Issues */
+  .issues-table{width:100%;border-collapse:collapse;font-size:.88rem}
+  .issues-table th{text-align:start;padding:12px 16px;background:var(--bg-secondary);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-secondary);border-bottom:2px solid var(--border-color)}
+  .issues-table td{padding:12px 16px;border-bottom:1px solid var(--border-color);vertical-align:top}
+  .issues-table tr:last-child td{border-bottom:none}
+  .priority-badge{display:inline-block;padding:3px 12px;border-radius:999px;font-size:.72rem;font-weight:700}
+  .priority-critical{background:rgba(248,113,113,.2);color:var(--accent-red)}
+  .priority-important{background:rgba(251,146,60,.2);color:var(--accent-orange)}
+  .priority-improvement{background:rgba(251,191,36,.2);color:var(--accent-amber)}
+  .priority-minor{background:rgba(96,165,250,.2);color:var(--accent-blue)}
+  /* Questions */
+  .questions-list{list-style:none}
+  .questions-list li{padding:14px 18px;margin-bottom:10px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:var(--radius-sm);font-size:.93rem;line-height:1.6;display:flex;align-items:flex-start;gap:10px}
+  .questions-list li:last-child{margin-bottom:0}
+  .question-icon{color:var(--accent-amber);font-size:1.1rem;flex-shrink:0}
+  /* Next steps */
+  .next-steps-list{list-style:none;counter-reset:steps}
+  .next-steps-list li{counter-increment:steps;padding:12px 0;border-bottom:1px solid var(--border-color);display:flex;align-items:flex-start;gap:14px;font-size:.93rem}
+  .next-steps-list li:last-child{border-bottom:none}
+  .next-steps-list li::before{content:counter(steps);width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--gradient-start),var(--gradient-end));color:#fff;border-radius:50%;font-size:.8rem;font-weight:700;flex-shrink:0}
+  /* Timeline */
+  .timeline{position:relative}
+  .timeline::before{content:'';position:absolute;top:0;bottom:0;right:14px;width:3px;background:linear-gradient(180deg,var(--gradient-start),var(--gradient-end));border-radius:999px}
+  .timeline-item{position:relative;padding-bottom:24px;display:flex;align-items:flex-start;gap:20px;padding-right:44px}
+  .timeline-item:last-child{padding-bottom:0}
+  .timeline-dot{position:absolute;top:4px;right:9px;width:14px;height:14px;border-radius:50%;background:var(--accent-blue);border:3px solid var(--bg-card);z-index:1}
+  .timeline-dot.current{background:var(--accent-green);box-shadow:0 0 12px rgba(52,211,153,.5)}
+  .timeline-content{flex:1}
+  .timeline-date{font-size:.78rem;color:var(--text-muted);font-weight:600}
+  .timeline-title{font-size:.93rem;font-weight:600;color:var(--text-primary)}
+  .timeline-desc{font-size:.83rem;color:var(--text-secondary);margin-top:2px}
+  /* Comparison banner */
+  .comparison-banner{background:linear-gradient(135deg,rgba(99,102,241,.1),rgba(217,70,239,.1));border:1px solid rgba(99,102,241,.2);border-radius:var(--radius-sm);padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .comparison-item{text-align:center;flex:1;min-width:80px}
+  .comparison-item .label{font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+  .comparison-item .value{font-size:1.4rem;font-weight:800;color:var(--text-primary)}
+  .comparison-item .delta{font-size:.75rem;font-weight:600}
+  .delta-up{color:var(--accent-green)}
+  .delta-down{color:var(--accent-red)}
+  /* Animated bars */
+  .bar-chart{display:flex;flex-direction:column;gap:10px}
+  .bar-row{display:flex;align-items:center;gap:10px}
+  .bar-label{width:80px;font-size:.78rem;color:var(--text-secondary);text-align:left;flex-shrink:0}
+  .bar-track{flex:1;height:24px;background:var(--bg-primary);border-radius:6px;overflow:hidden}
+  .bar-fill{height:100%;border-radius:6px;transition:width 1.2s ease;display:flex;align-items:center;justify-content:flex-end;padding:0 8px;font-size:.7rem;font-weight:700;color:#fff}
+  /* Export button */
+  .export-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--border-color);background:var(--bg-secondary);color:var(--text-secondary);cursor:pointer;font-size:.8rem;transition:all .2s}
+  .export-btn:hover{background:var(--bg-card-hover);color:var(--text-primary);border-color:var(--gradient-start)}
+  /* Tooltips */
+  [data-tooltip]{position:relative;cursor:help}
+  [data-tooltip]:hover::after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--bg-card);color:var(--text-primary);padding:6px 12px;border-radius:6px;font-size:.75rem;white-space:nowrap;box-shadow:var(--shadow-card);border:1px solid var(--border-color);z-index:10}
+  /* Badge */
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:999px;font-size:.72rem;font-weight:600}
+  .badge-green{background:rgba(52,211,153,.15);color:var(--accent-green)}
+  .badge-purple{background:rgba(167,139,250,.15);color:var(--accent-purple)}
+  .badge-blue{background:rgba(96,165,250,.15);color:var(--accent-blue)}
+  .badge-amber{background:rgba(251,191,36,.15);color:var(--accent-amber)}
+  /* Footer */
+  .footer{text-align:center;margin-top:48px;padding-top:24px;border-top:1px solid var(--border-color);color:var(--text-muted);font-size:.78rem}
+  .footer a{color:var(--accent-blue);text-decoration:none}
+  /* Print */
+  @media print{:root{--bg-primary:#fff;--bg-secondary:#f9f9f9;--bg-card:#fff;--text-primary:#111;--text-secondary:#444;--border-color:#ddd}body{background:#fff}body::before{display:none}.header{-webkit-print-color-adjust:exact;print-color-adjust:exact}.section{break-inside:avoid;box-shadow:none;opacity:1!important;transform:none!important}.section.collapsed .section-body{max-height:none!important;opacity:1!important;padding-bottom:24px!important}.chevron,.theme-toggle{display:none}}
+  @media(max-width:640px){.container{padding:20px 16px 60px}.header{padding:32px 20px}.header h1{font-size:1.5rem}.stats-grid{grid-template-columns:repeat(2,1fr);gap:10px}.stat-value{font-size:1.4rem}.section-header{padding:16px 18px}.section-body{padding:0 18px 18px}.comparison-banner{flex-direction:column;gap:10px}}
+</style>
+</head>
+<body>
+<button class="theme-toggle" onclick="document.body.classList.toggle('light-mode');localStorage.setItem('theme',document.body.classList.contains('light-mode')?'light':'dark')" title="מצב בהיר/כהה">🌓</button>
+
+<div class="container">
+  <!-- HEADER -->
+  <div class="header">
+    <h1>🏠 בית בסדר</h1>
+    <div class="subtitle">דוח סיכום מגה-איטרציה — 22 במרץ 2026</div>
+    <div class="version-badge">Phase 18 — Pesach + Zones + Domain + Viral</div>
+  </div>
+
+  <!-- COMPARISON BANNER -->
+  <div class="comparison-banner">
+    <div class="comparison-item"><div class="label">Commits</div><div class="value">15</div><div class="delta delta-up">↑ מגה-סשן</div></div>
+    <div class="comparison-item"><div class="label">שורות</div><div class="value">+2,603</div><div class="delta delta-up">↑ 50 קבצים</div></div>
+    <div class="comparison-item"><div class="label">פיצ'רים</div><div class="value">5</div><div class="delta delta-up">↑ חדשים</div></div>
+    <div class="comparison-item"><div class="label">דומיין</div><div class="value">🌐</div><div class="delta delta-up">bayitbeseder.com</div></div>
+    <div class="comparison-item"><div class="label">ציון UI</div><div class="value">8.5</div><div class="delta delta-up">↑ מ-7.5</div></div>
+  </div>
+
+  <!-- WHAT WAS DONE -->
+  <div class="section visible" id="section-done">
+    <div class="section-header" onclick="toggleSection('section-done')">
+      <div class="icon icon-done">✓</div>
+      <h2>מה בוצע <span class="badge badge-green">15 commits</span></h2>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <ul class="task-list">
+        <li><span class="bullet"></span><span><strong>🫓 מצב פסח</strong> — מערכת תבניות עונתיות: 37 משימות ב-4 שלבים, 25 פריטי קניות, באנר ספירה לאחור, מודל הפעלה 3 צעדים, תזמון מודע שבת</span></li>
+        <li><span class="bullet"></span><span><strong>🏠 תזמון אזורי</strong> — הרעיון של ענבל! Toggle רשימה/אזורים, אלגוריתם zone-first, zone-group UI, zone-day summary bar, הגדרות אזורים</span></li>
+        <li><span class="bullet"></span><span><strong>🌐 דומיין bayitbeseder.com</strong> — Namecheap → Cloudflare DNS → Vercel, SSL אוטומטי, SVG favicon חדש</span></li>
+        <li><span class="bullet"></span><span><strong>📤 כרטיס שיתוף שבועי</strong> — Viral Engine Phase 2: כרטיס gradient עם %, רצף, קטגוריה מובילה + כפתור שיתוף (Web Share API)</span></li>
+        <li><span class="bullet"></span><span><strong>🔒 אבטחה</strong> — HMAC-SHA256 webhook, headers (HSTS, X-Frame-Options, CSP, Referrer-Policy), הסרת X-Powered-By</span></li>
+        <li><span class="bullet"></span><span><strong>🎨 מתיחת פנים</strong> — Dark mode contrast #B0ACCC, ARIA attributes, confetti colors מ-CSS vars, spacing אחיד, focus-visible, 3+1 איורי Gemini</span></li>
+        <li><span class="bullet"></span><span><strong>📊 Supabase</strong> — Auth URLs עודכנו לדומיין, מיגרציות 004-009 כולן מאומתות (30 טבלאות, 19 RLS policies)</span></li>
+        <li><span class="bullet"></span><span><strong>📝 README</strong> — שדרוג מלא עם Features, tech stack, הוראות התקנה, URL חדש</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- STATISTICS -->
+  <div class="section" id="section-stats">
+    <div class="section-header" onclick="toggleSection('section-stats')">
+      <div class="icon icon-stats">☰</div>
+      <h2>נתונים</h2>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="stats-grid">
+        <div class="stat-card" data-tooltip="TypeScript + TSX"><div class="stat-value">141</div><div class="stat-label">קבצי מקור</div></div>
+        <div class="stat-card" data-tooltip="src/ directory"><div class="stat-value">13,951</div><div class="stat-label">שורות קוד</div></div>
+        <div class="stat-card" data-tooltip="React Components"><div class="stat-value">53</div><div class="stat-label">קומפוננטות</div></div>
+        <div class="stat-card" data-tooltip="Gemini AI Generated"><div class="stat-value">26</div><div class="stat-label">איורים</div></div>
+        <div class="stat-card" data-tooltip="קוד נקי!"><div class="stat-value">0</div><div class="stat-label">TODO/FIXME</div></div>
+        <div class="stat-card" data-tooltip="באיטרציה זו"><div class="stat-value">15</div><div class="stat-label">Commits</div></div>
+        <div class="stat-card" data-tooltip="50 קבצים שונו"><div class="stat-value">+2,603</div><div class="stat-label">שורות נוספו</div></div>
+        <div class="stat-card" data-tooltip="עלה מ-7.5"><div class="stat-value">8.5</div><div class="stat-label">ציון UI/UX</div></div>
+      </div>
+
+      <!-- Roadmap progress bar -->
+      <div class="progress-bar-container">
+        <div class="progress-label"><span>התקדמות Roadmap</span><span>65%</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:65%"></div></div>
+      </div>
+
+      <!-- Animated category bars -->
+      <div style="margin-top:20px">
+        <div style="font-size:.85rem;font-weight:600;margin-bottom:12px;color:var(--text-secondary)">שורות קוד לפי תחום:</div>
+        <div class="bar-chart">
+          <div class="bar-row"><div class="bar-label">Components</div><div class="bar-track"><div class="bar-fill" style="width:38%;background:linear-gradient(90deg,#6366f1,#8b5cf6)">38%</div></div></div>
+          <div class="bar-row"><div class="bar-label">Lib/Utils</div><div class="bar-track"><div class="bar-fill" style="width:28%;background:linear-gradient(90deg,#8b5cf6,#d946ef)">28%</div></div></div>
+          <div class="bar-row"><div class="bar-label">Pages</div><div class="bar-track"><div class="bar-fill" style="width:22%;background:linear-gradient(90deg,#d946ef,#ec4899)">22%</div></div></div>
+          <div class="bar-row"><div class="bar-label">Hooks</div><div class="bar-track"><div class="bar-fill" style="width:12%;background:linear-gradient(90deg,#ec4899,#f472b6)">12%</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ISSUES -->
+  <div class="section" id="section-issues">
+    <div class="section-header" onclick="toggleSection('section-issues')">
+      <div class="icon icon-issues">⚠</div>
+      <h2>בעיות שנמצאו</h2>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <table class="issues-table">
+        <thead><tr><th>עדיפות</th><th>תיאור</th><th>סטטוס</th></tr></thead>
+        <tbody>
+          <tr><td><span class="priority-badge priority-important">חשוב</span></td><td>Vercel Domains עדיין מראה "DNS Change Recommended" (למרות שהאתר עובד)</td><td><span class="badge badge-amber">ממתין</span></td></tr>
+          <tr><td><span class="priority-badge priority-improvement">שיפור</span></td><td>Zone view צריך wizard step לגרירת אזורים לימים</td><td><span class="badge badge-blue">תכנון</span></td></tr>
+          <tr><td><span class="priority-badge priority-minor">מינורי</span></td><td>Spacing לא אחיד בחלק מהקומפוננטות (p-3 / p-4)</td><td><span class="badge badge-blue">חלקי</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div class="section" id="section-questions">
+    <div class="section-header" onclick="toggleSection('section-questions')">
+      <div class="icon icon-questions">?</div>
+      <h2>שאלות להחלטתך</h2>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <ul class="questions-list">
+        <li><span class="question-icon">❓</span><span><strong>Viral Engine</strong> — האם לפרסם בקבוצות Facebook כבר? ההודעה מוכנה ב-strategy-2026.html</span></li>
+        <li><span class="question-icon">❓</span><span><strong>Freemium</strong> — מתי להתחיל עם Premium tier? (19.90₪/חודש לפי המסמך)</span></li>
+        <li><span class="question-icon">❓</span><span><strong>Multi-user</strong> — האם להתחיל ביישום תמיכה בילדים/שותפי דירה?</span></li>
+        <li><span class="question-icon">❓</span><span><strong>Google OAuth</strong> — האם להתחיל בתהליך Verification כדי לפתוח לכולם?</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- NEXT STEPS -->
+  <div class="section" id="section-next">
+    <div class="section-header" onclick="toggleSection('section-next')">
+      <div class="icon icon-next">➤</div>
+      <h2>הצעדים הבאים</h2>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <ol class="next-steps-list">
+        <li><span><strong>Viral Engine Phase 2</strong> — Achievement sharing card, WhatsApp status badge, progressive disclosure</span></li>
+        <li><span><strong>Zone wizard step</strong> — גרירת אזורים לימים בתוך אשף התכנון השבועי</span></li>
+        <li><span><strong>Multi-user households</strong> — תפקידים (הורה/ילד), משימות לפי גיל, לוח תוצאות משפחתי</span></li>
+        <li><span><strong>Equality Dashboard</strong> — ויזואליזציה של חלוקת עומסים בין בני הזוג</span></li>
+        <li><span><strong>Google OAuth Verification</strong> — פתיחה לכל המשתמשים (לא רק test users)</span></li>
+        <li><span><strong>Page transitions</strong> — אנימציות מעבר בין דפים עם framer-motion</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- TOOLS USED -->
+  <div class="section" id="section-tools">
+    <div class="section-header" onclick="toggleSection('section-tools')">
+      <div class="icon icon-tools">🔧</div>
+      <h2>כלים שהופעלו</h2>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        <div class="stat-card"><div class="stat-value" style="font-size:1.2rem">🌐</div><div class="stat-label">Chrome MCP</div><div class="stat-sub">Namecheap, Cloudflare, Vercel, Supabase</div></div>
+        <div class="stat-card"><div class="stat-value" style="font-size:1.2rem">🤖</div><div class="stat-label">4 Background Agents</div><div class="stat-sub">UI audit, zone planner, UI fixer, README</div></div>
+        <div class="stat-card"><div class="stat-value" style="font-size:1.2rem">🎨</div><div class="stat-label">Gemini Images</div><div class="stat-sub">4 illustrations + app icon</div></div>
+        <div class="stat-card"><div class="stat-value" style="font-size:1.2rem">📋</div><div class="stat-label">Skills</div><div class="stat-sub">iteration-report, nano-banana-poster</div></div>
+      </div>
+      <div style="margin-top:16px">
+        <button class="export-btn" onclick="navigator.clipboard.writeText(document.body.innerText).then(()=>alert('הועתק!'))">📋 העתק דוח</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div class="section" id="section-timeline">
+    <div class="section-header" onclick="toggleSection('section-timeline')">
+      <div class="icon icon-timeline">⏲</div>
+      <h2>ציר זמן</h2>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="timeline">
+        <div class="timeline-item"><div class="timeline-dot current"></div><div class="timeline-content"><div class="timeline-date">22 מרץ 2026 — סשן 2</div><div class="timeline-title">Phase 18b: Domain + Zones + Viral</div><div class="timeline-desc">דומיין חי, zone scheduling, weekly share card, UI facelift, README</div></div></div>
+        <div class="timeline-item"><div class="timeline-dot current"></div><div class="timeline-content"><div class="timeline-date">22 מרץ 2026 — סשן 1</div><div class="timeline-title">Phase 18a: Pesach + Security</div><div class="timeline-desc">מצב פסח (37 tasks), HMAC-SHA256, security headers, 3 Gemini illustrations</div></div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">15 מרץ 2026</div><div class="timeline-title">Phase 17: Weekly Wizard + D&D</div><div class="timeline-desc">אשף שבועי, Drag & Drop, generalization</div></div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">12 מרץ 2026</div><div class="timeline-title">Phase 16: Pre-Launch Sprint</div><div class="timeline-desc">Shopping Google Keep, custom categories, OG metadata</div></div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">12 מרץ 2026</div><div class="timeline-title">Phase 15: Google Calendar</div><div class="timeline-desc">OAuth, calendar events, smart scheduler</div></div></div>
+        <div class="timeline-item"><div class="timeline-dot"></div><div class="timeline-content"><div class="timeline-date">9 מרץ 2026</div><div class="timeline-title">Phase 14: UX Overhaul</div><div class="timeline-desc">16 illustrations, dark mode, coaching</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Generated on 2026-03-22T20:30:00Z by Claude Code iteration-report skill<br>
+    <span style="font-size:.7rem">Visual techniques: animated gradient, glassmorphism, mesh bg, dark/light toggle, scroll animations, animated bars, rainbow progress, comparison banner, deltas, pulse bullets, tooltips, badges, export button, hover effects — 14 techniques</span>
+  </div>
+</div>
+
+<script>
+function toggleSection(id){document.getElementById(id).classList.toggle('collapsed')}
+// Theme persistence
+if(localStorage.getItem('theme')==='light')document.body.classList.add('light-mode');
+// Scroll reveal
+const observer=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:0.1});
+document.querySelectorAll('.section').forEach(s=>observer.observe(s));
+</script>
+</body>
+</html>
