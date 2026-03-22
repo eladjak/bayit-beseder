@@ -26,6 +26,8 @@ import { NotificationSettings } from "@/components/settings/notification-setting
 import { AppearanceSettings, WhatsAppSettings } from "@/components/settings/appearance-settings";
 import { DangerZone } from "@/components/settings/danger-zone";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
+import { useZoneConfig } from "@/hooks/useZoneConfig";
+import { LayoutGrid } from "lucide-react";
 
 // ============================================
 // Theme helpers
@@ -103,6 +105,9 @@ export default function SettingsPage() {
 
   // Seasonal mode
   const seasonalMode = useSeasonalMode();
+
+  // Zone config
+  const zoneConfig = useZoneConfig();
   const [deactivatingSeasonal, setDeactivatingSeasonal] = useState(false);
 
   // WhatsApp state
@@ -404,6 +409,63 @@ export default function SettingsPage() {
           onPhoneChange={setWhatsappPhone}
           onSavePhone={handleSaveWhatsappPhone}
         />
+
+        {/* Zone-Based Scheduling */}
+        <div className="card-elevated p-4 space-y-3">
+          <h2 className="font-semibold text-foreground text-sm flex items-center gap-2">
+            <LayoutGrid className="w-4 h-4" />
+            תזמון לפי אזורים
+          </h2>
+          <p className="text-xs text-muted">
+            ארגון המשימות השבועיות לפי חדרים ואזורים בבית — הרעיון של ענבל!
+          </p>
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-foreground">מצב אזורים</span>
+            <button
+              onClick={zoneConfig.toggleZoneMode}
+              className={`relative w-11 h-6 rounded-full transition-colors ${
+                zoneConfig.zoneMode ? "bg-primary" : "bg-border"
+              }`}
+              role="switch"
+              aria-checked={zoneConfig.zoneMode}
+              aria-label="הפעלת מצב אזורים"
+            >
+              <span
+                className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                  zoneConfig.zoneMode ? "translate-x-0.5" : "translate-x-5"
+                }`}
+              />
+            </button>
+          </div>
+          {zoneConfig.zoneMode && (
+            <div className="space-y-2 pt-1">
+              <div className="text-xs font-medium text-muted">סידור ברירת מחדל:</div>
+              {zoneConfig.zoneDaySummary
+                .filter((d) => d.zones.length > 0)
+                .map((day) => (
+                  <div key={day.dayIndex} className="flex items-center gap-2 text-xs">
+                    <span className="font-bold text-foreground w-16">{day.dayName}</span>
+                    <span className="flex gap-1">
+                      {day.zones.map((z) => (
+                        <span
+                          key={z.zone}
+                          className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-surface-hover"
+                        >
+                          {z.icon} {z.label}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
+                ))}
+              <button
+                onClick={zoneConfig.resetMappings}
+                className="text-xs text-primary hover:text-primary-dark font-medium"
+              >
+                איפוס לברירת מחדל
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* Seasonal Mode Section */}
         {seasonalMode.activeTemplate && (
