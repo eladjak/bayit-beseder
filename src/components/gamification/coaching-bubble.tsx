@@ -27,6 +27,7 @@ export function CoachingBubble({
         >
           <button
             onClick={onDismiss}
+            aria-label="סגור טיפ"
             className="bg-surface shadow-lg rounded-2xl px-5 py-3 flex items-center gap-3 border border-border max-w-sm w-full"
           >
             <span className="text-2xl flex-shrink-0">{emoji}</span>

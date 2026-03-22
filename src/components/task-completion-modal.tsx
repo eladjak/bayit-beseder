@@ -91,6 +91,9 @@ export function TaskCompletionModal({
 
           {/* Modal */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label={`משוב על משימה: ${taskTitle}`}
             className="relative w-full max-w-lg bg-background dark:bg-surface rounded-t-3xl p-5 pb-8 space-y-4"
             dir="rtl"
             initial={{ y: "100%" }}
