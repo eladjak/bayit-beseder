@@ -99,8 +99,8 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
           alt="אין משימות להיום"
           className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
         />
-        <p className="font-medium text-foreground">אין משימות להיום!</p>
-        <p className="text-sm text-muted">יום חופשי מגיע לכם</p>
+        <p className="font-medium text-foreground">הבית נקי! (או שעדיין לא הוספתם משימות... 🤔)</p>
+        <p className="text-sm text-muted">נהנים מהשקט — מגיע לכם</p>
       </motion.div>
     );
   }

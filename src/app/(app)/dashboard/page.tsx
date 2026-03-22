@@ -62,13 +62,44 @@ function getHebrewDate(): string {
   });
 }
 
+const MORNING_SUBTITLES = [
+  "בואו נתחיל לפני שהקפה מתקרר ☕",
+  "יום חדש, בית חדש (כמעט)",
+  "הבית לא ינקה את עצמו — בואו",
+  "בוקר טוב לכם ולמדיח",
+];
+
+const AFTERNOON_SUBTITLES = [
+  "איך הולך היום? הבית שואל",
+  "אחרי הצהריים = שעת שיא ביצועים",
+  "עדיין אפשר להספיק הרבה היום",
+  "מה קורה? הבית בסדר?",
+];
+
+const EVENING_SUBTITLES = [
+  "בואו נסכם את היום בנקיון קל",
+  "ערב נעים — אחרי שמסדרים קצת",
+  "כמה משימות ואז הספה שלכם",
+  "ישר לנקות ואחר כך להירגע 💆",
+];
+
+const NIGHT_SUBTITLES = [
+  "מאוחר אבל הבית לא שופט 🌙",
+  "לילה טוב — מחר מתחילים מחדש",
+  "שינה טובה מגיעה למי שסידר היום",
+];
+
+function pickSubtitle(arr: string[]): string {
+  return arr[new Date().getDate() % arr.length];
+}
+
 function getTimeGreeting(name: string): { greeting: string; subtitle: string } {
   const hour = new Date().getHours();
-  if (hour < 6) return { greeting: `לילה טוב, ${name}`, subtitle: "מנוחה טובה מגיעה לכם" };
-  if (hour < 12) return { greeting: `בוקר טוב, ${name}!`, subtitle: "בואו נתחיל את היום" };
-  if (hour < 17) return { greeting: `צהריים טובים, ${name}`, subtitle: "איך הולך היום?" };
-  if (hour < 21) return { greeting: `ערב טוב, ${name}`, subtitle: "בואו נסכם את היום" };
-  return { greeting: `לילה טוב, ${name}`, subtitle: "יום מצוין מאחוריכם" };
+  if (hour < 6) return { greeting: `לילה טוב, ${name} 🌙`, subtitle: pickSubtitle(NIGHT_SUBTITLES) };
+  if (hour < 12) return { greeting: `בוקר טוב, ${name}! ☀️`, subtitle: pickSubtitle(MORNING_SUBTITLES) };
+  if (hour < 17) return { greeting: `צהריים טובים, ${name} 👋`, subtitle: pickSubtitle(AFTERNOON_SUBTITLES) };
+  if (hour < 21) return { greeting: `ערב טוב, ${name} 🌆`, subtitle: pickSubtitle(EVENING_SUBTITLES) };
+  return { greeting: `לילה טוב, ${name} 🌙`, subtitle: pickSubtitle(NIGHT_SUBTITLES) };
 }
 
 // CATEGORY_INFO derived from shared categories.ts

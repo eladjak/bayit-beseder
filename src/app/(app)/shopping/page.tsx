@@ -243,8 +243,8 @@ export default function ShoppingPage() {
               alt="רשימת קניות ריקה"
               className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
             />
-            <p className="font-medium text-foreground">הרשימה ריקה!</p>
-            <p className="text-sm text-muted mt-1">הוסיפו פריט ראשון</p>
+            <p className="font-medium text-foreground">הרשימה ריקה — או שהקנייה כבר הייתה? 🛒</p>
+            <p className="text-sm text-muted mt-1">הוסיפו פריט ראשון לפני שהמקרר מתחיל לדבר</p>
           </motion.div>
         )}
 
