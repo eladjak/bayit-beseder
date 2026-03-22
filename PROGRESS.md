@@ -10,17 +10,16 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 
 ## Recent Work
 
-### Iteration: 2026-03-22 (Session 2) [DONE]
+### Iteration: 2026-03-22 (Session 2) [DONE] — 22 commits total!
 - **Custom Domain**: bayitbeseder.com live! Namecheap → Cloudflare DNS → Vercel, SSL auto, SVG favicon
-- **Zone-Based Scheduling**: Full implementation of Inbal's idea:
-  - Zone types, default mappings, localStorage config
-  - Zone-first algorithm in weekly generator (tasks placed on zone's preferred day)
-  - Zone toggle in weekly page header ("רשימה/אזורים")
-  - Zone-grouped DayCard view with collapsible zone sections
-  - Zone day summary bar (א׳ 🍽️🚿 | ב׳ 🛋️🛏️ | ג׳ 👕🌿 | ד׳ 🏠🐱)
-  - Zone settings section in settings page with toggle + day mapping
-- **Supabase**: Auth URLs updated for new domain, SQL migrations ALL confirmed applied (30 tables)
-- **UI Facelift**: Confetti colors, spacing, empty states, focus-visible improvements (agent)
+- **Zone-Based Scheduling**: Full implementation of Inbal's idea (toggle, algorithm, settings, grouped view)
+- **Landing Page**: Conversion-focused homepage with hero, features, CTA (new users see landing, logged-in go to dashboard)
+- **Weekly Share Card**: Viral Engine Phase 2 — gradient card with stats + WhatsApp share
+- **Israeli Humor**: 20+ funny coaching messages, warmer greetings, playful empty states
+- **Pricing Strategy**: Full market research — recommended 15₪/mo, Founders 9.90₪, feature gating plan
+- **UI Facelift**: Confetti colors, spacing, empty states, focus-visible, dark mode contrast
+- **Supabase**: Auth URLs updated, migrations ALL confirmed (30 tables, 19+ RLS policies)
+- **README**: Full rewrite with features, tech stack, new URL
 
 ### Iteration: 2026-03-22 (Session 1) [DONE]
 - **Pesach Mode**: Full seasonal template system — 37 cleaning tasks in 4 phases, 25 shopping items, countdown banner, 3-step activation modal, Shabbat-aware scheduling
