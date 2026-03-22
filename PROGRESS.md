@@ -2,20 +2,31 @@
 
 ## Status: LIVE
 ## Last Updated: 2026-03-22
-## URL: https://bayit-beseder.vercel.app
+## URL: https://www.bayitbeseder.com
+## Domain: bayitbeseder.com (Namecheap → Cloudflare DNS → Vercel)
 
 ## Current State
-App is fully functional with Pesach mode, seasonal templates, security hardening, and UI facelift. Vercel auto-deploys from master. Zone-based scheduling planned (Inbal's idea).
+App is fully functional with Pesach mode, zone-based scheduling, custom domain, security hardening, and UI facelift. Vercel auto-deploys from master.
 
 ## Recent Work
 
-### Iteration: 2026-03-22 [DONE]
+### Iteration: 2026-03-22 (Session 2) [DONE]
+- **Custom Domain**: bayitbeseder.com live! Namecheap → Cloudflare DNS → Vercel, SSL auto, SVG favicon
+- **Zone-Based Scheduling**: Full implementation of Inbal's idea:
+  - Zone types, default mappings, localStorage config
+  - Zone-first algorithm in weekly generator (tasks placed on zone's preferred day)
+  - Zone toggle in weekly page header ("רשימה/אזורים")
+  - Zone-grouped DayCard view with collapsible zone sections
+  - Zone day summary bar (א׳ 🍽️🚿 | ב׳ 🛋️🛏️ | ג׳ 👕🌿 | ד׳ 🏠🐱)
+  - Zone settings section in settings page with toggle + day mapping
+- **Supabase**: Auth URLs updated for new domain, SQL migrations ALL confirmed applied (30 tables)
+- **UI Facelift**: Confetti colors, spacing, empty states, focus-visible improvements (agent)
+
+### Iteration: 2026-03-22 (Session 1) [DONE]
 - **Pesach Mode**: Full seasonal template system — 37 cleaning tasks in 4 phases, 25 shopping items, countdown banner, 3-step activation modal, Shabbat-aware scheduling
 - **Security Hardening**: HMAC-SHA256 webhook verification, security headers (HSTS, X-Frame-Options, CSP, Referrer-Policy), X-Powered-By removed
 - **UI Facelift**: Dark mode contrast fix (#B0ACCC), ARIA attributes on modals, 3 new Gemini illustrations (pesach-mode, empty-weekly, empty-stats)
-- **Zone-Based Scheduling**: Planning phase for Inbal's idea — organize weekly by house zones instead of individual tasks
 - **UI Audit**: Comprehensive 14-section audit completed (7.5/10 overall)
-- **Commits**: 6 commits, 35 files changed, +1,359 / -103 lines
 
 ### Wizard Modal Redesign + Error Surfacing (Mar 15) [DONE]
 - **Full modal rewrite**: matches app design system (gradient-hero header, card-elevated cards, CSS variables)
