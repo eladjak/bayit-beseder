@@ -381,6 +381,25 @@ export default function StatsPage() {
 
       <div className="px-4 space-y-4">
 
+      {/* Empty state illustration - shown when no real data yet */}
+      {!hasDbData && (
+        <motion.div
+          className="card-elevated p-4 text-center"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/illustrations/empty-stats.jpg"
+            alt="אין נתונים עדיין"
+            className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
+          />
+          <p className="font-medium text-foreground">עדיין אין נתונים</p>
+          <p className="text-sm text-muted">השלם משימות כדי לראות סטטיסטיקה</p>
+        </motion.div>
+      )}
+
       {/* Dashboard Analytics - shown when DB data is available */}
       {hasDbData && (
         <motion.div

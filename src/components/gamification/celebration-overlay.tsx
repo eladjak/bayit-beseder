@@ -8,6 +8,13 @@ import { haptic } from "@/lib/haptics";
 
 type CelebrationType = "task" | "all_daily" | "golden_rule" | "streak";
 
+// Brand colors using CSS variable values
+const CONFETTI_COLORS = {
+  primary: ["#4F46E5", "#22C55E", "#EAB308"],
+  streak: ["#FF6B35", "#F97316", "#EAB308", "#FB923C"],
+  golden: ["#4F46E5", "#22C55E", "#EAB308"],
+};
+
 interface CelebrationOverlayProps {
   type: CelebrationType;
   message: string;
@@ -29,7 +36,7 @@ export function CelebrationOverlay({
         particleCount: 30,
         spread: 60,
         origin: { y: 0.7 },
-        colors: ["#4F46E5", "#22C55E", "#EAB308"],
+        colors: CONFETTI_COLORS.primary,
       });
     } else if (type === "all_daily") {
       const duration = 2000;
@@ -40,21 +47,20 @@ export function CelebrationOverlay({
           angle: 60,
           spread: 55,
           origin: { x: 0 },
-          colors: ["#4F46E5", "#22C55E", "#EAB308"],
+          colors: CONFETTI_COLORS.primary,
         });
         confetti({
           particleCount: 3,
           angle: 120,
           spread: 55,
           origin: { x: 1 },
-          colors: ["#4F46E5", "#22C55E", "#EAB308"],
+          colors: CONFETTI_COLORS.primary,
         });
         if (Date.now() < end) requestAnimationFrame(frame);
       };
       frame();
     } else if (type === "streak") {
       // Fireworks-style burst for streak milestones
-      const colors = ["#FF6B35", "#FF4500", "#FFD700", "#FFA500"];
       for (let i = 0; i < 3; i++) {
         setTimeout(() => {
           confetti({
@@ -65,7 +71,7 @@ export function CelebrationOverlay({
               x: 0.2 + Math.random() * 0.6,
               y: 0.4 + Math.random() * 0.3,
             },
-            colors,
+            colors: CONFETTI_COLORS.streak,
             ticks: 100,
           });
         }, i * 300);
@@ -75,7 +81,7 @@ export function CelebrationOverlay({
         particleCount: 100,
         spread: 100,
         origin: { y: 0.5 },
-        colors: ["#4F46E5", "#22C55E", "#FFD700"],
+        colors: CONFETTI_COLORS.golden,
         gravity: 0.8,
       });
     }

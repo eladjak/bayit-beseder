@@ -88,7 +88,7 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
   if (tasks.length === 0) {
     return (
       <motion.div
-        className="card-elevated p-6 text-center"
+        className="card-elevated p-4 text-center"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
@@ -133,7 +133,7 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
                 layout
                 variants={itemVariants}
                 exit="exit"
-                className={`card-elevated p-3.5 flex items-center gap-3 active:scale-[0.98] transition-transform duration-100 overflow-hidden relative ${
+                className={`card-elevated p-4 flex items-center gap-3 active:scale-[0.98] transition-transform duration-100 overflow-hidden relative ${
                   isCompleted ? "opacity-60" : ""
                 } ${isLoading ? "pointer-events-none" : ""}`}
               >
