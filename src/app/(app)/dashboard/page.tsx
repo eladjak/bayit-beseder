@@ -35,6 +35,10 @@ import { PlaylistCard } from "@/components/dashboard/playlist-card";
 import { EnergyModeSection } from "@/components/dashboard/energy-mode-section";
 import { CoachingInsight } from "@/components/dashboard/coaching-insight";
 import { CoachingTips } from "@/components/dashboard/coaching-tips";
+import { PesachCountdownBanner } from "@/components/seasonal/pesach-countdown-banner";
+import { PesachActivationModal } from "@/components/seasonal/pesach-activation-modal";
+import { useSeasonalMode } from "@/hooks/useSeasonalMode";
+import { useHousehold } from "@/hooks/useHousehold";
 
 // ============================================
 // Mock data (fallback when Supabase not connected)
@@ -87,6 +91,9 @@ export default function DashboardPage() {
   const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const { partner } = usePartner(profile?.partner_id, todayStr);
+  const { household } = useHousehold(profile?.household_id ?? null);
+  const seasonalMode = useSeasonalMode();
+  const [showSeasonalModal, setShowSeasonalModal] = useState(false);
 
   // ---- Auto-seed tasks for authenticated users on first visit ----
   const seedAttempted = useRef(false);
@@ -353,6 +360,14 @@ export default function DashboardPage() {
 
       {/* Content area with padding */}
       <div className="px-4 space-y-4 -mt-6">
+        {seasonalMode.activeTemplate && (
+          <PesachCountdownBanner
+            daysUntilHoliday={seasonalMode.daysUntilHoliday}
+            progress={seasonalMode.progress}
+            onTap={() => setShowSeasonalModal(true)}
+          />
+        )}
+
         <GoldenRuleSection percentage={percentage} target={target} loading={tasksLoading} />
 
         <StreakDisplay count={streakCount} bestCount={bestStreak} />
@@ -438,6 +453,22 @@ export default function DashboardPage() {
         onClose={() => setCompletionModal({ isOpen: false, taskId: "", taskTitle: "" })}
         onSubmit={handleCompletionFeedback}
       />
+
+      {seasonalMode.activeTemplate && (
+        <PesachActivationModal
+          isOpen={showSeasonalModal}
+          template={seasonalMode.activeTemplate}
+          activation={seasonalMode.activation}
+          members={profile ? [profile.id, ...(profile.partner_id ? [profile.partner_id] : [])] : []}
+          householdId={profile?.household_id ?? null}
+          userId={profile?.id ?? null}
+          onClose={() => setShowSeasonalModal(false)}
+          onActivate={seasonalMode.activate}
+          onCreateTasks={seasonalMode.createTasks}
+          onAddShopping={seasonalMode.addShoppingItems}
+          onDeactivate={seasonalMode.deactivate}
+        />
+      )}
     </div>
   );
 }

@@ -10,6 +10,9 @@ import { useShoppingCategories } from "@/hooks/useShoppingCategories";
 import { ShoppingItemCard } from "@/components/shopping/shopping-item";
 import { CategoryManager } from "@/components/shopping/category-manager";
 import { haptic } from "@/lib/haptics";
+import { useSeasonalMode } from "@/hooks/useSeasonalMode";
+import { useProfile } from "@/hooks/useProfile";
+import { Loader2 } from "lucide-react";
 
 export default function ShoppingPage() {
   const { items, loading, addItem, toggleItem, removeItem, clearChecked } =
@@ -21,6 +24,9 @@ export default function ShoppingPage() {
     deleteCategory,
     reorderCategories,
   } = useShoppingCategories();
+  const seasonalMode = useSeasonalMode();
+  const { profile } = useProfile();
+  const [addingSeasonalShopping, setAddingSeasonalShopping] = useState(false);
 
   // Add-item form state
   const [showForm, setShowForm] = useState(false);
@@ -195,6 +201,34 @@ export default function ShoppingPage() {
       </div>
 
       <div className="px-4 space-y-3">
+        {/* ---- Pesach shopping button ---- */}
+        {seasonalMode.activation && !seasonalMode.activation.shoppingAdded && profile?.household_id && (
+          <motion.button
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            onClick={async () => {
+              if (!profile?.household_id || !profile?.id) return;
+              setAddingSeasonalShopping(true);
+              const result = await seasonalMode.addShoppingItems(profile.household_id, profile.id);
+              setAddingSeasonalShopping(false);
+              if (result.added > 0) {
+                toast.success(`${result.added} פריטי פסח נוספו לרשימה 🫓`);
+              } else if (result.errors.length > 0) {
+                toast.error("שגיאה בהוספת פריטי פסח");
+              }
+            }}
+            disabled={addingSeasonalShopping}
+            className="w-full py-3 rounded-xl text-white font-semibold text-sm shadow-lg disabled:opacity-60 transition-opacity"
+            style={{ background: "linear-gradient(135deg, #7C3AED, #DB2777)" }}
+          >
+            {addingSeasonalShopping ? (
+              <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+            ) : (
+              "🫓 הוסף רשימת קניות לפסח"
+            )}
+          </motion.button>
+        )}
+
         {/* ---- Empty state ---- */}
         {items.length === 0 && (
           <motion.div

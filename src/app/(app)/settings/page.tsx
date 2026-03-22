@@ -25,6 +25,7 @@ import { HouseholdSection } from "@/components/settings/household-section";
 import { NotificationSettings } from "@/components/settings/notification-settings";
 import { AppearanceSettings, WhatsAppSettings } from "@/components/settings/appearance-settings";
 import { DangerZone } from "@/components/settings/danger-zone";
+import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 
 // ============================================
 // Theme helpers
@@ -99,6 +100,10 @@ export default function SettingsPage() {
 
   // Push state
   const [pushSubscribed, setPushSubscribed] = useState(false);
+
+  // Seasonal mode
+  const seasonalMode = useSeasonalMode();
+  const [deactivatingSeasonal, setDeactivatingSeasonal] = useState(false);
 
   // WhatsApp state
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
@@ -399,6 +404,50 @@ export default function SettingsPage() {
           onPhoneChange={setWhatsappPhone}
           onSavePhone={handleSaveWhatsappPhone}
         />
+
+        {/* Seasonal Mode Section */}
+        {seasonalMode.activeTemplate && (
+          <div className="card-elevated p-4 space-y-3">
+            <h2 className="font-semibold text-foreground text-sm flex items-center gap-2">
+              {seasonalMode.activeTemplate.emoji} מצב עונתי
+            </h2>
+            {seasonalMode.activation ? (
+              <>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted">סטטוס</span>
+                  <span className="text-green-600 dark:text-green-400 font-medium">
+                    {seasonalMode.activeTemplate.nameHe} — פעיל
+                  </span>
+                </div>
+                {seasonalMode.progress.total > 0 && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted">התקדמות</span>
+                    <span className="text-foreground font-medium">
+                      {seasonalMode.progress.completed}/{seasonalMode.progress.total} משימות
+                    </span>
+                  </div>
+                )}
+                <button
+                  onClick={async () => {
+                    if (!confirm("האם לבטל את מצב הפסח? כל המשימות העונתיות יסומנו כהושלמו.")) return;
+                    setDeactivatingSeasonal(true);
+                    await seasonalMode.deactivate();
+                    setDeactivatingSeasonal(false);
+                    toast.success("מצב פסח בוטל");
+                  }}
+                  disabled={deactivatingSeasonal}
+                  className="w-full py-2 rounded-xl border border-red-200 dark:border-red-800 text-red-500 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-40"
+                >
+                  {deactivatingSeasonal ? "מבטל..." : "ביטול מצב פסח"}
+                </button>
+              </>
+            ) : (
+              <p className="text-sm text-muted">
+                מצב {seasonalMode.activeTemplate.nameHe} זמין — הפעילו מהדשבורד
+              </p>
+            )}
+          </div>
+        )}
 
         <DangerZone
           isDemo={isDemo}

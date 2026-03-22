@@ -1148,6 +1148,11 @@ function DraggableWeekTask({
           }`}
         >
           {task.title}
+          {task.description?.startsWith("[pesach-") && (
+            <span className="inline-flex items-center gap-0.5 mr-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+              🫓 פסח
+            </span>
+          )}
         </div>
         <div className="text-xs text-muted">
           {CATEGORY_LABELS[category]}
