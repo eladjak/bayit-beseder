@@ -1,13 +1,28 @@
 # BayitBeSeder (בית בסדר) - Progress
 
 ## Status: LIVE
-## Last Updated: 2026-03-14
+## Last Updated: 2026-03-15
 ## URL: https://bayit-beseder.vercel.app
 
 ## Current State
 App is fully functional. All migrations applied, all features connected to Supabase, 16 illustrated categories, adaptive coaching, dark mode, PWA with push notifications. Vercel auto-deploys from master.
 
 ## Recent Work
+
+### Wizard Modal Redesign + Error Surfacing (Mar 15) [IN PROGRESS]
+- **Full modal rewrite**: matches app design system (gradient-hero header, card-elevated cards, CSS variables)
+- **Error surfacing**: applyPlan now returns actual Supabase error instead of silent swallowing
+- **Layout fix**: bottom-sheet on mobile, centered max-w-lg modal on desktop (was full-viewport fixed inset-0)
+- **Dark mode**: uses CSS variables (--color-background, --color-surface) instead of hardcoded stone colors
+- **Backdrop**: blur overlay with click-to-close
+- **Pending**: Need user to test and report if tasks actually persist — error toast will show exact Supabase error if not
+
+### Weekly Wizard Fix + D&D (Mar 15) [DONE]
+- **Critical bug fix**: category_id was passing string keys ("kitchen") instead of UUID. Now resolves via Supabase categories table lookup.
+- **Drag & drop**: Added @dnd-kit/core for dragging tasks between day columns with touch sensors (200ms delay for mobile scroll safety)
+- **Responsive overhaul**: safe-area-inset classes (safe-top, safe-bottom), 44px+ touch targets, RTL-safe dropdowns, overscroll-contain, min-h on all buttons
+- **Mobile touch targets**: all action buttons meet 28-44px minimum tap area
+- Tasks created by wizard now properly appear in Tasks page and Dashboard (same DB table)
 
 ### Weekly Generator Wizard (Mar 14) [DONE]
 - **Smart task distribution algorithm**: bin-packing with daily caps (75min Sun-Thu, 20min Fri, 0 Shabbat)
@@ -57,13 +72,7 @@ App is fully functional. All migrations applied, all features connected to Supab
 - Adaptive coaching system with effectiveness tracking
 
 ## Migrations
-Applied: 001, 001_initial_schema, 002, 003, 005
-**PENDING** (run `supabase/consolidated-pending-migrations.sql` in SQL Editor):
-- `004_fix_rls_policies.sql` — CRITICAL: restores tasks SELECT policy
-- `006_coaching_tracking.sql` — coaching_events table
-- `007_expand_shopping_categories.sql` — drops category CHECK constraint
-- `008_shopping_categories.sql` — custom shopping categories table
-- `009_task_categories.sql` — custom task categories table
+Applied: 001, 001_initial_schema, 002, 003, 004, 005, 006, 007, 008, 009
 
 ## Feature History (compact)
 - **Phase 7**: Animations, sounds, haptics, onboarding
@@ -78,7 +87,6 @@ Applied: 001, 001_initial_schema, 002, 003, 005
 - **Phase 17**: Avatar upload, task completion feedback modal
 
 ## Remaining Roadmap
-- **Run pending migrations** (004-009) in Supabase SQL Editor ← CRITICAL for tasks page
 - Google OAuth Verification (for sharing with friends - guide created)
 - Reply-to-complete from WhatsApp (needs dedicated Green API instance)
 - i18n (English support)
