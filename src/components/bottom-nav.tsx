@@ -12,14 +12,17 @@ import {
   BarChart3,
   Settings,
 } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
+
+const NAV_KEYS = ["home", "tasks", "shopping", "weekly", "stats", "settings"] as const;
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "ראשי", icon: Home },
-  { href: "/tasks", label: "משימות", icon: CheckSquare },
-  { href: "/shopping", label: "קניות", icon: ShoppingCart },
-  { href: "/weekly", label: "שבועי", icon: Calendar },
-  { href: "/stats", label: "סטטיסטיקה", icon: BarChart3 },
-  { href: "/settings", label: "הגדרות", icon: Settings },
+  { href: "/dashboard", key: "home" as const, fallback: "ראשי", icon: Home },
+  { href: "/tasks", key: "tasks" as const, fallback: "משימות", icon: CheckSquare },
+  { href: "/shopping", key: "shopping" as const, fallback: "קניות", icon: ShoppingCart },
+  { href: "/weekly", key: "weekly" as const, fallback: "שבועי", icon: Calendar },
+  { href: "/stats", key: "stats" as const, fallback: "סטטיסטיקה", icon: BarChart3 },
+  { href: "/settings", key: "settings" as const, fallback: "הגדרות", icon: Settings },
 ] as const;
 
 const SPRING_TRANSITION = { type: "spring" as const, stiffness: 500, damping: 32 };
@@ -74,6 +77,7 @@ const NavItem = memo(function NavItem({
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   return (
     <nav className="fixed bottom-3 left-3 right-3 z-30">
@@ -83,7 +87,7 @@ export function BottomNav() {
             <NavItem
               key={item.href}
               href={item.href}
-              label={item.label}
+              label={t(`nav.${item.key}`) || item.fallback}
               icon={item.icon}
               isActive={pathname === item.href}
             />
