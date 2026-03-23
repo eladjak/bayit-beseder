@@ -1,6 +1,7 @@
 "use client";
 
 import { memo } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { User } from "lucide-react";
 
@@ -24,9 +25,11 @@ export const PartnerStatus = memo(function PartnerStatus({
       <div className="flex items-center gap-3 mb-3">
         <div className="relative">
           {avatarUrl ? (
-            <img
+            <Image
               src={avatarUrl}
               alt={name}
+              width={32}
+              height={32}
               className="w-8 h-8 rounded-full object-cover"
             />
           ) : (

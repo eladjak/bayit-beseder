@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import type { Notification } from "@/hooks/useNotifications";
 
@@ -49,10 +50,11 @@ export function DashboardHeader({
         <div className="flex justify-center mb-3">
           {avatarUrl ? (
             <div className="relative">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={avatarUrl}
                 alt={displayName}
+                width={56}
+                height={56}
                 className="w-14 h-14 rounded-2xl border-2 border-white/30 object-cover shadow-lg shadow-black/10"
               />
               <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success rounded-full border-2 border-white" />
