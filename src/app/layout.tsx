@@ -31,9 +31,9 @@ export const metadata: Metadata = {
     apple: "/icons/apple-touch-icon.png",
   },
   openGraph: {
-    title: "בית בסדר - ניהול תחזוקת הבית",
+    title: "בית בסדר — ניהול הבית ביחד, בכיף",
     description:
-      "אפליקציה לניהול תחזוקת הבית המשותף לזוגות — תכנון שבועי חכם, גיימיפיקציה, Google Calendar ו-WhatsApp",
+      "אפליקציה חינמית בעברית לניהול הבית לזוגות ומשפחות. משימות עם גיימיפיקציה, תכנון שבועי חכם, רשימת קניות משותפת ופרסים!",
     url: "https://www.bayitbeseder.com",
     siteName: "בית בסדר",
     images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
@@ -42,9 +42,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "בית בסדר - ניהול תחזוקת הבית",
+    title: "בית בסדר — ניהול הבית ביחד, בכיף",
     description:
-      "אפליקציה לניהול תחזוקת הבית המשותף לזוגות — תכנון שבועי חכם, גיימיפיקציה, Google Calendar ו-WhatsApp",
+      "אפליקציה חינמית בעברית לניהול הבית לזוגות ומשפחות. משימות עם גיימיפיקציה, תכנון שבועי חכם, רשימת קניות משותפת ופרסים!",
     images: ["/og-image.jpg"],
   },
 };
