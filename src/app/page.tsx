@@ -1,6 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import {
+  SocialProofSection,
+  TestimonialsSection,
+  FaqSection,
+  FloatingCta,
+} from "@/components/landing/landing-interactive";
 
 export const metadata: Metadata = {
   title: "בית בסדר — ניהול הבית ביחד, בכיף",
@@ -26,8 +32,9 @@ export default function LandingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden">
+      <section id="hero-section" className="relative overflow-hidden">
         <div
           className="absolute inset-0"
           style={{
@@ -86,6 +93,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Social Proof — animated stats counter */}
+      <SocialProofSection />
+
       {/* Features */}
       <section id="features" className="max-w-5xl mx-auto px-6 py-16">
         <h2 className="text-2xl font-bold text-center text-foreground mb-2">
@@ -116,7 +126,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Social Proof */}
+      {/* How it works */}
       <section className="bg-surface border-y border-border py-12">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-xl font-bold text-foreground mb-6">
@@ -142,6 +152,9 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Testimonials */}
+      <TestimonialsSection />
+
       {/* Visual break */}
       <section className="max-w-4xl mx-auto px-6 py-8">
         <Image
@@ -152,6 +165,9 @@ export default function LandingPage() {
           className="w-full max-w-md mx-auto rounded-2xl shadow-lg"
         />
       </section>
+
+      {/* FAQ */}
+      <FaqSection />
 
       {/* CTA */}
       <section className="max-w-3xl mx-auto px-6 py-16 text-center">
@@ -173,14 +189,34 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-6 text-center text-xs text-muted">
-        <p>בית בסדר © 2026 — נבנה באהבה 🇮🇱</p>
-        <p className="mt-1">
-          <Link href="/dashboard" className="text-primary hover:underline">דשבורד</Link>
-          {" · "}
-          <Link href="/login" className="text-primary hover:underline">התחברות</Link>
-        </p>
+      <footer className="border-t border-border py-10 text-center text-xs text-muted bg-surface">
+        <div className="max-w-4xl mx-auto px-6">
+          {/* Brand */}
+          <p className="font-bold text-base text-foreground mb-1">🏠 בית בסדר</p>
+          <p className="text-muted mb-5">ניהול הבית ביחד, בכיף — חינם לחלוטין</p>
+
+          {/* Links grid */}
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-6 text-xs">
+            <Link href="/dashboard" className="text-primary hover:underline">דשבורד</Link>
+            <Link href="/login" className="text-primary hover:underline">התחברות</Link>
+            <Link href="/tasks" className="text-primary hover:underline">משימות</Link>
+            <Link href="/shopping" className="text-primary hover:underline">קניות</Link>
+            <Link href="/weekly" className="text-primary hover:underline">שבועי</Link>
+            <Link href="/stats" className="text-primary hover:underline">סטטיסטיקות</Link>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-6 text-xs">
+            <Link href="/privacy" className="text-muted hover:text-foreground hover:underline">מדיניות פרטיות</Link>
+            <Link href="/terms" className="text-muted hover:text-foreground hover:underline">תנאי שימוש</Link>
+            <Link href="/contact" className="text-muted hover:text-foreground hover:underline">צור קשר</Link>
+          </div>
+
+          <p className="text-muted/60">בית בסדר © 2026 — נבנה באהבה בישראל 🇮🇱</p>
+        </div>
       </footer>
+
+      {/* Floating CTA — appears on scroll */}
+      <FloatingCta />
     </div>
   );
 }
