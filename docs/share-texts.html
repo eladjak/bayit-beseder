@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בית בסדר — נוסחי שיתוף</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Heebo',sans-serif;background:#0a0918;color:#e0def4;padding:24px}
+  .container{max-width:700px;margin:0 auto}
+  h1{font-size:1.8rem;font-weight:800;text-align:center;background:linear-gradient(135deg,#818CF8,#22C55E);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px}
+  .subtitle{text-align:center;color:#908caa;margin-bottom:32px;font-size:0.9rem}
+  .platform{margin:24px 0;background:#1a1730;border-radius:20px;border:1px solid #2d2a45;overflow:hidden}
+  .platform-header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid #2d2a45;cursor:pointer}
+  .platform-header .icon{font-size:1.5rem}
+  .platform-header h2{font-size:1rem;font-weight:600;flex:1}
+  .platform-header .badge{background:#818CF820;color:#818CF8;padding:2px 10px;border-radius:999px;font-size:0.7rem;font-weight:600}
+  .platform-body{padding:20px}
+  .text-box{background:#0a0918;border:1px solid #2d2a45;border-radius:12px;padding:16px;font-size:0.9rem;line-height:1.8;white-space:pre-wrap;margin-bottom:12px;direction:rtl;position:relative}
+  .copy-btn{display:inline-flex;align-items:center;gap:6px;background:#6366F1;color:white;border:none;padding:8px 20px;border-radius:12px;font-family:'Heebo';font-size:0.85rem;font-weight:600;cursor:pointer;transition:all 0.2s}
+  .copy-btn:hover{background:#4F46E5;transform:scale(1.02)}
+  .copy-btn:active{transform:scale(0.98)}
+  .copy-btn.copied{background:#22C55E}
+  .tip{background:#F59E0B15;border:1px solid #F59E0B30;border-radius:10px;padding:10px 14px;font-size:0.8rem;color:#FCD34D;margin-top:12px}
+  .og-preview{margin:32px 0;text-align:center}
+  .og-preview img{max-width:100%;border-radius:16px;border:1px solid #2d2a45}
+  .og-preview p{color:#908caa;font-size:0.8rem;margin-top:8px}
+  .divider{height:1px;background:#2d2a45;margin:8px 0 16px}
+  .footer{text-align:center;color:#908caa60;font-size:0.7rem;padding:40px 0}
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>📋 נוסחי שיתוף — בית בסדר</h1>
+<p class="subtitle">לחצו על "העתקה" ושתפו בפלטפורמה הרלוונטית</p>
+
+<!-- OG PREVIEW -->
+<div class="og-preview">
+  <p>תצוגה מקדימה של הלינק (OG Image):</p>
+  <img src="../../public/og-image.jpg" alt="OG Preview" onerror="this.style.display='none'">
+  <p>התמונה הזו מופיעה אוטומטית כשמדביקים את הלינק בWhatsApp, פייסבוק, טלגרם ועוד</p>
+</div>
+
+<!-- WHATSAPP -->
+<div class="platform">
+  <div class="platform-header">
+    <span class="icon">💬</span>
+    <h2>WhatsApp</h2>
+    <span class="badge">הכי נפוץ</span>
+  </div>
+  <div class="platform-body">
+    <div class="text-box" id="whatsapp-text">🏠 *בית בסדר* — ניהול הבית ביחד, בכיף!
+
+נמאס לכם מהוויכוחים על "מי עשה יותר בבית"? 😅
+
+בנינו אפליקציה (בעברית!) שהופכת את ניהול הבית למשחק:
+✅ משימות עם נקודות והישגים
+📅 תכנון שבועי חכם
+🛒 רשימת קניות משותפת
+🏆 פרסים לזוג שמשתף פעולה
+
+חינם לחלוטין. עובד מהדפדפן. בלי להוריד כלום.
+
+👉 bayitbeseder.com</div>
+    <button class="copy-btn" onclick="copyText('whatsapp-text', this)">📋 העתקה</button>
+    <div class="divider"></div>
+    <p style="font-size:0.8rem;color:#908caa">גרסה קצרה (לסטוריז / סטטוס):</p>
+    <div class="text-box" id="whatsapp-short">🏠 הבית שלכם. ביחד. בסדר. בכיף.
+אפליקציה חינמית בעברית לניהול הבית — משימות, קניות, תכנון שבועי, ופרסים!
+👉 bayitbeseder.com</div>
+    <button class="copy-btn" onclick="copyText('whatsapp-short', this)">📋 העתקה</button>
+  </div>
+</div>
+
+<!-- FACEBOOK -->
+<div class="platform">
+  <div class="platform-header">
+    <span class="icon">📘</span>
+    <h2>Facebook</h2>
+    <span class="badge">פוסט / קבוצות</span>
+  </div>
+  <div class="platform-body">
+    <div class="text-box" id="facebook-text">🏠 מכירים את הרגע שאתם מתווכחים מי ניקה יותר השבוע?
+
+אז בנינו משהו שפותר את זה 😄
+
+*בית בסדר* — אפליקציה חינמית בעברית לניהול הבית לזוגות ומשפחות:
+
+🎮 משימות עם נקודות, רצפים, הישגים ופרסים
+📅 תכנון שבועי חכם שמחלק בהוגנות
+🛒 רשימת קניות משותפת (סגנון Google Keep)
+📊 סטטיסטיקות — מי באמת עשה יותר 😉
+🫓 מצב פסח עם 37 משימות ו-25 פריטי קניות
+
+עובד ישר מהדפדפן, בלי להוריד. חינם.
+
+נסו ותגידו לנו מה אתם חושבים! 👇
+bayitbeseder.com</div>
+    <button class="copy-btn" onclick="copyText('facebook-text', this)">📋 העתקה</button>
+    <div class="tip">💡 טיפ: הדביקו את הלינק בסוף הפוסט. פייסבוק ישלוף את תמונת ה-OG אוטומטית.</div>
+  </div>
+</div>
+
+<!-- INSTAGRAM -->
+<div class="platform">
+  <div class="platform-header">
+    <span class="icon">📸</span>
+    <h2>Instagram</h2>
+    <span class="badge">ביו / סטורי</span>
+  </div>
+  <div class="platform-body">
+    <p style="font-size:0.8rem;color:#908caa;margin-bottom:12px">לביו (Bio):</p>
+    <div class="text-box" id="instagram-bio">🏠 בית בסדר — ניהול הבית ביחד, בכיף
+✅ משימות 📅 תכנון 🛒 קניות 🏆 פרסים
+חינם | בעברית | מהדפדפן
+👇 bayitbeseder.com</div>
+    <button class="copy-btn" onclick="copyText('instagram-bio', this)">📋 העתקה</button>
+    <div class="divider"></div>
+    <p style="font-size:0.8rem;color:#908caa;margin-bottom:12px">לפוסט / סטורי:</p>
+    <div class="text-box" id="instagram-post">נמאס מהוויכוחים על מי מנקה?? 🧹😤
+
+הפכנו את ניהול הבית למשחק! 🎮
+
+🏠 *בית בסדר* — אפליקציה חינמית בעברית:
+• משימות עם נקודות והישגים
+• תכנון שבועי שמחלק בצדק
+• רשימת קניות משותפת
+• ופרסים לזוג שמשתף פעולה! 🏆
+
+לינק בביו ☝️
+
+#ביתבסדר #ניהולבית #זוגיות #אפליקציה #חינם #ישראל #טכנולוגיה #בית #ניקיון #תכנון</div>
+    <button class="copy-btn" onclick="copyText('instagram-post', this)">📋 העתקה</button>
+    <div class="tip">💡 טיפ: אינסטגרם לא מאפשר לינקים בפוסטים. שימו את הלינק בביו ותציינו "לינק בביו". לסטורי — השתמשו בsticker של Link.</div>
+  </div>
+</div>
+
+<!-- TELEGRAM -->
+<div class="platform">
+  <div class="platform-header">
+    <span class="icon">✈️</span>
+    <h2>Telegram</h2>
+    <span class="badge">הודעה / קבוצה</span>
+  </div>
+  <div class="platform-body">
+    <div class="text-box" id="telegram-text">🏠 **בית בסדר** — ניהול הבית ביחד, בכיף!
+
+אפליקציה חינמית בעברית שהופכת את תחזוקת הבית למשחק:
+
+✅ משימות עם נקודות וגיימיפיקציה
+📅 תכנון שבועי חכם (אלגוריתם שמחלק בהוגנות)
+🛒 רשימת קניות משותפת בזמן אמת
+📊 סטטיסטיקות ומעקב התקדמות
+🏆 פרסים — ערב סרט, ארוחת חוץ, יום פינוק
+
+עובד ישר מהדפדפן. בלי הורדה. בלי תשלום.
+
+[bayitbeseder.com](https://www.bayitbeseder.com)</div>
+    <button class="copy-btn" onclick="copyText('telegram-text', this)">📋 העתקה</button>
+    <div class="tip">💡 טיפ: טלגרם תומך ב-Markdown — הלינק יוצג עם תצוגה מקדימה (Preview) אוטומטית.</div>
+  </div>
+</div>
+
+<!-- LINKEDIN / GENERAL -->
+<div class="platform">
+  <div class="platform-header">
+    <span class="icon">💼</span>
+    <h2>LinkedIn / כללי</h2>
+    <span class="badge">מקצועי</span>
+  </div>
+  <div class="platform-body">
+    <div class="text-box" id="linkedin-text">בניתי אפליקציה שפותרת בעיה שכל זוג מכיר — מי עושה יותר בבית? 🏠
+
+"בית בסדר" היא PWA בעברית לניהול תחזוקת הבית לזוגות ומשפחות.
+
+הגישה: הפיכת משימות הבית למשחק עם גיימיפיקציה — נקודות, רצפים, הישגים ופרסים.
+
+Tech stack: Next.js 15 + Supabase + TypeScript + Tailwind CSS
+פיצ'רים: תכנון שבועי חכם, רשימת קניות משותפת, Google Calendar sync, WhatsApp integration
+
+חינם ופתוח לכולם:
+bayitbeseder.com</div>
+    <button class="copy-btn" onclick="copyText('linkedin-text', this)">📋 העתקה</button>
+  </div>
+</div>
+
+<div class="footer">
+  בית בסדר &bull; bayitbeseder.com &bull; 2026
+</div>
+
+</div>
+
+<script>
+function copyText(id, btn) {
+  const el = document.getElementById(id);
+  const text = el.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = '✅ הועתק!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '📋 העתקה';
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>
