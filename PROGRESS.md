@@ -10,7 +10,7 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 
 ## Recent Work
 
-### Iteration: 2026-03-23 [DONE] — 25 commits! Performance, Security, A11y, SEO, Landing Upgrade, Share Kit
+### Iteration: 2026-03-23 [IN PROGRESS] — 29+ commits! Perf, Security, A11y, SEO, Landing, Share Kit, Legal, Onboarding
 - **Google Calendar Hardening**: task ID-based dedup, auto-clear dead tokens, timezone offset fix, abort controller, Hebrew error messages
 - **Performance — Images**: 12 static `<img>` → `next/image` (auto WebP, lazy loading, sizing hints)
 - **Performance — Code Splitting**: 5 heavy modals lazy-loaded via `dynamic()` (CelebrationOverlay, CoachingBubble, TaskCompletionModal, PesachActivationModal, WeeklyGeneratorModal)
@@ -35,6 +35,10 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 - **Dogfooding**: Live site tested via browser automation. Fixed CTAs routing to /login, removed personal name.
 - **Landing Page Upgrade**: SocialProofSection (animated counters), TestimonialsSection (3 Hebrew reviews), FaqSection (5-question accordion), FloatingCta (scroll-triggered). Footer expanded with legal links.
 - **Share Kit**: New OG image (Gemini), share texts HTML with copy buttons for WhatsApp/Facebook/Instagram/Telegram/LinkedIn. OG metadata rewritten for better CTR.
+- **Legal Pages**: Privacy policy, terms of service, contact page — all Hebrew, linked from footer and settings
+- **Navigation**: Dashboard header "בית בסדר" link to landing, 404 page improved, settings links to legal pages
+- **OG Metadata**: Rewritten titles and descriptions for better social sharing CTR
+- **Task Setup Wizard**: [IN PROGRESS] New onboarding wizard — users choose rooms, pets, time budget — replaces hardcoded seed
 - **Full Audit**: 3 parallel agents + browser dogfooding. ~85% critical/high resolved.
 - **Growth Review**: 10-dimension self-assessment. Average score: 7.05 → 7.85 (+0.8). 3 memory files saved.
 
