@@ -10,7 +10,7 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 
 ## Recent Work
 
-### Iteration: 2026-03-23 [DONE] — 7 commits! Performance, Security, Accessibility & Polish
+### Iteration: 2026-03-23 [DONE] — 11 commits! Performance, Security, Accessibility & Polish
 - **Google Calendar Hardening**: task ID-based dedup, auto-clear dead tokens, timezone offset fix, abort controller, Hebrew error messages
 - **Performance — Images**: 12 static `<img>` → `next/image` (auto WebP, lazy loading, sizing hints)
 - **Performance — Code Splitting**: 5 heavy modals lazy-loaded via `dynamic()` (CelebrationOverlay, CoachingBubble, TaskCompletionModal, PesachActivationModal, WeeklyGeneratorModal)
@@ -22,8 +22,13 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 - **RTL**: Shopping item border changed from `borderRight` to `borderInlineStart`
 - **Responsive**: NotificationCenter dropdown adds `max-w-[90vw]` for small screens
 - **Reliability**: useSeasonalMode — added error handling + cleanup flag for memory leak prevention
-- **Full Audit**: 3 parallel agents ran (perf: 30 issues, UI/UX: 120+ issues, security: 9 issues). ~50% of critical/high items resolved this iteration.
-- **Growth Review**: 10-dimension self-assessment saved. Average score: 7.05 → 7.85 (+0.8)
+- **Navigation**: BottomNav refactored — React.memo on NavItem, single layoutId, spring constant extracted
+- **Keyboard**: Enter key support on all category manager inputs
+- **Loading States**: Coaching insight shows skeleton instead of null
+- **Celebration Timing**: Auto-dismiss 2500ms → 4000ms (WCAG)
+- **Notification Bell**: Touch target enlarged to 44px
+- **Full Audit**: 3 parallel agents ran (perf: 30, UI/UX: 120+, security: 9). ~65% critical/high resolved.
+- **Growth Review**: 10-dimension self-assessment. Average score: 7.05 → 7.85 (+0.8). 3 memory files saved.
 
 ### Iteration: 2026-03-22 (Session 2) [DONE] — 22 commits total!
 - **Custom Domain**: bayitbeseder.com live! Namecheap → Cloudflare DNS → Vercel, SSL auto, SVG favicon
