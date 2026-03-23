@@ -10,7 +10,7 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 
 ## Recent Work
 
-### Iteration: 2026-03-23 [DONE] — 33 commits! Perf, Security, A11y, SEO, Landing, Share Kit, Legal, Onboarding Wizard
+### Iteration: 2026-03-23 [DONE] — 37 commits! Perf, Security, A11y, SEO, Landing, Share, Legal, Onboarding, i18n, Transitions
 - **Google Calendar Hardening**: task ID-based dedup, auto-clear dead tokens, timezone offset fix, abort controller, Hebrew error messages
 - **Performance — Images**: 12 static `<img>` → `next/image` (auto WebP, lazy loading, sizing hints)
 - **Performance — Code Splitting**: 5 heavy modals lazy-loaded via `dynamic()` (CelebrationOverlay, CoachingBubble, TaskCompletionModal, PesachActivationModal, WeeklyGeneratorModal)
@@ -39,7 +39,9 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 - **Navigation**: Dashboard header "בית בסדר" link to landing, 404 page improved, settings links to legal pages
 - **OG Metadata**: Rewritten titles and descriptions for better social sharing CTR
 - **Task Setup Wizard**: 4-step wizard (home features → rooms → time budget → preview). Replaces hardcoded seed. Seed API accepts custom tasks. Default fallback: 8 generic tasks.
-- **Full Audit**: 3 parallel agents + browser dogfooding. ~85% critical/high resolved.
+- **Page Transitions**: Smooth slide+fade between app routes via framer-motion PageTransition wrapper
+- **i18n Infrastructure**: Lightweight context+JSON system. Hebrew+English dictionaries, useTranslation hook, LanguageProvider. BottomNav integrated as demo.
+- **Full Audit**: 3 parallel agents + browser dogfooding. ~90% critical/high resolved.
 - **Growth Review**: 10-dimension self-assessment. Average score: 7.05 → 7.85 (+0.8). 3 memory files saved.
 
 ### Iteration: 2026-03-22 (Session 2) [DONE] — 22 commits total!
