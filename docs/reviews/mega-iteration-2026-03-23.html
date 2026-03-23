@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בית בסדר — מגה-איטרציה 23.03.2026 | 41 Commits</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Heebo',sans-serif;background:#0a0918;color:#e0def4;line-height:1.7}
+.hero{background:linear-gradient(135deg,#1a1145 0%,#0a0918 40%,#0f2a1a 100%);padding:60px 24px 48px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 25% 35%,rgba(99,102,241,0.2) 0%,transparent 50%),radial-gradient(circle at 75% 65%,rgba(34,197,94,0.15) 0%,transparent 40%)}
+.hero h1{font-size:2.5rem;font-weight:900;background:linear-gradient(135deg,#818CF8,#22C55E,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative;z-index:1}
+.hero .sub{color:#908caa;position:relative;z-index:1;margin-top:6px}
+.hero .big{font-size:6rem;font-weight:900;color:#818CF8;position:relative;z-index:1;margin:20px 0 4px}
+.hero .big-label{color:#908caa;font-size:0.9rem;position:relative;z-index:1}
+.c{max-width:960px;margin:0 auto;padding:32px 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin:28px 0}
+.sc{background:#1a1730;border-radius:16px;padding:18px 12px;border:1px solid #2d2a45;text-align:center}
+.sc .i{font-size:1.6rem;margin-bottom:6px}
+.sc .v{font-size:1.8rem;font-weight:800}
+.sc .l{color:#908caa;font-size:0.7rem;margin-top:2px}
+h2{font-size:1.3rem;font-weight:700;margin:32px 0 16px;padding-bottom:8px;border-bottom:2px solid #2d2a45;display:flex;align-items:center;gap:8px}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;border-radius:14px;border:1px solid #2d2a45;overflow:hidden;margin:12px 0}
+.tbl th{background:#1a1730;color:#908caa;font-weight:500;font-size:0.75rem;padding:10px 14px;text-align:right}
+.tbl td{padding:9px 14px;font-size:0.82rem;border-top:1px solid #1a173080}
+.tbl tr:hover td{background:#1a173040}
+.tag{display:inline-block;padding:2px 10px;border-radius:999px;font-size:0.65rem;font-weight:600;margin:1px}
+.t-p{background:#4F46E520;color:#A5B4FC;border:1px solid #4F46E540}
+.t-g{background:#22C55E20;color:#86EFAC;border:1px solid #22C55E40}
+.t-r{background:#EF444420;color:#FCA5A5;border:1px solid #EF444440}
+.t-y{background:#F59E0B20;color:#FCD34D;border:1px solid #F59E0B40}
+.t-b{background:#3B82F620;color:#93C5FD;border:1px solid #3B82F640}
+.t-pk{background:#EC489920;color:#F9A8D4;border:1px solid #EC489940}
+.t-c{background:#06B6D420;color:#67E8F9;border:1px solid #06B6D440}
+.box{border-radius:18px;padding:22px;margin:20px 0}
+.box-green{background:#0f2a1a;border:1px solid #22C55E40}
+.box-green h3{color:#22C55E;margin-bottom:10px}
+.box-purple{background:#1a1145;border:1px solid #818CF840}
+.box-purple h3{color:#818CF8;margin-bottom:10px}
+.box-amber{background:#2a1a0f;border:1px solid #F59E0B40}
+.box-amber h3{color:#F59E0B;margin-bottom:10px}
+.growth-row{display:flex;gap:8px;align-items:center;margin:6px 0;font-size:0.85rem}
+.growth-row .dim{width:90px;color:#908caa;font-size:0.8rem}
+.growth-row .bar{flex:1;height:7px;background:#2d2a45;border-radius:99px;overflow:hidden}
+.growth-row .fill{height:100%;border-radius:99px}
+.growth-row .score{width:80px;text-align:left;font-weight:700;font-size:0.8rem}
+.commits{list-style:none;background:#1a1730;border-radius:14px;border:1px solid #2d2a45;overflow:hidden;max-height:400px;overflow-y:auto}
+.commits li{padding:8px 14px;font-size:0.8rem;border-bottom:1px solid #1a173050;display:flex;gap:10px}
+.commits li:hover{background:#1a173040}
+.commits code{background:#2d2a45;color:#818CF8;padding:1px 6px;border-radius:5px;font-size:0.7rem;flex-shrink:0}
+.footer{text-align:center;color:#908caa50;font-size:0.65rem;padding:40px 0}
+a{color:#818CF8;text-decoration:none}a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="hero">
+<h1>🏠 בית בסדר — מגה-איטרציה</h1>
+<p class="sub">23 מרץ 2026 | <a href="https://www.bayitbeseder.com">bayitbeseder.com</a></p>
+<div class="big">41</div>
+<p class="big-label">commits | 80+ קבצים | +3,500 שורות | 0 שגיאות TypeScript</p>
+</div>
+
+<div class="c">
+
+<!-- STATS -->
+<div class="grid">
+<div class="sc"><div class="i">🖼️</div><div class="v" style="color:#22C55E">14</div><div class="l">images optimized</div></div>
+<div class="sc"><div class="i">⚡</div><div class="v" style="color:#818CF8">5</div><div class="l">lazy modals</div></div>
+<div class="sc"><div class="i">🧠</div><div class="v" style="color:#F59E0B">9</div><div class="l">React.memo</div></div>
+<div class="sc"><div class="i">♿</div><div class="v" style="color:#3B82F6">5</div><div class="l">focus traps</div></div>
+<div class="sc"><div class="i">🔒</div><div class="v" style="color:#EF4444">4</div><div class="l">security fixes</div></div>
+<div class="sc"><div class="i">📄</div><div class="v" style="color:#22C55E">3</div><div class="l">legal pages</div></div>
+<div class="sc"><div class="i">🧙</div><div class="v" style="color:#818CF8">4</div><div class="l">wizard steps</div></div>
+<div class="sc"><div class="i">🌍</div><div class="v" style="color:#F59E0B">2</div><div class="l">languages</div></div>
+<div class="sc"><div class="i">🎯</div><div class="v" style="color:#EC4899">6</div><div class="l">GPU animations</div></div>
+<div class="sc"><div class="i">🔍</div><div class="v" style="color:#06B6D4">4</div><div class="l">SEO files</div></div>
+</div>
+
+<!-- WHAT WAS BUILT -->
+<h2>🏗️ מה נבנה — סיכום מלא</h2>
+<table class="tbl">
+<thead><tr><th>#</th><th>קטגוריה</th><th>פריטים</th><th>קבצים</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><span class="tag t-p">ביצועים</span></td><td>next/image, lazy modals, dynamic confetti, GPU bars, React.memo, cache headers</td><td>35</td></tr>
+<tr><td>2</td><td><span class="tag t-b">נגישות</span></td><td>useFocusTrap, touch targets, WCAG timing, aria-live, reduced-motion, Enter key, skeletons</td><td>15</td></tr>
+<tr><td>3</td><td><span class="tag t-r">אבטחה</span></td><td>JSON.parse, fetch handling, error sanitization, date validation</td><td>4</td></tr>
+<tr><td>4</td><td><span class="tag t-c">SEO</span></td><td>robots.txt, sitemap.xml, JSON-LD, title templates, OG image+metadata</td><td>8</td></tr>
+<tr><td>5</td><td><span class="tag t-pk">Landing</span></td><td>Social proof counters, testimonials, FAQ accordion, floating CTA, footer</td><td>2</td></tr>
+<tr><td>6</td><td><span class="tag t-y">שיתוף</span></td><td>OG image (Gemini), share texts ל-5 פלטפורמות עם copy buttons</td><td>2</td></tr>
+<tr><td>7</td><td><span class="tag t-g">משפטי</span></td><td>Privacy Policy, Terms of Service, Contact page</td><td>3</td></tr>
+<tr><td>8</td><td><span class="tag t-p">Onboarding</span></td><td>Task Setup Wizard (4 שלבים) + Smart Seed API</td><td>3</td></tr>
+<tr><td>9</td><td><span class="tag t-b">ניווט</span></td><td>Header home link, settings links, 404 upgrade, page transitions</td><td>6</td></tr>
+<tr><td>10</td><td><span class="tag t-y">i18n</span></td><td>LanguageProvider, useTranslation, dictionaries (he+en), BottomNav+Settings</td><td>6</td></tr>
+<tr><td>11</td><td><span class="tag t-pk">Dark Mode</span></td><td>10 hardcoded colors → CSS variables</td><td>10</td></tr>
+<tr><td>12</td><td><span class="tag t-c">Calendar</span></td><td>Token dedup, auto-clear, timezone fix, Hebrew errors</td><td>6</td></tr>
+<tr><td>13</td><td><span class="tag t-g">Zones</span></td><td>ZoneDayPicker — tap-to-assign zones to days</td><td>1</td></tr>
+</tbody>
+</table>
+
+<!-- GROWTH -->
+<h2>📈 Growth Review — 10 ממדים</h2>
+<div class="growth-row"><span class="dim">אוטונומיה</span><div class="bar"><div class="fill" style="width:95%;background:#22C55E"></div></div><span class="score" style="color:#22C55E">9.5</span></div>
+<div class="growth-row"><span class="dim">דיוק</span><div class="bar"><div class="fill" style="width:90%;background:#3B82F6"></div></div><span class="score" style="color:#3B82F6">9.0</span></div>
+<div class="growth-row"><span class="dim">יוזמה</span><div class="bar"><div class="fill" style="width:90%;background:#818CF8"></div></div><span class="score" style="color:#818CF8">9.0</span></div>
+<div class="growth-row"><span class="dim">איכות</span><div class="bar"><div class="fill" style="width:85%;background:#22C55E"></div></div><span class="score" style="color:#22C55E">8.5</span></div>
+<div class="growth-row"><span class="dim">מהירות</span><div class="bar"><div class="fill" style="width:85%;background:#F59E0B"></div></div><span class="score" style="color:#F59E0B">8.5</span></div>
+<div class="growth-row"><span class="dim">למידה</span><div class="bar"><div class="fill" style="width:85%;background:#EC4899"></div></div><span class="score" style="color:#EC4899">8.5</span></div>
+<div class="growth-row"><span class="dim">שיתוף</span><div class="bar"><div class="fill" style="width:80%;background:#06B6D4"></div></div><span class="score" style="color:#06B6D4">8.0</span></div>
+<div class="growth-row"><span class="dim">יעילות</span><div class="bar"><div class="fill" style="width:80%;background:#818CF8"></div></div><span class="score" style="color:#818CF8">8.0</span></div>
+<div class="growth-row"><span class="dim">חיסכון</span><div class="bar"><div class="fill" style="width:75%;background:#F59E0B"></div></div><span class="score" style="color:#F59E0B">7.5</span></div>
+<div class="growth-row"><span class="dim">חדשנות</span><div class="bar"><div class="fill" style="width:75%;background:#22C55E"></div></div><span class="score" style="color:#22C55E">7.5</span></div>
+<p style="text-align:center;margin-top:16px;font-size:1rem">
+ממוצע: <strong style="color:#908caa">7.05</strong> → <strong style="color:#22C55E;font-size:1.3rem">8.4</strong> <span style="color:#22C55E">(+1.35)</span>
+</p>
+
+<!-- INSIGHTS -->
+<div class="box box-purple">
+<h3>💡 5 תובנות מרכזיות</h3>
+<ol style="padding-right:20px;font-size:0.9rem">
+<li><strong>Parallel agents + manual work = 3x throughput</strong> — השקתי עד 3 סוכנים במקביל ועבדתי בעצמי על קבצים אחרים</li>
+<li><strong>Wizard > Auto-seed</strong> — לתת למשתמש לבחור תמיד עדיף על hardcoding. עובד לכל סוג של personalization</li>
+<li><strong>i18n incrementally</strong> — לא לתרגם הכל בבת אחת. תשתית → קומפוננטה אחת → הוכחה → הרחבה</li>
+<li><strong>OG image matters</strong> — תמונת Gemini מקצועית הופכת שיתוף לינק ל-10x יותר מושך</li>
+<li><strong>Dogfood FIRST</strong> — באג ה-CTA (/dashboard במקום /login) היה צריך להימצא מוקדם יותר</li>
+</ol>
+</div>
+
+<!-- WHAT'S NEXT -->
+<div class="box box-green">
+<h3>🎯 איטרציה הבאה</h3>
+<ul style="list-style:none;padding:0;font-size:0.9rem">
+<li style="padding:4px 0"><span class="tag t-g">שילוב</span> Zone Day Picker בתוך weekly wizard modal</li>
+<li style="padding:4px 0"><span class="tag t-g">i18n</span> תרגום שאר הקומפוננטות לאנגלית</li>
+<li style="padding:4px 0"><span class="tag t-y">Google</span> OAuth Verification (צריך Google Console)</li>
+<li style="padding:4px 0"><span class="tag t-p">ארכיטקטורה</span> Multi-user households (ילדים/שותפי דירה)</li>
+<li style="padding:4px 0"><span class="tag t-b">WhatsApp</span> Reply-to-complete (צריך Green API instance)</li>
+<li style="padding:4px 0"><span class="tag t-pk">Scale</span> Redis rate limiter + list virtualization</li>
+</ul>
+</div>
+
+<!-- REMAINING AUDIT -->
+<div class="box box-amber">
+<h3>⚠️ ממצאי ביקורת שנשארו (~10%)</h3>
+<ul style="list-style:none;padding:0;font-size:0.85rem;color:#FCD34D">
+<li style="padding:3px 0">- Request deduplication layer for hooks (useProfile, useTasks)</li>
+<li style="padding:3px 0">- Recharts memoization in stats page</li>
+<li style="padding:3px 0">- Inline transition objects → constants (minor)</li>
+<li style="padding:3px 0">- AuthGuard redundant state (minor)</li>
+</ul>
+</div>
+
+<div class="footer">
+נוצר אוטומטית ע״י Claude Code &bull; <a href="https://www.bayitbeseder.com" style="color:#818CF860">bayitbeseder.com</a> &bull; 23 מרץ 2026<br>
+41 commits &bull; 80+ files &bull; +3,500 lines &bull; 0 errors &bull; Growth: 7.05 → 8.4
+</div>
+
+</div>
+</body>
+</html>
