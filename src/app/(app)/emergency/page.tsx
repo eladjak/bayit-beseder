@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { Shield, Check, Clock, Loader2, AlertTriangle } from "lucide-react";
 import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
@@ -188,15 +189,16 @@ export default function EmergencyPage() {
         className={`border rounded-2xl overflow-hidden text-center ${
           emergencyMode
             ? "bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-800/50"
-            : "bg-surface dark:bg-[#1a1730] border-border"
+            : "bg-surface dark:bg-surface border-border"
         }`}
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/illustrations/emergency-mode.jpg"
           alt="מצב חירום"
+          width={512}
+          height={144}
           className="w-full h-36 object-cover"
         />
         <div className="p-4">
@@ -242,7 +244,7 @@ export default function EmergencyPage() {
       {emergencyMode && (
         <>
           {/* Simplified Progress */}
-          <div className="bg-surface dark:bg-[#1a1730] rounded-2xl p-4 text-center">
+          <div className="bg-surface dark:bg-surface rounded-2xl p-4 text-center">
             <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
               {completedCount}/{totalCount}
             </div>
@@ -278,7 +280,7 @@ export default function EmergencyPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className={`bg-surface dark:bg-[#1a1730] rounded-xl p-3 flex items-center gap-3 ${
+                  className={`bg-surface dark:bg-surface rounded-xl p-3 flex items-center gap-3 ${
                     isCompleted ? "opacity-60" : ""
                   }`}
                 >

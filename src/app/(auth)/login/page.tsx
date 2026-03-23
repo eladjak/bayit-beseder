@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles } from "lucide-react";
@@ -111,10 +112,11 @@ function LoginContent() {
       <div className="w-full max-w-sm flex flex-col items-center gap-5 relative z-10">
         {/* Logo & Title */}
         <div className="flex flex-col items-center gap-3 mb-2">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/illustrations/welcome-home.jpg"
             alt="ברוכים הבאים לבית בסדר"
+            width={96}
+            height={96}
             className="w-24 h-24 rounded-2xl object-cover shadow-lg shadow-black/20 border-2 border-white/30"
           />
           <h1 className="text-3xl font-bold text-white">בית בסדר</h1>
@@ -130,7 +132,7 @@ function LoginContent() {
         </div>
 
         {/* Glass Card */}
-        <div className="w-full rounded-2xl bg-white/90 dark:bg-[#1a1730]/95 backdrop-blur-xl p-6 shadow-xl shadow-black/10 dark:shadow-black/40 border border-white/50 dark:border-[#2d2a45] space-y-4">
+        <div className="w-full rounded-2xl bg-white/90 dark:bg-surface/95 backdrop-blur-xl p-6 shadow-xl shadow-black/10 dark:shadow-black/40 border border-white/50 dark:border-[#2d2a45] space-y-4">
           {/* Error / Success Messages */}
           {errorParam === "auth" && (
             <div className="w-full bg-danger/10 border border-danger/20 text-danger text-sm rounded-xl px-4 py-3 text-center">

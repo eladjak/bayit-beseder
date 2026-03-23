@@ -33,7 +33,7 @@ export function ShoppingItemCard({ item, onToggle, onRemove, categoryColor, cate
         item.checked ? "opacity-50" : ""
       }`}
       style={{
-        borderRight: `3px solid ${borderColor}`,
+        borderInlineStart: `3px solid ${borderColor}`,
       }}
     >
       {/* Checkbox */}

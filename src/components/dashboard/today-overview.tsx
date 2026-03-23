@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Clock } from "lucide-react";
 import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
@@ -93,10 +94,11 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/illustrations/empty-tasks.jpg"
           alt="אין משימות להיום"
+          width={192}
+          height={192}
           className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
         />
         <p className="font-medium text-foreground">הבית נקי! (או שעדיין לא הוספתם משימות... 🤔)</p>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Clock, Filter, Plus, Settings, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -517,10 +518,11 @@ export default function TasksPage() {
             animate={{ opacity: 1, scale: 1 }}
             className="card-elevated p-8 text-center"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={activeCategory === "all" ? "/illustrations/tasks-done.jpg" : "/illustrations/empty-tasks.jpg"}
               alt={activeCategory === "all" ? "כל המשימות הושלמו" : "אין משימות בקטגוריה זו"}
+              width={192}
+              height={192}
               className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
             />
             <p className="font-medium text-foreground">

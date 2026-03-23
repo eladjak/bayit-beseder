@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, ChevronDown, ChevronUp, Trash2, Settings } from "lucide-react";
 import { toast } from "sonner";
@@ -237,10 +238,11 @@ export default function ShoppingPage() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/illustrations/empty-shopping.jpg"
               alt="רשימת קניות ריקה"
+              width={192}
+              height={192}
               className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
             />
             <p className="font-medium text-foreground">הרשימה ריקה — או שהקנייה כבר הייתה? 🛒</p>

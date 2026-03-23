@@ -130,7 +130,7 @@ export function CelebrationOverlay({
               {emoji}
             </motion.span>
             <motion.p
-              className="text-xl font-bold text-foreground bg-surface/90 dark:bg-[#1a1730]/95 px-6 py-3 rounded-2xl shadow-lg dark:shadow-black/40"
+              className="text-xl font-bold text-foreground bg-surface/90 dark:bg-surface/95 px-6 py-3 rounded-2xl shadow-lg dark:shadow-black/40"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -59,10 +60,11 @@ export default function LandingPage() {
           </p>
 
           {/* App mockup */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/illustrations/app-mockup.jpg"
             alt="תצוגת האפליקציה"
+            width={320}
+            height={640}
             className="mt-8 mx-auto w-64 md:w-80 rounded-2xl shadow-2xl border-2 border-white/10"
           />
         </div>
@@ -126,10 +128,11 @@ export default function LandingPage() {
 
       {/* Visual break */}
       <section className="max-w-4xl mx-auto px-6 py-8">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/illustrations/couple-celebration.jpg"
           alt="זוג חוגג בית נקי"
+          width={448}
+          height={300}
           className="w-full max-w-md mx-auto rounded-2xl shadow-lg"
         />
       </section>

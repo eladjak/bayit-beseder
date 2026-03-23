@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, ListChecks } from "lucide-react";
 import { PLAYLISTS } from "@/lib/playlists";
@@ -33,10 +34,11 @@ export default function PlaylistsPage() {
     <div className="space-y-5">
       {/* Gradient header */}
       <div className="gradient-hero rounded-b-3xl overflow-hidden">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/illustrations/playlist-cleaning.jpg"
           alt="פלייליסטים לניקיון"
+          width={512}
+          height={144}
           className="w-full h-36 object-cover opacity-60"
         />
         <div className="text-center px-4 pt-4 pb-8 -mt-4 relative z-10">

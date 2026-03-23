@@ -64,7 +64,13 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const body = JSON.parse(rawBody);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let body: any;
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
 
   // A1: Validate that this webhook originates from our Green API instance
   const expectedInstance = process.env.GREEN_API_INSTANCE_ID;
@@ -165,7 +171,8 @@ export async function POST(request: NextRequest) {
 
   if (error) {
     await sendReply(chatId, "שגיאה בעדכון המשימה, נסו שוב");
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[webhook] Task update failed:", error.message);
+    return NextResponse.json({ error: "Failed to update task" }, { status: 500 });
   }
 
   // Count remaining tasks

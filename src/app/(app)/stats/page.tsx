@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -404,10 +405,11 @@ export default function StatsPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/illustrations/empty-stats.jpg"
             alt="אין נתונים עדיין"
+            width={192}
+            height={192}
             className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
           />
           <p className="font-medium text-foreground">עדיין אין נתונים</p>
@@ -583,10 +585,11 @@ export default function StatsPage() {
             {unlockedAchievements.size}/{ACHIEVEMENTS.length}
           </span>
         </div>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/illustrations/stats-achievements.jpg"
           alt="הישגים ופרסים"
+          width={512}
+          height={128}
           className="w-full h-32 object-cover rounded-xl mb-3"
         />
         <div className="grid grid-cols-3 gap-3">

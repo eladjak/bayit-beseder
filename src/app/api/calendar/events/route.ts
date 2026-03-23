@@ -77,6 +77,22 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  // Validate date format and range
+  const minDate = new Date(timeMin);
+  const maxDate = new Date(timeMax);
+  if (isNaN(minDate.getTime()) || isNaN(maxDate.getTime())) {
+    return NextResponse.json(
+      { error: "Invalid date format for timeMin or timeMax" },
+      { status: 400 }
+    );
+  }
+  if (minDate >= maxDate) {
+    return NextResponse.json(
+      { error: "timeMin must be before timeMax" },
+      { status: 400 }
+    );
+  }
+
   // Load profile + tokens
   const { data: profile, error: profileError } = await supabase
     .from("profiles")

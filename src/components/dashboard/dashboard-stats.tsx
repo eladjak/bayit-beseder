@@ -127,7 +127,7 @@ export function DashboardStats({
       </div>
 
       {/* Upcoming Tasks */}
-      <div className="bg-surface dark:bg-[#1a1730] rounded-2xl p-4">
+      <div className="bg-surface dark:bg-surface rounded-2xl p-4">
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold text-foreground">משימות קרובות</p>
           <span className="text-xs text-muted">7 ימים הבאים</span>
@@ -187,7 +187,7 @@ export function DashboardStats({
       )}
 
       {/* Monthly Completion Chart */}
-      <div className="bg-surface dark:bg-[#1a1730] rounded-2xl p-4">
+      <div className="bg-surface dark:bg-surface rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-semibold text-foreground">
             30 יום אחרונים

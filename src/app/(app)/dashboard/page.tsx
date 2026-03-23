@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { TodayOverview, type TaskItem } from "@/components/dashboard/today-overview";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { PartnerStatus } from "@/components/dashboard/partner-status";
 import { EmergencyToggle } from "@/components/dashboard/emergency-toggle";
 import { WeeklySummaryCards } from "@/components/dashboard/weekly-summary-cards";
 import { RoomConditions } from "@/components/dashboard/room-conditions";
-import { CelebrationOverlay } from "@/components/gamification/celebration-overlay";
-import { CoachingBubble } from "@/components/gamification/coaching-bubble";
 import { StreakTracker } from "@/components/gamification/streak-tracker";
 import { WeeklyChallenge } from "@/components/gamification/weekly-challenge";
 import { CoupleRewards } from "@/components/gamification/couple-rewards";
@@ -25,7 +24,6 @@ import { useCategories } from "@/hooks/useCategories";
 import { useAppSounds } from "@/hooks/useAppSound";
 import { useNotifications } from "@/hooks/useNotifications";
 import { usePartner } from "@/hooks/usePartner";
-import { TaskCompletionModal } from "@/components/task-completion-modal";
 import { TaskListSkeleton } from "@/components/skeleton";
 import { toast } from "sonner";
 import { CATEGORY_NAME_TO_KEY, CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS } from "@/lib/categories";
@@ -36,8 +34,13 @@ import { EnergyModeSection } from "@/components/dashboard/energy-mode-section";
 import { CoachingInsight } from "@/components/dashboard/coaching-insight";
 import { CoachingTips } from "@/components/dashboard/coaching-tips";
 import { PesachCountdownBanner } from "@/components/seasonal/pesach-countdown-banner";
-import { PesachActivationModal } from "@/components/seasonal/pesach-activation-modal";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
+
+// Lazy-load components that aren't always visible (modals, overlays, coaching)
+const CelebrationOverlay = dynamic(() => import("@/components/gamification/celebration-overlay").then(m => ({ default: m.CelebrationOverlay })), { ssr: false });
+const CoachingBubble = dynamic(() => import("@/components/gamification/coaching-bubble").then(m => ({ default: m.CoachingBubble })), { ssr: false });
+const TaskCompletionModal = dynamic(() => import("@/components/task-completion-modal").then(m => ({ default: m.TaskCompletionModal })), { ssr: false });
+const PesachActivationModal = dynamic(() => import("@/components/seasonal/pesach-activation-modal").then(m => ({ default: m.PesachActivationModal })), { ssr: false });
 import { useHousehold } from "@/hooks/useHousehold";
 
 // ============================================

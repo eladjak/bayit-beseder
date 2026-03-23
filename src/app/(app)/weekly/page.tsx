@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,
@@ -29,8 +30,11 @@ import { useTasks } from "@/hooks/useTasks";
 import { useProfile } from "@/hooks/useProfile";
 import { usePartner } from "@/hooks/usePartner";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
+import dynamic from "next/dynamic";
 import { useWeeklyGenerator } from "@/hooks/useWeeklyGenerator";
-import { WeeklyGeneratorModal } from "@/components/weekly/weekly-generator-modal";
+
+// Lazy-load the heavy wizard modal (includes @dnd-kit, recharts-like previews)
+const WeeklyGeneratorModal = dynamic(() => import("@/components/weekly/weekly-generator-modal").then(m => ({ default: m.WeeklyGeneratorModal })), { ssr: false });
 import {
   analyzeDailyLoad,
   analyzeDailyLoadWithCalendar,
@@ -566,10 +570,11 @@ export default function WeeklyPage() {
       <div className="px-4 space-y-5">
         {/* Weekly planning illustration */}
         <div className="card-elevated overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/illustrations/weekly-plan.jpg"
             alt="תכנון שבועי"
+            width={512}
+            height={128}
             className="w-full h-32 object-cover"
           />
         </div>
