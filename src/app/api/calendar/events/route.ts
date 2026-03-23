@@ -100,9 +100,18 @@ export async function GET(request: NextRequest) {
   let updatedTokens: GoogleTokens;
   try {
     ({ accessToken, updatedTokens } = await getValidAccessToken(tokens));
-  } catch {
+  } catch (err) {
+    console.error("[calendar/events] Token refresh failed:", err);
+
+    // If refresh fails, the tokens are likely revoked — clear them so the UI
+    // shows the "disconnected" state instead of a perpetual error.
+    await supabase
+      .from("profiles")
+      .update({ google_calendar_tokens: null, google_calendar_id: null })
+      .eq("id", user.id);
+
     return NextResponse.json(
-      { connected: false, events: [], error: "Token expired. Please reconnect Google Calendar." },
+      { connected: false, events: [], error: "הרשאות Google Calendar פגו. יש להתחבר מחדש." },
       { status: 200 } // Not 401 - graceful degradation
     );
   }

@@ -461,8 +461,8 @@ export default function StatsPage() {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={weeklyData}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis dataKey="day" fontSize={12} />
-              <YAxis fontSize={12} allowDecimals={false} />
+              <XAxis dataKey="day" fontSize={12} tick={{ fill: "var(--color-muted)" }} axisLine={{ stroke: "var(--color-border)" }} tickLine={false} />
+              <YAxis fontSize={12} allowDecimals={false} tick={{ fill: "var(--color-muted)" }} axisLine={{ stroke: "var(--color-border)" }} tickLine={false} />
               <Tooltip
                 contentStyle={{
                   borderRadius: 12,

@@ -57,6 +57,14 @@ export default function LandingPage() {
           <p className="text-xs text-white/50 mt-4">
             לא צריך להוריד מחנות. עובד ישר מהדפדפן.
           </p>
+
+          {/* App mockup */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/illustrations/app-mockup.jpg"
+            alt="תצוגת האפליקציה"
+            className="mt-8 mx-auto w-64 md:w-80 rounded-2xl shadow-2xl border-2 border-white/10"
+          />
         </div>
       </section>
 
@@ -114,6 +122,16 @@ export default function LandingPage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Visual break */}
+      <section className="max-w-4xl mx-auto px-6 py-8">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/illustrations/couple-celebration.jpg"
+          alt="זוג חוגג בית נקי"
+          className="w-full max-w-md mx-auto rounded-2xl shadow-lg"
+        />
       </section>
 
       {/* CTA */}

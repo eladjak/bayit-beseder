@@ -78,7 +78,11 @@ export function CalendarSettings() {
           ? "שגיאה בשמירת ההרשאות. נסו שוב."
           : reason === "not_authenticated"
             ? "יש להתחבר לפני חיבור Calendar."
-            : "שגיאה בחיבור Google Calendar. נסו שוב.";
+            : reason === "state_mismatch"
+              ? "שגיאת אבטחה בתהליך ההתחברות. נסו שוב."
+              : reason === "access_denied"
+                ? "הגישה ל-Google Calendar נדחתה. יש לאשר את ההרשאות."
+                : "שגיאה בחיבור Google Calendar. נסו שוב.";
       toast.error(msg);
       const url = new URL(window.location.href);
       url.searchParams.delete("calendar");

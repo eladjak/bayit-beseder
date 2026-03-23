@@ -44,10 +44,10 @@ export async function POST() {
     }
   }
 
-  // Clear tokens from Supabase profile
+  // Clear tokens and cached calendar ID from Supabase profile
   const { error } = await supabase
     .from("profiles")
-    .update({ google_calendar_tokens: null })
+    .update({ google_calendar_tokens: null, google_calendar_id: null })
     .eq("id", user.id);
 
   if (error) {

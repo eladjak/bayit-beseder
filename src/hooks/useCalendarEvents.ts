@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { ClientCalendarEvent, CalendarEventsResponse } from "@/lib/types/calendar";
 
 interface UseCalendarEventsOptions {
@@ -27,19 +27,32 @@ export function useCalendarEvents({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [connected, setConnected] = useState(false);
+  // Prevent duplicate concurrent fetches
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const fetchEvents = useCallback(async () => {
     if (!enabled || !timeMin || !timeMax) return;
+
+    // Abort any in-flight request
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     setLoading(true);
     setError(null);
 
     try {
       const params = new URLSearchParams({ timeMin, timeMax });
-      const res = await fetch(`/api/calendar/events?${params.toString()}`);
+      const res = await fetch(`/api/calendar/events?${params.toString()}`, {
+        signal: controller.signal,
+      });
 
       if (!res.ok) {
-        throw new Error(`Failed to fetch calendar events: ${res.status}`);
+        const status = res.status;
+        if (status === 401) {
+          throw new Error("הרשאות Google Calendar פגו. יש להתחבר מחדש בהגדרות.");
+        }
+        throw new Error(`שגיאה בטעינת אירועי יומן (${status})`);
       }
 
       const data: CalendarEventsResponse & { error?: string } = await res.json();
@@ -50,6 +63,8 @@ export function useCalendarEvents({
         setError(data.error);
       }
     } catch (err) {
+      // Don't treat abort as an error
+      if (err instanceof DOMException && err.name === "AbortError") return;
       const message = err instanceof Error ? err.message : "שגיאה בטעינת היומן";
       setError(message);
       setEvents([]);
@@ -60,6 +75,9 @@ export function useCalendarEvents({
 
   useEffect(() => {
     fetchEvents();
+    return () => {
+      abortControllerRef.current?.abort();
+    };
   }, [fetchEvents]);
 
   const eventsByDate = useMemo(() => {

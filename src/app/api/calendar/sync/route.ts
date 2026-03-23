@@ -58,8 +58,15 @@ export async function POST() {
     ({ accessToken, updatedTokens } = await getValidAccessToken(tokens));
   } catch (err) {
     console.error("[calendar/sync] Token refresh failed:", err);
+
+    // Clear invalid tokens so the UI shows disconnected state
+    await supabase
+      .from("profiles")
+      .update({ google_calendar_tokens: null, google_calendar_id: null })
+      .eq("id", user.id);
+
     return NextResponse.json(
-      { error: "Failed to refresh Google access token. Please reconnect." },
+      { error: "הרשאות Google Calendar פגו. יש להתחבר מחדש." },
       { status: 401 }
     );
   }
@@ -103,14 +110,24 @@ export async function POST() {
   const todayStr = now.toISOString().split("T")[0];
   const weekStr = weekFromNow.toISOString().split("T")[0];
 
-  // Fetch existing calendar events so we can avoid duplicates
-  let existingEvents: Array<{ id?: string; summary?: string }> = [];
+  // Fetch existing calendar events so we can avoid duplicates.
+  // We match by a [bayit:TASK_ID] tag embedded in the event description.
+  let existingEvents: Array<{ id?: string; summary?: string; description?: string }> = [];
   try {
     existingEvents = await listEvents(accessToken, calendarId, timeMin, timeMax);
   } catch (err) {
     console.warn("[calendar/sync] Could not list existing events:", err);
   }
 
+  // Build a set of task IDs already synced to calendar (from description tag)
+  const syncedTaskIds = new Set<string>();
+  for (const ev of existingEvents) {
+    const match = ev.description?.match(/\[bayit:([^\]]+)\]/);
+    if (match) {
+      syncedTaskIds.add(match[1]);
+    }
+  }
+  // Fallback: also check by exact title match for events created before the tag system
   const existingTitles = new Set(existingEvents.map((e) => e.summary ?? ""));
 
   // Fetch tasks that are pending/in_progress with a due_date in the next 7 days
@@ -136,8 +153,8 @@ export async function POST() {
   const errors: string[] = [];
 
   for (const task of taskList) {
-    // Skip if a calendar event with the same title already exists in this window
-    if (existingTitles.has(task.title)) {
+    // Skip if already synced (by task ID tag or legacy title match)
+    if (syncedTaskIds.has(task.id) || existingTitles.has(task.title)) {
       skipped++;
       continue;
     }
@@ -150,13 +167,18 @@ export async function POST() {
         due_date: task.due_date ?? undefined,
       });
 
-      const createdEvent = await createEvent(accessToken, calendarId, eventBody);
+      // Embed task ID in description for reliable dedup on future syncs
+      const descParts = [eventBody.description, `[bayit:${task.id}]`].filter(Boolean);
+      eventBody.description = descParts.join("\n");
 
+      await createEvent(accessToken, calendarId, eventBody);
+
+      syncedTaskIds.add(task.id);
       existingTitles.add(task.title);
       created++;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      errors.push(`Task "${task.title}": ${message}`);
+      errors.push(`"${task.title}": ${message}`);
     }
   }
 
@@ -176,6 +198,7 @@ export async function POST() {
  * GET /api/calendar/sync
  *
  * Returns the current connection status and last sync metadata.
+ * Also validates that the stored tokens are still usable.
  */
 export async function GET() {
   const supabase = await createClient();
@@ -193,8 +216,26 @@ export async function GET() {
     .eq("id", user.id)
     .single();
 
-  const connected = !!profile?.google_calendar_tokens;
+  const rawTokens = profile?.google_calendar_tokens;
+  if (!rawTokens) {
+    return NextResponse.json({ connected: false, calendarId: null });
+  }
+
+  // Validate that the tokens can still be refreshed
+  const tokens = rawTokens as unknown as GoogleTokens;
+  try {
+    await getValidAccessToken(tokens);
+  } catch {
+    // Tokens are dead -- clear them and report disconnected
+    await supabase
+      .from("profiles")
+      .update({ google_calendar_tokens: null, google_calendar_id: null })
+      .eq("id", user.id);
+
+    return NextResponse.json({ connected: false, calendarId: null });
+  }
+
   const calendarId = (profile?.google_calendar_id as string | null) ?? null;
 
-  return NextResponse.json({ connected, calendarId });
+  return NextResponse.json({ connected: true, calendarId });
 }

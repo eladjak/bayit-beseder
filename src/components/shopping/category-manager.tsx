@@ -160,7 +160,7 @@ export function CategoryManager({
                           key={color}
                           onClick={() => setEditColor(color)}
                           className={`w-7 h-7 rounded-full transition-transform ${
-                            editColor === color ? "ring-2 ring-offset-2 ring-primary scale-110" : ""
+                            editColor === color ? "ring-2 ring-offset-2 ring-offset-surface dark:ring-offset-surface ring-primary scale-110" : ""
                           }`}
                           style={{ backgroundColor: color }}
                           aria-label={`בחר צבע ${color}`}
@@ -268,7 +268,7 @@ export function CategoryManager({
                   key={color}
                   onClick={() => setNewColor(color)}
                   className={`w-7 h-7 rounded-full transition-transform ${
-                    newColor === color ? "ring-2 ring-offset-2 ring-primary scale-110" : ""
+                    newColor === color ? "ring-2 ring-offset-2 ring-offset-surface dark:ring-offset-surface ring-primary scale-110" : ""
                   }`}
                   style={{ backgroundColor: color }}
                   aria-label={`בחר צבע ${color}`}

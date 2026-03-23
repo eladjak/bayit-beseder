@@ -221,7 +221,7 @@ async function calendarFetch(
   accessToken: string,
   options: RequestInit = {}
 ): Promise<Response> {
-  return fetch(`${CALENDAR_API}${path}`, {
+  const res = await fetch(`${CALENDAR_API}${path}`, {
     ...options,
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -229,6 +229,28 @@ async function calendarFetch(
       ...(options.headers ?? {}),
     },
   });
+
+  // Surface specific Google API errors for better debugging
+  if (!res.ok) {
+    const status = res.status;
+    if (status === 401) {
+      throw new Error(
+        "Google Calendar access token expired or was revoked. Please reconnect."
+      );
+    }
+    if (status === 403) {
+      throw new Error(
+        "Google Calendar permission denied. You may need to reconnect with the correct scopes."
+      );
+    }
+    if (status === 429) {
+      throw new Error(
+        "Google Calendar rate limit exceeded. Please wait a moment and try again."
+      );
+    }
+  }
+
+  return res;
 }
 
 /**
@@ -383,27 +405,38 @@ export function taskToCalendarEvent(task: TaskLike): CalendarEvent {
  * like "+02:00" or "+03:00" (depends on whether DST is active).
  */
 function getJerusalemOffset(): string {
-  // Extract the longOffset representation, e.g. "GMT+3" or "GMT+2"
+  // Extract the longOffset representation, e.g. "GMT+3", "GMT+03:00", or "GMT+2"
   const parts = new Intl.DateTimeFormat("en", {
     timeZone: TIMEZONE,
     timeZoneName: "longOffset",
   }).formatToParts(new Date());
   const offsetPart = parts.find((p) => p.type === "timeZoneName")?.value ?? "GMT+2";
-  // offsetPart is like "GMT+3" or "GMT+2" — convert to ±HH:MM
-  const match = offsetPart.match(/GMT([+-]\d+)/);
-  if (!match) return "+02:00";
-  const hours = parseInt(match[1], 10);
+  // offsetPart may be "GMT+3", "GMT+03:00", or "GMT+02:00" depending on environment
+  const fullMatch = offsetPart.match(/GMT([+-]\d{2}:\d{2})/);
+  if (fullMatch) return fullMatch[1]; // Already in ±HH:MM format
+  const shortMatch = offsetPart.match(/GMT([+-]?\d{1,2})/);
+  if (!shortMatch) return "+02:00";
+  const hours = parseInt(shortMatch[1], 10);
   const sign = hours >= 0 ? "+" : "-";
   return `${sign}${String(Math.abs(hours)).padStart(2, "0")}:00`;
 }
 
 /**
  * Adds `minutes` minutes to an ISO local datetime string ("YYYY-MM-DDTHH:mm:ss").
+ * Returns the result as a local datetime string in Israel timezone.
  */
 function offsetDateTime(localDatetime: string, minutes: number): string {
   const offset = getJerusalemOffset(); // dynamically resolve DST-aware offset
   const date = new Date(`${localDatetime}${offset}`);
   date.setMinutes(date.getMinutes() + minutes);
-  // Return in local format (strip the timezone part)
-  return date.toISOString().replace(/\.\d{3}Z$/, "").replace(/[+-]\d{2}:\d{2}$/, "");
+  // Convert back to Israel local time (not UTC) by formatting in Israel timezone
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const localDate = new Date(date.toLocaleString("en-US", { timeZone: TIMEZONE }));
+  const y = localDate.getFullYear();
+  const m = pad(localDate.getMonth() + 1);
+  const d = pad(localDate.getDate());
+  const h = pad(localDate.getHours());
+  const min = pad(localDate.getMinutes());
+  const s = pad(localDate.getSeconds());
+  return `${y}-${m}-${d}T${h}:${min}:${s}`;
 }
