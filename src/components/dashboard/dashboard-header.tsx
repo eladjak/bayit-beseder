@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import type { Notification } from "@/hooks/useNotifications";
 
@@ -35,6 +36,10 @@ export function DashboardHeader({
 }: DashboardHeaderProps) {
   return (
     <div className="relative gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-10 -mx-0 overflow-hidden">
+      {/* App name - links to landing page */}
+      <Link href="/" className="absolute top-4 right-4 z-10 text-white/50 hover:text-white/80 text-xs font-medium transition-colors">
+        🏠 בית בסדר
+      </Link>
       {/* Notification bell - positioned top-left (RTL: visually top-right) */}
       <div className="absolute top-4 left-4 z-10">
         <NotificationCenter
