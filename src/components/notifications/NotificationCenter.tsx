@@ -64,7 +64,7 @@ export function NotificationCenter({
       {/* Bell button */}
       <button
         onClick={toggle}
-        className="relative p-2 rounded-xl text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
+        className="relative p-2.5 rounded-xl text-muted hover:text-foreground hover:bg-surface-hover transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
         aria-label={`התראות${unreadCount > 0 ? ` (${unreadCount} חדשות)` : ""}`}
         aria-expanded={isOpen}
         aria-haspopup="true"

@@ -91,7 +91,7 @@ export function CelebrationOverlay({
     if (visible) {
       haptic("celebration");
       fireConfetti();
-      const timer = setTimeout(onDismiss, 2500);
+      const timer = setTimeout(onDismiss, 4000);
       return () => clearTimeout(timer);
     }
   }, [visible, fireConfetti, onDismiss]);
@@ -100,6 +100,8 @@ export function CelebrationOverlay({
     <AnimatePresence>
       {visible && (
         <motion.div
+          role="status"
+          aria-live="polite"
           className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
