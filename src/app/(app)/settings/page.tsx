@@ -417,7 +417,7 @@ export default function SettingsPage() {
             תזמון לפי אזורים
           </h2>
           <p className="text-xs text-muted">
-            ארגון המשימות השבועיות לפי חדרים ואזורים בבית — הרעיון של ענבל!
+            ארגון המשימות השבועיות לפי חדרים ואזורים בבית
           </p>
           <div className="flex items-center justify-between">
             <span className="text-sm text-foreground">מצב אזורים</span>

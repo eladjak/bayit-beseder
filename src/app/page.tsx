@@ -58,7 +58,7 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <Link
-              href="/dashboard"
+              href="/login"
               className="px-8 py-3.5 bg-white text-indigo-700 font-bold rounded-2xl text-lg shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95"
             >
               🚀 התחילו בחינם
@@ -162,7 +162,7 @@ export default function LandingPage() {
           חינם. בעברית. בלי הורדה. פשוט מתחילים.
         </p>
         <Link
-          href="/dashboard"
+          href="/login"
           className="inline-block px-10 py-4 rounded-2xl text-white font-bold text-lg shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95"
           style={{
             background: "linear-gradient(135deg, #6366F1, #8B5CF6, #D946EF)",
