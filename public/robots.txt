@@ -1,0 +1,15 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /callback
+Disallow: /dashboard
+Disallow: /tasks
+Disallow: /shopping
+Disallow: /weekly
+Disallow: /stats
+Disallow: /settings
+Disallow: /emergency
+Disallow: /playlists
+Disallow: /history
+
+Sitemap: https://www.bayitbeseder.com/sitemap.xml

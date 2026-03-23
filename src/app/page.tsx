@@ -7,9 +7,25 @@ export const metadata: Metadata = {
   description: "אפליקציה חינמית בעברית לניהול משימות הבית לזוגות ומשפחות. תכנון שבועי חכם, גיימיפיקציה, WhatsApp והכל בעברית!",
 };
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "בית בסדר",
+  url: "https://www.bayitbeseder.com",
+  description: "אפליקציה חינמית בעברית לניהול משימות הבית לזוגות ומשפחות",
+  applicationCategory: "LifestyleApplication",
+  operatingSystem: "Web",
+  offers: { "@type": "Offer", price: "0", priceCurrency: "ILS" },
+  inLanguage: "he",
+};
+
 export default function LandingPage() {
   return (
     <div className="min-h-dvh bg-background" dir="rtl" lang="he">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div
