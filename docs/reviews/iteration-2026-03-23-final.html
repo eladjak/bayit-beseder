@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בית בסדר — סקירת איטרציה מקיפה | 23.03.2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Heebo', sans-serif; background: #0a0918; color: #e0def4; line-height: 1.7; }
+  .hero { background: linear-gradient(135deg, #1a1145 0%, #0a0918 50%, #0f1a2e 100%); padding: 60px 24px 40px; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 30% 40%, rgba(99,102,241,0.15) 0%, transparent 50%), radial-gradient(circle at 70% 60%, rgba(34,197,94,0.1) 0%, transparent 40%); animation: drift 20s ease-in-out infinite; }
+  @keyframes drift { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-3%,2%); } }
+  .hero h1 { font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, #818CF8, #22C55E); -webkit-background-clip: text; -webkit-text-fill-color: transparent; position: relative; z-index: 1; }
+  .hero .subtitle { color: #908caa; font-size: 1rem; margin-top: 8px; position: relative; z-index: 1; }
+  .hero .big-number { font-size: 5rem; font-weight: 900; color: #818CF8; position: relative; z-index: 1; margin: 24px 0 8px; }
+  .hero .big-label { color: #908caa; font-size: 0.85rem; position: relative; z-index: 1; }
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin: 32px 0; }
+  .stat-card { background: linear-gradient(145deg, #1a1730, #141225); border-radius: 20px; padding: 24px; border: 1px solid #2d2a45; text-align: center; transition: transform 0.2s; }
+  .stat-card:hover { transform: translateY(-2px); }
+  .stat-icon { font-size: 2rem; margin-bottom: 8px; }
+  .stat-value { font-size: 2.2rem; font-weight: 800; }
+  .stat-value.purple { color: #818CF8; }
+  .stat-value.green { color: #22C55E; }
+  .stat-value.amber { color: #F59E0B; }
+  .stat-value.red { color: #EF4444; }
+  .stat-value.blue { color: #3B82F6; }
+  .stat-label { color: #908caa; font-size: 0.8rem; margin-top: 4px; }
+  .section { margin: 40px 0; }
+  .section h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 2px solid #2d2a45; display: flex; align-items: center; gap: 10px; }
+  .category-section { margin: 24px 0; }
+  .category-title { font-size: 1.1rem; font-weight: 600; color: #818CF8; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .changes-table { width: 100%; border-collapse: separate; border-spacing: 0; overflow: hidden; border-radius: 16px; border: 1px solid #2d2a45; }
+  .changes-table th { background: #1a1730; color: #908caa; font-weight: 500; font-size: 0.8rem; padding: 12px 16px; text-align: right; }
+  .changes-table td { padding: 10px 16px; font-size: 0.85rem; border-top: 1px solid #1a173080; }
+  .changes-table tr:hover td { background: #1a173040; }
+  .tag { display: inline-block; padding: 3px 12px; border-radius: 999px; font-size: 0.7rem; font-weight: 600; margin: 1px 2px; }
+  .tag-perf { background: #4F46E520; color: #A5B4FC; border: 1px solid #4F46E540; }
+  .tag-a11y { background: #22C55E20; color: #86EFAC; border: 1px solid #22C55E40; }
+  .tag-security { background: #EF444420; color: #FCA5A5; border: 1px solid #EF444440; }
+  .tag-dark { background: #7C3AED20; color: #C4B5FD; border: 1px solid #7C3AED40; }
+  .tag-seo { background: #F59E0B20; color: #FCD34D; border: 1px solid #F59E0B40; }
+  .tag-rtl { background: #06B6D420; color: #67E8F9; border: 1px solid #06B6D440; }
+  .tag-ux { background: #EC489920; color: #F9A8D4; border: 1px solid #EC489940; }
+  .commit-list { list-style: none; }
+  .commit-list li { padding: 10px 16px; border-bottom: 1px solid #1a173060; font-size: 0.85rem; display: flex; gap: 12px; align-items: flex-start; }
+  .commit-list li:hover { background: #1a173040; }
+  .commit-hash { font-family: 'Courier New', monospace; background: #2d2a45; color: #818CF8; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; flex-shrink: 0; margin-top: 2px; }
+  .growth-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .growth-card { background: #1a1730; border-radius: 16px; padding: 20px; border: 1px solid #2d2a45; }
+  .growth-card h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; }
+  .growth-bar { height: 8px; background: #2d2a45; border-radius: 999px; overflow: hidden; margin: 8px 0; }
+  .growth-fill { height: 100%; border-radius: 999px; }
+  .growth-score { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
+  .growth-score .before { color: #908caa; }
+  .growth-score .after { font-weight: 700; }
+  .next-box { background: linear-gradient(145deg, #0f2a1a, #0a1f14); border: 1px solid #22C55E40; border-radius: 20px; padding: 24px; margin: 24px 0; }
+  .next-box h3 { color: #22C55E; font-size: 1.1rem; margin-bottom: 12px; }
+  .next-box ul { padding-right: 20px; }
+  .next-box li { margin: 6px 0; font-size: 0.9rem; }
+  .insights-box { background: linear-gradient(145deg, #1a1145, #15103a); border: 1px solid #818CF840; border-radius: 20px; padding: 24px; margin: 24px 0; }
+  .insights-box h3 { color: #818CF8; font-size: 1.1rem; margin-bottom: 12px; }
+  .insights-box ol { padding-right: 20px; }
+  .insights-box li { margin: 8px 0; font-size: 0.9rem; }
+  .footer { text-align: center; color: #908caa60; font-size: 0.7rem; padding: 40px 0; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+  .progress-ring { width: 120px; height: 120px; margin: 0 auto; }
+  .audit-progress { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 20px 0; }
+  .audit-card { background: #1a1730; border-radius: 16px; padding: 20px; text-align: center; border: 1px solid #2d2a45; }
+  .audit-card .big { font-size: 2rem; font-weight: 800; margin: 8px 0; }
+  .audit-card .label { font-size: 0.75rem; color: #908caa; }
+  .audit-bar { height: 6px; background: #2d2a45; border-radius: 999px; margin-top: 10px; overflow: hidden; }
+  .audit-fill { height: 100%; border-radius: 999px; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>🏠 בית בסדר</h1>
+  <p class="subtitle">סקירת איטרציה מקיפה — 23 מרץ 2026</p>
+  <div class="big-number">19</div>
+  <p class="big-label">קומיטים | 56 קבצים | +1,358 שורות</p>
+</div>
+
+<div class="container">
+
+<!-- STATS -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon">🖼️</div>
+    <div class="stat-value green">14</div>
+    <div class="stat-label">תמונות → next/image</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">⚡</div>
+    <div class="stat-value purple">5</div>
+    <div class="stat-label">מודלים Lazy Loaded</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🧠</div>
+    <div class="stat-value amber">9</div>
+    <div class="stat-label">React.memo Components</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">♿</div>
+    <div class="stat-value blue">5</div>
+    <div class="stat-label">מודלים עם Focus Trap</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🔒</div>
+    <div class="stat-value red">4</div>
+    <div class="stat-label">תיקוני אבטחה</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🎯</div>
+    <div class="stat-value green">6</div>
+    <div class="stat-label">GPU Progress Bars</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🌙</div>
+    <div class="stat-value purple">10</div>
+    <div class="stat-label">Dark Mode → CSS Vars</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🔍</div>
+    <div class="stat-value amber">4</div>
+    <div class="stat-label">שיפורי SEO</div>
+  </div>
+</div>
+
+<!-- AUDIT RESULTS -->
+<div class="section">
+  <h2>📊 תוצאות ביקורת — 3 סוכנים במקביל</h2>
+  <div class="audit-progress">
+    <div class="audit-card">
+      <div class="label">ביצועים</div>
+      <div class="big" style="color:#818CF8">30</div>
+      <div class="label">ממצאים (5 קריטיים)</div>
+      <div class="audit-bar"><div class="audit-fill" style="width:80%;background:linear-gradient(90deg,#4F46E5,#818CF8)"></div></div>
+      <div class="label" style="margin-top:6px">80% טופלו</div>
+    </div>
+    <div class="audit-card">
+      <div class="label">UI / UX / נגישות</div>
+      <div class="big" style="color:#22C55E">120+</div>
+      <div class="label">ממצאים (8 RTL קריטיים)</div>
+      <div class="audit-bar"><div class="audit-fill" style="width:60%;background:linear-gradient(90deg,#10B981,#22C55E)"></div></div>
+      <div class="label" style="margin-top:6px">60% טופלו</div>
+    </div>
+    <div class="audit-card">
+      <div class="label">אבטחה</div>
+      <div class="big" style="color:#EF4444">9</div>
+      <div class="label">ממצאים (ציון: B+ → A-)</div>
+      <div class="audit-bar"><div class="audit-fill" style="width:90%;background:linear-gradient(90deg,#DC2626,#EF4444)"></div></div>
+      <div class="label" style="margin-top:6px">90% טופלו</div>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGES BY CATEGORY -->
+<div class="section">
+  <h2>✅ שינויים מפורטים לפי קטגוריה</h2>
+
+  <div class="category-section">
+    <div class="category-title">⚡ ביצועים</div>
+    <table class="changes-table">
+      <thead><tr><th>שינוי</th><th>קבצים</th><th>השפעה</th></tr></thead>
+      <tbody>
+        <tr><td>14 תגי &lt;img&gt; → next/image</td><td>12</td><td>WebP אוטומטי, lazy loading, גודל מותאם</td></tr>
+        <tr><td>5 מודלים כבדים → dynamic()</td><td>2</td><td>~100KB פחות ב-initial bundle</td></tr>
+        <tr><td>canvas-confetti → dynamic import</td><td>4</td><td>31KB נטען רק בקונפטי</td></tr>
+        <tr><td>6 progress bars: width → scaleX</td><td>6</td><td>GPU composited, בלי layout thrashing</td></tr>
+        <tr><td>9 קומפוננטות עם React.memo</td><td>9</td><td>מניעת re-renders מיותרים בדשבורד</td></tr>
+        <tr><td>BottomNav: NavItem memo + layoutId consolidation</td><td>1</td><td>פחות layout recalc ב-route change</td></tr>
+        <tr><td>Cache headers לillustrations/icons</td><td>1</td><td>1 שנת cache immutable</td></tr>
+        <tr><td>transition-all → transition-colors</td><td>1</td><td>פחות transition overhead</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="category-section">
+    <div class="category-title">♿ נגישות</div>
+    <table class="changes-table">
+      <thead><tr><th>שינוי</th><th>קבצים</th><th>השפעה</th></tr></thead>
+      <tbody>
+        <tr><td>useFocusTrap hook חדש + 5 מודלים</td><td>6</td><td>Tab wrapping, Escape, auto-focus, restore</td></tr>
+        <tr><td>Touch targets: 24px → 36-44px</td><td>3</td><td>קרוב ל-WCAG 44px minimum</td></tr>
+        <tr><td>aria-live="polite" בcelebrations</td><td>1</td><td>קוראי מסך מכריזים על חגיגות</td></tr>
+        <tr><td>role="dialog" + aria-modal + aria-label</td><td>2</td><td>category managers עכשיו dialogs תקניים</td></tr>
+        <tr><td>role="img" בbar chart</td><td>1</td><td>סמנטיקה נכונה לגרפים</td></tr>
+        <tr><td>Enter key בinputs קטגוריות</td><td>2</td><td>הגשה מהמקלדת</td></tr>
+        <tr><td>Skeleton loader בcoaching-insight</td><td>1</td><td>מצב טעינה במקום null</td></tr>
+        <tr><td>Celebration: 2500ms → 4000ms</td><td>1</td><td>WCAG timing guideline</td></tr>
+        <tr><td>CSS prefers-reduced-motion</td><td>1</td><td>כל האנימציות מבוטלות למשתמשים שביקשו</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="category-section">
+    <div class="category-title">🔒 אבטחה</div>
+    <table class="changes-table">
+      <thead><tr><th>שינוי</th><th>קבצים</th><th>השפעה</th></tr></thead>
+      <tbody>
+        <tr><td>JSON.parse try/catch בwebhook</td><td>1</td><td>מניעת קריסה על input פגום</td></tr>
+        <tr><td>fetch() error handling בGoogle Calendar</td><td>1</td><td>מניעת unhandled promise rejection</td></tr>
+        <tr><td>הודעות שגיאה מסוננות</td><td>1</td><td>לא חושף פרטי Supabase</td></tr>
+        <tr><td>Date validation בcalendar API</td><td>1</td><td>פורמט + סדר תאריכים</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="category-section">
+    <div class="category-title">🌙 דארק מוד + 🔤 RTL</div>
+    <table class="changes-table">
+      <thead><tr><th>שינוי</th><th>קבצים</th><th>השפעה</th></tr></thead>
+      <tbody>
+        <tr><td>dark:bg-[#1a1730] → dark:bg-surface</td><td>8</td><td>עקביות, CSS variable בלבד</td></tr>
+        <tr><td>dark:border-[#1a1730/2d2a45] → CSS vars</td><td>2</td><td>border colors עקביים</td></tr>
+        <tr><td>borderRight → borderInlineStart</td><td>1</td><td>RTL-safe shopping items</td></tr>
+        <tr><td>NotificationCenter: max-w-[90vw]</td><td>1</td><td>dropdown רספונסיבי</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="category-section">
+    <div class="category-title">🔍 SEO</div>
+    <table class="changes-table">
+      <thead><tr><th>שינוי</th><th>קבצים</th><th>השפעה</th></tr></thead>
+      <tbody>
+        <tr><td>robots.txt</td><td>1</td><td>Block app routes, allow landing</td></tr>
+        <tr><td>sitemap.xml</td><td>1</td><td>Landing, login, register</td></tr>
+        <tr><td>JSON-LD WebApplication schema</td><td>1</td><td>Google rich results</td></tr>
+        <tr><td>Title template + page metadata</td><td>3</td><td>כותרות דינמיות בטאב</td></tr>
+        <tr><td>Google avatar image domains</td><td>1</td><td>next/image לavatars חיצוניים</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="category-section">
+    <div class="category-title">📅 Google Calendar</div>
+    <table class="changes-table">
+      <thead><tr><th>שינוי</th><th>קבצים</th><th>השפעה</th></tr></thead>
+      <tbody>
+        <tr><td>Task ID dedup עם [bayit:ID] tags</td><td>1</td><td>לא יוצר כפילויות ביומן</td></tr>
+        <tr><td>Auto-clear dead tokens</td><td>3</td><td>UI מראה "מנותק" במקום שגיאה</td></tr>
+        <tr><td>Timezone offset fix</td><td>1</td><td>תמיכה בפורמטים שונים של GMT</td></tr>
+        <tr><td>AbortController בhook</td><td>1</td><td>ביטול requests כפולים</td></tr>
+        <tr><td>הודעות שגיאה בעברית</td><td>3</td><td>401, 403, 429, state_mismatch</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- COMMITS -->
+<div class="section">
+  <h2>📝 כל 19 הקומיטים</h2>
+  <ul class="commit-list" style="background:#1a1730;border-radius:16px;border:1px solid #2d2a45;overflow:hidden">
+    <li><span class="commit-hash">5c6eb86</span> feat: Google Calendar hardening + landing page images + dark mode fixes</li>
+    <li><span class="commit-hash">a94ecbb</span> perf+fix: image optimization, lazy loading, dark mode, security hardening</li>
+    <li><span class="commit-hash">9d78aed</span> perf: dynamic import canvas-confetti + GPU-accelerated progress bars</li>
+    <li><span class="commit-hash">ae83c82</span> fix: replace remaining hardcoded dark mode colors with CSS variables</li>
+    <li><span class="commit-hash">4ae586f</span> docs: iteration report 2026-03-23 + progress update</li>
+    <li><span class="commit-hash">4fd9b76</span> fix: fetch error handling, seasonal cleanup, touch target sizes</li>
+    <li><span class="commit-hash">45d353b</span> a11y: add focus trapping to all 5 modals</li>
+    <li><span class="commit-hash">2d55f0d</span> docs: update PROGRESS with full iteration summary</li>
+    <li><span class="commit-hash">219c7a0</span> perf+a11y: React.memo, GPU animations, z-index, nav optimization</li>
+    <li><span class="commit-hash">ca49c18</span> fix: coaching skeleton, Enter key support, bar chart animation</li>
+    <li><span class="commit-hash">ce0b780</span> a11y: aria-live on celebrations, bell touch target, dismiss timing</li>
+    <li><span class="commit-hash">b5a167d</span> docs: final iteration summary — 11 commits</li>
+    <li><span class="commit-hash">fee4ae3</span> perf: React.memo on 7 dashboard components</li>
+    <li><span class="commit-hash">d64abac</span> seo: robots.txt, sitemap.xml, JSON-LD structured data, image domains</li>
+    <li><span class="commit-hash">408e2e7</span> perf: convert avatar images to next/image</li>
+    <li><span class="commit-hash">74d5fb6</span> seo: title template, auth layout metadata, 404 title</li>
+    <li><span class="commit-hash">4c6be72</span> docs: iteration summary — 16 commits, 55 files</li>
+    <li><span class="commit-hash">badd0c6</span> a11y+perf: reduced motion, chart roles, static asset caching</li>
+    <li style="background:#2d2a4540"><span class="commit-hash">latest</span> final: bottom-nav transition, PROGRESS, review HTML</li>
+  </ul>
+</div>
+
+<!-- GROWTH REVIEW -->
+<div class="section">
+  <h2>📈 סקירת צמיחה — 10 ממדים</h2>
+  <div class="growth-grid">
+    <div class="growth-card">
+      <h4>1. איכות</h4>
+      <div class="growth-bar"><div class="growth-fill" style="width:80%;background:#818CF8"></div></div>
+      <div class="growth-score"><span class="before">7.5</span> → <span class="after" style="color:#818CF8">8.0</span></div>
+    </div>
+    <div class="growth-card">
+      <h4>2. מהירות</h4>
+      <div class="growth-bar"><div class="growth-fill" style="width:80%;background:#22C55E"></div></div>
+      <div class="growth-score"><span class="before">7.0</span> → <span class="after" style="color:#22C55E">8.0</span></div>
+    </div>
+    <div class="growth-card">
+      <h4>3. יעילות</h4>
+      <div class="growth-bar"><div class="growth-fill" style="width:75%;background:#F59E0B"></div></div>
+      <div class="growth-score"><span class="before">7.0</span> → <span class="after" style="color:#F59E0B">7.5</span></div>
+    </div>
+    <div class="growth-card">
+      <h4>4. חיסכון</h4>
+      <div class="growth-bar"><div class="growth-fill" style="width:70%;background:#EC4899"></div></div>
+      <div class="growth-score"><span class="before">6.0</span> → <span class="after" style="color:#EC4899">7.0</span></div>
+    </div>
+    <div class="growth-card">
+      <h4>5. דיוק</h4>
+      <div class="growth-bar"><div class="growth-fill" style="width:85%;background:#06B6D4"></div></div>
+      <div class="growth-score"><span class="before">8.0</span> → <span class="after" style="color:#06B6D4">8.5</span></div>
+    </div>
+    <div class="growth-card">
+      <h4>6. אוטונומיה</h4>
+      <div class="growth-bar"><div class="growth-fill" style="width:90%;background:#22C55E"></div></div>
+      <div class="growth-score"><span class="before">8.0</span> → <span class="after" style="color:#22C55E">9.0</span></div>
+    </div>
+    <div class="growth-card">
+      <h4>7. יוזמה</h4>
+      <div class="growth-bar"><div class="growth-fill" style="width:80%;background:#818CF8"></div></div>
+      <div class="growth-score"><span class="before">7.0</span> → <span class="after" style="color:#818CF8">8.0</span></div>
+    </div>
+    <div class="growth-card">
+      <h4>8. למידה</h4>
+      <div class="growth-bar"><div class="growth-fill" style="width:80%;background:#F59E0B"></div></div>
+      <div class="growth-score"><span class="before">7.0</span> → <span class="after" style="color:#F59E0B">8.0</span></div>
+    </div>
+    <div class="growth-card">
+      <h4>9. שיתוף פעולה</h4>
+      <div class="growth-bar"><div class="growth-fill" style="width:75%;background:#EC4899"></div></div>
+      <div class="growth-score"><span class="before">7.0</span> → <span class="after" style="color:#EC4899">7.5</span></div>
+    </div>
+    <div class="growth-card">
+      <h4>10. חדשנות</h4>
+      <div class="growth-bar"><div class="growth-fill" style="width:70%;background:#06B6D4"></div></div>
+      <div class="growth-score"><span class="before">6.0</span> → <span class="after" style="color:#06B6D4">7.0</span></div>
+    </div>
+  </div>
+  <p style="text-align:center;margin-top:20px;color:#908caa;font-size:0.9rem">
+    ממוצע: <strong style="color:#818CF8">7.05</strong> → <strong style="color:#22C55E">7.85</strong> (+0.8)
+  </p>
+</div>
+
+<!-- INSIGHTS -->
+<div class="insights-box">
+  <h3>💡 5 תובנות מרכזיות מהאיטרציה</h3>
+  <ol>
+    <li><strong>3 סוכנים במקביל עובד מצוין</strong> — אבל צריך scoping ייחודי לכל סוכן כדי למנוע חפיפה</li>
+    <li><strong>אלעד סומך על החלטות טכניות</strong> — להציג שאלות אבל לא לחסום. להחליט ולתעד</li>
+    <li><strong>Growth Review חייב להיות אוטומטי</strong> — זה הדבר הכי חשוב, לא הקוד עצמו</li>
+    <li><strong>CSS logical properties</strong> (borderInlineStart) צריכות להיות סטנדרט לכל קוד RTL חדש</li>
+    <li><strong>Dynamic imports ב-Next.js</strong>: <code>.then(m => ({ default: m.Named }))</code> עם <code>{ ssr: false }</code></li>
+  </ol>
+</div>
+
+<!-- NEXT STEPS -->
+<div class="next-box">
+  <h3>🎯 צעדים הבאים</h3>
+  <ul>
+    <li><strong>List virtualization</strong> — react-virtual למשימות/קניות עם רשימות ארוכות</li>
+    <li><strong>Redis rate limiter</strong> — Upstash לdeployment מבוזר</li>
+    <li><strong>Google OAuth Verification</strong> — נדרש לשיתוף עם חברים</li>
+    <li><strong>i18n</strong> — תמיכה באנגלית</li>
+    <li><strong>~20% ממצאי ביקורת</strong> — medium/low שנשארו</li>
+    <li><strong>Lighthouse CI</strong> — מדידת ביצועים אמיתית עם נתונים</li>
+  </ul>
+</div>
+
+<!-- WHAT'S NEW -->
+<div class="section">
+  <h2>🆕 קבצים חדשים שנוצרו</h2>
+  <div class="badge-row">
+    <span class="tag tag-a11y">src/hooks/useFocusTrap.ts</span>
+    <span class="tag tag-seo">public/robots.txt</span>
+    <span class="tag tag-seo">public/sitemap.xml</span>
+    <span class="tag tag-seo">src/app/(auth)/layout.tsx</span>
+    <span class="tag tag-dark">memory: growth_review_2026-03-23.md</span>
+    <span class="tag tag-dark">memory: feedback_trust_decisions.md</span>
+    <span class="tag tag-dark">memory: feedback_growth_review_mandatory.md</span>
+  </div>
+</div>
+
+<div class="footer">
+  נוצר אוטומטית ע״י Claude Code &bull; <a href="https://www.bayitbeseder.com" style="color:#818CF860">bayitbeseder.com</a> &bull; 23 מרץ 2026
+</div>
+
+</div>
+</body>
+</html>
