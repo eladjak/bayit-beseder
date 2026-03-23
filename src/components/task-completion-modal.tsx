@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, Camera, X, Send, Loader2 } from "lucide-react";
 import { haptic } from "@/lib/haptics";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface TaskCompletionModalProps {
   taskTitle: string;
@@ -22,6 +23,7 @@ export function TaskCompletionModal({
   onClose,
   onSubmit,
 }: TaskCompletionModalProps) {
+  const focusRef = useFocusTrap<HTMLDivElement>(isOpen, onClose);
   const [rating, setRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
   const [notes, setNotes] = useState("");
@@ -91,6 +93,7 @@ export function TaskCompletionModal({
 
           {/* Modal */}
           <motion.div
+            ref={focusRef}
             role="dialog"
             aria-modal="true"
             aria-label={`משוב על משימה: ${taskTitle}`}

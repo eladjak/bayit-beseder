@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, X } from "lucide-react";
 import { haptic } from "@/lib/haptics";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface AchievementUnlockProps {
   visible: boolean;
@@ -20,6 +21,7 @@ export function AchievementUnlock({
   icon,
   onDismiss,
 }: AchievementUnlockProps) {
+  const focusRef = useFocusTrap<HTMLDivElement>(visible, onDismiss);
   useEffect(() => {
     if (visible) {
       haptic("celebration");
@@ -45,6 +47,7 @@ export function AchievementUnlock({
           onClick={onDismiss}
         >
           <motion.div
+            ref={focusRef}
             role="dialog"
             aria-modal="true"
             aria-label="הישג חדש!"

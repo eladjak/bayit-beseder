@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Pencil, Trash2, ArrowUp, ArrowDown, Check } from "lucide-react";
 import { toast } from "sonner";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import type { TaskCategoryRow } from "@/hooks/useTaskCategories";
 
 const COLOR_OPTIONS = [
@@ -35,6 +36,7 @@ export function TaskCategoryManager({
   onReorder,
   onClose,
 }: TaskCategoryManagerProps) {
+  const focusRef = useFocusTrap<HTMLDivElement>(true, onClose);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editIcon, setEditIcon] = useState("");
@@ -98,6 +100,10 @@ export function TaskCategoryManager({
       }}
     >
       <motion.div
+        ref={focusRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="ניהול קטגוריות משימות"
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         exit={{ y: "100%" }}

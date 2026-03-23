@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
   X,
   Wand2,
@@ -83,6 +84,7 @@ export function WeeklyGeneratorModal({
   onApply,
   onReset,
 }: WeeklyGeneratorModalProps) {
+  const focusRef = useFocusTrap<HTMLDivElement>(open && !!plan, onClose);
   if (!open || !plan) return null;
 
   const totalNew = plan.reduce(
@@ -112,6 +114,10 @@ export function WeeklyGeneratorModal({
             exit={{ opacity: 0 }}
           >
             <motion.div
+              ref={focusRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="אשף תכנון שבועי"
               className="pointer-events-auto w-full max-w-lg flex flex-col bg-background rounded-t-2xl sm:rounded-2xl max-h-[92dvh] sm:max-h-[85dvh] sm:mx-4 overflow-hidden"
               initial={{ y: 40, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
