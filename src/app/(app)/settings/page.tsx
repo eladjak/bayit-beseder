@@ -298,7 +298,7 @@ export default function SettingsPage() {
     setStoredLanguage(newLang);
     toast.info(
       newLang === "en"
-        ? "English will be available soon!"
+        ? "אנגלית תהיה זמינה בקרוב!"
         : "השפה עודכנה לעברית."
     );
   }

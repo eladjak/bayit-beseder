@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertTriangle, LogOut } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, LogOut, ExternalLink } from "lucide-react";
 
 interface DangerZoneProps {
   isDemo: boolean;
@@ -42,6 +43,20 @@ export function DangerZone({ isDemo, onLogout, onClearLocalData }: DangerZonePro
               <span>עם ❤️ ו-Claude</span>
               <span className="text-foreground font-medium">בית בסדר</span>
             </div>
+          </div>
+          <div className="flex flex-wrap gap-2 mt-3">
+            <Link href="/" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+              <ExternalLink className="w-3 h-3" />דף הבית
+            </Link>
+            <Link href="/privacy" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+              מדיניות פרטיות
+            </Link>
+            <Link href="/terms" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+              תנאי שימוש
+            </Link>
+            <Link href="/contact" className="inline-flex items-center gap-1 text-xs text-primary hover:underline">
+              צור קשר
+            </Link>
           </div>
         </div>
 
