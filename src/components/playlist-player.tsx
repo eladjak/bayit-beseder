@@ -336,8 +336,8 @@ export function PlaylistPlayer({
                 <div className="h-1.5 bg-border rounded-full overflow-hidden">
                   <motion.div
                     className="h-full rounded-full"
-                    style={{ background: "var(--color-primary)" }}
-                    animate={{ width: `${progressPercent}%` }}
+                    style={{ background: "var(--color-primary)", transformOrigin: "right" }}
+                    animate={{ scaleX: progressPercent / 100 }}
                     transition={{ duration: 0.4 }}
                   />
                 </div>

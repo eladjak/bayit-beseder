@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { Check, Trash2 } from "lucide-react";
 import type { ShoppingItem as ShoppingItemType } from "@/hooks/useShoppingList";
@@ -15,7 +16,7 @@ interface ShoppingItemProps {
   categoryIcon?: string;
 }
 
-export function ShoppingItemCard({ item, onToggle, onRemove, categoryColor, categoryIcon }: ShoppingItemProps) {
+export const ShoppingItemCard = memo(function ShoppingItemCard({ item, onToggle, onRemove, categoryColor, categoryIcon }: ShoppingItemProps) {
   const borderColor = item.checked
     ? "var(--color-success)"
     : (categoryColor ?? CATEGORY_COLORS[item.category] ?? "#6B7280");
@@ -91,4 +92,4 @@ export function ShoppingItemCard({ item, onToggle, onRemove, categoryColor, cate
       </button>
     </motion.div>
   );
-}
+});

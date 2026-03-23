@@ -85,9 +85,9 @@ export function RoomConditions({
                   <div className="h-2 bg-border/30 rounded-full overflow-hidden">
                     <motion.div
                       className="h-full rounded-full"
-                      style={{ backgroundColor: barColor }}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${item.health}%` }}
+                      style={{ backgroundColor: barColor, transformOrigin: "right" }}
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: item.health / 100 }}
                       transition={{
                         duration: 0.6,
                         delay: index * 0.05,

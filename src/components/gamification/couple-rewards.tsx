@@ -145,9 +145,9 @@ function RewardCard({
         <div className="h-2 bg-border/30 rounded-full overflow-hidden">
           <motion.div
             className="h-full rounded-full"
-            style={{ backgroundColor: color }}
-            initial={{ width: 0 }}
-            animate={{ width: `${progress}%` }}
+            style={{ backgroundColor: color, transformOrigin: "right" }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: progress / 100 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: index * 0.06 }}
           />
         </div>
