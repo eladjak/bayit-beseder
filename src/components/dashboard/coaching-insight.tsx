@@ -57,7 +57,7 @@ function MiniBar({ summary, bestStyle }: MiniBarProps) {
   const maxRate = Math.max(...Array.from(byStyle.values()), 0.01);
 
   return (
-    <div className="flex items-end gap-2 h-12 mt-3" aria-label="גרף אפקטיביות לפי סגנון">
+    <div className="flex items-end gap-2 h-12 mt-3" role="img" aria-label="גרף אפקטיביות לפי סגנון">
       {STYLE_ORDER.map((style) => {
         const rate = byStyle.get(style) ?? 0;
         const heightPct = Math.round((rate / maxRate) * 100);
