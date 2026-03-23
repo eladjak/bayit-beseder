@@ -27,6 +27,7 @@ import { AppearanceSettings, WhatsAppSettings } from "@/components/settings/appe
 import { DangerZone } from "@/components/settings/danger-zone";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
+import { useTranslation } from "@/hooks/useTranslation";
 import { LayoutGrid } from "lucide-react";
 
 // ============================================
@@ -74,6 +75,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
+  const { setLocale: i18nSetLocale } = useTranslation();
   const { household, updateHousehold } = useHousehold(profile?.household_id ?? null);
 
   // Profile state
@@ -296,9 +298,11 @@ export default function SettingsPage() {
   function handleLanguageChange(newLang: Language) {
     setLanguage(newLang);
     setStoredLanguage(newLang);
+    // Sync with i18n context
+    i18nSetLocale(newLang === "en" ? "en" : "he");
     toast.info(
       newLang === "en"
-        ? "אנגלית תהיה זמינה בקרוב!"
+        ? "Language switched to English"
         : "השפה עודכנה לעברית."
     );
   }
