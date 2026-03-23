@@ -95,18 +95,26 @@ export function useSeasonalMode(): SeasonalModeReturn {
       return;
     }
 
+    let cancelled = false;
     const supabase = createClient();
     supabase
       .from("tasks")
       .select("id, status")
       .in("id", activation.taskIds)
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          console.error("[seasonal] Failed to fetch task progress:", error.message);
+          return;
+        }
         if (data) {
           const total = data.length;
           const completed = data.filter((t) => t.status === "completed").length;
           setProgress({ completed, total });
         }
       });
+
+    return () => { cancelled = true; };
   }, [activation]);
 
   const activate = useCallback(

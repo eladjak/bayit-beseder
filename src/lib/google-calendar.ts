@@ -123,17 +123,16 @@ export async function exchangeCodeForTokens(
   });
 
   if (!res.ok) {
-    const text = await res.text();
+    const text = await res.text().catch(() => "unknown");
     throw new Error(`Token exchange failed: ${res.status} ${text}`);
   }
 
-  const data = (await res.json()) as {
-    access_token: string;
-    refresh_token?: string;
-    expires_in: number;
-    token_type: string;
-    scope: string;
-  };
+  let data: { access_token: string; refresh_token?: string; expires_in: number; token_type: string; scope: string };
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error(`Invalid JSON from Google token endpoint: ${res.status}`);
+  }
 
   if (!data.refresh_token) {
     throw new Error(
@@ -171,17 +170,16 @@ export async function refreshAccessToken(
   });
 
   if (!res.ok) {
-    const text = await res.text();
+    const text = await res.text().catch(() => "unknown");
     throw new Error(`Token refresh failed: ${res.status} ${text}`);
   }
 
-  const data = (await res.json()) as {
-    access_token: string;
-    expires_in: number;
-    token_type: string;
-    scope: string;
-    refresh_token?: string;
-  };
+  let data: { access_token: string; expires_in: number; token_type: string; scope: string; refresh_token?: string };
+  try {
+    data = await res.json();
+  } catch {
+    throw new Error(`Invalid JSON from Google refresh endpoint: ${res.status}`);
+  }
 
   return {
     ...tokens,

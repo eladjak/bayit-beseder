@@ -203,7 +203,7 @@ export function TaskCategoryManager({
                       <button
                         onClick={() => moveUp(index)}
                         disabled={index === 0}
-                        className="p-1.5 rounded-lg hover:bg-surface-hover text-muted disabled:opacity-30"
+                        className="p-2 rounded-lg hover:bg-surface-hover text-muted disabled:opacity-30 min-w-[36px] min-h-[36px] flex items-center justify-center"
                         aria-label="הזז למעלה"
                       >
                         <ArrowUp className="w-3.5 h-3.5" />
@@ -211,14 +211,14 @@ export function TaskCategoryManager({
                       <button
                         onClick={() => moveDown(index)}
                         disabled={index === categories.length - 1}
-                        className="p-1.5 rounded-lg hover:bg-surface-hover text-muted disabled:opacity-30"
+                        className="p-2 rounded-lg hover:bg-surface-hover text-muted disabled:opacity-30 min-w-[36px] min-h-[36px] flex items-center justify-center"
                         aria-label="הזז למטה"
                       >
                         <ArrowDown className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => startEdit(cat)}
-                        className="p-1.5 rounded-lg hover:bg-surface-hover text-muted"
+                        className="p-2 rounded-lg hover:bg-surface-hover text-muted min-w-[36px] min-h-[36px] flex items-center justify-center"
                         aria-label="ערוך קטגוריה"
                       >
                         <Pencil className="w-3.5 h-3.5" />
