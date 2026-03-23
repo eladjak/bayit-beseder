@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>תיקון Google OAuth — בית בסדר</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Heebo',sans-serif;background:#0a0918;color:#e0def4;padding:24px;line-height:1.8}
+.c{max-width:700px;margin:0 auto}
+h1{font-size:1.6rem;font-weight:800;color:#EF4444;margin-bottom:16px}
+h2{font-size:1.1rem;font-weight:700;color:#818CF8;margin:24px 0 12px}
+.box{background:#1a1730;border-radius:16px;padding:20px;border:1px solid #2d2a45;margin:16px 0}
+.error{background:#EF444415;border:1px solid #EF444440;border-radius:12px;padding:16px;margin:12px 0}
+.error h3{color:#EF4444;font-size:0.9rem;margin-bottom:6px}
+.step{display:flex;gap:12px;margin:12px 0;align-items:flex-start}
+.num{width:32px;height:32px;border-radius:50%;background:#818CF820;color:#818CF8;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.step-content{flex:1;font-size:0.9rem}
+code{background:#2d2a45;padding:2px 8px;border-radius:6px;font-size:0.8rem;color:#22C55E;direction:ltr;display:inline-block}
+.copy-btn{background:#6366F1;color:white;border:none;padding:6px 16px;border-radius:10px;font-family:'Heebo';font-size:0.8rem;cursor:pointer;margin-top:6px}
+.copy-btn:hover{background:#4F46E5}
+.important{background:#F59E0B15;border:1px solid #F59E0B40;border-radius:12px;padding:16px;margin:16px 0}
+.important h3{color:#F59E0B;margin-bottom:6px}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>תיקון שגיאת Google OAuth</h1>
+<p>שגיאה: <code>redirect_uri_mismatch (400)</code></p>
+
+<div class="error">
+<h3>מה קרה?</h3>
+<p>Google לא מכיר את ה-Supabase callback URL כ-redirect URI מורשה. צריך להוסיף אותו ב-Google Cloud Console.</p>
+</div>
+
+<h2>שלבים לתיקון</h2>
+
+<div class="box">
+<div class="step">
+<div class="num">1</div>
+<div class="step-content">
+<strong>פתח את Google Cloud Console:</strong><br>
+<a href="https://console.cloud.google.com/apis/credentials" target="_blank" style="color:#818CF8">console.cloud.google.com/apis/credentials</a>
+</div>
+</div>
+
+<div class="step">
+<div class="num">2</div>
+<div class="step-content">
+<strong>בחר את הפרויקט</strong> שבו הגדרת את OAuth Client (כנראה "kidushishi" או "bayit-beseder")
+</div>
+</div>
+
+<div class="step">
+<div class="num">3</div>
+<div class="step-content">
+<strong>לחץ על OAuth 2.0 Client ID</strong> הקיים (מסוג "Web application")
+</div>
+</div>
+
+<div class="step">
+<div class="num">4</div>
+<div class="step-content">
+<strong>בסעיף "Authorized redirect URIs"</strong> — ודא שה-URIs הבאים קיימים:<br><br>
+<code>https://uqumzjmyejlhoyliyesu.supabase.co/auth/v1/callback</code>
+<button class="copy-btn" onclick="navigator.clipboard.writeText('https://uqumzjmyejlhoyliyesu.supabase.co/auth/v1/callback')">העתק</button>
+<br><br>
+וגם (לפיתוח מקומי):<br>
+<code>http://localhost:3000/callback</code>
+<button class="copy-btn" onclick="navigator.clipboard.writeText('http://localhost:3000/callback')">העתק</button>
+</div>
+</div>
+
+<div class="step">
+<div class="num">5</div>
+<div class="step-content">
+<strong>בסעיף "Authorized JavaScript origins"</strong> — ודא:<br><br>
+<code>https://www.bayitbeseder.com</code>
+<button class="copy-btn" onclick="navigator.clipboard.writeText('https://www.bayitbeseder.com')">העתק</button>
+<br><br>
+<code>https://uqumzjmyejlhoyliyesu.supabase.co</code>
+<button class="copy-btn" onclick="navigator.clipboard.writeText('https://uqumzjmyejlhoyliyesu.supabase.co')">העתק</button>
+</div>
+</div>
+
+<div class="step">
+<div class="num">6</div>
+<div class="step-content">
+<strong>לחץ Save</strong> — זה עשוי לקחת כמה דקות להתעדכן
+</div>
+</div>
+</div>
+
+<div class="important">
+<h3>חשוב: בדוק גם ב-Supabase Dashboard</h3>
+<p>ב-<a href="https://supabase.com/dashboard/project/uqumzjmyejlhoyliyesu/auth/providers" target="_blank" style="color:#F59E0B">Supabase Dashboard → Auth → Providers → Google</a>:</p>
+<ul style="padding-right:20px;font-size:0.9rem">
+<li>ודא ש-Client ID ו-Client Secret מעודכנים</li>
+<li>ודא ש-"Site URL" הוא <code>https://www.bayitbeseder.com</code></li>
+<li>ודא ש-"Redirect URLs" כולל <code>https://www.bayitbeseder.com/callback</code></li>
+</ul>
+</div>
+
+<h2>למה זה קורה?</h2>
+<div class="box" style="font-size:0.85rem">
+<p>Supabase OAuth flow:</p>
+<p>1. האפליקציה שלך → Google (login)</p>
+<p>2. Google → <strong>Supabase callback</strong> (uqumzjmyejlhoyliyesu.supabase.co/auth/v1/callback)</p>
+<p>3. Supabase → <strong>האפליקציה שלך</strong> (bayitbeseder.com/callback)</p>
+<p><br>Google צריך לדעת על שלב 2 — ה-Supabase URL. בלי זה → <code>redirect_uri_mismatch</code></p>
+</div>
+
+</div>
+</body>
+</html>
