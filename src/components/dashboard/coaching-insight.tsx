@@ -71,10 +71,10 @@ function MiniBar({ summary, bestStyle }: MiniBarProps) {
             <span className="text-[9px] text-muted leading-none">{pct}%</span>
             <motion.div
               className={`w-full rounded-t-sm transition-all ${STYLE_COLORS[style]} ${isBest ? "ring-2 ring-offset-1 ring-primary" : "opacity-70"}`}
-              initial={{ height: 0 }}
-              animate={{ height: `${Math.max(heightPct, 4)}%` }}
+              initial={{ scaleY: 0 }}
+              animate={{ scaleY: 1 }}
               transition={{ duration: 0.5, delay: STYLE_ORDER.indexOf(style) * 0.08 }}
-              style={{ minHeight: 4 }}
+              style={{ height: `${Math.max(heightPct, 4)}%`, minHeight: 4, transformOrigin: "bottom" }}
               title={`${label}: ${pct}%`}
             />
             <span className="text-[9px] text-muted leading-none" aria-hidden>
@@ -115,8 +115,15 @@ export function CoachingInsight() {
     };
   }, []);
 
-  // Don't render while loading
-  if (loading) return null;
+  // Show skeleton while loading
+  if (loading) {
+    return (
+      <div className="rounded-2xl bg-card border border-border p-4 shadow-sm animate-pulse" dir="rtl">
+        <div className="h-4 w-32 bg-border/50 rounded mb-3" />
+        <div className="h-20 bg-border/30 rounded" />
+      </div>
+    );
+  }
 
   // Onboarding card when there's no coaching data yet (cold start)
   if (!data || !data.hasData) {
