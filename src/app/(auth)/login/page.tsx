@@ -132,7 +132,7 @@ function LoginContent() {
         </div>
 
         {/* Glass Card */}
-        <div className="w-full rounded-2xl bg-white/90 dark:bg-surface/95 backdrop-blur-xl p-6 shadow-xl shadow-black/10 dark:shadow-black/40 border border-white/50 dark:border-[#2d2a45] space-y-4">
+        <div className="w-full rounded-2xl bg-white/90 dark:bg-surface/95 backdrop-blur-xl p-6 shadow-xl shadow-black/10 dark:shadow-black/40 border border-white/50 dark:border-border space-y-4">
           {/* Error / Success Messages */}
           {errorParam === "auth" && (
             <div className="w-full bg-danger/10 border border-danger/20 text-danger text-sm rounded-xl px-4 py-3 text-center">
