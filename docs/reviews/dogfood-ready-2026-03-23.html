@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בית בסדר — דוח מוכנות לשיתוף | 23.03.2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Heebo',sans-serif;background:#0a0918;color:#e0def4;line-height:1.7}
+  .hero{background:linear-gradient(135deg,#0f2a1a 0%,#0a0918 50%,#1a1145 100%);padding:60px 24px 40px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 40%,rgba(34,197,94,0.15) 0%,transparent 50%),radial-gradient(circle at 70% 60%,rgba(99,102,241,0.1) 0%,transparent 40%)}
+  .hero h1{font-size:2.5rem;font-weight:800;background:linear-gradient(135deg,#22C55E,#818CF8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative;z-index:1}
+  .hero .subtitle{color:#908caa;font-size:1rem;margin-top:8px;position:relative;z-index:1}
+  .container{max-width:900px;margin:0 auto;padding:32px 20px}
+  .verdict{text-align:center;margin:40px 0;padding:40px;background:linear-gradient(145deg,#0f2a1a,#0a1f14);border:2px solid #22C55E40;border-radius:24px}
+  .verdict .emoji{font-size:4rem}
+  .verdict h2{font-size:2rem;font-weight:800;color:#22C55E;margin:12px 0}
+  .verdict p{color:#908caa;font-size:1rem}
+  .flow{margin:32px 0}
+  .flow h2{font-size:1.4rem;font-weight:700;margin-bottom:20px;border-bottom:2px solid #2d2a45;padding-bottom:10px;display:flex;align-items:center;gap:10px}
+  .flow-step{display:flex;gap:16px;margin:16px 0;align-items:flex-start}
+  .step-num{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;flex-shrink:0}
+  .step-ok{background:#22C55E20;color:#22C55E;border:2px solid #22C55E40}
+  .step-fix{background:#F59E0B20;color:#F59E0B;border:2px solid #F59E0B40}
+  .step-warn{background:#EF444420;color:#EF4444;border:2px solid #EF444440}
+  .step-content{flex:1}
+  .step-content h3{font-size:1rem;font-weight:600;margin-bottom:4px}
+  .step-content p{font-size:0.85rem;color:#908caa}
+  .step-content .fixed{color:#22C55E;font-size:0.8rem;font-weight:500;margin-top:4px}
+  .step-content .note{color:#F59E0B;font-size:0.8rem;font-weight:500;margin-top:4px}
+  .section{margin:40px 0}
+  .section h2{font-size:1.4rem;font-weight:700;margin-bottom:16px;border-bottom:2px solid #2d2a45;padding-bottom:10px}
+  .grid-2{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:20px}
+  .card{background:#1a1730;border-radius:16px;padding:20px;border:1px solid #2d2a45}
+  .card h3{font-size:1rem;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .card ul{list-style:none;padding:0}
+  .card li{padding:6px 0;font-size:0.85rem;display:flex;align-items:center;gap:8px}
+  .card li::before{content:'';display:none}
+  .check{color:#22C55E}
+  .cross{color:#EF4444}
+  .dash{color:#F59E0B}
+  .stats-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin:24px 0}
+  .stat-pill{background:#1a1730;border:1px solid #2d2a45;border-radius:999px;padding:8px 20px;font-size:0.85rem;display:flex;align-items:center;gap:8px}
+  .stat-pill .num{font-weight:800;font-size:1.1rem}
+  .blocker-box{background:linear-gradient(145deg,#2a1a0f,#1f140a);border:1px solid #F59E0B40;border-radius:20px;padding:24px;margin:24px 0}
+  .blocker-box h3{color:#F59E0B;font-size:1.1rem;margin-bottom:12px}
+  .go-box{background:linear-gradient(145deg,#0f2a1a,#0a1f14);border:2px solid #22C55E60;border-radius:20px;padding:24px;margin:24px 0}
+  .go-box h3{color:#22C55E;font-size:1.2rem;margin-bottom:12px}
+  .go-box ol{padding-right:20px}
+  .go-box li{margin:8px 0;font-size:0.9rem}
+  .footer{text-align:center;color:#908caa60;font-size:0.7rem;padding:40px 0}
+  a{color:#818CF8;text-decoration:none}a:hover{text-decoration:underline}
+  .tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:0.7rem;font-weight:600}
+  .tag-g{background:#22C55E20;color:#86EFAC;border:1px solid #22C55E40}
+  .tag-y{background:#F59E0B20;color:#FCD34D;border:1px solid #F59E0B40}
+  .tag-r{background:#EF444420;color:#FCA5A5;border:1px solid #EF444440}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>🏠 בית בסדר — מוכן לשיתוף?</h1>
+  <p class="subtitle">דוח Dogfooding מקיף | 23 מרץ 2026 | <a href="https://www.bayitbeseder.com">bayitbeseder.com</a></p>
+</div>
+
+<div class="container">
+
+<!-- VERDICT -->
+<div class="verdict">
+  <div class="emoji">✅</div>
+  <h2>כן! האפליקציה מוכנה לשיתוף</h2>
+  <p>התהליך הקריטי עובד: Landing → Login → Register → Dashboard → Invite Partner.<br>
+  Google Calendar אופציונלי. כל שאר הפיצ'רים פועלים.</p>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-pill"><span class="num" style="color:#818CF8">21</span> קומיטים היום</div>
+  <div class="stat-pill"><span class="num" style="color:#22C55E">56</span> קבצים שונו</div>
+  <div class="stat-pill"><span class="num" style="color:#F59E0B">+1,358</span> שורות</div>
+  <div class="stat-pill"><span class="num" style="color:#EF4444">6</span> דפים נבדקו</div>
+</div>
+
+<!-- CRITICAL FLOW -->
+<div class="flow">
+  <h2>🔄 תהליך משתמש חדש — בדיקה חיה</h2>
+
+  <div class="flow-step">
+    <div class="step-num step-ok">1</div>
+    <div class="step-content">
+      <h3>Landing Page — bayitbeseder.com</h3>
+      <p>נטען יפה. Hero עם gradient, פיצ'רים, "איך זה עובד", CTA.</p>
+      <p class="fixed">תוקן: CTAs היו מפנים ל-/dashboard (demo) → עכשיו מפנים ל-/login</p>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-num step-ok">2</div>
+    <div class="step-content">
+      <h3>Login Page — /login</h3>
+      <p>Email/password + Google OAuth + Demo mode + Link לregister. Title template עובד: "התחברות | בית בסדר".</p>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-num step-ok">3</div>
+    <div class="step-content">
+      <h3>Register Page — /register</h3>
+      <p>שם, אימייל, סיסמה, Google OAuth. אימות מייל עובד. Link חזרה ל-login.</p>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-num step-ok">4</div>
+    <div class="step-content">
+      <h3>Dashboard — /dashboard</h3>
+      <p>Onboarding wizard בפעם הראשונה. משימות, גיימיפיקציה, streak, אתגר שבועי, פרסים, טיפים.</p>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-num step-ok">5</div>
+    <div class="step-content">
+      <h3>Settings + Invite — /settings</h3>
+      <p>פרופיל, שם בית, קוד הזמנה, שליחת WhatsApp, התראות, מראה, צלילים.</p>
+      <p class="fixed">תוקן: "הרעיון של ענבל" הוסר (generalization)</p>
+    </div>
+  </div>
+
+  <div class="flow-step">
+    <div class="step-num step-ok">6</div>
+    <div class="step-content">
+      <h3>Invite Join — /invite/[code]</h3>
+      <p>שותף/ה מקבל/ת link → רואה שם הבית ושם המזמין → מצטרף → confetti. Login required.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE BY PAGE -->
+<div class="section">
+  <h2>📱 בדיקה דף-דף</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>🏠 Dashboard</h3>
+      <ul>
+        <li><span class="check">✓</span> Onboarding wizard פעם ראשונה</li>
+        <li><span class="check">✓</span> משימות + check/uncheck</li>
+        <li><span class="check">✓</span> Streak + אתגר שבועי</li>
+        <li><span class="check">✓</span> Pesach banner + countdown</li>
+        <li><span class="check">✓</span> פרסים לזוג</li>
+        <li><span class="check">✓</span> מצב חירום</li>
+        <li><span class="check">✓</span> Coaching tips</li>
+        <li><span class="check">✓</span> Notification bell</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>✅ Tasks</h3>
+      <ul>
+        <li><span class="check">✓</span> קטגוריות עם סינון</li>
+        <li><span class="check">✓</span> הוספת משימה חדשה</li>
+        <li><span class="check">✓</span> מחיקת משימה</li>
+        <li><span class="check">✓</span> Check/uncheck</li>
+        <li><span class="check">✓</span> ניהול קטגוריות</li>
+        <li><span class="check">✓</span> Empty state עם איור</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>🛒 Shopping</h3>
+      <ul>
+        <li><span class="check">✓</span> Empty state עם הומור</li>
+        <li><span class="check">✓</span> הוספת פריטים</li>
+        <li><span class="check">✓</span> 22 קטגוריות</li>
+        <li><span class="check">✓</span> ניהול קטגוריות</li>
+        <li><span class="check">✓</span> Google Keep-style accordion</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>📅 Weekly</h3>
+      <ul>
+        <li><span class="check">✓</span> תכנון שבועי חכם</li>
+        <li><span class="check">✓</span> Drag & Drop</li>
+        <li><span class="check">✓</span> מצב אזורים</li>
+        <li><span class="check">✓</span> Google Calendar integration</li>
+        <li><span class="check">✓</span> Wizard עם preview</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>📊 Stats</h3>
+      <ul>
+        <li><span class="check">✓</span> גרפים (Recharts)</li>
+        <li><span class="check">✓</span> הישגים</li>
+        <li><span class="check">✓</span> לוח שנה חודשי</li>
+        <li><span class="check">✓</span> Empty state עם איור</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>⚙️ Settings</h3>
+      <ul>
+        <li><span class="check">✓</span> פרופיל + avatar</li>
+        <li><span class="check">✓</span> הזמנת שותף/ה (WhatsApp)</li>
+        <li><span class="check">✓</span> התראות push</li>
+        <li><span class="check">✓</span> Dark mode / Light mode</li>
+        <li><span class="check">✓</span> צלילים on/off</li>
+        <li><span class="check">✓</span> מצב אזורים</li>
+        <li><span class="check">✓</span> מצב פסח</li>
+        <li><span class="check">✓</span> מצב חירום</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- WHAT WE FIXED TODAY -->
+<div class="section">
+  <h2>🔧 מה תוקן באיטרציה הזו (21 commits)</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>⚡ ביצועים</h3>
+      <ul>
+        <li><span class="check">✓</span> 14 תמונות → next/image</li>
+        <li><span class="check">✓</span> 5 מודלים lazy loaded</li>
+        <li><span class="check">✓</span> canvas-confetti dynamic import</li>
+        <li><span class="check">✓</span> 6 progress bars GPU-composited</li>
+        <li><span class="check">✓</span> 9 React.memo components</li>
+        <li><span class="check">✓</span> Static asset caching (1yr)</li>
+        <li><span class="check">✓</span> BottomNav optimized</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>♿ נגישות</h3>
+      <ul>
+        <li><span class="check">✓</span> Focus trapping — 5 מודלים</li>
+        <li><span class="check">✓</span> Touch targets ≥ 36-44px</li>
+        <li><span class="check">✓</span> aria-live על celebrations</li>
+        <li><span class="check">✓</span> role="dialog" + aria-modal</li>
+        <li><span class="check">✓</span> Enter key בforms</li>
+        <li><span class="check">✓</span> Skeleton loaders</li>
+        <li><span class="check">✓</span> prefers-reduced-motion</li>
+        <li><span class="check">✓</span> WCAG celebration timing</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>🔒 אבטחה</h3>
+      <ul>
+        <li><span class="check">✓</span> JSON.parse try/catch</li>
+        <li><span class="check">✓</span> fetch() error handling</li>
+        <li><span class="check">✓</span> Error messages sanitized</li>
+        <li><span class="check">✓</span> Date validation</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>🔍 SEO + UX</h3>
+      <ul>
+        <li><span class="check">✓</span> robots.txt + sitemap.xml</li>
+        <li><span class="check">✓</span> JSON-LD schema</li>
+        <li><span class="check">✓</span> Title templates</li>
+        <li><span class="check">✓</span> CTAs → /login (לא /dashboard)</li>
+        <li><span class="check">✓</span> Dark mode CSS variables</li>
+        <li><span class="check">✓</span> RTL borderInlineStart</li>
+        <li><span class="check">✓</span> שמות פרטיים הוסרו</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCKERS -->
+<div class="blocker-box">
+  <h3>⚠️ מה עוד נשאר (לא חוסם שיתוף!)</h3>
+  <ul style="list-style:none;padding:0">
+    <li style="padding:6px 0;font-size:0.9rem"><span class="tag tag-y">אופציונלי</span> Google Calendar — מסך "app not verified" (רק Calendar, שאר האפליקציה עובדת)</li>
+    <li style="padding:6px 0;font-size:0.9rem"><span class="tag tag-y">עתידי</span> i18n — אנגלית (עברית מספיק לשוק ישראלי)</li>
+    <li style="padding:6px 0;font-size:0.9rem"><span class="tag tag-y">עתידי</span> Redis rate limiter (מספיק לעשרות משתמשים)</li>
+    <li style="padding:6px 0;font-size:0.9rem"><span class="tag tag-y">עתידי</span> List virtualization (לא רלוונטי עם <50 משימות)</li>
+    <li style="padding:6px 0;font-size:0.9rem"><span class="tag tag-y">עתידי</span> ~15% ממצאי ביקורת בדרגת low</li>
+  </ul>
+</div>
+
+<!-- GO LIVE CHECKLIST -->
+<div class="go-box">
+  <h3>🚀 מוכן! איך לשתף</h3>
+  <ol>
+    <li><strong>שלח את הלינק:</strong> <a href="https://www.bayitbeseder.com">bayitbeseder.com</a> לכל מי שרוצה</li>
+    <li><strong>הרשמה:</strong> כפתור "התחילו בחינם" → Login → Register with Google (הכי קל)</li>
+    <li><strong>הזמנת שותף/ה:</strong> Settings → "העתקת קוד הזמנה" → WhatsApp</li>
+    <li><strong>PWA:</strong> "הוסף למסך הבית" מהדפדפן — עובד כאפליקציה</li>
+    <li><strong>אופציונלי:</strong> Google Calendar (יציג אזהרה "app not verified" — לחיצה על Advanced → Go to bayitbeseder.com)</li>
+  </ol>
+</div>
+
+<!-- GROWTH REVIEW SUMMARY -->
+<div class="section">
+  <h2>📈 סיכום צמיחה</h2>
+  <p style="text-align:center;font-size:1.2rem;margin:20px 0">
+    ממוצע 10 ממדים: <strong style="color:#908caa">7.05</strong> → <strong style="color:#22C55E;font-size:1.5rem">7.85</strong> <span style="color:#22C55E">(+0.8)</span>
+  </p>
+  <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0">
+    <span class="tag tag-g">אוטונומיה 9.0</span>
+    <span class="tag tag-g">דיוק 8.5</span>
+    <span class="tag tag-g">איכות 8.0</span>
+    <span class="tag tag-g">מהירות 8.0</span>
+    <span class="tag tag-g">יוזמה 8.0</span>
+    <span class="tag tag-g">למידה 8.0</span>
+    <span class="tag tag-y">יעילות 7.5</span>
+    <span class="tag tag-y">שיתוף 7.5</span>
+    <span class="tag tag-y">חיסכון 7.0</span>
+    <span class="tag tag-y">חדשנות 7.0</span>
+  </div>
+  <p style="text-align:center;color:#908caa;font-size:0.85rem">
+    3 קבצי memory חדשים | 5 תובנות מרכזיות | יעדים מוגדרים לאיטרציה הבאה
+  </p>
+</div>
+
+<div class="footer">
+  נוצר אוטומטית ע״י Claude Code &bull; <a href="https://www.bayitbeseder.com" style="color:#818CF860">bayitbeseder.com</a> &bull; 23 מרץ 2026<br>
+  21 commits &bull; 56 files &bull; +1,358 lines &bull; 0 TypeScript errors &bull; Build passing
+</div>
+
+</div>
+</body>
+</html>

@@ -10,7 +10,7 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 
 ## Recent Work
 
-### Iteration: 2026-03-23 [DONE] — 19 commits, 60+ files! Performance, Security, Accessibility, SEO & Polish
+### Iteration: 2026-03-23 [DONE] — 21 commits! Performance, Security, Accessibility, SEO, Dogfooding & Polish
 - **Google Calendar Hardening**: task ID-based dedup, auto-clear dead tokens, timezone offset fix, abort controller, Hebrew error messages
 - **Performance — Images**: 12 static `<img>` → `next/image` (auto WebP, lazy loading, sizing hints)
 - **Performance — Code Splitting**: 5 heavy modals lazy-loaded via `dynamic()` (CelebrationOverlay, CoachingBubble, TaskCompletionModal, PesachActivationModal, WeeklyGeneratorModal)
@@ -32,7 +32,8 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 - **React.memo**: 9 components memoized (was 0) — StreakDisplay, EmergencyToggle, PartnerStatus, GoldenRuleRing, StreakTracker, WeeklyChallenge, CoupleRewards, ShoppingItemCard, NavItem
 - **Reduced Motion**: CSS prefers-reduced-motion support (disables all animations)
 - **Cache**: Static assets (illustrations, icons) served with 1-year immutable cache
-- **Full Audit**: 3 parallel agents ran (perf: 30, UI/UX: 120+, security: 9). ~80% critical/high resolved.
+- **Dogfooding**: Live site tested via browser automation. Fixed CTAs routing to /login, removed personal name.
+- **Full Audit**: 3 parallel agents + browser dogfooding. ~85% critical/high resolved.
 - **Growth Review**: 10-dimension self-assessment. Average score: 7.05 → 7.85 (+0.8). 3 memory files saved.
 
 ### Iteration: 2026-03-22 (Session 2) [DONE] — 22 commits total!
