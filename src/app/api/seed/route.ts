@@ -50,6 +50,11 @@ export async function POST(request: NextRequest) {
     .select("id, name");
 
   const catMap: Record<string, string> = {};
+  const catNameMap: Record<string, string> = {
+    kitchen: "מטבח", bathroom: "אמבטיה", living: "סלון",
+    bedroom: "חדר שינה", laundry: "כביסה", general: "כללי",
+    outdoor: "חוץ", pets: "חיות מחמד", kids: "ילדים",
+  };
   for (const c of categories || []) {
     catMap[c.name] = c.id;
   }
@@ -57,27 +62,38 @@ export async function POST(request: NextRequest) {
   const today = new Date().toISOString().slice(0, 10);
   const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
 
-  const tasks = [
-    // Today - Kitchen
-    { title: "שטיפת כלים / הפעלת מדיח", category_id: catMap["מטבח"], assigned_to: user.id, due_date: today, points: 10, recurring: true },
-    { title: "ניקוי משטחי עבודה במטבח", category_id: catMap["מטבח"], assigned_to: user.id, due_date: today, points: 5, recurring: true },
-    { title: "הוצאת אשפה", category_id: catMap["מטבח"], due_date: today, points: 5, recurring: true },
-    { title: "סידור שיש ושולחן אוכל", category_id: catMap["מטבח"], due_date: today, points: 5, recurring: true },
-    // Today - Pets
-    { title: "האכלת חתולים (בוקר)", category_id: catMap["חיות מחמד"], assigned_to: user.id, due_date: today, points: 5, recurring: true },
-    { title: "האכלת חתולים (ערב)", category_id: catMap["חיות מחמד"], due_date: today, points: 5, recurring: true },
-    { title: "מים טריים לחתולים", category_id: catMap["חיות מחמד"], due_date: today, points: 3, recurring: true },
-    { title: "ניקוי ארגז חול", category_id: catMap["חיות מחמד"], due_date: today, points: 10, recurring: true },
-    // Today - Other
-    { title: "סידור מהיר של הסלון", category_id: catMap["סלון"], due_date: today, points: 5, recurring: true },
-    { title: "איוורור הבית (פתיחת חלונות)", category_id: catMap["כללי"], due_date: today, points: 2, recurring: true },
-    { title: "ניקוי כיור אמבטיה", category_id: catMap["אמבטיה"], due_date: today, points: 8, recurring: true },
-    // Tomorrow
-    { title: "כביסה - מכונה + תליה", category_id: catMap["כביסה"], due_date: tomorrow, points: 15, recurring: true },
-    { title: "שאיבת אבק סלון וחדרים", category_id: catMap["סלון"], due_date: tomorrow, points: 15, recurring: true },
-    { title: "החלפת מצעים", category_id: catMap["חדר שינה"], due_date: tomorrow, points: 15, recurring: true },
-    { title: "ניקוי מקלחת", category_id: catMap["אמבטיה"], due_date: tomorrow, points: 15, recurring: true },
-  ];
+  // Check if custom tasks were sent from the wizard
+  let body: { tasks?: { title: string; category: string; estimatedMinutes: number; recurring: boolean; frequency: string }[] } = {};
+  try {
+    body = await request.json();
+  } catch {
+    // No body — use default tasks
+  }
+
+  let tasks;
+  if (body.tasks && Array.isArray(body.tasks) && body.tasks.length > 0) {
+    // Custom tasks from wizard
+    tasks = body.tasks.map((t, i) => ({
+      title: t.title,
+      category_id: catMap[catNameMap[t.category] ?? "כללי"] ?? catMap["כללי"],
+      assigned_to: user.id,
+      due_date: i < Math.ceil(body.tasks!.length / 2) ? today : tomorrow,
+      points: Math.max(Math.round(t.estimatedMinutes / 2), 3),
+      recurring: t.recurring,
+    }));
+  } else {
+    // Default tasks (fallback when user skips wizard)
+    tasks = [
+      { title: "שטיפת כלים / הפעלת מדיח", category_id: catMap["מטבח"], assigned_to: user.id, due_date: today, points: 10, recurring: true },
+      { title: "ניקוי משטחי עבודה במטבח", category_id: catMap["מטבח"], assigned_to: user.id, due_date: today, points: 5, recurring: true },
+      { title: "הוצאת אשפה", category_id: catMap["מטבח"], due_date: today, points: 5, recurring: true },
+      { title: "סידור מהיר של הסלון", category_id: catMap["סלון"], due_date: today, points: 5, recurring: true },
+      { title: "איוורור הבית (פתיחת חלונות)", category_id: catMap["כללי"], due_date: today, points: 2, recurring: true },
+      { title: "ניקוי כיור אמבטיה", category_id: catMap["אמבטיה"], due_date: today, points: 8, recurring: true },
+      { title: "כביסה - מכונה + תליה", category_id: catMap["כביסה"], due_date: tomorrow, points: 15, recurring: true },
+      { title: "שאיבת אבק", category_id: catMap["סלון"], due_date: tomorrow, points: 15, recurring: true },
+    ];
+  }
 
   const { error } = await supabase.from("tasks").insert(tasks);
 

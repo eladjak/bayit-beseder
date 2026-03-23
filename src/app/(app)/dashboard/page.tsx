@@ -41,6 +41,7 @@ const CelebrationOverlay = dynamic(() => import("@/components/gamification/celeb
 const CoachingBubble = dynamic(() => import("@/components/gamification/coaching-bubble").then(m => ({ default: m.CoachingBubble })), { ssr: false });
 const TaskCompletionModal = dynamic(() => import("@/components/task-completion-modal").then(m => ({ default: m.TaskCompletionModal })), { ssr: false });
 const PesachActivationModal = dynamic(() => import("@/components/seasonal/pesach-activation-modal").then(m => ({ default: m.PesachActivationModal })), { ssr: false });
+const TaskSetupWizard = dynamic(() => import("@/components/onboarding/task-setup-wizard").then(m => ({ default: m.TaskSetupWizard })), { ssr: false });
 import { useHousehold } from "@/hooks/useHousehold";
 
 // ============================================
@@ -129,22 +130,46 @@ export default function DashboardPage() {
   const seasonalMode = useSeasonalMode();
   const [showSeasonalModal, setShowSeasonalModal] = useState(false);
 
-  // ---- Auto-seed tasks for authenticated users on first visit ----
+  // ---- Task Setup Wizard for new authenticated users ----
+  const [showTaskWizard, setShowTaskWizard] = useState(false);
   const seedAttempted = useRef(false);
   useEffect(() => {
     if (seedAttempted.current || tasksLoading || dbTasks.length > 0 || !profile) return;
     seedAttempted.current = true;
-    fetch("/api/seed", { method: "POST" })
-      .then((res) => res.json())
-      .then((data) => {
+    // Show task setup wizard instead of auto-seeding hardcoded tasks
+    setShowTaskWizard(true);
+  }, [tasksLoading, dbTasks.length, profile]);
+
+  const handleWizardComplete = useCallback(
+    async (selectedTasks: { title: string; category: string; estimatedMinutes: number; recurring: boolean; frequency: string }[]) => {
+      setShowTaskWizard(false);
+      if (!profile) return;
+      try {
+        const res = await fetch("/api/seed", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tasks: selectedTasks }),
+        });
+        const data = await res.json();
         if (data.seeded) {
           refetchTasks();
+          toast.success(`${selectedTasks.length} משימות נוצרו בהצלחה!`);
         }
-      })
-      .catch(() => {
-        // Seed failed - will use mock data fallback
-      });
-  }, [tasksLoading, dbTasks.length, profile, refetchTasks]);
+      } catch {
+        toast.error("שגיאה ביצירת המשימות. נסו שוב.");
+      }
+    },
+    [profile, refetchTasks]
+  );
+
+  const handleWizardSkip = useCallback(() => {
+    setShowTaskWizard(false);
+    // Fall back to default seed
+    fetch("/api/seed", { method: "POST" })
+      .then((res) => res.json())
+      .then((data) => { if (data.seeded) refetchTasks(); })
+      .catch(() => {});
+  }, [refetchTasks]);
 
   const hasDbTasks = !tasksLoading && dbTasks.length > 0;
 
@@ -503,6 +528,13 @@ export default function DashboardPage() {
           onDeactivate={seasonalMode.deactivate}
         />
       )}
+
+      {/* Task setup wizard for new users */}
+      <TaskSetupWizard
+        open={showTaskWizard}
+        onComplete={handleWizardComplete}
+        onSkip={handleWizardSkip}
+      />
     </div>
   );
 }
