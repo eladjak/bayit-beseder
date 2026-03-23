@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "home": "ראשי",
+    "tasks": "משימות",
+    "shopping": "קניות",
+    "weekly": "שבועי",
+    "stats": "סטטיסטיקה",
+    "settings": "הגדרות"
+  },
+  "settings": {
+    "title": "הגדרות",
+    "profile": "פרופיל",
+    "household": "בית",
+    "notifications": "התראות",
+    "sounds": "צלילים",
+    "appearance": "מראה",
+    "language": "שפה",
+    "about": "אודות"
+  },
+  "common": {
+    "save": "שמירה",
+    "cancel": "ביטול",
+    "delete": "מחיקה",
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "login": "התחברות",
+    "register": "הרשמה",
+    "logout": "התנתקות"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "nav": {
+    "home": "Home",
+    "tasks": "Tasks",
+    "shopping": "Shopping",
+    "weekly": "Weekly",
+    "stats": "Stats",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "profile": "Profile",
+    "household": "Household",
+    "notifications": "Notifications",
+    "sounds": "Sounds",
+    "appearance": "Appearance",
+    "language": "Language",
+    "about": "About"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout"
+  }
+}
