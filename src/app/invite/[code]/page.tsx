@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Home, Loader2, UserPlus, Heart, LogIn } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { toast } from "sonner";
-import confetti from "canvas-confetti";
 
 type PageState =
   | "loading"
@@ -24,8 +23,9 @@ interface HouseholdInfo {
   inviteCode: string;
 }
 
-function fireConfetti() {
-  void confetti({
+async function fireConfetti() {
+  const { default: confetti } = await import("canvas-confetti");
+  confetti({
     particleCount: 120,
     spread: 80,
     origin: { y: 0.55 },

@@ -116,9 +116,10 @@ export function StreakTracker({
               style={{
                 background:
                   "linear-gradient(90deg, #EF4444, #F59E0B, #22C55E)",
+                transformOrigin: "right",
               }}
-              initial={{ width: 0 }}
-              animate={{ width: `${milestoneProgress}%` }}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: milestoneProgress / 100 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             />
           </div>

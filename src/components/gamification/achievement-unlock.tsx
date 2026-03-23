@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, X } from "lucide-react";
 import { haptic } from "@/lib/haptics";
@@ -24,11 +23,13 @@ export function AchievementUnlock({
   useEffect(() => {
     if (visible) {
       haptic("celebration");
-      confetti({
-        particleCount: 50,
-        spread: 80,
-        origin: { y: 0.5 },
-        colors: ["#FFD700", "#FFA500", "#4F46E5"],
+      import("canvas-confetti").then(({ default: confetti }) => {
+        confetti({
+          particleCount: 50,
+          spread: 80,
+          origin: { y: 0.5 },
+          colors: ["#FFD700", "#FFA500", "#4F46E5"],
+        });
       });
     }
   }, [visible]);

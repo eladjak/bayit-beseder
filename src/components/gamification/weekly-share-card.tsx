@@ -107,8 +107,9 @@ export function WeeklyShareCard({
         <div className="h-2 bg-white/20 rounded-full overflow-hidden mb-3">
           <motion.div
             className="h-full bg-white/80 rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${percentage}%` }}
+            style={{ transformOrigin: "right" }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: percentage / 100 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           />
         </div>

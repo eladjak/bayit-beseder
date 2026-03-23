@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
 import { haptic } from "@/lib/haptics";
@@ -30,7 +29,8 @@ export function CelebrationOverlay({
   visible,
   onDismiss,
 }: CelebrationOverlayProps) {
-  const fireConfetti = useCallback(() => {
+  const fireConfetti = useCallback(async () => {
+    const { default: confetti } = await import("canvas-confetti");
     if (type === "task") {
       confetti({
         particleCount: 30,

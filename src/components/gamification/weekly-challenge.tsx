@@ -101,9 +101,10 @@ export function WeeklyChallenge({
             className="h-full rounded-full"
             style={{
               backgroundColor: isCompleted ? "#22C55E" : "#4F46E5",
+              transformOrigin: "right",
             }}
-            initial={{ width: 0 }}
-            animate={{ width: `${progress.percentage}%` }}
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: progress.percentage / 100 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
           />
         </div>

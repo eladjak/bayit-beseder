@@ -2,7 +2,6 @@
 
 import { useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import confetti from "canvas-confetti";
 import { X, SkipForward, Pause, Play, Square } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase";
@@ -90,7 +89,8 @@ export function PlaylistPlayer({
   const completionRecordedRef = useRef(false);
 
   // Fire confetti when playlist completes
-  const fireCompletion = useCallback(() => {
+  const fireCompletion = useCallback(async () => {
+    const { default: confetti } = await import("canvas-confetti");
     const duration = 2500;
     const end = Date.now() + duration;
     const frame = () => {
