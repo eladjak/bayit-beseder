@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { createClient } from "@/lib/supabase";
+import { useSupabase } from "@/components/SupabaseProvider";
 import type { ProfileRow, ProfileUpdate } from "@/lib/types/database";
 
 interface UseProfileReturn {
@@ -17,6 +17,7 @@ interface UseProfileReturn {
  * Returns null profile (no error) when Supabase is not connected or user not logged in.
  */
 export function useProfile(): UseProfileReturn {
+  const supabase = useSupabase();
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +27,6 @@ export function useProfile(): UseProfileReturn {
     setError(null);
 
     try {
-      const supabase = createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -69,7 +69,7 @@ export function useProfile(): UseProfileReturn {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
     fetchProfile();
@@ -78,7 +78,6 @@ export function useProfile(): UseProfileReturn {
   const updateProfile = useCallback(
     async (updates: ProfileUpdate): Promise<boolean> => {
       try {
-        const supabase = createClient();
         const {
           data: { user },
         } = await supabase.auth.getUser();
@@ -135,7 +134,7 @@ export function useProfile(): UseProfileReturn {
         return false;
       }
     },
-    []
+    [supabase]
   );
 
   return { profile, loading, error, updateProfile, refetch: fetchProfile };

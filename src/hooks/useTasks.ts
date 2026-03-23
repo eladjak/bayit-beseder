@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { createClient } from "@/lib/supabase";
+import { useSupabase } from "@/components/SupabaseProvider";
 import type { TaskRow, TaskInsert, TaskUpdate } from "@/lib/types/database";
 
 interface UseTasksOptions {
@@ -32,6 +32,7 @@ interface UseTasksReturn {
  * Returns empty array (no error) when Supabase is not connected or table doesn't exist.
  */
 export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
+  const supabase = useSupabase();
   const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,8 +46,6 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
     setError(null);
 
     try {
-      const supabase = createClient();
-
       let query = supabase.from("tasks").select("*");
 
       if (options.assignedTo) {
@@ -81,7 +80,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
       setLoading(false);
       initialLoadDone.current = true;
     }
-  }, [options.assignedTo, options.status, options.dueDate, options.categoryId]);
+  }, [supabase, options.assignedTo, options.status, options.dueDate, options.categoryId]);
 
   useEffect(() => {
     fetchTasks();
@@ -92,7 +91,6 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
     if (!options.realtime) return;
 
     try {
-      const supabase = createClient();
       const channel = supabase
         .channel("tasks-realtime")
         .on(
@@ -121,12 +119,11 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
     } catch {
       // Realtime not available - silently ignore
     }
-  }, [options.realtime]);
+  }, [supabase, options.realtime]);
 
   const createTask = useCallback(
     async (task: TaskInsert): Promise<TaskRow | null> => {
       try {
-        const supabase = createClient();
         const { data, error: insertError } = await supabase
           .from("tasks")
           .insert(task)
@@ -146,13 +143,12 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
         return null;
       }
     },
-    []
+    [supabase]
   );
 
   const updateTask = useCallback(
     async (id: string, updates: TaskUpdate): Promise<boolean> => {
       try {
-        const supabase = createClient();
         const { error: updateError } = await supabase
           .from("tasks")
           .update(updates)
@@ -173,13 +169,12 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
         return false;
       }
     },
-    []
+    [supabase]
   );
 
   const deleteTask = useCallback(
     async (id: string): Promise<boolean> => {
       try {
-        const supabase = createClient();
         const { error: deleteError } = await supabase
           .from("tasks")
           .delete()
@@ -197,7 +192,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
         return false;
       }
     },
-    []
+    [supabase]
   );
 
   return {

@@ -6,19 +6,22 @@ import { NotificationBanner } from "@/components/NotificationBanner";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { Onboarding } from "@/components/Onboarding";
 import { PageTransition } from "@/components/page-transition";
+import { SupabaseProvider } from "@/components/SupabaseProvider";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthGuard allowDemo={true}>
-      <div className="min-h-dvh bg-background">
-        <NotificationBanner />
-        <ServiceWorkerRegistrar />
-        <Onboarding />
-        <main className="pb-safe max-w-lg mx-auto">
-          <PageTransition>{children}</PageTransition>
-        </main>
-        <BottomNav />
-      </div>
-    </AuthGuard>
+    <SupabaseProvider>
+      <AuthGuard allowDemo={true}>
+        <div className="min-h-dvh bg-background">
+          <NotificationBanner />
+          <ServiceWorkerRegistrar />
+          <Onboarding />
+          <main className="pb-safe max-w-lg mx-auto">
+            <PageTransition>{children}</PageTransition>
+          </main>
+          <BottomNav />
+        </div>
+      </AuthGuard>
+    </SupabaseProvider>
   );
 }

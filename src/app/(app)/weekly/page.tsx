@@ -19,11 +19,13 @@ import {
   ArrowLeftRight,
   LayoutGrid,
   List,
+  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
 import { ZoneGroupCard } from "@/components/weekly/zone-group";
 import { ZoneDaySummary } from "@/components/weekly/zone-day-summary";
+import { ZoneDayPicker } from "@/components/weekly/zone-day-picker";
 import { getZoneInfo, type ZoneGroup } from "@/lib/zones";
 import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
 import { useTasks } from "@/hooks/useTasks";
@@ -188,6 +190,7 @@ export default function WeeklyPage() {
   // Weekly generator wizard
   const wizard = useWeeklyGenerator();
   const [showWizard, setShowWizard] = useState(false);
+  const [showZonePicker, setShowZonePicker] = useState(false);
 
   const handleOpenWizard = useCallback(() => {
     if (!profile) {
@@ -519,6 +522,16 @@ export default function WeeklyPage() {
                 {zoneConfig.zoneMode ? "אזורים" : "רשימה"}
               </span>
             </button>
+            {zoneConfig.zoneMode && (
+              <button
+                onClick={() => setShowZonePicker(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/30 transition-colors active:scale-95"
+                title="הגדרת אזורים"
+              >
+                <SlidersHorizontal className="w-4 h-4 text-white" />
+                <span className="text-xs font-medium text-white">הגדרת אזורים</span>
+              </button>
+            )}
             <button
               onClick={handleOpenWizard}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/30 transition-colors active:scale-95"
@@ -825,6 +838,54 @@ export default function WeeklyPage() {
         onApply={handleApplyWizard}
         onReset={wizard.reset}
       />
+
+      {/* Zone Day Picker Modal */}
+      <AnimatePresence>
+        {showZonePicker && (
+          <motion.div
+            key="zone-picker-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm px-4 pb-4"
+            onClick={() => setShowZonePicker(false)}
+          >
+            <motion.div
+              key="zone-picker-card"
+              initial={{ y: 40, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 40, opacity: 0 }}
+              transition={{ type: "spring", damping: 24, stiffness: 300 }}
+              className="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 shadow-xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal header */}
+              <div className="flex items-center justify-between px-4 pt-4 pb-2">
+                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">הגדרת אזורים לימים</h2>
+                <button
+                  onClick={() => setShowZonePicker(false)}
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  aria-label="סגור"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="px-4 pb-4">
+                <ZoneDayPicker
+                  mappings={zoneConfig.zoneMappings}
+                  onChange={(updated) => {
+                    updated.forEach((m) => {
+                      if (m.preferredDays[0] !== undefined) {
+                        zoneConfig.moveZone(m.zone, m.preferredDays[0]);
+                      }
+                    });
+                  }}
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

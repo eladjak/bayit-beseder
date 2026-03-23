@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { createClient } from "@/lib/supabase";
+import { useSupabase } from "@/components/SupabaseProvider";
 import type {
   TaskCompletionRow,
   TaskCompletionInsert,
@@ -51,6 +51,7 @@ interface UseCompletionsReturn {
 export function useCompletions(
   options: UseCompletionsOptions = {}
 ): UseCompletionsReturn {
+  const supabase = useSupabase();
   const [completions, setCompletions] = useState<TaskCompletionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +61,6 @@ export function useCompletions(
     setError(null);
 
     try {
-      const supabase = createClient();
       let query = supabase
         .from("task_completions")
         .select("*")
@@ -90,7 +90,7 @@ export function useCompletions(
     } finally {
       setLoading(false);
     }
-  }, [options.taskId, options.userId, options.limit]);
+  }, [supabase, options.taskId, options.userId, options.limit]);
 
   useEffect(() => {
     fetchCompletions();
@@ -137,8 +137,6 @@ export function useCompletions(
       recurring?: boolean;
     }): Promise<TaskCompletionRow | null> => {
       try {
-        const supabase = createClient();
-
         const insertion: TaskCompletionInsert = {
           task_id: params.taskId,
           user_id: params.userId,
@@ -182,13 +180,12 @@ export function useCompletions(
         return null;
       }
     },
-    []
+    [supabase]
   );
 
   const getHistory = useCallback(
     async (taskId: string): Promise<TaskCompletionRow[]> => {
       try {
-        const supabase = createClient();
         const { data, error: fetchError } = await supabase
           .from("task_completions")
           .select("*")
@@ -205,7 +202,7 @@ export function useCompletions(
         return [];
       }
     },
-    []
+    [supabase]
   );
 
   return {

@@ -15,7 +15,15 @@
     "sounds": "Sounds",
     "appearance": "Appearance",
     "language": "Language",
-    "about": "About"
+    "about": "About",
+    "emergency": "Emergency Mode",
+    "zones": "Zone Scheduling",
+    "seasonal": "Seasonal Mode",
+    "whatsapp": "WhatsApp",
+    "dangerZone": "Data Management",
+    "clearData": "Clear Local Data",
+    "version": "Version",
+    "developer": "Developed by"
   },
   "common": {
     "save": "Save",
@@ -26,6 +34,90 @@
     "success": "Success",
     "login": "Login",
     "register": "Register",
-    "logout": "Logout"
+    "logout": "Logout",
+    "back": "Back",
+    "next": "Next",
+    "skip": "Skip",
+    "done": "Done",
+    "close": "Close",
+    "add": "Add",
+    "edit": "Edit",
+    "search": "Search",
+    "noData": "No data",
+    "retry": "Try again",
+    "yes": "Yes",
+    "no": "No",
+    "free": "Free"
+  },
+  "dashboard": {
+    "goodMorning": "Good morning",
+    "goodAfternoon": "Good afternoon",
+    "goodEvening": "Good evening",
+    "tasksToday": "Today's tasks",
+    "completed": "Completed",
+    "streak": "Day streak",
+    "bestStreak": "Best",
+    "weeklyChallenge": "Weekly challenge",
+    "rewards": "Our rewards",
+    "goldenRule": "Golden Rule",
+    "roomHealth": "Room health",
+    "coaching": "Daily tip",
+    "emergencyMode": "Emergency Mode",
+    "allDone": "Perfect day! You completed everything together",
+    "noTasks": "House is clean! (or you haven't added tasks yet...)"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "addTask": "Add task",
+    "allCategories": "All",
+    "manageCategories": "Manage categories",
+    "markComplete": "Mark complete",
+    "deleteTask": "Delete task",
+    "noTasks": "No tasks",
+    "newTask": "New task"
+  },
+  "shopping": {
+    "title": "Shopping List",
+    "addItem": "Add item",
+    "emptyList": "List is empty",
+    "manageCategories": "Manage categories",
+    "markBought": "Mark as bought"
+  },
+  "weekly": {
+    "title": "Weekly Plan",
+    "generatePlan": "Generate plan",
+    "zoneMode": "Zone mode",
+    "calendarSync": "Calendar sync",
+    "configureZones": "Configure zones"
+  },
+  "stats": {
+    "title": "Statistics",
+    "achievements": "Achievements",
+    "weeklyTrend": "Weekly trend",
+    "categoryBreakdown": "Category breakdown",
+    "noData": "No data yet"
+  },
+  "auth": {
+    "welcome": "Welcome to Bayit BeSeder",
+    "loginTitle": "Login",
+    "registerTitle": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "fullName": "Full name",
+    "forgotPassword": "Forgot password?",
+    "loginWithGoogle": "Login with Google",
+    "registerWithGoogle": "Register with Google",
+    "demoMode": "Try demo (no registration)",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
+  },
+  "onboarding": {
+    "welcomeTitle": "Welcome to Bayit BeSeder!",
+    "step1Title": "What's in your home?",
+    "step2Title": "Which rooms to focus on?",
+    "step3Title": "How much time per day?",
+    "step4Title": "Your tasks",
+    "letsStart": "Let's go!"
   }
 }

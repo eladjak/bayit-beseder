@@ -15,7 +15,15 @@
     "sounds": "צלילים",
     "appearance": "מראה",
     "language": "שפה",
-    "about": "אודות"
+    "about": "אודות",
+    "emergency": "מצב חירום",
+    "zones": "תזמון לפי אזורים",
+    "seasonal": "מצב עונתי",
+    "whatsapp": "WhatsApp",
+    "dangerZone": "ניהול נתונים",
+    "clearData": "מחיקת נתונים מקומיים",
+    "version": "גרסה",
+    "developer": "פותח על ידי"
   },
   "common": {
     "save": "שמירה",
@@ -26,6 +34,90 @@
     "success": "הצלחה",
     "login": "התחברות",
     "register": "הרשמה",
-    "logout": "התנתקות"
+    "logout": "התנתקות",
+    "back": "חזרה",
+    "next": "הבא",
+    "skip": "דלג",
+    "done": "סיום",
+    "close": "סגירה",
+    "add": "הוספה",
+    "edit": "עריכה",
+    "search": "חיפוש",
+    "noData": "אין נתונים",
+    "retry": "נסו שוב",
+    "yes": "כן",
+    "no": "לא",
+    "free": "חינם"
+  },
+  "dashboard": {
+    "goodMorning": "בוקר טוב",
+    "goodAfternoon": "צהריים טובים",
+    "goodEvening": "ערב טוב",
+    "tasksToday": "משימות להיום",
+    "completed": "הושלם",
+    "streak": "ימים ברצף",
+    "bestStreak": "שיא",
+    "weeklyChallenge": "אתגר שבועי",
+    "rewards": "הפרסים שלנו",
+    "goldenRule": "כלל הזהב",
+    "roomHealth": "מצב החדרים",
+    "coaching": "טיפ יומי",
+    "emergencyMode": "מצב חירום",
+    "allDone": "יום מושלם! סיימתם הכל ביחד",
+    "noTasks": "הבית נקי! (או שעדיין לא הוספתם משימות...)"
+  },
+  "tasks": {
+    "title": "משימות",
+    "addTask": "הוספת משימה",
+    "allCategories": "הכל",
+    "manageCategories": "ניהול קטגוריות",
+    "markComplete": "סמן כהושלם",
+    "deleteTask": "מחיקת משימה",
+    "noTasks": "אין משימות",
+    "newTask": "משימה חדשה"
+  },
+  "shopping": {
+    "title": "רשימת קניות",
+    "addItem": "הוספת פריט",
+    "emptyList": "הרשימה ריקה",
+    "manageCategories": "ניהול קטגוריות",
+    "markBought": "סמן כנרכש"
+  },
+  "weekly": {
+    "title": "תכנון שבועי",
+    "generatePlan": "יצירת תוכנית",
+    "zoneMode": "מצב אזורים",
+    "calendarSync": "סנכרון יומן",
+    "configureZones": "הגדרת אזורים"
+  },
+  "stats": {
+    "title": "סטטיסטיקה",
+    "achievements": "הישגים",
+    "weeklyTrend": "מגמה שבועית",
+    "categoryBreakdown": "חלוקה לפי קטגוריות",
+    "noData": "עדיין אין נתונים"
+  },
+  "auth": {
+    "welcome": "ברוכים הבאים לבית בסדר",
+    "loginTitle": "התחברות",
+    "registerTitle": "הרשמה",
+    "email": "אימייל",
+    "password": "סיסמה",
+    "confirmPassword": "אימות סיסמה",
+    "fullName": "שם מלא",
+    "forgotPassword": "שכחתם סיסמה?",
+    "loginWithGoogle": "התחברות עם Google",
+    "registerWithGoogle": "הרשמה עם Google",
+    "demoMode": "כניסה במצב דמו (ללא הרשמה)",
+    "noAccount": "אין לכם חשבון?",
+    "hasAccount": "כבר יש לכם חשבון?"
+  },
+  "onboarding": {
+    "welcomeTitle": "ברוכים הבאים לבית בסדר!",
+    "step1Title": "מה יש אצלכם בבית?",
+    "step2Title": "באילו חדרים תרצו להתמקד?",
+    "step3Title": "כמה זמן יש לכם ביום?",
+    "step4Title": "המשימות שלכם",
+    "letsStart": "התחלה!"
   }
 }
