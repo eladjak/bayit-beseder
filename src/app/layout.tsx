@@ -11,7 +11,10 @@ const heebo = Heebo({
 });
 
 export const metadata: Metadata = {
-  title: "בית בסדר - ניהול תחזוקת הבית",
+  title: {
+    default: "בית בסדר - ניהול תחזוקת הבית",
+    template: "%s | בית בסדר",
+  },
   description:
     "אפליקציה לניהול תחזוקת הבית המשותף לזוגות — תכנון שבועי, גיימיפיקציה, Google Calendar ו-WhatsApp",
   manifest: "/manifest.json",
