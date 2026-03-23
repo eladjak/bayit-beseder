@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בית בסדר — דוח איטרציה 23.03.2026</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Heebo', 'Segoe UI', sans-serif; background: #0f0e17; color: #e0def4; line-height: 1.6; padding: 24px; }
+  .container { max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 2rem; background: linear-gradient(135deg, #4F46E5, #7C3AED); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+  .subtitle { color: #908caa; font-size: 0.9rem; margin-bottom: 32px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .card { background: #1a1730; border-radius: 16px; padding: 20px; border: 1px solid #2d2a45; }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .card-header .icon { font-size: 1.4rem; }
+  .card-header h3 { font-size: 0.85rem; color: #908caa; font-weight: 500; }
+  .card-value { font-size: 2rem; font-weight: 700; }
+  .card-value.green { color: #22C55E; }
+  .card-value.blue { color: #4F46E5; }
+  .card-value.amber { color: #F59E0B; }
+  .card-value.red { color: #EF4444; }
+  .section { margin-bottom: 32px; }
+  .section h2 { font-size: 1.3rem; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 1px solid #2d2a45; }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; margin: 2px; }
+  .tag-perf { background: #4F46E520; color: #818CF8; border: 1px solid #4F46E540; }
+  .tag-security { background: #EF444420; color: #FCA5A5; border: 1px solid #EF444440; }
+  .tag-ui { background: #22C55E20; color: #86EFAC; border: 1px solid #22C55E40; }
+  .tag-dark { background: #7C3AED20; color: #C4B5FD; border: 1px solid #7C3AED40; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th, td { text-align: right; padding: 10px 12px; border-bottom: 1px solid #2d2a45; font-size: 0.85rem; }
+  th { color: #908caa; font-weight: 500; }
+  .status-done { color: #22C55E; }
+  .status-remaining { color: #F59E0B; }
+  .commit-list { list-style: none; }
+  .commit-list li { padding: 8px 0; border-bottom: 1px solid #2d2a4530; font-size: 0.85rem; }
+  .commit-list li code { background: #2d2a45; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; color: #818CF8; }
+  .next-steps { background: #22C55E10; border: 1px solid #22C55E30; border-radius: 12px; padding: 16px; }
+  .next-steps h3 { color: #22C55E; margin-bottom: 8px; }
+  .next-steps ul { padding-right: 20px; font-size: 0.9rem; }
+  .questions { background: #F59E0B10; border: 1px solid #F59E0B30; border-radius: 12px; padding: 16px; }
+  .questions h3 { color: #F59E0B; margin-bottom: 8px; }
+  .audit-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .audit-card { background: #2d2a45; border-radius: 12px; padding: 14px; text-align: center; }
+  .audit-card .label { font-size: 0.75rem; color: #908caa; }
+  .audit-card .value { font-size: 1.4rem; font-weight: 700; margin-top: 4px; }
+  .progress-bar { height: 8px; background: #2d2a45; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+  .progress-fill { height: 100%; border-radius: 999px; transition: width 0.3s; }
+  a { color: #818CF8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🏠 בית בסדר — דוח איטרציה</h1>
+<p class="subtitle">23 מרץ 2026 | Sprint: ביצועים, אבטחה ופוליש | <a href="https://www.bayitbeseder.com" target="_blank">bayitbeseder.com</a></p>
+
+<!-- Status Cards -->
+<div class="grid">
+  <div class="card">
+    <div class="card-header"><span class="icon">📦</span><h3>קומיטים</h3></div>
+    <div class="card-value blue">4</div>
+    <div style="font-size:0.8rem;color:#908caa">28 קבצים שונו</div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="icon">🖼️</span><h3>תמונות אופטימיזציה</h3></div>
+    <div class="card-value green">12</div>
+    <div style="font-size:0.8rem;color:#908caa">img → next/image</div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="icon">⚡</span><h3>חיסכון Bundle</h3></div>
+    <div class="card-value amber">~130KB</div>
+    <div style="font-size:0.8rem;color:#908caa">lazy load + dynamic import</div>
+  </div>
+  <div class="card">
+    <div class="card-header"><span class="icon">🔒</span><h3>תיקוני אבטחה</h3></div>
+    <div class="card-value red">3</div>
+    <div style="font-size:0.8rem;color:#908caa">JSON.parse, error leak, validation</div>
+  </div>
+</div>
+
+<!-- What Was Done -->
+<div class="section">
+  <h2>✅ מה נעשה</h2>
+  <table>
+    <thead><tr><th>קטגוריה</th><th>שינוי</th><th>השפעה</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag tag-perf">ביצועים</span></td><td>12 תגי img → next/image</td><td>WebP אוטומטי, lazy loading, גודל מותאם</td></tr>
+      <tr><td><span class="tag tag-perf">ביצועים</span></td><td>5 מודלים כבדים → dynamic import</td><td>~100KB פחות ב-initial bundle</td></tr>
+      <tr><td><span class="tag tag-perf">ביצועים</span></td><td>canvas-confetti → dynamic import (4 קבצים)</td><td>31KB נטען רק כשיש קונפטי</td></tr>
+      <tr><td><span class="tag tag-perf">ביצועים</span></td><td>Progress bars: width → scaleX</td><td>GPU compositing, בלי layout thrashing</td></tr>
+      <tr><td><span class="tag tag-security">אבטחה</span></td><td>JSON.parse בwebhook עטוף try/catch</td><td>מניעת קריסה על input פגום</td></tr>
+      <tr><td><span class="tag tag-security">אבטחה</span></td><td>הודעות שגיאה מסוננות</td><td>לא חושף פרטי Supabase ללקוח</td></tr>
+      <tr><td><span class="tag tag-security">אבטחה</span></td><td>Date validation בcalendar API</td><td>מניעת queries עם תאריכים לא תקינים</td></tr>
+      <tr><td><span class="tag tag-dark">דארק מוד</span></td><td>8 קבצים: #1a1730 → CSS variable</td><td>עקביות, קלות תחזוקה</td></tr>
+      <tr><td><span class="tag tag-ui">UI/RTL</span></td><td>borderRight → borderInlineStart</td><td>תמיכה נכונה ב-RTL</td></tr>
+      <tr><td><span class="tag tag-ui">UI</span></td><td>NotificationCenter: max-w-[90vw]</td><td>רספונסיבי למסכים קטנים</td></tr>
+      <tr><td><span class="tag tag-ui">UI</span></td><td>Calendar: token cleanup, dedup, timezone fix</td><td>חוויה חלקה יותר עם Google Calendar</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Audit Results -->
+<div class="section">
+  <h2>📊 תוצאות ביקורת (3 סוכנים במקביל)</h2>
+  <div class="audit-summary">
+    <div class="audit-card">
+      <div class="label">ביצועים</div>
+      <div class="value" style="color:#4F46E5">30</div>
+      <div class="label">ממצאים (5 קריטיים)</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:40%;background:#4F46E5"></div></div>
+      <div class="label" style="margin-top:4px">40% טופלו</div>
+    </div>
+    <div class="audit-card">
+      <div class="label">UI/UX</div>
+      <div class="value" style="color:#22C55E">120+</div>
+      <div class="label">ממצאים (8 RTL קריטיים)</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:20%;background:#22C55E"></div></div>
+      <div class="label" style="margin-top:4px">20% טופלו</div>
+    </div>
+    <div class="audit-card">
+      <div class="label">אבטחה</div>
+      <div class="value" style="color:#EF4444">9</div>
+      <div class="label">ממצאים (ציון: B+)</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%;background:#EF4444"></div></div>
+      <div class="label" style="margin-top:4px">60% טופלו</div>
+    </div>
+  </div>
+</div>
+
+<!-- Commits -->
+<div class="section">
+  <h2>📝 קומיטים</h2>
+  <ul class="commit-list">
+    <li><code>5c6eb86</code> feat: Google Calendar hardening + landing page images + dark mode fixes</li>
+    <li><code>a94ecbb</code> perf+fix: image optimization, lazy loading, dark mode, security hardening</li>
+    <li><code>9d78aed</code> perf: dynamic import canvas-confetti + GPU-accelerated progress bars</li>
+    <li><code>ae83c82</code> fix: replace remaining hardcoded dark mode colors with CSS variables</li>
+  </ul>
+</div>
+
+<!-- Next Steps -->
+<div class="section">
+  <div class="next-steps">
+    <h3>🎯 צעדים הבאים (לפי סדר עדיפות)</h3>
+    <ul>
+      <li><strong>Focus management במודלים</strong> — 5 מודלים בלי focus trap (נגישות קריטית)</li>
+      <li><strong>Touch targets</strong> — 6 קומפוננטות עם כפתורים קטנים מ-44px</li>
+      <li><strong>List virtualization</strong> — tasks/shopping עם 100+ פריטים צריכים react-virtual</li>
+      <li><strong>Redis rate limiting</strong> — in-memory לא מחזיק בין deploys</li>
+      <li><strong>Google OAuth Verification</strong> — נדרש לשיתוף עם חברים</li>
+      <li><strong>i18n (English)</strong> — הוספת תמיכה באנגלית</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Questions -->
+<div class="section">
+  <div class="questions">
+    <h3>❓ שאלות לאלעד</h3>
+    <ul>
+      <li>האם להוסיף focus trapping לכל המודלים עכשיו? (יצריך headless UI או radix)</li>
+      <li>האם יש צורך ב-list virtualization עם הכמות הנוכחית של משימות?</li>
+      <li>עדיפות: i18n או Google OAuth verification?</li>
+      <li>האם לשדרג ל-Redis rate limiter (Upstash)?</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Tools Used -->
+<div class="section">
+  <h2>🔧 כלים שהופעלו</h2>
+  <p>
+    <span class="tag tag-perf">3 סוכנים במקביל</span>
+    <span class="tag tag-perf">TypeScript strict</span>
+    <span class="tag tag-perf">next/image</span>
+    <span class="tag tag-perf">next/dynamic</span>
+    <span class="tag tag-security">tsc --noEmit</span>
+    <span class="tag tag-security">npm run build</span>
+    <span class="tag tag-ui">Grep</span>
+    <span class="tag tag-dark">auto-memory</span>
+  </p>
+</div>
+
+<p style="text-align:center;color:#908caa;font-size:0.75rem;margin-top:40px">
+  נוצר ע״י Claude Code • bayitbeseder.com • 23 מרץ 2026
+</p>
+
+</div>
+</body>
+</html>

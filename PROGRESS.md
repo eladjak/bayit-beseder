@@ -1,7 +1,7 @@
 # BayitBeSeder (בית בסדר) - Progress
 
 ## Status: LIVE
-## Last Updated: 2026-03-22
+## Last Updated: 2026-03-23
 ## URL: https://www.bayitbeseder.com
 ## Domain: bayitbeseder.com (Namecheap → Cloudflare DNS → Vercel)
 
@@ -9,6 +9,18 @@
 App is fully functional with Pesach mode, zone-based scheduling, custom domain, security hardening, and UI facelift. Vercel auto-deploys from master.
 
 ## Recent Work
+
+### Iteration: 2026-03-23 [DONE] — Performance, Security & Polish Sprint
+- **Google Calendar Hardening**: task ID-based dedup, auto-clear dead tokens, timezone offset fix, abort controller, Hebrew error messages
+- **Performance — Images**: 12 static `<img>` → `next/image` (auto WebP, lazy loading, sizing hints)
+- **Performance — Code Splitting**: 5 heavy modals lazy-loaded via `dynamic()` (CelebrationOverlay, CoachingBubble, TaskCompletionModal, PesachActivationModal, WeeklyGeneratorModal)
+- **Performance — Bundle**: `canvas-confetti` (31KB) converted to dynamic import in all 4 files — only loaded when confetti fires
+- **Performance — Animations**: Progress bars converted from `width` animation to `scaleX` + `transformOrigin` (GPU-composited, no layout thrashing)
+- **Security**: JSON.parse wrapped in try/catch in webhook, error messages sanitized (no Supabase details leaked), date validation on calendar API
+- **Dark Mode**: All hardcoded `dark:bg-[#1a1730]` and `dark:border-[#2d2a45]` replaced with CSS variables (`dark:bg-surface`, `dark:border-border`) — 8 files fixed
+- **RTL**: Shopping item border changed from `borderRight` to `borderInlineStart`
+- **Responsive**: NotificationCenter dropdown adds `max-w-[90vw]` for small screens
+- **Landing Page**: App mockup + couple celebration illustrations added
 
 ### Iteration: 2026-03-22 (Session 2) [DONE] — 22 commits total!
 - **Custom Domain**: bayitbeseder.com live! Namecheap → Cloudflare DNS → Vercel, SSL auto, SVG favicon
