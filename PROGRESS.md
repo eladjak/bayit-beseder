@@ -10,7 +10,7 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 
 ## Recent Work
 
-### Iteration: 2026-03-23 [DONE] — 40 commits! Perf, Security, A11y, SEO, Landing, Share, Legal, Onboarding, i18n, Transitions, Zones
+### Iteration: 2026-03-23 [DONE] — 43 commits! Perf, Security, A11y, SEO, Landing, Share, Legal, Onboarding, i18n, Transitions, Zones, Supabase
 - **Google Calendar Hardening**: task ID-based dedup, auto-clear dead tokens, timezone offset fix, abort controller, Hebrew error messages
 - **Performance — Images**: 12 static `<img>` → `next/image` (auto WebP, lazy loading, sizing hints)
 - **Performance — Code Splitting**: 5 heavy modals lazy-loaded via `dynamic()` (CelebrationOverlay, CoachingBubble, TaskCompletionModal, PesachActivationModal, WeeklyGeneratorModal)
