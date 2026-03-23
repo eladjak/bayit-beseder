@@ -28,7 +28,8 @@ export function CategoryCard({
 
   return (
     <motion.button
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
       aria-label={`קטגוריה: ${label}`}
       aria-pressed={isActive}

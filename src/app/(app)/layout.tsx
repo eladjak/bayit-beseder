@@ -5,6 +5,7 @@ import { AuthGuard } from "@/components/AuthGuard";
 import { NotificationBanner } from "@/components/NotificationBanner";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { Onboarding } from "@/components/Onboarding";
+import { PageTransition } from "@/components/page-transition";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -13,7 +14,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <NotificationBanner />
         <ServiceWorkerRegistrar />
         <Onboarding />
-        <main className="pb-safe max-w-lg mx-auto">{children}</main>
+        <main className="pb-safe max-w-lg mx-auto">
+          <PageTransition>{children}</PageTransition>
+        </main>
         <BottomNav />
       </div>
     </AuthGuard>
