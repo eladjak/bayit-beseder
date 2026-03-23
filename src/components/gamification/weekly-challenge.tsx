@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { motion } from "framer-motion";
 import { Target, PartyPopper } from "lucide-react";
 import { computeWeeklyChallengeProgress } from "@/hooks/useNotifications";
@@ -24,7 +24,7 @@ function getChallengeMessage(percentage: number): string {
   return "אתגר הושלם! כל הכבוד!";
 }
 
-export function WeeklyChallenge({
+export const WeeklyChallenge = memo(function WeeklyChallenge({
   completionDates,
   today,
   target = 5,
@@ -123,4 +123,4 @@ export function WeeklyChallenge({
       )}
     </motion.div>
   );
-}
+});

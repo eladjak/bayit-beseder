@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { motion } from "framer-motion";
 import { Flame, Trophy } from "lucide-react";
 import { computeConsecutiveStreak } from "@/hooks/useNotifications";
@@ -34,7 +34,7 @@ function getNextMilestone(streak: number): number | null {
   return null;
 }
 
-export function StreakTracker({
+export const StreakTracker = memo(function StreakTracker({
   completionDates,
   today,
   bestStreak,
@@ -163,4 +163,4 @@ export function StreakTracker({
       </div>
     </div>
   );
-}
+});

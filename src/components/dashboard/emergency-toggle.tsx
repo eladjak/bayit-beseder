@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { AlertTriangle, Shield } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -8,7 +9,7 @@ interface EmergencyToggleProps {
   onToggle: () => void;
 }
 
-export function EmergencyToggle({ active, onToggle }: EmergencyToggleProps) {
+export const EmergencyToggle = memo(function EmergencyToggle({ active, onToggle }: EmergencyToggleProps) {
   return (
     <div className="space-y-2">
       {active && (
@@ -44,4 +45,4 @@ export function EmergencyToggle({ active, onToggle }: EmergencyToggleProps) {
       </button>
     </div>
   );
-}
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { motion } from "framer-motion";
 import { Gift, Lock, Sparkles } from "lucide-react";
 import type { Reward, RewardProgress } from "@/lib/rewards";
@@ -40,7 +40,7 @@ const cardVariants = {
   }),
 };
 
-export function CoupleRewards({
+export const CoupleRewards = memo(function CoupleRewards({
   rewardsProgress,
   onRewardClick,
 }: CoupleRewardsProps) {
@@ -74,7 +74,7 @@ export function CoupleRewards({
       </div>
     </div>
   );
-}
+});
 
 function RewardCard({
   item,

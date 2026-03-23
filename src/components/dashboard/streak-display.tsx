@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 
 interface StreakDisplayProps {
@@ -7,7 +8,7 @@ interface StreakDisplayProps {
   bestCount: number;
 }
 
-export function StreakDisplay({ count, bestCount }: StreakDisplayProps) {
+export const StreakDisplay = memo(function StreakDisplay({ count, bestCount }: StreakDisplayProps) {
   const fireSize = Math.min(count * 4 + 20, 48);
 
   return (
@@ -58,4 +59,4 @@ export function StreakDisplay({ count, bestCount }: StreakDisplayProps) {
       )}
     </div>
   );
-}
+});

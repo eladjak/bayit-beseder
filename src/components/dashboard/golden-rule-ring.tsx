@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 
 interface GoldenRuleRingProps {
@@ -13,7 +14,7 @@ function getColor(pct: number): string {
   return "var(--color-golden-high)";
 }
 
-export function GoldenRuleRing({
+export const GoldenRuleRing = memo(function GoldenRuleRing({
   percentage,
   target = 80,
 }: GoldenRuleRingProps) {
@@ -135,4 +136,4 @@ export function GoldenRuleRing({
       </div>
     </div>
   );
-}
+});

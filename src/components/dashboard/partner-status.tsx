@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { User } from "lucide-react";
 
@@ -11,7 +12,7 @@ interface PartnerStatusProps {
   recentTasks: string[];
 }
 
-export function PartnerStatus({
+export const PartnerStatus = memo(function PartnerStatus({
   name,
   avatarUrl,
   completedCount,
@@ -81,4 +82,4 @@ export function PartnerStatus({
       )}
     </div>
   );
-}
+});
