@@ -16,6 +16,9 @@ export const metadata: Metadata = {
     default: "בית בסדר - ניהול תחזוקת הבית",
     template: "%s | בית בסדר",
   },
+  verification: {
+    google: "X9pkJAZuvtfG0-NomU_6uv9i47aG2_apJjFAzUFle9A",
+  },
   description:
     "אפליקציה לניהול תחזוקת הבית המשותף לזוגות — תכנון שבועי, גיימיפיקציה, Google Calendar ו-WhatsApp",
   manifest: "/manifest.json",
