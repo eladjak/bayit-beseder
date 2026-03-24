@@ -43,6 +43,7 @@ export default function TasksPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [showAddForm, setShowAddForm] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskCategory, setNewTaskCategory] = useState("general");
 
@@ -370,7 +371,7 @@ export default function TasksPage() {
               </p>
             )}
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => {
                 if (hasDbTasks) {
@@ -379,13 +380,22 @@ export default function TasksPage() {
                   toast("התחברו כדי להוסיף משימות");
                 }
               }}
-              className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl gradient-primary text-white text-sm font-semibold shadow-lg shadow-primary/30 active:scale-95 transition-transform border border-white/20"
               aria-label="הוספת משימה"
             >
-              <Plus className="w-4.5 h-4.5" />
+              <Plus className="w-4 h-4" />
+              <span>הוספת משימה</span>
             </button>
-            <button className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white/70 transition-colors border border-white/10">
-              <Filter className="w-4.5 h-4.5" />
+            <button
+              onClick={() => setShowFilters((prev) => !prev)}
+              className="relative p-2 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white/70 transition-colors border border-white/10"
+              aria-label="סינון לפי קטגוריה"
+              aria-expanded={showFilters}
+            >
+              <Filter className="w-4 h-4" />
+              {activeCategory !== "all" && (
+                <span className="absolute top-1.5 left-1.5 w-2 h-2 rounded-full bg-amber-400" />
+              )}
             </button>
           </div>
         </div>
@@ -468,46 +478,59 @@ export default function TasksPage() {
         </motion.div>
       )}
 
-      {/* Category Filter Cards + gear icon */}
-      <div className="flex items-center gap-2">
-        <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-0 flex-1 scrollbar-none">
-          {/* "All" card */}
-          <CategoryCard
-            categoryKey="all"
-            label="הכל"
-            icon="📋"
-            isActive={activeCategory === "all"}
-            onClick={() => setActiveCategory("all")}
-            size="sm"
-          />
-          {/* Dynamic task categories */}
-          {taskCategories.map((tc) => {
-            const staticKey = CATEGORY_NAME_TO_KEY[tc.name];
-            return (
-              <CategoryCard
-                key={tc.id}
-                categoryKey={tc.id}
-                label={tc.name}
-                icon={tc.icon}
-                illustration={staticKey ? CATEGORY_ILLUSTRATIONS[staticKey] : undefined}
-                isActive={activeCategory === tc.id}
-                onClick={() => setActiveCategory(tc.id)}
-                size="sm"
-              />
-            );
-          })}
-        </div>
-        {/* Manage categories button */}
-        {hasDbTasks && (
-          <button
-            onClick={() => setShowCategoryManager(true)}
-            className="flex-shrink-0 p-2 rounded-xl bg-surface border border-border text-muted hover:text-foreground hover:bg-surface-hover transition-colors mb-2"
-            aria-label="ניהול קטגוריות"
+      {/* Category Filter Cards — hidden by default, toggled via Filter button in header */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            key="category-filters"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="overflow-hidden"
           >
-            <Settings className="w-4 h-4" />
-          </button>
+            <div className="flex items-center gap-2 pt-1">
+              <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-0 flex-1 scrollbar-none">
+                {/* "All" card */}
+                <CategoryCard
+                  categoryKey="all"
+                  label="הכל"
+                  icon="📋"
+                  isActive={activeCategory === "all"}
+                  onClick={() => setActiveCategory("all")}
+                  size="sm"
+                />
+                {/* Dynamic task categories */}
+                {taskCategories.map((tc) => {
+                  const staticKey = CATEGORY_NAME_TO_KEY[tc.name];
+                  return (
+                    <CategoryCard
+                      key={tc.id}
+                      categoryKey={tc.id}
+                      label={tc.name}
+                      icon={tc.icon}
+                      illustration={staticKey ? CATEGORY_ILLUSTRATIONS[staticKey] : undefined}
+                      isActive={activeCategory === tc.id}
+                      onClick={() => setActiveCategory(tc.id)}
+                      size="sm"
+                    />
+                  );
+                })}
+              </div>
+              {/* Manage categories button — only visible when filter panel is open */}
+              {hasDbTasks && (
+                <button
+                  onClick={() => setShowCategoryManager(true)}
+                  className="flex-shrink-0 p-2 rounded-xl bg-surface border border-border text-muted hover:text-foreground hover:bg-surface-hover transition-colors mb-2"
+                  aria-label="ניהול קטגוריות"
+                >
+                  <Settings className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
 
       {/* Task List */}
       <div className="space-y-2">
@@ -535,6 +558,15 @@ export default function TasksPage() {
                 ? "הוסיפו משימה חדשה להתחיל"
                 : "נסו לבחור קטגוריה אחרת"}
             </p>
+            {activeCategory === "all" && (
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl gradient-primary text-white text-sm font-semibold shadow-md shadow-primary/25 active:scale-95 transition-transform"
+              >
+                <Plus className="w-4 h-4" />
+                הוסיפו משימה ראשונה
+              </button>
+            )}
           </motion.div>
         )}
 

@@ -35,6 +35,7 @@ import { CoachingInsight } from "@/components/dashboard/coaching-insight";
 import { CoachingTips } from "@/components/dashboard/coaching-tips";
 import { PesachCountdownBanner } from "@/components/seasonal/pesach-countdown-banner";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
+import { ChevronDown } from "lucide-react";
 
 // Lazy-load components that aren't always visible (modals, overlays, coaching)
 const CelebrationOverlay = dynamic(() => import("@/components/gamification/celebration-overlay").then(m => ({ default: m.CelebrationOverlay })), { ssr: false });
@@ -216,6 +217,7 @@ export default function DashboardPage() {
     : mockTasks.map(t => ({ ...t, completed: mockCompletedIds.has(t.id) }));
 
   const [emergencyMode, setEmergencyMode] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [energyLevel, setEnergyLevel] = useState<EnergyLevel>(() => {
     if (typeof window !== "undefined") {
       return (localStorage.getItem("bayit-energy-mode") as EnergyLevel) || "all";
@@ -427,22 +429,6 @@ export default function DashboardPage() {
           />
         )}
 
-        <GoldenRuleSection percentage={percentage} target={target} loading={tasksLoading} />
-
-        <StreakDisplay count={streakCount} bestCount={bestStreak} />
-
-        <StreakTracker
-          completionDates={completionDates}
-          today={todayStr}
-          bestStreak={bestStreak}
-        />
-
-        <WeeklyChallenge
-          completionDates={completionDates}
-          today={todayStr}
-          target={5}
-        />
-
         <EnergyModeSection
           energyLevel={energyLevel}
           onToggle={cycleEnergyLevel}
@@ -455,6 +441,39 @@ export default function DashboardPage() {
         ) : (
           <TodayOverview tasks={filteredTasks} onToggle={handleToggle} />
         )}
+
+        {/* Collapsible gamification section */}
+        <div>
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="w-full flex items-center justify-between p-3 card-elevated text-sm font-medium text-foreground"
+          >
+            <span>🏆 הישגים וגיימיפיקציה</span>
+            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+          </button>
+          {showAdvanced && (
+            <div className="space-y-4 mt-2">
+              <GoldenRuleSection percentage={percentage} target={target} loading={tasksLoading} />
+
+              <StreakDisplay count={streakCount} bestCount={bestStreak} />
+
+              <StreakTracker
+                completionDates={completionDates}
+                today={todayStr}
+                bestStreak={bestStreak}
+              />
+
+              <WeeklyChallenge
+                completionDates={completionDates}
+                today={todayStr}
+                target={5}
+              />
+
+              <CoupleRewards rewardsProgress={rewardsProgress} />
+            </div>
+          )}
+        </div>
 
         <PlaylistCard />
 
@@ -478,8 +497,6 @@ export default function DashboardPage() {
             />
           </div>
         )}
-
-        <CoupleRewards rewardsProgress={rewardsProgress} />
 
         <CoachingTips completedCount={completedCount} totalCount={filteredTasks.length} />
 

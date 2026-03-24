@@ -247,6 +247,13 @@ export default function ShoppingPage() {
             />
             <p className="font-medium text-foreground">הרשימה ריקה — או שהקנייה כבר הייתה? 🛒</p>
             <p className="text-sm text-muted mt-1">הוסיפו פריט ראשון לפני שהמקרר מתחיל לדבר</p>
+            <button
+              onClick={() => openAddForm()}
+              className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl gradient-primary text-white text-sm font-semibold shadow-md shadow-primary/25 active:scale-95 transition-transform"
+            >
+              <Plus className="w-4 h-4" />
+              הוסיפו פריט ראשון
+            </button>
           </motion.div>
         )}
 
@@ -451,9 +458,9 @@ export default function ShoppingPage() {
           whileTap={{ scale: 0.9 }}
           onClick={() => openAddForm()}
           aria-label="הוספת פריט לרשימת קניות"
-          className="fixed bottom-24 left-4 w-13 h-13 rounded-2xl gradient-primary text-white shadow-lg shadow-primary/30 flex items-center justify-center z-20 border border-white/20"
+          className="fixed bottom-24 left-4 w-14 h-14 rounded-2xl gradient-primary text-white shadow-xl shadow-primary/40 flex items-center justify-center z-20 border border-white/20"
         >
-          <Plus className="w-6 h-6" />
+          <Plus className="w-7 h-7" />
         </motion.button>
       )}
 

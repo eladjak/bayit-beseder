@@ -502,49 +502,52 @@ export default function WeeklyPage() {
             <p className="text-sm text-white/60 mt-0.5">{weekRange}</p>
             <p className="text-xs text-white/70 mt-1">פריסת המשימות שלכם לכל השבוע עם המלצות לאיזון</p>
           </div>
-          <div className="flex items-center gap-2">
-            {/* Zone view toggle */}
-            <button
-              onClick={zoneConfig.toggleZoneMode}
-              className={`flex items-center gap-1.5 px-3 py-1.5 backdrop-blur-sm rounded-xl border transition-colors active:scale-95 ${
-                zoneConfig.zoneMode
-                  ? "bg-white/30 border-white/30"
-                  : "bg-white/12 border-white/10 hover:bg-white/20"
-              }`}
-              title={zoneConfig.zoneMode ? "תצוגת רשימה" : "תצוגת אזורים"}
-            >
-              {zoneConfig.zoneMode ? (
-                <LayoutGrid className="w-4 h-4 text-white" />
-              ) : (
-                <List className="w-4 h-4 text-white" />
-              )}
-              <span className="text-xs font-medium text-white">
-                {zoneConfig.zoneMode ? "אזורים" : "רשימה"}
-              </span>
-            </button>
-            {zoneConfig.zoneMode && (
-              <button
-                onClick={() => setShowZonePicker(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/30 transition-colors active:scale-95"
-                title="הגדרת אזורים"
-              >
-                <SlidersHorizontal className="w-4 h-4 text-white" />
-                <span className="text-xs font-medium text-white">הגדרת אזורים</span>
-              </button>
-            )}
+          <div className="flex flex-col items-end gap-2">
+            {/* Primary CTA: wizard button */}
             <button
               onClick={handleOpenWizard}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/30 transition-colors active:scale-95"
-              title="אשף שבועי"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-primary text-sm font-bold shadow-lg active:scale-95 transition-transform"
+              title="יצירת תוכנית שבועית"
             >
-              <Wand2 className="w-4 h-4 text-white" />
-              <span className="text-xs font-medium text-white">אשף</span>
+              <Wand2 className="w-4 h-4" />
+              <span>יצירת תוכנית שבועית</span>
             </button>
-            <div className="flex items-center gap-2 px-3.5 py-1.5 bg-white/12 backdrop-blur-sm rounded-xl border border-white/10">
-              <Calendar className="w-4 h-4 text-white" />
-              <span className="text-xs font-medium text-white">
-                {stats.total} משימות
-              </span>
+            {/* Secondary controls row */}
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={zoneConfig.toggleZoneMode}
+                className={`flex items-center gap-1 px-2.5 py-1.5 backdrop-blur-sm rounded-xl border transition-colors active:scale-95 ${
+                  zoneConfig.zoneMode
+                    ? "bg-white/30 border-white/30"
+                    : "bg-white/12 border-white/10 hover:bg-white/20"
+                }`}
+                title={zoneConfig.zoneMode ? "תצוגת רשימה" : "תצוגת אזורים"}
+              >
+                {zoneConfig.zoneMode ? (
+                  <LayoutGrid className="w-3.5 h-3.5 text-white" />
+                ) : (
+                  <List className="w-3.5 h-3.5 text-white" />
+                )}
+                <span className="text-[11px] font-medium text-white">
+                  {zoneConfig.zoneMode ? "אזורים" : "רשימה"}
+                </span>
+              </button>
+              {zoneConfig.zoneMode && (
+                <button
+                  onClick={() => setShowZonePicker(true)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/30 transition-colors active:scale-95"
+                  title="הגדרת אזורים"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-white" />
+                  <span className="text-[11px] font-medium text-white">אזורים</span>
+                </button>
+              )}
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/12 backdrop-blur-sm rounded-xl border border-white/10">
+                <Calendar className="w-3.5 h-3.5 text-white" />
+                <span className="text-[11px] font-medium text-white">
+                  {stats.total} משימות
+                </span>
+              </div>
             </div>
           </div>
         </div>
