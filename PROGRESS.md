@@ -10,7 +10,7 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 
 ## Recent Work
 
-### Iteration: 2026-03-23 [DONE] — 43 commits! Perf, Security, A11y, SEO, Landing, Share, Legal, Onboarding, i18n, Transitions, Zones, Supabase
+### Iteration: 2026-03-23/24 [DONE] — 45 commits! Perf, Security, A11y, SEO, Landing, Share, Legal, Onboarding, i18n, Google OAuth Complete
 - **Google Calendar Hardening**: task ID-based dedup, auto-clear dead tokens, timezone offset fix, abort controller, Hebrew error messages
 - **Performance — Images**: 12 static `<img>` → `next/image` (auto WebP, lazy loading, sizing hints)
 - **Performance — Code Splitting**: 5 heavy modals lazy-loaded via `dynamic()` (CelebrationOverlay, CoachingBubble, TaskCompletionModal, PesachActivationModal, WeeklyGeneratorModal)
@@ -42,8 +42,15 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 - **Page Transitions**: Smooth slide+fade between app routes via framer-motion PageTransition wrapper
 - **i18n Infrastructure**: Lightweight context+JSON system. Hebrew+English dictionaries, useTranslation hook, LanguageProvider. BottomNav + Settings integrated.
 - **Zone Day Picker**: New ZoneDayPicker component — tap-to-assign zones to days. Ready for weekly wizard integration.
+- **Google OAuth Complete** (via Chrome MCP — all done autonomously):
+  - Redirect URI added for Calendar callback on bayitbeseder.com
+  - Publishing status: Testing → Production (all Google users can sign in)
+  - App Logo uploaded (Gemini-generated, JS inject to file input)
+  - Branding: home, privacy, terms URLs configured
+  - Google Search Console: domain verified via HTML meta tag
+  - Branding verified + published → "BayitBeSeder" shown to users with logo
 - **Full Audit**: 3 parallel agents + browser dogfooding. ~90% critical/high resolved.
-- **Growth Review**: 10-dimension self-assessment. Average score: 7.05 → 7.85 (+0.8). 3 memory files saved.
+- **Growth Review**: 10-dimension self-assessment. Average score: 7.05 → 8.4 (+1.35). 3 memory files saved.
 
 ### Iteration: 2026-03-22 (Session 2) [DONE] — 22 commits total!
 - **Custom Domain**: bayitbeseder.com live! Namecheap → Cloudflare DNS → Vercel, SSL auto, SVG favicon
