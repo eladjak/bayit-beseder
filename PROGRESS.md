@@ -1,28 +1,25 @@
 # BayitBeSeder (בית בסדר) - Progress
 
 ## Status: LIVE
-## Last Updated: 2026-03-24
+## Last Updated: 2026-03-25
 ## URL: https://www.bayitbeseder.com
 ## Domain: bayitbeseder.com (Namecheap → Cloudflare DNS → Vercel)
 
 ## Current State
-App is fully functional with Pesach mode, zone-based scheduling, custom domain, security hardening, and UI facelift. Vercel auto-deploys from master.
+App is fully functional with Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, and voice input POC. Vercel auto-deploys from master.
 
 ## Recent Work
 
-### Iteration: 2026-03-23/24 [PAUSED] — 54 commits! Full-stack overhaul + AI Planning vision
+### Iteration: 2026-03-25 — Conversational Onboarding + Polish + Voice POC
 
-**SESSION RESUME POINT — paste this to continue:**
-```
-יאללה בית בסדר! המשך מאיפה שעצרנו — 54 commits. תקרא PROGRESS.md, MEMORY.md, ואת docs/plans/ai-planner-spec.md. הפריטים הבאים לביצוע:
-1. בנה את ה-Conversational Onboarding Wizard (Phase 1 מהspec)
-2. המשך visual consistency Phase 2 (מביקורת: buttons, spacing, border-radius)
-3. Microcopy overhaul — קופי קליל יותר בכל האפליקציה
-4. בדוק dark mode fix v2 live בנייד
-5. Google OAuth — ודא שredirect fix + branding עובדים
-6. תחקור voice input (Web Speech API he-IL) ותבנה POC
-רוץ על הכל לפי הפרוטוקולים!
-```
+- **Conversational Onboarding Wizard (Phase 1)**: Full Typeform-style 6-screen flow replacing both old Onboarding slideshow and TaskSetupWizard. Screens: Welcome → Home Name → Room Count → Residents → Cleaning Personality → AI Plan Preview. framer-motion transitions, warm Hebrew copy, tappable cards.
+- **Visual Consistency Phase 2**: Standardized buttons (gradient-primary rounded-2xl for primary, border rounded-xl for secondary), card-elevated usage, consistent spacing (space-y-4, p-4) across ALL pages (29 files touched).
+- **Microcopy Overhaul**: Warmer, lighter Hebrew copy across 9 key files. Casual tone, shorter text, encouraging empty states. "משימות" → "משימות 📋", "הושלמו" → "עשינו 💪", etc.
+- **Voice Input POC**: useVoiceInput hook (Web Speech API he-IL) + VoiceInputButton component with animated pulse. Chrome/Android full support, partial iOS Safari, no Firefox.
+- **Dark Mode v2**: Verified clean — zero hardcoded dark colors remaining, CSS variable system working properly.
+- **Google OAuth**: Verified — redirect callbacks properly configured for bayitbeseder.com, CSRF state validation, branding published.
+
+### Iteration: 2026-03-23/24 [DONE] — 54 commits! Full-stack overhaul + AI Planning vision
 - **Google Calendar Hardening**: task ID-based dedup, auto-clear dead tokens, timezone offset fix, abort controller, Hebrew error messages
 - **Performance — Images**: 12 static `<img>` → `next/image` (auto WebP, lazy loading, sizing hints)
 - **Performance — Code Splitting**: 5 heavy modals lazy-loaded via `dynamic()` (CelebrationOverlay, CoachingBubble, TaskCompletionModal, PesachActivationModal, WeeklyGeneratorModal)
