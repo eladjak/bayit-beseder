@@ -151,14 +151,14 @@ function RewardCard({
             transition={{ duration: 0.8, ease: "easeOut", delay: index * 0.06 }}
           />
         </div>
-        <p className="text-[10px] text-muted text-center">
+        <p className="text-xs text-muted text-center">
           {current}/{target}
         </p>
       </div>
 
       {/* Description tooltip on unlocked */}
       {unlocked && (
-        <p className="text-[10px] text-yellow-600 dark:text-yellow-400 text-center font-medium">
+        <p className="text-xs text-yellow-600 dark:text-yellow-400 text-center font-medium">
           נפתח!
         </p>
       )}

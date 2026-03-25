@@ -34,7 +34,7 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/30 dark:to-purple-950/30 border border-indigo-100/50 dark:border-indigo-800/30 p-4 shadow-sm"
+      className="rounded-2xl bg-primary/5 dark:bg-primary/10 border border-primary/10 dark:border-primary/20 p-4 shadow-sm"
       dir="rtl"
       aria-label="טיפ יומי"
     >

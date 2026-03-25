@@ -104,7 +104,7 @@ export const StreakTracker = memo(function StreakTracker({
       {/* Milestone progress bar */}
       {nextMilestone !== null && (
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-[10px] text-muted">
+          <div className="flex items-center justify-between text-xs text-muted">
             <span>יעד הבא: {nextMilestone} ימים</span>
             <span>
               {currentStreak}/{nextMilestone}
@@ -140,7 +140,7 @@ export const StreakTracker = memo(function StreakTracker({
           return (
             <div key={dateStr} className="flex flex-col items-center gap-0.5">
               <motion.div
-                className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
                   hasActivity
                     ? "bg-success/20 text-success"
                     : dateStr === today

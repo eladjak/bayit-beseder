@@ -39,7 +39,7 @@ function SummaryCard({
 }: SummaryCardProps) {
   return (
     <motion.div
-      className="card-elevated p-3.5"
+      className="card-elevated p-4"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.3 }}
@@ -58,7 +58,7 @@ function SummaryCard({
         suffix={suffix}
         className="text-xl font-bold text-foreground"
       />
-      <p className="text-[10px] text-muted mt-0.5">{subtitle}</p>
+      <p className="text-xs text-muted mt-0.5">{subtitle}</p>
     </motion.div>
   );
 }
