@@ -64,7 +64,9 @@
     "coaching": "Daily tip",
     "emergencyMode": "Emergency Mode",
     "allDone": "Perfect day! You completed everything together",
-    "noTasks": "House is clean! (or you haven't added tasks yet...)"
+    "noTasks": "House is clean! (or you haven't added tasks yet...)",
+    "achievementsSection": "Achievements & Gamification",
+    "todayHeader": "Today"
   },
   "tasks": {
     "title": "Tasks",
@@ -95,7 +97,14 @@
     "achievements": "Achievements",
     "weeklyTrend": "Weekly trend",
     "categoryBreakdown": "Category breakdown",
-    "noData": "No data yet"
+    "noData": "No data yet",
+    "pageTitle": "Our Stats",
+    "history": "History",
+    "streakActivity": "Activity streak",
+    "thisWeek": "What we did this week",
+    "byCategory": "By category",
+    "ourData": "Our data",
+    "demo": "Demo"
   },
   "auth": {
     "welcome": "Welcome to Bayit BeSeder",
@@ -145,6 +154,10 @@
     "activeSubtitle": "Only the essentials. No pressure.",
     "inactiveSubtitle": "When you're low on energy — just the basics, guilt-free",
     "goal": "Goal: 50% — then breathe",
-    "allDone": "All done! You're amazing"
+    "allDone": "All done! You're amazing",
+    "activateButton": "Activate Emergency Mode",
+    "deactivateButton": "Deactivate Emergency Mode",
+    "completedFromList": "Completed from essential list",
+    "essentialOnly": "Essentials only"
   }
 }

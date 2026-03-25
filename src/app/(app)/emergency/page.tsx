@@ -7,6 +7,7 @@ import { Shield, Check, Clock, Loader2, AlertTriangle } from "lucide-react";
 import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
 import { createClient } from "@/lib/supabase";
 import { toast } from "sonner";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface EmergencyTask {
   id: string;
@@ -17,6 +18,7 @@ interface EmergencyTask {
 }
 
 export default function EmergencyPage() {
+  const { t } = useTranslation();
   const [tasks, setTasks] = useState<EmergencyTask[]>([]);
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -205,7 +207,7 @@ export default function EmergencyPage() {
         {emergencyMode ? (
           <>
             <Shield className="w-8 h-8 text-blue-500 dark:text-blue-400 mx-auto mb-2" />
-            <h1 className="text-lg font-bold text-blue-700 dark:text-blue-300">🛡️ מצב חירום פעיל</h1>
+            <h1 className="text-lg font-bold text-blue-700 dark:text-blue-300">🛡️ {t("emergency.activeTitle")}</h1>
             <p className="text-sm text-blue-600 dark:text-blue-400 mt-1">
               רק הבסיס. צעד אחד בכל פעם. הכל יסתדר 💙
             </p>
@@ -213,7 +215,7 @@ export default function EmergencyPage() {
         ) : (
           <>
             <AlertTriangle className="w-8 h-8 text-muted mx-auto mb-2" />
-            <h1 className="text-lg font-bold text-foreground">⚡ מצב חירום</h1>
+            <h1 className="text-lg font-bold text-foreground">⚡ {t("emergency.title")}</h1>
             <p className="text-sm text-muted mt-1">
               כשהכל על הראש — מתמקדים רק בחיוני
             </p>
@@ -223,7 +225,7 @@ export default function EmergencyPage() {
         <button
           onClick={toggleEmergencyMode}
           disabled={togglingEmergency}
-          aria-label={emergencyMode ? "ביטול מצב חירום" : "הפעלת מצב חירום"}
+          aria-label={emergencyMode ? t("emergency.deactivateButton") : t("emergency.activateButton")}
           className={`mt-3 px-5 py-2 rounded-2xl text-sm font-semibold transition-colors disabled:opacity-50 ${
             emergencyMode
               ? "bg-blue-500 text-white hover:bg-blue-600"
@@ -233,9 +235,9 @@ export default function EmergencyPage() {
           {togglingEmergency ? (
             <Loader2 className="w-4 h-4 animate-spin inline" />
           ) : emergencyMode ? (
-            "ביטול מצב חירום ✓"
+            `${t("emergency.deactivateButton")} ✓`
           ) : (
-            "⚡ הפעלת מצב חירום"
+            `⚡ ${t("emergency.activateButton")}`
           )}
         </button>
         </div>
@@ -248,7 +250,7 @@ export default function EmergencyPage() {
             <div className="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">
               {completedCount}/{totalCount}
             </div>
-            <p className="text-sm text-muted">הושלמו מהרשימה החיונית</p>
+            <p className="text-sm text-muted">{t("emergency.completedFromList")}</p>
             <div className="h-2 bg-blue-100 dark:bg-blue-900/40 rounded-full mt-3 overflow-hidden">
               <motion.div
                 className="h-full bg-blue-500 rounded-full"
@@ -256,7 +258,7 @@ export default function EmergencyPage() {
                 transition={{ duration: 0.3 }}
               />
             </div>
-            <p className="text-xs text-muted mt-2">יעד: 50% — ואחר כך נושמים</p>
+            <p className="text-xs text-muted mt-2">{t("emergency.goal")}</p>
           </div>
 
           {/* Coaching Message */}
@@ -270,7 +272,7 @@ export default function EmergencyPage() {
           {/* Emergency Tasks */}
           <div className="space-y-2">
             <h2 className="font-semibold text-sm text-foreground px-1">
-              החיוני בלבד {tasks.length === 0 && "— אין פתוחות, כל הכבוד! 🎉"}
+              {t("emergency.essentialOnly")} {tasks.length === 0 && "— אין פתוחות, כל הכבוד! 🎉"}
             </h2>
             {tasks.map((task: EmergencyTask, i: number) => {
               const isCompleted = completedIds.has(task.id);

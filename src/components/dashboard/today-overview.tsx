@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, Clock } from "lucide-react";
 import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
 import { haptic } from "@/lib/haptics";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export interface TaskItem {
   id: string;
@@ -52,6 +53,7 @@ const itemVariants = {
 };
 
 export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
+  const { t } = useTranslation();
   const [completing, setCompleting] = useState<string | null>(null);
   const [optimisticCompleted, setOptimisticCompleted] = useState<Set<string>>(new Set());
 
@@ -112,7 +114,7 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between px-1">
-        <h2 className="font-semibold text-foreground">היום 🏠</h2>
+        <h2 className="font-semibold text-foreground">{t("dashboard.todayHeader")} 🏠</h2>
         <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-primary/10 text-primary">
           {completed}/{tasks.length}
         </span>

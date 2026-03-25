@@ -35,6 +35,7 @@ import { CoachingInsight } from "@/components/dashboard/coaching-insight";
 import { CoachingTips } from "@/components/dashboard/coaching-tips";
 import { PesachCountdownBanner } from "@/components/seasonal/pesach-countdown-banner";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
+import { useTranslation } from "@/hooks/useTranslation";
 import { ChevronDown } from "lucide-react";
 
 // Lazy-load components that aren't always visible (modals, overlays, coaching)
@@ -116,6 +117,7 @@ const CATEGORY_INFO = Object.fromEntries(
 ) as Record<string, { label: string; icon: string; color: string }>;
 
 export default function DashboardPage() {
+  const { t } = useTranslation();
   // ---- Supabase hooks ----
   const { profile } = useProfile();
   const { tasks: dbTasks, loading: tasksLoading, refetch: refetchTasks } = useTasks({
@@ -458,7 +460,7 @@ export default function DashboardPage() {
             onClick={() => setShowAdvanced(!showAdvanced)}
             className="w-full flex items-center justify-between p-3 card-elevated text-sm font-medium text-foreground"
           >
-            <span>🏆 הישגים וגיימיפיקציה</span>
+            <span>🏆 {t("dashboard.achievementsSection")}</span>
             <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
           </button>
           {showAdvanced && (

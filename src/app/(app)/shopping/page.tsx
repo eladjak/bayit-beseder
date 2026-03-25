@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, ChevronDown, ChevronUp, Trash2, Settings } from "lucide-react";
@@ -14,6 +15,11 @@ import { haptic } from "@/lib/haptics";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useProfile } from "@/hooks/useProfile";
 import { Loader2 } from "lucide-react";
+
+const VoiceInputButton = dynamic(
+  () => import("@/components/voice-input-button").then((m) => m.VoiceInputButton),
+  { ssr: false }
+);
 
 export default function ShoppingPage() {
   const { items, loading, addItem, toggleItem, removeItem, clearChecked } =
@@ -404,17 +410,24 @@ export default function ShoppingPage() {
                 </button>
               </div>
 
-              <input
-                type="text"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleAdd();
-                }}
-                placeholder="מה קונים?"
-                className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary transition-colors mb-3"
-                autoFocus
-              />
+              <div className="flex items-center gap-2 mb-3">
+                <input
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleAdd();
+                  }}
+                  placeholder="מה קונים?"
+                  className="flex-1 bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary transition-colors"
+                  autoFocus
+                />
+                <VoiceInputButton
+                  onTranscript={(text) => setNewTitle(text)}
+                  ariaLabel="הוספה בקול"
+                  className="flex-shrink-0 w-8 h-8"
+                />
+              </div>
 
               {/* Category selector */}
               <div className="flex flex-wrap gap-1.5 mb-3 max-h-36 overflow-y-auto">

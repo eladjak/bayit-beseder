@@ -27,7 +27,7 @@ export interface UseAIChatResult {
 export const QUICK_ACTIONS = ["תכנן את השבוע", "שנה חלוקה", "יום קל", "תן לי טיפ"];
 
 // ---------------------------------------------------------------------------
-// Pre-programmed local response logic
+// Pre-programmed local response logic (fallback)
 // ---------------------------------------------------------------------------
 
 const CLEANING_TIPS = [
@@ -71,15 +71,33 @@ function generateLocalResponse(userText: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// API history message type (matches server contract)
+// ---------------------------------------------------------------------------
+
+interface HistoryMessage {
+  role: "user" | "model";
+  content: string;
+}
+
+// ---------------------------------------------------------------------------
 // Welcome message
 // ---------------------------------------------------------------------------
 
 const WELCOME_MESSAGE: ChatMessage = {
   id: "welcome",
-  content: "שלום! אני העוזר החכם של הבית 🏠 אני יכול לעזור לכם לתכנן את השבוע, לחלק משימות, ולתת טיפים לניקוי. במה אוכל לסייע?",
+  content:
+    "שלום! אני העוזר החכם של הבית 🏠 אני יכול לעזור לכם לתכנן את השבוע, לחלק משימות, ולתת טיפים לניקוי. במה אוכל לסייע?",
   sender: "ai",
   timestamp: new Date().toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" }),
 };
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function makeTimestamp(): string {
+  return new Date().toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" });
+}
 
 // ---------------------------------------------------------------------------
 // Hook
@@ -89,6 +107,9 @@ export function useAIChat(): UseAIChatResult {
   const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
   const [isTyping, setIsTyping] = useState(false);
   const idCounterRef = useRef(1);
+
+  // Keep a ref to history for the API call (parallel to messages state)
+  const historyRef = useRef<HistoryMessage[]>([]);
 
   const nextId = useCallback(() => {
     idCounterRef.current += 1;
@@ -100,43 +121,113 @@ export function useAIChat(): UseAIChatResult {
       const trimmed = text.trim();
       if (!trimmed) return;
 
-      const timestamp = new Date().toLocaleTimeString("he-IL", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-
       // Add user message immediately
       const userMsg: ChatMessage = {
         id: nextId(),
         content: trimmed,
         sender: "user",
-        timestamp,
+        timestamp: makeTimestamp(),
       };
-
       setMessages((prev) => [...prev, userMsg]);
       setIsTyping(true);
 
-      // Simulate AI typing delay (800–1500ms)
-      const delay = 800 + Math.random() * 700;
+      // Snapshot history before this message (last 10 exchanges)
+      const historySnapshot: HistoryMessage[] = historyRef.current.slice(-10);
 
-      setTimeout(() => {
-        const responseText = generateLocalResponse(trimmed);
+      // Attempt real streaming API
+      const aiMsgId = nextId();
 
-        const aiMsg: ChatMessage = {
-          id: nextId(),
-          content: responseText,
-          sender: "ai",
-          timestamp: new Date().toLocaleTimeString("he-IL", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        };
+      (async () => {
+        let usedFallback = false;
 
-        setMessages((prev) => [...prev, aiMsg]);
+        try {
+          const response = await fetch("/api/ai/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: trimmed, history: historySnapshot }),
+          });
+
+          if (!response.ok || !response.body) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          // Create a placeholder AI message and stream text into it
+          const placeholder: ChatMessage = {
+            id: aiMsgId,
+            content: "",
+            sender: "ai",
+            timestamp: makeTimestamp(),
+          };
+          setMessages((prev) => [...prev, placeholder]);
+          setIsTyping(false);
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let accumulatedText = "";
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            accumulatedText += chunk;
+
+            // Update message content incrementally
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === aiMsgId ? { ...m, content: accumulatedText } : m
+              )
+            );
+          }
+
+          // If we got an empty response, fall back
+          if (!accumulatedText.trim()) {
+            usedFallback = true;
+          } else {
+            // Record this exchange in history
+            historyRef.current = [
+              ...historyRef.current,
+              { role: "user", content: trimmed },
+              { role: "model", content: accumulatedText },
+            ];
+            return;
+          }
+        } catch {
+          usedFallback = true;
+        }
+
+        // Fallback: local response with simulated delay
+        if (usedFallback) {
+          // Remove placeholder if it was added (id may already be in messages)
+          setMessages((prev) => prev.filter((m) => m.id !== aiMsgId));
+          setIsTyping(true);
+
+          const delay = 800 + Math.random() * 700;
+          await new Promise<void>((resolve) => setTimeout(resolve, delay));
+
+          const responseText = generateLocalResponse(trimmed);
+          const aiMsg: ChatMessage = {
+            id: aiMsgId,
+            content: responseText,
+            sender: "ai",
+            timestamp: makeTimestamp(),
+          };
+          setMessages((prev) => [...prev, aiMsg]);
+          setIsTyping(false);
+
+          // Still record in history so the model has context if API recovers
+          historyRef.current = [
+            ...historyRef.current,
+            { role: "user", content: trimmed },
+            { role: "model", content: responseText },
+          ];
+        }
+      })().catch(() => {
+        // Safety net — ensure typing indicator is cleared
         setIsTyping(false);
-      }, delay);
+      });
     },
-    [nextId],
+    [nextId]
   );
 
   return {

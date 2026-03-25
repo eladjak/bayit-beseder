@@ -40,6 +40,7 @@ import { AnimatedNumber } from "@/components/animated-number";
 import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
 import { CATEGORY_NAME_TO_KEY, CATEGORY_LABELS, CATEGORY_ICONS } from "@/lib/categories";
 import { WeeklyShareCard } from "@/components/gamification/weekly-share-card";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const MOCK_WEEKLY_DATA = [
   { day: "א׳", completed: 7, total: 10 },
@@ -117,12 +118,13 @@ function StreakVisualization({
   currentStreak,
   bestStreak,
 }: StreakVisualizationProps) {
+  const { t } = useTranslation();
   const hebrewDayNames = ["א", "ב", "ג", "ד", "ה", "ו", "ש"];
 
   return (
     <div className="card-elevated p-4">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-semibold text-sm">🔥 רצף פעילות</h2>
+        <h2 className="font-semibold text-sm">🔥 {t("stats.streakActivity")}</h2>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
             <span className="text-xs text-muted">עכשיו:</span>
@@ -272,6 +274,7 @@ function PartnerComparisonSection({
 // ============================================
 
 export default function StatsPage() {
+  const { t } = useTranslation();
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const { tasks } = useTasks({});
   const { completions } = useCompletions({ limit: 500 });
@@ -369,14 +372,14 @@ export default function StatsPage() {
       {/* Header with gradient */}
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
         <div className="flex items-center justify-between relative z-10">
-          <h1 className="text-xl font-bold text-white tracking-tight">📊 הנתונים שלנו</h1>
+          <h1 className="text-xl font-bold text-white tracking-tight">📊 {t("stats.pageTitle")}</h1>
           <Link
             href="/history"
             className="flex items-center gap-1.5 text-xs text-white bg-white/12 px-3.5 py-1.5 rounded-xl font-medium backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-colors"
             aria-label="עבור להיסטוריית משימות"
           >
             <History className="w-3.5 h-3.5" />
-            היסטוריה
+            {t("stats.history")}
           </Link>
         </div>
       </div>
@@ -454,9 +457,9 @@ export default function StatsPage() {
         transition={{ duration: 0.3, delay: 0.2 }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-sm">📈 מה עשינו השבוע</h2>
+          <h2 className="font-semibold text-sm">📈 {t("stats.thisWeek")}</h2>
           <span className="text-[10px] text-muted bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
-            {hasDbData ? "נתונים שלנו" : "הדגמה"}
+            {hasDbData ? t("stats.ourData") : t("stats.demo")}
           </span>
         </div>
         <div className="h-48" dir="ltr">
@@ -505,10 +508,10 @@ export default function StatsPage() {
         transition={{ duration: 0.3, delay: 0.4 }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-sm">🏷️ לפי קטגוריה</h2>
+          <h2 className="font-semibold text-sm">🏷️ {t("stats.byCategory")}</h2>
           {hasDbData && (
             <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">
-              נתונים שלנו
+              {t("stats.ourData")}
             </span>
           )}
         </div>
@@ -580,7 +583,7 @@ export default function StatsPage() {
       >
         <div className="flex items-center gap-2 mb-3">
           <Trophy className="w-5 h-5 text-amber-500" />
-          <h2 className="font-semibold text-sm">🏆 הישגים</h2>
+          <h2 className="font-semibold text-sm">🏆 {t("stats.achievements")}</h2>
           <span className="text-xs text-muted">
             {unlockedAchievements.size}/{ACHIEVEMENTS.length}
           </span>

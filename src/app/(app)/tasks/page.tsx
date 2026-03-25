@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Clock, Filter, Plus, Settings, Trash2 } from "lucide-react";
@@ -26,6 +27,10 @@ import { useProfile } from "@/hooks/useProfile";
 import { useCategories } from "@/hooks/useCategories";
 import { useTaskCategories } from "@/hooks/useTaskCategories";
 
+const VoiceInputButton = dynamic(
+  () => import("@/components/voice-input-button").then((m) => m.VoiceInputButton),
+  { ssr: false }
+);
 
 interface DbTaskView {
   id: string;
@@ -430,14 +435,21 @@ export default function TasksPage() {
           style={{ transformOrigin: "top" }}
           className="card-elevated p-4 space-y-3"
         >
-          <input
-            type="text"
-            value={newTaskTitle}
-            onChange={(e) => setNewTaskTitle(e.target.value)}
-            placeholder="מה צריך לעשות?"
-            className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary"
-            dir="rtl"
-          />
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={newTaskTitle}
+              onChange={(e) => setNewTaskTitle(e.target.value)}
+              placeholder="מה צריך לעשות?"
+              className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+              dir="rtl"
+            />
+            <VoiceInputButton
+              onTranscript={(text) => setNewTaskTitle(text)}
+              ariaLabel="הוספה בקול"
+              className="flex-shrink-0 w-8 h-8"
+            />
+          </div>
           <div className="flex gap-2 flex-wrap">
             {taskCategories.map((tc) => (
               <button

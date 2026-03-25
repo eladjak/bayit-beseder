@@ -64,7 +64,9 @@
     "coaching": "טיפ יומי",
     "emergencyMode": "מצב חירום",
     "allDone": "יום מושלם! סיימתם הכל ביחד",
-    "noTasks": "הבית נקי! (או שעדיין לא הוספתם משימות...)"
+    "noTasks": "הבית נקי! (או שעדיין לא הוספתם משימות...)",
+    "achievementsSection": "הישגים וגיימיפיקציה",
+    "todayHeader": "היום"
   },
   "tasks": {
     "title": "משימות",
@@ -95,7 +97,14 @@
     "achievements": "הישגים",
     "weeklyTrend": "מגמה שבועית",
     "categoryBreakdown": "חלוקה לפי קטגוריות",
-    "noData": "עדיין אין נתונים"
+    "noData": "עדיין אין נתונים",
+    "pageTitle": "הנתונים שלנו",
+    "history": "היסטוריה",
+    "streakActivity": "רצף פעילות",
+    "thisWeek": "מה עשינו השבוע",
+    "byCategory": "לפי קטגוריה",
+    "ourData": "נתונים שלנו",
+    "demo": "הדגמה"
   },
   "auth": {
     "welcome": "ברוכים הבאים לבית בסדר",
@@ -145,6 +154,10 @@
     "activeSubtitle": "רק הדברים ההכרחיים. בלי לחץ.",
     "inactiveSubtitle": "כשאין כוח — רק הבסיס, בלי אשמה",
     "goal": "יעד: 50% — ואחר כך נושמים",
-    "allDone": "הכל הושלם! אתם מדהימים"
+    "allDone": "הכל הושלם! אתם מדהימים",
+    "activateButton": "הפעלת מצב חירום",
+    "deactivateButton": "ביטול מצב חירום",
+    "completedFromList": "הושלמו מהרשימה החיונית",
+    "essentialOnly": "החיוני בלבד"
   }
 }
