@@ -10,7 +10,7 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 
 ## Recent Work
 
-### Iteration: 2026-03-23/24 [DONE] — 45 commits! Perf, Security, A11y, SEO, Landing, Share, Legal, Onboarding, i18n, Google OAuth Complete
+### Iteration: 2026-03-23/24 [DONE] — 48 commits! Perf, Security, A11y, SEO, Landing, Share, Legal, Onboarding, i18n, OAuth, UX Overhaul
 - **Google Calendar Hardening**: task ID-based dedup, auto-clear dead tokens, timezone offset fix, abort controller, Hebrew error messages
 - **Performance — Images**: 12 static `<img>` → `next/image` (auto WebP, lazy loading, sizing hints)
 - **Performance — Code Splitting**: 5 heavy modals lazy-loaded via `dynamic()` (CelebrationOverlay, CoachingBubble, TaskCompletionModal, PesachActivationModal, WeeklyGeneratorModal)
@@ -49,7 +49,13 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
   - Branding: home, privacy, terms URLs configured
   - Google Search Console: domain verified via HTML meta tag
   - Branding verified + published → "BayitBeSeder" shown to users with logo
-- **Full Audit**: 3 parallel agents + browser dogfooding. ~90% critical/high resolved.
+- **Dark Mode Fix**: CSS variable override fixed — :root.dark properly overrides @theme inline vars
+- **UX Overhaul** (based on UX simulation agent + user feedback):
+  - Dashboard: tasks moved to TOP, gamification collapsed into accordion
+  - Tasks: big "הוספת משימה" button, category filters hidden behind toggle
+  - Shopping: prominent "הוסיפו פריט ראשון" CTA, larger FAB
+  - Weekly: wizard as primary CTA, advanced options in secondary row
+- **Full Audit**: 3 parallel agents + browser dogfooding + UX simulation. ~90% resolved.
 - **Growth Review**: 10-dimension self-assessment. Average score: 7.05 → 8.4 (+1.35). 3 memory files saved.
 
 ### Iteration: 2026-03-22 (Session 2) [DONE] — 22 commits total!
