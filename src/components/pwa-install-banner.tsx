@@ -19,6 +19,8 @@ export function PWAInstallBanner() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -60, opacity: 0 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          role="complementary"
+          aria-label="הצעת התקנה"
           className="mx-4 mt-2 mb-1"
           dir="rtl"
         >
@@ -37,15 +39,16 @@ export function PWAInstallBanner() {
             <button
               type="button"
               onClick={promptInstall}
-              className="px-3 py-1.5 rounded-xl gradient-primary text-white text-xs font-semibold shrink-0"
+              aria-label="התקן את האפליקציה על המסך הראשי"
+              className="px-3 py-1.5 rounded-xl gradient-primary text-white text-xs font-semibold shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
             >
               התקנה
             </button>
             <button
               type="button"
               onClick={dismiss}
-              className="p-1 text-muted hover:text-foreground transition-colors shrink-0"
-              aria-label="סגור"
+              className="p-1 text-muted hover:text-foreground transition-colors shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+              aria-label="סגור הצעת ההתקנה"
             >
               <X className="w-4 h-4" />
             </button>

@@ -35,7 +35,7 @@ interface ChatFABProps {
 
 export function ChatFAB({ onClick }: ChatFABProps) {
   return (
-    <div className="fixed bottom-24 right-4 z-20" aria-label="פתח עוזר AI">
+    <div className="fixed bottom-24 right-4 z-20">
       {/* Attention pulse ring — rendered once on mount */}
       <motion.span
         className="absolute inset-0 rounded-full gradient-primary pointer-events-none"

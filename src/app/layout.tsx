@@ -16,11 +16,44 @@ export const metadata: Metadata = {
     default: "בית בסדר - ניהול תחזוקת הבית",
     template: "%s | בית בסדר",
   },
+  description:
+    "אפליקציה חינמית בעברית לניהול תחזוקת הבית לזוגות ומשפחות — תכנון שבועי חכם, גיימיפיקציה, רשימת קניות משותפת, Google Calendar ו-WhatsApp",
+  keywords: [
+    "ניהול הבית",
+    "תחזוקת הבית",
+    "משימות בית",
+    "זוגות",
+    "משפחה",
+    "תכנון שבועי",
+    "רשימת קניות",
+    "גיימיפיקציה",
+    "אפליקציה עברית",
+    "בית בסדר",
+    "bayit beseder",
+    "home management",
+    "household chores",
+  ],
+  metadataBase: new URL("https://www.bayitbeseder.com"),
+  alternates: {
+    canonical: "https://www.bayitbeseder.com",
+    languages: {
+      "he-IL": "https://www.bayitbeseder.com",
+      "en-US": "https://www.bayitbeseder.com",
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   verification: {
     google: "X9pkJAZuvtfG0-NomU_6uv9i47aG2_apJjFAzUFle9A",
   },
-  description:
-    "אפליקציה לניהול תחזוקת הבית המשותף לזוגות — תכנון שבועי, גיימיפיקציה, Google Calendar ו-WhatsApp",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -40,7 +73,14 @@ export const metadata: Metadata = {
       "אפליקציה חינמית בעברית לניהול הבית לזוגות ומשפחות. משימות עם גיימיפיקציה, תכנון שבועי חכם, רשימת קניות משותפת ופרסים!",
     url: "https://www.bayitbeseder.com",
     siteName: "בית בסדר",
-    images: [{ url: "/og-image.jpg", width: 1200, height: 630 }],
+    images: [
+      {
+        url: "https://www.bayitbeseder.com/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "בית בסדר — אפליקציה לניהול הבית לזוגות",
+      },
+    ],
     locale: "he_IL",
     type: "website",
   },
@@ -49,7 +89,7 @@ export const metadata: Metadata = {
     title: "בית בסדר — ניהול הבית ביחד, בכיף",
     description:
       "אפליקציה חינמית בעברית לניהול הבית לזוגות ומשפחות. משימות עם גיימיפיקציה, תכנון שבועי חכם, רשימת קניות משותפת ופרסים!",
-    images: ["/og-image.jpg"],
+    images: ["https://www.bayitbeseder.com/og-image.jpg"],
   },
 };
 

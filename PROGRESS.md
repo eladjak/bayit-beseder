@@ -10,14 +10,23 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 
 ## Recent Work
 
-### Iteration: 2026-03-25 — Conversational Onboarding + Polish + Voice POC
+### Iteration: 2026-03-25 — AI Chat + Onboarding + Polish + Voice + PWA
 
-- **Conversational Onboarding Wizard (Phase 1)**: Full Typeform-style 6-screen flow replacing both old Onboarding slideshow and TaskSetupWizard. Screens: Welcome → Home Name → Room Count → Residents → Cleaning Personality → AI Plan Preview. framer-motion transitions, warm Hebrew copy, tappable cards.
-- **Visual Consistency Phase 2**: Standardized buttons (gradient-primary rounded-2xl for primary, border rounded-xl for secondary), card-elevated usage, consistent spacing (space-y-4, p-4) across ALL pages (29 files touched).
-- **Microcopy Overhaul**: Warmer, lighter Hebrew copy across 9 key files. Casual tone, shorter text, encouraging empty states. "משימות" → "משימות 📋", "הושלמו" → "עשינו 💪", etc.
-- **Voice Input POC**: useVoiceInput hook (Web Speech API he-IL) + VoiceInputButton component with animated pulse. Chrome/Android full support, partial iOS Safari, no Firefox.
-- **Dark Mode v2**: Verified clean — zero hardcoded dark colors remaining, CSS variable system working properly.
-- **Google OAuth**: Verified — redirect callbacks properly configured for bayitbeseder.com, CSRF state validation, branding published.
+**Commit 55**: Conversational Onboarding + Visual Consistency + Microcopy + Voice POC
+- **Conversational Onboarding Wizard (Phase 1)**: Full Typeform-style 6-screen flow replacing old Onboarding + TaskSetupWizard. Screens: Welcome → Home Name → Room Count → Residents → Cleaning Personality → AI Plan Preview.
+- **Visual Consistency Phase 2**: Standardized buttons, cards, spacing across 29 files.
+- **Microcopy Overhaul**: Warmer Hebrew copy across 9 files.
+- **Voice Input POC**: useVoiceInput hook + VoiceInputButton (Web Speech API he-IL).
+- **Dark Mode v2**: Verified clean. **Google OAuth**: Verified working.
+
+**Commit 57**: AI Chat UI + Interactive FAQ + PWA Install + i18n
+- **AI Chat UI (Phase 2 shell)**: Floating FAB on all pages → opens bottom-sheet chat drawer. Pre-programmed Hebrew responses, quick action chips, voice input integration. Ready for Claude/Gemini API connection.
+- **Interactive FAQ Chat**: Landing page FAQ converted from accordion to chat-style interface with typing animation and follow-up suggestions.
+- **PWA Install Banner**: Native install prompt with 7-day dismiss. usePWAInstall hook.
+- **i18n Expansion**: he/en dictionaries expanded with onboarding, AI chat, emergency sections.
+- **@tanstack/react-virtual**: Added for future list virtualization.
+
+**In progress**: Accessibility improvements + SEO meta tag optimization.
 
 ### Iteration: 2026-03-23/24 [DONE] — 54 commits! Full-stack overhaul + AI Planning vision
 - **Google Calendar Hardening**: task ID-based dedup, auto-clear dead tokens, timezone offset fix, abort controller, Hebrew error messages

@@ -6,6 +6,7 @@ import { X, Send } from "lucide-react";
 import { VoiceInputButton } from "@/components/voice-input-button";
 import { ChatMessage } from "./chat-message";
 import { useAIChat } from "@/hooks/useAIChat";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -25,6 +26,7 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const focusTrapRef = useFocusTrap<HTMLDivElement>(open, onClose);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -40,15 +42,6 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
       return () => clearTimeout(timeout);
     }
   }, [open]);
-
-  // Close on Escape key
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && open) onClose();
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [open, onClose]);
 
   const handleSend = useCallback(() => {
     const trimmed = inputValue.trim();
@@ -100,6 +93,7 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
           {/* Drawer sheet */}
           <motion.div
             key="drawer"
+            ref={focusTrapRef}
             role="dialog"
             aria-modal="true"
             aria-label="העוזר החכם"
@@ -184,7 +178,7 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
               <VoiceInputButton
                 onTranscript={handleVoiceTranscript}
                 className="flex-shrink-0"
-                ariaLabel="הקלדה קולית"
+                ariaLabel="הקלטה קולית"
               />
 
               {/* Text input */}

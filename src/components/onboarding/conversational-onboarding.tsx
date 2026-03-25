@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Check, Sparkles, Home, Loader2 } from "lucide-react";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -189,7 +190,8 @@ function OptionCard({
       type="button"
       onClick={onClick}
       whileTap={{ scale: 0.97 }}
-      className={`relative flex items-center gap-3 w-full p-4 rounded-2xl border-2 transition-colors text-right ${
+      aria-pressed={selected}
+      className={`relative flex items-center gap-3 w-full p-4 rounded-2xl border-2 transition-colors text-right focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
         selected
           ? "border-primary bg-primary/10"
           : "border-border bg-surface hover:border-primary/30"
@@ -203,7 +205,7 @@ function OptionCard({
         {sublabel && <p className="text-xs text-muted mt-0.5">{sublabel}</p>}
       </div>
       {selected && (
-        <span className="bg-primary rounded-full p-0.5 shrink-0">
+        <span className="bg-primary rounded-full p-0.5 shrink-0" aria-hidden="true">
           <Check className="w-3.5 h-3.5 text-white" />
         </span>
       )}
@@ -227,18 +229,19 @@ function GridCard({
       type="button"
       onClick={onClick}
       whileTap={{ scale: 0.95 }}
-      className={`relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-colors ${
+      aria-pressed={selected}
+      className={`relative flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
         selected
           ? "border-primary bg-primary/10"
           : "border-border bg-surface hover:border-primary/30"
       }`}
     >
       {selected && (
-        <span className="absolute top-2 left-2 bg-primary rounded-full p-0.5">
+        <span className="absolute top-2 left-2 bg-primary rounded-full p-0.5" aria-hidden="true">
           <Check className="w-3 h-3 text-white" />
         </span>
       )}
-      <span className="text-3xl">{emoji}</span>
+      <span className="text-3xl" aria-hidden="true">{emoji}</span>
       <span className={`text-xs font-medium ${selected ? "text-primary" : "text-foreground"}`}>
         {label}
       </span>
@@ -288,9 +291,9 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
         transition={{ delay: 0.4 }}
         whileTap={{ scale: 0.97 }}
         onClick={onNext}
-        className="gradient-primary text-white font-semibold px-8 py-3 rounded-2xl flex items-center gap-2 text-sm"
+        className="gradient-primary text-white font-semibold px-8 py-3 rounded-2xl flex items-center gap-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
-        <Sparkles className="w-4 h-4" />
+        <Sparkles className="w-4 h-4" aria-hidden="true" />
         יאללה, בואו נתחיל
       </motion.button>
 
@@ -327,7 +330,8 @@ function StepHomeName({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="הקלידו שם..."
-        className="w-full px-4 py-3 rounded-2xl border-2 border-border bg-surface text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none transition-colors text-right text-sm"
+        aria-label="שם הבית"
+        className="w-full px-4 py-3 rounded-2xl border-2 border-border bg-surface text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-colors text-right text-sm"
         autoFocus
         dir="rtl"
       />
@@ -338,7 +342,8 @@ function StepHomeName({
             key={s}
             type="button"
             onClick={() => onChange(s)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+            aria-pressed={value === s}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
               value === s
                 ? "bg-primary text-white"
                 : "bg-surface border border-border text-muted hover:border-primary/40"
@@ -612,6 +617,7 @@ function TaskGroup({
 const TOTAL_STEPS = 6;
 
 export function ConversationalOnboarding({ open, onComplete, onSkip }: ConversationalOnboardingProps) {
+  const focusTrapRef = useFocusTrap<HTMLDivElement>(open, onSkip);
   const [step, setStep] = useState(0); // 0 = welcome
   const [homeName, setHomeName] = useState("");
   const [roomCount, setRoomCount] = useState<RoomCount>("3");
@@ -675,7 +681,14 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background flex flex-col" dir="rtl">
+    <div
+      ref={focusTrapRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="אשף הגדרת הבית"
+      className="fixed inset-0 z-[100] bg-background flex flex-col"
+      dir="rtl"
+    >
       {/* Header — skip + progress */}
       {step > 0 && (
         <motion.div
@@ -687,7 +700,8 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
           <button
             type="button"
             onClick={onSkip}
-            className="text-xs text-muted hover:text-foreground transition-colors px-2 py-1"
+            aria-label="דלג על ההגדרה"
+            className="text-xs text-muted hover:text-foreground transition-colors px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
           >
             דלג
           </button>
@@ -737,7 +751,8 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
             <button
               type="button"
               onClick={goBack}
-              className="px-4 py-2.5 rounded-2xl border border-border text-muted text-sm hover:bg-surface-hover transition-colors"
+              aria-label="חזור לשלב הקודם"
+              className="px-4 py-2.5 rounded-2xl border border-border text-muted text-sm hover:bg-surface-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               חזרה
             </button>
@@ -748,9 +763,9 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
               type="button"
               onClick={handleFinish}
               disabled={!canProceed}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl gradient-primary text-white font-semibold text-sm transition-opacity disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl gradient-primary text-white font-semibold text-sm transition-opacity disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4" aria-hidden="true" />
               מתחילים!
             </button>
           ) : step > 0 ? (
@@ -758,10 +773,11 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
               type="button"
               onClick={goNext}
               disabled={!canProceed}
-              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl gradient-primary text-white font-semibold text-sm transition-opacity disabled:opacity-50"
+              aria-label="המשך לשלב הבא"
+              className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl gradient-primary text-white font-semibold text-sm transition-opacity disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               המשך
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             </button>
           ) : null}
         </motion.div>
