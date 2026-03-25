@@ -33,6 +33,7 @@
     "@hookform/resolvers": "^5.2.2",
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.95.3",
+    "@tanstack/react-virtual": "^3.13.23",
     "better-result": "^2.7.0",
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.34.0",

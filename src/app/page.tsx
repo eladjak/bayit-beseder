@@ -4,9 +4,9 @@ import type { Metadata } from "next";
 import {
   SocialProofSection,
   TestimonialsSection,
-  FaqSection,
   FloatingCta,
 } from "@/components/landing/landing-interactive";
+import { FaqChat } from "@/components/landing/faq-chat";
 
 export const metadata: Metadata = {
   title: "בית בסדר — ניהול הבית ביחד, בכיף",
@@ -166,8 +166,8 @@ export default function LandingPage() {
         />
       </section>
 
-      {/* FAQ */}
-      <FaqSection />
+      {/* FAQ — chat-style interactive interface */}
+      <FaqChat />
 
       {/* CTA */}
       <section className="max-w-3xl mx-auto px-6 py-16 text-center">

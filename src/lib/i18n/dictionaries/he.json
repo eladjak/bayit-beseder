@@ -113,11 +113,38 @@
     "hasAccount": "כבר יש לכם חשבון?"
   },
   "onboarding": {
-    "welcomeTitle": "ברוכים הבאים לבית בסדר!",
-    "step1Title": "מה יש אצלכם בבית?",
-    "step2Title": "באילו חדרים תרצו להתמקד?",
-    "step3Title": "כמה זמן יש לכם ביום?",
-    "step4Title": "המשימות שלכם",
-    "letsStart": "התחלה!"
+    "welcomeTitle": "היי! אני העוזר שלכם",
+    "welcomeSubtitle": "כמה שאלות קצרות ואני אבנה לכם תוכנית תחזוקה מותאמת אישית לבית",
+    "letsStart": "יאללה, בואו נתחיל",
+    "takesLessThanMinute": "לוקח פחות מדקה",
+    "homeNameTitle": "איך קוראים לבית שלכם?",
+    "homeNameSubtitle": "תנו לבית שם — זה יוצר חיבור רגשי",
+    "roomCountTitle": "כמה חדרים יש אצלכם?",
+    "roomCountSubtitle": "ככה נדע כמה משימות לייצר",
+    "residentsTitle": "מי גר בבית?",
+    "residentsSubtitle": "נתאים משימות מיוחדות לפי מה שרלוונטי",
+    "personalityTitle": "מה הסגנון שלכם?",
+    "personalitySubtitle": "אין תשובה נכונה — כל סגנון עובד",
+    "planReadyEmoji": "🎉",
+    "planReadySubtitle": "משימות",
+    "canChangeAnytime": "אפשר לשנות ולהוסיף בכל רגע מתוך האפליקציה"
+  },
+  "aiChat": {
+    "title": "העוזר החכם",
+    "placeholder": "מה תרצו לשאול?",
+    "quickPlan": "תכנן את השבוע",
+    "quickRebalance": "שנה חלוקה",
+    "quickEasyDay": "יום קל",
+    "quickTip": "תן לי טיפ",
+    "welcome": "היי! אני כאן לעזור עם תכנון הבית. מה תרצו לדעת?",
+    "thinking": "חושב..."
+  },
+  "emergency": {
+    "title": "מצב חירום",
+    "activeTitle": "מצב חירום פעיל",
+    "activeSubtitle": "רק הדברים ההכרחיים. בלי לחץ.",
+    "inactiveSubtitle": "כשאין כוח — רק הבסיס, בלי אשמה",
+    "goal": "יעד: 50% — ואחר כך נושמים",
+    "allDone": "הכל הושלם! אתם מדהימים"
   }
 }

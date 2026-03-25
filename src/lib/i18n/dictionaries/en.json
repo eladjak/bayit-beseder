@@ -113,11 +113,38 @@
     "hasAccount": "Already have an account?"
   },
   "onboarding": {
-    "welcomeTitle": "Welcome to Bayit BeSeder!",
-    "step1Title": "What's in your home?",
-    "step2Title": "Which rooms to focus on?",
-    "step3Title": "How much time per day?",
-    "step4Title": "Your tasks",
-    "letsStart": "Let's go!"
+    "welcomeTitle": "Hi! I'm your home assistant",
+    "welcomeSubtitle": "A few quick questions and I'll build a custom maintenance plan for your home",
+    "letsStart": "Let's get started",
+    "takesLessThanMinute": "Takes less than a minute",
+    "homeNameTitle": "What's your home called?",
+    "homeNameSubtitle": "Give your home a name — it creates emotional connection",
+    "roomCountTitle": "How many rooms?",
+    "roomCountSubtitle": "This helps us know how many tasks to create",
+    "residentsTitle": "Who lives here?",
+    "residentsSubtitle": "We'll tailor special tasks based on what's relevant",
+    "personalityTitle": "What's your cleaning style?",
+    "personalitySubtitle": "No wrong answers — every style works",
+    "planReadyEmoji": "🎉",
+    "planReadySubtitle": "tasks",
+    "canChangeAnytime": "You can change and add tasks anytime from the app"
+  },
+  "aiChat": {
+    "title": "Smart Assistant",
+    "placeholder": "What would you like to ask?",
+    "quickPlan": "Plan the week",
+    "quickRebalance": "Rebalance tasks",
+    "quickEasyDay": "Easy day",
+    "quickTip": "Give me a tip",
+    "welcome": "Hi! I'm here to help with home planning. What would you like to know?",
+    "thinking": "Thinking..."
+  },
+  "emergency": {
+    "title": "Emergency Mode",
+    "activeTitle": "Emergency Mode Active",
+    "activeSubtitle": "Only the essentials. No pressure.",
+    "inactiveSubtitle": "When you're low on energy — just the basics, guilt-free",
+    "goal": "Goal: 50% — then breathe",
+    "allDone": "All done! You're amazing"
   }
 }
