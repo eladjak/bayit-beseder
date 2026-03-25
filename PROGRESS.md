@@ -31,7 +31,14 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 - **SEO**: metadataBase + canonical URL, hreflang alternates (he-IL/en-US), keywords, googleBot rich snippet directives, absolute OG image URLs, alt text. JSON-LD enriched with featureList (9), creator, aggregateRating, screenshot.
 - **Sitemap**: Added /privacy, /terms, /contact pages; removed non-existent /register; added lastmod dates.
 
-**Session totals**: 4 commits (55-58), 14 new files created, 40+ files modified, ~2,500 lines added.
+**Commit 60**: Gemini AI Chat API + Voice in Tasks/Shopping + i18n + Interactive Coaching
+- **Gemini AI Chat API**: /api/ai/chat route with streaming SSE (gemini-2.0-flash), Hebrew system prompt, rate limiting. useAIChat hook upgraded to stream real responses with local fallback.
+- **Voice Input Wired**: mic button on tasks + shopping input fields for voice-powered data entry.
+- **i18n**: t() now in dashboard, stats, emergency, today-overview. Dictionaries expanded.
+- **Interactive Coaching**: coaching-tips.tsx upgraded to chat-style with tappable "עוד טיפ", "למה?", "תודה!" options.
+- **GEMINI_API_KEY**: Added to Vercel production env. Commit 61 triggers redeploy.
+
+**Session totals**: 7 commits (55-61), 15 new files created, 50+ files modified, ~3,300 lines added.
 
 ### Iteration: 2026-03-23/24 [DONE] — 54 commits! Full-stack overhaul + AI Planning vision
 - **Google Calendar Hardening**: task ID-based dedup, auto-clear dead tokens, timezone offset fix, abort controller, Hebrew error messages
