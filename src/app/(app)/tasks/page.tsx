@@ -19,6 +19,7 @@ import {
 } from "@/lib/categories";
 import { CategoryCard } from "@/components/category-card";
 import { TaskCategoryManager } from "@/components/tasks/task-category-manager";
+import { TaskListSkeleton } from "@/components/skeleton";
 import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useProfile } from "@/hooks/useProfile";
@@ -534,6 +535,11 @@ export default function TasksPage() {
 
       {/* Task List */}
       <div className="space-y-2">
+        {/* Loading skeleton — prevents flash of mock data while DB loads */}
+        {tasksLoading && !sawDbTasks.current && (
+          <TaskListSkeleton count={6} />
+        )}
+
         {/* Empty state for DB tasks */}
         {hasDbTasks && filteredDbTasks.length === 0 && (
           <motion.div
@@ -571,7 +577,10 @@ export default function TasksPage() {
         )}
 
         <AnimatePresence mode="popLayout">
-          {hasDbTasks
+          {tasksLoading && !sawDbTasks.current
+            ? /* ---- Loading: skeleton is shown above, render nothing here ---- */
+              null
+            : hasDbTasks
             ? /* ---- DB Tasks (pending) ---- */
               pendingDbTasks.map((task) => {
                 const display = resolveCategoryDisplay(task.categoryKey);
