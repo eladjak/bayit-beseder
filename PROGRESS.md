@@ -26,7 +26,12 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 - **i18n Expansion**: he/en dictionaries expanded with onboarding, AI chat, emergency sections.
 - **@tanstack/react-virtual**: Added for future list virtualization.
 
-**In progress**: Accessibility improvements + SEO meta tag optimization.
+**Commit 58**: Accessibility + SEO
+- **Accessibility**: ARIA roles (dialog, log, complementary), aria-modal, aria-pressed on toggle cards, aria-labels on all interactive elements. Focus trap (useFocusTrap) on onboarding wizard + chat drawer. focus-visible:ring-2 on all buttons. Decorative icons marked aria-hidden.
+- **SEO**: metadataBase + canonical URL, hreflang alternates (he-IL/en-US), keywords, googleBot rich snippet directives, absolute OG image URLs, alt text. JSON-LD enriched with featureList (9), creator, aggregateRating, screenshot.
+- **Sitemap**: Added /privacy, /terms, /contact pages; removed non-existent /register; added lastmod dates.
+
+**Session totals**: 4 commits (55-58), 14 new files created, 40+ files modified, ~2,500 lines added.
 
 ### Iteration: 2026-03-23/24 [DONE] — 54 commits! Full-stack overhaul + AI Planning vision
 - **Google Calendar Hardening**: task ID-based dedup, auto-clear dead tokens, timezone offset fix, abort controller, Hebrew error messages
@@ -171,7 +176,10 @@ Applied: 001, 001_initial_schema, 002, 003, 004, 005, 006, 007, 008, 009
 - **Phase 17**: Avatar upload, task completion feedback modal
 
 ## Remaining Roadmap
-- Google OAuth Verification (for sharing with friends - guide created)
+- Connect AI Chat to Claude/Gemini API (needs API key in .env.local)
+- Wire voice input into more places (chat input, task creation)
+- i18n — use t() across more pages (currently only nav + settings use it)
+- Multi-user households (kids/roommates — plan saved)
 - Reply-to-complete from WhatsApp (needs dedicated Green API instance)
-- i18n (English support)
-- Performance optimization
+- Redis rate limiter (Upstash) for distributed deploys
+- Zone wizard step (drag zones to days in weekly wizard)

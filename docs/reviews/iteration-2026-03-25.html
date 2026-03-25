@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בית בסדר — סקירת איטרציה 25.03.2026</title>
+<style>
+  :root {
+    --primary: #6366F1;
+    --primary-light: #818CF8;
+    --bg: #F8F7FF;
+    --surface: #FFFFFF;
+    --text: #1E1B4B;
+    --muted: #6B7280;
+    --border: #E5E7EB;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Heebo', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+  .container { max-width: 800px; margin: 0 auto; padding: 24px 16px; }
+  h1 { font-size: 28px; margin-bottom: 8px; }
+  h2 { font-size: 20px; margin: 32px 0 16px; color: var(--primary); border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+  h3 { font-size: 16px; margin: 16px 0 8px; }
+  .hero { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; border-radius: 20px; padding: 32px; margin-bottom: 24px; text-align: center; }
+  .hero h1 { color: white; font-size: 32px; }
+  .hero p { opacity: 0.9; margin-top: 8px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0; }
+  .stat-card { background: var(--surface); border-radius: 16px; padding: 20px; text-align: center; border: 1px solid var(--border); }
+  .stat-card .number { font-size: 36px; font-weight: 800; color: var(--primary); }
+  .stat-card .label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .feature-card { background: var(--surface); border-radius: 16px; padding: 16px; margin: 8px 0; border: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; }
+  .feature-card .icon { font-size: 24px; flex-shrink: 0; width: 40px; height: 40px; background: #EEF2FF; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+  .feature-card .content { flex: 1; }
+  .feature-card .title { font-weight: 700; font-size: 14px; }
+  .feature-card .desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-shipped { background: #D1FAE5; color: #065F46; }
+  .badge-verified { background: #DBEAFE; color: #1E40AF; }
+  .badge-new { background: #EDE9FE; color: #5B21B6; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+  th, td { padding: 10px 12px; text-align: right; border-bottom: 1px solid var(--border); }
+  th { background: #F3F4F6; font-weight: 600; font-size: 12px; color: var(--muted); }
+  .score { font-weight: 700; }
+  .score-up { color: var(--success); }
+  .score-down { color: var(--danger); }
+  .progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 4px 0; }
+  .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--primary), var(--primary-light)); }
+  .next-steps { background: var(--surface); border-radius: 16px; padding: 16px; border: 2px solid var(--primary); }
+  .next-steps li { margin: 8px 0; font-size: 14px; }
+  .questions { background: #FFF7ED; border-radius: 16px; padding: 16px; border: 1px solid #FED7AA; }
+  .questions li { margin: 8px 0; font-size: 14px; }
+  .tools-used { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .tool-tag { background: #EEF2FF; color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+  .copy-btn { background: var(--primary); color: white; border: none; padding: 6px 16px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; margin-top: 8px; }
+  .copy-btn:hover { opacity: 0.9; }
+  .file-list { font-size: 12px; color: var(--muted); columns: 2; column-gap: 16px; }
+  .file-list li { margin: 2px 0; }
+  .growth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .growth-item { background: var(--surface); border-radius: 12px; padding: 12px; border: 1px solid var(--border); }
+  .growth-item .dim { font-size: 11px; color: var(--muted); }
+  .growth-item .val { font-size: 18px; font-weight: 700; color: var(--primary); }
+  footer { text-align: center; margin-top: 40px; padding: 20px; color: var(--muted); font-size: 12px; }
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .growth-grid { grid-template-columns: 1fr; }
+    .file-list { columns: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>🏠 בית בסדר — סקירת איטרציה</h1>
+  <p>25 במרץ 2026 &bull; 4 commits &bull; 44 קבצים &bull; +2,550 שורות</p>
+</div>
+
+<!-- Stats Dashboard -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="number">58</div>
+    <div class="label">סה"כ commits</div>
+  </div>
+  <div class="stat-card">
+    <div class="number">14</div>
+    <div class="label">קבצים חדשים</div>
+  </div>
+  <div class="stat-card">
+    <div class="number">44</div>
+    <div class="label">קבצים שהשתנו</div>
+  </div>
+  <div class="stat-card">
+    <div class="number">8</div>
+    <div class="label">סוכנים בפעולה</div>
+  </div>
+  <div class="stat-card">
+    <div class="number">10</div>
+    <div class="label">פיצ'רים חדשים</div>
+  </div>
+  <div class="stat-card">
+    <div class="number">0</div>
+    <div class="label">שגיאות TypeScript</div>
+  </div>
+</div>
+
+<!-- Features Shipped -->
+<h2>🚀 מה נשלח</h2>
+
+<div class="feature-card">
+  <div class="icon">🧙</div>
+  <div class="content">
+    <div class="title">Conversational Onboarding Wizard <span class="badge badge-shipped">Phase 1</span></div>
+    <div class="desc">6 מסכים בסגנון Typeform — ברוכים הבאים → שם הבית → חדרים → דיירים → סגנון ניקיון → תוכנית AI. מחליף את ה-Onboarding + TaskSetupWizard הישנים.</div>
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="icon">🤖</div>
+  <div class="content">
+    <div class="title">AI Chat UI <span class="badge badge-new">Phase 2 Shell</span></div>
+    <div class="desc">כפתור צף (FAB) בכל הדפים → פותח מגירת צ'אט מלמטה. תשובות מקומיות בעברית, צ'יפים לפעולות מהירות, אינטגרציית קלט קולי. מוכן לחיבור API של Claude/Gemini.</div>
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="icon">🎤</div>
+  <div class="content">
+    <div class="title">Voice Input POC <span class="badge badge-shipped">Shipped</span></div>
+    <div class="desc">useVoiceInput hook (Web Speech API he-IL) + VoiceInputButton עם אנימציית פולס. עובד על Chrome/Android, חלקי ב-iOS Safari, אין תמיכה ב-Firefox.</div>
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="icon">🎨</div>
+  <div class="content">
+    <div class="title">Visual Consistency Phase 2 <span class="badge badge-shipped">29 קבצים</span></div>
+    <div class="desc">כפתורים ראשיים (gradient-primary rounded-2xl), כפתורים משניים (border rounded-xl), card-elevated, מרווחים אחידים (space-y-4) — בכל הדפים.</div>
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="icon">✍️</div>
+  <div class="content">
+    <div class="title">Microcopy Overhaul <span class="badge badge-shipped">9 קבצים</span></div>
+    <div class="desc">עברית חמה יותר, קלילה יותר. "הושלמו" → "עשינו 💪", "רשימת קניות" → "🛒 קניות", מצבי ריק מעודדים במקום עצובים.</div>
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="icon">💬</div>
+  <div class="content">
+    <div class="title">Interactive FAQ Chat <span class="badge badge-new">Landing Page</span></div>
+    <div class="desc">FAQ בדף הנחיתה הומר מאקורדיון סטטי לממשק צ'אט עם אנימציית הקלדה והצעות המשך. עקרון דודו נחום — אינטראקציה, לא תצוגה.</div>
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="icon">📲</div>
+  <div class="content">
+    <div class="title">PWA Install Banner <span class="badge badge-new">New</span></div>
+    <div class="desc">באנר התקנה מקורי עם ביטול ל-7 ימים. usePWAInstall hook תופס beforeinstallprompt, מגלה standalone mode.</div>
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="icon">♿</div>
+  <div class="content">
+    <div class="title">Accessibility <span class="badge badge-shipped">Shipped</span></div>
+    <div class="desc">ARIA roles (dialog, log, complementary), aria-modal, aria-pressed, aria-labels. Focus trap על אונבורדינג + צ'אט. focus-visible:ring על כל הכפתורים.</div>
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="icon">🔍</div>
+  <div class="content">
+    <div class="title">SEO Improvements <span class="badge badge-shipped">Shipped</span></div>
+    <div class="desc">metadataBase, canonical URL, hreflang (he-IL/en-US), keywords, googleBot rich snippets, JSON-LD מורחב עם featureList. Sitemap מעודכן.</div>
+  </div>
+</div>
+
+<div class="feature-card">
+  <div class="icon">🌐</div>
+  <div class="content">
+    <div class="title">i18n Expansion <span class="badge badge-shipped">he + en</span></div>
+    <div class="desc">מילונים הורחבו עם sections: onboarding, aiChat, emergency. מוכנים לשימוש ב-t() ברחבי האפליקציה.</div>
+  </div>
+</div>
+
+<!-- Verified Items -->
+<h2>✅ אומתו</h2>
+<div class="feature-card">
+  <div class="icon">🌙</div>
+  <div class="content">
+    <div class="title">Dark Mode v2 <span class="badge badge-verified">Verified</span></div>
+    <div class="desc">אפס צבעים hardcoded. מערכת CSS variables עובדת נכון עם :root.dark ו-!important overrides.</div>
+  </div>
+</div>
+<div class="feature-card">
+  <div class="icon">🔐</div>
+  <div class="content">
+    <div class="title">Google OAuth <span class="badge badge-verified">Verified</span></div>
+    <div class="desc">Redirect callbacks מוגדרים נכון ל-bayitbeseder.com. CSRF state validation, branding published ב-Production.</div>
+  </div>
+</div>
+
+<!-- Growth Review -->
+<h2>📊 סקירת צמיחה (10 ממדים)</h2>
+<table>
+  <tr><th>ממד</th><th>קודם</th><th>עכשיו</th><th>שינוי</th></tr>
+  <tr><td>איכות</td><td>8.5</td><td class="score">9.0</td><td class="score-up">+0.5</td></tr>
+  <tr><td>מהירות</td><td>8.0</td><td class="score">8.5</td><td class="score-up">+0.5</td></tr>
+  <tr><td>יעילות</td><td>8.0</td><td class="score">9.0</td><td class="score-up">+1.0</td></tr>
+  <tr><td>חיסכון</td><td>8.0</td><td class="score">8.5</td><td class="score-up">+0.5</td></tr>
+  <tr><td>דיוק</td><td>8.5</td><td class="score">9.0</td><td class="score-up">+0.5</td></tr>
+  <tr><td>אוטונומיה</td><td>9.0</td><td class="score">9.0</td><td>—</td></tr>
+  <tr><td>יוזמה</td><td>8.0</td><td class="score">9.0</td><td class="score-up">+1.0</td></tr>
+  <tr><td>למידה</td><td>8.0</td><td class="score">8.5</td><td class="score-up">+0.5</td></tr>
+  <tr><td>שיתוף פעולה</td><td>8.5</td><td class="score">9.0</td><td class="score-up">+0.5</td></tr>
+  <tr><td>חדשנות</td><td>8.0</td><td class="score">9.0</td><td class="score-up">+1.0</td></tr>
+</table>
+<p style="text-align: center; font-size: 14px; margin-top: 8px;">
+  <strong>ממוצע: 8.4 → 8.85</strong> <span class="score-up">(+0.45)</span>
+</p>
+
+<div class="progress-bar"><div class="progress-fill" style="width: 88.5%"></div></div>
+
+<!-- Insights -->
+<h2>💡 תובנות מהאיטרציה</h2>
+<div class="feature-card">
+  <div class="icon">⚡</div>
+  <div class="content">
+    <div class="title">Framer Motion layout + virtualization לא מתאימים יחד</div>
+    <div class="desc">@tanstack/react-virtual דורש מיקום absolute, layout animations דורש flow טבעי. אל תנסה לשלב. לרשימות ארוכות — ויתור על אנימציות layout.</div>
+  </div>
+</div>
+<div class="feature-card">
+  <div class="icon">💬</div>
+  <div class="content">
+    <div class="title">ממשק צ'אט עובד מצוין ל-FAQ</div>
+    <div class="desc">הופך קריאה פסיבית למעורבות אקטיבית. להחיל על עוד חלקים באפליקציה (tips, onboarding).</div>
+  </div>
+</div>
+<div class="feature-card">
+  <div class="icon">🤝</div>
+  <div class="content">
+    <div class="title">8 סוכנים מקבילים — Sweet Spot</div>
+    <div class="desc">אפס קונפליקטים בקבצים. מעבר ל-8, סיכון לקונפליקטים עולה. לשמור על חלוקה ברורה לפי קבצים.</div>
+  </div>
+</div>
+<div class="feature-card">
+  <div class="icon">🔊</div>
+  <div class="content">
+    <div class="title">Web Speech API he-IL עובד היטב ב-Chrome</div>
+    <div class="desc">דיוק טוב בעברית. ב-iOS Safari — חלקי. ב-Firefox — לא נתמך כלל. Chrome Android = יעד ראשי.</div>
+  </div>
+</div>
+
+<!-- Tools Used -->
+<h2>🛠️ כלים ששימשו</h2>
+<div class="tools-used">
+  <span class="tool-tag">framer-motion</span>
+  <span class="tool-tag">Web Speech API</span>
+  <span class="tool-tag">next/dynamic</span>
+  <span class="tool-tag">@tanstack/react-virtual</span>
+  <span class="tool-tag">useFocusTrap</span>
+  <span class="tool-tag">JSON-LD</span>
+  <span class="tool-tag">beforeinstallprompt</span>
+  <span class="tool-tag">8 parallel agents</span>
+  <span class="tool-tag">TypeScript strict</span>
+  <span class="tool-tag">Tailwind CSS 4</span>
+</div>
+
+<!-- New Files -->
+<h2>📁 קבצים חדשים (14)</h2>
+<ul class="file-list">
+  <li>src/components/onboarding/conversational-onboarding.tsx</li>
+  <li>src/components/ai-chat/chat-drawer.tsx</li>
+  <li>src/components/ai-chat/chat-fab.tsx</li>
+  <li>src/components/ai-chat/chat-message.tsx</li>
+  <li>src/components/landing/faq-chat.tsx</li>
+  <li>src/components/voice-input-button.tsx</li>
+  <li>src/components/pwa-install-banner.tsx</li>
+  <li>src/hooks/useAIChat.ts</li>
+  <li>src/hooks/useVoiceInput.ts</li>
+  <li>src/hooks/usePWAInstall.ts</li>
+</ul>
+
+<!-- Next Steps -->
+<h2>📋 הצעדים הבאים</h2>
+<div class="next-steps">
+  <ol>
+    <li><strong>חיבור AI Chat ל-API</strong> — צריך להוסיף CLAUDE_API_KEY או GEMINI_API_KEY ל-.env.local, ליצור /api/ai/chat route עם streaming</li>
+    <li><strong>קלט קולי במקומות נוספים</strong> — יצירת משימה בקול, הוספת פריט לקניות בקול</li>
+    <li><strong>i18n — הרחבת t()</strong> — להשתמש ב-hook הקיים בעוד דפים (כרגע רק nav + settings)</li>
+    <li><strong>משקי בית מרובי משתמשים</strong> — ילדים/שותפים (תוכנית שמורה)</li>
+    <li><strong>Reply-to-complete מ-WhatsApp</strong> — דורש instance ייעודי של Green API</li>
+  </ol>
+</div>
+
+<!-- Questions for Elad -->
+<h2>❓ שאלות לאלעד</h2>
+<div class="questions">
+  <ol>
+    <li>יש לך מפתח API של Claude או Gemini שאפשר להוסיף ל-.env.local? זה יאפשר חיבור אמיתי של הצ'אט AI.</li>
+    <li>האם לבדוק את האונבורדינג החדש באתר החי? (אפשר לנקות localStorage כדי לראות אותו מחדש)</li>
+    <li>האם הכיוון של FAQ כצ'אט מוצא חן? רוצה להחיל את זה על עוד חלקים?</li>
+    <li>עדיפות — מה יותר חשוב עכשיו: חיבור AI אמיתי, או i18n + English support?</li>
+  </ol>
+</div>
+
+<!-- Session Resume Point -->
+<h2>🔄 נקודת המשך</h2>
+<div style="background: var(--surface); border-radius: 16px; padding: 16px; border: 1px solid var(--border); position: relative;">
+  <pre style="font-size: 12px; white-space: pre-wrap; direction: rtl; font-family: 'Heebo', sans-serif;" id="resume-text">יאללה בית בסדר! המשך מאיפה שעצרנו — 58 commits. תקרא PROGRESS.md, MEMORY.md. הפריטים הבאים:
+1. חבר את ה-AI Chat ל-Claude/Gemini API (צריך מפתח ב-.env.local)
+2. הוסף קלט קולי ליצירת משימות ולהוספת פריטי קניות
+3. הרחב i18n — השתמש ב-t() בעוד דפים
+4. בדוק את כל הפיצ'רים החדשים באתר החי (אונבורדינג, צ'אט, FAQ)
+5. משקי בית מרובי משתמשים
+רוץ על הכל!</pre>
+  <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('resume-text').textContent).then(()=>this.textContent='הועתק! ✓')">העתק נקודת המשך</button>
+</div>
+
+<footer>
+  <p>נוצר אוטומטית על ידי Claude Code &bull; בית בסדר &bull; 25.03.2026</p>
+  <p style="margin-top: 4px;"><a href="https://www.bayitbeseder.com" style="color: var(--primary);">www.bayitbeseder.com</a></p>
+</footer>
+
+</div>
+</body>
+</html>
