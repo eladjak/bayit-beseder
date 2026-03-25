@@ -85,9 +85,9 @@ export function DashboardHeader({
             />
             <p className="text-xs text-white/90 font-medium">
               {completedCount === totalCount
-                ? "יום מושלם! סיימתם הכל ביחד"
+                ? "🎉 יום מושלם! סיימתם הכל"
                 : completedCount > 0
-                  ? `${completedCount} מתוך ${totalCount} משימות הושלמו`
+                  ? `${completedCount} מתוך ${totalCount} — ממשיכים! 💪`
                   : subtitle}
             </p>
           </div>

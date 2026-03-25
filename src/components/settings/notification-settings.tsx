@@ -87,7 +87,7 @@ export function NotificationSettings({
           {notifPermission === "default" && (
             <button
               onClick={onEnableNotifications}
-              className="px-3 py-1.5 gradient-primary text-white rounded-lg text-xs font-medium shadow-sm shadow-primary/20"
+              className="px-3 py-1.5 gradient-primary text-white rounded-xl text-xs font-semibold shadow-sm shadow-primary/20"
             >
               הפעלת התראות
             </button>

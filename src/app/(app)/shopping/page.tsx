@@ -137,7 +137,7 @@ export default function ShoppingPage() {
   function handleRemove(id: string) {
     haptic("tap");
     removeItem(id);
-    toast.info("הפריט הוסר מהרשימה");
+    toast.info("הוסר מהרשימה");
   }
 
   function handleClearChecked() {
@@ -145,7 +145,7 @@ export default function ShoppingPage() {
     if (count === 0) return;
     haptic("success");
     clearChecked();
-    toast.success(`${count} פריטים נוקו מהרשימה`);
+    toast.success(`${count} פריטים נקו — כיף! 🧹`);
   }
 
   if (loading) {
@@ -165,12 +165,12 @@ export default function ShoppingPage() {
         <div className="flex items-center justify-between relative z-10">
           <div className="text-center flex-1">
             <h1 className="text-xl font-bold text-white tracking-tight">
-              רשימת קניות
+              🛒 קניות
             </h1>
             {totalCount > 0 && (
               <div className="mt-2 inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 border border-white/10">
                 <span className="text-xs text-white/90 font-medium">
-                  {checkedCount}/{totalCount} פריטים סומנו
+                  {checkedCount}/{totalCount} בעגלה ✓
                 </span>
               </div>
             )}
@@ -366,7 +366,7 @@ export default function ShoppingPage() {
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border text-muted text-sm font-medium hover:border-primary hover:text-primary transition-colors"
         >
           <Settings className="w-4 h-4" />
-          ניהול קטגוריות
+          עריכת קטגוריות
         </button>
       </div>
 
@@ -393,7 +393,7 @@ export default function ShoppingPage() {
             >
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-foreground text-sm">
-                  {formPresetCategory ? `הוסיפו ל${formPresetCategory}` : "פריט חדש"}
+                  {formPresetCategory ? `➕ ל${formPresetCategory}` : "מה חסר?"}
                 </h3>
                 <button
                   onClick={() => setShowForm(false)}
@@ -411,7 +411,7 @@ export default function ShoppingPage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") handleAdd();
                 }}
-                placeholder="הוסיפו פריט..."
+                placeholder="מה קונים?"
                 className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary transition-colors mb-3"
                 autoFocus
               />
@@ -441,9 +441,9 @@ export default function ShoppingPage() {
               <button
                 onClick={handleAdd}
                 disabled={!newTitle.trim()}
-                className="w-full py-2.5 rounded-xl gradient-primary text-white font-medium text-sm disabled:opacity-40 transition-opacity shadow-md shadow-primary/20"
+                className="w-full py-2.5 rounded-2xl gradient-primary text-white font-semibold text-sm disabled:opacity-40 transition-opacity shadow-md shadow-primary/20"
               >
-                הוסיפו
+                לרשימה! 🛒
               </button>
             </motion.div>
           </>

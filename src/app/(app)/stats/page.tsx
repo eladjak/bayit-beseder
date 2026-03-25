@@ -122,10 +122,10 @@ function StreakVisualization({
   return (
     <div className="card-elevated p-4">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-semibold text-sm">רצף פעילות</h2>
+        <h2 className="font-semibold text-sm">🔥 רצף פעילות</h2>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
-            <span className="text-xs text-muted">נוכחי:</span>
+            <span className="text-xs text-muted">עכשיו:</span>
             <span className="text-xs font-bold text-primary">
               {currentStreak}
             </span>
@@ -199,7 +199,7 @@ function PartnerComparisonSection({
     <div className="card-elevated p-4">
       <div className="flex items-center gap-2 mb-3">
         <Users className="w-4 h-4 text-primary" />
-        <h2 className="font-semibold text-sm">השוואה השבוע</h2>
+        <h2 className="font-semibold text-sm">⚖️ השבוע — מי עשה מה?</h2>
       </div>
 
       {/* Bar comparison */}
@@ -369,7 +369,7 @@ export default function StatsPage() {
       {/* Header with gradient */}
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
         <div className="flex items-center justify-between relative z-10">
-          <h1 className="text-xl font-bold text-white tracking-tight">סטטיסטיקה</h1>
+          <h1 className="text-xl font-bold text-white tracking-tight">📊 הנתונים שלנו</h1>
           <Link
             href="/history"
             className="flex items-center gap-1.5 text-xs text-white bg-white/12 px-3.5 py-1.5 rounded-xl font-medium backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-colors"
@@ -412,8 +412,8 @@ export default function StatsPage() {
             height={192}
             className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
           />
-          <p className="font-medium text-foreground">עדיין אין נתונים</p>
-          <p className="text-sm text-muted">השלם משימות כדי לראות סטטיסטיקה</p>
+          <p className="font-medium text-foreground">עדיין אין מה להראות 🌱</p>
+          <p className="text-sm text-muted">השלימו כמה משימות ונתחיל לראות תמונה</p>
         </motion.div>
       )}
 
@@ -454,9 +454,9 @@ export default function StatsPage() {
         transition={{ duration: 0.3, delay: 0.2 }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-sm">מגמת השלמה שבועית</h2>
+          <h2 className="font-semibold text-sm">📈 מה עשינו השבוע</h2>
           <span className="text-[10px] text-muted bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
-            {hasDbData ? "נתונים אמיתיים" : "נתוני הדגמה"}
+            {hasDbData ? "נתונים שלנו" : "הדגמה"}
           </span>
         </div>
         <div className="h-48" dir="ltr">
@@ -505,10 +505,10 @@ export default function StatsPage() {
         transition={{ duration: 0.3, delay: 0.4 }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-sm">חלוקה לפי קטגוריה</h2>
+          <h2 className="font-semibold text-sm">🏷️ לפי קטגוריה</h2>
           {hasDbData && (
             <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">
-              נתונים אמיתיים
+              נתונים שלנו
             </span>
           )}
         </div>
@@ -580,7 +580,7 @@ export default function StatsPage() {
       >
         <div className="flex items-center gap-2 mb-3">
           <Trophy className="w-5 h-5 text-amber-500" />
-          <h2 className="font-semibold text-sm">הישגים</h2>
+          <h2 className="font-semibold text-sm">🏆 הישגים</h2>
           <span className="text-xs text-muted">
             {unlockedAchievements.size}/{ACHIEVEMENTS.length}
           </span>

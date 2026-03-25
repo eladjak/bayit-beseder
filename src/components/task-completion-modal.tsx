@@ -239,7 +239,7 @@ export function TaskCompletionModal({
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 gradient-primary text-white rounded-xl text-sm font-medium shadow-md shadow-primary/20 disabled:opacity-50 transition-colors"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 gradient-primary text-white rounded-2xl text-sm font-semibold shadow-md shadow-primary/20 disabled:opacity-50 transition-colors"
               >
                 {submitting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />

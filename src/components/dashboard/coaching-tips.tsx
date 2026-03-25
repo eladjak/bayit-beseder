@@ -42,7 +42,7 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
         <span className="text-2xl flex-shrink-0">{tip.emoji}</span>
         <div className="flex-1 min-w-0">
           <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 mb-0.5">
-            💡 מה שרק בית בסדר יודע
+            💡 טיפ של היום
           </p>
           <p className="text-sm font-medium text-foreground leading-snug">
             {tip.message}

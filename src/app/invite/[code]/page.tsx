@@ -240,7 +240,7 @@ export default function InvitePage() {
                 </p>
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="w-full py-3 gradient-primary text-white rounded-xl font-medium text-sm shadow-md shadow-primary/20"
+                  className="w-full py-3 gradient-primary text-white rounded-2xl font-semibold text-sm shadow-md shadow-primary/20"
                 >
                   חזרה לאפליקציה
                 </button>
@@ -283,7 +283,7 @@ export default function InvitePage() {
 
                 <button
                   onClick={handleLoginRedirect}
-                  className="w-full flex items-center justify-center gap-2 py-3 gradient-primary text-white rounded-xl font-medium text-sm shadow-md shadow-primary/20"
+                  className="w-full flex items-center justify-center gap-2 py-3 gradient-primary text-white rounded-2xl font-semibold text-sm shadow-md shadow-primary/20"
                 >
                   <LogIn className="w-4 h-4" />
                   התחברות / הרשמה
@@ -323,7 +323,7 @@ export default function InvitePage() {
 
                 <button
                   onClick={handleJoin}
-                  className="w-full flex items-center justify-center gap-2 py-3 gradient-primary text-white rounded-xl font-medium text-sm shadow-md shadow-primary/20 active:scale-95 transition-transform"
+                  className="w-full flex items-center justify-center gap-2 py-3 gradient-primary text-white rounded-2xl font-semibold text-sm shadow-md shadow-primary/20 active:scale-95 transition-transform"
                 >
                   <UserPlus className="w-4 h-4" />
                   הצטרף/י לבית
@@ -404,7 +404,7 @@ export default function InvitePage() {
                 </p>
                 <button
                   onClick={() => router.push("/dashboard")}
-                  className="w-full py-3 gradient-primary text-white rounded-xl font-medium text-sm shadow-md shadow-primary/20"
+                  className="w-full py-3 gradient-primary text-white rounded-2xl font-semibold text-sm shadow-md shadow-primary/20"
                 >
                   חזרה לאפליקציה
                 </button>

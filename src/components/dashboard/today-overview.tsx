@@ -101,8 +101,8 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
           height={192}
           className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
         />
-        <p className="font-medium text-foreground">הבית נקי! (או שעדיין לא הוספתם משימות... 🤔)</p>
-        <p className="text-sm text-muted">נהנים מהשקט — מגיע לכם</p>
+        <p className="font-medium text-foreground">אין משימות להיום — מצוין! 🥳</p>
+        <p className="text-sm text-muted">נהנים מהשקט, מגיע לכם</p>
       </motion.div>
     );
   }
@@ -112,7 +112,7 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between px-1">
-        <h2 className="font-semibold text-foreground">משימות להיום</h2>
+        <h2 className="font-semibold text-foreground">היום 🏠</h2>
         <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-primary/10 text-primary">
           {completed}/{tasks.length}
         </span>

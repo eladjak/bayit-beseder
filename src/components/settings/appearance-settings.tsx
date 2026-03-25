@@ -46,7 +46,7 @@ function ThemeButton({ label, value, current, icon, onSelect }: ThemeButtonProps
   return (
     <button
       onClick={() => onSelect(value)}
-      className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+      className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-sm font-semibold transition-all ${
         isActive
           ? "gradient-primary text-white shadow-md shadow-primary/20"
           : "bg-surface border border-border text-foreground hover:bg-surface-hover"
@@ -134,7 +134,7 @@ export function AppearanceSettings({
         <div className="flex gap-2">
           <button
             onClick={() => onLanguageChange("he")}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
+            className={`flex-1 py-2.5 rounded-2xl text-sm font-semibold transition-all ${
               language === "he"
                 ? "gradient-primary text-white shadow-md shadow-primary/20"
                 : "bg-surface border border-border text-foreground hover:bg-surface-hover"
@@ -144,7 +144,7 @@ export function AppearanceSettings({
           </button>
           <button
             onClick={() => onLanguageChange("en")}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-medium transition-all ${
+            className={`flex-1 py-2.5 rounded-2xl text-sm font-semibold transition-all ${
               language === "en"
                 ? "gradient-primary text-white shadow-md shadow-primary/20"
                 : "bg-surface border border-border text-foreground hover:bg-surface-hover"
@@ -226,7 +226,7 @@ export function WhatsAppSettings({
           <button
             onClick={onSavePhone}
             disabled={whatsappPhoneSaving || isDemo}
-            className="flex items-center gap-2 px-4 py-2 gradient-primary text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 shadow-md shadow-primary/20"
+            className="flex items-center gap-2 px-4 py-2 gradient-primary text-white rounded-2xl text-sm font-semibold transition-colors disabled:opacity-50 shadow-md shadow-primary/20"
           >
             {whatsappPhoneSaving ? (
               <Loader2 className="w-4 h-4 animate-spin" />

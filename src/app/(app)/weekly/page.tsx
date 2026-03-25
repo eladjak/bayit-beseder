@@ -194,7 +194,7 @@ export default function WeeklyPage() {
 
   const handleOpenWizard = useCallback(() => {
     if (!profile) {
-      toast.error("יש להתחבר כדי להשתמש באשף");
+      toast.error("צריך להתחבר קודם 🔑");
       return;
     }
     const memberIds = [profile.id];
@@ -223,7 +223,7 @@ export default function WeeklyPage() {
   const handleApplyWizard = useCallback(async () => {
     const { created, errors } = await wizard.applyPlan();
     if (created > 0) {
-      toast.success(`${created} משימות חדשות נוספו!`);
+      toast.success(`${created} משימות נוספו לשבוע 🙌`);
       haptic("success");
       await refetch();
     }
@@ -234,7 +234,7 @@ export default function WeeklyPage() {
       });
     }
     if (created === 0 && errors.length === 0) {
-      toast.info("אין משימות חדשות להוספה");
+      toast.info("השבוע כבר מלא במשימות 😄");
     }
   }, [wizard, refetch]);
 
@@ -344,9 +344,9 @@ export default function WeeklyPage() {
       haptic("tap");
       const ok = await updateTask(taskId, { assigned_to: newUserId });
       if (ok) {
-        toast.success("המשימה הועברה");
+        toast.success("עבר ✓");
       } else {
-        toast.error("שגיאה בהעברת המשימה");
+        toast.error("לא הצלחנו להעביר — נסו שוב");
       }
     },
     [updateTask]
@@ -359,9 +359,9 @@ export default function WeeklyPage() {
       haptic("success");
       const ok = await updateTask(taskId, { due_date: newDate });
       if (ok) {
-        toast.success("המשימה הועברה ליום אחר");
+        toast.success("הוזזה ✓");
       } else {
-        toast.error("שגיאה בהעברת המשימה");
+        toast.error("לא הצלחנו להזיז — נסו שוב");
       }
     },
     [updateTask]
@@ -372,7 +372,7 @@ export default function WeeklyPage() {
     async (suggestion: Suggestion) => {
       if (!suggestion.affectedDates || suggestion.affectedDates.length < 2) return;
       if (!isRealData) {
-        toast.info("יש להתחבר כדי ליישם המלצות");
+        toast.info("התחברו כדי ליישם את ההמלצות 🔑");
         return;
       }
 
@@ -444,7 +444,7 @@ export default function WeeklyPage() {
   const handleAddTask = useCallback(
     async (dueDate: string, title: string, categoryId: string) => {
       if (!profile?.id) {
-        toast.error("יש להתחבר כדי להוסיף משימות");
+        toast.error("צריך להתחבר קודם 🔑");
         return false;
       }
 
@@ -460,10 +460,10 @@ export default function WeeklyPage() {
       const result = await createTask(taskData);
       if (result) {
         haptic("success");
-        toast.success("משימה נוספה בהצלחה");
+        toast.success("נוסף! 🙌");
         return true;
       } else {
-        toast.error("שגיאה בהוספת המשימה");
+        toast.error("אופס, לא הצלחנו — נסו שוב");
         return false;
       }
     },
@@ -483,10 +483,10 @@ export default function WeeklyPage() {
       if (ok) {
         if (newStatus === "completed") {
           haptic("success");
-          toast.success("כל הכבוד! משימה הושלמה");
+          toast.success("יופי! ✅");
         }
       } else {
-        toast.error("שגיאה בעדכון המשימה");
+        toast.error("לא הצלחנו לעדכן — נסו שוב");
       }
     },
     [updateTask]
@@ -498,9 +498,9 @@ export default function WeeklyPage() {
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
         <div className="flex items-center justify-between mb-3 relative z-10">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">תכנון שבועי</h1>
+            <h1 className="text-xl font-bold text-white tracking-tight">השבוע שלנו 🗓️</h1>
             <p className="text-sm text-white/60 mt-0.5">{weekRange}</p>
-            <p className="text-xs text-white/70 mt-1">פריסת המשימות שלכם לכל השבוע עם המלצות לאיזון</p>
+            <p className="text-xs text-white/70 mt-1">מי עושה מה ומתי? בואו נחלק בהוגן</p>
           </div>
           <div className="flex flex-col items-end gap-2">
             {/* Primary CTA: wizard button */}
@@ -510,7 +510,7 @@ export default function WeeklyPage() {
               title="יצירת תוכנית שבועית"
             >
               <Wand2 className="w-4 h-4" />
-              <span>יצירת תוכנית שבועית</span>
+              <span>✨ צרו תוכנית</span>
             </button>
             {/* Secondary controls row */}
             <div className="flex items-center gap-1.5">
@@ -555,7 +555,7 @@ export default function WeeklyPage() {
         {/* Week summary */}
         <div className={`grid gap-2 ${calendarConnected ? "grid-cols-4" : "grid-cols-3"}`}>
           <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
-            <div className="text-xs text-white/70 mb-0.5">סיום</div>
+            <div className="text-xs text-white/70 mb-0.5">הושלם</div>
             <div className="text-lg font-bold text-white">
               {stats.completionRate}%
             </div>
@@ -607,7 +607,7 @@ export default function WeeklyPage() {
             </div>
             <a
               href="/settings"
-              className="px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-medium hover:bg-blue-700 transition-colors flex-shrink-0"
+              className="px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors flex-shrink-0"
             >
               חיבור
             </a>
@@ -619,7 +619,7 @@ export default function WeeklyPage() {
           <div className="card-elevated p-4 text-center bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 rounded-xl">
             <p className="text-sm font-medium text-amber-800 dark:text-amber-200">מצב תצוגה בלבד</p>
             <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">התחברו כדי לעדכן ולנהל משימות</p>
-            <a href="/login" className="inline-block mt-2 px-4 py-1.5 rounded-lg gradient-primary text-white text-xs font-medium">התחברו עכשיו</a>
+            <a href="/login" className="inline-block mt-2 px-4 py-1.5 rounded-xl gradient-primary text-white text-xs font-semibold">התחברו עכשיו</a>
           </div>
         )}
 
@@ -697,7 +697,7 @@ export default function WeeklyPage() {
                           {isActionable && isRealData && (
                             <button
                               onClick={() => handleApplySuggestion(suggestion)}
-                              className="mt-2 flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors active:scale-95"
+                              className="mt-2 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors active:scale-95"
                             >
                               <ArrowLeftRight className="w-3 h-3" />
                               העבר משימה
@@ -1097,7 +1097,7 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
                 <button
                   type="button"
                   onClick={handleCancelAdd}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-border/20 text-muted hover:bg-border/40 transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-xl border border-border text-muted hover:bg-surface-hover transition-colors"
                 >
                   <X className="w-3 h-3" />
                   ביטול
@@ -1106,7 +1106,7 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
                   type="button"
                   onClick={handleSaveTask}
                   disabled={!newTitle.trim() || saving}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-primary text-white disabled:opacity-50 hover:bg-primary/90 transition-colors"
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-xl gradient-primary text-white disabled:opacity-50 transition-colors"
                 >
                   <Check className="w-3 h-3" />
                   {saving ? "שומר..." : "הוסף"}

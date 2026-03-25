@@ -214,7 +214,7 @@ export function CalendarSettings() {
               <button
                 onClick={handleSync}
                 disabled={syncing}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 gradient-primary text-white rounded-xl text-sm font-medium shadow-md shadow-primary/20 disabled:opacity-50 active:scale-95 transition-transform"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 gradient-primary text-white rounded-2xl text-sm font-semibold shadow-md shadow-primary/20 disabled:opacity-50 active:scale-95 transition-transform"
                 aria-label="סנכרן עם Google Calendar"
               >
                 {syncing ? (
@@ -259,7 +259,7 @@ export function CalendarSettings() {
             <button
               onClick={handleConnect}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 gradient-primary text-white rounded-xl font-medium text-sm shadow-md shadow-primary/20 disabled:opacity-50 active:scale-95 transition-transform"
+              className="w-full flex items-center justify-center gap-2 py-3 gradient-primary text-white rounded-2xl font-semibold text-sm shadow-md shadow-primary/20 disabled:opacity-50 active:scale-95 transition-transform"
               aria-label="חבר Google Calendar"
             >
               {loading ? (

@@ -168,7 +168,7 @@ function LoginContent() {
               <button
                 type="submit"
                 disabled={loading || !resetEmail}
-                className="w-full py-3 gradient-primary text-white rounded-xl font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 shadow-md shadow-primary/20"
+                className="w-full py-3 gradient-primary text-white rounded-2xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 shadow-md shadow-primary/20"
               >
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin mx-auto" />
@@ -228,7 +228,7 @@ function LoginContent() {
                 <button
                   type="submit"
                   disabled={loading || !email || !password}
-                  className="w-full py-3 gradient-primary text-white rounded-xl font-medium text-sm hover:opacity-90 transition-opacity disabled:opacity-50 shadow-md shadow-primary/20"
+                  className="w-full py-3 gradient-primary text-white rounded-2xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 shadow-md shadow-primary/20"
                 >
                   {loading ? (
                     <Loader2 className="w-4 h-4 animate-spin mx-auto" />

@@ -196,10 +196,10 @@ export default function TasksPage() {
     });
     if (isCurrentlyCompleted) {
       haptic("tap");
-      toast("המשימה סומנה כלא הושלמה");
+      toast("בסדר, הורדנו את הסימון");
     } else {
       haptic("success");
-      toast.success("המשימה הושלמה! 🎉");
+      toast.success("יופי! משימה הושלמה 🎉");
     }
   }
 
@@ -251,9 +251,9 @@ export default function TasksPage() {
 
           if (!delError) {
             await refetchCompletions();
-            toast.info("המשימה סומנה כלא הושלמה");
+            toast.info("הסרנו את הסימון");
           } else {
-            toast.error("שגיאה בעדכון המשימה");
+            toast.error("אופס, לא הצלחנו — נסו שוב");
           }
         } else {
           const success = await updateTask(taskId, { status: "pending" });
@@ -263,9 +263,9 @@ export default function TasksPage() {
             return next;
           });
           if (success) {
-            toast.info("המשימה סומנה כלא הושלמה");
+            toast.info("הסרנו את הסימון");
           } else {
-            toast.error("שגיאה בעדכון המשימה");
+            toast.error("אופס, לא הצלחנו — נסו שוב");
           }
         }
       } else {
@@ -284,9 +284,9 @@ export default function TasksPage() {
           return next;
         });
         if (result) {
-          toast.success("כל הכבוד! המשימה הושלמה 🎉");
+          toast.success("כל הכבוד! 🎉");
         } else {
-          toast.error("שגיאה בהשלמת המשימה");
+          toast.error("אופס, לא הצלחנו — נסו שוב");
         }
       }
     },
@@ -314,11 +314,11 @@ export default function TasksPage() {
     });
 
     if (result) {
-      toast.success("המשימה נוספה בהצלחה!");
+      toast.success("נוסף! 🙌");
       setNewTaskTitle("");
       setShowAddForm(false);
     } else {
-      toast.error("שגיאה בהוספת המשימה");
+      toast.error("אופס, משהו השתבש — נסו שוב");
     }
   }, [newTaskTitle, newTaskCategory, categories, profile, createTask]);
 
@@ -328,9 +328,9 @@ export default function TasksPage() {
       haptic("tap");
       const success = await deleteTask(taskId);
       if (success) {
-        toast.success("המשימה נמחקה");
+        toast.success("הלכה 🗑️");
       } else {
-        toast.error("שגיאה במחיקת המשימה");
+        toast.error("לא הצלחנו למחוק — נסו שוב");
       }
     },
     [deleteTask]
@@ -365,10 +365,10 @@ export default function TasksPage() {
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
         <div className="flex items-center justify-between relative z-10">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">משימות</h1>
+            <h1 className="text-xl font-bold text-white tracking-tight">משימות 📋</h1>
             {hasDbTasks && (
               <p className="text-xs text-white/60 mt-0.5">
-                {filteredDbTasks.filter(t => t.isCompleted).length}/{filteredDbTasks.length} הושלמו
+                {filteredDbTasks.filter(t => t.isCompleted).length}/{filteredDbTasks.length} עשינו 💪
               </p>
             )}
           </div>
@@ -385,7 +385,7 @@ export default function TasksPage() {
               aria-label="הוספת משימה"
             >
               <Plus className="w-4 h-4" />
-              <span>הוספת משימה</span>
+              <span>+ משימה</span>
             </button>
             <button
               onClick={() => setShowFilters((prev) => !prev)}
@@ -408,15 +408,15 @@ export default function TasksPage() {
       {!hasDbTasks && !tasksLoading && (
         <div className="rounded-xl overflow-hidden border-2 border-amber-300/70 dark:border-amber-700/50 shadow-md shadow-amber-100/50 dark:shadow-amber-950/20">
           <div className="bg-amber-50 dark:bg-amber-950/30 p-4 text-center">
-            <p className="text-base font-bold text-amber-900 dark:text-amber-100">👋 מצב תצוגה בלבד</p>
+            <p className="text-base font-bold text-amber-900 dark:text-amber-100">👀 מצב הצצה</p>
             <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-              אלו משימות לדוגמה. התחברו כדי לנהל את המשימות הבייתיות שלכם ולעקוב אחרי ההתקדמות.
+              אלו משימות לדוגמה — נראה בסדר? התחברו וזה יהיה שלכם 🏠
             </p>
             <a
               href="/login"
               className="inline-block mt-3 px-6 py-2 rounded-xl gradient-primary text-white text-sm font-semibold shadow-md shadow-primary/25 active:scale-95 transition-transform"
             >
-              התחברות / הרשמה
+              יאללה, נכנסים
             </a>
           </div>
         </div>
@@ -434,7 +434,7 @@ export default function TasksPage() {
             type="text"
             value={newTaskTitle}
             onChange={(e) => setNewTaskTitle(e.target.value)}
-            placeholder="שם המשימה..."
+            placeholder="מה צריך לעשות?"
             className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary"
             dir="rtl"
           />
@@ -462,18 +462,18 @@ export default function TasksPage() {
             <button
               onClick={handleAddTask}
               disabled={!newTaskTitle.trim()}
-              className="flex-1 py-2 rounded-xl gradient-primary text-white text-sm font-medium disabled:opacity-50 shadow-md shadow-primary/20"
+              className="flex-1 py-2 rounded-2xl gradient-primary text-white text-sm font-semibold disabled:opacity-50 shadow-md shadow-primary/20"
             >
-              הוסף משימה
+              בואו נעשה את זה 🚀
             </button>
             <button
               onClick={() => {
                 setShowAddForm(false);
                 setNewTaskTitle("");
               }}
-              className="px-4 py-2 rounded-lg bg-background text-muted text-sm"
+              className="px-4 py-2 rounded-xl border border-border text-muted text-sm"
             >
-              ביטול
+              בטל
             </button>
           </div>
         </motion.div>
@@ -556,13 +556,13 @@ export default function TasksPage() {
             />
             <p className="font-medium text-foreground">
               {activeCategory === "all"
-                ? "אין משימות - הכל בסדר!"
-                : "אין משימות בקטגוריה זו"}
+                ? "הבית בסדר גמור! 🎉"
+                : "אין כאן שום דבר — מצוין!"}
             </p>
             <p className="text-sm text-muted mt-1">
               {activeCategory === "all"
-                ? "הוסיפו משימה חדשה להתחיל"
-                : "נסו לבחור קטגוריה אחרת"}
+                ? "רוצים להוסיף משהו? קדימה"
+                : "נסו קטגוריה אחרת"}
             </p>
             {activeCategory === "all" && (
               <button
@@ -605,7 +605,7 @@ export default function TasksPage() {
                   >
                     {task.isOverdue && (
                       <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
-                        מאחר
+                        ⏰ איחור
                       </div>
                     )}
                     <button
@@ -729,7 +729,7 @@ export default function TasksPage() {
             >
               <div className="h-px flex-1 bg-border" />
               <span className="font-medium px-2">
-                {showCompleted ? "▾" : "▸"} הושלמו ({completedDbTasks.length})
+                {showCompleted ? "▾" : "▸"} ✅ בוצע ({completedDbTasks.length})
               </span>
               <div className="h-px flex-1 bg-border" />
             </button>

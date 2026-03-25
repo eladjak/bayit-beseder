@@ -263,7 +263,7 @@ export function InvitePartner() {
             <button
               onClick={handleGenerateInvite}
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 py-3 gradient-primary text-white rounded-xl font-medium text-sm shadow-md shadow-primary/20 disabled:opacity-50 active:scale-95 transition-transform"
+              className="w-full flex items-center justify-center gap-2 py-3 gradient-primary text-white rounded-2xl font-semibold text-sm shadow-md shadow-primary/20 disabled:opacity-50 active:scale-95 transition-transform"
             >
               <UserPlus className="w-4 h-4" />
               יצירת קוד הזמנה

@@ -14,7 +14,7 @@ export default function Error({
         <p className="text-sm text-muted mb-6">אירעה שגיאה לא צפויה. אנחנו מצטערים על אי הנוחות.</p>
         <button
           onClick={reset}
-          className="px-6 py-2.5 rounded-xl gradient-primary text-white font-medium text-sm shadow-md shadow-primary/20 active:scale-95 transition-transform"
+          className="px-6 py-2.5 rounded-2xl gradient-primary text-white font-semibold text-sm shadow-md shadow-primary/20 active:scale-95 transition-transform"
         >
           נסו שוב
         </button>

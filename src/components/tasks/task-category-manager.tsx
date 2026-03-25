@@ -181,14 +181,14 @@ export function TaskCategoryManager({
                     <div className="flex gap-2">
                       <button
                         onClick={saveEdit}
-                        className="flex-1 py-2 rounded-lg gradient-primary text-white text-sm font-medium"
+                        className="flex-1 py-2 rounded-xl gradient-primary text-white text-sm font-semibold"
                       >
                         <Check className="w-4 h-4 inline ml-1" />
                         שמור
                       </button>
                       <button
                         onClick={() => setEditingId(null)}
-                        className="px-4 py-2 rounded-lg bg-surface text-muted text-sm"
+                        className="px-4 py-2 rounded-xl border border-border text-muted text-sm"
                       >
                         ביטול
                       </button>
@@ -295,14 +295,14 @@ export function TaskCategoryManager({
               <button
                 onClick={handleAdd}
                 disabled={!newName.trim()}
-                className="flex-1 py-2 rounded-lg gradient-primary text-white text-sm font-medium disabled:opacity-50"
+                className="flex-1 py-2 rounded-xl gradient-primary text-white text-sm font-semibold disabled:opacity-50"
               >
                 <Plus className="w-4 h-4 inline ml-1" />
                 הוסף
               </button>
               <button
                 onClick={() => setShowAddForm(false)}
-                className="px-4 py-2 rounded-lg bg-surface text-muted text-sm"
+                className="px-4 py-2 rounded-xl border border-border text-muted text-sm"
               >
                 ביטול
               </button>

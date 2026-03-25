@@ -196,7 +196,7 @@ export function WeeklyGeneratorModal({
                     </button>
                     <button
                       onClick={onApply}
-                      className="flex-1 py-3 rounded-xl gradient-primary text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
+                      className="flex-1 py-3 rounded-2xl gradient-primary text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
                     >
                       <Check className="w-4 h-4" />
                       <span className="truncate">החל ישירות</span>
@@ -206,7 +206,7 @@ export function WeeklyGeneratorModal({
                 {state === "editing" && (
                   <button
                     onClick={onApply}
-                    className="w-full py-3 rounded-xl gradient-primary text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
+                    className="w-full py-3 rounded-2xl gradient-primary text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
                   >
                     <Check className="w-4 h-4" />
                     <span className="truncate">החל תוכנית ({totalNew} משימות חדשות)</span>
@@ -215,7 +215,7 @@ export function WeeklyGeneratorModal({
                 {state === "done" && (
                   <button
                     onClick={() => { onReset(); onClose(); }}
-                    className="w-full py-3 rounded-xl gradient-primary text-white font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
+                    className="w-full py-3 rounded-2xl gradient-primary text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
                   >
                     <Check className="w-4 h-4" />
                     סיום
@@ -862,13 +862,13 @@ function DayEditCard({
                     <button
                       onClick={handleAdd}
                       disabled={!newTitle.trim()}
-                      className="flex-1 py-2 rounded-lg gradient-primary text-white text-sm font-medium disabled:opacity-50 min-h-[40px]"
+                      className="flex-1 py-2 rounded-xl gradient-primary text-white text-sm font-semibold disabled:opacity-50 min-h-[40px]"
                     >
                       הוסף
                     </button>
                     <button
                       onClick={() => setShowAddForm(false)}
-                      className="px-4 py-2 rounded-lg bg-border/30 text-foreground text-sm min-h-[40px] hover:bg-border/50 transition-colors"
+                      className="px-4 py-2 rounded-xl border border-border text-muted text-sm min-h-[40px] hover:bg-surface-hover transition-colors"
                     >
                       ביטול
                     </button>

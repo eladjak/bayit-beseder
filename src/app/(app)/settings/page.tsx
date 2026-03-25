@@ -183,9 +183,9 @@ export default function SettingsPage() {
     const success = await updateProfile({ name: displayName, avatar_url: avatarUrl || null });
     setProfileSaving(false);
     if (success) {
-      toast.success("הפרופיל עודכן בהצלחה!");
+      toast.success("הפרופיל עודכן 🙌");
     } else {
-      toast.error("שגיאה בעדכון הפרופיל.");
+      toast.error("אופס, לא הצלחנו — נסו שוב");
     }
   }, [displayName, avatarUrl, updateProfile]);
 
@@ -199,9 +199,9 @@ export default function SettingsPage() {
     const success = await updateProfile({ whatsapp_phone: whatsappPhone || null });
     setWhatsappPhoneSaving(false);
     if (success) {
-      toast.success("מספר הטלפון עודכן!");
+      toast.success("מספר הטלפון נשמר 📱");
     } else {
-      toast.error("שגיאה בשמירת מספר הטלפון");
+      toast.error("לא הצלחנו לשמור — נסו שוב");
     }
   }, [whatsappPhone, user, updateProfile]);
 
@@ -231,9 +231,9 @@ export default function SettingsPage() {
     const success = await updateHousehold({ name: householdName, goldenRuleTarget: goldenTarget });
     setHouseholdSaving(false);
     if (success) {
-      toast.success("הגדרות הבית עודכנו!");
+      toast.success("הגדרות הבית עודכנו 🏠");
     } else {
-      toast.error("שגיאה בשמירת הגדרות הבית");
+      toast.error("לא הצלחנו לשמור — נסו שוב");
     }
   }, [householdName, goldenTarget, profile?.household_id, updateHousehold]);
 
@@ -265,9 +265,9 @@ export default function SettingsPage() {
         const sub = await subscribeToPush(user.id);
         setPushSubscribed(sub !== null);
       }
-      toast.success("התראות הופעלו!");
+      toast.success("התראות פעילות 🔔");
     } else if (result === "denied") {
-      toast.error("ההתראות נחסמו. שנו את ההגדרה בדפדפן.");
+      toast.error("ההתראות חסומות — שנו בהגדרות הדפדפן");
     }
   }
 
@@ -277,15 +277,15 @@ export default function SettingsPage() {
       const ok = await unsubscribeFromPush(user.id);
       if (ok) {
         setPushSubscribed(false);
-        toast.success("התראות Push בוטלו");
+        toast.success("התראות בוטלו");
       }
     } else {
       const sub = await subscribeToPush(user.id);
       if (sub) {
         setPushSubscribed(true);
-        toast.success("התראות Push הופעלו!");
+        toast.success("התראות הופעלו! 🔔");
       } else {
-        toast.error("לא ניתן להפעיל התראות Push");
+        toast.error("לא הצלחנו להפעיל — נסו שוב");
       }
     }
   }
@@ -313,14 +313,14 @@ export default function SettingsPage() {
   }
 
   function handleClearLocalData() {
-    if (confirm("האם אתם בטוחים? פעולה זו תמחק את כל הנתונים המקומיים (העדפות, הגדרות).")) {
+    if (confirm("בטוחים? זה ימחק את כל ההעדפות המקומיות.")) {
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key?.startsWith("bayit-")) keysToRemove.push(key);
       }
       keysToRemove.forEach((key) => localStorage.removeItem(key));
-      toast.success("הנתונים המקומיים נמחקו");
+      toast.success("נוקה 🧹");
       setTimeout(() => window.location.reload(), 500);
     }
   }
@@ -328,21 +328,21 @@ export default function SettingsPage() {
   const isDemo = !user;
 
   return (
-    <div className="space-y-5 bg-background min-h-dvh" dir="rtl">
+    <div className="space-y-4 bg-background min-h-dvh" dir="rtl">
       {/* Header with gradient */}
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 text-center overflow-hidden">
-        <h1 className="text-xl font-bold text-white tracking-tight relative z-10">הגדרות</h1>
+        <h1 className="text-xl font-bold text-white tracking-tight relative z-10">⚙️ הגדרות</h1>
       </div>
 
-      <div className="px-4 space-y-5">
+      <div className="px-4 space-y-4">
         {/* Demo Mode Indicator */}
         {isDemo && (
           <div className="bg-warning/10 border border-warning/20 text-warning rounded-xl px-4 py-3 text-sm text-center">
-            אתם במצב דמו.{" "}
+            👀 אתם מסתכלים בלבד.{" "}
             <button onClick={() => router.push("/login")} className="underline font-medium">
-              התחברו
+              היכנסו
             </button>{" "}
-            כדי לשמור נתונים.
+            כדי לשמור.
           </div>
         )}
 
@@ -421,7 +421,7 @@ export default function SettingsPage() {
             תזמון לפי אזורים
           </h2>
           <p className="text-xs text-muted">
-            ארגון המשימות השבועיות לפי חדרים ואזורים בבית
+            מארגנים לפי חדרים — מטבח ביום שני, סלון ביום שלישי וכו׳
           </p>
           <div className="flex items-center justify-between">
             <span className="text-sm text-foreground">מצב אזורים</span>
@@ -443,7 +443,7 @@ export default function SettingsPage() {
           </div>
           {zoneConfig.zoneMode && (
             <div className="space-y-2 pt-1">
-              <div className="text-xs font-medium text-muted">סידור ברירת מחדל:</div>
+              <div className="text-xs font-medium text-muted">תצורה נוכחית:</div>
               {zoneConfig.zoneDaySummary
                 .filter((d) => d.zones.length > 0)
                 .map((day) => (
@@ -495,11 +495,11 @@ export default function SettingsPage() {
                 )}
                 <button
                   onClick={async () => {
-                    if (!confirm("האם לבטל את מצב הפסח? כל המשימות העונתיות יסומנו כהושלמו.")) return;
+                    if (!confirm("לבטל את מצב הפסח? המשימות העונתיות יסומנו כהושלמו.")) return;
                     setDeactivatingSeasonal(true);
                     await seasonalMode.deactivate();
                     setDeactivatingSeasonal(false);
-                    toast.success("מצב פסח בוטל");
+                    toast.success("מצב פסח בוטל 🫓");
                   }}
                   disabled={deactivatingSeasonal}
                   className="w-full py-2 rounded-xl border border-red-200 dark:border-red-800 text-red-500 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-40"
@@ -509,7 +509,7 @@ export default function SettingsPage() {
               </>
             ) : (
               <p className="text-sm text-muted">
-                מצב {seasonalMode.activeTemplate.nameHe} זמין — הפעילו מהדשבורד
+                {seasonalMode.activeTemplate.nameHe} זמין — הפעילו מהדשבורד 🏠
               </p>
             )}
           </div>

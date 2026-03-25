@@ -24,7 +24,7 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/"
-            className="inline-block px-6 py-2.5 rounded-xl gradient-primary text-white font-medium text-sm"
+            className="inline-block px-6 py-2.5 rounded-2xl gradient-primary text-white font-semibold text-sm"
           >
             לדף הבית
           </Link>

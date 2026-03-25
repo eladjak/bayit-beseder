@@ -42,7 +42,7 @@ const CelebrationOverlay = dynamic(() => import("@/components/gamification/celeb
 const CoachingBubble = dynamic(() => import("@/components/gamification/coaching-bubble").then(m => ({ default: m.CoachingBubble })), { ssr: false });
 const TaskCompletionModal = dynamic(() => import("@/components/task-completion-modal").then(m => ({ default: m.TaskCompletionModal })), { ssr: false });
 const PesachActivationModal = dynamic(() => import("@/components/seasonal/pesach-activation-modal").then(m => ({ default: m.PesachActivationModal })), { ssr: false });
-const TaskSetupWizard = dynamic(() => import("@/components/onboarding/task-setup-wizard").then(m => ({ default: m.TaskSetupWizard })), { ssr: false });
+const ConversationalOnboarding = dynamic(() => import("@/components/onboarding/conversational-onboarding").then(m => ({ default: m.ConversationalOnboarding })), { ssr: false });
 import { useHousehold } from "@/hooks/useHousehold";
 
 // ============================================
@@ -131,30 +131,38 @@ export default function DashboardPage() {
   const seasonalMode = useSeasonalMode();
   const [showSeasonalModal, setShowSeasonalModal] = useState(false);
 
-  // ---- Task Setup Wizard for new authenticated users ----
+  // ---- Conversational Onboarding for new authenticated users ----
   const [showTaskWizard, setShowTaskWizard] = useState(false);
   const seedAttempted = useRef(false);
   useEffect(() => {
-    if (seedAttempted.current || tasksLoading || dbTasks.length > 0 || !profile) return;
+    if (seedAttempted.current || tasksLoading || !profile) return;
+    // Show onboarding if no tasks exist AND onboarding not yet done
+    const onboardingDone = localStorage.getItem("bayit-beseder-onboarding-done");
+    if (dbTasks.length > 0 || onboardingDone) return;
     seedAttempted.current = true;
-    // Show task setup wizard instead of auto-seeding hardcoded tasks
     setShowTaskWizard(true);
   }, [tasksLoading, dbTasks.length, profile]);
 
-  const handleWizardComplete = useCallback(
-    async (selectedTasks: { title: string; category: string; estimatedMinutes: number; recurring: boolean; frequency: string }[]) => {
+  const handleOnboardingComplete = useCallback(
+    async (result: { homeName: string; tasks: { title: string; category: string; estimatedMinutes: number; recurring: boolean; frequency: string }[] }) => {
       setShowTaskWizard(false);
       if (!profile) return;
+      // Save home name to localStorage
+      if (result.homeName) {
+        localStorage.setItem("bayit-beseder-home-name", result.homeName);
+      }
+      // Mark conversational onboarding as done
+      localStorage.setItem("bayit-beseder-onboarding-done", "true");
       try {
         const res = await fetch("/api/seed", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tasks: selectedTasks }),
+          body: JSON.stringify({ tasks: result.tasks }),
         });
         const data = await res.json();
         if (data.seeded) {
           refetchTasks();
-          toast.success(`${selectedTasks.length} משימות נוצרו בהצלחה!`);
+          toast.success(`${result.tasks.length} משימות נוצרו בהצלחה!`);
         }
       } catch {
         toast.error("שגיאה ביצירת המשימות. נסו שוב.");
@@ -163,8 +171,9 @@ export default function DashboardPage() {
     [profile, refetchTasks]
   );
 
-  const handleWizardSkip = useCallback(() => {
+  const handleOnboardingSkip = useCallback(() => {
     setShowTaskWizard(false);
+    localStorage.setItem("bayit-beseder-onboarding-done", "true");
     // Fall back to default seed
     fetch("/api/seed", { method: "POST" })
       .then((res) => res.json())
@@ -546,11 +555,11 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Task setup wizard for new users */}
-      <TaskSetupWizard
+      {/* Conversational onboarding for new users */}
+      <ConversationalOnboarding
         open={showTaskWizard}
-        onComplete={handleWizardComplete}
-        onSkip={handleWizardSkip}
+        onComplete={handleOnboardingComplete}
+        onSkip={handleOnboardingSkip}
       />
     </div>
   );
