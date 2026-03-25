@@ -36,22 +36,27 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Dark mode overrides — must use :root.dark to override @theme inline vars */
+/* Dark mode overrides — !important needed to beat @theme inline specificity */
 :root.dark,
 .dark {
-  --color-background: #0F0D1A;
-  --color-surface: #1A1730;
-  --color-surface-hover: #252240;
-  --color-foreground: #E2E0F0;
-  --color-muted: #B0ACCC;
-  --color-border: #2D2A45;
+  --color-background: #0F0D1A !important;
+  --color-surface: #1A1730 !important;
+  --color-surface-hover: #252240 !important;
+  --color-foreground: #E2E0F0 !important;
+  --color-muted: #B0ACCC !important;
+  --color-border: #2D2A45 !important;
   color-scheme: dark;
 }
 
-/* Ensure html.dark body gets dark background */
-.dark body {
-  background-color: #0F0D1A;
+/* Belt and suspenders — force dark on body and all bg-background elements */
+.dark body,
+.dark .bg-background {
+  background-color: #0F0D1A !important;
   color: #E2E0F0;
+}
+
+.dark .bg-surface {
+  background-color: #1A1730 !important;
 }
 
 ::-webkit-scrollbar {
