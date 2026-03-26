@@ -42,8 +42,19 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 - Login page: 15+ hardcoded Hebrew strings → t() calls (form labels, buttons, toasts, error messages)
 - Register page: 12+ hardcoded Hebrew strings → t() calls
 
-**Session totals**: 8 commits (62-69), 13 files modified, ~400 lines added/changed
-**i18n coverage**: nav, settings, dashboard, stats, emergency, tasks, shopping, login, register — 9/12 app pages done
+**Commit 68**: i18n for PWA install banner, history page
+- PWA banner: all strings translatable (install title, subtitle, buttons, aria)
+- History page: header, search, empty states use t()
+- Added pwa, history, notFound sections to dictionaries
+
+**Commit 69**: i18n for weekly page — header, toasts, summary
+- Weekly page: 15+ toast messages, header, wizard CTA, zone mode, week summary → t()
+- Added 20 new weekly.* translation keys
+
+**Dogfood verification**: Dashboard, tasks, shopping, settings — all verified working on live site (bayitbeseder.com)
+
+**Session totals**: 11 commits (62-72), 17 files modified, ~550 lines added/changed
+**i18n coverage**: 11/12 app pages done (only playlists remains)
 
 ### Iteration: 2026-03-25 — AI Chat + Onboarding + Polish + Voice + PWA
 
