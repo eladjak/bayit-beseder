@@ -26,6 +26,7 @@ import { useCompletions } from "@/hooks/useCompletions";
 import { useProfile } from "@/hooks/useProfile";
 import { useCategories } from "@/hooks/useCategories";
 import { useTaskCategories } from "@/hooks/useTaskCategories";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const VoiceInputButton = dynamic(
   () => import("@/components/voice-input-button").then((m) => m.VoiceInputButton),
@@ -52,6 +53,7 @@ export default function TasksPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskCategory, setNewTaskCategory] = useState("general");
+  const { t } = useTranslation();
 
   // Supabase hooks
   const { profile } = useProfile();
@@ -117,8 +119,8 @@ export default function TasksPage() {
   // Convert DB tasks to a display-friendly shape
   const dbTaskViews: DbTaskView[] = useMemo(
     () =>
-      dbTasks.map((t) => {
-        const categoryName = t.category_id ? categoryMap[t.category_id] : null;
+      dbTasks.map((dbTask) => {
+        const categoryName = dbTask.category_id ? categoryMap[dbTask.category_id] : null;
         // Prefer dynamic category id lookup, fall back to hardcoded key
         const categoryKey = categoryName
           ? (dynamicCategoryNameToKey[categoryName] ?? CATEGORY_KEY_TO_NAME[categoryName] ?? "general")
@@ -127,34 +129,34 @@ export default function TasksPage() {
         // Check if task is overdue (due date is in the past and not completed)
         const today = new Date().toISOString().slice(0, 10);
         const isOverdue =
-          t.due_date &&
-          t.due_date < today &&
-          t.status !== "completed";
+          dbTask.due_date &&
+          dbTask.due_date < today &&
+          dbTask.status !== "completed";
 
         // For recurring tasks, use today's completions instead of permanent status.
-        const dbCompleted = t.recurring
-          ? isCompletedToday(t.id)
-          : t.status === "completed";
-        const isCompleted = optimisticCompleted.has(t.id)
+        const dbCompleted = dbTask.recurring
+          ? isCompletedToday(dbTask.id)
+          : dbTask.status === "completed";
+        const isCompleted = optimisticCompleted.has(dbTask.id)
           ? true
-          : optimisticUncompleted.has(t.id)
+          : optimisticUncompleted.has(dbTask.id)
             ? false
             : dbCompleted;
 
         return {
-          id: t.id,
-          title: t.title,
+          id: dbTask.id,
+          title: dbTask.title,
           categoryKey,
           estimated_minutes: 10,
           isCompleted,
           tips: [],
           isEmergency: false,
-          recurrenceLabel: t.recurring ? "חוזר" : "חד-פעמי",
-          dueDate: t.due_date ?? undefined,
+          recurrenceLabel: dbTask.recurring ? t("common.recurring") : t("common.oneTime"),
+          dueDate: dbTask.due_date ?? undefined,
           isOverdue: !!isOverdue,
         };
       }),
-    [dbTasks, categoryMap, dynamicCategoryNameToKey, optimisticCompleted, optimisticUncompleted, isCompletedToday]
+    [dbTasks, categoryMap, dynamicCategoryNameToKey, optimisticCompleted, optimisticUncompleted, isCompletedToday, t]
   );
 
   // ---- Mock tasks (fallback mode) ----
@@ -201,10 +203,10 @@ export default function TasksPage() {
     });
     if (isCurrentlyCompleted) {
       haptic("tap");
-      toast("בסדר, הורדנו את הסימון");
+      toast(t("tasks.demoUncomplete"));
     } else {
       haptic("success");
-      toast.success("יופי! משימה הושלמה 🎉");
+      toast.success(t("tasks.demoComplete"));
     }
   }
 
@@ -212,7 +214,7 @@ export default function TasksPage() {
   const toggleDbTask = useCallback(
     async (taskId: string) => {
       if (!profile) {
-        toast.error("יש להתחבר כדי לסמן משימות");
+        toast.error(t("tasks.loginRequired"));
         return;
       }
 
@@ -256,9 +258,9 @@ export default function TasksPage() {
 
           if (!delError) {
             await refetchCompletions();
-            toast.info("הסרנו את הסימון");
+            toast.info(t("tasks.removedMark"));
           } else {
-            toast.error("אופס, לא הצלחנו — נסו שוב");
+            toast.error(t("tasks.operationFailed"));
           }
         } else {
           const success = await updateTask(taskId, { status: "pending" });
@@ -268,9 +270,9 @@ export default function TasksPage() {
             return next;
           });
           if (success) {
-            toast.info("הסרנו את הסימון");
+            toast.info(t("tasks.removedMark"));
           } else {
-            toast.error("אופס, לא הצלחנו — נסו שוב");
+            toast.error(t("tasks.operationFailed"));
           }
         }
       } else {
@@ -289,13 +291,13 @@ export default function TasksPage() {
           return next;
         });
         if (result) {
-          toast.success("כל הכבוד! 🎉");
+          toast.success(t("tasks.taskCompleted"));
         } else {
-          toast.error("אופס, לא הצלחנו — נסו שוב");
+          toast.error(t("tasks.operationFailed"));
         }
       }
     },
-    [dbTasks, profile, markComplete, updateTask, optimisticCompleted, optimisticUncompleted, isCompletedToday, refetchCompletions]
+    [dbTasks, profile, markComplete, updateTask, optimisticCompleted, optimisticUncompleted, isCompletedToday, refetchCompletions, t]
   );
 
   // Add new task to DB
@@ -319,13 +321,13 @@ export default function TasksPage() {
     });
 
     if (result) {
-      toast.success("נוסף! 🙌");
+      toast.success(t("tasks.taskAdded"));
       setNewTaskTitle("");
       setShowAddForm(false);
     } else {
-      toast.error("אופס, משהו השתבש — נסו שוב");
+      toast.error(t("tasks.addFailed"));
     }
-  }, [newTaskTitle, newTaskCategory, categories, profile, createTask]);
+  }, [newTaskTitle, newTaskCategory, categories, profile, createTask, t]);
 
   // Delete task from DB
   const handleDeleteTask = useCallback(
@@ -333,12 +335,12 @@ export default function TasksPage() {
       haptic("tap");
       const success = await deleteTask(taskId);
       if (success) {
-        toast.success("הלכה 🗑️");
+        toast.success(t("tasks.taskDeleted"));
       } else {
-        toast.error("לא הצלחנו למחוק — נסו שוב");
+        toast.error(t("tasks.deleteFailed"));
       }
     },
-    [deleteTask]
+    [deleteTask, t]
   );
 
   // Resolve display label/color/icon for a categoryKey that may be either a
@@ -370,10 +372,10 @@ export default function TasksPage() {
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
         <div className="flex items-center justify-between relative z-10">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">משימות 📋</h1>
+            <h1 className="text-xl font-bold text-white tracking-tight">{t("tasks.title")} 📋</h1>
             {hasDbTasks && (
               <p className="text-xs text-white/60 mt-0.5">
-                {filteredDbTasks.filter(t => t.isCompleted).length}/{filteredDbTasks.length} עשינו 💪
+                {filteredDbTasks.filter(ft => ft.isCompleted).length}/{filteredDbTasks.length} {t("tasks.weDid")}
               </p>
             )}
           </div>
@@ -383,19 +385,19 @@ export default function TasksPage() {
                 if (hasDbTasks) {
                   setShowAddForm((prev) => !prev);
                 } else {
-                  toast("התחברו כדי להוסיף משימות");
+                  toast(t("tasks.loginToAdd"));
                 }
               }}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl gradient-primary text-white text-sm font-semibold shadow-lg shadow-primary/30 active:scale-95 transition-transform border border-white/20"
-              aria-label="הוספת משימה"
+              aria-label={t("tasks.addTask")}
             >
               <Plus className="w-4 h-4" />
-              <span>+ משימה</span>
+              <span>{t("tasks.addTaskShort")}</span>
             </button>
             <button
               onClick={() => setShowFilters((prev) => !prev)}
               className="relative p-2 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white/70 transition-colors border border-white/10"
-              aria-label="סינון לפי קטגוריה"
+              aria-label={t("tasks.filterByCategory")}
               aria-expanded={showFilters}
             >
               <Filter className="w-4 h-4" />
@@ -413,15 +415,15 @@ export default function TasksPage() {
       {!hasDbTasks && !tasksLoading && (
         <div className="rounded-xl overflow-hidden border-2 border-amber-300/70 dark:border-amber-700/50 shadow-md shadow-amber-100/50 dark:shadow-amber-950/20">
           <div className="bg-amber-50 dark:bg-amber-950/30 p-4 text-center">
-            <p className="text-base font-bold text-amber-900 dark:text-amber-100">👀 מצב הצצה</p>
+            <p className="text-base font-bold text-amber-900 dark:text-amber-100">👀 {t("common.peekMode")}</p>
             <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-              אלו משימות לדוגמה — נראה בסדר? התחברו וזה יהיה שלכם 🏠
+              {t("tasks.peekDescription")}
             </p>
             <a
               href="/login"
               className="inline-block mt-3 px-6 py-2 rounded-xl gradient-primary text-white text-sm font-semibold shadow-md shadow-primary/25 active:scale-95 transition-transform"
             >
-              יאללה, נכנסים
+              {t("common.letsGo")}
             </a>
           </div>
         </div>
@@ -440,13 +442,13 @@ export default function TasksPage() {
               type="text"
               value={newTaskTitle}
               onChange={(e) => setNewTaskTitle(e.target.value)}
-              placeholder="מה צריך לעשות?"
+              placeholder={t("tasks.whatToDo")}
               className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary"
               dir="rtl"
             />
             <VoiceInputButton
               onTranscript={(text) => setNewTaskTitle(text)}
-              ariaLabel="הוספה בקול"
+              ariaLabel={t("tasks.addByVoice")}
               className="flex-shrink-0 w-8 h-8"
             />
           </div>
@@ -476,7 +478,7 @@ export default function TasksPage() {
               disabled={!newTaskTitle.trim()}
               className="flex-1 py-2 rounded-2xl gradient-primary text-white text-sm font-semibold disabled:opacity-50 shadow-md shadow-primary/20"
             >
-              בואו נעשה את זה 🚀
+              {t("tasks.letsDoIt")}
             </button>
             <button
               onClick={() => {
@@ -485,7 +487,7 @@ export default function TasksPage() {
               }}
               className="px-4 py-2 rounded-xl border border-border text-muted text-sm"
             >
-              בטל
+              {t("common.cancel")}
             </button>
           </div>
         </motion.div>
@@ -507,7 +509,7 @@ export default function TasksPage() {
                 {/* "All" card */}
                 <CategoryCard
                   categoryKey="all"
-                  label="הכל"
+                  label={t("tasks.allCategories")}
                   icon="📋"
                   isActive={activeCategory === "all"}
                   onClick={() => setActiveCategory("all")}
@@ -535,7 +537,7 @@ export default function TasksPage() {
                 <button
                   onClick={() => setShowCategoryManager(true)}
                   className="flex-shrink-0 p-2 rounded-xl bg-surface border border-border text-muted hover:text-foreground hover:bg-surface-hover transition-colors mb-2"
-                  aria-label="ניהול קטגוריות"
+                  aria-label={t("tasks.manageCategories")}
                 >
                   <Settings className="w-4 h-4" />
                 </button>
@@ -561,20 +563,20 @@ export default function TasksPage() {
           >
             <Image
               src={activeCategory === "all" ? "/illustrations/tasks-done.jpg" : "/illustrations/empty-tasks.jpg"}
-              alt={activeCategory === "all" ? "כל המשימות הושלמו" : "אין משימות בקטגוריה זו"}
+              alt={activeCategory === "all" ? t("tasks.allDone") : t("tasks.noCategoryTasks")}
               width={192}
               height={192}
               className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
             />
             <p className="font-medium text-foreground">
               {activeCategory === "all"
-                ? "הבית בסדר גמור! 🎉"
-                : "אין כאן שום דבר — מצוין!"}
+                ? t("tasks.allDone")
+                : t("tasks.noCategoryTasks")}
             </p>
             <p className="text-sm text-muted mt-1">
               {activeCategory === "all"
-                ? "רוצים להוסיף משהו? קדימה"
-                : "נסו קטגוריה אחרת"}
+                ? t("tasks.wantToAdd")
+                : t("tasks.tryOtherCategory")}
             </p>
             {activeCategory === "all" && (
               <button
@@ -582,7 +584,7 @@ export default function TasksPage() {
                 className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl gradient-primary text-white text-sm font-semibold shadow-md shadow-primary/25 active:scale-95 transition-transform"
               >
                 <Plus className="w-4 h-4" />
-                הוסיפו משימה ראשונה
+                {t("tasks.addFirstTask")}
               </button>
             )}
           </motion.div>
@@ -617,12 +619,12 @@ export default function TasksPage() {
                   >
                     {task.isOverdue && (
                       <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
-                        ⏰ איחור
+                        ⏰ {t("common.overdue")}
                       </div>
                     )}
                     <button
                       onClick={() => toggleDbTask(task.id)}
-                      aria-label={`סמן כהושלם: ${task.title}`}
+                      aria-label={`${t("tasks.markComplete")}: ${task.title}`}
                       aria-pressed={false}
                       className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                         task.isOverdue
@@ -648,14 +650,14 @@ export default function TasksPage() {
                         </span>
                         <span className="text-[10px] text-muted flex items-center gap-0.5">
                           <Clock className="w-3 h-3" />
-                          {task.estimated_minutes} דק׳
+                          {task.estimated_minutes} {t("common.minutes")}
                         </span>
                       </div>
                     </div>
                     <button
                       onClick={() => handleDeleteTask(task.id)}
                       className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors"
-                      aria-label="מחיקת משימה"
+                      aria-label={t("tasks.deleteTask")}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -677,7 +679,7 @@ export default function TasksPage() {
                   >
                     <button
                       onClick={() => toggleMockTask(i)}
-                      aria-label={isCompleted ? `בטל השלמה: ${task.title}` : `סמן כהושלם: ${task.title}`}
+                      aria-label={isCompleted ? `${t("tasks.undoComplete")}: ${task.title}` : `${t("tasks.markComplete")}: ${task.title}`}
                       aria-pressed={isCompleted}
                       className={`mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                         isCompleted
@@ -713,11 +715,11 @@ export default function TasksPage() {
                         </span>
                         <span className="text-[10px] text-muted flex items-center gap-0.5">
                           <Clock className="w-3 h-3" />
-                          {task.estimated_minutes} דק׳
+                          {task.estimated_minutes} {t("common.minutes")}
                         </span>
                         {task.is_emergency && (
                           <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-medium">
-                            חירום
+                            {t("emergency.title")}
                           </span>
                         )}
                       </div>
@@ -741,7 +743,7 @@ export default function TasksPage() {
             >
               <div className="h-px flex-1 bg-border" />
               <span className="font-medium px-2">
-                {showCompleted ? "▾" : "▸"} ✅ בוצע ({completedDbTasks.length})
+                {showCompleted ? "▾" : "▸"} ✅ {t("tasks.completedSection")} ({completedDbTasks.length})
               </span>
               <div className="h-px flex-1 bg-border" />
             </button>
@@ -759,7 +761,7 @@ export default function TasksPage() {
                     >
                       <button
                         onClick={() => toggleDbTask(task.id)}
-                        aria-label={`בטל השלמה: ${task.title}`}
+                        aria-label={`${t("tasks.undoComplete")}: ${task.title}`}
                         aria-pressed={true}
                         className="mt-0.5 w-6 h-6 rounded-lg border-2 bg-success border-success flex items-center justify-center flex-shrink-0"
                       >

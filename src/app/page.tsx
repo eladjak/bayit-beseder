@@ -226,7 +226,8 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto px-6">
           {/* Brand */}
           <p className="font-bold text-base text-foreground mb-1">🏠 בית בסדר</p>
-          <p className="text-muted mb-5">ניהול הבית ביחד, בכיף — חינם לחלוטין</p>
+          <p className="text-muted mb-2">ניהול הבית ביחד, בכיף — חינם לחלוטין</p>
+          <p className="inline-flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary mb-4">🧪 גרסה ראשונה — <a href="/contact" className="underline hover:text-primary/80">נשמח למשוב!</a></p>
 
           {/* Links grid */}
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-6 text-xs">

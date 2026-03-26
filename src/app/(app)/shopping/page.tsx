@@ -14,6 +14,7 @@ import { CategoryManager } from "@/components/shopping/category-manager";
 import { haptic } from "@/lib/haptics";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useProfile } from "@/hooks/useProfile";
+import { useTranslation } from "@/hooks/useTranslation";
 import { Loader2 } from "lucide-react";
 
 const VoiceInputButton = dynamic(
@@ -33,6 +34,7 @@ export default function ShoppingPage() {
   } = useShoppingCategories();
   const seasonalMode = useSeasonalMode();
   const { profile } = useProfile();
+  const { t } = useTranslation();
   const [addingSeasonalShopping, setAddingSeasonalShopping] = useState(false);
 
   // Add-item form state
@@ -129,7 +131,7 @@ export default function ShoppingPage() {
     if (!newTitle.trim()) return;
     addItem(newTitle.trim(), newCategory);
     haptic("success");
-    toast.success("הפריט נוסף לרשימה");
+    toast.success(t("shopping.itemAdded"));
     setNewTitle("");
     setShowForm(false);
     setFormPresetCategory(null);
@@ -143,7 +145,7 @@ export default function ShoppingPage() {
   function handleRemove(id: string) {
     haptic("tap");
     removeItem(id);
-    toast.info("הוסר מהרשימה");
+    toast.info(t("shopping.itemRemoved"));
   }
 
   function handleClearChecked() {
@@ -151,7 +153,7 @@ export default function ShoppingPage() {
     if (count === 0) return;
     haptic("success");
     clearChecked();
-    toast.success(`${count} פריטים נקו — כיף! 🧹`);
+    toast.success(`${count} ${t("shopping.itemsCleared")}`);
   }
 
   if (loading) {
@@ -171,12 +173,12 @@ export default function ShoppingPage() {
         <div className="flex items-center justify-between relative z-10">
           <div className="text-center flex-1">
             <h1 className="text-xl font-bold text-white tracking-tight">
-              🛒 קניות
+              🛒 {t("shopping.titleShort")}
             </h1>
             {totalCount > 0 && (
               <div className="mt-2 inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 border border-white/10">
                 <span className="text-xs text-white/90 font-medium">
-                  {checkedCount}/{totalCount} בעגלה ✓
+                  {checkedCount}/{totalCount} {t("shopping.inCart")}
                 </span>
               </div>
             )}
@@ -189,7 +191,7 @@ export default function ShoppingPage() {
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
                 onClick={handleClearChecked}
-                aria-label={`נקה ${checkedCount} פריטים מסומנים`}
+                aria-label={t("shopping.clearChecked")}
                 className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
               >
                 <Trash2 className="w-4 h-4" />
@@ -199,7 +201,7 @@ export default function ShoppingPage() {
             <button
               onClick={() => setShowCategoryManager(true)}
               className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
-              aria-label="ניהול קטגוריות"
+              aria-label={t("shopping.manageCategories")}
             >
               <Settings className="w-4 h-4" />
             </button>
@@ -219,9 +221,9 @@ export default function ShoppingPage() {
               const result = await seasonalMode.addShoppingItems(profile.household_id, profile.id);
               setAddingSeasonalShopping(false);
               if (result.added > 0) {
-                toast.success(`${result.added} פריטי פסח נוספו לרשימה 🫓`);
+                toast.success(`${result.added} ${t("shopping.pesachItemsAdded")}`);
               } else if (result.errors.length > 0) {
-                toast.error("שגיאה בהוספת פריטי פסח");
+                toast.error(t("shopping.pesachAddError"));
               }
             }}
             disabled={addingSeasonalShopping}
@@ -231,7 +233,7 @@ export default function ShoppingPage() {
             {addingSeasonalShopping ? (
               <Loader2 className="w-4 h-4 animate-spin mx-auto" />
             ) : (
-              "🫓 הוסף רשימת קניות לפסח"
+              t("shopping.pesachShopping")
             )}
           </motion.button>
         )}
@@ -251,14 +253,14 @@ export default function ShoppingPage() {
               height={192}
               className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
             />
-            <p className="font-medium text-foreground">הרשימה ריקה — או שהקנייה כבר הייתה? 🛒</p>
-            <p className="text-sm text-muted mt-1">הוסיפו פריט ראשון לפני שהמקרר מתחיל לדבר</p>
+            <p className="font-medium text-foreground">{t("shopping.emptyTitle")}</p>
+            <p className="text-sm text-muted mt-1">{t("shopping.emptySubtitle")}</p>
             <button
               onClick={() => openAddForm()}
               className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl gradient-primary text-white text-sm font-semibold shadow-md shadow-primary/25 active:scale-95 transition-transform"
             >
               <Plus className="w-4 h-4" />
-              הוסיפו פריט ראשון
+              {t("shopping.addFirstItem")}
             </button>
           </motion.div>
         )}
@@ -288,7 +290,7 @@ export default function ShoppingPage() {
                   onClick={() => toggleCollapse(categoryName)}
                   role="button"
                   aria-expanded={!isCollapsed}
-                  aria-label={`${categoryName} - ${totalInCat} פריטים`}
+                  aria-label={`${categoryName} - ${totalInCat} ${t("shopping.items")}`}
                 >
                   {/* Color dot + icon */}
                   <span
@@ -315,7 +317,7 @@ export default function ShoppingPage() {
                       e.stopPropagation();
                       openAddForm(categoryName);
                     }}
-                    aria-label={`הוסף פריט ל${categoryName}`}
+                    aria-label={`${t("shopping.addToCategory")}${categoryName}`}
                     className="p-1.5 rounded-lg text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
@@ -372,7 +374,7 @@ export default function ShoppingPage() {
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border text-muted text-sm font-medium hover:border-primary hover:text-primary transition-colors"
         >
           <Settings className="w-4 h-4" />
-          עריכת קטגוריות
+          {t("shopping.editCategories")}
         </button>
       </div>
 
@@ -399,11 +401,11 @@ export default function ShoppingPage() {
             >
               <div className="flex items-center justify-between mb-3">
                 <h3 className="font-semibold text-foreground text-sm">
-                  {formPresetCategory ? `➕ ל${formPresetCategory}` : "מה חסר?"}
+                  {formPresetCategory ? `➕ ${t("shopping.addToCategory")}${formPresetCategory}` : t("shopping.whatsMissing")}
                 </h3>
                 <button
                   onClick={() => setShowForm(false)}
-                  aria-label="סגירת טופס הוספת פריט"
+                  aria-label={t("shopping.closeForm")}
                   className="p-1 rounded-lg text-muted hover:text-foreground"
                 >
                   <X className="w-4 h-4" />
@@ -418,13 +420,13 @@ export default function ShoppingPage() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter") handleAdd();
                   }}
-                  placeholder="מה קונים?"
+                  placeholder={t("shopping.whatToBuy")}
                   className="flex-1 bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary transition-colors"
                   autoFocus
                 />
                 <VoiceInputButton
                   onTranscript={(text) => setNewTitle(text)}
-                  ariaLabel="הוספה בקול"
+                  ariaLabel={t("shopping.addByVoice")}
                   className="flex-shrink-0 w-8 h-8"
                 />
               </div>
@@ -456,7 +458,7 @@ export default function ShoppingPage() {
                 disabled={!newTitle.trim()}
                 className="w-full py-2.5 rounded-2xl gradient-primary text-white font-semibold text-sm disabled:opacity-40 transition-opacity shadow-md shadow-primary/20"
               >
-                לרשימה! 🛒
+                {t("shopping.addToList")}
               </button>
             </motion.div>
           </>
@@ -470,7 +472,7 @@ export default function ShoppingPage() {
           animate={{ scale: 1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => openAddForm()}
-          aria-label="הוספת פריט לרשימת קניות"
+          aria-label={t("shopping.addItem")}
           className="fixed bottom-24 left-4 w-14 h-14 rounded-2xl gradient-primary text-white shadow-xl shadow-primary/40 flex items-center justify-center z-20 border border-white/20"
         >
           <Plus className="w-7 h-7" />
