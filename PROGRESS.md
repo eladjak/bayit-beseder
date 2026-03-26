@@ -63,9 +63,15 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 **Commit 72**: Deep i18n — 15 components (coaching, seasonal, dashboard, gamification, notifications, error page) + 95 new dict keys
 **Commit 73**: Iteration report HTML
 
-**Session totals**: 17 commits, 35+ files modified, ~1,200 lines added/changed
-**i18n coverage**: ALL 12 app pages + ALL major components — 550+ translation keys ✅
+**Commit 74**: SW v5 network-first for chunks + manifest shortcuts + sitemap
+**Commit 75**: Loading state with animated house icon
+**Commit 76**: Massive 4-agent commit: zone wizard, settings/chat i18n, onboarding i18n, ServiceWorkerUpdateToast
+
+**Session totals**: 21 commits, 50+ files modified, ~2,500 lines added/changed
+**i18n coverage**: ALL 12 pages + ALL 30+ components — 600+ translation keys ✅
+**New features**: Zone config in wizard, SW update toast, loading state, manifest shortcuts
 **Dogfood**: Dashboard, tasks, shopping, settings verified on live site
+**Agents used**: 8+ parallel agents across the session
 
 ### Iteration: 2026-03-25 — AI Chat + Onboarding + Polish + Voice + PWA
 
