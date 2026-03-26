@@ -51,6 +51,7 @@ import {
 import type { ClientCalendarEvent } from "@/lib/types/calendar";
 import type { TaskRow, TaskInsert } from "@/lib/types/database";
 import { haptic } from "@/lib/haptics";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   CATEGORY_BG_CLASSES,
   CATEGORY_LABELS,
@@ -143,6 +144,7 @@ function getCategoryFromId(categoryId: string | null): string {
 }
 
 export default function WeeklyPage() {
+  const { t } = useTranslation();
   const { profile } = useProfile();
   const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
   const { partner } = usePartner(profile?.partner_id, todayStr);
@@ -195,7 +197,7 @@ export default function WeeklyPage() {
 
   const handleOpenWizard = useCallback(() => {
     if (!profile) {
-      toast.error("צריך להתחבר קודם 🔑");
+      toast.error(t("weekly.loginFirst"));
       return;
     }
     const memberIds = [profile.id];
@@ -235,7 +237,7 @@ export default function WeeklyPage() {
       });
     }
     if (created === 0 && errors.length === 0) {
-      toast.info("השבוע כבר מלא במשימות 😄");
+      toast.info(t("weekly.weekFull"));
     }
   }, [wizard, refetch]);
 
@@ -345,9 +347,9 @@ export default function WeeklyPage() {
       haptic("tap");
       const ok = await updateTask(taskId, { assigned_to: newUserId });
       if (ok) {
-        toast.success("עבר ✓");
+        toast.success(t("weekly.moved"));
       } else {
-        toast.error("לא הצלחנו להעביר — נסו שוב");
+        toast.error(t("weekly.moveFailed"));
       }
     },
     [updateTask]
@@ -360,9 +362,9 @@ export default function WeeklyPage() {
       haptic("success");
       const ok = await updateTask(taskId, { due_date: newDate });
       if (ok) {
-        toast.success("הוזזה ✓");
+        toast.success(t("weekly.shifted"));
       } else {
-        toast.error("לא הצלחנו להזיז — נסו שוב");
+        toast.error(t("weekly.shiftFailed"));
       }
     },
     [updateTask]
@@ -373,7 +375,7 @@ export default function WeeklyPage() {
     async (suggestion: Suggestion) => {
       if (!suggestion.affectedDates || suggestion.affectedDates.length < 2) return;
       if (!isRealData) {
-        toast.info("התחברו כדי ליישם את ההמלצות 🔑");
+        toast.info(t("weekly.loginToApply"));
         return;
       }
 
@@ -386,7 +388,7 @@ export default function WeeklyPage() {
         (t) => t.due_date === sourceDate && t.status !== "completed"
       );
       if (sourceTasks.length === 0) {
-        toast.info("אין משימות להעביר");
+        toast.info(t("weekly.noTasksToMove"));
         return;
       }
 
@@ -396,7 +398,7 @@ export default function WeeklyPage() {
       if (ok) {
         toast.success(`"${taskToMove.title}" הועברה בהצלחה`);
       } else {
-        toast.error("שגיאה בהעברת המשימה");
+        toast.error(t("weekly.moveError"));
       }
     },
     [weekTasks, updateTask, isRealData]
@@ -445,7 +447,7 @@ export default function WeeklyPage() {
   const handleAddTask = useCallback(
     async (dueDate: string, title: string, categoryId: string) => {
       if (!profile?.id) {
-        toast.error("צריך להתחבר קודם 🔑");
+        toast.error(t("weekly.loginFirst"));
         return false;
       }
 
@@ -461,10 +463,10 @@ export default function WeeklyPage() {
       const result = await createTask(taskData);
       if (result) {
         haptic("success");
-        toast.success("נוסף! 🙌");
+        toast.success(t("weekly.taskAdded"));
         return true;
       } else {
-        toast.error("אופס, לא הצלחנו — נסו שוב");
+        toast.error(t("weekly.addFailed"));
         return false;
       }
     },
@@ -475,7 +477,7 @@ export default function WeeklyPage() {
   const handleToggleComplete = useCallback(
     async (task: TaskRow) => {
       if (task.id.startsWith("mock-")) {
-        toast.info("חיבור לסופאבייס נדרש לשינויים");
+        toast.info(t("weekly.dbRequired"));
         return;
       }
       const newStatus = task.status === "completed" ? "pending" : "completed";
@@ -484,10 +486,10 @@ export default function WeeklyPage() {
       if (ok) {
         if (newStatus === "completed") {
           haptic("success");
-          toast.success("יופי! ✅");
+          toast.success(t("weekly.completed"));
         }
       } else {
-        toast.error("לא הצלחנו לעדכן — נסו שוב");
+        toast.error(t("weekly.updateFailed"));
       }
     },
     [updateTask]
@@ -499,7 +501,7 @@ export default function WeeklyPage() {
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
         <div className="flex items-center justify-between mb-3 relative z-10">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">השבוע שלנו 🗓️</h1>
+            <h1 className="text-xl font-bold text-white tracking-tight">{t("weekly.title")} 🗓️</h1>
             <p className="text-sm text-white/60 mt-0.5">{weekRange}</p>
             <p className="text-xs text-white/70 mt-1">מי עושה מה ומתי? בואו נחלק בהוגן</p>
           </div>
@@ -511,7 +513,7 @@ export default function WeeklyPage() {
               title="יצירת תוכנית שבועית"
             >
               <Wand2 className="w-4 h-4" />
-              <span>✨ צרו תוכנית</span>
+              <span>{t("weekly.wizardCta")}</span>
             </button>
             {/* Secondary controls row */}
             <div className="flex items-center gap-1.5">
@@ -522,7 +524,7 @@ export default function WeeklyPage() {
                     ? "bg-white/30 border-white/30"
                     : "bg-white/12 border-white/10 hover:bg-white/20"
                 }`}
-                title={zoneConfig.zoneMode ? "תצוגת רשימה" : "תצוגת אזורים"}
+                title={zoneConfig.zoneMode ? t("weekly.zoneMode") : t("weekly.zoneMode")}
               >
                 {zoneConfig.zoneMode ? (
                   <LayoutGrid className="w-3.5 h-3.5 text-white" />
@@ -760,7 +762,7 @@ export default function WeeklyPage() {
         <div className="card-elevated p-4">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold text-foreground">סיכום השבוע</h3>
+            <h3 className="font-semibold text-foreground">{t("weekly.weekSummary")}</h3>
           </div>
 
           <div className="space-y-3">
