@@ -75,7 +75,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
-  const { setLocale: i18nSetLocale } = useTranslation();
+  const { t, setLocale: i18nSetLocale } = useTranslation();
   const { household, updateHousehold } = useHousehold(profile?.household_id ?? null);
 
   // Profile state
@@ -520,6 +520,29 @@ export default function SettingsPage() {
           onLogout={handleLogout}
           onClearLocalData={handleClearLocalData}
         />
+
+        {/* Beta Feedback Section */}
+        <div className="card-elevated p-4 text-center space-y-2">
+          <p className="text-sm font-semibold text-foreground">🧪 גרסה ראשונה</p>
+          <p className="text-xs text-muted leading-relaxed">
+            נתקלתם בבאג? חסר פיצ׳ר? רעיון לשיפור? נשמח לשמוע!
+          </p>
+          <div className="flex gap-2 justify-center">
+            <a
+              href="mailto:eladjak@gmail.com?subject=משוב על בית בסדר"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl gradient-primary text-white text-xs font-semibold shadow-md shadow-primary/20 active:scale-95 transition-transform"
+            >
+              ✉️ {t("common.login") === "Login" ? "Send feedback" : "שלחו משוב"}
+            </a>
+            <a
+              href="/contact"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-muted text-xs font-medium hover:text-foreground transition-colors"
+            >
+              💬 {t("common.login") === "Login" ? "Contact" : "צור קשר"}
+            </a>
+          </div>
+          <p className="text-[10px] text-muted/60">v1.0 — {t("settings.developer")} Elad Jayousi</p>
+        </div>
 
         <div className="pb-4" />
       </div>

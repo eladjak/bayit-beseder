@@ -80,7 +80,7 @@ export default function LandingPage() {
 
         <div className="relative z-10 max-w-4xl mx-auto px-6 py-20 text-center text-white">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/15 backdrop-blur-sm rounded-full text-sm font-medium mb-6 border border-white/20">
-            🏠 חינם לחלוטין — בעברית — מותאם לנייד
+            🏠 חינם לחלוטין — בעברית — מותאם לנייד — <span className="text-amber-200">🧪 גרסה ראשונה</span>
           </div>
 
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4 tracking-tight">
@@ -219,6 +219,32 @@ export default function LandingPage() {
         >
           🏠 בואו נתחיל!
         </Link>
+      </section>
+
+      {/* Beta Feedback Banner */}
+      <section className="bg-amber-50 dark:bg-amber-950/20 border-y border-amber-200/50 dark:border-amber-800/30 py-8 px-6 text-center">
+        <div className="max-w-2xl mx-auto">
+          <p className="text-lg font-bold text-amber-900 dark:text-amber-100 mb-2">🧪 גרסה ראשונה — המשוב שלכם חשוב!</p>
+          <p className="text-sm text-amber-700 dark:text-amber-300 mb-4 leading-relaxed">
+            אנחנו בונים את &quot;בית בסדר&quot; ומשפרים כל הזמן. נתקלתם בבאג? חסר לכם פיצ&apos;ר? יש רעיון?
+            <br />
+            כל משוב — גם קטן — עוזר לנו לבנות אפליקציה טובה יותר.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+            <a
+              href="mailto:eladjak@gmail.com?subject=משוב על בית בסדר"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 text-white font-semibold text-sm shadow-md hover:bg-amber-700 transition-colors active:scale-95"
+            >
+              ✉️ שלחו משוב במייל
+            </a>
+            <Link
+              href="/contact"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 font-medium text-sm hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+            >
+              💬 דף יצירת קשר
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* Footer */}
