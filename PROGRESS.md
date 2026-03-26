@@ -6,7 +6,7 @@
 ## Domain: bayitbeseder.com (Namecheap → Cloudflare DNS → Vercel)
 
 ## Current State
-App is fully functional with Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input, Gemini AI chat, and i18n. Beta feedback CTAs across all surfaces. Vercel auto-deploys from master.
+App is fully functional with: Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input (5 locations), Gemini AI chat, full i18n (600+ keys, 12 pages + 30+ components), beta feedback CTAs, list virtualization, page transitions, SW v5, zone wizard step. Vercel auto-deploys from master. 167 files, 19K+ lines of code.
 
 ## Recent Work
 
