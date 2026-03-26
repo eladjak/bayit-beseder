@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "צור קשר",
   description: "צרו קשר עם הצוות של בית בסדר — ברוכים הבאים לכל שאלה, רעיון או דיווח על באג.",
+  alternates: { canonical: "https://www.bayitbeseder.com/contact" },
 };
 
 const contacts = [

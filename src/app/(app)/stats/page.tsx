@@ -283,6 +283,87 @@ function PartnerComparisonSection({
 }
 
 // ============================================
+// N-Member Comparison Component
+// ============================================
+
+interface MembersComparisonProps {
+  members: Array<{ userId: string; name: string; count: number }>;
+  weeklyCompletedTotal: number;
+  monthlyCompletedTotal: number;
+}
+
+function MembersComparisonSection({
+  members,
+  weeklyCompletedTotal,
+  monthlyCompletedTotal,
+}: MembersComparisonProps) {
+  const total = members.reduce((sum, m) => sum + m.count, 0);
+  const COLORS = ["text-primary", "text-primary-light", "text-amber-500", "text-success", "text-rose-400", "text-sky-400"];
+  const BAR_COLORS = ["bg-primary", "bg-primary-light", "bg-amber-400", "bg-success", "bg-rose-400", "bg-sky-400"];
+
+  return (
+    <div className="card-elevated p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Users className="w-4 h-4 text-primary" />
+        <h2 className="font-semibold text-sm">⚖️ השבוע — מי עשה מה?</h2>
+      </div>
+
+      {/* Per-member counts */}
+      <div className={`grid gap-4 mb-3 ${members.length === 2 ? "grid-cols-2" : members.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+        {members.map((m, i) => (
+          <div key={m.userId} className="text-center">
+            <p className="text-xs text-muted mb-1 truncate">{m.name}</p>
+            <AnimatedNumber value={m.count} className={`text-2xl font-bold ${COLORS[i % COLORS.length]}`} />
+            <p className="text-xs text-muted">משימות</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Stacked ratio bar */}
+      {total > 0 && (
+        <div className="space-y-1 mb-3">
+          <div className="flex rounded-full h-2.5 overflow-hidden bg-border/30">
+            {members.map((m, i) => {
+              const pct = Math.round((m.count / total) * 100);
+              return (
+                <motion.div
+                  key={m.userId}
+                  className={`${BAR_COLORS[i % BAR_COLORS.length]} ${i === 0 ? "rounded-r-full" : ""} ${i === members.length - 1 ? "rounded-l-full" : ""}`}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${pct}%` }}
+                  transition={{ duration: 0.6, ease: "easeOut", delay: i * 0.08 }}
+                />
+              );
+            })}
+          </div>
+          <div className="flex justify-between text-[10px] text-muted">
+            {members.map((m) => (
+              <span key={m.userId}>{total > 0 ? Math.round((m.count / total) * 100) : 0}%</span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Summary stats */}
+      <div className="flex justify-between pt-2 border-t border-border">
+        <div className="flex items-center gap-1.5">
+          <TrendingUp className="w-3 h-3 text-success" />
+          <span className="text-[11px] text-muted">
+            השבוע: <span className="font-medium text-foreground">{weeklyCompletedTotal}</span>
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <TrendingUp className="w-3 h-3 text-primary" />
+          <span className="text-[11px] text-muted">
+            החודש: <span className="font-medium text-foreground">{monthlyCompletedTotal}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
 // Main Stats Page
 // ============================================
 
@@ -325,7 +406,22 @@ export default function StatsPage() {
     return breakdown.length > 0 ? breakdown : MOCK_CATEGORY_DATA;
   }, [hasDbData, completions, tasks, categoryIdToKey]);
 
-  // Partner comparison
+  // Partner / household comparison
+  // If household_members table has data, use N-member comparison; otherwise fall back to 2-user
+  const membersForComparison = useMemo(() => {
+    if (householdMembers.length > 0) return householdMembers.map((m) => ({ id: m.id, name: m.name }));
+    if (!profile) return [];
+    const list = [{ id: profile.id, name: profile.name ?? "אני" }];
+    if (profile.partner_id) list.push({ id: profile.partner_id, name: partner.name });
+    return list;
+  }, [householdMembers, profile, partner]);
+
+  const membersComparison = useMemo(() => {
+    if (!hasDbData || membersForComparison.length === 0) return [];
+    return computeMembersComparison(completions, membersForComparison, today);
+  }, [hasDbData, completions, membersForComparison, today]);
+
+  // Legacy 2-user comparison (used by PartnerComparisonSection when N-member not available)
   const partnerComparison = useMemo(() => {
     if (!hasDbData || !profile) {
       return { myCount: 48, partnerCount: 42, myUserId: "", partnerUserId: "" };
@@ -520,21 +616,31 @@ export default function StatsPage() {
         <CategoryPieChart data={categoryData} />
       </motion.div>
 
-      {/* Partner Comparison - now uses real data when available */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.5 }}
-      >
-        <PartnerComparisonSection
-        myCount={partnerComparison.myCount}
-        partnerCount={partnerComparison.partnerCount}
-        myName={profile?.name ?? "אני"}
-        partnerName={partner.name}
-        weeklyCompletedTotal={weeklyTotal}
-        monthlyCompletedTotal={monthlyTotal}
-      />
-      </motion.div>
+      {/* Household comparison — N members when available, falls back to 2-user */}
+      {membersForComparison.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.5 }}
+        >
+          {membersComparison.length > 0 ? (
+            <MembersComparisonSection
+              members={membersComparison}
+              weeklyCompletedTotal={weeklyTotal}
+              monthlyCompletedTotal={monthlyTotal}
+            />
+          ) : (
+            <PartnerComparisonSection
+              myCount={partnerComparison.myCount}
+              partnerCount={partnerComparison.partnerCount}
+              myName={profile?.name ?? "אני"}
+              partnerName={partner.name}
+              weeklyCompletedTotal={weeklyTotal}
+              monthlyCompletedTotal={monthlyTotal}
+            />
+          )}
+        </motion.div>
+      )}
 
       {/* Achievements */}
       <motion.div

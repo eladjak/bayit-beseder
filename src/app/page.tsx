@@ -11,6 +11,7 @@ import { FaqChat } from "@/components/landing/faq-chat";
 export const metadata: Metadata = {
   title: "בית בסדר — ניהול הבית ביחד, בכיף",
   description: "אפליקציה חינמית בעברית לניהול משימות הבית לזוגות ומשפחות. תכנון שבועי חכם, גיימיפיקציה, WhatsApp והכל בעברית!",
+  alternates: { canonical: "https://www.bayitbeseder.com" },
 };
 
 const jsonLd = {

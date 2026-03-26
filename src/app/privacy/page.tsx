@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "מדיניות פרטיות",
   description: "מדיניות הפרטיות של בית בסדר — איך אנחנו מגנים על המידע שלך",
+  alternates: { canonical: "https://www.bayitbeseder.com/privacy" },
 };
 
 export default function PrivacyPage() {

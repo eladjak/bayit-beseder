@@ -4,6 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "תנאי שימוש",
   description: "תנאי השימוש של בית בסדר — מה מותר, מה אסור, ומה אנחנו מבטיחים",
+  alternates: { canonical: "https://www.bayitbeseder.com/terms" },
 };
 
 export default function TermsPage() {

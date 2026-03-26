@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { WifiOff } from "lucide-react";
 
-export default function OfflinePage() {
+export function OfflineContent() {
   const { t } = useTranslation();
   const [retrying, setRetrying] = useState(false);
 
