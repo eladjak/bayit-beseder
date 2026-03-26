@@ -1,7 +1,7 @@
 {
-  "name": "בית בסדר",
+  "name": "בית בסדר — ניהול הבית ביחד",
   "short_name": "בית בסדר",
-  "description": "ניהול תחזוקת הבית המשותף",
+  "description": "אפליקציה חינמית בעברית לניהול תחזוקת הבית לזוגות ומשפחות — משימות, תכנון שבועי, רשימת קניות וגיימיפיקציה",
   "id": "bayitbeseder",
   "start_url": "/dashboard",
   "scope": "/",
@@ -11,16 +11,36 @@
   "lang": "he",
   "background_color": "#FAFAF9",
   "theme_color": "#6366F1",
+  "categories": ["lifestyle", "productivity", "utilities"],
   "icons": [
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "משימות",
+      "url": "/tasks",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "קניות",
+      "url": "/shopping",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "תכנון שבועי",
+      "url": "/weekly",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
