@@ -542,7 +542,7 @@ export default function SettingsPage() {
           </p>
           <div className="flex gap-2 justify-center">
             <a
-              href="mailto:eladjak@gmail.com?subject=משוב על בית בסדר"
+              href="mailto:contact@bayitbeseder.com?subject=משוב על בית בסדר"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl gradient-primary text-white text-xs font-semibold shadow-md shadow-primary/20 active:scale-95 transition-transform"
             >
               ✉️ {t("common.login") === "Login" ? "Send feedback" : "שלחו משוב"}

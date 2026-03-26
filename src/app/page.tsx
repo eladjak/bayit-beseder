@@ -232,7 +232,7 @@ export default function LandingPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <a
-              href="mailto:eladjak@gmail.com?subject=משוב על בית בסדר"
+              href="mailto:contact@bayitbeseder.com?subject=משוב על בית בסדר"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 text-white font-semibold text-sm shadow-md hover:bg-amber-700 transition-colors active:scale-95"
             >
               ✉️ שלחו משוב במייל

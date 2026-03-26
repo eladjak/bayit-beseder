@@ -33,7 +33,7 @@ export default function Error({
           </a>
         </div>
         <p className="text-[10px] text-muted/60 mt-4">
-          🧪 <a href="mailto:eladjak@gmail.com?subject=Bug Report — Bayit BeSeder" className="underline hover:text-primary">
+          🧪 <a href="mailto:contact@bayitbeseder.com?subject=Bug Report — Bayit BeSeder" className="underline hover:text-primary">
             {t("common.login") === "Login" ? "Report this bug" : "דווחו על הבאג"}
           </a>
         </p>

@@ -40,7 +40,7 @@ export function WeeklyShareCard({
   };
 
   const handleShare = useCallback(async () => {
-    const text = `${getEmoji()} ${getMessage()}\n${householdName} — ${weekRange}\n✅ ${completedTasks}/${totalTasks} משימות (${percentage}%)\n🔥 ${streakDays} ימים ברצף\n\nבית בסדר — bayitbeseder.com\n🧪 גרסה ראשונה — נשמח למשוב! eladjak@gmail.com`;
+    const text = `${getEmoji()} ${getMessage()}\n${householdName} — ${weekRange}\n✅ ${completedTasks}/${totalTasks} משימות (${percentage}%)\n🔥 ${streakDays} ימים ברצף\n\nבית בסדר — bayitbeseder.com\n🧪 גרסה ראשונה — נשמח למשוב! contact@bayitbeseder.com`;
 
     if (navigator.share) {
       try {
