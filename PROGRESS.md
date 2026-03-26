@@ -83,7 +83,15 @@ App is fully functional with: Pesach mode, zone-based scheduling, custom domain,
 **Commit 81**: RTL fix borderRight → borderInlineStart
 **Commit 82**: Dogfood audit fixes — 3 dead files deleted (1,050 lines)
 **Commit 83**: RTL logical props (20 files!), emergency nav, shopping virtualization, weekly refetch fix
-**Dogfood audit results**: 4 CRITICAL (3 fixed), 11 IMPORTANT (6 fixed), 15 MINOR (10+ fixed)
+**Dogfood audit results**: 4 CRITICAL (3 fixed), 11 IMPORTANT (8 fixed), 15 MINOR (12+ fixed)
+
+**Commit 84**: Language switcher (floating EN/עב pill on all pages)
+**Commit 85**: npm → bun migration (3.4s build vs 4.5s)
+**Commit 86**: contact@bayitbeseder.com email (Cloudflare routing → agents)
+**Commit 87**: Share texts updated with AI chat, Pesach, i18n features
+**Commit 88**: RTL fixes for auth pages (login + register)
+
+**Final session totals**: 33 commits, 70+ files, bun migration, email routing, language switcher
 
 ### Iteration: 2026-03-25 — AI Chat + Onboarding + Polish + Voice + PWA
 
