@@ -77,6 +77,13 @@ App is fully functional with: Pesach mode, zone-based scheduling, custom domain,
 **Dogfood**: Full code audit (critical/important/minor) + browser verification
 **Agents used**: 12+ parallel agents across the session
 **Codebase**: 164 files, 18,130 lines (down from 19,173 after dead code cleanup)
+**Total project commits**: 189
+
+**Commit 80**: List virtualization (tasks 15+), page transitions (150ms fade+slide)
+**Commit 81**: RTL fix borderRight → borderInlineStart
+**Commit 82**: Dogfood audit fixes — 3 dead files deleted (1,050 lines)
+**Commit 83**: RTL logical props (20 files!), emergency nav, shopping virtualization, weekly refetch fix
+**Dogfood audit results**: 4 CRITICAL (3 fixed), 11 IMPORTANT (6 fixed), 15 MINOR (10+ fixed)
 
 ### Iteration: 2026-03-25 — AI Chat + Onboarding + Polish + Voice + PWA
 
