@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { Search, Filter } from "lucide-react";
+
+const VoiceInputButton = dynamic(
+  () => import("@/components/voice-input-button").then((m) => m.VoiceInputButton),
+  { ssr: false }
+);
 import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
@@ -295,19 +301,26 @@ export default function HistoryPage() {
       </div>
 
       {/* Search */}
-      <div className="relative">
-        <Search
-          className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none"
-          aria-hidden="true"
-        />
-        <input
-          type="text"
-          placeholder="חיפוש משימות..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full bg-surface rounded-xl pr-9 pl-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:ring-2 focus:ring-primary/30"
-          dir="rtl"
-          aria-label="חיפוש במשימות שהושלמו"
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none"
+            aria-hidden="true"
+          />
+          <input
+            type="text"
+            placeholder="חיפוש משימות..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-surface rounded-xl pr-9 pl-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:ring-2 focus:ring-primary/30"
+            dir="rtl"
+            aria-label="חיפוש במשימות שהושלמו"
+          />
+        </div>
+        <VoiceInputButton
+          onTranscript={(text) => setSearch(text)}
+          ariaLabel="חיפוש בקול"
+          className="flex-shrink-0 w-9 h-9"
         />
       </div>
 

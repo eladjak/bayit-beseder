@@ -37,6 +37,7 @@ import { useWeeklyGenerator } from "@/hooks/useWeeklyGenerator";
 
 // Lazy-load the heavy wizard modal (includes @dnd-kit, recharts-like previews)
 const WeeklyGeneratorModal = dynamic(() => import("@/components/weekly/weekly-generator-modal").then(m => ({ default: m.WeeklyGeneratorModal })), { ssr: false });
+const VoiceInputButton = dynamic(() => import("@/components/voice-input-button").then(m => ({ default: m.VoiceInputButton })), { ssr: false });
 import {
   analyzeDailyLoad,
   analyzeDailyLoadWithCalendar,
@@ -1053,24 +1054,30 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
             className="overflow-hidden"
           >
             <div className="px-4 pb-3 pt-1 space-y-2 border-t border-border/20">
-              {/* Title input */}
-              <input
-                type="text"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSaveTask();
-                  if (e.key === "Escape") {
-                    setShowAddForm(false);
-                    setNewTitle("");
-                  }
-                }}
-                placeholder="משימה חדשה..."
-                dir="rtl"
-                autoFocus
-                className="w-full px-3 py-2 text-sm rounded-lg bg-background border border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/30 text-foreground placeholder:text-muted"
-              />
-
+              {/* Title input + voice */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveTask();
+                    if (e.key === "Escape") {
+                      setShowAddForm(false);
+                      setNewTitle("");
+                    }
+                  }}
+                  placeholder="משימה חדשה..."
+                  dir="rtl"
+                  autoFocus
+                  className="flex-1 px-3 py-2 text-sm rounded-lg bg-background border border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/30 text-foreground placeholder:text-muted"
+                />
+                <VoiceInputButton
+                  onTranscript={(text) => setNewTitle(text)}
+                  ariaLabel="הוספה בקול"
+                  className="flex-shrink-0 w-8 h-8"
+                />
+              </div>
               {/* Category selector */}
               <div className="flex flex-wrap gap-1.5">
                 {CATEGORY_KEYS.map((cat) => (
