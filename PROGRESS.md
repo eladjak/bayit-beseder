@@ -59,8 +59,13 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 - playlists: 5 Hebrew strings → t() (last remaining app page!)
 - Added invite (24 keys), voice (4 keys), playlists (5 keys) to both dicts
 
-**Session totals**: 13 commits, 20+ files modified, ~650 lines added/changed
-**i18n coverage**: ALL 12 app pages + key components (invite, voice, PWA) — COMPLETE ✅
+**Commit 71**: i18n weekly generator wizard (30+ strings across 6 sub-components)
+**Commit 72**: Deep i18n — 15 components (coaching, seasonal, dashboard, gamification, notifications, error page) + 95 new dict keys
+**Commit 73**: Iteration report HTML
+
+**Session totals**: 17 commits, 35+ files modified, ~1,200 lines added/changed
+**i18n coverage**: ALL 12 app pages + ALL major components — 550+ translation keys ✅
+**Dogfood**: Dashboard, tasks, shopping, settings verified on live site
 
 ### Iteration: 2026-03-25 — AI Chat + Onboarding + Polish + Voice + PWA
 
