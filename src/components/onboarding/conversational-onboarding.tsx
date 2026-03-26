@@ -3,8 +3,14 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Check, Sparkles, Home, Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useTranslation } from "@/hooks/useTranslation";
+
+const VoiceInputButton = dynamic(
+  () => import("@/components/voice-input-button").then((m) => m.VoiceInputButton),
+  { ssr: false }
+);
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -332,16 +338,23 @@ function StepHomeName({
       </h2>
       <p className="text-sm text-muted mb-6">{t("onboarding.homeNameSubtitle")}</p>
 
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={t("onboarding.homeNamePlaceholder")}
-        aria-label={t("onboarding.homeNameAriaLabel")}
-        className="w-full px-4 py-3 rounded-2xl border-2 border-border bg-surface text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-colors text-right text-sm"
-        autoFocus
-        dir="rtl"
-      />
+      <div className="flex items-center gap-2">
+        <input
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={t("onboarding.homeNamePlaceholder")}
+          aria-label={t("onboarding.homeNameAriaLabel")}
+          className="flex-1 px-4 py-3 rounded-2xl border-2 border-border bg-surface text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-colors text-right text-sm"
+          autoFocus
+          dir="rtl"
+        />
+        <VoiceInputButton
+          onTranscript={(text) => onChange(text)}
+          ariaLabel={t("voice.record")}
+          className="flex-shrink-0 w-10 h-10"
+        />
+      </div>
 
       <div className="flex flex-wrap gap-2 mt-4">
         {suggestions.map((s) => (
