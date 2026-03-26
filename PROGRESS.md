@@ -53,8 +53,14 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 
 **Dogfood verification**: Dashboard, tasks, shopping, settings — all verified working on live site (bayitbeseder.com)
 
-**Session totals**: 11 commits (62-72), 17 files modified, ~550 lines added/changed
-**i18n coverage**: 11/12 app pages done (only playlists remains)
+**Commit 70**: i18n for invite-partner, voice-input, playlists + 33 new dict keys
+- invite-partner: 17 Hebrew strings → t() (toasts, UI text, WhatsApp message template)
+- voice-input-button: 3 Hebrew aria-labels/titles → t()
+- playlists: 5 Hebrew strings → t() (last remaining app page!)
+- Added invite (24 keys), voice (4 keys), playlists (5 keys) to both dicts
+
+**Session totals**: 13 commits, 20+ files modified, ~650 lines added/changed
+**i18n coverage**: ALL 12 app pages + key components (invite, voice, PWA) — COMPLETE ✅
 
 ### Iteration: 2026-03-25 — AI Chat + Onboarding + Polish + Voice + PWA
 
