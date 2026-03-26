@@ -67,11 +67,16 @@ App is fully functional with: Pesach mode, zone-based scheduling, custom domain,
 **Commit 75**: Loading state with animated house icon
 **Commit 76**: Massive 4-agent commit: zone wizard, settings/chat i18n, onboarding i18n, ServiceWorkerUpdateToast
 
-**Session totals**: 21 commits, 50+ files modified, ~2,500 lines added/changed
+**Commit 77**: List virtualization (tasks), page transitions, calendar i18n
+**Commit 78**: RTL fix — borderRight → borderInlineStart (4 occurrences)
+**Commit 79**: Dogfood audit fixes — 3 dead files deleted (1,050 lines), RTL fixes, i18n fix
+
+**Session totals**: 26 commits, 60+ files modified, ~2,800 lines added, 1,050 lines dead code removed
 **i18n coverage**: ALL 12 pages + ALL 30+ components — 600+ translation keys ✅
-**New features**: Zone config in wizard, SW update toast, loading state, manifest shortcuts
-**Dogfood**: Dashboard, tasks, shopping, settings verified on live site
-**Agents used**: 8+ parallel agents across the session
+**New features**: Zone config in wizard, SW update toast, loading state, manifest shortcuts, list virtualization, page transitions
+**Dogfood**: Full code audit (critical/important/minor) + browser verification
+**Agents used**: 12+ parallel agents across the session
+**Codebase**: 164 files, 18,130 lines (down from 19,173 after dead code cleanup)
 
 ### Iteration: 2026-03-25 — AI Chat + Onboarding + Polish + Voice + PWA
 
