@@ -145,7 +145,7 @@ export function DashboardStats({
     <div className="space-y-4">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="card-elevated rounded-2xl p-4">
+        <div className="card-elevated rounded-2xl p-4 hover:shadow-md transition-shadow duration-150">
           <p className="text-xs text-muted mb-1">{t("stats.totalTasks")}</p>
           <p className="text-2xl font-bold text-foreground">{animatedTotal}</p>
           <div className="flex gap-2 mt-1">
@@ -159,7 +159,7 @@ export function DashboardStats({
           </div>
         </div>
 
-        <div className="card-elevated rounded-2xl p-4">
+        <div className="card-elevated rounded-2xl p-4 hover:shadow-md transition-shadow duration-150">
           <p className="text-xs text-muted mb-1">{t("stats.completionRate")}</p>
           <p className="text-2xl font-bold text-primary">{animatedRate}%</p>
           <div className="mt-2 bg-border rounded-full h-1.5 overflow-hidden">

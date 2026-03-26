@@ -26,7 +26,7 @@ export function DangerZone({ isDemo, onLogout, onClearLocalData }: DangerZonePro
         <p className="text-xs text-muted mb-3">
           {t("settings.dangerSection.emergencyDesc")}
         </p>
-        <button className="w-full py-2.5 rounded-xl border border-border bg-surface text-sm font-medium text-foreground hover:bg-surface-hover transition-colors">
+        <button className="w-full py-2.5 rounded-xl border border-border bg-surface text-sm font-medium text-foreground hover:bg-surface-hover transition-all duration-100 active:scale-[0.98]">
           {t("settings.dangerSection.activateEmergency")}
         </button>
       </section>
@@ -91,7 +91,7 @@ export function DangerZone({ isDemo, onLogout, onClearLocalData }: DangerZonePro
           </p>
           <button
             onClick={onClearLocalData}
-            className="w-full py-2.5 rounded-xl border border-danger/30 text-sm font-medium text-danger hover:bg-danger/5 transition-colors"
+            className="w-full py-2.5 rounded-xl border border-danger/30 text-sm font-medium text-danger hover:bg-danger/5 transition-all duration-100 active:scale-[0.97]"
           >
             {t("settings.dangerSection.clearData")}
           </button>
@@ -101,7 +101,7 @@ export function DangerZone({ isDemo, onLogout, onClearLocalData }: DangerZonePro
       {/* Logout */}
       <button
         onClick={onLogout}
-        className="w-full flex items-center justify-center gap-2 py-3 text-danger text-sm font-medium"
+        className="w-full flex items-center justify-center gap-2 py-3 text-danger text-sm font-medium transition-all duration-100 active:scale-[0.97] hover:opacity-80"
       >
         <LogOut className="w-4 h-4" />
         {isDemo

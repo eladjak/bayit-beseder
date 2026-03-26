@@ -46,6 +46,7 @@ import {
 import type { WeekPlan, PlannedTask } from "@/lib/weekly-generator";
 import type { TaskTemplate } from "@/lib/seed-data";
 import { ZoneDayPicker } from "@/components/weekly/zone-day-picker";
+import { ZoneWizardStep } from "@/components/weekly/zone-wizard-step";
 import type { ZoneDayMapping } from "@/lib/zones";
 
 // ============================================
@@ -99,7 +100,23 @@ export function WeeklyGeneratorModal({
   const focusRef = useFocusTrap<HTMLDivElement>(open && !!plan, onClose);
   const { t } = useTranslation();
   const [zoneOpen, setZoneOpen] = useState(false);
+  // Internal wizard step: show zone-config before preview when showZoneStep is on
+  const [localStep, setLocalStep] = useState<"zone-config" | "plan">(
+    showZoneStep ? "zone-config" : "plan"
+  );
+
   if (!open || !plan) return null;
+
+  // Compute task count per category from the plan for the zone wizard
+  const taskCountByCategory: Record<string, number> = {};
+  for (const day of plan) {
+    for (const task of day.tasks) {
+      const catKey = task.category;
+      taskCountByCategory[catKey] = (taskCountByCategory[catKey] ?? 0) + 1;
+    }
+  }
+
+  const showingZoneStep = localStep === "zone-config" && state === "preview" && showZoneStep;
 
   const totalNew = plan.reduce(
     (sum, day) => sum + day.tasks.filter((task) => !task.isExisting).length,
@@ -158,7 +175,17 @@ export function WeeklyGeneratorModal({
 
                 {/* Step indicator */}
                 <div className="flex items-center gap-2 mt-3 relative z-10">
-                  <StepDot active={state === "preview"} done={state === "editing" || state === "applying" || state === "done"} label={t("weekly.stepPreview")} />
+                  {showZoneStep && (
+                    <>
+                      <StepDot
+                        active={showingZoneStep}
+                        done={!showingZoneStep}
+                        label={t("weekly.stepZoneConfig")}
+                      />
+                      <div className="flex-1 h-px bg-white/20" />
+                    </>
+                  )}
+                  <StepDot active={state === "preview" && !showingZoneStep} done={state === "editing" || state === "applying" || state === "done"} label={t("weekly.stepPreview")} />
                   <div className="flex-1 h-px bg-white/20" />
                   <StepDot active={state === "editing"} done={state === "applying" || state === "done"} label={t("weekly.stepEdit")} />
                   <div className="flex-1 h-px bg-white/20" />
@@ -168,8 +195,17 @@ export function WeeklyGeneratorModal({
 
               {/* Content — scrollable */}
               <div className="flex-1 overflow-y-auto overscroll-contain bg-background">
-                {/* Zone configuration collapsible — shown in preview state when showZoneStep is true */}
-                {state === "preview" && showZoneStep && (
+                {/* Zone wizard step — full-page step before preview */}
+                {showingZoneStep && (
+                  <ZoneWizardStep
+                    zoneMappings={zoneMappings}
+                    onZoneMappingsChange={onZoneMappingsChange ?? (() => {})}
+                    taskCountByCategory={taskCountByCategory}
+                  />
+                )}
+
+                {/* Zone configuration collapsible — shown in preview state when showZoneStep is true AND zone step was already completed */}
+                {state === "preview" && showZoneStep && !showingZoneStep && (
                   <div className="border-b border-border">
                     <button
                       type="button"
@@ -221,7 +257,7 @@ export function WeeklyGeneratorModal({
                   </div>
                 )}
 
-                {state === "preview" && (
+                {state === "preview" && !showingZoneStep && (
                   <PreviewStep
                     plan={plan}
                     members={members}
@@ -252,8 +288,33 @@ export function WeeklyGeneratorModal({
 
               {/* Footer actions — elevated surface */}
               <div className="px-4 py-3 bg-surface border-t border-border safe-bottom">
-                {state === "preview" && (
+                {/* Zone step footer: Next button to proceed to preview */}
+                {showingZoneStep && (
                   <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        if (onRegenerateWithZones) onRegenerateWithZones();
+                        setLocalStep("plan");
+                      }}
+                      className="flex-1 py-3 rounded-2xl gradient-primary text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
+                    >
+                      <Wand2 className="w-4 h-4" />
+                      <span className="truncate">{t("weekly.regenerateWithZones")}</span>
+                    </button>
+                  </div>
+                )}
+                {state === "preview" && !showingZoneStep && (
+                  <div className="flex gap-2">
+                    {/* Back to zone step if zone mode is on */}
+                    {showZoneStep && (
+                      <button
+                        onClick={() => setLocalStep("zone-config")}
+                        className="py-3 px-4 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-medium flex items-center justify-center gap-1.5 active:scale-[0.98] transition-transform min-h-[48px]"
+                        aria-label={t("weekly.stepZoneConfig")}
+                      >
+                        <span className="text-base">🏠</span>
+                      </button>
+                    )}
                     <button
                       onClick={onStartEditing}
                       className="flex-1 py-3 rounded-xl bg-primary/10 text-primary font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"

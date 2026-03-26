@@ -261,6 +261,7 @@ export default function ShoppingPage() {
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
+                whileTap={{ scale: 0.88 }}
                 onClick={handleClearChecked}
                 aria-label={t("shopping.clearChecked")}
                 className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
@@ -271,7 +272,7 @@ export default function ShoppingPage() {
             {/* Category manager */}
             <button
               onClick={() => setShowCategoryManager(true)}
-              className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
+              className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-all duration-100 active:scale-[0.90] border border-white/10"
               aria-label={t("shopping.manageCategories")}
             >
               <Settings className="w-4 h-4" />
@@ -357,7 +358,7 @@ export default function ShoppingPage() {
               >
                 {/* Category header */}
                 <div
-                  className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none"
+                  className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-surface-hover transition-colors duration-150 active:bg-border/20"
                   onClick={() => toggleCollapse(categoryName)}
                   role="button"
                   aria-expanded={!isCollapsed}
@@ -389,7 +390,7 @@ export default function ShoppingPage() {
                       openAddForm(categoryName);
                     }}
                     aria-label={`${t("shopping.addToCategory")}${categoryName}`}
-                    className="p-1.5 rounded-lg text-muted hover:text-foreground hover:bg-surface-hover transition-colors"
+                    className="p-1.5 rounded-lg text-muted hover:text-foreground hover:bg-surface-hover transition-all duration-100 active:scale-[0.85]"
                   >
                     <Plus className="w-3.5 h-3.5" />
                   </button>
@@ -454,7 +455,7 @@ export default function ShoppingPage() {
         {/* Manage categories link */}
         <button
           onClick={() => setShowCategoryManager(true)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border text-muted text-sm font-medium hover:border-primary hover:text-primary transition-colors"
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border text-muted text-sm font-medium hover:border-primary hover:text-primary transition-all duration-100 active:scale-[0.98]"
         >
           <Settings className="w-4 h-4" />
           {t("shopping.editCategories")}
@@ -539,7 +540,7 @@ export default function ShoppingPage() {
               <button
                 onClick={handleAdd}
                 disabled={!newTitle.trim()}
-                className="w-full py-2.5 rounded-2xl gradient-primary text-white font-semibold text-sm disabled:opacity-40 transition-opacity shadow-md shadow-primary/20"
+                className="w-full py-2.5 rounded-2xl gradient-primary text-white font-semibold text-sm disabled:opacity-40 transition-all duration-100 active:scale-[0.97] shadow-md shadow-primary/20"
               >
                 {t("shopping.addToList")}
               </button>

@@ -94,7 +94,7 @@ export function HouseholdSection({
       <button
         onClick={onSave}
         disabled={householdSaving}
-        className="flex items-center gap-2 px-4 py-2 gradient-primary text-white rounded-2xl text-sm font-semibold transition-colors disabled:opacity-50 shadow-md shadow-primary/20"
+        className="flex items-center gap-2 px-4 py-2 gradient-primary text-white rounded-2xl text-sm font-semibold transition-all duration-100 active:scale-[0.97] disabled:opacity-50 shadow-md shadow-primary/20"
       >
         {householdSaving ? (
           <Loader2 className="w-4 h-4 animate-spin" />

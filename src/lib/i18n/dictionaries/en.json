@@ -115,6 +115,26 @@
       "connecting": "Connecting...",
       "connectLabel": "Connect Google Calendar",
       "securityHint": "Your data is secure. We only request access to create events."
+    },
+    "members": {
+      "title": "Household Members",
+      "owner": "Owner",
+      "member": "Member",
+      "you": "You",
+      "makeOwner": "Make owner",
+      "makeRegularMember": "Make regular member",
+      "changeRole": "Change role",
+      "removeMember": "Remove from household",
+      "removeConfirm": "Are you sure? This will remove {name} from the household",
+      "inviteMore": "Invite another member",
+      "tasksToday": "Today's tasks",
+      "noTasksToday": "No tasks today",
+      "noMembers": "No other members yet",
+      "roleUpdated": "Role updated",
+      "memberRemoved": "Removed from household",
+      "cannotRemoveSelf": "Cannot remove yourself",
+      "lastOwner": "Must have at least one owner",
+      "manage": "Manage"
     }
   },
   "common": {
@@ -301,7 +321,16 @@
     "zoneConfig": "Zone Configuration",
     "zoneConfigDesc": "Adjust zone-to-day assignments before generating the plan",
     "zoneConfigToggle": "🏠 Zone Configuration",
-    "regenerateWithZones": "Regenerate with zones"
+    "regenerateWithZones": "Regenerate with zones",
+    "stepZoneConfig": "Zones",
+    "zoneWizard": {
+      "title": "Assign Zones to Days",
+      "unassigned": "Unassigned",
+      "resetDefaults": "Reset to Defaults",
+      "dragHint": "Drag a zone to the desired day",
+      "tapHint": "Tap a zone to select a day",
+      "tasksCount": "tasks"
+    }
   },
   "stats": {
     "title": "Statistics",

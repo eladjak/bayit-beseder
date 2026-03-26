@@ -53,7 +53,7 @@ export function RoomConditions({
             <button
               key={item.category}
               type="button"
-              className="w-full text-right"
+              className="w-full text-right transition-transform duration-100 active:scale-[0.98]"
               onClick={() => onCategoryClick?.(item.category)}
             >
               <div className="flex items-center gap-3">

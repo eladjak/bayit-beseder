@@ -39,7 +39,7 @@ function SummaryCard({
 }: SummaryCardProps) {
   return (
     <motion.div
-      className="card-elevated p-4"
+      className="card-elevated p-4 hover:shadow-md transition-shadow duration-150"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.3 }}

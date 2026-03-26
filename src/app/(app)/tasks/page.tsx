@@ -502,7 +502,7 @@ export default function TasksPage() {
             <button
               onClick={handleAddTask}
               disabled={!newTaskTitle.trim()}
-              className="flex-1 py-2 rounded-2xl gradient-primary text-white text-sm font-semibold disabled:opacity-50 shadow-md shadow-primary/20"
+              className="flex-1 py-2 rounded-2xl gradient-primary text-white text-sm font-semibold disabled:opacity-50 shadow-md shadow-primary/20 transition-transform duration-100 active:scale-[0.97]"
             >
               {t("tasks.letsDoIt")}
             </button>
@@ -511,7 +511,7 @@ export default function TasksPage() {
                 setShowAddForm(false);
                 setNewTaskTitle("");
               }}
-              className="px-4 py-2 rounded-xl border border-border text-muted text-sm"
+              className="px-4 py-2 rounded-xl border border-border text-muted text-sm transition-transform duration-100 active:scale-[0.95]"
             >
               {t("common.cancel")}
             </button>
@@ -715,7 +715,8 @@ export default function TasksPage() {
                     layout
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`card-elevated p-3.5 flex items-start gap-3 relative overflow-hidden ${
+                    whileTap={{ scale: 0.99 }}
+                    className={`card-elevated p-3.5 flex items-start gap-3 relative overflow-hidden hover:shadow-md transition-shadow duration-150 ${
                       task.isOverdue ? "ring-1 ring-red-500/20" : ""
                     }`}
                     style={{
@@ -784,7 +785,8 @@ export default function TasksPage() {
                   layout
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className={`card-elevated p-3 flex items-start gap-3 relative overflow-hidden ${
+                  whileTap={{ scale: 0.99 }}
+                  className={`card-elevated p-3 flex items-start gap-3 relative overflow-hidden hover:shadow-md transition-shadow duration-150 ${
                     isCompleted ? "opacity-60" : ""
                   }`}
                 >
@@ -859,7 +861,7 @@ export default function TasksPage() {
           <div className="mt-4">
             <button
               onClick={() => setShowCompleted((prev) => !prev)}
-              className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors w-full"
+              className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition-all duration-100 active:scale-[0.97] w-full"
             >
               <div className="h-px flex-1 bg-border" />
               <span className="font-medium px-2">

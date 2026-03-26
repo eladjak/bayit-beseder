@@ -19,12 +19,12 @@ function ToggleRow({ label, enabled, onToggle }: ToggleRowProps) {
         onClick={onToggle}
         role="switch"
         aria-checked={enabled}
-        className={`w-10 h-6 rounded-full transition-colors relative ${
+        className={`w-10 h-6 rounded-full transition-all duration-150 active:scale-90 relative ${
           enabled ? "bg-primary" : "bg-border"
         }`}
       >
         <span
-          className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+          className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-150 ${
             enabled ? "translate-x-0.5" : "translate-x-[18px]"
           }`}
         />
@@ -90,7 +90,7 @@ export function NotificationSettings({
           {notifPermission === "default" && (
             <button
               onClick={onEnableNotifications}
-              className="px-3 py-1.5 gradient-primary text-white rounded-xl text-xs font-semibold shadow-sm shadow-primary/20"
+              className="px-3 py-1.5 gradient-primary text-white rounded-xl text-xs font-semibold shadow-sm shadow-primary/20 transition-transform duration-100 active:scale-[0.95]"
             >
               {t("settings.notificationSection.enableNotifications")}
             </button>

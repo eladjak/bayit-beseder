@@ -25,6 +25,7 @@ import { HouseholdSection } from "@/components/settings/household-section";
 import { NotificationSettings } from "@/components/settings/notification-settings";
 import { AppearanceSettings, WhatsAppSettings } from "@/components/settings/appearance-settings";
 import { DangerZone } from "@/components/settings/danger-zone";
+import { MembersSection } from "@/components/settings/members-section";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -370,7 +371,14 @@ export default function SettingsPage() {
           onSave={handleSaveHousehold}
         />
 
-        <InvitePartner />
+        <MembersSection onInviteClick={() => {
+          // Scroll to invite partner section
+          document.getElementById("invite-partner-section")?.scrollIntoView({ behavior: "smooth" });
+        }} />
+
+        <div id="invite-partner-section">
+          <InvitePartner />
+        </div>
 
         <Suspense fallback={null}>
           <CalendarSettings />

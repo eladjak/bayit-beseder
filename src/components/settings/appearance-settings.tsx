@@ -20,12 +20,12 @@ function ToggleRow({ label, enabled, onToggle }: ToggleRowProps) {
         onClick={onToggle}
         role="switch"
         aria-checked={enabled}
-        className={`w-10 h-6 rounded-full transition-colors relative ${
+        className={`w-10 h-6 rounded-full transition-all duration-150 active:scale-90 relative ${
           enabled ? "bg-primary" : "bg-border"
         }`}
       >
         <span
-          className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+          className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-150 ${
             enabled ? "translate-x-0.5" : "translate-x-[18px]"
           }`}
         />
@@ -47,7 +47,7 @@ function ThemeButton({ label, value, current, icon, onSelect }: ThemeButtonProps
   return (
     <button
       onClick={() => onSelect(value)}
-      className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-sm font-semibold transition-all ${
+      className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-100 active:scale-[0.96] ${
         isActive
           ? "gradient-primary text-white shadow-md shadow-primary/20"
           : "bg-surface border border-border text-foreground hover:bg-surface-hover"

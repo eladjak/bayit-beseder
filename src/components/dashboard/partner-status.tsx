@@ -2,8 +2,9 @@
 
 import { memo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { User } from "lucide-react";
+import { User, Settings } from "lucide-react";
 import type { HouseholdMember } from "@/hooks/useHouseholdMembers";
 
 // ---- Single-member card (legacy / partner mode) ----
@@ -76,6 +77,9 @@ interface MembersStatusProps {
 export const MembersStatus = memo(function MembersStatus({ members }: MembersStatusProps) {
   if (members.length === 0) return null;
 
+  // Show manage link when there are 3+ other members (household is larger)
+  const showManageLink = members.length >= 2;
+
   return (
     <div className="card-elevated p-4 space-y-2">
       {members.map((m, i) => (
@@ -93,6 +97,22 @@ export const MembersStatus = memo(function MembersStatus({ members }: MembersSta
           />
         </motion.div>
       ))}
+      {showManageLink && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: members.length * 0.08 + 0.1 }}
+          className="pt-1"
+        >
+          <Link
+            href="/settings"
+            className="flex items-center justify-center gap-1.5 py-1.5 text-xs text-muted hover:text-foreground transition-colors"
+          >
+            <Settings className="w-3 h-3" />
+            <span>ניהול חברי הבית</span>
+          </Link>
+        </motion.div>
+      )}
     </div>
   );
 });

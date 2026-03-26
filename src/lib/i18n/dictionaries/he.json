@@ -115,6 +115,26 @@
       "connecting": "מתחבר...",
       "connectLabel": "חבר Google Calendar",
       "securityHint": "הנתונים שלכם מאובטחים. אנחנו מבקשים גישה ליצירת אירועים בלבד."
+    },
+    "members": {
+      "title": "חברי הבית",
+      "owner": "בעלים",
+      "member": "חבר/ה",
+      "you": "את/ה",
+      "makeOwner": "הפוך לבעלים",
+      "makeRegularMember": "הפוך לחבר/ה רגיל/ה",
+      "changeRole": "שנה תפקיד",
+      "removeMember": "הסרה מהבית",
+      "removeConfirm": "בטוח/ה? הפעולה תסיר את {name} מהבית",
+      "inviteMore": "הזמנת חבר/ת בית נוסף/ת",
+      "tasksToday": "משימות היום",
+      "noTasksToday": "אין משימות להיום",
+      "noMembers": "עדיין אין חברי בית נוספים",
+      "roleUpdated": "התפקיד עודכן",
+      "memberRemoved": "הוסר/ה מהבית",
+      "cannotRemoveSelf": "לא ניתן להסיר את עצמך",
+      "lastOwner": "חייב להיות לפחות בעלים אחד",
+      "manage": "ניהול"
     }
   },
   "common": {
@@ -301,7 +321,16 @@
     "zoneConfig": "הגדרת אזורים",
     "zoneConfigDesc": "שנה את חלוקת האזורים לפני יצירת התוכנית",
     "zoneConfigToggle": "🏠 הגדרת אזורים",
-    "regenerateWithZones": "יצירה מחדש עם אזורים"
+    "regenerateWithZones": "יצירה מחדש עם אזורים",
+    "stepZoneConfig": "אזורים",
+    "zoneWizard": {
+      "title": "סדרו את האזורים לימים",
+      "unassigned": "לא משויך",
+      "resetDefaults": "איפוס לברירת מחדל",
+      "dragHint": "גררו אזור ליום הרצוי",
+      "tapHint": "לחצו על אזור לבחירת יום",
+      "tasksCount": "משימות"
+    }
   },
   "stats": {
     "title": "סטטיסטיקה",

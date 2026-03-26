@@ -29,8 +29,9 @@ export const ShoppingItemCard = memo(function ShoppingItemCard({ item, onToggle,
       initial={{ opacity: 0, y: 12, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9, height: 0, marginBottom: 0 }}
+      whileTap={{ scale: 0.98 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      className={`card-elevated p-3 flex items-center gap-3 relative overflow-hidden ${
+      className={`card-elevated p-3 flex items-center gap-3 relative overflow-hidden hover:shadow-md transition-shadow duration-150 ${
         item.checked ? "opacity-50" : ""
       }`}
       style={{
@@ -42,7 +43,7 @@ export const ShoppingItemCard = memo(function ShoppingItemCard({ item, onToggle,
         onClick={() => onToggle(item.id)}
         aria-label={item.checked ? `בטל סימון: ${item.title}` : `סמן כנרכש: ${item.title}`}
         aria-pressed={item.checked}
-        className="w-6 h-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-colors"
+        className="w-6 h-6 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all duration-100 active:scale-[0.85]"
         style={{
           borderColor: item.checked
             ? "var(--color-success)"

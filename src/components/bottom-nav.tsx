@@ -45,7 +45,7 @@ const NavItem = memo(function NavItem({
       aria-label={label}
       aria-current={isActive ? "page" : undefined}
       onClick={() => haptic("tap")}
-      className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors relative ${
+      className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-100 active:scale-[0.88] relative ${
         isActive
           ? "text-primary"
           : "text-muted hover:text-foreground"
@@ -83,7 +83,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-3 left-3 right-3 z-30">
-      <div className="glass-nav rounded-2xl max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto">
+      <div className="glass-nav rounded-2xl max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto shadow-lg shadow-black/10">
         <div className="flex items-center justify-around h-[60px] px-1">
           {NAV_ITEMS.map((item) => (
             <NavItem

@@ -534,7 +534,7 @@ export default function DashboardPage() {
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between p-3 card-elevated text-sm font-medium text-foreground"
+            className="w-full flex items-center justify-between p-3 card-elevated text-sm font-medium text-foreground hover:bg-surface-hover transition-colors duration-150 active:scale-[0.99]"
           >
             <span>🏆 {t("dashboard.achievementsSection")}</span>
             <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
