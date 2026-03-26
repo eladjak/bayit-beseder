@@ -480,7 +480,9 @@
     "record": "Record voice",
     "stopRecording": "Stop recording",
     "clickToStop": "Click to stop",
-    "clickToRecord": "Click to record"
+    "clickToRecord": "Click to record",
+    "permissionDenied": "Microphone access denied",
+    "permissionHint": "Click the icon in the address bar → allow microphone → refresh"
   },
   "playlists": {
     "title": "Playlists 🎵",

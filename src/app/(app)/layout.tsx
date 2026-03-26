@@ -29,12 +29,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SupabaseProvider>
       <AuthGuard allowDemo={true}>
-        <div className="min-h-dvh bg-background">
+        <div className="min-h-dvh bg-background lg:bg-muted/30">
           <NotificationBanner />
           <PWAInstallBanner />
           <ServiceWorkerRegistrar />
           <ServiceWorkerUpdateToast />
-          <main className="pb-safe max-w-lg mx-auto">
+          <main className="pb-safe max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto lg:bg-background lg:min-h-dvh lg:shadow-xl lg:border-x lg:border-border/50">
             <PageTransition>{children}</PageTransition>
           </main>
           <BottomNav />

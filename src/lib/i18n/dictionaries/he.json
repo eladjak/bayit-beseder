@@ -480,7 +480,9 @@
     "record": "הקלטת קול",
     "stopRecording": "עצור הקלטה",
     "clickToStop": "לחץ לעצור",
-    "clickToRecord": "לחץ להקלטה"
+    "clickToRecord": "לחץ להקלטה",
+    "permissionDenied": "גישה למיקרופון נדחתה",
+    "permissionHint": "לחצו על הסמל בשורת הכתובת ← אפשרו מיקרופון ← רעננו"
   },
   "playlists": {
     "title": "פלייליסטים 🎵",

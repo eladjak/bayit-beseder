@@ -83,7 +83,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-3 left-3 right-3 z-30">
-      <div className="glass-nav rounded-2xl max-w-lg mx-auto">
+      <div className="glass-nav rounded-2xl max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto">
         <div className="flex items-center justify-around h-[60px] px-1">
           {NAV_ITEMS.map((item) => (
             <NavItem

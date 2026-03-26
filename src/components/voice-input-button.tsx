@@ -1,7 +1,8 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -34,6 +35,7 @@ export function VoiceInputButton({
   const resolvedAriaLabel = ariaLabel ?? t("voice.record");
   const { isListening, transcript, startListening, stopListening, isSupported, error } =
     useVoiceInput({ lang });
+  const permissionDenied = useRef(false);
 
   // Fire onTranscript whenever we get a non-empty transcript
   useEffect(() => {
@@ -41,6 +43,22 @@ export function VoiceInputButton({
       onTranscript(transcript);
     }
   }, [transcript, onTranscript]);
+
+  // Show helpful toast on permission denied
+  useEffect(() => {
+    if (error && (error.includes("נדחתה") || error.includes("denied"))) {
+      permissionDenied.current = true;
+      toast.error(t("voice.permissionDenied") || "גישה למיקרופון נדחתה", {
+        description: t("voice.permissionHint") || "בדקו הרשאות הדפדפן ← הגדרות אתר ← מיקרופון",
+        duration: 6000,
+      });
+    }
+  }, [error, t]);
+
+  // Hide button completely if permission was denied
+  if (permissionDenied.current || !isSupported) {
+    return null;
+  }
 
   const handleClick = () => {
     if (isListening) {
