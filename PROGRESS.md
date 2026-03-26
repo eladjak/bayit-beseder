@@ -91,7 +91,10 @@ App is fully functional with: Pesach mode, zone-based scheduling, custom domain,
 **Commit 87**: Share texts updated with AI chat, Pesach, i18n features
 **Commit 88**: RTL fixes for auth pages (login + register)
 
-**Final session totals**: 33 commits, 70+ files, bun migration, email routing, language switcher
+**Commit 89**: Vitest + 56 tests, PWA offline page, micro-interactions, multi-user hook + spec
+
+**Final session totals**: 35 commits, 90+ files, bun migration, email routing, language switcher, tests, offline, micro-interactions
+**Codebase**: 173 files, 18,580 lines, 56 passing tests
 
 ### Iteration: 2026-03-25 — AI Chat + Onboarding + Polish + Voice + PWA
 
