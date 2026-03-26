@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface PesachCountdownBannerProps {
   daysUntilHoliday: number;
@@ -13,6 +14,7 @@ export function PesachCountdownBanner({
   progress,
   onTap,
 }: PesachCountdownBannerProps) {
+  const { t } = useTranslation();
   const progressPct = progress.total > 0
     ? Math.round((progress.completed / progress.total) * 100)
     : 0;
@@ -59,20 +61,20 @@ export function PesachCountdownBanner({
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-lg font-bold leading-none">{daysUntilHoliday}</span>
-            <span className="text-[9px] opacity-80">ימים</span>
+            <span className="text-[9px] opacity-80">{t("seasonal.days")}</span>
           </div>
         </div>
 
         {/* Text content */}
         <div className="flex-1 min-w-0">
-          <div className="font-bold text-sm">🫓 הכנות לפסח</div>
+          <div className="font-bold text-sm">{t("seasonal.pesachPrep")}</div>
           {progress.total > 0 ? (
             <div className="text-xs opacity-90 mt-0.5">
-              {progress.completed}/{progress.total} משימות הושלמו ({progressPct}%)
+              {progress.completed}/{progress.total} {t("seasonal.tasksCompleted")} ({progressPct}%)
             </div>
           ) : (
             <div className="text-xs opacity-90 mt-0.5">
-              לחצו להפעלת מצב פסח
+              {t("seasonal.activatePesach")}
             </div>
           )}
         </div>

@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { AlertTriangle, Shield } from "lucide-react";
 import { motion } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface EmergencyToggleProps {
   active: boolean;
@@ -10,6 +11,7 @@ interface EmergencyToggleProps {
 }
 
 export const EmergencyToggle = memo(function EmergencyToggle({ active, onToggle }: EmergencyToggleProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-2">
       {active && (
@@ -19,7 +21,7 @@ export const EmergencyToggle = memo(function EmergencyToggle({ active, onToggle 
           animate={{ opacity: 1, y: 0 }}
         >
           <p className="text-sm font-medium text-blue-700 dark:text-blue-400">
-            🫂 מצב חירום פעיל - מתמקדים רק בחשוב
+            🫂 {t("emergency.activeTitle")} - {t("emergency.focusEssentials")}
           </p>
         </motion.div>
       )}
@@ -34,12 +36,12 @@ export const EmergencyToggle = memo(function EmergencyToggle({ active, onToggle 
         {active ? (
           <>
             <Shield className="w-5 h-5" />
-            כיבוי מצב חירום
+            {t("emergency.deactivateButton")}
           </>
         ) : (
           <>
             <AlertTriangle className="w-5 h-5" />
-            הפעלת מצב חירום
+            {t("emergency.activateButton")}
           </>
         )}
       </button>

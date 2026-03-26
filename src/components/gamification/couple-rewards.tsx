@@ -4,6 +4,7 @@ import { useMemo, memo } from "react";
 import { motion } from "framer-motion";
 import { Gift, Lock, Sparkles } from "lucide-react";
 import type { Reward, RewardProgress } from "@/lib/rewards";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CoupleRewardsProps {
   rewardsProgress: RewardProgress[];
@@ -44,6 +45,7 @@ export const CoupleRewards = memo(function CoupleRewards({
   rewardsProgress,
   onRewardClick,
 }: CoupleRewardsProps) {
+  const { t } = useTranslation();
   const sorted = useMemo(() => sortRewards(rewardsProgress), [rewardsProgress]);
 
   return (
@@ -53,11 +55,11 @@ export const CoupleRewards = memo(function CoupleRewards({
         <div className="flex items-center gap-2">
           <Gift className="w-5 h-5 text-primary" />
           <h2 className="text-base font-bold text-foreground">
-            הפרסים שלנו
+            {t("dashboard.rewards")}
           </h2>
         </div>
         <p className="text-xs text-muted">
-          השלימו משימות יחד כדי לפתוח פרסים
+          {t("gamification.rewardsSubtitle")}
         </p>
       </div>
 
@@ -85,6 +87,7 @@ function RewardCard({
   index: number;
   onClick?: (reward: Reward) => void;
 }) {
+  const { t } = useTranslation();
   const { reward, current, target, progress, unlocked } = item;
   const nearUnlock = !unlocked && progress >= 75;
   const color = getProgressColor(progress, unlocked);
@@ -159,7 +162,7 @@ function RewardCard({
       {/* Description tooltip on unlocked */}
       {unlocked && (
         <p className="text-xs text-yellow-600 dark:text-yellow-400 text-center font-medium">
-          נפתח!
+          {t("gamification.rewardUnlocked")}
         </p>
       )}
     </motion.button>

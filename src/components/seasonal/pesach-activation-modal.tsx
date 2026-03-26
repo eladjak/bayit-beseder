@@ -6,6 +6,7 @@ import { X, Calendar, ShoppingCart, Check, Loader2 } from "lucide-react";
 import type { SeasonalTemplate } from "@/lib/seasonal/types";
 import type { SeasonalActivation } from "@/lib/seasonal/types";
 import { getDaysUntilHoliday } from "@/lib/seasonal/registry";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type ModalStep = "overview" | "creating" | "shopping" | "done";
 
@@ -46,6 +47,7 @@ export function PesachActivationModal({
   const [isProcessing, setIsProcessing] = useState(false);
   const [deactivating, setDeactivating] = useState(false);
 
+  const { t } = useTranslation();
   const daysUntil = useMemo(() => getDaysUntilHoliday(template), [template]);
   const holidayDateStr = useMemo(() => {
     const d = template.getHolidayDate(new Date().getFullYear());
@@ -118,12 +120,12 @@ export function PesachActivationModal({
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-bold">{template.emoji} {template.nameHe}</h2>
-                  <p className="text-xs opacity-80 mt-0.5">{holidayDateStr} — {daysUntil} ימים</p>
+                  <p className="text-xs opacity-80 mt-0.5">{holidayDateStr} — {daysUntil} {t("seasonal.days")}</p>
                 </div>
                 <button
                   onClick={onClose}
                   className="p-1.5 rounded-lg bg-white/20 hover:bg-white/30 transition-colors"
-                  aria-label="סגירה"
+                  aria-label={t("seasonal.closeLabel")}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -139,11 +141,11 @@ export function PesachActivationModal({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="card-elevated p-3 text-center">
                       <div className="text-2xl font-bold text-foreground">{template.tasks.length}</div>
-                      <div className="text-xs text-muted">משימות ניקיון</div>
+                      <div className="text-xs text-muted">{t("seasonal.cleaningTasks")}</div>
                     </div>
                     <div className="card-elevated p-3 text-center">
                       <div className="text-2xl font-bold text-foreground">{template.shopping.length}</div>
-                      <div className="text-xs text-muted">פריטי קניות</div>
+                      <div className="text-xs text-muted">{t("seasonal.shoppingItems")}</div>
                     </div>
                   </div>
 
@@ -151,7 +153,7 @@ export function PesachActivationModal({
                   <div>
                     <label className="text-sm font-medium text-foreground block mb-1.5">
                       <Calendar className="w-4 h-4 inline-block ml-1" />
-                      תאריך התחלה
+                      {t("seasonal.startDate")}
                     </label>
                     <input
                       type="date"
@@ -160,18 +162,18 @@ export function PesachActivationModal({
                       className="w-full bg-background border border-border rounded-xl px-3 py-2.5 text-sm text-foreground focus:outline-none focus:border-primary transition-colors"
                     />
                     <p className="text-xs text-muted mt-1">
-                      המשימות יתוזמנו מתאריך זה עד ליל הסדר
+                      {t("seasonal.scheduledUntil")}
                     </p>
                   </div>
 
                   {/* Phase breakdown */}
                   <div className="space-y-2">
-                    <h3 className="text-sm font-semibold text-foreground">שלבי ההכנה:</h3>
+                    <h3 className="text-sm font-semibold text-foreground">{t("seasonal.prepPhases")}</h3>
                     {[
-                      { phase: 1, label: "ניקוי כללי עמוק", days: "18-12 ימים לפני" },
-                      { phase: 2, label: "חדר אחרי חדר + מכשירים", days: "11-5 ימים לפני" },
-                      { phase: 3, label: "מטבח אינטנסיבי + הכשרה", days: "4-2 ימים לפני" },
-                      { phase: 4, label: "בדיקת חמץ, בישולים, שולחן סדר", days: "יום לפני" },
+                      { phase: 1, label: t("seasonal.phaseLabels.phase1Label"), days: t("seasonal.phaseLabels.phase1Days") },
+                      { phase: 2, label: t("seasonal.phaseLabels.phase2Label"), days: t("seasonal.phaseLabels.phase2Days") },
+                      { phase: 3, label: t("seasonal.phaseLabels.phase3Label"), days: t("seasonal.phaseLabels.phase3Days") },
+                      { phase: 4, label: t("seasonal.phaseLabels.phase4Label"), days: t("seasonal.phaseLabels.phase4Days") },
                     ].map((p) => (
                       <div key={p.phase} className="flex items-center gap-2 text-xs">
                         <span
@@ -191,7 +193,7 @@ export function PesachActivationModal({
                     className="w-full py-3 rounded-xl text-white font-semibold text-sm shadow-lg transition-opacity"
                     style={{ background: `linear-gradient(135deg, ${template.gradientColors[0]}, ${template.gradientColors[1]})` }}
                   >
-                    {template.emoji} הפעלת מצב פסח
+                    {template.emoji} {t("seasonal.activateMode")}
                   </button>
                 </>
               )}
@@ -200,8 +202,8 @@ export function PesachActivationModal({
               {step === "creating" && (
                 <div className="text-center py-8">
                   <Loader2 className="w-10 h-10 animate-spin mx-auto text-primary mb-3" />
-                  <p className="font-semibold text-foreground">יוצר משימות...</p>
-                  <p className="text-sm text-muted mt-1">מתזמן {template.tasks.length} משימות לפי שלבים</p>
+                  <p className="font-semibold text-foreground">{t("seasonal.creatingTasks")}</p>
+                  <p className="text-sm text-muted mt-1">{template.tasks.length} {t("seasonal.tasksCreatedSuccess")}</p>
                 </div>
               )}
 
@@ -212,11 +214,11 @@ export function PesachActivationModal({
                     <div className="card-elevated p-3 text-center">
                       <Check className="w-8 h-8 text-green-500 mx-auto mb-1" />
                       <p className="font-semibold text-foreground">
-                        {createResult.created} משימות נוצרו בהצלחה!
+                        {createResult.created} {t("seasonal.tasksCreatedSuccess")}
                       </p>
                       {createResult.errors.length > 0 && (
                         <p className="text-xs text-red-500 mt-1">
-                          {createResult.errors.length} שגיאות
+                          {createResult.errors.length} {t("seasonal.errors")}
                         </p>
                       )}
                     </div>
@@ -225,10 +227,10 @@ export function PesachActivationModal({
                   <div className="card-elevated p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <ShoppingCart className="w-5 h-5 text-primary" />
-                      <h3 className="font-semibold text-foreground">רשימת קניות לפסח</h3>
+                      <h3 className="font-semibold text-foreground">{t("seasonal.pesachShoppingList")}</h3>
                     </div>
                     <p className="text-sm text-muted mb-3">
-                      {template.shopping.length} פריטים — מצות, יין, ירקות, בשר ועוד
+                      {template.shopping.length} {t("seasonal.pesachShoppingDesc")}
                     </p>
 
                     <div className="flex gap-2">
@@ -241,14 +243,14 @@ export function PesachActivationModal({
                         {isProcessing ? (
                           <Loader2 className="w-4 h-4 animate-spin mx-auto" />
                         ) : (
-                          "הוסף לרשימת קניות"
+                          t("seasonal.addToShoppingList")
                         )}
                       </button>
                       <button
                         onClick={handleSkipShopping}
                         className="px-4 py-2.5 rounded-xl border border-border text-muted text-sm font-medium hover:bg-surface-hover transition-colors"
                       >
-                        דלג
+                        {t("seasonal.skipShopping")}
                       </button>
                     </div>
                   </div>
@@ -260,16 +262,16 @@ export function PesachActivationModal({
                 <>
                   <div className="text-center py-4">
                     <div className="text-4xl mb-2">🫓✨</div>
-                    <h3 className="font-bold text-lg text-foreground">מצב פסח הופעל!</h3>
+                    <h3 className="font-bold text-lg text-foreground">{t("seasonal.pesachActivated")}</h3>
                     <p className="text-sm text-muted mt-1">
-                      המשימות מופיעות בלוח השבועי לפי תאריכים
+                      {t("seasonal.tasksInWeekly")}
                     </p>
                   </div>
 
                   {shoppingResult && shoppingResult.added > 0 && (
                     <div className="card-elevated p-3 text-center text-sm">
                       <ShoppingCart className="w-5 h-5 text-green-500 mx-auto mb-1" />
-                      {shoppingResult.added} פריטים נוספו לרשימת הקניות
+                      {shoppingResult.added} {t("seasonal.itemsAddedToShopping")}
                     </div>
                   )}
 
@@ -283,7 +285,7 @@ export function PesachActivationModal({
                       {deactivating ? (
                         <Loader2 className="w-4 h-4 animate-spin mx-auto" />
                       ) : (
-                        "ביטול מצב פסח (סיום כל המשימות)"
+                        t("seasonal.deactivatePesach")
                       )}
                     </button>
                   )}
@@ -293,7 +295,7 @@ export function PesachActivationModal({
                     className="w-full py-3 rounded-xl text-white font-semibold text-sm"
                     style={{ background: `linear-gradient(135deg, ${template.gradientColors[0]}, ${template.gradientColors[1]})` }}
                   >
-                    סגירה
+                    {t("seasonal.closeButton")}
                   </button>
                 </>
               )}

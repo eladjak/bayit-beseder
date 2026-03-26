@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface GoldenRuleRingProps {
   percentage: number;
@@ -18,6 +19,7 @@ export const GoldenRuleRing = memo(function GoldenRuleRing({
   percentage,
   target = 80,
 }: GoldenRuleRingProps) {
+  const { t } = useTranslation();
   const size = 200;
   const strokeWidth = 14;
   const radius = (size - strokeWidth) / 2;
@@ -124,15 +126,15 @@ export const GoldenRuleRing = memo(function GoldenRuleRing({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
             >
-              בית בסדר!
+              {t("dashboard.houseInOrder")}
             </motion.span>
           ) : (
-            <span className="text-xs text-muted">כלל הזהב</span>
+            <span className="text-xs text-muted">{t("dashboard.goldenRule")}</span>
           )}
         </div>
       </div>
       <div className="flex items-center gap-2 text-xs text-muted">
-        <span className="px-2 py-0.5 bg-primary/8 rounded-full">יעד: {target}%</span>
+        <span className="px-2 py-0.5 bg-primary/8 rounded-full">{t("dashboard.goldenRuleTargetPrefix")}{target}%</span>
       </div>
     </div>
   );

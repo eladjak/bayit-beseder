@@ -10,6 +10,7 @@ import {
   subscribeToPush,
 } from "@/lib/notifications";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/hooks/useTranslation";
 
 /**
  * In-app banner that asks the user to enable push notifications.
@@ -17,6 +18,7 @@ import { useAuth } from "@/hooks/useAuth";
  * Persists dismissal in localStorage.
  */
 export function NotificationBanner() {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const { user } = useAuth();
@@ -76,9 +78,9 @@ export function NotificationBanner() {
             <Bell className="w-5 h-5" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-sm">הפעלת התראות</h3>
+            <h3 className="font-semibold text-sm">{t("notifications.enableTitle")}</h3>
             <p className="text-xs text-white/80 mt-0.5">
-              קבלו תזכורות על משימות, סיכומים יומיים וסטטוס השותף/ה
+              {t("notifications.enableSubtitle")}
             </p>
             <div className="flex gap-2 mt-3">
               <button
@@ -86,20 +88,20 @@ export function NotificationBanner() {
                 disabled={requesting}
                 className="px-4 py-1.5 bg-white text-primary rounded-lg text-xs font-semibold hover:bg-white/90 transition-colors disabled:opacity-50"
               >
-                {requesting ? "מפעיל..." : "הפעלה"}
+                {requesting ? t("notifications.enabling") : t("notifications.enableButton")}
               </button>
               <button
                 onClick={handleDismiss}
                 className="px-4 py-1.5 bg-white/20 text-white rounded-lg text-xs font-medium hover:bg-white/30 transition-colors"
               >
-                לא עכשיו
+                {t("notifications.notNow")}
               </button>
             </div>
           </div>
           <button
             onClick={handleDismiss}
             className="text-white/60 hover:text-white p-1"
-            aria-label="סגירה"
+            aria-label={t("notifications.closeLabel")}
           >
             <X className="w-4 h-4" />
           </button>

@@ -103,8 +103,8 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
           height={192}
           className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
         />
-        <p className="font-medium text-foreground">אין משימות להיום — מצוין! 🥳</p>
-        <p className="text-sm text-muted">נהנים מהשקט, מגיע לכם</p>
+        <p className="font-medium text-foreground">{t("dashboard.noTasksToday")}</p>
+        <p className="text-sm text-muted">{t("dashboard.enjoySilence")}</p>
       </motion.div>
     );
   }
@@ -151,7 +151,7 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
                 <button
                   onClick={() => handleToggle(task.id)}
                   disabled={isLoading}
-                  aria-label={isCompleted ? `בטל השלמה: ${task.title}` : `סמן כהושלם: ${task.title}`}
+                  aria-label={isCompleted ? `${t("tasks.undoComplete")}: ${task.title}` : `${t("tasks.markComplete")}: ${task.title}`}
                   aria-pressed={isCompleted}
                   className="w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 relative overflow-hidden transition-all disabled:cursor-wait"
                   style={{
@@ -222,7 +222,7 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
                     </span>
                     <span className="text-[10px] text-muted flex items-center gap-0.5">
                       <Clock className="w-3 h-3" />
-                      {task.estimated_minutes} דק׳
+                      {task.estimated_minutes} {t("common.minutes")}
                     </span>
                   </div>
                 </div>

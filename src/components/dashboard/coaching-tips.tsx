@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { COACHING_MESSAGES } from "@/lib/coaching-messages";
 import type { CoachingTrigger } from "@/lib/coaching-messages";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -21,22 +22,12 @@ function pickTrigger(completedCount: number, totalCount: number): CoachingTrigge
   return "low_motivation";
 }
 
-/** "Why" explanations for each trigger — shown when user taps למה? */
-const WHY_EXPLANATIONS: Record<CoachingTrigger, string> = {
-  task_complete: "כל משימה שמושלמת מחזקת את ההרגל ועוזרת לשמור על הבית בסדר לאורך זמן 🧠",
-  streak: "עקביות היא המפתח — גם ימים קטנים בונים תנועה גדולה לאורך זמן 🔄",
-  golden_rule_hit: "80% זה ה'כלל הזהב' של ניהול הבית — מספיק כדי לחיות בנוחות, בלי שלמות-מלחיצה 💡",
-  all_daily_done: "לסיים יום שלם של משימות זה הישג אמיתי! זה בונה תחושת שליטה ורגיעה 🌙",
-  emergency: "בתקופות קשות, לתת לעצמנו רשות לעשות פחות זה בריאות נפשית, לא עצלות 💙",
-  low_motivation: "מחקרים מראים שהכי קשה זה להתחיל — אחרי 2 דקות הגוף נכנס לפעולה לבד ⚡",
-  partner_complete: "עבודת צוות בבית מפחיתה מתחים ומחזקת את הקשר — שני הצדדים מרוצים 🤝",
-};
 
 // ─── Typing dots animation ────────────────────────────────────────────────
 
-function TypingDots() {
+function TypingDots({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-1 px-3 py-2" aria-label="מקליד...">
+    <div className="flex items-center gap-1 px-3 py-2" aria-label={label}>
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}
@@ -54,9 +45,10 @@ function TypingDots() {
 interface BubbleProps {
   emoji: string;
   text: string;
+  avatarLabel: string;
 }
 
-function CoachBubble({ emoji, text }: BubbleProps) {
+function CoachBubble({ emoji, text, avatarLabel }: BubbleProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 6, scale: 0.96 }}
@@ -72,7 +64,7 @@ function CoachBubble({ emoji, text }: BubbleProps) {
       {/* Bubble */}
       <div className="flex-1 min-w-0 rounded-2xl rounded-tr-sm bg-primary/8 dark:bg-primary/15 border border-primary/10 dark:border-primary/20 px-3 py-2">
         <p className="text-[11px] font-semibold text-primary/70 dark:text-primary/50 mb-0.5">
-          {emoji} המאמן
+          {emoji} {avatarLabel}
         </p>
         <p className="text-sm text-foreground leading-snug">{text}</p>
       </div>
@@ -88,9 +80,27 @@ interface ChipsProps {
   onThanks: () => void;
   showWhy: boolean;
   showThanks: boolean;
+  nextTipLabel: string;
+  nextTipText: string;
+  whyLabel: string;
+  whyText: string;
+  thanksLabel: string;
+  thanksText: string;
 }
 
-function ActionChips({ onNextTip, onWhy, onThanks, showWhy, showThanks }: ChipsProps) {
+function ActionChips({
+  onNextTip,
+  onWhy,
+  onThanks,
+  showWhy,
+  showThanks,
+  nextTipLabel,
+  nextTipText,
+  whyLabel,
+  whyText,
+  thanksLabel,
+  thanksText,
+}: ChipsProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 4 }}
@@ -101,26 +111,26 @@ function ActionChips({ onNextTip, onWhy, onThanks, showWhy, showThanks }: ChipsP
       <button
         onClick={onNextTip}
         className="text-xs px-3 py-1.5 rounded-full bg-surface border border-border text-foreground hover:bg-primary/5 hover:border-primary/30 transition-colors active:scale-95"
-        aria-label="הצג טיפ הבא"
+        aria-label={nextTipLabel}
       >
-        עוד טיפ 💡
+        {nextTipText}
       </button>
       {showWhy && (
         <button
           onClick={onWhy}
           className="text-xs px-3 py-1.5 rounded-full bg-surface border border-border text-foreground hover:bg-primary/5 hover:border-primary/30 transition-colors active:scale-95"
-          aria-label="למה?"
+          aria-label={whyLabel}
         >
-          למה? 🤔
+          {whyText}
         </button>
       )}
       {showThanks && (
         <button
           onClick={onThanks}
           className="text-xs px-3 py-1.5 rounded-full bg-surface border border-border text-muted hover:bg-surface/80 transition-colors active:scale-95"
-          aria-label="תודה"
+          aria-label={thanksLabel}
         >
-          תודה! 😊
+          {thanksText}
         </button>
       )}
     </motion.div>
@@ -132,6 +142,8 @@ function ActionChips({ onNextTip, onWhy, onThanks, showWhy, showThanks }: ChipsP
 type ViewState = "tip" | "typing" | "why" | "thanks";
 
 export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) {
+  const { t } = useTranslation();
+
   const trigger = useMemo(
     () => pickTrigger(completedCount, totalCount),
     [completedCount, totalCount]
@@ -155,6 +167,8 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
   const tip = pool[tipIndex] ?? pool[0];
 
   if (!tip) return null;
+
+  const whyText = t(`coaching.whyExplanations.${trigger}`);
 
   const handleNextTip = () => {
     setView("typing");
@@ -187,11 +201,11 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
       animate={{ opacity: 1, y: 0 }}
       className="rounded-2xl bg-card border border-border p-4 shadow-sm space-y-3"
       dir="rtl"
-      aria-label="טיפ יומי מהמאמן"
+      aria-label={t("coaching.containerLabel")}
     >
       {/* Header */}
       <p className="text-xs font-semibold text-muted uppercase tracking-wide">
-        💬 טיפ יומי
+        {t("coaching.dailyTip")}
       </p>
 
       {/* Chat area */}
@@ -209,20 +223,21 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
                 🤖
               </span>
               <div className="rounded-2xl rounded-tr-sm bg-primary/8 dark:bg-primary/15 border border-primary/10 dark:border-primary/20">
-                <TypingDots />
+                <TypingDots label={t("coaching.typingLabel")} />
               </div>
             </motion.div>
           )}
 
           {view === "tip" && (
-            <CoachBubble key={`tip-${tipIndex}`} emoji={tip.emoji} text={tip.message} />
+            <CoachBubble key={`tip-${tipIndex}`} emoji={tip.emoji} text={tip.message} avatarLabel={t("coaching.avatarLabel")} />
           )}
 
           {view === "why" && (
             <CoachBubble
               key="why"
               emoji="💡"
-              text={WHY_EXPLANATIONS[trigger]}
+              text={whyText}
+              avatarLabel={t("coaching.avatarLabel")}
             />
           )}
 
@@ -234,7 +249,7 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
               className="flex items-center gap-2 pr-9"
             >
               <p className="text-sm text-muted">
-                😊 בכיף! כאן תמיד כשצריך טיפ נוסף.
+                {t("coaching.thanksMessage")}
               </p>
             </motion.div>
           )}
@@ -251,6 +266,12 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
             onThanks={handleThanks}
             showWhy={true}
             showThanks={true}
+            nextTipLabel={t("coaching.nextTipLabel")}
+            nextTipText={t("coaching.nextTip")}
+            whyLabel={t("coaching.whyLabel")}
+            whyText={t("coaching.why")}
+            thanksLabel={t("coaching.thanksLabel")}
+            thanksText={t("coaching.thanks")}
           />
         )}
         {view === "why" && (
@@ -261,6 +282,12 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
             onThanks={handleThanks}
             showWhy={false}
             showThanks={true}
+            nextTipLabel={t("coaching.nextTipLabel")}
+            nextTipText={t("coaching.nextTip")}
+            whyLabel={t("coaching.whyLabel")}
+            whyText={t("coaching.why")}
+            thanksLabel={t("coaching.thanksLabel")}
+            thanksText={t("coaching.thanks")}
           />
         )}
         {view === "thanks" && (
@@ -277,7 +304,7 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
               }}
               className="text-xs px-3 py-1.5 rounded-full bg-surface border border-border text-foreground hover:bg-primary/5 hover:border-primary/30 transition-colors active:scale-95"
             >
-              עוד טיפ 💡
+              {t("coaching.nextTip")}
             </button>
           </motion.div>
         )}

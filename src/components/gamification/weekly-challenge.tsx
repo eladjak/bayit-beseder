@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Target, PartyPopper } from "lucide-react";
 import { computeWeeklyChallengeProgress } from "@/hooks/useNotifications";
 import { AnimatedNumber } from "@/components/animated-number";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface WeeklyChallengeProps {
   /** Array of ISO date strings when tasks were completed */
@@ -15,13 +16,13 @@ interface WeeklyChallengeProps {
   target?: number;
 }
 
-function getChallengeMessage(percentage: number): string {
-  if (percentage === 0) return "בואו נתחיל את האתגר!";
-  if (percentage < 25) return "התחלה טובה!";
-  if (percentage < 50) return "ממשיכים חזק!";
-  if (percentage < 75) return "כמעט שם!";
-  if (percentage < 100) return "עוד קצת!";
-  return "אתגר הושלם! כל הכבוד!";
+function getChallengeMessageKey(percentage: number): string {
+  if (percentage === 0) return "gamification.challengeStart";
+  if (percentage < 25) return "gamification.challengeGoodStart";
+  if (percentage < 50) return "gamification.challengeKeepGoing";
+  if (percentage < 75) return "gamification.challengeAlmostThere";
+  if (percentage < 100) return "gamification.challengeAlmostDone";
+  return "gamification.challengeCompleted";
 }
 
 export const WeeklyChallenge = memo(function WeeklyChallenge({
@@ -29,13 +30,14 @@ export const WeeklyChallenge = memo(function WeeklyChallenge({
   today,
   target = 5,
 }: WeeklyChallengeProps) {
+  const { t } = useTranslation();
   const progress = useMemo(
     () => computeWeeklyChallengeProgress(completionDates, today, target),
     [completionDates, today, target]
   );
 
   const isCompleted = progress.completed >= progress.target;
-  const message = getChallengeMessage(progress.percentage);
+  const message = t(getChallengeMessageKey(progress.percentage));
 
   // Calculate days remaining in the week
   const dayOfWeek = new Date(today).getDay(); // 0=Sun
@@ -67,19 +69,19 @@ export const WeeklyChallenge = memo(function WeeklyChallenge({
             <Target className="w-5 h-5 text-primary" />
           )}
           <span className="text-sm font-bold text-foreground">
-            אתגר שבועי
+            {t("dashboard.weeklyChallenge")}
           </span>
         </div>
         <span className="text-[10px] text-muted px-2 py-0.5 bg-surface-hover rounded-full">
           {daysRemaining === 0
-            ? "יום אחרון!"
-            : `${daysRemaining} ימים נותרו`}
+            ? t("gamification.lastDay")
+            : `${daysRemaining} ${t("gamification.daysRemaining")}`}
         </span>
       </div>
 
       {/* Challenge description */}
       <p className="text-xs text-muted">
-        השלימו {target} משימות השבוע
+        {t("gamification.challengeGoalPrefix")}{target}{t("gamification.challengeGoalSuffix")}
       </p>
 
       {/* Progress bar */}
@@ -118,7 +120,7 @@ export const WeeklyChallenge = memo(function WeeklyChallenge({
           transition={{ delay: 0.3 }}
           className="text-xs text-success font-medium text-center"
         >
-          מעולה! סיימתם את האתגר השבועי 🎉
+          {t("gamification.challengeFinished")}
         </motion.p>
       )}
     </motion.div>

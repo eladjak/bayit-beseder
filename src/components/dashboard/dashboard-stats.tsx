@@ -6,6 +6,7 @@ import {
   computeMonthlyData,
   countUpcomingTasks,
 } from "@/lib/task-stats";
+import { useTranslation } from "@/hooks/useTranslation";
 import type {
   CategoryStat,
   MonthlyCompletionPoint,
@@ -21,9 +22,12 @@ export type { CategoryStat, MonthlyCompletionPoint };
 
 interface BarChartProps {
   data: MonthlyCompletionPoint[];
+  ariaLabel: string;
+  dayLabel: string;
+  tasksLabel: string;
 }
 
-function CssBarChart({ data }: BarChartProps) {
+function CssBarChart({ data, ariaLabel, dayLabel, tasksLabel }: BarChartProps) {
   const maxCount = Math.max(...data.map((d) => d.count), 1);
   // Show a label every 5 days to avoid crowding
   const visibleIndices = new Set([0, 4, 9, 14, 19, 24, 29]);
@@ -31,7 +35,7 @@ function CssBarChart({ data }: BarChartProps) {
   return (
     <div
       className="flex items-end gap-px h-24 w-full"
-      aria-label="גרף השלמה חודשי"
+      aria-label={ariaLabel}
     >
       {data.map((point, i) => {
         const heightPct = Math.round((point.count / maxCount) * 100);
@@ -39,7 +43,7 @@ function CssBarChart({ data }: BarChartProps) {
           <div
             key={i}
             className="flex-1 flex flex-col items-center gap-0.5"
-            title={`יום ${point.day}: ${point.count} משימות`}
+            title={`${dayLabel} ${point.day}: ${point.count} ${tasksLabel}`}
           >
             <div
               className="w-full rounded-t-sm bg-primary transition-all duration-300 min-h-px"
@@ -75,6 +79,7 @@ export function DashboardStats({
   categoryNameToKey,
   today,
 }: DashboardStatsProps) {
+  const { t } = useTranslation();
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter((t) => t.status === "completed").length;
   const pendingTasks = tasks.filter((t) => t.status === "pending").length;
@@ -101,21 +106,21 @@ export function DashboardStats({
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3">
         <div className="card-elevated rounded-2xl p-4">
-          <p className="text-xs text-muted mb-1">סה״כ משימות</p>
+          <p className="text-xs text-muted mb-1">{t("stats.totalTasks")}</p>
           <p className="text-2xl font-bold text-foreground">{totalTasks}</p>
           <div className="flex gap-2 mt-1">
             <span className="text-[11px] text-emerald-600 dark:text-emerald-400">
-              {completedTasks} הושלמו
+              {completedTasks} {t("stats.completedCount")}
             </span>
             <span className="text-[11px] text-muted">·</span>
             <span className="text-[11px] text-amber-600 dark:text-amber-400">
-              {pendingTasks} ממתינות
+              {pendingTasks} {t("stats.pendingCount")}
             </span>
           </div>
         </div>
 
         <div className="card-elevated rounded-2xl p-4">
-          <p className="text-xs text-muted mb-1">אחוז השלמה</p>
+          <p className="text-xs text-muted mb-1">{t("stats.completionRate")}</p>
           <p className="text-2xl font-bold text-primary">{completionRate}%</p>
           <div className="mt-2 bg-border rounded-full h-1.5 overflow-hidden">
             <div
@@ -129,16 +134,16 @@ export function DashboardStats({
       {/* Upcoming Tasks */}
       <div className="bg-surface dark:bg-surface rounded-2xl p-4">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-foreground">משימות קרובות</p>
-          <span className="text-xs text-muted">7 ימים הבאים</span>
+          <p className="text-sm font-semibold text-foreground">{t("stats.upcomingTasks")}</p>
+          <span className="text-xs text-muted">{t("stats.next7Days")}</span>
         </div>
         <p className="text-3xl font-bold text-primary mt-2">{upcomingCount}</p>
         <p className="text-xs text-muted mt-0.5">
           {upcomingCount === 0
-            ? "אין משימות ממתינות בשבוע הקרוב"
+            ? t("stats.noUpcoming")
             : upcomingCount === 1
-            ? "משימה ממתינה בשבוע הקרוב"
-            : "משימות ממתינות בשבוע הקרוב"}
+            ? t("stats.oneUpcoming")
+            : t("stats.manyUpcoming")}
         </p>
       </div>
 
@@ -146,7 +151,7 @@ export function DashboardStats({
       {categoryStats.length > 0 && (
         <div className="card-elevated rounded-2xl p-4">
           <p className="text-sm font-semibold text-foreground mb-3">
-            לפי קטגוריה
+            {t("stats.byCategory")}
           </p>
           <div className="space-y-2.5">
             {categoryStats.slice(0, 6).map((cat) => {
@@ -190,13 +195,18 @@ export function DashboardStats({
       <div className="bg-surface dark:bg-surface rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-sm font-semibold text-foreground">
-            30 יום אחרונים
+            {t("stats.last30Days")}
           </p>
           <span className="text-xs text-muted">
-            {completions.length} השלמות
+            {completions.length} {t("stats.completionsCount")}
           </span>
         </div>
-        <CssBarChart data={monthlyData} />
+        <CssBarChart
+          data={monthlyData}
+          ariaLabel={t("dashboard.monthlyChartLabel")}
+          dayLabel={t("stats.dayLabel")}
+          tasksLabel={t("stats.tasksLabel")}
+        />
       </div>
     </div>
   );

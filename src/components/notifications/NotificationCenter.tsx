@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Bell, CheckCheck } from "lucide-react";
 import { NotificationItem } from "./NotificationItem";
 import type { UseNotificationsReturn } from "@/hooks/useNotifications";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface NotificationCenterProps {
   notifications: UseNotificationsReturn["notifications"];
@@ -21,6 +22,7 @@ export function NotificationCenter({
   markAllAsRead,
   dismiss,
 }: NotificationCenterProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -65,7 +67,7 @@ export function NotificationCenter({
       <button
         onClick={toggle}
         className="relative p-2.5 rounded-xl text-muted hover:text-foreground hover:bg-surface-hover transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-        aria-label={`התראות${unreadCount > 0 ? ` (${unreadCount} חדשות)` : ""}`}
+        aria-label={unreadCount > 0 ? `${t("notifications.bellLabel")} (${unreadCount} ${t("notifications.header")})` : t("notifications.bellLabel")}
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
@@ -92,19 +94,19 @@ export function NotificationCenter({
             className="absolute top-full left-0 right-auto mt-2 w-80 max-w-[90vw] max-h-96 bg-surface dark:bg-surface rounded-2xl shadow-xl dark:shadow-black/50 border border-border overflow-hidden z-50"
             style={{ minWidth: "300px" }}
             role="menu"
-            aria-label="רשימת התראות"
+            aria-label={t("notifications.listLabel")}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-              <h3 className="text-sm font-bold text-foreground">התראות</h3>
+              <h3 className="text-sm font-bold text-foreground">{t("notifications.header")}</h3>
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
                   className="flex items-center gap-1 text-xs text-primary hover:text-primary-dark transition-colors"
-                  aria-label="סמן הכל כנקרא"
+                  aria-label={t("notifications.markAllReadLabel")}
                 >
                   <CheckCheck className="w-3.5 h-3.5" />
-                  <span>סמן הכל כנקרא</span>
+                  <span>{t("notifications.markAllRead")}</span>
                 </button>
               )}
             </div>
@@ -114,7 +116,7 @@ export function NotificationCenter({
               {notifications.length === 0 ? (
                 <div className="px-4 py-8 text-center">
                   <span className="text-3xl block mb-2">🔔</span>
-                  <p className="text-sm text-muted">אין התראות חדשות</p>
+                  <p className="text-sm text-muted">{t("notifications.emptyTitle")}</p>
                 </div>
               ) : (
                 <AnimatePresence mode="popLayout">

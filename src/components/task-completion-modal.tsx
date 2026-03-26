@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Star, Camera, X, Send, Loader2 } from "lucide-react";
 import { haptic } from "@/lib/haptics";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface TaskCompletionModalProps {
   taskTitle: string;
@@ -23,6 +24,7 @@ export function TaskCompletionModal({
   onClose,
   onSubmit,
 }: TaskCompletionModalProps) {
+  const { t } = useTranslation();
   const focusRef = useFocusTrap<HTMLDivElement>(isOpen, onClose);
   const [rating, setRating] = useState(0);
   const [hoveredStar, setHoveredStar] = useState(0);
@@ -71,7 +73,14 @@ export function TaskCompletionModal({
     onClose();
   }, [onClose, handleRemovePhoto]);
 
-  const ratingLabels = ["", "גרוע", "לא טוב", "סביר", "טוב", "מעולה!"];
+  const ratingLabels = [
+    "",
+    t("taskCompletion.rating1"),
+    t("taskCompletion.rating2"),
+    t("taskCompletion.rating3"),
+    t("taskCompletion.rating4"),
+    t("taskCompletion.rating5"),
+  ];
 
   return (
     <AnimatePresence>
@@ -96,7 +105,7 @@ export function TaskCompletionModal({
             ref={focusRef}
             role="dialog"
             aria-modal="true"
-            aria-label={`משוב על משימה: ${taskTitle}`}
+            aria-label={`${t("taskCompletion.completedLabel")}: ${taskTitle}`}
             className="relative w-full max-w-lg bg-background dark:bg-surface rounded-t-3xl p-5 pb-8 space-y-4"
             dir="rtl"
             initial={{ y: "100%" }}
@@ -108,24 +117,24 @@ export function TaskCompletionModal({
             <button
               onClick={handleSkip}
               className="absolute top-4 right-4 p-1 rounded-full text-muted hover:text-foreground transition-colors"
-              aria-label="סגירה"
+              aria-label={t("taskCompletion.closeLabel")}
             >
               <X className="w-5 h-5" />
             </button>
 
             {/* Title */}
             <div className="text-center pt-1">
-              <p className="text-xs text-muted mb-1">השלמתם את</p>
+              <p className="text-xs text-muted mb-1">{t("taskCompletion.completedLabel")}</p>
               <p className="font-semibold text-foreground">{taskTitle}</p>
             </div>
 
             {/* Star Rating */}
             <div className="text-center space-y-2">
-              <p className="text-sm text-muted">איך היה?</p>
+              <p className="text-sm text-muted">{t("taskCompletion.howWasIt")}</p>
               <div
                 className="flex justify-center gap-1.5"
                 role="radiogroup"
-                aria-label="דירוג המשימה"
+                aria-label={t("taskCompletion.ratingGroup")}
               >
                 {[1, 2, 3, 4, 5].map((star) => {
                   const isFilled =
@@ -155,7 +164,7 @@ export function TaskCompletionModal({
                       }}
                       whileTap={{ scale: 1.3 }}
                       className="p-1"
-                      aria-label={`דירוג ${star} כוכבים`}
+                      aria-label={ratingLabels[star]}
                     >
                       <Star
                         className={`w-8 h-8 transition-colors ${
@@ -189,7 +198,7 @@ export function TaskCompletionModal({
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="הערות (אופציונלי)..."
+                placeholder={t("taskCompletion.notesPlaceholder")}
                 rows={2}
                 className="w-full bg-background dark:bg-background border border-border rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:border-primary resize-none"
               />
@@ -202,13 +211,13 @@ export function TaskCompletionModal({
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={photoPreview}
-                    alt="תמונת משימה"
+                    alt={t("taskCompletion.taskPhotoAlt")}
                     className="w-full h-full object-cover"
                   />
                   <button
                     onClick={handleRemovePhoto}
                     className="absolute -top-1 -left-1 w-5 h-5 rounded-full bg-danger text-white flex items-center justify-center"
-                    aria-label="הסרת תמונה"
+                    aria-label={t("taskCompletion.removePhoto")}
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -216,7 +225,7 @@ export function TaskCompletionModal({
               ) : (
                 <label className="flex items-center gap-2 px-3 py-2 rounded-xl border border-dashed border-border text-muted text-sm cursor-pointer hover:border-primary hover:text-primary transition-colors">
                   <Camera className="w-4 h-4" />
-                  <span>הוספת תמונה</span>
+                  <span>{t("taskCompletion.addPhoto")}</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -234,7 +243,7 @@ export function TaskCompletionModal({
                 onClick={handleSkip}
                 className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium text-muted hover:bg-surface-hover transition-colors"
               >
-                דלג
+                {t("taskCompletion.skip")}
               </button>
               <button
                 onClick={handleSubmit}
@@ -246,7 +255,7 @@ export function TaskCompletionModal({
                 ) : (
                   <Send className="w-4 h-4" />
                 )}
-                {submitting ? "שומר..." : "שמירה"}
+                {submitting ? t("taskCompletion.saving") : t("taskCompletion.save")}
               </button>
             </div>
           </motion.div>

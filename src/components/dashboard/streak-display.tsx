@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import { motion } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface StreakDisplayProps {
   count: number;
@@ -9,6 +10,7 @@ interface StreakDisplayProps {
 }
 
 export const StreakDisplay = memo(function StreakDisplay({ count, bestCount }: StreakDisplayProps) {
+  const { t } = useTranslation();
   const fireSize = Math.min(count * 4 + 20, 48);
 
   return (
@@ -43,9 +45,9 @@ export const StreakDisplay = memo(function StreakDisplay({ count, bestCount }: S
           >
             {count}
           </motion.span>
-          <span className="text-sm text-muted">ימים ברצף</span>
+          <span className="text-sm text-muted">{t("dashboard.streak")}</span>
         </div>
-        <p className="text-xs text-muted">שיא: {bestCount} ימים</p>
+        <p className="text-xs text-muted">{t("dashboard.bestStreak")}: {bestCount} {t("dashboard.days")}</p>
       </div>
       {count >= 7 && (
         <motion.span

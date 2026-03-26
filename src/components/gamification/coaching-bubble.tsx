@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CoachingBubbleProps {
   visible: boolean;
@@ -15,6 +16,7 @@ export function CoachingBubble({
   emoji = "💪",
   onDismiss,
 }: CoachingBubbleProps) {
+  const { t } = useTranslation();
   return (
     <AnimatePresence>
       {visible && (
@@ -27,7 +29,7 @@ export function CoachingBubble({
         >
           <button
             onClick={onDismiss}
-            aria-label="סגור טיפ"
+            aria-label={t("dashboard.dismissTip")}
             className="bg-surface shadow-lg rounded-2xl px-5 py-3 flex items-center gap-3 border border-border max-w-sm w-full"
           >
             <span className="text-2xl flex-shrink-0">{emoji}</span>
