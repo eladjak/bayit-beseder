@@ -38,7 +38,12 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 - History page: mic button next to search input for voice search
 - Both dynamically imported for bundle optimization
 
-**Session totals**: 5 commits (62-66), 11 files modified, ~330 lines added/changed
+**Commit 67**: i18n for login and register pages
+- Login page: 15+ hardcoded Hebrew strings → t() calls (form labels, buttons, toasts, error messages)
+- Register page: 12+ hardcoded Hebrew strings → t() calls
+
+**Session totals**: 8 commits (62-69), 13 files modified, ~400 lines added/changed
+**i18n coverage**: nav, settings, dashboard, stats, emergency, tasks, shopping, login, register — 9/12 app pages done
 
 ### Iteration: 2026-03-25 — AI Chat + Onboarding + Polish + Voice + PWA
 
