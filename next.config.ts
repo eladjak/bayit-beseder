@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Enable gzip/brotli compression
+  compress: true,
+
   images: {
+    // Serve modern formats for smaller file sizes
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "https",

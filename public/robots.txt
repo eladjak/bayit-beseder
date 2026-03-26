@@ -2,6 +2,9 @@ User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /callback
+Disallow: /register
+Disallow: /invite/
+Disallow: /offline
 Disallow: /dashboard
 Disallow: /tasks
 Disallow: /shopping
