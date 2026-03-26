@@ -10,6 +10,7 @@ import { ServiceWorkerUpdateToast } from "@/components/ServiceWorkerUpdateToast"
 import { PageTransition } from "@/components/page-transition";
 import { SupabaseProvider } from "@/components/SupabaseProvider";
 import { PWAInstallBanner } from "@/components/pwa-install-banner";
+import { LanguageToggle } from "@/components/language-toggle";
 
 // Lazy-load the AI chat components to keep the initial bundle lean
 const ChatFAB = dynamic(
@@ -37,6 +38,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <PageTransition>{children}</PageTransition>
           </main>
           <BottomNav />
+
+          {/* Language toggle — fixed top-left */}
+          <LanguageToggle />
 
           {/* AI Chat floating button */}
           <ChatFAB onClick={() => setChatOpen(true)} />

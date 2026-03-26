@@ -157,13 +157,13 @@ function LoginContent() {
                 {t("auth.resetPassword")}
               </p>
               <div className="relative">
-                <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+                <Mail className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                 <input
                   type="email"
                   placeholder={t("auth.email")}
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
-                  className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pr-10 pl-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                  className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pe-10 ps-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                   dir="ltr"
                 />
               </div>
@@ -191,32 +191,32 @@ function LoginContent() {
               {/* Email/Password Form */}
               <form onSubmit={handleEmailLogin} className="space-y-3">
                 <div className="relative">
-                  <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+                  <Mail className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                   <input
                     type="email"
                     placeholder={t("auth.email")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pr-10 pl-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pe-10 ps-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     dir="ltr"
                     autoComplete="email"
                   />
                 </div>
                 <div className="relative">
-                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+                  <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                   <input
                     type={showPassword ? "text" : "password"}
                     placeholder={t("auth.password")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pr-10 pl-10 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+                    className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pe-10 ps-10 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
                     dir="ltr"
                     autoComplete="current-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((p) => !p)}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground"
+                    className="absolute start-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground"
                     tabIndex={-1}
                   >
                     {showPassword ? (
