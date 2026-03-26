@@ -1,14 +1,39 @@
 # BayitBeSeder (בית בסדר) - Progress
 
 ## Status: LIVE
-## Last Updated: 2026-03-25
+## Last Updated: 2026-03-26
 ## URL: https://www.bayitbeseder.com
 ## Domain: bayitbeseder.com (Namecheap → Cloudflare DNS → Vercel)
 
 ## Current State
-App is fully functional with Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, and voice input POC. Vercel auto-deploys from master.
+App is fully functional with Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input, Gemini AI chat, and i18n. Beta feedback CTAs across all surfaces. Vercel auto-deploys from master.
 
 ## Recent Work
+
+### Iteration: 2026-03-26 — i18n Expansion + Beta Feedback + Voice UX
+
+**Commit 62**: i18n expansion for tasks/shopping pages + beta feedback messaging
+- **i18n Tasks Page**: Wired `useTranslation` into tasks page — 30+ hardcoded Hebrew strings replaced with `t()` calls (header, buttons, toasts, empty states, aria-labels)
+- **i18n Shopping Page**: Wired `useTranslation` into shopping page — 20+ hardcoded Hebrew strings replaced
+- **Dictionary Expansion**: 60+ new translation keys in both he.json and en.json (tasks, shopping, weekly, common, auth sections)
+- **Share Texts Updated**: All 5 platform share texts (WhatsApp, Facebook, Instagram, Telegram, LinkedIn) now include "🧪 גרסה ראשונה" beta note + feedback CTA (eladjak@gmail.com)
+- **Weekly Share Card**: Appended beta feedback line to WhatsApp share text
+
+**Commit 63**: Beta feedback CTA on landing page, hero badge, and settings
+- **Landing Hero**: Added "גרסה ראשונה" badge to hero top pill
+- **Feedback Banner**: New amber feedback section between CTA and footer with mailto + contact link
+- **Landing Footer**: Beta badge with feedback link
+- **Settings Page**: New feedback card with version info, mailto button, contact link
+
+**Commit 64**: Enhanced contact page for beta feedback collection
+- Contact hero now has beta badge
+- Story card copy emphasizes feedback importance
+- Email mailto has auto-subject "משוב על בית בסדר"
+
+**Commit 65**: Voice auto-send in AI chat drawer
+- Voice input now auto-sends messages instead of just filling the input — better conversational UX
+
+**Session totals**: 4 commits (62-65), 9 files modified, ~280 lines added/changed
 
 ### Iteration: 2026-03-25 — AI Chat + Onboarding + Polish + Voice + PWA
 
@@ -183,10 +208,14 @@ Applied: 001, 001_initial_schema, 002, 003, 004, 005, 006, 007, 008, 009
 - **Phase 17**: Avatar upload, task completion feedback modal
 
 ## Remaining Roadmap
-- Connect AI Chat to Claude/Gemini API (needs API key in .env.local)
-- Wire voice input into more places (chat input, task creation)
-- i18n — use t() across more pages (currently only nav + settings use it)
+- ~~Connect AI Chat to Gemini API~~ ✅ (Commit 60)
+- ~~i18n tasks/shopping pages~~ ✅ (Commit 62)
+- ~~Voice in chat, tasks, shopping~~ ✅ (Commits 60, 65)
+- ~~Beta feedback CTAs everywhere~~ ✅ (Commits 62-64)
+- i18n — weekly page + login page (partial — nav, settings, dashboard, stats, emergency, tasks, shopping done)
 - Multi-user households (kids/roommates — plan saved)
 - Reply-to-complete from WhatsApp (needs dedicated Green API instance)
 - Redis rate limiter (Upstash) for distributed deploys
 - Zone wizard step (drag zones to days in weekly wizard)
+- List virtualization for long task/shopping lists (react-virtual)
+- Full app facelift (page transitions, microinteractions)
