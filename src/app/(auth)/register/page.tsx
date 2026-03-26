@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { signUp, signInWithGoogle } from "@/lib/auth";
 import { toast } from "sonner";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const { t } = useTranslation();
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -75,7 +77,7 @@ export default function RegisterPage() {
           <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center">
             <Home className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-foreground">הרשמה</h1>
+          <h1 className="text-3xl font-bold text-foreground">{t("auth.registerTitle")}</h1>
           <p className="text-muted text-center">
             צרו חשבון והתחילו לנהל
             <br />
@@ -89,7 +91,7 @@ export default function RegisterPage() {
             <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
             <input
               type="text"
-              placeholder="שם מלא"
+              placeholder={t("auth.fullName")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-surface border border-border rounded-xl pr-10 pl-4 py-3 text-sm focus:outline-none focus:border-primary"
@@ -101,7 +103,7 @@ export default function RegisterPage() {
             <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
             <input
               type="email"
-              placeholder="אימייל"
+              placeholder={t("auth.email")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full bg-surface border border-border rounded-xl pr-10 pl-4 py-3 text-sm focus:outline-none focus:border-primary"
@@ -114,7 +116,7 @@ export default function RegisterPage() {
             <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
             <input
               type={showPassword ? "text" : "password"}
-              placeholder="סיסמה (לפחות 6 תווים)"
+              placeholder={t("auth.password")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full bg-surface border border-border rounded-xl pr-10 pl-10 py-3 text-sm focus:outline-none focus:border-primary"
@@ -139,7 +141,7 @@ export default function RegisterPage() {
             <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
             <input
               type={showPassword ? "text" : "password"}
-              placeholder="אימות סיסמה"
+              placeholder={t("auth.confirmPassword")}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full bg-surface border border-border rounded-xl pr-10 pl-4 py-3 text-sm focus:outline-none focus:border-primary"
@@ -156,7 +158,7 @@ export default function RegisterPage() {
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin mx-auto" />
             ) : (
-              "יצירת חשבון"
+              t("auth.registerButton")
             )}
           </button>
         </form>
@@ -164,7 +166,7 @@ export default function RegisterPage() {
         {/* Divider */}
         <div className="w-full flex items-center gap-3">
           <div className="flex-1 h-px bg-border" />
-          <span className="text-xs text-muted">או</span>
+          <span className="text-xs text-muted">{t("auth.orDivider")}</span>
           <div className="flex-1 h-px bg-border" />
         </div>
 
@@ -196,17 +198,17 @@ export default function RegisterPage() {
               />
             </svg>
           )}
-          {googleLoading ? "מתחבר..." : "הרשמה עם Google"}
+          {googleLoading ? t("common.loading") : t("auth.registerWithGoogle")}
         </button>
 
         {/* Login Link */}
         <p className="text-sm text-muted">
-          כבר יש לכם חשבון?{" "}
+          {t("auth.hasAccount")}{" "}
           <Link
             href="/login"
             className="text-primary font-medium hover:underline"
           >
-            התחברות
+            {t("common.login")}
           </Link>
         </p>
 

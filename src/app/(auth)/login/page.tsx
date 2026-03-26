@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles } from "lucide-react";
 import { signIn, signInWithGoogle, resetPassword } from "@/lib/auth";
 import { toast } from "sonner";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function LoginPage() {
   return (
@@ -32,6 +33,7 @@ function LoginContent() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [resetEmail, setResetEmail] = useState("");
+  const { t } = useTranslation();
 
   const errorParam = searchParams.get("error");
   const resetDone = searchParams.get("reset") === "true";
@@ -90,7 +92,7 @@ function LoginContent() {
       return;
     }
 
-    toast.success("קישור לאיפוס סיסמה נשלח למייל!");
+    toast.success(t("auth.resetSent"));
     setShowReset(false);
     setResetEmail("");
   }
@@ -114,7 +116,7 @@ function LoginContent() {
         <div className="flex flex-col items-center gap-3 mb-2">
           <Image
             src="/illustrations/welcome-home.jpg"
-            alt="ברוכים הבאים לבית בסדר"
+            alt={t("auth.welcome")}
             width={96}
             height={96}
             className="w-24 h-24 rounded-2xl object-cover shadow-lg shadow-black/20 border-2 border-white/30"
@@ -136,12 +138,12 @@ function LoginContent() {
           {/* Error / Success Messages */}
           {errorParam === "auth" && (
             <div className="w-full bg-danger/10 border border-danger/20 text-danger text-sm rounded-xl px-4 py-3 text-center">
-              שגיאה בהתחברות. נסו שוב.
+              {t("common.error")}. {t("common.retry")}.
             </div>
           )}
           {resetDone && (
             <div className="w-full bg-success/10 border border-success/20 text-success text-sm rounded-xl px-4 py-3 text-center">
-              הסיסמה עודכנה בהצלחה! התחברו עם הסיסמה החדשה.
+              {t("common.success")}!
             </div>
           )}
 
@@ -149,16 +151,16 @@ function LoginContent() {
           {showReset ? (
             <form onSubmit={handleResetPassword} className="space-y-3">
               <h2 className="text-lg font-semibold text-foreground text-center">
-                איפוס סיסמה
+                {t("auth.resetPassword")}
               </h2>
               <p className="text-sm text-muted text-center">
-                נשלח לכם קישור לאיפוס סיסמה למייל
+                {t("auth.resetPassword")}
               </p>
               <div className="relative">
                 <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                 <input
                   type="email"
-                  placeholder="אימייל"
+                  placeholder={t("auth.email")}
                   value={resetEmail}
                   onChange={(e) => setResetEmail(e.target.value)}
                   className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pr-10 pl-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
@@ -173,7 +175,7 @@ function LoginContent() {
                 {loading ? (
                   <Loader2 className="w-4 h-4 animate-spin mx-auto" />
                 ) : (
-                  "שליחת קישור"
+                  t("auth.resetPassword")
                 )}
               </button>
               <button
@@ -181,7 +183,7 @@ function LoginContent() {
                 onClick={() => setShowReset(false)}
                 className="w-full text-sm text-muted hover:text-foreground transition-colors"
               >
-                חזרה להתחברות
+                {t("common.back")}
               </button>
             </form>
           ) : (
@@ -192,7 +194,7 @@ function LoginContent() {
                   <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                   <input
                     type="email"
-                    placeholder="אימייל"
+                    placeholder={t("auth.email")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pr-10 pl-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
@@ -204,7 +206,7 @@ function LoginContent() {
                   <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                   <input
                     type={showPassword ? "text" : "password"}
-                    placeholder="סיסמה"
+                    placeholder={t("auth.password")}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pr-10 pl-10 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
@@ -233,7 +235,7 @@ function LoginContent() {
                   {loading ? (
                     <Loader2 className="w-4 h-4 animate-spin mx-auto" />
                   ) : (
-                    "התחברות"
+                    t("auth.loginButton")
                   )}
                 </button>
               </form>
@@ -243,13 +245,13 @@ function LoginContent() {
                 onClick={() => setShowReset(true)}
                 className="w-full text-sm text-primary hover:underline"
               >
-                שכחתם סיסמה?
+                {t("auth.forgotPassword")}
               </button>
 
               {/* Divider */}
               <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-border" />
-                <span className="text-xs text-muted">או</span>
+                <span className="text-xs text-muted">{t("auth.orDivider")}</span>
                 <div className="flex-1 h-px bg-border" />
               </div>
 
@@ -281,7 +283,7 @@ function LoginContent() {
                     />
                   </svg>
                 )}
-                {googleLoading ? "מתחבר..." : "התחברות עם Google"}
+                {googleLoading ? t("common.loading") : t("auth.loginWithGoogle")}
               </button>
 
               {/* Demo Mode */}
@@ -289,17 +291,17 @@ function LoginContent() {
                 onClick={handleDemoMode}
                 className="w-full py-2.5 bg-background/60 dark:bg-surface/60 border border-border rounded-xl text-sm text-muted hover:text-foreground hover:bg-surface-hover transition-all"
               >
-                כניסה במצב דמו (ללא הרשמה)
+                {t("auth.demoMode")}
               </button>
 
               {/* Register Link */}
               <p className="text-sm text-muted text-center">
-                אין לכם חשבון?{" "}
+                {t("auth.noAccount")}{" "}
                 <Link
                   href="/register"
                   className="text-primary font-medium hover:underline"
                 >
-                  הרשמה
+                  {t("common.register")}
                 </Link>
               </p>
             </>
