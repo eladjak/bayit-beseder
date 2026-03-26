@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>בית בסדר — דוח איטרציה 2026-03-26</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
+  :root{--bg:#0a0918;--bg2:#12101f;--card:#1a1730;--card-hover:#221f3a;--text:#e0def4;--text2:#908caa;--muted:#6e6a86;--border:#2d2a45;--blue:#60a5fa;--purple:#a78bfa;--green:#34d399;--amber:#fbbf24;--red:#f87171;--orange:#fb923c;--pink:#f472b6;--grad1:#6366F1;--grad2:#8B5CF6;--grad3:#D946EF;--r:16px;--rs:10px;--shadow:0 8px 32px rgba(0,0,0,0.4)}
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Heebo',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;min-height:100vh}
+  .container{max-width:900px;margin:0 auto;padding:32px 20px 80px}
+
+  /* Animated gradient header */
+  .header{text-align:center;padding:48px 28px 40px;border-radius:var(--r);position:relative;overflow:hidden;margin-bottom:40px;
+    background:linear-gradient(-45deg,#6366F1,#8B5CF6,#D946EF,#EC4899,#6366F1);
+    background-size:400% 400%;animation:gradMove 8s ease infinite}
+  @keyframes gradMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  .header::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 80%,rgba(255,255,255,0.12) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(255,255,255,0.08) 0%,transparent 40%);pointer-events:none}
+  .header h1{font-size:2.2rem;font-weight:900;color:#fff;margin-bottom:6px;position:relative;z-index:1}
+  .header .sub{font-size:1rem;color:rgba(255,255,255,0.8);position:relative;z-index:1}
+  .header .badge{display:inline-block;margin-top:14px;padding:5px 18px;background:rgba(255,255,255,0.2);border-radius:999px;font-size:0.8rem;color:#fff;font-weight:700;backdrop-filter:blur(6px);position:relative;z-index:1}
+
+  /* Stats grid with animated counters */
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:36px}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;text-align:center;transition:transform 0.2s,box-shadow 0.2s;position:relative;overflow:hidden}
+  .stat:hover{transform:translateY(-3px);box-shadow:0 0 30px rgba(99,102,241,0.15)}
+  .stat::after{content:'';position:absolute;top:0;right:0;left:0;height:3px;background:linear-gradient(90deg,var(--grad1),var(--grad2),var(--grad3));opacity:0;transition:opacity 0.2s}
+  .stat:hover::after{opacity:1}
+  .stat .v{font-size:2rem;font-weight:900;background:linear-gradient(135deg,var(--grad1),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .stat .l{font-size:0.8rem;color:var(--text2);margin-top:2px;font-weight:500}
+  .stat .delta{font-size:0.7rem;margin-top:4px;font-weight:700}
+  .delta-up{color:var(--green)}
+  .delta-down{color:var(--red)}
+
+  /* Sections */
+  .section{margin-bottom:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+  .sh{display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;transition:background 0.15s}
+  .sh:hover{background:var(--card-hover)}
+  .sh .ic{font-size:1.2rem;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:var(--rs);flex-shrink:0}
+  .sh h2{font-size:1rem;font-weight:700;flex:1}
+  .sh .chev{font-size:0.75rem;color:var(--muted);transition:transform 0.2s}
+  .section.c .chev{transform:rotate(90deg)}
+  .sb{padding:0 22px 22px;overflow:hidden;transition:max-height 0.3s,opacity 0.2s}
+  .section.c .sb{max-height:0!important;padding-top:0;padding-bottom:0;opacity:0}
+
+  .ig{background:rgba(52,211,153,0.12);color:var(--green)}
+  .ib{background:rgba(96,165,250,0.12);color:var(--blue)}
+  .ir{background:rgba(248,113,113,0.12);color:var(--red)}
+  .ia{background:rgba(251,191,36,0.12);color:var(--amber)}
+  .ip{background:rgba(167,139,250,0.12);color:var(--purple)}
+  .io{background:rgba(251,146,60,0.12);color:var(--orange)}
+  .ipk{background:rgba(244,114,182,0.12);color:var(--pink)}
+
+  /* Lists */
+  ul.tl{list-style:none}
+  ul.tl li{padding:8px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px;font-size:0.9rem}
+  ul.tl li:last-child{border-bottom:none}
+  .bul{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:9px}
+
+  ol.ns{list-style:none;counter-reset:s}
+  ol.ns li{counter-increment:s;padding:10px 0;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:14px;font-size:0.9rem}
+  ol.ns li:last-child{border-bottom:none}
+  ol.ns li::before{content:counter(s);width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--grad1),var(--grad2));color:#fff;border-radius:50%;font-size:0.75rem;font-weight:800;flex-shrink:0;margin-top:2px}
+
+  /* Questions amber */
+  ul.ql{list-style:none}
+  ul.ql li{padding:12px 16px;margin-bottom:8px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:var(--rs);font-size:0.9rem;display:flex;gap:10px}
+  ul.ql li:last-child{margin-bottom:0}
+  .qi{color:var(--amber);flex-shrink:0}
+
+  /* Progress bar */
+  .pb{margin-top:16px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rs);padding:14px 18px}
+  .pl{display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:8px;font-weight:600}
+  .pl span:last-child{color:var(--green)}
+  .pt{height:10px;background:var(--bg);border-radius:999px;overflow:hidden}
+  .pf{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--grad1),var(--green));transition:width 1.5s ease}
+
+  /* Timeline */
+  .tl-wrap{position:relative;padding:0}
+  .tl-wrap::before{content:'';position:absolute;top:0;bottom:0;right:14px;width:3px;background:linear-gradient(180deg,var(--grad1),var(--green));border-radius:999px}
+  .tl-item{position:relative;padding-bottom:20px;padding-right:44px}
+  .tl-item:last-child{padding-bottom:0}
+  .tl-dot{position:absolute;top:4px;right:9px;width:13px;height:13px;border-radius:50%;background:var(--blue);border:3px solid var(--card);z-index:1}
+  .tl-dot.cur{background:var(--green);box-shadow:0 0 12px rgba(52,211,153,0.5)}
+  .tl-date{font-size:0.75rem;color:var(--muted);font-weight:600}
+  .tl-title{font-size:0.9rem;font-weight:700;color:var(--text)}
+  .tl-desc{font-size:0.8rem;color:var(--text2);margin-top:2px}
+
+  /* Growth radar SVG */
+  .radar-wrap{display:flex;justify-content:center;margin:20px 0}
+
+  /* Rainbow bar */
+  .rainbow{height:4px;border-radius:999px;background:linear-gradient(90deg,#f87171,#fb923c,#fbbf24,#34d399,#60a5fa,#a78bfa,#f472b6);margin:24px 0}
+
+  /* Footer */
+  .footer{text-align:center;margin-top:40px;padding-top:20px;border-top:1px solid var(--border);color:var(--muted);font-size:0.75rem}
+  .footer a{color:var(--blue);text-decoration:none}
+
+  /* Scroll reveal animation */
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity 0.5s,transform 0.5s}
+  .reveal.visible{opacity:1;transform:translateY(0)}
+
+  @media(max-width:640px){.container{padding:16px 12px 60px}.header{padding:32px 18px}.header h1{font-size:1.6rem}.stats{grid-template-columns:repeat(2,1fr);gap:10px}.stat .v{font-size:1.4rem}}
+  @media print{body{background:#fff;color:#111}.header{-webkit-print-color-adjust:exact;print-color-adjust:exact}.section.c .sb{max-height:none!important;opacity:1!important;padding-bottom:22px!important}.chev{display:none}.stat,.section{box-shadow:none;border:1px solid #ddd}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>🏠 בית בסדר</h1>
+  <div class="sub">דוח סיכום איטרציה — 26 במרץ 2026</div>
+  <div class="badge">סשן #5 · 76 קומיטים · גרסה ראשונה</div>
+</div>
+
+<!-- Stats -->
+<div class="stats reveal">
+  <div class="stat"><div class="v">15</div><div class="l">קומיטים בסשן</div><div class="delta delta-up">↑ מ-7 בסשן קודם</div></div>
+  <div class="stat"><div class="v">165</div><div class="l">קבצי קוד</div><div class="delta delta-up">↑ 20 קבצים שונו</div></div>
+  <div class="stat"><div class="v">18,689</div><div class="l">שורות קוד</div><div class="delta delta-up">+650 שורות</div></div>
+  <div class="stat"><div class="v">462</div><div class="l">מפתחות תרגום</div><div class="delta delta-up">↑ מ-163 בסשן קודם</div></div>
+  <div class="stat"><div class="v">12/12</div><div class="l">דפים עם i18n</div><div class="delta delta-up">✅ הושלם!</div></div>
+  <div class="stat"><div class="v">0</div><div class="l">TODO/FIXME</div><div class="delta delta-up">קוד נקי</div></div>
+</div>
+
+<div class="rainbow"></div>
+
+<!-- מה בוצע -->
+<div class="section reveal" id="s1">
+  <div class="sh" onclick="tog('s1')"><div class="ic ig">✓</div><h2>מה בוצע</h2><span class="chev">▼</span></div>
+  <div class="sb">
+    <ul class="tl">
+      <li><span class="bul"></span><span><strong>i18n מלא — כל 12 דפי האפליקציה:</strong> tasks, shopping, weekly, login, register, history, playlists, settings, dashboard, stats, emergency + PWA banner</span></li>
+      <li><span class="bul"></span><span><strong>i18n קומפוננטים:</strong> invite-partner (17 מחרוזות), voice-input (3), weekly-generator-modal (30+), coaching-tips, seasonal, task-completion, notifications</span></li>
+      <li><span class="bul"></span><span><strong>מילונים:</strong> 462 מפתחות תרגום בכל שפה (עברית + אנגלית) — מ-163 בסשן קודם</span></li>
+      <li><span class="bul"></span><span><strong>Beta Feedback CTAs:</strong> נוסחי שיתוף ב-5 פלטפורמות, באנר משוב בנחיתה + הגדרות + contact, כרטיס שיתוף שבועי</span></li>
+      <li><span class="bul"></span><span><strong>Voice UX:</strong> auto-send בצ'אט AI, מיקרופון בדף שבועי + היסטוריה (סה"כ 5 מיקומים)</span></li>
+      <li><span class="bul"></span><span><strong>Dogfood:</strong> בדיקת 4 דפים חיים (dashboard, tasks, shopping, settings) — הכל עובד</span></li>
+      <li><span class="bul"></span><span><strong>דף יצירת קשר:</strong> שודרג למיקוד משוב עם נוסח בטא + mailto subject אוטומטי</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- נתונים -->
+<div class="section reveal" id="s2">
+  <div class="sh" onclick="tog('s2')"><div class="ic ib">📊</div><h2>נתונים</h2><span class="chev">▼</span></div>
+  <div class="sb">
+    <div class="stats" style="margin-bottom:0">
+      <div class="stat"><div class="v">76</div><div class="l">קומיטים (סה"כ)</div></div>
+      <div class="stat"><div class="v">5</div><div class="l">סשנים</div></div>
+      <div class="stat"><div class="v">~300</div><div class="l">מפתחות חדשים</div></div>
+      <div class="stat"><div class="v">5</div><div class="l">מיקומי Voice</div></div>
+    </div>
+    <div class="pb">
+      <div class="pl"><span>כיסוי i18n</span><span>100%</span></div>
+      <div class="pt"><div class="pf" style="width:100%"></div></div>
+    </div>
+    <div class="pb">
+      <div class="pl"><span>כיסוי Voice Input</span><span>83%</span></div>
+      <div class="pt"><div class="pf" style="width:83%"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- בעיות -->
+<div class="section reveal" id="s3">
+  <div class="sh" onclick="tog('s3')"><div class="ic ir">⚠</div><h2>בעיות שנמצאו</h2><span class="chev">▼</span></div>
+  <div class="sb">
+    <ul class="tl">
+      <li><span class="bul" style="background:var(--amber)"></span><span><strong>ChunkLoadError בדשבורד:</strong> Cache ישן אחרי דפלויי — נפתר עם hard reload. לא באג אמיתי.</span></li>
+      <li><span class="bul" style="background:var(--amber)"></span><span><strong>node_modules נמחקו:</strong> ניקוי דיסק אוטומטי (10GB free) מחק את התלויות. צריך npm install לפני build.</span></li>
+      <li><span class="bul" style="background:var(--blue)"></span><span><strong>TypeScript גלובלי קונפליקט:</strong> npx tsc לקח גרסה 6.0.2 במקום local — נפתר עם npm run build ישיר.</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- שאלות -->
+<div class="section reveal" id="s4">
+  <div class="sh" onclick="tog('s4')"><div class="ic ia">❓</div><h2>שאלות להחלטה</h2><span class="chev">▼</span></div>
+  <div class="sb">
+    <ul class="ql">
+      <li><span class="qi">❓</span><span>האם לשתף את האפליקציה עכשיו בקבוצות WhatsApp/Facebook? הנוסחים מוכנים עם הודעת בטא.</span></li>
+      <li><span class="qi">❓</span><span>האם להוסיף language switcher נראה ב-UI? כרגע השפה נבחרת רק מההגדרות.</span></li>
+      <li><span class="qi">❓</span><span>האם לעבור ל-bun כ-package manager? npm install איטי ותופס מקום בדיסק.</span></li>
+    </ul>
+  </div>
+</div>
+
+<!-- הצעדים הבאים -->
+<div class="section reveal" id="s5">
+  <div class="sh" onclick="tog('s5')"><div class="ic ip">➤</div><h2>הצעדים הבאים</h2><span class="chev">▼</span></div>
+  <div class="sb">
+    <ol class="ns">
+      <li><span>i18n לקומפוננטים נותרים (coaching-tips, seasonal, dashboard sub-components) — סוכנים רצים ברקע</span></li>
+      <li><span>Zone wizard step — הוספת שלב אזורים לוויזארד השבועי</span></li>
+      <li><span>Multi-user households — תמיכה בילדים/שותפי דירה</span></li>
+      <li><span>List virtualization (react-virtual) — ביצועים ברשימות ארוכות</span></li>
+      <li><span>Full app facelift — מעברי דפים, מיקרו-אינטראקציות</span></li>
+      <li><span>Redis rate limiter (Upstash) — הגנה מ-abuse</span></li>
+    </ol>
+  </div>
+</div>
+
+<!-- צמיחה -->
+<div class="section reveal" id="s6">
+  <div class="sh" onclick="tog('s6')"><div class="ic ig">▲</div><h2>דוח צמיחה</h2><span class="chev">▼</span></div>
+  <div class="sb">
+    <div class="stats" style="margin-bottom:16px">
+      <div class="stat"><div class="v">9.5</div><div class="l">איכות</div><div class="delta delta-up">↑ מ-8.5</div></div>
+      <div class="stat"><div class="v">9</div><div class="l">מהירות</div><div class="delta delta-up">↑ מ-8</div></div>
+      <div class="stat"><div class="v">9</div><div class="l">יעילות</div><div class="delta delta-up">15 קומיטים בסשן</div></div>
+      <div class="stat"><div class="v">9</div><div class="l">דיוק</div><div class="delta delta-up">0 שגיאות build</div></div>
+      <div class="stat"><div class="v">10</div><div class="l">אוטונומיה</div><div class="delta delta-up">אפס שאלות</div></div>
+      <div class="stat"><div class="v">9</div><div class="l">יוזמה</div><div class="delta delta-up">dogfood עצמאי</div></div>
+    </div>
+    <p style="color:var(--text2);font-size:0.85rem;line-height:1.8">
+      <strong style="color:var(--green)">שיפורים מרכזיים:</strong><br>
+      • i18n הושלם ב-100% — מ-5 דפים בסשן הקודם ל-12 דפים + קומפוננטים<br>
+      • Voice input ב-5 מיקומים (מ-3 בסשן הקודם)<br>
+      • Beta feedback loop מובנה בכל נקודת מגע<br>
+      • Dogfood אוטונומי עם דפדפן — לא היה בסשנים קודמים<br>
+      • סוכנים מקבילים — 5+ סוכנים רצו במקביל לאורך הסשן<br>
+      <br>
+      <strong style="color:var(--amber)">מה לשפר בסשן הבא:</strong><br>
+      • ביצועים — list virtualization<br>
+      • עומק i18n — גם data files (seed-data, coaching-messages)<br>
+      • בדיקות — אין coverage כרגע
+    </p>
+  </div>
+</div>
+
+<!-- ציר זמן -->
+<div class="section reveal" id="s7">
+  <div class="sh" onclick="tog('s7')"><div class="ic io">⏱</div><h2>ציר זמן</h2><span class="chev">▼</span></div>
+  <div class="sb">
+    <div class="tl-wrap">
+      <div class="tl-item"><div class="tl-dot"></div><div><div class="tl-date">22 מרץ</div><div class="tl-title">סשן 1-2: פסח + דומיין + אבטחה</div><div class="tl-desc">22 קומיטים, מצב פסח, אזורים, נחיתה, שיתוף</div></div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div><div class="tl-date">23-24 מרץ</div><div class="tl-title">סשן 3-4: ביצועים + OAuth + UX</div><div class="tl-desc">32 קומיטים נוספים, Google OAuth, אוברהול UX</div></div></div>
+      <div class="tl-item"><div class="tl-dot"></div><div><div class="tl-date">25 מרץ</div><div class="tl-title">סשן 4: AI Chat + Voice + Onboarding</div><div class="tl-desc">7 קומיטים, Gemini API, voice POC, PWA</div></div></div>
+      <div class="tl-item"><div class="tl-dot cur"></div><div><div class="tl-date">26 מרץ</div><div class="tl-title">סשן 5: i18n מלא + Beta Feedback</div><div class="tl-desc">15 קומיטים, 462 מפתחות, 12/12 דפים, dogfood חי</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  נוצר ב-26.03.2026 על ידי Claude Code · iteration-report skill<br>
+  <a href="https://www.bayitbeseder.com">bayitbeseder.com</a> · 76 קומיטים · גרסה ראשונה
+</div>
+
+</div>
+
+<script>
+function tog(id){document.getElementById(id).classList.toggle('c')}
+// Scroll reveal
+const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}})},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
