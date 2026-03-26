@@ -13,10 +13,13 @@ Home maintenance management app for 2 users (Elad & Inbal/ענבל). Hebrew RTL,
 - **Celebrations:** canvas-confetti
 - **Toast:** Sonner
 
+## Package Manager
+- **bun** (not npm/yarn/pnpm) — bun.lock is the lockfile
+
 ## Commands
-- `npm run dev` - Start dev server
-- `npm run build` - Production build
-- `npx tsc --noEmit` - Type check
+- `bun run dev` - Start dev server
+- `bun run build` - Production build
+- `bunx tsc --noEmit` - Type check
 
 ## Key Directories
 ```
@@ -102,8 +105,8 @@ Before designing ANY UI component, page, or layout:
 
 ### בסיום כל איטרציה
 1. עדכן PROGRESS.md עם מה שנעשה בפועל
-2. הרץ typecheck: `npx tsc --noEmit`
-3. ודא build עובד לפני commit: `npm run build`
+2. הרץ typecheck: `bunx tsc --noEmit`
+3. ודא build עובד לפני commit: `bun run build`
 4. commit עם הודעה: `feat/fix/refactor: תיאור באנגלית`
 
 
