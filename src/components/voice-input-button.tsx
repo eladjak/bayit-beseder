@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect } from "react";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface VoiceInputButtonProps {
   /** Called with the final recognised text each time recognition ends with a result. */
@@ -27,8 +28,10 @@ export function VoiceInputButton({
   onTranscript,
   className = "",
   lang = "he-IL",
-  ariaLabel = "הקלטת קול",
+  ariaLabel,
 }: VoiceInputButtonProps) {
+  const { t } = useTranslation();
+  const resolvedAriaLabel = ariaLabel ?? t("voice.record");
   const { isListening, transcript, startListening, stopListening, isSupported, error } =
     useVoiceInput({ lang });
 
@@ -69,9 +72,9 @@ export function VoiceInputButton({
         type="button"
         onClick={handleClick}
         disabled={!isSupported}
-        aria-label={isListening ? "עצור הקלטה" : ariaLabel}
+        aria-label={isListening ? t("voice.stopRecording") : resolvedAriaLabel}
         aria-pressed={isListening}
-        title={error ?? (isListening ? "לחץ לעצור" : "לחץ להקלטה")}
+        title={error ?? (isListening ? t("voice.clickToStop") : t("voice.clickToRecord"))}
         whileTap={isSupported ? { scale: 0.9 } : undefined}
         className={[
           "relative z-10 flex items-center justify-center",

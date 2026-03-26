@@ -260,6 +260,46 @@
     "toHome": "Home page",
     "toDashboard": "Dashboard"
   },
+  "invite": {
+    "title": "Invite a partner",
+    "partner": "Partner",
+    "errorGenerating": "Error generating invite code",
+    "errorConnection": "Connection error",
+    "codeCopied": "Invite code copied!",
+    "linkCopied": "Link copied!",
+    "whatsappMessage": "Hey! I invited you to manage the home together with me on \"Bayit BeSeder\" 🏠✨",
+    "whatsappLink": "Click the link to join:",
+    "whatsappCode": "Invite code:",
+    "connectedWith": "Connected with",
+    "managingTogether": "Managing the home together",
+    "loadingCode": "Loading invite code...",
+    "stepSend": "Send invite",
+    "stepJoin": "Join",
+    "stepTogether": "Together!",
+    "instruction1": "1. Tap \"Share on WhatsApp\" to send an invite to your partner",
+    "instruction2": "2. Your partner clicks the link and joins automatically",
+    "instruction3": "3. After joining, you can manage the home together!",
+    "shareWhatsapp": "Share on WhatsApp",
+    "copyLink": "Copy invite link",
+    "showCode": "Show invite code",
+    "hideCode": "Hide code",
+    "copyCodeLabel": "Copy invite code",
+    "generateDescription": "Create an invite code and send it to your partner to start managing the home together",
+    "generateButton": "Create invite code"
+  },
+  "voice": {
+    "record": "Record voice",
+    "stopRecording": "Stop recording",
+    "clickToStop": "Click to stop",
+    "clickToRecord": "Click to record"
+  },
+  "playlists": {
+    "title": "Playlists 🎵",
+    "subtitle": "Guided cleaning routines with timer",
+    "imageAlt": "Cleaning playlists",
+    "tasks": "tasks",
+    "hint": "Tap a playlist to start a guided routine with timer"
+  },
   "emergency": {
     "title": "Emergency Mode",
     "activeTitle": "Emergency Mode Active",

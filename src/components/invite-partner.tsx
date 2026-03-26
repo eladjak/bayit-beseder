@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
+import { useTranslation } from "@/hooks/useTranslation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase";
 
@@ -34,6 +35,7 @@ interface PartnerInfo {
 export function InvitePartner() {
   const { user } = useAuth();
   const { profile } = useProfile();
+  const { t } = useTranslation();
 
   const [inviteData, setInviteData] = useState<InviteData | null>(null);
   const [partnerInfo, setPartnerInfo] = useState<PartnerInfo | null>(null);
@@ -54,7 +56,7 @@ export function InvitePartner() {
       .single()
       .then(({ data }) => {
         if (data) {
-          setPartnerInfo({ id: data.id, name: data.display_name ?? "שותף/ה" });
+          setPartnerInfo({ id: data.id, name: data.display_name ?? t("invite.partner") });
         }
       });
   }, [profile?.partner_id]);
@@ -67,13 +69,13 @@ export function InvitePartner() {
     try {
       const res = await fetch("/api/invite", { method: "POST" });
       if (!res.ok) {
-        toast.error("שגיאה ביצירת קוד ההזמנה");
+        toast.error(t("invite.errorGenerating"));
         return;
       }
       const data = (await res.json()) as InviteData;
       setInviteData(data);
     } catch {
-      toast.error("שגיאה בחיבור לשרת");
+      toast.error(t("invite.errorConnection"));
     } finally {
       setLoading(false);
     }
@@ -90,27 +92,27 @@ export function InvitePartner() {
     if (!inviteData) return;
     void navigator.clipboard.writeText(inviteData.inviteCode).then(() => {
       setCodeCopied(true);
-      toast.success("קוד ההזמנה הועתק!");
+      toast.success(t("invite.codeCopied"));
       setTimeout(() => setCodeCopied(false), 2000);
     });
-  }, [inviteData]);
+  }, [inviteData, t]);
 
   const handleCopyLink = useCallback(() => {
     if (!inviteData) return;
     void navigator.clipboard.writeText(inviteData.link).then(() => {
       setLinkCopied(true);
-      toast.success("הקישור הועתק!");
+      toast.success(t("invite.linkCopied"));
       setTimeout(() => setLinkCopied(false), 2000);
     });
-  }, [inviteData]);
+  }, [inviteData, t]);
 
   const handleWhatsAppShare = useCallback(() => {
     if (!inviteData) return;
     const message = encodeURIComponent(
-      `היי! הזמנתי אותך לנהל את הבית יחד איתי ב"בית בסדר" 🏠✨\n\nלחץ/י על הקישור להצטרפות:\n${inviteData.link}\n\nקוד הזמנה: ${inviteData.inviteCode}`
+      `${t("invite.whatsappMessage")}\n\n${t("invite.whatsappLink")}\n${inviteData.link}\n\n${t("invite.whatsappCode")} ${inviteData.inviteCode}`
     );
     window.open(`https://wa.me/?text=${message}`, "_blank", "noopener,noreferrer");
-  }, [inviteData]);
+  }, [inviteData, t]);
 
   // Not logged in
   if (!user) return null;
@@ -119,7 +121,7 @@ export function InvitePartner() {
     <section className="card-elevated p-4 space-y-4">
       <div className="flex items-center gap-2">
         <UserPlus className="w-4 h-4 text-muted" />
-        <h2 className="font-semibold text-sm">הזמן/י שותף/ה</h2>
+        <h2 className="font-semibold text-sm">{t("invite.title")}</h2>
       </div>
 
       <AnimatePresence mode="wait">
@@ -135,9 +137,9 @@ export function InvitePartner() {
             <Heart className="w-5 h-5 text-success fill-success flex-shrink-0" />
             <div className="min-w-0">
               <p className="text-sm font-medium text-foreground">
-                מחובר/ת עם {partnerInfo.name}
+                {t("invite.connectedWith")} {partnerInfo.name}
               </p>
-              <p className="text-xs text-muted">מנהלים את הבית יחד</p>
+              <p className="text-xs text-muted">{t("invite.managingTogether")}</p>
             </div>
           </motion.div>
         ) : loading ? (
@@ -149,7 +151,7 @@ export function InvitePartner() {
             className="flex items-center justify-center gap-2 py-4"
           >
             <Loader2 className="w-5 h-5 text-primary animate-spin" />
-            <span className="text-sm text-muted">טוען קוד הזמנה...</span>
+            <span className="text-sm text-muted">{t("invite.loadingCode")}</span>
           </motion.div>
         ) : inviteData ? (
           <motion.div
@@ -165,29 +167,29 @@ export function InvitePartner() {
                 <div className="w-8 h-8 rounded-full bg-[#25D366]/10 flex items-center justify-center">
                   <Send className="w-4 h-4 text-[#25D366]" />
                 </div>
-                <span className="text-[10px] text-muted font-medium">שלחו הזמנה</span>
+                <span className="text-[10px] text-muted font-medium">{t("invite.stepSend")}</span>
               </div>
               <div className="text-muted/30 text-lg">&larr;</div>
               <div className="flex flex-col items-center gap-1 flex-1">
                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <Users className="w-4 h-4 text-primary" />
                 </div>
-                <span className="text-[10px] text-muted font-medium">הצטרפות</span>
+                <span className="text-[10px] text-muted font-medium">{t("invite.stepJoin")}</span>
               </div>
               <div className="text-muted/30 text-lg">&larr;</div>
               <div className="flex flex-col items-center gap-1 flex-1">
                 <div className="w-8 h-8 rounded-full bg-success/10 flex items-center justify-center">
                   <Home className="w-4 h-4 text-success" />
                 </div>
-                <span className="text-[10px] text-muted font-medium">ביחד!</span>
+                <span className="text-[10px] text-muted font-medium">{t("invite.stepTogether")}</span>
               </div>
             </div>
 
             {/* Step-by-step instructions */}
             <div className="space-y-1.5 text-xs text-muted">
-              <p>1. לחצו &quot;שתף בוואטסאפ&quot; כדי לשלוח הזמנה לשותף/ה</p>
-              <p>2. השותף/ה ילחץ על הקישור ויצטרף אוטומטית</p>
-              <p>3. אחרי ההצטרפות תוכלו לנהל את הבית יחד!</p>
+              <p>{t("invite.instruction1")}</p>
+              <p>{t("invite.instruction2")}</p>
+              <p>{t("invite.instruction3")}</p>
             </div>
 
             {/* Primary: WhatsApp share (full width, prominent) */}
@@ -196,7 +198,7 @@ export function InvitePartner() {
               className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition-opacity active:scale-[0.98] transition-transform shadow-md shadow-[#25D366]/20"
             >
               <MessageCircle className="w-5 h-5" />
-              שתפו בוואטסאפ
+              {t("invite.shareWhatsapp")}
             </button>
 
             {/* Secondary: Copy link */}
@@ -209,7 +211,7 @@ export function InvitePartner() {
               ) : (
                 <LinkIcon className="w-4 h-4 text-muted" />
               )}
-              {linkCopied ? "הקישור הועתק!" : "העתקת קישור הזמנה"}
+              {linkCopied ? t("invite.linkCopied") : t("invite.copyLink")}
             </button>
 
             {/* Tertiary: Show code (collapsed) */}
@@ -218,7 +220,7 @@ export function InvitePartner() {
               className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs text-muted hover:text-foreground transition-colors"
             >
               <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showCode ? "rotate-180" : ""}`} />
-              {showCode ? "הסתר קוד" : "הצג קוד הזמנה"}
+              {showCode ? t("invite.hideCode") : t("invite.showCode")}
             </button>
 
             <AnimatePresence>
@@ -236,7 +238,7 @@ export function InvitePartner() {
                     <button
                       onClick={handleCopyCode}
                       className="p-2.5 rounded-lg bg-background border border-border hover:bg-surface-hover transition-colors"
-                      aria-label="העתק קוד הזמנה"
+                      aria-label={t("invite.copyCodeLabel")}
                     >
                       {codeCopied ? (
                         <Check className="w-4 h-4 text-success" />
@@ -258,7 +260,7 @@ export function InvitePartner() {
             className="space-y-3"
           >
             <p className="text-xs text-muted">
-              צרו קוד הזמנה ושלחו לשותף/ה שלכם כדי להתחיל לנהל את הבית יחד
+              {t("invite.generateDescription")}
             </p>
             <button
               onClick={handleGenerateInvite}
@@ -266,7 +268,7 @@ export function InvitePartner() {
               className="w-full flex items-center justify-center gap-2 py-3 gradient-primary text-white rounded-2xl font-semibold text-sm shadow-md shadow-primary/20 disabled:opacity-50 active:scale-95 transition-transform"
             >
               <UserPlus className="w-4 h-4" />
-              יצירת קוד הזמנה
+              {t("invite.generateButton")}
             </button>
           </motion.div>
         )}

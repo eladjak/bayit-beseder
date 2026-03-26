@@ -260,6 +260,46 @@
     "toHome": "לדף הבית",
     "toDashboard": "לדשבורד"
   },
+  "invite": {
+    "title": "הזמן/י שותף/ה",
+    "partner": "שותף/ה",
+    "errorGenerating": "שגיאה ביצירת קוד ההזמנה",
+    "errorConnection": "שגיאה בחיבור לשרת",
+    "codeCopied": "קוד ההזמנה הועתק!",
+    "linkCopied": "הקישור הועתק!",
+    "whatsappMessage": "היי! הזמנתי אותך לנהל את הבית יחד איתי ב\"בית בסדר\" 🏠✨",
+    "whatsappLink": "לחץ/י על הקישור להצטרפות:",
+    "whatsappCode": "קוד הזמנה:",
+    "connectedWith": "מחובר/ת עם",
+    "managingTogether": "מנהלים את הבית יחד",
+    "loadingCode": "טוען קוד הזמנה...",
+    "stepSend": "שלחו הזמנה",
+    "stepJoin": "הצטרפות",
+    "stepTogether": "ביחד!",
+    "instruction1": "1. לחצו \"שתף בוואטסאפ\" כדי לשלוח הזמנה לשותף/ה",
+    "instruction2": "2. השותף/ה ילחץ על הקישור ויצטרף אוטומטית",
+    "instruction3": "3. אחרי ההצטרפות תוכלו לנהל את הבית יחד!",
+    "shareWhatsapp": "שתפו בוואטסאפ",
+    "copyLink": "העתקת קישור הזמנה",
+    "showCode": "הצג קוד הזמנה",
+    "hideCode": "הסתר קוד",
+    "copyCodeLabel": "העתק קוד הזמנה",
+    "generateDescription": "צרו קוד הזמנה ושלחו לשותף/ה שלכם כדי להתחיל לנהל את הבית יחד",
+    "generateButton": "יצירת קוד הזמנה"
+  },
+  "voice": {
+    "record": "הקלטת קול",
+    "stopRecording": "עצור הקלטה",
+    "clickToStop": "לחץ לעצור",
+    "clickToRecord": "לחץ להקלטה"
+  },
+  "playlists": {
+    "title": "פלייליסטים 🎵",
+    "subtitle": "שגרות ניקיון מודרכות עם טיימר",
+    "imageAlt": "פלייליסטים לניקיון",
+    "tasks": "משימות",
+    "hint": "לחצו על פלייליסט כדי להתחיל שגרה מודרכת עם טיימר"
+  },
   "emergency": {
     "title": "מצב חירום",
     "activeTitle": "מצב חירום פעיל",

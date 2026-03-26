@@ -7,8 +7,10 @@ import { Clock, ListChecks } from "lucide-react";
 import { PLAYLISTS } from "@/lib/playlists";
 import { usePlaylistTimer } from "@/hooks/usePlaylistTimer";
 import { PlaylistPlayer } from "@/components/playlist-player";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function PlaylistsPage() {
+  const { t } = useTranslation();
   const timer = usePlaylistTimer();
   const [showPlayer, setShowPlayer] = useState(false);
 
@@ -36,15 +38,15 @@ export default function PlaylistsPage() {
       <div className="gradient-hero rounded-b-3xl overflow-hidden">
         <Image
           src="/illustrations/playlist-cleaning.jpg"
-          alt="פלייליסטים לניקיון"
+          alt={t("playlists.imageAlt")}
           width={512}
           height={144}
           className="w-full h-36 object-cover opacity-60"
         />
         <div className="text-center px-4 pt-4 pb-8 -mt-4 relative z-10">
-          <h1 className="text-2xl font-bold text-white">פלייליסטים 🎵</h1>
+          <h1 className="text-2xl font-bold text-white">{t("playlists.title")}</h1>
           <p className="text-sm text-white/70 mt-1">
-            שגרות ניקיון מודרכות עם טיימר
+            {t("playlists.subtitle")}
           </p>
         </div>
       </div>
@@ -68,12 +70,12 @@ export default function PlaylistsPage() {
               <div className="flex flex-col gap-1 mt-auto">
                 <div className="flex items-center gap-1 text-muted">
                   <Clock className="w-3 h-3" />
-                  <span className="text-[11px]">{playlist.totalMinutes} דקות</span>
+                  <span className="text-[11px]">{playlist.totalMinutes} {t("common.minutes")}</span>
                 </div>
                 <div className="flex items-center gap-1 text-muted">
                   <ListChecks className="w-3 h-3" />
                   <span className="text-[11px]">
-                    {playlist.tasks.length} משימות
+                    {playlist.tasks.length} {t("playlists.tasks")}
                   </span>
                 </div>
               </div>
@@ -88,7 +90,7 @@ export default function PlaylistsPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          לחצו על פלייליסט כדי להתחיל שגרה מודרכת עם טיימר
+          {t("playlists.hint")}
         </motion.p>
       </div>
 
