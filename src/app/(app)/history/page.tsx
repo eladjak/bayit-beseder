@@ -11,6 +11,7 @@ const VoiceInputButton = dynamic(
 import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
+import { useTranslation } from "@/hooks/useTranslation";
 import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
 import type { TaskRow, TaskCompletionRow } from "@/lib/types/database";
 import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
@@ -217,6 +218,7 @@ export default function HistoryPage() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortOrder] = useState<"desc">("desc"); // newest first always
+  const { t } = useTranslation();
 
   // Fetch all tasks (no status filter - we need all to look up completions)
   const { tasks, loading: tasksLoading } = useTasks({});
@@ -294,7 +296,7 @@ export default function HistoryPage() {
     <div className="px-4 py-6 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-foreground">היסטוריית משימות</h1>
+        <h1 className="text-xl font-bold text-foreground">{t("history.title")}</h1>
         <span className="text-xs text-muted bg-surface px-2.5 py-1 rounded-full">
           {sortedEntries.length} רשומות
         </span>
@@ -309,17 +311,17 @@ export default function HistoryPage() {
           />
           <input
             type="text"
-            placeholder="חיפוש משימות..."
+            placeholder={t("history.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full bg-surface rounded-xl pr-9 pl-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:ring-2 focus:ring-primary/30"
             dir="rtl"
-            aria-label="חיפוש במשימות שהושלמו"
+            aria-label={t("history.searchLabel")}
           />
         </div>
         <VoiceInputButton
           onTranscript={(text) => setSearch(text)}
-          ariaLabel="חיפוש בקול"
+          ariaLabel={t("history.searchByVoice")}
           className="flex-shrink-0 w-9 h-9"
         />
       </div>
@@ -350,11 +352,11 @@ export default function HistoryPage() {
       {!loading && sortedEntries.length === 0 && (
         <div className="text-center py-12">
           <p className="text-4xl mb-3">📋</p>
-          <p className="text-sm font-medium text-foreground">אין משימות להצגה</p>
+          <p className="text-sm font-medium text-foreground">{t("history.noResults")}</p>
           <p className="text-xs text-muted mt-1">
             {search || selectedCategory
-              ? "נסו לשנות את הסינון"
-              : "משימות שהושלמו יופיעו כאן"}
+              ? t("tasks.tryOtherCategory")
+              : t("history.noResults")}
           </p>
         </div>
       )}

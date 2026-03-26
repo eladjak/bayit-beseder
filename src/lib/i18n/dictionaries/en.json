@@ -221,6 +221,29 @@
     "welcome": "Hi! I'm here to help with home planning. What would you like to know?",
     "thinking": "Thinking..."
   },
+  "pwa": {
+    "installTitle": "Install Bayit BeSeder",
+    "installSubtitle": "Quick access from your home screen",
+    "installButton": "Install",
+    "installLabel": "Install app on home screen",
+    "dismissLabel": "Dismiss install prompt"
+  },
+  "history": {
+    "title": "History",
+    "searchPlaceholder": "Search tasks...",
+    "searchLabel": "Search completed tasks",
+    "searchByVoice": "Search by voice",
+    "all": "All",
+    "noResults": "No tasks found",
+    "completedAt": "Completed on "
+  },
+  "notFound": {
+    "title": "Page not found",
+    "subtitle": "Looks like this address doesn't exist.",
+    "message": "But don't worry — the house is fine!",
+    "toHome": "Home page",
+    "toDashboard": "Dashboard"
+  },
   "emergency": {
     "title": "Emergency Mode",
     "activeTitle": "Emergency Mode Active",

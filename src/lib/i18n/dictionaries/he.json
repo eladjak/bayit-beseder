@@ -221,6 +221,29 @@
     "welcome": "היי! אני כאן לעזור עם תכנון הבית. מה תרצו לדעת?",
     "thinking": "חושב..."
   },
+  "pwa": {
+    "installTitle": "התקינו את בית בסדר",
+    "installSubtitle": "גישה מהירה מהמסך הראשי",
+    "installButton": "התקנה",
+    "installLabel": "התקן את האפליקציה על המסך הראשי",
+    "dismissLabel": "סגור הצעת ההתקנה"
+  },
+  "history": {
+    "title": "היסטוריה",
+    "searchPlaceholder": "חיפוש משימות...",
+    "searchLabel": "חיפוש במשימות שהושלמו",
+    "searchByVoice": "חיפוש בקול",
+    "all": "הכל",
+    "noResults": "לא נמצאו משימות",
+    "completedAt": "הושלם ב-"
+  },
+  "notFound": {
+    "title": "הדף לא נמצא",
+    "subtitle": "נראה שהגעתם לכתובת שלא קיימת.",
+    "message": "אבל אל דאגה — הבית בסדר!",
+    "toHome": "לדף הבית",
+    "toDashboard": "לדשבורד"
+  },
   "emergency": {
     "title": "מצב חירום",
     "activeTitle": "מצב חירום פעיל",
