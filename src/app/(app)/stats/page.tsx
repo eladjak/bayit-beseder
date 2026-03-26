@@ -566,7 +566,7 @@ export default function StatsPage() {
                 <span className="text-foreground">
                   {getCategoryLabel(entry.category)}
                 </span>
-                <span className="text-muted mr-auto">{entry.value}%</span>
+                <span className="text-muted ms-auto">{entry.value}%</span>
               </div>
             ))}
           </div>

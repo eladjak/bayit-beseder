@@ -306,7 +306,7 @@ export default function HistoryPage() {
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <Search
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none"
+            className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none"
             aria-hidden="true"
           />
           <input
@@ -314,7 +314,7 @@ export default function HistoryPage() {
             placeholder={t("history.searchPlaceholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-surface rounded-xl pr-9 pl-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full bg-surface rounded-xl pe-9 ps-4 py-2.5 text-sm text-foreground placeholder:text-muted outline-none focus:ring-2 focus:ring-primary/30"
             dir="rtl"
             aria-label={t("history.searchLabel")}
           />

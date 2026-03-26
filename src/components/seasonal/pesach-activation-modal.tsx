@@ -152,7 +152,7 @@ export function PesachActivationModal({
                   {/* Date picker */}
                   <div>
                     <label className="text-sm font-medium text-foreground block mb-1.5">
-                      <Calendar className="w-4 h-4 inline-block ml-1" />
+                      <Calendar className="w-4 h-4 inline-block ms-1" />
                       {t("seasonal.startDate")}
                     </label>
                     <input

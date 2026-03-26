@@ -42,6 +42,7 @@ export const GoldenRuleRing = memo(function GoldenRuleRing({
         )}
         <svg width={size} height={size} className="-rotate-90">
           <defs>
+            {/* Intentional hex colors: SVG gradients cannot consume CSS variables */}
             <linearGradient id="ring-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#6366F1" />
               <stop offset="50%" stopColor="#8B5CF6" />

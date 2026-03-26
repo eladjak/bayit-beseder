@@ -123,13 +123,13 @@ function RewardCard({
           {reward.emoji}
         </span>
         {!unlocked && (
-          <div className="absolute -bottom-1 -left-1 w-4 h-4 bg-surface-hover rounded-full flex items-center justify-center">
+          <div className="absolute -bottom-1 -start-1 w-4 h-4 bg-surface-hover rounded-full flex items-center justify-center">
             <Lock className="w-2.5 h-2.5 text-muted" />
           </div>
         )}
         {unlocked && (
           <motion.div
-            className="absolute -top-1 -left-1"
+            className="absolute -top-1 -start-1"
             animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
           >

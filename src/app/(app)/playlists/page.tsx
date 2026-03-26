@@ -64,9 +64,9 @@ export default function PlaylistsPage() {
               transition={{ delay: i * 0.06 }}
             >
               <span className="text-3xl">{playlist.icon}</span>
-              <h2 className="text-sm font-bold text-foreground leading-tight">
+              <span className="text-sm font-bold text-foreground leading-tight">
                 {playlist.name}
-              </h2>
+              </span>
               <div className="flex flex-col gap-1 mt-auto">
                 <div className="flex items-center gap-1 text-muted">
                   <Clock className="w-3 h-3" />

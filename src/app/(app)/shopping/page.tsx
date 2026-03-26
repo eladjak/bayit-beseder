@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, ChevronDown, ChevronUp, Trash2, Settings } from "lucide-react";
 import { toast } from "sonner";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useShoppingList, CATEGORY_COLORS, SHOPPING_CATEGORY_ICONS } from "@/hooks/useShoppingList";
-import type { ShoppingCategory } from "@/hooks/useShoppingList";
+import type { ShoppingCategory, ShoppingItem } from "@/hooks/useShoppingList";
 import { useShoppingCategories } from "@/hooks/useShoppingCategories";
 import { ShoppingItemCard } from "@/components/shopping/shopping-item";
 import { CategoryManager } from "@/components/shopping/category-manager";
@@ -16,6 +17,76 @@ import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useProfile } from "@/hooks/useProfile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Loader2 } from "lucide-react";
+
+const VIRTUALIZE_THRESHOLD = 10;
+const ITEM_HEIGHT = 52; // px — estimated height of each ShoppingItemCard + gap
+const ITEM_GAP = 6; // px — space-y-1.5 = 6px
+const OVERSCAN = 3;
+
+interface VirtualizedItemsProps {
+  items: ShoppingItem[];
+  onToggle: (id: string) => void;
+  onRemove: (id: string) => void;
+  categoryColor: string;
+  categoryIcon: string;
+}
+
+function VirtualizedCategoryItems({
+  items,
+  onToggle,
+  onRemove,
+  categoryColor,
+  categoryIcon,
+}: VirtualizedItemsProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => containerRef.current,
+    estimateSize: () => ITEM_HEIGHT + ITEM_GAP,
+    overscan: OVERSCAN,
+  });
+
+  const totalHeight = rowVirtualizer.getTotalSize();
+
+  return (
+    <div
+      ref={containerRef}
+      // Cap visible area so the container becomes scrollable when item count is large
+      style={{ maxHeight: Math.min(totalHeight, 8 * (ITEM_HEIGHT + ITEM_GAP)), overflowY: "auto" }}
+      className="p-2"
+      aria-label={`${items.length} פריטים`}
+    >
+      {/* Spacer that sets the full virtual height */}
+      <div style={{ height: totalHeight, position: "relative" }}>
+        {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+          const item = items[virtualRow.index];
+          return (
+            <div
+              key={item.id}
+              style={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                left: 0,
+                transform: `translateY(${virtualRow.start}px)`,
+                paddingBottom: ITEM_GAP,
+              }}
+            >
+              <ShoppingItemCard
+                item={item}
+                onToggle={onToggle}
+                onRemove={onRemove}
+                categoryColor={categoryColor}
+                categoryIcon={categoryIcon}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 const VoiceInputButton = dynamic(
   () => import("@/components/voice-input-button").then((m) => m.VoiceInputButton),
@@ -346,20 +417,32 @@ export default function ShoppingPage() {
                       transition={{ type: "tween", duration: 0.18, ease: "easeInOut" }}
                       className="overflow-hidden"
                     >
-                      <div className="p-2 space-y-1.5">
-                        <AnimatePresence mode="popLayout">
-                          {catItems.map((item) => (
-                            <ShoppingItemCard
-                              key={item.id}
-                              item={item}
-                              onToggle={handleToggle}
-                              onRemove={handleRemove}
-                              categoryColor={color}
-                              categoryIcon={icon}
-                            />
-                          ))}
-                        </AnimatePresence>
-                      </div>
+                      {catItems.length >= VIRTUALIZE_THRESHOLD ? (
+                        // Large category: virtualize items to keep rendering fast
+                        <VirtualizedCategoryItems
+                          items={catItems}
+                          onToggle={handleToggle}
+                          onRemove={handleRemove}
+                          categoryColor={color}
+                          categoryIcon={icon}
+                        />
+                      ) : (
+                        // Small category: normal animated rendering
+                        <div className="p-2 space-y-1.5">
+                          <AnimatePresence mode="popLayout">
+                            {catItems.map((item) => (
+                              <ShoppingItemCard
+                                key={item.id}
+                                item={item}
+                                onToggle={handleToggle}
+                                onRemove={handleRemove}
+                                categoryColor={color}
+                                categoryIcon={icon}
+                              />
+                            ))}
+                          </AnimatePresence>
+                        </div>
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>

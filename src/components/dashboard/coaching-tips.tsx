@@ -106,7 +106,7 @@ function ActionChips({
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18, delay: 0.12 }}
-      className="flex items-center gap-2 pr-9 flex-wrap"
+      className="flex items-center gap-2 pe-9 flex-wrap"
     >
       <button
         onClick={onNextTip}
@@ -246,7 +246,7 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
               key="thanks"
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-2 pr-9"
+              className="flex items-center gap-2 pe-9"
             >
               <p className="text-sm text-muted">
                 {t("coaching.thanksMessage")}
@@ -295,7 +295,7 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
             key="chips-thanks"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex items-center gap-2 pr-9"
+            className="flex items-center gap-2 pe-9"
           >
             <button
               onClick={() => {

@@ -179,7 +179,7 @@ export function CategoryManager({
                         onClick={saveEdit}
                         className="flex-1 py-2 rounded-xl gradient-primary text-white text-sm font-semibold"
                       >
-                        <Check className="w-4 h-4 inline ml-1" />
+                        <Check className="w-4 h-4 inline ms-1" />
                         שמור
                       </button>
                       <button
@@ -289,7 +289,7 @@ export function CategoryManager({
                 disabled={!newName.trim()}
                 className="flex-1 py-2 rounded-xl gradient-primary text-white text-sm font-semibold disabled:opacity-50"
               >
-                <Plus className="w-4 h-4 inline ml-1" />
+                <Plus className="w-4 h-4 inline ms-1" />
                 הוסף
               </button>
               <button

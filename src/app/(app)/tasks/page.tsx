@@ -653,7 +653,7 @@ export default function TasksPage() {
                         }}
                       >
                         {task.isOverdue && (
-                          <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                          <div className="absolute top-2 start-2 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
                             ⏰ {t("common.overdue")}
                           </div>
                         )}
@@ -721,7 +721,7 @@ export default function TasksPage() {
                     }}
                   >
                     {task.isOverdue && (
-                      <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                      <div className="absolute top-2 start-2 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
                         ⏰ {t("common.overdue")}
                       </div>
                     )}

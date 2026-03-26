@@ -78,7 +78,7 @@ export function CategoryCard({
           {label}
         </span>
         {count !== undefined && count > 0 && (
-          <span className="absolute top-1.5 left-1.5 bg-primary text-white text-[9px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+          <span className="absolute top-1.5 start-1.5 bg-primary text-white text-[9px] font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
             {count}
           </span>
         )}

@@ -271,12 +271,11 @@ export default function WeeklyPage() {
       .then((res) => res.json())
       .then((data) => {
         if (data.seeded) {
-          // Force page reload to get fresh data
-          window.location.reload();
+          refetch();
         }
       })
       .catch(() => {});
-  }, [loading, tasks.length, profile]);
+  }, [loading, tasks.length, profile, refetch]);
 
   // Whether we're in real-data mode (Supabase connected and returned tasks)
   const isRealData = !loading && tasks.length > 0;
@@ -772,7 +771,7 @@ export default function WeeklyPage() {
           <DragOverlay>
             {activeDragTask && (
               <div className="bg-primary/15 rounded-lg px-3 py-2 text-xs shadow-lg border-2 border-primary opacity-90 text-foreground">
-                <span className="ml-1">{CATEGORY_ICONS[getCategoryFromId(activeDragTask.task.category_id)] ?? "🏠"}</span>
+                <span className="ms-1">{CATEGORY_ICONS[getCategoryFromId(activeDragTask.task.category_id)] ?? "🏠"}</span>
                 {activeDragTask.task.title}
               </div>
             )}
@@ -1058,7 +1057,7 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
         {isRealData && (
           <button
             onClick={handleAddButtonClick}
-            className={`flex-shrink-0 ml-2 mr-3 w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+            className={`flex-shrink-0 ms-2 me-3 w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
               showAddForm
                 ? "bg-primary text-white"
                 : "bg-border/30 text-muted hover:bg-primary/10 hover:text-primary"
@@ -1336,7 +1335,7 @@ function DraggableWeekTask({
         >
           {task.title}
           {task.description?.startsWith("[pesach-") && (
-            <span className="inline-flex items-center gap-0.5 mr-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
+            <span className="inline-flex items-center gap-0.5 me-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
               🫓 פסח
             </span>
           )}

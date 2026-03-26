@@ -492,7 +492,7 @@ function PreviewStep({
       <DragOverlay>
         {activeDrag && (
           <div className="bg-primary/15 rounded-lg px-3 py-2 text-xs shadow-lg border-2 border-primary opacity-90 text-foreground">
-            <span className="ml-1">{CATEGORY_ICONS[activeDrag.task.category] ?? "🏠"}</span>
+            <span className="ms-1">{CATEGORY_ICONS[activeDrag.task.category] ?? "🏠"}</span>
             {activeDrag.task.title}
           </div>
         )}
@@ -786,7 +786,7 @@ function EditStep({
       <DragOverlay>
         {activeDrag && (
           <div className="bg-primary/15 rounded-lg px-3 py-2 text-xs shadow-lg border-2 border-primary opacity-90 text-foreground">
-            <span className="ml-1">{CATEGORY_ICONS[activeDrag.task.category] ?? "🏠"}</span>
+            <span className="ms-1">{CATEGORY_ICONS[activeDrag.task.category] ?? "🏠"}</span>
             {activeDrag.task.title}
           </div>
         )}

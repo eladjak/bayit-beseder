@@ -286,7 +286,7 @@ export function FaqChat() {
             <p className="text-white/70 text-xs">מענה מיידי לשאלות</p>
           </div>
           {/* Traffic lights decoration */}
-          <div className="flex gap-1.5 mr-auto opacity-60">
+          <div className="flex gap-1.5 ms-auto opacity-60">
             {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
               <div key={c} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
             ))}

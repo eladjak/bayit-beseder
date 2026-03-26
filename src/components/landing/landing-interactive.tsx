@@ -284,7 +284,7 @@ export function FaqSection() {
               <motion.span
                 animate={{ rotate: open === i ? 180 : 0 }}
                 transition={{ duration: 0.25 }}
-                className="text-primary text-lg flex-shrink-0 mr-2"
+                className="text-primary text-lg flex-shrink-0 me-2"
               >
                 ▾
               </motion.span>

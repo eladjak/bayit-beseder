@@ -28,7 +28,8 @@ import { DangerZone } from "@/components/settings/danger-zone";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
 import { useTranslation } from "@/hooks/useTranslation";
-import { LayoutGrid } from "lucide-react";
+import { LayoutGrid, AlertTriangle } from "lucide-react";
+import Link from "next/link";
 
 // ============================================
 // Theme helpers
@@ -470,6 +471,18 @@ export default function SettingsPage() {
             </div>
           )}
         </div>
+
+        {/* Emergency Page Link */}
+        <Link href="/emergency" className="card-elevated p-4 flex items-center gap-3 hover:bg-surface-hover transition-colors">
+          <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-5 h-5 text-red-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">🚨 דף חירום</p>
+            <p className="text-xs text-muted mt-0.5">מספרי חירום, ספקים, ונקודות כיבוי למקרה חירום בבית</p>
+          </div>
+          <span className="text-muted text-lg leading-none">‹</span>
+        </Link>
 
         {/* Seasonal Mode Section */}
         {seasonalMode.activeTemplate && (

@@ -24,7 +24,7 @@ interface SummaryCardProps {
   numericValue: number;
   suffix?: string;
   subtitle: string;
-  color: string;
+  colorClass: string;
   delay: number;
 }
 
@@ -34,7 +34,7 @@ function SummaryCard({
   numericValue,
   suffix = "",
   subtitle,
-  color,
+  colorClass,
   delay,
 }: SummaryCardProps) {
   return (
@@ -46,8 +46,7 @@ function SummaryCard({
     >
       <div className="flex items-center gap-2 mb-2">
         <div
-          className="w-7 h-7 rounded-lg flex items-center justify-center"
-          style={{ backgroundColor: `${color}15` }}
+          className={`w-7 h-7 rounded-lg flex items-center justify-center ${colorClass}`}
         >
           {icon}
         </div>
@@ -87,7 +86,7 @@ export function WeeklySummaryCards({
   return (
     <div className="grid grid-cols-2 gap-3">
       <SummaryCard
-        icon={<CheckCircle2 className="w-4 h-4" style={{ color: "#22C55E" }} />}
+        icon={<CheckCircle2 className="w-4 h-4 text-green-500" />}
         label="הושלמו השבוע"
         numericValue={completedThisWeek}
         subtitle={
@@ -97,19 +96,19 @@ export function WeeklySummaryCards({
               ? "משימה אחת"
               : `${completedThisWeek} משימות`
         }
-        color="#22C55E"
+        colorClass="bg-green-500/10"
         delay={0}
       />
       <SummaryCard
-        icon={<Clock className="w-4 h-4" style={{ color: "#F59E0B" }} />}
+        icon={<Clock className="w-4 h-4 text-amber-500" />}
         label="ממתינות"
         numericValue={upcomingCount}
         subtitle="7 ימים הבאים"
-        color="#F59E0B"
+        colorClass="bg-amber-500/10"
         delay={0.05}
       />
       <SummaryCard
-        icon={<Flame className="w-4 h-4" style={{ color: "#EF4444" }} />}
+        icon={<Flame className="w-4 h-4 text-red-500" />}
         label="רצף"
         numericValue={streak}
         subtitle={
@@ -119,11 +118,11 @@ export function WeeklySummaryCards({
               ? "יום אחד"
               : `${streak} ימים ברצף`
         }
-        color="#EF4444"
+        colorClass="bg-red-500/10"
         delay={0.1}
       />
       <SummaryCard
-        icon={<TrendingUp className="w-4 h-4" style={{ color: "#4F46E5" }} />}
+        icon={<TrendingUp className="w-4 h-4 text-primary" />}
         label="אחוז השלמה"
         numericValue={completionRate}
         suffix="%"
@@ -134,7 +133,7 @@ export function WeeklySummaryCards({
               ? "בכיוון הנכון"
               : "יש מקום לשיפור"
         }
-        color="#4F46E5"
+        colorClass="bg-primary/10"
         delay={0.15}
       />
     </div>

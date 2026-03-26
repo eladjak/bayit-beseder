@@ -238,7 +238,7 @@ function GridCard({
       }`}
     >
       {selected && (
-        <span className="absolute top-2 left-2 bg-primary rounded-full p-0.5" aria-hidden="true">
+        <span className="absolute top-2 start-2 bg-primary rounded-full p-0.5" aria-hidden="true">
           <Check className="w-3 h-3 text-white" />
         </span>
       )}
