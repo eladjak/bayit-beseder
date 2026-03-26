@@ -649,7 +649,7 @@ export default function TasksPage() {
                           task.isOverdue ? "ring-1 ring-red-500/20" : ""
                         }`}
                         style={{
-                          borderRight: `3px solid ${task.isOverdue ? "#EF4444" : display.color}`,
+                          borderInlineStart: `3px solid ${task.isOverdue ? "#EF4444" : display.color}`,
                         }}
                       >
                         {task.isOverdue && (
@@ -717,7 +717,7 @@ export default function TasksPage() {
                       task.isOverdue ? "ring-1 ring-red-500/20" : ""
                     }`}
                     style={{
-                      borderRight: `3px solid ${task.isOverdue ? "#EF4444" : display.color}`,
+                      borderInlineStart: `3px solid ${task.isOverdue ? "#EF4444" : display.color}`,
                     }}
                   >
                     {task.isOverdue && (
@@ -884,7 +884,7 @@ export default function TasksPage() {
                         >
                           <div
                             className="card-elevated p-3 flex items-start gap-3 opacity-50"
-                            style={{ borderRight: `3px solid #10B981` }}
+                            style={{ borderInlineStart: `3px solid #10B981` }}
                           >
                             <button
                               onClick={() => toggleDbTask(task.id)}
@@ -925,7 +925,7 @@ export default function TasksPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className="card-elevated p-3 flex items-start gap-3 opacity-50"
-                        style={{ borderRight: `3px solid #10B981` }}
+                        style={{ borderInlineStart: `3px solid #10B981` }}
                       >
                         <button
                           onClick={() => toggleDbTask(task.id)}
