@@ -28,9 +28,30 @@ import { useUserAchievements } from "@/hooks/useUserAchievements";
 import { AnimatedNumber } from "@/components/animated-number";
 import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
 import { CATEGORY_NAME_TO_KEY, CATEGORY_ICONS } from "@/lib/categories";
-import { WeeklyShareCard } from "@/components/gamification/weekly-share-card";
+// WeeklyShareCard uses canvas — lazy-load it
+const WeeklyShareCard = dynamic(
+  () => import("@/components/gamification/weekly-share-card").then((m) => m.WeeklyShareCard),
+  { ssr: false }
+);
 import { useTranslation } from "@/hooks/useTranslation";
 import { StatCardSkeleton, RingSkeleton } from "@/components/skeleton";
+
+// Recharts is ~200 KB — lazy-load the two chart panels independently
+const WeeklyBarChart = dynamic(
+  () => import("@/components/stats/weekly-bar-chart").then((m) => m.WeeklyBarChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-48 bg-muted/30 rounded-xl animate-pulse" />,
+  }
+);
+
+const CategoryPieChart = dynamic(
+  () => import("@/components/stats/category-pie-chart").then((m) => m.CategoryPieChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-36 bg-muted/30 rounded-xl animate-pulse" />,
+  }
+);
 
 const MOCK_WEEKLY_DATA = [
   { day: "א׳", completed: 7, total: 10 },

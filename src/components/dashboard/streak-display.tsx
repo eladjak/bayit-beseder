@@ -1,8 +1,33 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useTranslation } from "@/hooks/useTranslation";
+
+function useCountUp(target: number, duration = 500): number {
+  const [display, setDisplay] = useState(target);
+  const prevRef = useRef(target);
+  const frameRef = useRef<number | null>(null);
+  useEffect(() => {
+    const from = prevRef.current;
+    if (from === target) return;
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - (1 - progress) ** 3;
+      setDisplay(Math.round(from + (target - from) * eased));
+      if (progress < 1) {
+        frameRef.current = requestAnimationFrame(animate);
+      } else {
+        prevRef.current = target;
+      }
+    };
+    frameRef.current = requestAnimationFrame(animate);
+    return () => { if (frameRef.current !== null) cancelAnimationFrame(frameRef.current); };
+  }, [target, duration]);
+  return display;
+}
 
 interface StreakDisplayProps {
   count: number;
@@ -12,6 +37,8 @@ interface StreakDisplayProps {
 export const StreakDisplay = memo(function StreakDisplay({ count, bestCount }: StreakDisplayProps) {
   const { t } = useTranslation();
   const fireSize = Math.min(count * 4 + 20, 48);
+  const animatedCount = useCountUp(count);
+  const animatedBest = useCountUp(bestCount);
 
   return (
     <div className="card-elevated p-4 flex items-center gap-4 relative overflow-hidden">
@@ -43,11 +70,11 @@ export const StreakDisplay = memo(function StreakDisplay({ count, bestCount }: S
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            {count}
+            {animatedCount}
           </motion.span>
           <span className="text-sm text-muted">{t("dashboard.streak")}</span>
         </div>
-        <p className="text-xs text-muted">{t("dashboard.bestStreak")}: {bestCount} {t("dashboard.days")}</p>
+        <p className="text-xs text-muted">{t("dashboard.bestStreak")}: {animatedBest} {t("dashboard.days")}</p>
       </div>
       {count >= 7 && (
         <motion.span

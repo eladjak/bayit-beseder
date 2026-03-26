@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef, useEffect, useReducer } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { motion, AnimatePresence, useSpring, useTransform } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Check, Clock, Filter, Plus, Settings, Trash2 } from "lucide-react";
 import { toast } from "sonner";
