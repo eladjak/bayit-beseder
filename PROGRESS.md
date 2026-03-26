@@ -33,7 +33,12 @@ App is fully functional with Pesach mode, zone-based scheduling, custom domain, 
 **Commit 65**: Voice auto-send in AI chat drawer
 - Voice input now auto-sends messages instead of just filling the input — better conversational UX
 
-**Session totals**: 4 commits (62-65), 9 files modified, ~280 lines added/changed
+**Commit 66**: Voice input in weekly add-task and history search
+- Weekly page: mic button next to "משימה חדשה" input for voice task addition
+- History page: mic button next to search input for voice search
+- Both dynamically imported for bundle optimization
+
+**Session totals**: 5 commits (62-66), 11 files modified, ~330 lines added/changed
 
 ### Iteration: 2026-03-25 — AI Chat + Onboarding + Polish + Voice + PWA
 
