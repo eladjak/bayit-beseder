@@ -1,12 +1,45 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useEffect, useRef, useState } from "react";
 import {
   computeCategoryStats,
   computeMonthlyData,
   countUpcomingTasks,
 } from "@/lib/task-stats";
 import { useTranslation } from "@/hooks/useTranslation";
+
+// ============================================
+// CountUp - animated number on value change
+// ============================================
+function useCountUp(target: number, duration = 600): number {
+  const [display, setDisplay] = useState(target);
+  const prevRef = useRef(target);
+  const frameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const from = prevRef.current;
+    if (from === target) return;
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease-out cubic
+      const eased = 1 - (1 - progress) ** 3;
+      setDisplay(Math.round(from + (target - from) * eased));
+      if (progress < 1) {
+        frameRef.current = requestAnimationFrame(animate);
+      } else {
+        prevRef.current = target;
+      }
+    };
+    frameRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (frameRef.current !== null) cancelAnimationFrame(frameRef.current);
+    };
+  }, [target, duration]);
+
+  return display;
+}
 import type {
   CategoryStat,
   MonthlyCompletionPoint,
@@ -91,6 +124,13 @@ export function DashboardStats({
     [tasks, today]
   );
 
+  // Animated counters
+  const animatedTotal = useCountUp(totalTasks);
+  const animatedCompleted = useCountUp(completedTasks);
+  const animatedPending = useCountUp(pendingTasks);
+  const animatedRate = useCountUp(completionRate);
+  const animatedUpcoming = useCountUp(upcomingCount);
+
   const categoryStats = useMemo(
     () => computeCategoryStats(tasks, categoryNameToKey),
     [tasks, categoryNameToKey]
@@ -107,21 +147,21 @@ export function DashboardStats({
       <div className="grid grid-cols-2 gap-3">
         <div className="card-elevated rounded-2xl p-4">
           <p className="text-xs text-muted mb-1">{t("stats.totalTasks")}</p>
-          <p className="text-2xl font-bold text-foreground">{totalTasks}</p>
+          <p className="text-2xl font-bold text-foreground">{animatedTotal}</p>
           <div className="flex gap-2 mt-1">
             <span className="text-[11px] text-emerald-600 dark:text-emerald-400">
-              {completedTasks} {t("stats.completedCount")}
+              {animatedCompleted} {t("stats.completedCount")}
             </span>
             <span className="text-[11px] text-muted">·</span>
             <span className="text-[11px] text-amber-600 dark:text-amber-400">
-              {pendingTasks} {t("stats.pendingCount")}
+              {animatedPending} {t("stats.pendingCount")}
             </span>
           </div>
         </div>
 
         <div className="card-elevated rounded-2xl p-4">
           <p className="text-xs text-muted mb-1">{t("stats.completionRate")}</p>
-          <p className="text-2xl font-bold text-primary">{completionRate}%</p>
+          <p className="text-2xl font-bold text-primary">{animatedRate}%</p>
           <div className="mt-2 bg-border rounded-full h-1.5 overflow-hidden">
             <div
               className="h-full bg-primary rounded-full transition-all duration-500"
@@ -137,7 +177,7 @@ export function DashboardStats({
           <p className="text-sm font-semibold text-foreground">{t("stats.upcomingTasks")}</p>
           <span className="text-xs text-muted">{t("stats.next7Days")}</span>
         </div>
-        <p className="text-3xl font-bold text-primary mt-2">{upcomingCount}</p>
+        <p className="text-3xl font-bold text-primary mt-2">{animatedUpcoming}</p>
         <p className="text-xs text-muted mt-0.5">
           {upcomingCount === 0
             ? t("stats.noUpcoming")

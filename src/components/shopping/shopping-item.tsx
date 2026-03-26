@@ -66,13 +66,25 @@ export const ShoppingItemCard = memo(function ShoppingItemCard({ item, onToggle,
       {/* Category icon */}
       <span className="text-sm flex-shrink-0" aria-hidden>{icon}</span>
 
-      {/* Title */}
-      <span
-        className={`flex-1 text-sm font-medium ${
-          item.checked ? "line-through text-muted" : "text-foreground"
-        }`}
-      >
-        {item.title}
+      {/* Title with animated strikethrough */}
+      <span className="flex-1 text-sm font-medium relative">
+        <span className={`transition-colors duration-200 ${item.checked ? "text-muted" : "text-foreground"}`}>
+          {item.title}
+        </span>
+        {item.checked && (
+          <motion.span
+            className="absolute inset-y-0 start-0 end-0 flex items-center pointer-events-none"
+            aria-hidden
+          >
+            <motion.span
+              className="block h-px bg-muted w-full"
+              initial={{ scaleX: 0, originX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              style={{ transformOrigin: "0% 50%" }}
+            />
+          </motion.span>
+        )}
       </span>
 
       {/* Quantity badge */}

@@ -591,6 +591,13 @@
     "notNow": "Not now",
     "closeLabel": "Close"
   },
+  "offline": {
+    "title": "No Internet Connection",
+    "subtitle": "Looks like you're offline right now",
+    "description": "Check your WiFi or mobile data connection and try again.",
+    "retry": "Try again",
+    "retrying": "Reconnecting..."
+  },
   "gamification": {
     "challengeStart": "Let's start the challenge!",
     "challengeGoodStart": "Good start!",

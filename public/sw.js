@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_VERSION = "v5";
+const CACHE_VERSION = "v6";
 const CACHE_NAME = `bayit-beseder-${CACHE_VERSION}`;
 
 // These JS/CSS chunks change on every deploy — cache them aggressively
@@ -23,7 +23,11 @@ const PAGE_PATHS = [
   "/settings",
   "/emergency",
   "/playlists",
+  "/offline",
 ];
+
+// The offline fallback page — shown when a navigation fails with no cache.
+const OFFLINE_URL = "/offline";
 
 // ============================================
 // Install: pre-cache pages only (not chunks —
@@ -169,7 +173,19 @@ async function staleWhileRevalidate(request) {
   const networkResponse = await networkPromise;
   if (networkResponse) return networkResponse;
 
-  // Both failed — try root as ultimate fallback
+  // Both failed — serve the offline page for navigation requests,
+  // or a bare 503 for everything else (sub-resources).
+  const isNavigation =
+    request.mode === "navigate" ||
+    (request.method === "GET" &&
+      request.headers.get("accept")?.includes("text/html"));
+
+  if (isNavigation) {
+    const offlinePage = await cache.match(OFFLINE_URL);
+    if (offlinePage) return offlinePage;
+  }
+
+  // Last-resort: try root as generic fallback
   const rootFallback = await cache.match("/");
   return rootFallback ?? new Response("Offline", { status: 503 });
 }

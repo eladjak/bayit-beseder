@@ -3,22 +3,11 @@
 import { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
 import { Trophy, History, TrendingUp, Users } from "lucide-react";
+
 import { ACHIEVEMENTS } from "@/lib/achievements";
-import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { MonthlyCalendar } from "@/components/dashboard/monthly-calendar";
 import {
@@ -38,7 +27,7 @@ import { usePartner } from "@/hooks/usePartner";
 import { useUserAchievements } from "@/hooks/useUserAchievements";
 import { AnimatedNumber } from "@/components/animated-number";
 import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
-import { CATEGORY_NAME_TO_KEY, CATEGORY_LABELS, CATEGORY_ICONS } from "@/lib/categories";
+import { CATEGORY_NAME_TO_KEY, CATEGORY_ICONS } from "@/lib/categories";
 import { WeeklyShareCard } from "@/components/gamification/weekly-share-card";
 import { useTranslation } from "@/hooks/useTranslation";
 import { StatCardSkeleton, RingSkeleton } from "@/components/skeleton";
@@ -477,33 +466,7 @@ export default function StatsPage() {
             {hasDbData ? t("stats.ourData") : t("stats.demo")}
           </span>
         </div>
-        <div className="h-48" dir="ltr">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={weeklyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-              <XAxis dataKey="day" fontSize={12} tick={{ fill: "var(--color-muted)" }} axisLine={{ stroke: "var(--color-border)" }} tickLine={false} />
-              <YAxis fontSize={12} allowDecimals={false} tick={{ fill: "var(--color-muted)" }} axisLine={{ stroke: "var(--color-border)" }} tickLine={false} />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: 12,
-                  border: "1px solid var(--color-border)",
-                  background: "var(--color-surface)",
-                  color: "var(--color-foreground)",
-                  fontSize: 12,
-                  direction: "rtl",
-                }}
-                formatter={(value) => [`${value} משימות`, "הושלמו"]}
-                labelFormatter={(label) => `יום ${label}`}
-              />
-              <Bar
-                dataKey="completed"
-                fill="#6366F1"
-                radius={[4, 4, 0, 0]}
-                name="הושלמו"
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <WeeklyBarChart data={weeklyData} />
       </motion.div>
 
       {/* Monthly Calendar */}
@@ -530,47 +493,7 @@ export default function StatsPage() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-4">
-          <div className="w-36 h-36" dir="ltr">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={30}
-                  outerRadius={55}
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  {categoryData.map((entry, i) => (
-                    <Cell
-                      key={i}
-                      fill={getCategoryColor(entry.category)}
-                    />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="flex-1 space-y-1.5">
-            {categoryData.map((entry) => (
-              <div
-                key={entry.category}
-                className="flex items-center gap-2 text-xs"
-              >
-                <span
-                  className="w-2.5 h-2.5 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: getCategoryColor(entry.category) }}
-                />
-                <span className="text-foreground">
-                  {getCategoryLabel(entry.category)}
-                </span>
-                <span className="text-muted ms-auto">{entry.value}%</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <CategoryPieChart data={categoryData} />
       </motion.div>
 
       {/* Partner Comparison - now uses real data when available */}

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
 import { TodayOverview, type TaskItem } from "@/components/dashboard/today-overview";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { PartnerStatus } from "@/components/dashboard/partner-status";
@@ -413,8 +414,74 @@ export default function DashboardPage() {
     [streakCount, todayStr]
   );
 
+  // Pull-to-refresh hint: track touch drag and trigger refresh on sufficient pull
+  const pullStartY = useRef(0);
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isPulling, setIsPulling] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const PULL_THRESHOLD = 70;
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    // Only activate when at the very top of the page
+    if (window.scrollY <= 0) {
+      pullStartY.current = e.touches[0].clientY;
+      setIsPulling(true);
+    }
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isPulling) return;
+    const delta = Math.max(0, e.touches[0].clientY - pullStartY.current);
+    setPullDistance(Math.min(delta, PULL_THRESHOLD * 1.5));
+  }, [isPulling]);
+
+  const handleTouchEnd = useCallback(async () => {
+    if (!isPulling) return;
+    setIsPulling(false);
+    if (pullDistance >= PULL_THRESHOLD) {
+      setIsRefreshing(true);
+      setPullDistance(0);
+      await refetchTasks();
+      setIsRefreshing(false);
+    } else {
+      setPullDistance(0);
+    }
+  }, [isPulling, pullDistance, refetchTasks]);
+
+  const pullProgress = Math.min(pullDistance / PULL_THRESHOLD, 1);
+
   return (
-    <div className="space-y-4">
+    <div
+      className="space-y-4"
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* Pull-to-refresh indicator */}
+      <AnimatePresence>
+        {(isPulling && pullDistance > 5) || isRefreshing ? (
+          <motion.div
+            key="ptr"
+            initial={{ opacity: 0, y: -24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -24 }}
+            transition={{ duration: 0.15 }}
+            className="fixed top-0 inset-x-0 z-50 flex justify-center pointer-events-none pt-2"
+            aria-hidden
+          >
+            <div className="flex items-center gap-2 bg-surface/90 backdrop-blur-sm px-4 py-1.5 rounded-full shadow-md border border-border/50 text-xs text-muted font-medium">
+              <motion.span
+                animate={isRefreshing ? { rotate: 360 } : { rotate: pullProgress * 180 }}
+                transition={isRefreshing ? { duration: 0.7, repeat: Infinity, ease: "linear" } : { duration: 0 }}
+              >
+                ↻
+              </motion.span>
+              {isRefreshing ? "מרענן..." : pullProgress >= 1 ? "שחרר לרענון" : "משוך לרענון"}
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
       <DashboardHeader
         displayName={displayName}
         greeting={greeting}

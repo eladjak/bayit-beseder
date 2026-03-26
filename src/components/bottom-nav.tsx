@@ -13,6 +13,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { haptic } from "@/lib/haptics";
 
 const NAV_KEYS = ["home", "tasks", "shopping", "weekly", "stats", "settings"] as const;
 
@@ -43,6 +44,7 @@ const NavItem = memo(function NavItem({
       href={href}
       aria-label={label}
       aria-current={isActive ? "page" : undefined}
+      onClick={() => haptic("tap")}
       className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-colors relative ${
         isActive
           ? "text-primary"

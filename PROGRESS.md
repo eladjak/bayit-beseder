@@ -266,14 +266,28 @@ Applied: 001, 001_initial_schema, 002, 003, 004, 005, 006, 007, 008, 009
 - **Phase 17**: Avatar upload, task completion feedback modal
 
 ## Remaining Roadmap
-- ~~Connect AI Chat to Gemini API~~ ✅ (Commit 60)
-- ~~i18n tasks/shopping pages~~ ✅ (Commit 62)
-- ~~Voice in chat, tasks, shopping~~ ✅ (Commits 60, 65)
-- ~~Beta feedback CTAs everywhere~~ ✅ (Commits 62-64)
-- i18n — weekly page + login page (partial — nav, settings, dashboard, stats, emergency, tasks, shopping done)
-- Multi-user households (kids/roommates — plan saved)
+### Done ✅
+- ~~i18n~~ ✅ 600+ keys, all pages + components
+- ~~Language switcher~~ ✅ floating EN/עב
+- ~~Voice everywhere~~ ✅ 5 locations
+- ~~Zone wizard~~ ✅ in weekly wizard
+- ~~List virtualization~~ ✅ tasks + shopping
+- ~~Page transitions~~ ✅ 150ms fade+slide
+- ~~SW v5~~ ✅ network-first + update toast
+- ~~bun migration~~ ✅ 3.2s builds
+- ~~contact@bayitbeseder.com~~ ✅ Cloudflare routing
+- ~~Dogfood audit~~ ✅ 30 findings, most fixed
+- ~~RTL fixes~~ ✅ 25+ logical properties
+- ~~Dead code cleanup~~ ✅ 1,050 lines removed
+- ~~Beta feedback~~ ✅ 6 CTAs + dedicated email
+
+### Remaining
+- Multi-user households (kids/roommates — architectural change)
 - Reply-to-complete from WhatsApp (needs dedicated Green API instance)
 - Redis rate limiter (Upstash) for distributed deploys
-- Zone wizard step (drag zones to days in weekly wizard)
-- List virtualization for long task/shopping lists (react-virtual)
-- Full app facelift (page transitions, microinteractions)
+- Supabase types regeneration (resolve `as any` casts)
+- Test coverage (currently 0% — add Vitest + key tests)
+- PWA offline mode improvements
+- Push notification reliability
+- Performance: lazy-load more heavy components
+- Landing page A/B test variations

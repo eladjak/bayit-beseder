@@ -591,6 +591,13 @@
     "notNow": "לא עכשיו",
     "closeLabel": "סגירה"
   },
+  "offline": {
+    "title": "אין חיבור לאינטרנט",
+    "subtitle": "נראה שאתם לא מחוברים כרגע",
+    "description": "בדקו את חיבור ה-WiFi או הניידים שלכם ונסו שוב.",
+    "retry": "נסו שוב",
+    "retrying": "מנסה להתחבר..."
+  },
   "gamification": {
     "challengeStart": "בואו נתחיל את האתגר!",
     "challengeGoodStart": "התחלה טובה!",

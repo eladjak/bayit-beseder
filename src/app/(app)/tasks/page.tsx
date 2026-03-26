@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect, useReducer } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useSpring, useTransform } from "framer-motion";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Check, Clock, Filter, Plus, Settings, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -657,11 +657,13 @@ export default function TasksPage() {
                             ⏰ {t("common.overdue")}
                           </div>
                         )}
-                        <button
+                        <motion.button
                           onClick={() => toggleDbTask(task.id)}
                           aria-label={`${t("tasks.markComplete")}: ${task.title}`}
                           aria-pressed={false}
-                          className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                          whileTap={{ scale: 1.3 }}
+                          transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
+                          className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                             task.isOverdue
                               ? "border-red-400 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
                               : "border-border hover:border-primary hover:bg-primary/5"
@@ -725,11 +727,13 @@ export default function TasksPage() {
                         ⏰ {t("common.overdue")}
                       </div>
                     )}
-                    <button
+                    <motion.button
                       onClick={() => toggleDbTask(task.id)}
                       aria-label={`${t("tasks.markComplete")}: ${task.title}`}
                       aria-pressed={false}
-                      className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                      whileTap={{ scale: 1.3 }}
+                      transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
+                      className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                         task.isOverdue
                           ? "border-red-400 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
                           : "border-border hover:border-primary hover:bg-primary/5"
@@ -784,20 +788,28 @@ export default function TasksPage() {
                     isCompleted ? "opacity-60" : ""
                   }`}
                 >
-                  <button
+                  <motion.button
                     onClick={() => toggleMockTask(i)}
                     aria-label={isCompleted ? `${t("tasks.undoComplete")}: ${task.title}` : `${t("tasks.markComplete")}: ${task.title}`}
                     aria-pressed={isCompleted}
-                    className={`mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                    whileTap={{ scale: 1.3 }}
+                    transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
+                    className={`mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                       isCompleted
                         ? "bg-success border-success"
                         : "border-border hover:border-primary"
                     }`}
                   >
                     {isCompleted && (
-                      <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                      >
+                        <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                      </motion.div>
                     )}
-                  </button>
+                  </motion.button>
                   <div className="flex-1 min-w-0">
                     <p
                       className={`text-sm font-medium ${
