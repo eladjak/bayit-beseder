@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { X } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { formatRelativeTime } from "@/hooks/useNotifications";
 import type { Notification } from "@/hooks/useNotifications";
 
@@ -16,6 +17,7 @@ export function NotificationItem({
   onRead,
   onDismiss,
 }: NotificationItemProps) {
+  const { t } = useTranslation();
   const handleClick = () => {
     if (!notification.read) {
       onRead(notification.id);
@@ -81,7 +83,7 @@ export function NotificationItem({
           onDismiss(notification.id);
         }}
         className="text-muted/40 hover:text-muted p-1 rounded-lg transition-colors flex-shrink-0"
-        aria-label="סגור התראה"
+        aria-label={t("notifications.closeLabel")}
       >
         <X className="w-3.5 h-3.5" />
       </button>

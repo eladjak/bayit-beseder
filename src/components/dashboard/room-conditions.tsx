@@ -38,7 +38,7 @@ export function RoomConditions({
             {"\u05DE\u05E6\u05D1 \u05D4\u05D7\u05D3\u05E8\u05D9\u05DD"}
           </span>
         </div>
-        <p className="text-[10px] text-muted mt-0.5 mr-7">
+        <p className="text-[10px] text-muted mt-0.5 me-7">
           {"\u05D1\u05D4\u05EA\u05D1\u05E1\u05E1 \u05E2\u05DC \u05DE\u05E9\u05D9\u05DE\u05D5\u05EA \u05E9\u05D4\u05D5\u05E9\u05DC\u05DE\u05D5"}
         </p>
       </div>

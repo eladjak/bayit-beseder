@@ -428,7 +428,7 @@ export default function TasksPage() {
             >
               <Filter className="w-4 h-4" />
               {activeCategory !== "all" && (
-                <span className="absolute top-1.5 left-1.5 w-2 h-2 rounded-full bg-amber-400" />
+                <span className="absolute top-1.5 start-1.5 w-2 h-2 rounded-full bg-amber-400" />
               )}
             </button>
           </div>
@@ -884,7 +884,7 @@ export default function TasksPage() {
                         >
                           <div
                             className="card-elevated p-3 flex items-start gap-3 opacity-50"
-                            style={{ borderInlineStart: `3px solid #10B981` }}
+                            style={{ borderInlineStart: "3px solid var(--color-success, #10B981)" }}
                           >
                             <button
                               onClick={() => toggleDbTask(task.id)}
@@ -925,7 +925,7 @@ export default function TasksPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className="card-elevated p-3 flex items-start gap-3 opacity-50"
-                        style={{ borderInlineStart: `3px solid #10B981` }}
+                        style={{ borderInlineStart: "3px solid var(--color-success, #10B981)" }}
                       >
                         <button
                           onClick={() => toggleDbTask(task.id)}
