@@ -36,6 +36,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { haptic } from "@/lib/haptics";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   CATEGORY_BG_CLASSES,
   CATEGORY_LABELS,
@@ -85,10 +86,11 @@ export function WeeklyGeneratorModal({
   onReset,
 }: WeeklyGeneratorModalProps) {
   const focusRef = useFocusTrap<HTMLDivElement>(open && !!plan, onClose);
+  const { t } = useTranslation();
   if (!open || !plan) return null;
 
   const totalNew = plan.reduce(
-    (sum, day) => sum + day.tasks.filter((t) => !t.isExisting).length,
+    (sum, day) => sum + day.tasks.filter((task) => !task.isExisting).length,
     0
   );
   const totalMinutes = plan.reduce((sum, day) => sum + day.totalMinutes, 0);
@@ -117,7 +119,7 @@ export function WeeklyGeneratorModal({
               ref={focusRef}
               role="dialog"
               aria-modal="true"
-              aria-label="אשף תכנון שבועי"
+              aria-label={t("weekly.wizardLabel")}
               className="pointer-events-auto w-full max-w-lg flex flex-col bg-background rounded-t-2xl sm:rounded-2xl max-h-[92dvh] sm:max-h-[85dvh] sm:mx-4 overflow-hidden"
               initial={{ y: 40, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -131,12 +133,12 @@ export function WeeklyGeneratorModal({
                 <div className="flex items-center justify-between relative z-10">
                   <div className="flex items-center gap-2">
                     <Wand2 className="w-5 h-5 text-white" />
-                    <h2 className="text-lg font-bold text-white">אשף שבועי</h2>
+                    <h2 className="text-lg font-bold text-white">{t("weekly.wizard")}</h2>
                   </div>
                   <button
                     onClick={() => { onReset(); onClose(); }}
                     className="p-2 rounded-xl bg-white/15 hover:bg-white/25 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                    aria-label="סגור"
+                    aria-label={t("common.close")}
                   >
                     <X className="w-5 h-5 text-white" />
                   </button>
@@ -144,11 +146,11 @@ export function WeeklyGeneratorModal({
 
                 {/* Step indicator */}
                 <div className="flex items-center gap-2 mt-3 relative z-10">
-                  <StepDot active={state === "preview"} done={state === "editing" || state === "applying" || state === "done"} label="תצוגה" />
+                  <StepDot active={state === "preview"} done={state === "editing" || state === "applying" || state === "done"} label={t("weekly.stepPreview")} />
                   <div className="flex-1 h-px bg-white/20" />
-                  <StepDot active={state === "editing"} done={state === "applying" || state === "done"} label="עריכה" />
+                  <StepDot active={state === "editing"} done={state === "applying" || state === "done"} label={t("weekly.stepEdit")} />
                   <div className="flex-1 h-px bg-white/20" />
-                  <StepDot active={state === "applying" || state === "done"} done={state === "done"} label="החלה" />
+                  <StepDot active={state === "applying" || state === "done"} done={state === "done"} label={t("weekly.stepApply")} />
                 </div>
               </div>
 
@@ -192,14 +194,14 @@ export function WeeklyGeneratorModal({
                       className="flex-1 py-3 rounded-xl bg-primary/10 text-primary font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
                     >
                       <Sparkles className="w-4 h-4" />
-                      <span className="truncate">ערוך תוכנית</span>
+                      <span className="truncate">{t("weekly.editPlan")}</span>
                     </button>
                     <button
                       onClick={onApply}
                       className="flex-1 py-3 rounded-2xl gradient-primary text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
                     >
                       <Check className="w-4 h-4" />
-                      <span className="truncate">החל ישירות</span>
+                      <span className="truncate">{t("weekly.applyDirect")}</span>
                     </button>
                   </div>
                 )}
@@ -209,7 +211,7 @@ export function WeeklyGeneratorModal({
                     className="w-full py-3 rounded-2xl gradient-primary text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
                   >
                     <Check className="w-4 h-4" />
-                    <span className="truncate">החל תוכנית ({totalNew} משימות חדשות)</span>
+                    <span className="truncate">{t("weekly.applyPlan")} ({totalNew} {t("weekly.newTasks")})</span>
                   </button>
                 )}
                 {state === "done" && (
@@ -218,7 +220,7 @@ export function WeeklyGeneratorModal({
                     className="w-full py-3 rounded-2xl gradient-primary text-white font-semibold flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[48px]"
                   >
                     <Check className="w-4 h-4" />
-                    סיום
+                    {t("weekly.finish")}
                   </button>
                 )}
               </div>
@@ -284,8 +286,9 @@ function PreviewStep({
   onRemoveTask: (date: string, taskIndex: number) => void;
   onReassignTask: (date: string, taskIndex: number, newUserId: string) => void;
 }) {
+  const { t } = useTranslation();
   const totalNew = plan.reduce(
-    (sum, day) => sum + day.tasks.filter((t) => !t.isExisting).length,
+    (sum, day) => sum + day.tasks.filter((task) => !task.isExisting).length,
     0
   );
   const totalMinutes = plan.reduce((sum, day) => sum + day.totalMinutes, 0);
@@ -362,17 +365,17 @@ function PreviewStep({
         <div className="grid grid-cols-3 gap-2">
           <div className="card-elevated p-3 text-center">
             <div className="text-2xl font-bold text-primary">{totalNew}</div>
-            <div className="text-[11px] text-muted">משימות חדשות</div>
+            <div className="text-[11px] text-muted">{t("weekly.newTasks")}</div>
           </div>
           <div className="card-elevated p-3 text-center">
             <div className="text-2xl font-bold text-success">{totalMinutes}</div>
-            <div className="text-[11px] text-muted">דקות סה״כ</div>
+            <div className="text-[11px] text-muted">{t("weekly.totalMin")}</div>
           </div>
           <div className="card-elevated p-3 text-center">
             <div className="text-2xl font-bold text-warning">
               {plan.filter((d) => d.tasks.length > 0).length}
             </div>
-            <div className="text-[11px] text-muted">ימים פעילים</div>
+            <div className="text-[11px] text-muted">{t("weekly.activeDays")}</div>
           </div>
         </div>
 
@@ -381,7 +384,7 @@ function PreviewStep({
           <div className="card-elevated p-3">
             <div className="flex items-center gap-2 mb-2">
               <Users className="w-4 h-4 text-muted" />
-              <span className="text-sm font-medium text-foreground">חלוקה בין השותפים</span>
+              <span className="text-sm font-medium text-foreground">{t("weekly.partnerSplit")}</span>
             </div>
             <div className="flex gap-2">
               {members.map((m) => {
@@ -390,7 +393,7 @@ function PreviewStep({
                   <div key={m.id} className="flex-1 bg-background rounded-lg p-2">
                     <div className="text-sm font-medium text-foreground truncate">{m.name}</div>
                     <div className="text-xs text-muted">
-                      {s?.tasks ?? 0} משימות · {s?.minutes ?? 0} דק׳
+                      {s?.tasks ?? 0} {t("nav.tasks")} · {s?.minutes ?? 0} {t("common.minutes")}
                     </div>
                   </div>
                 );
@@ -402,7 +405,7 @@ function PreviewStep({
         {/* D&D hint */}
         <div className="text-xs text-center text-muted/60 flex items-center justify-center gap-1">
           <GripVertical className="w-3 h-3" />
-          גררו משימות בין ימים לשינוי התוכנית
+          {t("weekly.dragHint")}
         </div>
 
         {/* Day columns */}
@@ -446,7 +449,8 @@ function DayPreviewCard({
   onRemoveTask: (date: string, taskIndex: number) => void;
   onReassignTask: (date: string, taskIndex: number, newUserId: string) => void;
 }) {
-  const newCount = day.tasks.filter((t) => !t.isExisting).length;
+  const { t } = useTranslation();
+  const newCount = day.tasks.filter((ti) => !ti.isExisting).length;
   const getMemberName = (id: string | null) =>
     members.find((m) => m.id === id)?.name ?? "—";
 
@@ -472,18 +476,18 @@ function DayPreviewCard({
         <div className="flex items-center gap-2">
           {newCount > 0 && (
             <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded-full font-medium">
-              +{newCount} חדש
+              +{newCount} {t("weekly.new")}
             </span>
           )}
           <div className="flex items-center gap-1 text-xs text-muted">
             <Clock className="w-3 h-3" />
-            {day.totalMinutes} דק׳
+            {day.totalMinutes} {t("common.minutes")}
           </div>
         </div>
       </div>
 
       {day.tasks.length === 0 ? (
-        <div className="text-xs text-muted text-center py-2">אין משימות</div>
+        <div className="text-xs text-muted text-center py-2">{t("weekly.noTasks")}</div>
       ) : (
         <SortableContext items={day.tasks.map((_, i) => `preview-${day.date}-${i}`)} strategy={verticalListSortingStrategy}>
           <div className="space-y-1">
@@ -532,6 +536,7 @@ function PreviewDraggableTask({
   onRemove: () => void;
   onReassign: (newUserId: string) => void;
 }) {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -568,7 +573,7 @@ function PreviewDraggableTask({
           {...attributes}
           {...listeners}
           className="p-0.5 rounded touch-none cursor-grab active:cursor-grabbing text-muted/40 hover:text-muted flex-shrink-0"
-          aria-label="גרור להעברה"
+          aria-label={t("weekly.dragToMove")}
         >
           <GripVertical className="w-3 h-3" />
         </button>
@@ -585,7 +590,7 @@ function PreviewDraggableTask({
             if (other) onReassign(other.id);
           }}
           className="px-2 py-0.5 rounded bg-border/30 text-[10px] hover:bg-border/50 transition-colors whitespace-nowrap text-foreground"
-          title="החלף שותף"
+          title={t("weekly.switchPartner")}
         >
           {getMemberName(task.assignee)}
         </button>
@@ -602,8 +607,8 @@ function PreviewDraggableTask({
         <button
           onClick={onRemove}
           className="p-1 rounded hover:bg-danger/10 text-danger/40 hover:text-danger transition-colors"
-          title="הסר"
-          aria-label="הסר משימה"
+          title={t("weekly.remove")}
+          aria-label={t("weekly.removeTask")}
         >
           <Trash2 className="w-3 h-3" />
         </button>
@@ -631,6 +636,7 @@ function EditStep({
   onAddTask: (date: string, task: PlannedTask) => void;
   onReassignTask: (date: string, taskIndex: number, newUserId: string) => void;
 }) {
+  const { t } = useTranslation();
   const [expandedDay, setExpandedDay] = useState<string | null>(null);
   const [activeDrag, setActiveDrag] = useState<{
     task: PlannedTask;
@@ -686,10 +692,10 @@ function EditStep({
         {/* Summary bar */}
         <div className="bg-primary/5 rounded-xl p-3 flex items-center justify-between gap-2 border border-primary/10">
           <span className="text-xs sm:text-sm text-primary font-medium">
-            {plan.reduce((s, d) => s + d.tasks.filter((t) => !t.isExisting).length, 0)} משימות חדשות
+            {plan.reduce((s, d) => s + d.tasks.filter((task) => !task.isExisting).length, 0)} {t("weekly.newTasks")}
           </span>
           <span className="text-xs sm:text-sm text-primary font-medium">
-            {plan.reduce((s, d) => s + d.totalMinutes, 0)} דק׳ סה״כ
+            {plan.reduce((s, d) => s + d.totalMinutes, 0)} {t("weekly.totalMin")}
           </span>
         </div>
 
@@ -745,6 +751,7 @@ function DayEditCard({
   onAddTask: (date: string, task: PlannedTask) => void;
   onReassignTask: (date: string, taskIndex: number, newUserId: string) => void;
 }) {
+  const { t } = useTranslation();
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newCategory, setNewCategory] = useState<string>("general");
@@ -786,10 +793,10 @@ function DayEditCard({
       >
         <div className="flex items-center gap-2">
           <span className="font-medium text-sm text-foreground">{day.dayName}</span>
-          <span className="text-xs text-muted">{day.tasks.length} משימות</span>
+          <span className="text-xs text-muted">{day.tasks.length} {t("nav.tasks")}</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted">{day.totalMinutes} דק׳</span>
+          <span className="text-xs text-muted">{day.totalMinutes} {t("common.minutes")}</span>
           {expanded ? (
             <ChevronUp className="w-4 h-4 text-muted" />
           ) : (
@@ -838,7 +845,7 @@ function DayEditCard({
                     type="text"
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
-                    placeholder="שם המשימה..."
+                    placeholder={t("weekly.taskNamePlaceholder")}
                     className="w-full px-3 py-2.5 rounded-lg bg-surface border border-border text-sm outline-none focus:ring-2 focus:ring-primary/30 text-foreground placeholder:text-muted"
                     onKeyDown={(e) => e.key === "Enter" && handleAdd()}
                     autoFocus
@@ -864,13 +871,13 @@ function DayEditCard({
                       disabled={!newTitle.trim()}
                       className="flex-1 py-2 rounded-xl gradient-primary text-white text-sm font-semibold disabled:opacity-50 min-h-[40px]"
                     >
-                      הוסף
+                      {t("weekly.addButton")}
                     </button>
                     <button
                       onClick={() => setShowAddForm(false)}
                       className="px-4 py-2 rounded-xl border border-border text-muted text-sm min-h-[40px] hover:bg-surface-hover transition-colors"
                     >
-                      ביטול
+                      {t("common.cancel")}
                     </button>
                   </div>
                 </div>
@@ -880,7 +887,7 @@ function DayEditCard({
                   className="w-full flex items-center justify-center gap-1 py-2.5 text-xs text-primary hover:bg-primary/5 rounded-lg transition-colors mt-1 min-h-[40px]"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  הוסף משימה
+                  {t("tasks.addTask")}
                 </button>
               )}
             </div>
@@ -914,6 +921,7 @@ function DraggableTaskRow({
   onRemove: () => void;
   onReassign: (newUserId: string) => void;
 }) {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -950,7 +958,7 @@ function DraggableTaskRow({
           {...attributes}
           {...listeners}
           className="p-1 rounded touch-none cursor-grab active:cursor-grabbing text-muted hover:text-foreground min-w-[28px] min-h-[28px] flex items-center justify-center"
-          aria-label="גרור להעברה"
+          aria-label={t("weekly.dragToMove")}
         >
           <GripVertical className="w-3.5 h-3.5" />
         </button>
@@ -967,7 +975,7 @@ function DraggableTaskRow({
             if (other) onReassign(other.id);
           }}
           className="px-2 py-1 rounded bg-border/30 text-[11px] hover:bg-border/50 transition-colors whitespace-nowrap min-h-[28px] text-foreground"
-          title="החלף שותף"
+          title={t("weekly.switchPartner")}
         >
           {getMemberName(task.assignee)}
         </button>
@@ -978,8 +986,8 @@ function DraggableTaskRow({
         <button
           onClick={onRemove}
           className="p-1.5 rounded hover:bg-danger/10 text-danger/60 hover:text-danger transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
-          title="הסר"
-          aria-label="הסר משימה"
+          title={t("weekly.remove")}
+          aria-label={t("weekly.removeTask")}
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
@@ -1003,6 +1011,7 @@ function ApplyStep({
   progress: number;
   isDone: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center p-6 min-h-[250px]">
       {isDone ? (
@@ -1015,9 +1024,9 @@ function ApplyStep({
             <Check className="w-8 h-8 text-success" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-foreground">התוכנית הוחלה!</h3>
+            <h3 className="text-lg font-bold text-foreground">{t("common.success")}!</h3>
             <p className="text-sm text-muted mt-1">
-              {totalNew} משימות חדשות נוספו · {totalMinutes} דקות סה״כ
+              {totalNew} {t("weekly.newTasks")} · {totalMinutes} {t("weekly.totalMin")}
             </p>
           </div>
         </motion.div>
@@ -1025,9 +1034,9 @@ function ApplyStep({
         <div className="text-center space-y-4 w-full max-w-xs">
           <Loader2 className="w-8 h-8 text-primary animate-spin mx-auto" />
           <div>
-            <h3 className="text-lg font-bold text-foreground">מוסיף משימות...</h3>
+            <h3 className="text-lg font-bold text-foreground">{t("common.loading")}</h3>
             <p className="text-sm text-muted mt-1">
-              {totalNew} משימות חדשות
+              {totalNew} {t("weekly.newTasks")}
             </p>
           </div>
           {/* Progress bar */}
