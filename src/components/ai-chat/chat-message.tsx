@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -17,8 +18,10 @@ interface ChatMessageProps {
 // ---------------------------------------------------------------------------
 
 function TypingDots() {
+  const { t } = useTranslation();
+
   return (
-    <span className="inline-flex items-center gap-[3px] h-4" aria-label="מקליד...">
+    <span className="inline-flex items-center gap-[3px] h-4" aria-label={t("aiChat.typingLabel")}>
       {[0, 1, 2].map((i) => (
         <motion.span
           key={i}

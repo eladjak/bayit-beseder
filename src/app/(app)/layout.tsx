@@ -6,6 +6,7 @@ import { BottomNav } from "@/components/bottom-nav";
 import { AuthGuard } from "@/components/AuthGuard";
 import { NotificationBanner } from "@/components/NotificationBanner";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
+import { ServiceWorkerUpdateToast } from "@/components/ServiceWorkerUpdateToast";
 import { PageTransition } from "@/components/page-transition";
 import { SupabaseProvider } from "@/components/SupabaseProvider";
 import { PWAInstallBanner } from "@/components/pwa-install-banner";
@@ -31,6 +32,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <NotificationBanner />
           <PWAInstallBanner />
           <ServiceWorkerRegistrar />
+          <ServiceWorkerUpdateToast />
           <main className="pb-safe max-w-lg mx-auto">
             <PageTransition>{children}</PageTransition>
           </main>

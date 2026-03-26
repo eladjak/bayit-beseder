@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Send } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { VoiceInputButton } from "@/components/voice-input-button";
 import { ChatMessage } from "./chat-message";
 import { useAIChat } from "@/hooks/useAIChat";
@@ -22,6 +23,7 @@ interface ChatDrawerProps {
 // ---------------------------------------------------------------------------
 
 export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
+  const { t } = useTranslation();
   const { messages, sendMessage, isTyping, quickActions } = useAIChat();
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -98,7 +100,7 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
             ref={focusTrapRef}
             role="dialog"
             aria-modal="true"
-            aria-label="העוזר החכם"
+            aria-label={t("aiChat.title")}
             dir="rtl"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
@@ -115,13 +117,13 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
             {/* Header */}
             <div className="flex items-center justify-between px-5 pb-3 pt-1 border-b border-border">
               <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                <span>העוזר החכם</span>
+                <span>{t("aiChat.title")}</span>
                 <span aria-hidden="true">🤖</span>
               </h2>
               <button
                 type="button"
                 onClick={onClose}
-                aria-label="סגור"
+                aria-label={t("aiChat.closeLabel")}
                 className="w-9 h-9 flex items-center justify-center rounded-full text-muted hover:text-foreground hover:bg-surface-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <X size={18} />
@@ -133,7 +135,7 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
               className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0"
               role="log"
               aria-live="polite"
-              aria-label="היסטוריית שיחה"
+              aria-label={t("aiChat.historyLabel")}
             >
               {messages.map((msg) => (
                 <ChatMessage
@@ -160,7 +162,7 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
             {/* Quick action chips */}
             <div
               className="px-4 py-2 flex gap-2 overflow-x-auto scrollbar-hide"
-              aria-label="פעולות מהירות"
+              aria-label={t("aiChat.quickActionsLabel")}
             >
               {quickActions.map((action) => (
                 <button
@@ -180,7 +182,7 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
               <VoiceInputButton
                 onTranscript={handleVoiceTranscript}
                 className="flex-shrink-0"
-                ariaLabel="הקלטה קולית"
+                ariaLabel={t("aiChat.voiceLabel")}
               />
 
               {/* Text input */}
@@ -190,9 +192,9 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="כתבו הודעה..."
+                placeholder={t("aiChat.inputPlaceholder")}
                 dir="rtl"
-                aria-label="הודעה לעוזר"
+                aria-label={t("aiChat.inputLabel")}
                 className="flex-1 bg-surface border border-border rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
               />
 
@@ -202,7 +204,7 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
                 onClick={handleSend}
                 disabled={!inputValue.trim()}
                 whileTap={{ scale: 0.9 }}
-                aria-label="שלח הודעה"
+                aria-label={t("aiChat.sendLabel")}
                 className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-full gradient-primary text-white disabled:opacity-40 disabled:cursor-not-allowed transition-opacity focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <Send size={16} />

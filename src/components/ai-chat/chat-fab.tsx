@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // ---------------------------------------------------------------------------
 // Sparkles icon (inline SVG — no extra dependency)
@@ -34,6 +35,8 @@ interface ChatFABProps {
 }
 
 export function ChatFAB({ onClick }: ChatFABProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="fixed bottom-24 right-4 z-20">
       {/* Attention pulse ring — rendered once on mount */}
@@ -51,7 +54,7 @@ export function ChatFAB({ onClick }: ChatFABProps) {
         onClick={onClick}
         whileTap={{ scale: 0.92 }}
         whileHover={{ scale: 1.06 }}
-        aria-label="פתח עוזר חכם"
+        aria-label={t("aiChat.openLabel")}
         className="relative w-14 h-14 rounded-full gradient-primary text-white flex items-center justify-center shadow-lg shadow-primary/30 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
         style={{ touchAction: "manipulation" }}
       >

@@ -3,6 +3,7 @@
 import { Save, Loader2 } from "lucide-react";
 import { AvatarUpload } from "@/components/avatar-upload";
 import { User } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ProfileSectionProps {
   displayName: string;
@@ -25,29 +26,33 @@ export function ProfileSection({
   onAvatarUploaded,
   onSave,
 }: ProfileSectionProps) {
+  const { t } = useTranslation();
+
   return (
     <section className="card-elevated p-4 space-y-4">
       <div className="flex items-center gap-2 mb-1">
         <User className="w-4 h-4 text-muted" />
-        <h2 className="font-semibold text-sm">פרופיל</h2>
+        <h2 className="font-semibold text-sm">{t("settings.profile")}</h2>
       </div>
 
       {/* Avatar */}
       <AvatarUpload
         currentUrl={avatarUrl || null}
         userId={userId}
-        displayName={displayName || "משתמש"}
+        displayName={displayName || t("settings.profileSection.defaultUser")}
         onUploaded={onAvatarUploaded}
       />
 
       {/* Name edit */}
       <div>
-        <label className="text-xs text-muted block mb-1">שם תצוגה</label>
+        <label className="text-xs text-muted block mb-1">
+          {t("settings.profileSection.displayNameLabel")}
+        </label>
         <input
           type="text"
           value={displayName}
           onChange={(e) => onNameChange(e.target.value)}
-          placeholder="השם שלכם"
+          placeholder={t("settings.profileSection.displayNamePlaceholder")}
           className="w-full bg-background dark:bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
         />
       </div>
@@ -63,7 +68,9 @@ export function ProfileSection({
         ) : (
           <Save className="w-4 h-4" />
         )}
-        {profileSaving ? "שומר..." : "שמירת שינויים"}
+        {profileSaving
+          ? t("settings.profileSection.saving")
+          : t("settings.profileSection.saveChanges")}
       </button>
     </section>
   );

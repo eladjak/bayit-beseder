@@ -25,7 +25,7 @@ interface UseWeeklyGeneratorReturn {
   state: WizardState;
   plan: WeekPlan | null;
   applyProgress: number; // 0-100
-  generate: (existingTasks: TaskRow[], members: string[], weekStartDate: Date, zoneMode?: boolean) => void;
+  generate: (existingTasks: TaskRow[], members: string[], weekStartDate: Date, zoneMode?: boolean, zoneMappings?: import("@/lib/zones").ZoneDayMapping[]) => void;
   moveTask: (fromDate: string, taskIndex: number, toDate: string) => void;
   removeTask: (date: string, taskIndex: number) => void;
   addTask: (date: string, task: PlannedTask) => void;
@@ -59,8 +59,8 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
   const [applyProgress, setApplyProgress] = useState(0);
 
   const generate = useCallback(
-    (existingTasks: TaskRow[], members: string[], weekStartDate: Date, zoneMode?: boolean) => {
-      const weekPlan = generateWeekPlan({ existingTasks, members, weekStartDate, zoneMode });
+    (existingTasks: TaskRow[], members: string[], weekStartDate: Date, zoneMode?: boolean, zoneMappings?: import("@/lib/zones").ZoneDayMapping[]) => {
+      const weekPlan = generateWeekPlan({ existingTasks, members, weekStartDate, zoneMode, zoneMappings });
       setPlan(weekPlan);
       setState("preview");
     },

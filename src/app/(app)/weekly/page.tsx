@@ -194,6 +194,8 @@ export default function WeeklyPage() {
   const wizard = useWeeklyGenerator();
   const [showWizard, setShowWizard] = useState(false);
   const [showZonePicker, setShowZonePicker] = useState(false);
+  // Local zone mappings for the wizard (separate from the zone-view config)
+  const [wizardZoneMappings, setWizardZoneMappings] = useState(zoneConfig.zoneMappings);
 
   const handleOpenWizard = useCallback(() => {
     if (!profile) {
@@ -209,10 +211,29 @@ export default function WeeklyPage() {
       (t) => t.due_date && t.due_date >= startStr && t.due_date <= endStr
     );
 
+    // Sync wizard mappings with current zone config
+    setWizardZoneMappings(zoneConfig.zoneMappings);
     wizard.generate(weekTasksForWizard, memberIds, startOfWeek, zoneConfig.zoneMode);
     setShowWizard(true);
     haptic("tap");
-  }, [profile, partner, tasks, startOfWeek, endOfWeek, wizard]);
+  }, [profile, partner, tasks, startOfWeek, endOfWeek, wizard, zoneConfig.zoneMappings, zoneConfig.zoneMode]);
+
+  // Regenerate the plan with the current wizardZoneMappings
+  const handleRegenerateWithZones = useCallback(() => {
+    if (!profile) return;
+    const memberIds = [profile.id];
+    if (profile.partner_id) memberIds.push(profile.partner_id);
+
+    const startStr = startOfWeek.toISOString().split("T")[0];
+    const endStr = endOfWeek.toISOString().split("T")[0];
+    const weekTasksForWizard = tasks.filter(
+      (t) => t.due_date && t.due_date >= startStr && t.due_date <= endStr
+    );
+
+    haptic("tap");
+    // Pass zoneMode=true so generator uses the mappings
+    wizard.generate(weekTasksForWizard, memberIds, startOfWeek, true, wizardZoneMappings);
+  }, [profile, tasks, startOfWeek, endOfWeek, wizard, wizardZoneMappings]);
 
   const wizardMembers = useMemo(() => {
     const m: Array<{ id: string; name: string }> = [];
@@ -843,6 +864,10 @@ export default function WeeklyPage() {
         onReassignTask={wizard.reassignTask}
         onApply={handleApplyWizard}
         onReset={wizard.reset}
+        showZoneStep={zoneConfig.zoneMode}
+        zoneMappings={wizardZoneMappings}
+        onZoneMappingsChange={setWizardZoneMappings}
+        onRegenerateWithZones={handleRegenerateWithZones}
       />
 
       {/* Zone Day Picker Modal */}

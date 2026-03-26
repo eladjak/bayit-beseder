@@ -1,6 +1,7 @@
 "use client";
 
 import { Save, Loader2, Copy, Check, Home } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface HouseholdSectionProps {
   householdName: string;
@@ -25,14 +26,18 @@ export function HouseholdSection({
   onCopyInviteCode,
   onSave,
 }: HouseholdSectionProps) {
+  const { t } = useTranslation();
+
   return (
     <section className="card-elevated p-4 space-y-4">
       <div className="flex items-center gap-2">
         <Home className="w-4 h-4 text-muted" />
-        <h2 className="font-semibold text-sm">בית</h2>
+        <h2 className="font-semibold text-sm">{t("settings.household")}</h2>
       </div>
       <div>
-        <label className="text-xs text-muted block mb-1">שם הבית</label>
+        <label className="text-xs text-muted block mb-1">
+          {t("settings.householdSection.householdNameLabel")}
+        </label>
         <input
           type="text"
           value={householdName}
@@ -41,7 +46,9 @@ export function HouseholdSection({
         />
       </div>
       <div>
-        <label className="text-xs text-muted block mb-1">קוד הזמנה</label>
+        <label className="text-xs text-muted block mb-1">
+          {t("settings.householdSection.inviteCodeLabel")}
+        </label>
         <div className="flex items-center gap-2">
           <code className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm font-mono text-foreground">
             {inviteCode}
@@ -49,7 +56,7 @@ export function HouseholdSection({
           <button
             onClick={onCopyInviteCode}
             className="p-2 rounded-lg bg-background border border-border hover:bg-surface-hover text-muted"
-            aria-label="העתקת קוד הזמנה"
+            aria-label={t("settings.householdSection.copyInviteCode")}
           >
             {copied ? (
               <Check className="w-4 h-4 text-success" />
@@ -61,7 +68,7 @@ export function HouseholdSection({
       </div>
       <div>
         <label className="text-xs text-muted block mb-2">
-          יעד כלל הזהב: {goldenTarget}%
+          {t("settings.householdSection.goldenTargetLabel")}: {goldenTarget}%
         </label>
         <input
           type="range"
@@ -77,10 +84,10 @@ export function HouseholdSection({
         </div>
         <p className="text-[10px] text-muted mt-2">
           {goldenTarget === 50
-            ? "חלוקה שווה לחלוטין"
+            ? t("settings.householdSection.splitEqual")
             : goldenTarget >= 80
-              ? "יעד גבוה לשיתוף פעולה"
-              : "יעד מאוזן"}
+              ? t("settings.householdSection.highTarget")
+              : t("settings.householdSection.balancedTarget")}
         </p>
       </div>
       {/* Save household button */}
@@ -94,7 +101,9 @@ export function HouseholdSection({
         ) : (
           <Save className="w-4 h-4" />
         )}
-        {householdSaving ? "שומר..." : "שמירת הגדרות הבית"}
+        {householdSaving
+          ? t("settings.householdSection.saving")
+          : t("settings.householdSection.saveHousehold")}
       </button>
     </section>
   );

@@ -4,6 +4,7 @@ import { useState, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Check, Sparkles, Home, Loader2 } from "lucide-react";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useTranslation } from "@/hooks/useTranslation";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -39,7 +40,7 @@ type CleaningStyle = "sprint" | "daily";
 type DailyMinutes = 15 | 30 | 60;
 
 // ────────────────────────────────────────────────────────────────────────────
-// Task Templates (same as before, used for plan generation)
+// Task Templates (DO NOT translate — content goes into the DB)
 // ────────────────────────────────────────────────────────────────────────────
 
 const TASK_TEMPLATES: TaskTemplate[] = [
@@ -253,7 +254,9 @@ function GridCard({
 // Step screens
 // ────────────────────────────────────────────────────────────────────────────
 
-function StepWelcome({ onNext }: { onNext: () => void }) {
+type TFn = (key: string) => string;
+
+function StepWelcome({ onNext, t }: { onNext: () => void; t: TFn }) {
   return (
     <div className="flex flex-col items-center justify-center text-center h-full px-2">
       <motion.div
@@ -271,7 +274,7 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
         transition={{ delay: 0.2 }}
         className="text-2xl font-bold text-foreground mb-3"
       >
-        היי! אני העוזר שלכם
+        {t("onboarding.welcomeTitle")}
       </motion.h1>
 
       <motion.p
@@ -280,9 +283,7 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
         transition={{ delay: 0.3 }}
         className="text-muted text-sm leading-relaxed max-w-xs mb-8"
       >
-        כמה שאלות קצרות ואני אבנה לכם
-        <br />
-        תוכנית תחזוקה מותאמת אישית לבית
+        {t("onboarding.welcomeSubtitle")}
       </motion.p>
 
       <motion.button
@@ -294,7 +295,7 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
         className="gradient-primary text-white font-semibold px-8 py-3 rounded-2xl flex items-center gap-2 text-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       >
         <Sparkles className="w-4 h-4" aria-hidden="true" />
-        יאללה, בואו נתחיל
+        {t("onboarding.letsStart")}
       </motion.button>
 
       <motion.p
@@ -303,7 +304,7 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
         transition={{ delay: 0.6 }}
         className="text-xs text-muted mt-4"
       >
-        לוקח פחות מדקה
+        {t("onboarding.takesLessThanMinute")}
       </motion.p>
     </div>
   );
@@ -312,25 +313,31 @@ function StepWelcome({ onNext }: { onNext: () => void }) {
 function StepHomeName({
   value,
   onChange,
+  t,
 }: {
   value: string;
   onChange: (v: string) => void;
+  t: TFn;
 }) {
-  const suggestions = ["הדירה שלנו", "הבית שלנו", "הקן"];
+  const suggestions = [
+    t("onboarding.homeNameSuggestion1"),
+    t("onboarding.homeNameSuggestion2"),
+    t("onboarding.homeNameSuggestion3"),
+  ];
 
   return (
     <div className="pt-4">
       <h2 className="text-xl font-bold text-foreground mb-2">
-        איך קוראים לבית שלכם?
+        {t("onboarding.homeNameTitle")}
       </h2>
-      <p className="text-sm text-muted mb-6">תנו לבית שם — זה יוצר חיבור רגשי</p>
+      <p className="text-sm text-muted mb-6">{t("onboarding.homeNameSubtitle")}</p>
 
       <input
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="הקלידו שם..."
-        aria-label="שם הבית"
+        placeholder={t("onboarding.homeNamePlaceholder")}
+        aria-label={t("onboarding.homeNameAriaLabel")}
         className="w-full px-4 py-3 rounded-2xl border-2 border-border bg-surface text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-colors text-right text-sm"
         autoFocus
         dir="rtl"
@@ -357,30 +364,32 @@ function StepHomeName({
   );
 }
 
-const ROOM_OPTIONS: { value: RoomCount; emoji: string; label: string }[] = [
-  { value: "studio", emoji: "🏠", label: "סטודיו" },
-  { value: "2", emoji: "🏡", label: "2 חדרים" },
-  { value: "3", emoji: "🏡", label: "3 חדרים" },
-  { value: "4", emoji: "🏘️", label: "4 חדרים" },
-  { value: "5+", emoji: "🏰", label: "5+ חדרים" },
-];
-
 function StepRoomCount({
   value,
   onChange,
+  t,
 }: {
   value: RoomCount;
   onChange: (v: RoomCount) => void;
+  t: TFn;
 }) {
+  const roomOptions: { value: RoomCount; emoji: string; label: string }[] = [
+    { value: "studio", emoji: "🏠", label: t("onboarding.roomStudio") },
+    { value: "2", emoji: "🏡", label: t("onboarding.room2") },
+    { value: "3", emoji: "🏡", label: t("onboarding.room3") },
+    { value: "4", emoji: "🏘️", label: t("onboarding.room4") },
+    { value: "5+", emoji: "🏰", label: t("onboarding.room5plus") },
+  ];
+
   return (
     <div className="pt-4">
       <h2 className="text-xl font-bold text-foreground mb-2">
-        כמה חדרים יש אצלכם?
+        {t("onboarding.roomCountTitle")}
       </h2>
-      <p className="text-sm text-muted mb-6">ככה נדע כמה משימות לייצר</p>
+      <p className="text-sm text-muted mb-6">{t("onboarding.roomCountSubtitle")}</p>
 
       <div className="flex flex-col gap-3">
-        {ROOM_OPTIONS.map((opt) => (
+        {roomOptions.map((opt) => (
           <OptionCard
             key={opt.value}
             emoji={opt.emoji}
@@ -394,20 +403,22 @@ function StepRoomCount({
   );
 }
 
-const RESIDENT_OPTIONS: { value: ResidentType; emoji: string; label: string }[] = [
-  { value: "couple", emoji: "👫", label: "זוג" },
-  { value: "kids", emoji: "👶", label: "ילדים" },
-  { value: "pets", emoji: "🐱", label: "חיות מחמד" },
-  { value: "parents", emoji: "👴", label: "הורים" },
-];
-
 function StepResidents({
   value,
   onChange,
+  t,
 }: {
   value: Set<ResidentType>;
   onChange: (v: Set<ResidentType>) => void;
+  t: TFn;
 }) {
+  const residentOptions: { value: ResidentType; emoji: string; label: string }[] = [
+    { value: "couple", emoji: "👫", label: t("onboarding.residentCouple") },
+    { value: "kids", emoji: "👶", label: t("onboarding.residentKids") },
+    { value: "pets", emoji: "🐱", label: t("onboarding.residentPets") },
+    { value: "parents", emoji: "👴", label: t("onboarding.residentParents") },
+  ];
+
   const toggle = (key: ResidentType) => {
     const next = new Set(value);
     if (next.has(key)) next.delete(key);
@@ -418,12 +429,12 @@ function StepResidents({
   return (
     <div className="pt-4">
       <h2 className="text-xl font-bold text-foreground mb-2">
-        מי גר בבית?
+        {t("onboarding.residentsTitle")}
       </h2>
-      <p className="text-sm text-muted mb-6">נתאים משימות מיוחדות לפי מה שרלוונטי</p>
+      <p className="text-sm text-muted mb-6">{t("onboarding.residentsSubtitle")}</p>
 
       <div className="grid grid-cols-2 gap-3">
-        {RESIDENT_OPTIONS.map((opt) => (
+        {residentOptions.map((opt) => (
           <GridCard
             key={opt.value}
             emoji={opt.emoji}
@@ -435,7 +446,7 @@ function StepResidents({
       </div>
 
       <p className="text-xs text-muted mt-4 text-center">
-        אפשר לבחור כמה שרוצים, או לדלג
+        {t("onboarding.residentsChooseMany")}
       </p>
     </div>
   );
@@ -446,49 +457,57 @@ function StepPersonality({
   onStyleChange,
   minutes,
   onMinutesChange,
+  t,
 }: {
   style: CleaningStyle;
   onStyleChange: (v: CleaningStyle) => void;
   minutes: DailyMinutes;
   onMinutesChange: (v: DailyMinutes) => void;
+  t: TFn;
 }) {
+  const timeOptions: { value: DailyMinutes; emoji: string; label: string; sublabel: string }[] = [
+    { value: 15, emoji: "⚡", label: t("onboarding.time15Label"), sublabel: t("onboarding.time15Sublabel") },
+    { value: 30, emoji: "⏰", label: t("onboarding.time30Label"), sublabel: t("onboarding.time30Sublabel") },
+    { value: 60, emoji: "💪", label: t("onboarding.time60Label"), sublabel: t("onboarding.time60Sublabel") },
+  ];
+
   return (
     <div className="pt-4">
       <h2 className="text-xl font-bold text-foreground mb-2">
-        מה הסגנון שלכם?
+        {t("onboarding.personalityTitle")}
       </h2>
-      <p className="text-sm text-muted mb-5">אין תשובה נכונה — כל סגנון עובד</p>
+      <p className="text-sm text-muted mb-5">{t("onboarding.personalitySubtitle")}</p>
 
       <div className="flex flex-col gap-3 mb-6">
         <OptionCard
           emoji="🏃"
-          label="ספרינט ניקיון"
-          sublabel="ניקיון עמוק פעם-פעמיים בשבוע"
+          label={t("onboarding.styleSprintLabel")}
+          sublabel={t("onboarding.styleSprintSublabel")}
           selected={style === "sprint"}
           onClick={() => onStyleChange("sprint")}
         />
         <OptionCard
           emoji="🧹"
-          label="תחזוקה יומית"
-          sublabel="קצת כל יום, תמיד מסודר"
+          label={t("onboarding.styleDailyLabel")}
+          sublabel={t("onboarding.styleDailySublabel")}
           selected={style === "daily"}
           onClick={() => onStyleChange("daily")}
         />
       </div>
 
       <h3 className="text-sm font-semibold text-foreground mb-3">
-        כמה זמן ביום אתם מוכנים להשקיע?
+        {t("onboarding.timeQuestion")}
       </h3>
 
       <div className="flex flex-col gap-2">
-        {([15, 30, 60] as const).map((m) => (
+        {timeOptions.map((opt) => (
           <OptionCard
-            key={m}
-            emoji={m === 15 ? "⚡" : m === 30 ? "⏰" : "💪"}
-            label={`${m} דקות`}
-            sublabel={m === 15 ? "מינימום — רק הבסיס" : m === 30 ? "מומלץ — איזון טוב" : "מקסימום — הכל נוצץ"}
-            selected={minutes === m}
-            onClick={() => onMinutesChange(m)}
+            key={opt.value}
+            emoji={opt.emoji}
+            label={opt.label}
+            sublabel={opt.sublabel}
+            selected={minutes === opt.value}
+            onClick={() => onMinutesChange(opt.value)}
           />
         ))}
       </div>
@@ -496,11 +515,11 @@ function StepPersonality({
   );
 }
 
-function StepGenerating() {
+function StepGenerating({ t }: { t: TFn }) {
   const messages = [
-    "בודק את הבית...",
-    "מחשב משימות...",
-    "בונה תוכנית...",
+    t("onboarding.loadingMsg1"),
+    t("onboarding.loadingMsg2"),
+    t("onboarding.loadingMsg3"),
   ];
   const [msgIndex, setMsgIndex] = useState(0);
 
@@ -539,13 +558,23 @@ function StepGenerating() {
 function StepPlanReady({
   tasks,
   homeName,
+  t,
 }: {
   tasks: TaskTemplate[];
   homeName: string;
+  t: TFn;
 }) {
-  const daily = tasks.filter((t) => t.frequency === "daily");
-  const weekly = tasks.filter((t) => t.frequency === "weekly");
-  const totalDaily = daily.reduce((s, t) => s + t.estimatedMinutes, 0);
+  const daily = tasks.filter((task) => task.frequency === "daily");
+  const weekly = tasks.filter((task) => task.frequency === "weekly");
+  const totalDaily = daily.reduce((s, task) => s + task.estimatedMinutes, 0);
+
+  const planTitle = t("onboarding.planReadyTitle").replace(
+    "{homeName}",
+    homeName || t("onboarding.planReadyDefaultHome"),
+  );
+  const taskCountText = t("onboarding.planReadyTaskCount")
+    .replace("{count}", String(tasks.length))
+    .replace("{minutes}", String(totalDaily));
 
   return (
     <div className="pt-4">
@@ -555,14 +584,14 @@ function StepPlanReady({
         transition={{ type: "spring", damping: 15 }}
         className="text-center mb-4"
       >
-        <span className="text-4xl">🎉</span>
+        <span className="text-4xl">{t("onboarding.planReadyEmoji")}</span>
       </motion.div>
 
       <h2 className="text-xl font-bold text-foreground mb-1 text-center">
-        התוכנית של {homeName || "הבית"} מוכנה!
+        {planTitle}
       </h2>
       <p className="text-sm text-muted mb-4 text-center">
-        {tasks.length} משימות &middot; ~{totalDaily} דק&apos; ביום
+        {taskCountText}
       </p>
 
       <div
@@ -570,15 +599,25 @@ function StepPlanReady({
         style={{ maxHeight: 220 }}
       >
         {daily.length > 0 && (
-          <TaskGroup label="יומי" count={daily.length} tasks={daily} color="bg-success/15 text-success" />
+          <TaskGroup
+            label={t("onboarding.planReadyDailyLabel")}
+            count={daily.length}
+            tasks={daily}
+            color="bg-success/15 text-success"
+          />
         )}
         {weekly.length > 0 && (
-          <TaskGroup label="שבועי" count={weekly.length} tasks={weekly} color="bg-primary/15 text-primary" />
+          <TaskGroup
+            label={t("onboarding.planReadyWeeklyLabel")}
+            count={weekly.length}
+            tasks={weekly}
+            color="bg-primary/15 text-primary"
+          />
         )}
       </div>
 
       <p className="text-xs text-muted mt-3 text-center">
-        אפשר לשנות ולהוסיף בכל רגע מתוך האפליקציה
+        {t("onboarding.canChangeAnytime")}
       </p>
     </div>
   );
@@ -600,10 +639,10 @@ function TaskGroup({
       <div className={`px-3 py-1.5 text-xs font-semibold sticky top-0 bg-surface ${color}`}>
         {label} ({count})
       </div>
-      {tasks.map((t, i) => (
+      {tasks.map((task, i) => (
         <div key={i} className="flex items-center justify-between px-3 py-2 gap-2">
-          <span className="text-sm text-foreground flex-1 text-right">{t.title}</span>
-          <span className="text-xs text-muted shrink-0">{t.estimatedMinutes} דק&apos;</span>
+          <span className="text-sm text-foreground flex-1 text-right">{task.title}</span>
+          <span className="text-xs text-muted shrink-0">{task.estimatedMinutes} דק&apos;</span>
         </div>
       ))}
     </div>
@@ -617,6 +656,7 @@ function TaskGroup({
 const TOTAL_STEPS = 6;
 
 export function ConversationalOnboarding({ open, onComplete, onSkip }: ConversationalOnboardingProps) {
+  const { t } = useTranslation();
   const focusTrapRef = useFocusTrap<HTMLDivElement>(open, onSkip);
   const [step, setStep] = useState(0); // 0 = welcome
   const [homeName, setHomeName] = useState("");
@@ -685,7 +725,7 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
       ref={focusTrapRef}
       role="dialog"
       aria-modal="true"
-      aria-label="אשף הגדרת הבית"
+      aria-label={t("onboarding.dialogAriaLabel")}
       className="fixed inset-0 z-[100] bg-background flex flex-col"
       dir="rtl"
     >
@@ -700,10 +740,10 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
           <button
             type="button"
             onClick={onSkip}
-            aria-label="דלג על ההגדרה"
+            aria-label={t("onboarding.skipAriaLabel")}
             className="text-xs text-muted hover:text-foreground transition-colors px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
           >
-            דלג
+            {t("common.skip")}
           </button>
         </motion.div>
       )}
@@ -720,21 +760,22 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
             transition={{ duration: 0.25, ease: "easeOut" }}
             className={step === 0 || (step === 5 && isGenerating) ? "h-full flex items-center justify-center" : ""}
           >
-            {step === 0 && <StepWelcome onNext={() => setStep(1)} />}
-            {step === 1 && <StepHomeName value={homeName} onChange={setHomeName} />}
-            {step === 2 && <StepRoomCount value={roomCount} onChange={setRoomCount} />}
-            {step === 3 && <StepResidents value={residents} onChange={setResidents} />}
+            {step === 0 && <StepWelcome onNext={() => setStep(1)} t={t} />}
+            {step === 1 && <StepHomeName value={homeName} onChange={setHomeName} t={t} />}
+            {step === 2 && <StepRoomCount value={roomCount} onChange={setRoomCount} t={t} />}
+            {step === 3 && <StepResidents value={residents} onChange={setResidents} t={t} />}
             {step === 4 && (
               <StepPersonality
                 style={style}
                 onStyleChange={setStyle}
                 minutes={dailyMinutes}
                 onMinutesChange={setDailyMinutes}
+                t={t}
               />
             )}
-            {step === 5 && isGenerating && <StepGenerating />}
+            {step === 5 && isGenerating && <StepGenerating t={t} />}
             {step === 5 && !isGenerating && generatedTasks && (
-              <StepPlanReady tasks={generatedTasks} homeName={homeName} />
+              <StepPlanReady tasks={generatedTasks} homeName={homeName} t={t} />
             )}
           </motion.div>
         </AnimatePresence>
@@ -751,10 +792,10 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
             <button
               type="button"
               onClick={goBack}
-              aria-label="חזור לשלב הקודם"
+              aria-label={t("onboarding.backAriaLabel")}
               className="px-4 py-2.5 rounded-2xl border border-border text-muted text-sm hover:bg-surface-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              חזרה
+              {t("common.back")}
             </button>
           )}
 
@@ -766,17 +807,17 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl gradient-primary text-white font-semibold text-sm transition-opacity disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <Sparkles className="w-4 h-4" aria-hidden="true" />
-              מתחילים!
+              {t("onboarding.finishButton")}
             </button>
           ) : step > 0 ? (
             <button
               type="button"
               onClick={goNext}
               disabled={!canProceed}
-              aria-label="המשך לשלב הבא"
+              aria-label={t("onboarding.continueAriaLabel")}
               className="flex-1 flex items-center justify-center gap-1.5 py-3 rounded-2xl gradient-primary text-white font-semibold text-sm transition-opacity disabled:opacity-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              המשך
+              {t("onboarding.continueButton")}
               <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             </button>
           ) : null}

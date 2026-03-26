@@ -1,6 +1,7 @@
 "use client";
 
 import { Moon, Sun, Globe, Volume2, MessageCircle, Save, Loader2 } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Theme = "light" | "dark" | "system";
 type Language = "he" | "en";
@@ -75,16 +76,20 @@ export function AppearanceSettings({
   onLanguageChange,
   onSoundToggle,
 }: AppearanceSettingsProps) {
+  const { t } = useTranslation();
+
   return (
     <>
       {/* Sounds */}
       <section className="card-elevated p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Volume2 className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm">צלילים</h2>
+          <h2 className="font-semibold text-sm">
+            {t("settings.appearanceSection.soundsTitle")}
+          </h2>
         </div>
         <ToggleRow
-          label="צלילי אפליקציה"
+          label={t("settings.appearanceSection.appSounds")}
           enabled={soundEnabled}
           onToggle={onSoundToggle}
         />
@@ -98,25 +103,27 @@ export function AppearanceSettings({
           ) : (
             <Sun className="w-4 h-4 text-muted" />
           )}
-          <h2 className="font-semibold text-sm">מראה</h2>
+          <h2 className="font-semibold text-sm">
+            {t("settings.appearanceSection.themeTitle")}
+          </h2>
         </div>
         <div className="flex gap-2">
           <ThemeButton
-            label="בהיר"
+            label={t("settings.appearanceSection.themeLight")}
             value="light"
             current={theme}
             icon={<Sun className="w-4 h-4" />}
             onSelect={onThemeChange}
           />
           <ThemeButton
-            label="כהה"
+            label={t("settings.appearanceSection.themeDark")}
             value="dark"
             current={theme}
             icon={<Moon className="w-4 h-4" />}
             onSelect={onThemeChange}
           />
           <ThemeButton
-            label="מערכת"
+            label={t("settings.appearanceSection.themeSystem")}
             value="system"
             current={theme}
             icon={<Globe className="w-4 h-4" />}
@@ -129,7 +136,9 @@ export function AppearanceSettings({
       <section className="card-elevated p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Globe className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm">שפה</h2>
+          <h2 className="font-semibold text-sm">
+            {t("settings.appearanceSection.languageTitle")}
+          </h2>
         </div>
         <div className="flex gap-2">
           <button
@@ -155,8 +164,7 @@ export function AppearanceSettings({
         </div>
         {language === "en" && (
           <p className="text-xs text-muted">
-            English translation is coming soon. The app will remain in Hebrew
-            for now.
+            {t("settings.appearanceSection.languageSoon")}
           </p>
         )}
       </section>
@@ -183,6 +191,8 @@ export function WhatsAppSettings({
   onPhoneChange,
   onSavePhone,
 }: WhatsAppSettingsProps) {
+  const { t } = useTranslation();
+
   return (
     <section className="card-elevated p-4 space-y-3">
       <div className="flex items-center gap-2">
@@ -190,10 +200,12 @@ export function WhatsAppSettings({
         <h2 className="font-semibold text-sm">WhatsApp</h2>
       </div>
       <p className="text-xs text-muted">
-        קבלו סיכום יומי בוואטסאפ - תזכורת בוקר (08:00) וסיכום ערב (20:00)
+        {t("settings.whatsappSection.description")}
       </p>
       <div className="flex items-center justify-between">
-        <span className="text-sm text-foreground">הודעות וואטסאפ</span>
+        <span className="text-sm text-foreground">
+          {t("settings.whatsappSection.toggle")}
+        </span>
         <button
           onClick={onToggle}
           role="switch"
@@ -211,7 +223,9 @@ export function WhatsAppSettings({
       </div>
       {whatsappEnabled && (
         <div className="space-y-2">
-          <label className="text-xs text-muted block mb-1">מספר טלפון</label>
+          <label className="text-xs text-muted block mb-1">
+            {t("settings.whatsappSection.phoneLabel")}
+          </label>
           <input
             type="tel"
             value={whatsappPhone}
@@ -221,7 +235,7 @@ export function WhatsAppSettings({
             className="w-full bg-background dark:bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
           />
           <p className="text-[10px] text-muted">
-            המספר ישמש לזיהוי בעת השלמת משימות דרך WhatsApp
+            {t("settings.whatsappSection.phoneHint")}
           </p>
           <button
             onClick={onSavePhone}
@@ -233,7 +247,9 @@ export function WhatsAppSettings({
             ) : (
               <Save className="w-4 h-4" />
             )}
-            {whatsappPhoneSaving ? "שומר..." : "שמירת מספר"}
+            {whatsappPhoneSaving
+              ? t("settings.whatsappSection.saving")
+              : t("settings.whatsappSection.savePhone")}
           </button>
         </div>
       )}

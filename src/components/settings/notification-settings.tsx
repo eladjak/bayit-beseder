@@ -3,6 +3,7 @@
 import { Bell, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 import { isNotificationSupported } from "@/lib/notifications";
 import type { NotificationPrefs } from "@/lib/notifications";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ToggleRowProps {
   label: string;
@@ -69,11 +70,13 @@ export function NotificationSettings({
   onEnableNotifications,
   onTogglePushSubscription,
 }: NotificationSettingsProps) {
+  const { t } = useTranslation();
+
   return (
     <section className="card-elevated p-4 space-y-3">
       <div className="flex items-center gap-2">
         <Bell className="w-4 h-4 text-muted" />
-        <h2 className="font-semibold text-sm">התראות</h2>
+        <h2 className="font-semibold text-sm">{t("settings.notifications")}</h2>
       </div>
 
       {/* Permission status */}
@@ -81,15 +84,15 @@ export function NotificationSettings({
         <div className="bg-primary/5 border border-primary/10 rounded-xl p-3">
           <p className="text-xs text-muted mb-2">
             {notifPermission === "denied"
-              ? "ההתראות חסומות. שנו את ההגדרה בהגדרות הדפדפן."
-              : "הפעילו התראות כדי לקבל תזכורות על משימות."}
+              ? t("settings.notificationSection.permissionDenied")
+              : t("settings.notificationSection.permissionPrompt")}
           </p>
           {notifPermission === "default" && (
             <button
               onClick={onEnableNotifications}
               className="px-3 py-1.5 gradient-primary text-white rounded-xl text-xs font-semibold shadow-sm shadow-primary/20"
             >
-              הפעלת התראות
+              {t("settings.notificationSection.enableNotifications")}
             </button>
           )}
         </div>
@@ -97,7 +100,7 @@ export function NotificationSettings({
 
       {/* Master toggle */}
       <ToggleRow
-        label="התראות מופעלות"
+        label={t("settings.notificationSection.masterToggle")}
         enabled={notifPrefs.enabled}
         onToggle={() => onTogglePref("enabled")}
       />
@@ -105,7 +108,7 @@ export function NotificationSettings({
       {/* Push subscription toggle */}
       {notifPrefs.enabled && notifPermission === "granted" && (
         <ToggleRow
-          label="התראות Push (גם כשהאפליקציה סגורה)"
+          label={t("settings.notificationSection.pushToggle")}
           enabled={pushSubscribed}
           onToggle={onTogglePushSubscription}
         />
@@ -114,22 +117,22 @@ export function NotificationSettings({
       {notifPrefs.enabled && (
         <>
           <ToggleRow
-            label="תזכורת בוקר (08:00)"
+            label={t("settings.notificationSection.morningToggle")}
             enabled={notifPrefs.morning}
             onToggle={() => onTogglePref("morning")}
           />
           <ToggleRow
-            label="בדיקת צהריים (14:00)"
+            label={t("settings.notificationSection.middayToggle")}
             enabled={notifPrefs.midday}
             onToggle={() => onTogglePref("midday")}
           />
           <ToggleRow
-            label="סיכום ערב (20:00)"
+            label={t("settings.notificationSection.eveningToggle")}
             enabled={notifPrefs.evening}
             onToggle={() => onTogglePref("evening")}
           />
           <ToggleRow
-            label="פעילות השותף/ה"
+            label={t("settings.notificationSection.partnerActivityToggle")}
             enabled={notifPrefs.partnerActivity}
             onToggle={() => onTogglePref("partnerActivity")}
           />
@@ -138,23 +141,32 @@ export function NotificationSettings({
 
       {/* Notification Status Indicators */}
       <div className="border-t border-border pt-3 mt-3 space-y-2">
-        <p className="text-xs text-muted font-medium">סטטוס התראות</p>
+        <p className="text-xs text-muted font-medium">
+          {t("settings.notificationSection.statusTitle")}
+        </p>
         <div className="space-y-1.5">
           <StatusRow
-            label="הרשאת דפדפן"
+            label={t("settings.notificationSection.browserPermission")}
             status={
               notifPermission === "granted" ? "active" :
               notifPermission === "denied" ? "error" : "inactive"
             }
             detail={
-              notifPermission === "granted" ? "מאושר" :
-              notifPermission === "denied" ? "חסום" : "לא הופעל"
+              notifPermission === "granted"
+                ? t("settings.notificationSection.statusGranted")
+                : notifPermission === "denied"
+                  ? t("settings.notificationSection.statusDenied")
+                  : t("settings.notificationSection.statusDefault")
             }
           />
           <StatusRow
-            label="Push (רקע)"
+            label={t("settings.notificationSection.pushBackground")}
             status={pushSubscribed ? "active" : "inactive"}
-            detail={pushSubscribed ? "פעיל" : "לא פעיל"}
+            detail={
+              pushSubscribed
+                ? t("settings.notificationSection.statusActive")
+                : t("settings.notificationSection.statusInactive")
+            }
           />
         </div>
       </div>

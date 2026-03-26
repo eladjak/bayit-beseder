@@ -41,6 +41,7 @@ import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
 import { CATEGORY_NAME_TO_KEY, CATEGORY_LABELS, CATEGORY_ICONS } from "@/lib/categories";
 import { WeeklyShareCard } from "@/components/gamification/weekly-share-card";
 import { useTranslation } from "@/hooks/useTranslation";
+import { StatCardSkeleton, RingSkeleton } from "@/components/skeleton";
 
 const MOCK_WEEKLY_DATA = [
   { day: "א׳", completed: 7, total: 10 },
@@ -276,8 +277,8 @@ function PartnerComparisonSection({
 export default function StatsPage() {
   const { t } = useTranslation();
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
-  const { tasks } = useTasks({});
-  const { completions } = useCompletions({ limit: 500 });
+  const { tasks, loading: tasksLoading } = useTasks({});
+  const { completions, loading: completionsLoading } = useCompletions({ limit: 500 });
   const { categoryMap } = useCategories();
   const { profile } = useProfile();
   const { partner } = usePartner(profile?.partner_id, today);
@@ -366,6 +367,20 @@ export default function StatsPage() {
       tasks
     );
   }, [hasAchievementsDbData, dbUnlockedCodes, hasDbData, completions, profile?.streak, tasks]);
+
+  // Show skeleton while data is loading to prevent blank flash
+  if (tasksLoading || completionsLoading) {
+    return (
+      <div className="space-y-4 pb-28 px-4 pt-6" dir="rtl">
+        <RingSkeleton />
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <StatCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4" dir="rtl">

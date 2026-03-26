@@ -45,6 +45,8 @@ import {
 } from "@/lib/categories";
 import type { WeekPlan, PlannedTask } from "@/lib/weekly-generator";
 import type { TaskTemplate } from "@/lib/seed-data";
+import { ZoneDayPicker } from "@/components/weekly/zone-day-picker";
+import type { ZoneDayMapping } from "@/lib/zones";
 
 // ============================================
 // Props
@@ -64,6 +66,11 @@ interface WeeklyGeneratorModalProps {
   onReassignTask: (date: string, taskIndex: number, newUserId: string) => void;
   onApply: () => void;
   onReset: () => void;
+  // Zone configuration (optional)
+  showZoneStep?: boolean;
+  zoneMappings?: ZoneDayMapping[];
+  onZoneMappingsChange?: (mappings: ZoneDayMapping[]) => void;
+  onRegenerateWithZones?: () => void;
 }
 
 // ============================================
@@ -84,9 +91,14 @@ export function WeeklyGeneratorModal({
   onReassignTask,
   onApply,
   onReset,
+  showZoneStep = false,
+  zoneMappings = [],
+  onZoneMappingsChange,
+  onRegenerateWithZones,
 }: WeeklyGeneratorModalProps) {
   const focusRef = useFocusTrap<HTMLDivElement>(open && !!plan, onClose);
   const { t } = useTranslation();
+  const [zoneOpen, setZoneOpen] = useState(false);
   if (!open || !plan) return null;
 
   const totalNew = plan.reduce(
@@ -156,6 +168,59 @@ export function WeeklyGeneratorModal({
 
               {/* Content — scrollable */}
               <div className="flex-1 overflow-y-auto overscroll-contain bg-background">
+                {/* Zone configuration collapsible — shown in preview state when showZoneStep is true */}
+                {state === "preview" && showZoneStep && (
+                  <div className="border-b border-border">
+                    <button
+                      type="button"
+                      onClick={() => setZoneOpen((o) => !o)}
+                      className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-surface transition-colors"
+                      aria-expanded={zoneOpen}
+                    >
+                      <span>{t("weekly.zoneConfigToggle")}</span>
+                      {zoneOpen ? (
+                        <ChevronUp className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                      )}
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {zoneOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.18 }}
+                          className="overflow-hidden"
+                        >
+                          <div className="px-4 pb-4 flex flex-col gap-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {t("weekly.zoneConfigDesc")}
+                            </p>
+                            <ZoneDayPicker
+                              mappings={zoneMappings}
+                              onChange={onZoneMappingsChange ?? (() => {})}
+                            />
+                            {onRegenerateWithZones && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setZoneOpen(false);
+                                  onRegenerateWithZones();
+                                }}
+                                className="w-full py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform min-h-[44px]"
+                              >
+                                <Wand2 className="w-4 h-4" />
+                                {t("weekly.regenerateWithZones")}
+                              </button>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                )}
+
                 {state === "preview" && (
                   <PreviewStep
                     plan={plan}
