@@ -60,6 +60,7 @@ export function DashboardHeader({
                 alt={displayName}
                 width={56}
                 height={56}
+                sizes="56px"
                 className="w-14 h-14 rounded-2xl border-2 border-white/30 object-cover shadow-lg shadow-black/10"
               />
               <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success rounded-full border-2 border-white" />

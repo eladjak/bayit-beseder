@@ -119,6 +119,8 @@ function LoginContent() {
             alt={t("auth.welcome")}
             width={96}
             height={96}
+            priority
+            sizes="96px"
             className="w-24 h-24 rounded-2xl object-cover shadow-lg shadow-black/20 border-2 border-white/30"
           />
           <h1 className="text-3xl font-bold text-white">בית בסדר</h1>

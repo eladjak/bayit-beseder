@@ -36,6 +36,7 @@ function MemberCard({
             alt={name}
             width={32}
             height={32}
+            sizes="32px"
             className="w-8 h-8 rounded-full object-cover"
           />
         ) : (

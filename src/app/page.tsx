@@ -119,9 +119,11 @@ export default function LandingPage() {
           {/* App mockup */}
           <Image
             src="/illustrations/app-mockup.jpg"
-            alt="תצוגת האפליקציה"
+            alt="תצוגת האפליקציה — בית בסדר"
             width={320}
             height={640}
+            priority
+            sizes="(max-width: 768px) 256px, 320px"
             className="mt-8 mx-auto w-64 md:w-80 rounded-2xl shadow-2xl border-2 border-white/10"
           />
         </div>
@@ -193,9 +195,10 @@ export default function LandingPage() {
       <section className="max-w-4xl mx-auto px-6 py-8">
         <Image
           src="/illustrations/couple-celebration.jpg"
-          alt="זוג חוגג בית נקי"
+          alt="זוג חוגג בית נקי ומסודר"
           width={448}
           height={300}
+          sizes="(max-width: 640px) 100vw, 448px"
           className="w-full max-w-md mx-auto rounded-2xl shadow-lg"
         />
       </section>
