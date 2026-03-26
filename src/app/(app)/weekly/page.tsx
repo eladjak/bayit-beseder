@@ -31,6 +31,7 @@ import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
 import { useTasks } from "@/hooks/useTasks";
 import { useProfile } from "@/hooks/useProfile";
 import { usePartner } from "@/hooks/usePartner";
+import { useHouseholdMembers } from "@/hooks/useHouseholdMembers";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import dynamic from "next/dynamic";
 import { useWeeklyGenerator } from "@/hooks/useWeeklyGenerator";
@@ -148,6 +149,11 @@ export default function WeeklyPage() {
   const { profile } = useProfile();
   const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
   const { partner } = usePartner(profile?.partner_id, todayStr);
+  // N-member support: prefer household_members table; fall back to partner_id
+  const { members: householdMembers } = useHouseholdMembers(
+    profile?.household_id ?? null,
+    todayStr
+  );
   const [showSuggestions, setShowSuggestions] = useState(true);
   // Generate mock data once (client-side only) to avoid SSR/client Math.random() mismatch.
   const mockTasksRef = useRef<ReturnType<typeof generateMockWeeklyTasks> | null>(null);
@@ -202,8 +208,11 @@ export default function WeeklyPage() {
       toast.error(t("weekly.loginFirst"));
       return;
     }
-    const memberIds = [profile.id];
-    if (profile.partner_id) memberIds.push(profile.partner_id);
+    // Use all household members when available, otherwise fall back to partner_id
+    const memberIds =
+      householdMembers.length > 0
+        ? householdMembers.map((m) => m.id)
+        : [profile.id, ...(profile.partner_id ? [profile.partner_id] : [])];
 
     const startStr = startOfWeek.toISOString().split("T")[0];
     const endStr = endOfWeek.toISOString().split("T")[0];
@@ -216,13 +225,16 @@ export default function WeeklyPage() {
     wizard.generate(weekTasksForWizard, memberIds, startOfWeek, zoneConfig.zoneMode);
     setShowWizard(true);
     haptic("tap");
-  }, [profile, partner, tasks, startOfWeek, endOfWeek, wizard, zoneConfig.zoneMappings, zoneConfig.zoneMode]);
+  }, [profile, partner, householdMembers, tasks, startOfWeek, endOfWeek, wizard, zoneConfig.zoneMappings, zoneConfig.zoneMode]);
 
   // Regenerate the plan with the current wizardZoneMappings
   const handleRegenerateWithZones = useCallback(() => {
     if (!profile) return;
-    const memberIds = [profile.id];
-    if (profile.partner_id) memberIds.push(profile.partner_id);
+    // Use all household members when available, otherwise fall back to partner_id
+    const memberIds =
+      householdMembers.length > 0
+        ? householdMembers.map((m) => m.id)
+        : [profile.id, ...(profile.partner_id ? [profile.partner_id] : [])];
 
     const startStr = startOfWeek.toISOString().split("T")[0];
     const endStr = endOfWeek.toISOString().split("T")[0];
@@ -233,16 +245,21 @@ export default function WeeklyPage() {
     haptic("tap");
     // Pass zoneMode=true so generator uses the mappings
     wizard.generate(weekTasksForWizard, memberIds, startOfWeek, true, wizardZoneMappings);
-  }, [profile, tasks, startOfWeek, endOfWeek, wizard, wizardZoneMappings]);
+  }, [profile, householdMembers, tasks, startOfWeek, endOfWeek, wizard, wizardZoneMappings]);
 
   const wizardMembers = useMemo(() => {
+    // Prefer the household_members table (N members) when available
+    if (householdMembers.length > 0) {
+      return householdMembers.map((m) => ({ id: m.id, name: m.name }));
+    }
+    // Fall back to profile + partner_id (2-user legacy)
     const m: Array<{ id: string; name: string }> = [];
     if (profile) m.push({ id: profile.id, name: profile.name });
     if (profile?.partner_id && partner) {
       m.push({ id: profile.partner_id, name: partner.name });
     }
     return m;
-  }, [profile, partner]);
+  }, [householdMembers, profile, partner]);
 
   const handleApplyWizard = useCallback(async () => {
     const { created, errors } = await wizard.applyPlan();

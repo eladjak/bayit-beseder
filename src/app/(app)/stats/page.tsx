@@ -14,6 +14,7 @@ import {
   computeWeeklyTrend,
   computeCategoryBreakdown,
   computePartnerComparison,
+  computeMembersComparison,
   buildStreakHistory,
   countCompletedThisWeek,
   countCompletedThisMonth,
@@ -24,6 +25,7 @@ import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
 import { useProfile } from "@/hooks/useProfile";
 import { usePartner } from "@/hooks/usePartner";
+import { useHouseholdMembers } from "@/hooks/useHouseholdMembers";
 import { useUserAchievements } from "@/hooks/useUserAchievements";
 import { AnimatedNumber } from "@/components/animated-number";
 import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
@@ -292,6 +294,7 @@ export default function StatsPage() {
   const { categoryMap } = useCategories();
   const { profile } = useProfile();
   const { partner } = usePartner(profile?.partner_id, today);
+  const { members: householdMembers } = useHouseholdMembers(profile?.household_id ?? null, today);
   const { dbUnlockedCodes, hasDbData: hasAchievementsDbData } = useUserAchievements();
 
   // Build category_id -> key mapping

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { TodayOverview, type TaskItem } from "@/components/dashboard/today-overview";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
-import { PartnerStatus } from "@/components/dashboard/partner-status";
+import { PartnerStatus, MembersStatus } from "@/components/dashboard/partner-status";
 import { EmergencyToggle } from "@/components/dashboard/emergency-toggle";
 import { WeeklySummaryCards } from "@/components/dashboard/weekly-summary-cards";
 import { RoomConditions } from "@/components/dashboard/room-conditions";
@@ -26,6 +26,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useAppSounds } from "@/hooks/useAppSound";
 import { useNotifications } from "@/hooks/useNotifications";
 import { usePartner } from "@/hooks/usePartner";
+import { useHouseholdMembers } from "@/hooks/useHouseholdMembers";
 import { TaskListSkeleton } from "@/components/skeleton";
 import { toast } from "sonner";
 import { CATEGORY_NAME_TO_KEY, CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS } from "@/lib/categories";
@@ -132,6 +133,13 @@ export default function DashboardPage() {
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const { partner } = usePartner(profile?.partner_id, todayStr);
   const { household } = useHousehold(profile?.household_id ?? null);
+  // N-member support: prefer household_members table; falls back to partner_id
+  const { members: householdMembers, loading: membersLoading } = useHouseholdMembers(
+    profile?.household_id ?? null,
+    todayStr
+  );
+  // Members other than the current user (for the "household activity" section)
+  const otherMembers = householdMembers.filter((m) => m.id !== profile?.id);
   const seasonalMode = useSeasonalMode();
   const [showSeasonalModal, setShowSeasonalModal] = useState(false);
 
@@ -565,16 +573,26 @@ export default function DashboardPage() {
 
         <RoomConditions categoryHealthData={categoryHealthData} />
 
-        {profile?.partner_id && (
+        {/* Household members activity — uses N-member hook when available, falls back to partner */}
+        {!membersLoading && otherMembers.length > 0 ? (
           <div>
-            <h2 className="font-semibold text-foreground px-1 mb-2">{partner.name}</h2>
-            <PartnerStatus
-              name={partner.name}
-              completedCount={partner.completedCount}
-              totalCount={partner.totalCount}
-              recentTasks={partner.recentTasks}
-            />
+            <h2 className="font-semibold text-foreground px-1 mb-2">
+              {otherMembers.length === 1 ? otherMembers[0].name : "חברי הבית"}
+            </h2>
+            <MembersStatus members={otherMembers} />
           </div>
+        ) : (
+          !membersLoading && profile?.partner_id && (
+            <div>
+              <h2 className="font-semibold text-foreground px-1 mb-2">{partner.name}</h2>
+              <PartnerStatus
+                name={partner.name}
+                completedCount={partner.completedCount}
+                totalCount={partner.totalCount}
+                recentTasks={partner.recentTasks}
+              />
+            </div>
+          )
         )}
 
         <CoachingTips completedCount={completedCount} totalCount={filteredTasks.length} />

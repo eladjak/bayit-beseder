@@ -229,6 +229,43 @@ export function computePartnerComparison(
 }
 
 // ============================================
+// N-member comparison (generalised version)
+// ============================================
+
+export interface MemberCompletionCount {
+  userId: string;
+  name: string;
+  count: number;
+}
+
+/**
+ * Count completions for each of the given member IDs for the current week.
+ * Returns members sorted by count descending.
+ */
+export function computeMembersComparison(
+  completions: TaskCompletionRow[],
+  members: Array<{ id: string; name: string }>,
+  today: string
+): MemberCompletionCount[] {
+  const weekAgo = addDays(today, -6);
+  const countMap: Record<string, number> = {};
+
+  for (const c of completions) {
+    const d = c.completed_at.slice(0, 10);
+    if (d < weekAgo || d > today) continue;
+    if (c.user_id in countMap) {
+      countMap[c.user_id] += 1;
+    } else {
+      countMap[c.user_id] = 1;
+    }
+  }
+
+  return members
+    .map((m) => ({ userId: m.id, name: m.name, count: countMap[m.id] ?? 0 }))
+    .sort((a, b) => b.count - a.count);
+}
+
+// ============================================
 // Category breakdown from completions (real data)
 // ============================================
 
