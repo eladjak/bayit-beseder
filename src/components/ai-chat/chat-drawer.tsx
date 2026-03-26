@@ -69,9 +69,11 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
 
   const handleVoiceTranscript = useCallback(
     (text: string) => {
-      setInputValue(text);
+      if (text.trim()) {
+        sendMessage(text.trim());
+      }
     },
-    [],
+    [sendMessage],
   );
 
   return (
