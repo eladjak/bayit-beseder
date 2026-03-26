@@ -10,8 +10,8 @@ const contacts = [
   {
     icon: "✉️",
     title: "אימייל",
-    description: "לכל שאלה או הצעה",
-    href: "mailto:eladjak@gmail.com",
+    description: "משוב, שאלות, רעיונות, באגים — הכל מגיע!",
+    href: "mailto:eladjak@gmail.com?subject=משוב על בית בסדר",
     label: "eladjak@gmail.com",
     cta: "שלחו הודעה",
     gradient: "from-indigo-500 to-violet-500",
@@ -70,6 +70,9 @@ export default function ContactPage() {
           <p className="text-white/75 text-base leading-relaxed max-w-md mx-auto">
             יש לכם שאלה, רעיון, או מצאתם באג? נשמח לשמוע מכם!
           </p>
+          <div className="inline-flex items-center gap-1.5 mt-3 px-3 py-1 bg-amber-400/20 text-amber-100 rounded-full text-xs font-medium border border-amber-300/30">
+            🧪 אנחנו בגרסה ראשונה — כל משוב עוזר לנו להשתפר!
+          </div>
         </div>
       </section>
 
@@ -80,9 +83,11 @@ export default function ContactPage() {
         <div className="card-elevated p-6 mb-10 flex gap-4 items-start">
           <span className="text-3xl flex-shrink-0 mt-0.5">😄</span>
           <p className="text-foreground/80 leading-relaxed text-sm md:text-base">
-            אנחנו זוג שבנה את האפליקציה הזו כי נמאס לנו מוויכוחים על מי עושה
-            יותר בבית. אם גם אתם מכירים את זה — ברוכים הבאים! נשמח לשמוע
-            מכם, בין אם זה תגובה, רעיון או סתם &quot;תודה&quot; 🙏
+            בנינו את &quot;בית בסדר&quot; כי נמאס לנו מוויכוחים על מי עושה
+            יותר בבית. האפליקציה עדיין בגרסה ראשונה ואנחנו משפרים כל יום.
+            <br className="hidden md:block" />
+            <strong>המשוב שלכם ממש חשוב לנו</strong> — מצאתם באג? חסר פיצ׳ר? יש רעיון מגניב?
+            או סתם רוצים להגיד &quot;תודה&quot;? 🙏 שלחו הודעה!
           </p>
         </div>
 
