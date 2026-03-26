@@ -99,6 +99,10 @@
     "calendarSection": {
       "connectedBadge": "מחובר ל-Google Calendar",
       "lastSync": "סנכרון אחרון:",
+      "syncedCreated": "אירועים נוצרו",
+      "syncedSkipped": "כבר קיימים",
+      "syncedChecked": "משימות נבדקו",
+      "syncErrors": "שגיאות בסנכרון",
       "syncNow": "סנכרן עכשיו",
       "syncing": "מסנכרן...",
       "syncLabel": "סנכרן עם Google Calendar",

@@ -99,6 +99,10 @@
     "calendarSection": {
       "connectedBadge": "Connected to Google Calendar",
       "lastSync": "Last sync:",
+      "syncedCreated": "events created",
+      "syncedSkipped": "already exist",
+      "syncedChecked": "tasks checked",
+      "syncErrors": "sync errors",
       "syncNow": "Sync now",
       "syncing": "Syncing...",
       "syncLabel": "Sync with Google Calendar",

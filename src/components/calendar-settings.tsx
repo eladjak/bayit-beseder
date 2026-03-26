@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface SyncResult {
   created: number;
@@ -29,6 +30,7 @@ interface CalendarStatus {
 }
 
 export function CalendarSettings() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const searchParams = useSearchParams();
 
@@ -179,11 +181,11 @@ export function CalendarSettings() {
               <CheckCircle className="w-4 h-4 text-success flex-shrink-0" />
               <div className="min-w-0">
                 <p className="text-sm font-medium text-foreground">
-                  מחובר ל-Google Calendar
+                  {t("settings.calendarSection.connectedBadge")}
                 </p>
                 {status.lastSync && (
                   <p className="text-xs text-muted">
-                    סנכרון אחרון:{" "}
+                    {t("settings.calendarSection.lastSync")}{" "}
                     {new Date(status.lastSync).toLocaleString("he-IL", {
                       dateStyle: "short",
                       timeStyle: "short",
@@ -197,13 +199,17 @@ export function CalendarSettings() {
             {lastSyncResult && (
               <div className="text-xs text-muted bg-surface rounded-xl px-4 py-3 space-y-1">
                 <p>
-                  נוצרו {lastSyncResult.created} אירועים ·{" "}
-                  {lastSyncResult.skipped} כבר קיימים ·{" "}
-                  {lastSyncResult.totalTasks} משימות נבדקו
+                  {lastSyncResult.created}{" "}
+                  {t("settings.calendarSection.syncedCreated")} ·{" "}
+                  {lastSyncResult.skipped}{" "}
+                  {t("settings.calendarSection.syncedSkipped")} ·{" "}
+                  {lastSyncResult.totalTasks}{" "}
+                  {t("settings.calendarSection.syncedChecked")}
                 </p>
                 {lastSyncResult.errors.length > 0 && (
                   <p className="text-warning">
-                    {lastSyncResult.errors.length} שגיאות בסנכרון
+                    {lastSyncResult.errors.length}{" "}
+                    {t("settings.calendarSection.syncErrors")}
                   </p>
                 )}
               </div>
@@ -215,33 +221,37 @@ export function CalendarSettings() {
                 onClick={handleSync}
                 disabled={syncing}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 gradient-primary text-white rounded-2xl text-sm font-semibold shadow-md shadow-primary/20 disabled:opacity-50 active:scale-95 transition-transform"
-                aria-label="סנכרן עם Google Calendar"
+                aria-label={t("settings.calendarSection.syncLabel")}
               >
                 {syncing ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <RefreshCw className="w-4 h-4" />
                 )}
-                {syncing ? "מסנכרן..." : "סנכרן עכשיו"}
+                {syncing
+                  ? t("settings.calendarSection.syncing")
+                  : t("settings.calendarSection.syncNow")}
               </button>
 
               <button
                 onClick={handleDisconnect}
                 disabled={disconnecting}
                 className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-danger/30 text-danger text-sm font-medium hover:bg-danger/5 transition-colors disabled:opacity-50"
-                aria-label="נתק Google Calendar"
+                aria-label={t("settings.calendarSection.disconnectLabel")}
               >
                 {disconnecting ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
                   <Link2Off className="w-4 h-4" />
                 )}
-                {disconnecting ? "מנתק..." : "נתק"}
+                {disconnecting
+                  ? t("settings.calendarSection.disconnecting")
+                  : t("settings.calendarSection.disconnect")}
               </button>
             </div>
 
             <p className="text-xs text-muted">
-              הסנכרון יוסיף את המשימות השבועיות שלכם ל-Google Calendar אוטומטית.
+              {t("settings.calendarSection.syncHint")}
             </p>
           </motion.div>
         ) : (
@@ -253,25 +263,27 @@ export function CalendarSettings() {
             className="space-y-3"
           >
             <p className="text-xs text-muted">
-              חברו את Google Calendar כדי לראות את המשימות הביתיות ישירות בלוח השנה שלכם.
+              {t("settings.calendarSection.connectHint")}
             </p>
 
             <button
               onClick={handleConnect}
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 py-3 gradient-primary text-white rounded-2xl font-semibold text-sm shadow-md shadow-primary/20 disabled:opacity-50 active:scale-95 transition-transform"
-              aria-label="חבר Google Calendar"
+              aria-label={t("settings.calendarSection.connectLabel")}
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <ExternalLink className="w-4 h-4" />
               )}
-              {loading ? "מתחבר..." : "חבר Google Calendar"}
+              {loading
+                ? t("settings.calendarSection.connecting")
+                : t("settings.calendarSection.connect")}
             </button>
 
             <p className="text-[10px] text-muted">
-              הנתונים שלכם מאובטחים. אנחנו מבקשים גישה ליצירת אירועים בלבד.
+              {t("settings.calendarSection.securityHint")}
             </p>
           </motion.div>
         )}

@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { Check, Clock, Filter, Plus, Settings, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
@@ -188,6 +189,10 @@ export default function TasksPage() {
   );
   const [showCompleted, setShowCompleted] = useState(true);
 
+  // Virtualizer parent refs
+  const pendingListRef = useRef<HTMLDivElement>(null);
+  const completedListRef = useRef<HTMLDivElement>(null);
+
   // Toggle for mock tasks
   function toggleMockTask(index: number) {
     const key = `task-${index}`;
@@ -365,6 +370,27 @@ export default function TasksPage() {
     },
     [taskCategories]
   );
+
+  // Virtualizer for pending tasks (enabled when >= 15 items)
+  const VIRTUALIZE_THRESHOLD = 15;
+  const TASK_ROW_HEIGHT = 80; // px estimate per task card
+  const pendingVirtualizer = useVirtualizer({
+    count: pendingDbTasks.length,
+    getScrollElement: () => pendingListRef.current,
+    estimateSize: () => TASK_ROW_HEIGHT,
+    overscan: 4,
+    enabled: pendingDbTasks.length >= VIRTUALIZE_THRESHOLD,
+  });
+  const completedVirtualizer = useVirtualizer({
+    count: completedDbTasks.length,
+    getScrollElement: () => completedListRef.current,
+    estimateSize: () => TASK_ROW_HEIGHT,
+    overscan: 3,
+    enabled: completedDbTasks.length >= VIRTUALIZE_THRESHOLD && showCompleted,
+  });
+
+  const usePendingVirtual = pendingDbTasks.length >= VIRTUALIZE_THRESHOLD;
+  const useCompletedVirtual = completedDbTasks.length >= VIRTUALIZE_THRESHOLD && showCompleted;
 
   return (
     <div className="space-y-4" dir="rtl">
@@ -590,13 +616,96 @@ export default function TasksPage() {
           </motion.div>
         )}
 
-        <AnimatePresence mode="popLayout">
-          {tasksLoading && !sawDbTasks.current
-            ? /* ---- Loading: skeleton is shown above, render nothing here ---- */
-              null
-            : hasDbTasks
-            ? /* ---- DB Tasks (pending) ---- */
-              pendingDbTasks.map((task) => {
+        {/* ---- Pending Tasks ---- */}
+        {tasksLoading && !sawDbTasks.current ? null : hasDbTasks ? (
+          usePendingVirtual ? (
+            /* Virtual list for large pending task sets */
+            <div
+              ref={pendingListRef}
+              style={{ height: "calc(100dvh - 320px)", overflowY: "auto" }}
+              className="scrollbar-none"
+            >
+              <div
+                style={{ height: `${pendingVirtualizer.getTotalSize()}px`, position: "relative" }}
+              >
+                {pendingVirtualizer.getVirtualItems().map((virtualRow) => {
+                  const task = pendingDbTasks[virtualRow.index];
+                  const display = resolveCategoryDisplay(task.categoryKey);
+                  return (
+                    <div
+                      key={task.id}
+                      data-index={virtualRow.index}
+                      ref={pendingVirtualizer.measureElement}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        transform: `translateY(${virtualRow.start}px)`,
+                        width: "100%",
+                        paddingBottom: "8px",
+                      }}
+                    >
+                      <div
+                        className={`card-elevated p-3.5 flex items-start gap-3 relative overflow-hidden transition-opacity duration-150 ${
+                          task.isOverdue ? "ring-1 ring-red-500/20" : ""
+                        }`}
+                        style={{
+                          borderRight: `3px solid ${task.isOverdue ? "#EF4444" : display.color}`,
+                        }}
+                      >
+                        {task.isOverdue && (
+                          <div className="absolute top-2 left-2 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
+                            ⏰ {t("common.overdue")}
+                          </div>
+                        )}
+                        <button
+                          onClick={() => toggleDbTask(task.id)}
+                          aria-label={`${t("tasks.markComplete")}: ${task.title}`}
+                          aria-pressed={false}
+                          className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                            task.isOverdue
+                              ? "border-red-400 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                              : "border-border hover:border-primary hover:bg-primary/5"
+                          }`}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-sm font-medium leading-snug ${
+                            task.isOverdue ? "text-red-700 dark:text-red-400" : "text-foreground"
+                          }`}>
+                            {task.title}
+                          </p>
+                          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                            <span
+                              className="text-[10px] px-2 py-0.5 rounded-md text-white font-medium"
+                              style={{ backgroundColor: display.color }}
+                            >
+                              {display.icon ? `${display.icon} ` : ""}{display.label}
+                            </span>
+                            <span className="text-[10px] text-muted px-2 py-0.5 rounded-md bg-background border border-border/50">
+                              {task.recurrenceLabel}
+                            </span>
+                            <span className="text-[10px] text-muted flex items-center gap-0.5">
+                              <Clock className="w-3 h-3" />
+                              {task.estimated_minutes} {t("common.minutes")}
+                            </span>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteTask(task.id)}
+                          className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors"
+                          aria-label={t("tasks.deleteTask")}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            /* Normal animated list for small pending task sets */
+            <AnimatePresence mode="popLayout">
+              {pendingDbTasks.map((task) => {
                 const display = resolveCategoryDisplay(task.categoryKey);
                 return (
                   <motion.div
@@ -605,16 +714,10 @@ export default function TasksPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`card-elevated p-3.5 flex items-start gap-3 relative overflow-hidden ${
-                      task.isOverdue
-                        ? "ring-1 ring-red-500/20"
-                        : ""
+                      task.isOverdue ? "ring-1 ring-red-500/20" : ""
                     }`}
                     style={{
-                      borderRight: `3px solid ${
-                        task.isOverdue
-                          ? "#EF4444"
-                          : display.color
-                      }`,
+                      borderRight: `3px solid ${task.isOverdue ? "#EF4444" : display.color}`,
                     }}
                   >
                     {task.isOverdue && (
@@ -663,76 +766,81 @@ export default function TasksPage() {
                     </button>
                   </motion.div>
                 );
-              })
-            : /* ---- Mock Tasks (fallback) ---- */
-              filteredMockTasks.map((task, i) => {
-                const isCompleted = completedIds.has(`task-${i}`);
-                return (
-                  <motion.div
-                    key={`${task.title}-${i}`}
-                    layout
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`card-elevated p-3 flex items-start gap-3 relative overflow-hidden ${
-                      isCompleted ? "opacity-60" : ""
+              })}
+            </AnimatePresence>
+          )
+        ) : (
+          /* ---- Mock Tasks (fallback) ---- */
+          <AnimatePresence mode="popLayout">
+            {filteredMockTasks.map((task, i) => {
+              const isCompleted = completedIds.has(`task-${i}`);
+              return (
+                <motion.div
+                  key={`${task.title}-${i}`}
+                  layout
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`card-elevated p-3 flex items-start gap-3 relative overflow-hidden ${
+                    isCompleted ? "opacity-60" : ""
+                  }`}
+                >
+                  <button
+                    onClick={() => toggleMockTask(i)}
+                    aria-label={isCompleted ? `${t("tasks.undoComplete")}: ${task.title}` : `${t("tasks.markComplete")}: ${task.title}`}
+                    aria-pressed={isCompleted}
+                    className={`mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                      isCompleted
+                        ? "bg-success border-success"
+                        : "border-border hover:border-primary"
                     }`}
                   >
-                    <button
-                      onClick={() => toggleMockTask(i)}
-                      aria-label={isCompleted ? `${t("tasks.undoComplete")}: ${task.title}` : `${t("tasks.markComplete")}: ${task.title}`}
-                      aria-pressed={isCompleted}
-                      className={`mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                    {isCompleted && (
+                      <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                    )}
+                  </button>
+                  <div className="flex-1 min-w-0">
+                    <p
+                      className={`text-sm font-medium ${
                         isCompleted
-                          ? "bg-success border-success"
-                          : "border-border hover:border-primary"
+                          ? "line-through text-muted"
+                          : "text-foreground"
                       }`}
                     >
-                      {isCompleted && (
-                        <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
-                      )}
-                    </button>
-                    <div className="flex-1 min-w-0">
-                      <p
-                        className={`text-sm font-medium ${
-                          isCompleted
-                            ? "line-through text-muted"
-                            : "text-foreground"
-                        }`}
+                      {task.title}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span
+                        className="text-[10px] px-1.5 py-0.5 rounded-full text-white font-medium"
+                        style={{
+                          backgroundColor: getCategoryColor(task.category),
+                        }}
                       >
-                        {task.title}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                        <span
-                          className="text-[10px] px-1.5 py-0.5 rounded-full text-white font-medium"
-                          style={{
-                            backgroundColor: getCategoryColor(task.category),
-                          }}
-                        >
-                          {getCategoryLabel(task.category)}
+                        {getCategoryLabel(task.category)}
+                      </span>
+                      <span className="text-[10px] text-muted px-1.5 py-0.5 rounded-full bg-background">
+                        {getRecurrenceLabel(task.recurrence_type)}
+                      </span>
+                      <span className="text-[10px] text-muted flex items-center gap-0.5">
+                        <Clock className="w-3 h-3" />
+                        {task.estimated_minutes} {t("common.minutes")}
+                      </span>
+                      {task.is_emergency && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-medium">
+                          {t("emergency.title")}
                         </span>
-                        <span className="text-[10px] text-muted px-1.5 py-0.5 rounded-full bg-background">
-                          {getRecurrenceLabel(task.recurrence_type)}
-                        </span>
-                        <span className="text-[10px] text-muted flex items-center gap-0.5">
-                          <Clock className="w-3 h-3" />
-                          {task.estimated_minutes} {t("common.minutes")}
-                        </span>
-                        {task.is_emergency && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-medium">
-                            {t("emergency.title")}
-                          </span>
-                        )}
-                      </div>
-                      {task.tips.length > 0 && (
-                        <p className="text-[11px] text-muted mt-1">
-                          💡 {task.tips[0]}
-                        </p>
                       )}
                     </div>
-                  </motion.div>
-                );
-              })}
-        </AnimatePresence>
+                    {task.tips.length > 0 && (
+                      <p className="text-[11px] text-muted mt-1">
+                        💡 {task.tips[0]}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
+        )}
 
         {/* ---- Completed Tasks Section ---- */}
         {hasDbTasks && completedDbTasks.length > 0 && (
@@ -748,43 +856,104 @@ export default function TasksPage() {
               <div className="h-px flex-1 bg-border" />
             </button>
             {showCompleted && (
-              <div className="space-y-2 mt-2">
-                {completedDbTasks.map((task) => {
-                  const display = resolveCategoryDisplay(task.categoryKey);
-                  return (
-                    <motion.div
-                      key={task.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="card-elevated p-3 flex items-start gap-3 opacity-50"
-                      style={{ borderRight: `3px solid #10B981` }}
-                    >
-                      <button
-                        onClick={() => toggleDbTask(task.id)}
-                        aria-label={`${t("tasks.undoComplete")}: ${task.title}`}
-                        aria-pressed={true}
-                        className="mt-0.5 w-6 h-6 rounded-lg border-2 bg-success border-success flex items-center justify-center flex-shrink-0"
-                      >
-                        <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
-                      </button>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium line-through text-muted">{task.title}</p>
-                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                          <span
-                            className="text-[10px] px-2 py-0.5 rounded-md text-white/80 font-medium"
-                            style={{ backgroundColor: display.color }}
+              useCompletedVirtual ? (
+                /* Virtual list for large completed task sets */
+                <div
+                  ref={completedListRef}
+                  style={{ height: "240px", overflowY: "auto" }}
+                  className="mt-2 scrollbar-none"
+                >
+                  <div
+                    style={{ height: `${completedVirtualizer.getTotalSize()}px`, position: "relative" }}
+                  >
+                    {completedVirtualizer.getVirtualItems().map((virtualRow) => {
+                      const task = completedDbTasks[virtualRow.index];
+                      const display = resolveCategoryDisplay(task.categoryKey);
+                      return (
+                        <div
+                          key={task.id}
+                          data-index={virtualRow.index}
+                          ref={completedVirtualizer.measureElement}
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            transform: `translateY(${virtualRow.start}px)`,
+                            width: "100%",
+                            paddingBottom: "8px",
+                          }}
+                        >
+                          <div
+                            className="card-elevated p-3 flex items-start gap-3 opacity-50"
+                            style={{ borderRight: `3px solid #10B981` }}
                           >
-                            {display.icon ? `${display.icon} ` : ""}{display.label}
-                          </span>
-                          <span className="text-[10px] text-muted px-2 py-0.5 rounded-md bg-background border border-border/50">
-                            {task.recurrenceLabel}
-                          </span>
+                            <button
+                              onClick={() => toggleDbTask(task.id)}
+                              aria-label={`${t("tasks.undoComplete")}: ${task.title}`}
+                              aria-pressed={true}
+                              className="mt-0.5 w-6 h-6 rounded-lg border-2 bg-success border-success flex items-center justify-center flex-shrink-0"
+                            >
+                              <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                            </button>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium line-through text-muted">{task.title}</p>
+                              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                <span
+                                  className="text-[10px] px-2 py-0.5 rounded-md text-white/80 font-medium"
+                                  style={{ backgroundColor: display.color }}
+                                >
+                                  {display.icon ? `${display.icon} ` : ""}{display.label}
+                                </span>
+                                <span className="text-[10px] text-muted px-2 py-0.5 rounded-md bg-background border border-border/50">
+                                  {task.recurrenceLabel}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                /* Normal list for small completed task sets */
+                <div className="space-y-2 mt-2">
+                  {completedDbTasks.map((task) => {
+                    const display = resolveCategoryDisplay(task.categoryKey);
+                    return (
+                      <motion.div
+                        key={task.id}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="card-elevated p-3 flex items-start gap-3 opacity-50"
+                        style={{ borderRight: `3px solid #10B981` }}
+                      >
+                        <button
+                          onClick={() => toggleDbTask(task.id)}
+                          aria-label={`${t("tasks.undoComplete")}: ${task.title}`}
+                          aria-pressed={true}
+                          className="mt-0.5 w-6 h-6 rounded-lg border-2 bg-success border-success flex items-center justify-center flex-shrink-0"
+                        >
+                          <Check className="w-3.5 h-3.5 text-white" strokeWidth={3} />
+                        </button>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium line-through text-muted">{task.title}</p>
+                          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                            <span
+                              className="text-[10px] px-2 py-0.5 rounded-md text-white/80 font-medium"
+                              style={{ backgroundColor: display.color }}
+                            >
+                              {display.icon ? `${display.icon} ` : ""}{display.label}
+                            </span>
+                            <span className="text-[10px] text-muted px-2 py-0.5 rounded-md bg-background border border-border/50">
+                              {task.recurrenceLabel}
+                            </span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              )
             )}
           </div>
         )}
