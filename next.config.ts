@@ -101,8 +101,13 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(withBundleAnalyzer(nextConfig), {
-  silent: true,
-  org: "eladjak",
-  project: "bayit-beseder",
-});
+const withAnalyzer = withBundleAnalyzer(nextConfig);
+
+// Only wrap with Sentry when auth token is available (skips source map upload in CI without token)
+export default process.env.SENTRY_AUTH_TOKEN
+  ? withSentryConfig(withAnalyzer, {
+      silent: true,
+      org: "eladjak",
+      project: "bayit-beseder",
+    })
+  : withAnalyzer;
