@@ -59,12 +59,63 @@ const jsonLd = {
   },
 };
 
+const faqStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: [
+    {
+      "@type": "Question",
+      name: "האם האפליקציה בחינם לגמרי?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "כן, בית בסדר חינמית לחלוטין. אין תשלום, אין מנוי, אין תכונות פרימיום נסתרות. פשוט נרשמים ומתחילים.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "האם צריך להוריד אפליקציה מהחנות?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "לא! בית בסדר עובדת ישר מהדפדפן. אפשר גם להוסיף לדף הבית (PWA) ולקבל חוויה כמו אפליקציה אמיתית — בלי להוריד כלום.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "איך עובד שיתוף הבית עם הפרטנר/ית?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "אחרי ההרשמה שולחים הזמנה בוואטסאפ בלחיצה אחת. כשהפרטנר/ית מצטרף/ת — הכל מסונכרן בזמן אמת: משימות, קניות, נקודות.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "מה עם פרטיות? המידע שלנו בטוח?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "המידע שלכם מאובטח ב-Supabase עם הצפנה מלאה. אנחנו לא מוכרים מידע ולא מפרסמים. רק אתם ושותפכם רואים את הנתונים.",
+      },
+    },
+    {
+      "@type": "Question",
+      name: "האם זה עובד גם למשפחות עם ילדים?",
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: "כרגע האפליקציה מותאמת לשני משתמשים — אך אנחנו עובדים על תמיכה מלאה במשפחות גדולות עם ילדים. רישום עכשיו מבטיח לכם מקום בגרסה הבאה!",
+      },
+    },
+  ],
+};
+
 export default function LandingPage() {
   return (
     <div className="min-h-dvh bg-background" dir="rtl" lang="he">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
       />
 
       {/* Hero Section */}

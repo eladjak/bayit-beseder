@@ -4,7 +4,7 @@ import { useState, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, ChevronDown, ChevronUp, Trash2, Settings } from "lucide-react";
+import { Plus, X, ChevronDown, ChevronUp, Trash2, Settings, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useShoppingList, CATEGORY_COLORS, SHOPPING_CATEGORY_ICONS } from "@/hooks/useShoppingList";
@@ -12,6 +12,7 @@ import type { ShoppingCategory, ShoppingItem } from "@/hooks/useShoppingList";
 import { useShoppingCategories } from "@/hooks/useShoppingCategories";
 import { ShoppingItemCard } from "@/components/shopping/shopping-item";
 import { CategoryManager } from "@/components/shopping/category-manager";
+import { ShoppingShareSheet } from "@/components/shopping/shopping-share-sheet";
 import { haptic } from "@/lib/haptics";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useProfile } from "@/hooks/useProfile";
@@ -119,6 +120,7 @@ export default function ShoppingPage() {
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
 
   const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [showShareSheet, setShowShareSheet] = useState(false);
 
   // Build icon/color maps from dynamic categories (with fallback to static maps)
   const categoryIconMap = useMemo(() => {
@@ -248,7 +250,12 @@ export default function ShoppingPage() {
             </h1>
             {totalCount > 0 && (
               <div className="mt-2 inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 border border-white/10">
-                <span className="text-xs text-white/90 font-medium">
+                <span
+                  className="text-xs text-white/90 font-medium"
+                  aria-live="polite"
+                  aria-atomic="true"
+                  aria-label={`${checkedCount} מתוך ${totalCount} פריטים בסל`}
+                >
                   {checkedCount}/{totalCount} {t("shopping.inCart")}
                 </span>
               </div>
@@ -269,6 +276,14 @@ export default function ShoppingPage() {
                 <Trash2 className="w-4 h-4" />
               </motion.button>
             )}
+            {/* Share list */}
+            <button
+              onClick={() => { haptic("tap"); setShowShareSheet(true); }}
+              className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-all duration-100 active:scale-[0.90] border border-white/10"
+              aria-label={t("shopping.share.title")}
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
             {/* Category manager */}
             <button
               onClick={() => setShowCategoryManager(true)}
@@ -576,6 +591,13 @@ export default function ShoppingPage() {
           />
         )}
       </AnimatePresence>
+
+      {/* Share Sheet */}
+      <ShoppingShareSheet
+        open={showShareSheet}
+        onClose={() => setShowShareSheet(false)}
+        items={items}
+      />
     </div>
   );
 }

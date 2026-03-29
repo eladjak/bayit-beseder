@@ -116,7 +116,12 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
     <div className="space-y-2">
       <div className="flex items-center justify-between px-1">
         <h2 className="font-semibold text-foreground">{t("dashboard.todayHeader")} 🏠</h2>
-        <span className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-primary/10 text-primary">
+        <span
+          className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-primary/10 text-primary"
+          aria-live="polite"
+          aria-atomic="true"
+          aria-label={`${completed} מתוך ${tasks.length} משימות הושלמו`}
+        >
           {completed}/{tasks.length}
         </span>
       </div>

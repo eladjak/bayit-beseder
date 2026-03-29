@@ -230,7 +230,20 @@
     "tryOtherCategory": "נסו קטגוריה אחרת",
     "addFirstTask": "הוסיפו משימה ראשונה",
     "completedSection": "בוצע",
-    "weDid": "עשינו 💪"
+    "weDid": "עשינו 💪",
+    "photo": {
+      "addPhoto": "הוסף תמונה",
+      "preview": "תצוגה מקדימה",
+      "confirm": "אישור",
+      "ready": "תמונה מוכנה 📷",
+      "attached": "תמונה מצורפת",
+      "uploadFailed": "לא הצלחנו להעלות את התמונה"
+    },
+    "skip": {
+      "skip": "דילוג להיום",
+      "unskip": "ביטול דילוג",
+      "skipped": "דולג"
+    }
   },
   "shopping": {
     "title": "רשימת קניות",
@@ -257,7 +270,16 @@
     "pesachShopping": "🫓 הוסף רשימת קניות לפסח",
     "pesachItemsAdded": "פריטי פסח נוספו לרשימה 🫓",
     "pesachAddError": "שגיאה בהוספת פריטי פסח",
-    "items": "פריטים"
+    "items": "פריטים",
+    "share": {
+      "title": "שיתוף רשימה",
+      "whatsapp": "שיתוף ב-WhatsApp",
+      "native": "שיתוף...",
+      "copy": "העתקה ללוח",
+      "copied": "הרשימה הועתקה ✓",
+      "copyFailed": "לא הצלחנו להעתיק — נסו שוב",
+      "emptyList": "אין פריטים שלא נרכשו לשיתוף"
+    }
   },
   "weekly": {
     "title": "תכנון שבועי",
@@ -526,7 +548,10 @@
     "hideCode": "הסתר קוד",
     "copyCodeLabel": "העתק קוד הזמנה",
     "generateDescription": "צרו קוד הזמנה ושלחו לשותף/ה שלכם כדי להתחיל לנהל את הבית יחד",
-    "generateButton": "יצירת קוד הזמנה"
+    "generateButton": "יצירת קוד הזמנה",
+    "tabLink": "קישור",
+    "tabQR": "QR",
+    "tabWhatsapp": "WhatsApp"
   },
   "voice": {
     "record": "הקלטת קול",
@@ -697,6 +722,35 @@
     "typeHousehold": "בית",
     "typeIndividual": "אישי",
     "completed": "הושלם"
+  },
+  "export": {
+    "title": "ייצוא נתונים",
+    "description": "הורידו את הנתונים שלכם כקובץ CSV (תואם Excel)",
+    "tasks": "ייצא משימות",
+    "completions": "ייצא השלמות",
+    "tasksSuccess": "משימות יוצאו בהצלחה 📥",
+    "completionsSuccess": "השלמות יוצאו בהצלחה 📥",
+    "error": "שגיאה בייצוא — נסו שוב",
+    "loginRequired": "יש להתחבר כדי לייצא נתונים"
+  },
+  "templates": {
+    "title": "תבניות משימות",
+    "subtitle": "הוסיפו סט משימות מוכן מראש",
+    "taskCount": "משימות",
+    "addAll": "הוסף {n} משימות",
+    "adding": "מוסיף...",
+    "addedToast": "נוספו {n} משימות מתבנית {name} 🎉",
+    "addError": "שגיאה בהוספת משימות — נסו שוב",
+    "backToList": "חזרה לרשימה",
+    "taskPreview": "משימות בתבנית:",
+    "minutes": "דק׳"
+  },
+  "qr": {
+    "scanInstruction": "סרקו עם הטלפון כדי להצטרף לבית",
+    "share": "שתף QR",
+    "download": "הורד QR",
+    "shareTitle": "הצטרפו לבית בסדר",
+    "downloaded": "QR הורד בהצלחה 📲"
   },
   "leaderboard": {
     "title": "לוח מנצחים",

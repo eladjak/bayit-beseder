@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Check, Clock, Filter, Plus, Settings, Trash2 } from "lucide-react";
+import { Camera, Check, Clock, Filter, LayoutTemplate, Plus, Settings, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
 import {
@@ -27,7 +27,12 @@ import { useCompletions } from "@/hooks/useCompletions";
 import { useProfile } from "@/hooks/useProfile";
 import { useCategories } from "@/hooks/useCategories";
 import { useTaskCategories } from "@/hooks/useTaskCategories";
+import { useTaskStreaks } from "@/hooks/useTaskStreaks";
+import { useTaskPhoto } from "@/hooks/useTaskPhoto";
+import { TaskPhotoCapture } from "@/components/task-photo-capture";
 import { useTranslation } from "@/hooks/useTranslation";
+import { TaskTemplatePicker } from "@/components/task-template-picker";
+import type { TaskTemplate } from "@/lib/task-templates";
 
 const VoiceInputButton = dynamic(
   () => import("@/components/voice-input-button").then((m) => m.VoiceInputButton),
@@ -51,6 +56,7 @@ export default function TasksPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [showAddForm, setShowAddForm] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskCategory, setNewTaskCategory] = useState("general");
@@ -66,7 +72,49 @@ export default function TasksPage() {
     updateTask,
     refetch: refetchTasks,
   } = useTasks({ realtime: true });
-  const { markComplete, isCompletedToday, refetch: refetchCompletions } = useCompletions({ limit: 500 });
+  const { markComplete, completions, isCompletedToday, refetch: refetchCompletions } = useCompletions({ limit: 500 });
+  const { getStreak } = useTaskStreaks(completions);
+  const { uploadPhoto } = useTaskPhoto();
+  // taskId currently showing the photo capture UI
+  const [photoTaskId, setPhotoTaskId] = useState<string | null>(null);
+  // taskId → pending photo URL (uploading)
+  const [pendingPhotoUrl, setPendingPhotoUrl] = useState<Record<string, string>>({});
+
+  // Skipped recurring tasks: key = `{taskId}-{YYYY-MM-DD}`, stored in localStorage
+  const todayDateStr = new Date().toISOString().slice(0, 10);
+  const [skippedTaskIds, setSkippedTaskIds] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set();
+    const stored = localStorage.getItem("bayit-skipped");
+    if (!stored) return new Set();
+    try {
+      const arr: string[] = JSON.parse(stored);
+      // Keep only today's entries
+      return new Set(arr.filter((k) => k.endsWith(`-${new Date().toISOString().slice(0, 10)}`)));
+    } catch {
+      return new Set();
+    }
+  });
+
+  function isSkippedToday(taskId: string): boolean {
+    return skippedTaskIds.has(`${taskId}-${todayDateStr}`);
+  }
+
+  function toggleSkip(taskId: string) {
+    const key = `${taskId}-${todayDateStr}`;
+    setSkippedTaskIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      if (typeof window !== "undefined") {
+        localStorage.setItem("bayit-skipped", JSON.stringify(Array.from(next)));
+      }
+      return next;
+    });
+  }
+
   const { categories, categoryMap } = useCategories();
   const {
     taskCategories,
@@ -289,12 +337,21 @@ export default function TasksPage() {
           return next;
         });
 
-        const result = await markComplete({ taskId, userId: profile.id, recurring: !!task.recurring });
+        const photoUrl = pendingPhotoUrl[taskId] ?? undefined;
+        const result = await markComplete({ taskId, userId: profile.id, recurring: !!task.recurring, photoUrl });
         setOptimisticCompleted((prev) => {
           const next = new Set(prev);
           next.delete(taskId);
           return next;
         });
+        // Clear pending photo
+        if (photoUrl) {
+          setPendingPhotoUrl((prev) => {
+            const next = { ...prev };
+            delete next[taskId];
+            return next;
+          });
+        }
         if (result) {
           toast.success(t("tasks.taskCompleted"));
         } else {
@@ -302,7 +359,7 @@ export default function TasksPage() {
         }
       }
     },
-    [dbTasks, profile, markComplete, updateTask, optimisticCompleted, optimisticUncompleted, isCompletedToday, refetchCompletions, t]
+    [dbTasks, profile, markComplete, updateTask, optimisticCompleted, optimisticUncompleted, isCompletedToday, refetchCompletions, pendingPhotoUrl, t]
   );
 
   // Add new task to DB
@@ -346,6 +403,30 @@ export default function TasksPage() {
       }
     },
     [deleteTask, t]
+  );
+
+  // Add tasks from a template
+  const handleAddFromTemplate = useCallback(
+    async (template: TaskTemplate) => {
+      if (!profile) throw new Error("not logged in");
+      const todayStr = new Date().toISOString().slice(0, 10);
+
+      for (const templateTask of template.tasks) {
+        const categoryName = CATEGORY_KEY_TO_NAME[templateTask.category] ?? templateTask.category;
+        const category = categories.find((c) => c.name === categoryName);
+        await createTask({
+          title: templateTask.title,
+          category_id: category?.id ?? null,
+          assigned_to: profile.id,
+          status: "pending",
+          due_date: todayStr,
+          points: 10,
+          recurring: templateTask.recurring,
+        });
+      }
+      await refetchTasks();
+    },
+    [profile, categories, createTask, refetchTasks]
   );
 
   // Resolve display label/color/icon for a categoryKey that may be either a
@@ -420,6 +501,16 @@ export default function TasksPage() {
               <Plus className="w-4 h-4" />
               <span>{t("tasks.addTaskShort")}</span>
             </button>
+            {hasDbTasks && (
+              <button
+                onClick={() => setShowTemplatePicker(true)}
+                className="p-2 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white/70 transition-colors border border-white/10"
+                aria-label={t("templates.title")}
+                title={t("templates.title")}
+              >
+                <LayoutTemplate className="w-4 h-4" />
+              </button>
+            )}
             <button
               onClick={() => setShowFilters((prev) => !prev)}
               className="relative p-2 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white/70 transition-colors border border-white/10"
@@ -693,7 +784,7 @@ export default function TasksPage() {
                         </div>
                         <button
                           onClick={() => handleDeleteTask(task.id)}
-                          className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors"
+                          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                           aria-label={t("tasks.deleteTask")}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -709,6 +800,8 @@ export default function TasksPage() {
             <AnimatePresence mode="popLayout">
               {pendingDbTasks.map((task) => {
                 const display = resolveCategoryDisplay(task.categoryKey);
+                const isRecurring = task.recurrenceLabel === t("common.recurring");
+                const skipped = isRecurring && isSkippedToday(task.id);
                 return (
                   <motion.div
                     key={task.id}
@@ -718,7 +811,7 @@ export default function TasksPage() {
                     whileTap={{ scale: 0.99 }}
                     className={`card-elevated p-3.5 flex items-start gap-3 relative overflow-hidden hover:shadow-md transition-shadow duration-150 ${
                       task.isOverdue ? "ring-1 ring-red-500/20" : ""
-                    }`}
+                    } ${skipped ? "opacity-50" : ""}`}
                     style={{
                       borderInlineStart: `3px solid ${task.isOverdue ? "#EF4444" : display.color}`,
                     }}
@@ -760,15 +853,99 @@ export default function TasksPage() {
                           <Clock className="w-3 h-3" />
                           {task.estimated_minutes} {t("common.minutes")}
                         </span>
+                        {/* Streak badge for recurring tasks */}
+                        {isRecurring && (() => {
+                          const streak = getStreak(task.id);
+                          return streak >= 2 ? (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200/50 dark:border-orange-700/30">
+                              🔥{streak}
+                            </span>
+                          ) : null;
+                        })()}
+                        {/* Skipped badge */}
+                        {skipped && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted/20 text-muted font-medium line-through border border-border/50">
+                            {t("tasks.skip.skipped")}
+                          </span>
+                        )}
                       </div>
+                      {/* Photo capture UI */}
+                      <AnimatePresence>
+                        {photoTaskId === task.id && (
+                          <motion.div
+                            key="photo-capture"
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="mt-2 overflow-hidden"
+                          >
+                            <TaskPhotoCapture
+                              onPhotoSelected={async (file) => {
+                                const url = await uploadPhoto(file, task.id);
+                                if (url) {
+                                  setPendingPhotoUrl((prev) => ({ ...prev, [task.id]: url }));
+                                  toast.success(t("tasks.photo.ready"));
+                                } else {
+                                  toast.error(t("tasks.photo.uploadFailed"));
+                                }
+                                setPhotoTaskId(null);
+                              }}
+                              onCancel={() => setPhotoTaskId(null)}
+                            />
+                          </motion.div>
+                        )}
+                        {pendingPhotoUrl[task.id] && photoTaskId !== task.id && (
+                          <motion.div
+                            key="photo-badge"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="mt-1.5 text-[10px] text-primary font-medium flex items-center gap-1"
+                          >
+                            📷 {t("tasks.photo.attached")}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
-                    <button
-                      onClick={() => handleDeleteTask(task.id)}
-                      className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors"
-                      aria-label={t("tasks.deleteTask")}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {/* Skip button (recurring only) */}
+                      {isRecurring && (
+                        <button
+                          onClick={() => {
+                            toggleSkip(task.id);
+                            haptic("tap");
+                          }}
+                          className={`p-1.5 rounded-lg transition-colors text-[10px] font-medium ${
+                            skipped
+                              ? "text-muted bg-muted/10 hover:bg-muted/20"
+                              : "text-muted/50 hover:text-muted hover:bg-muted/10"
+                          }`}
+                          aria-label={skipped ? t("tasks.skip.unskip") : t("tasks.skip.skip")}
+                          title={skipped ? t("tasks.skip.unskip") : t("tasks.skip.skip")}
+                        >
+                          ⏭
+                        </button>
+                      )}
+                      {/* Camera button */}
+                      <button
+                        onClick={() => setPhotoTaskId((prev) => prev === task.id ? null : task.id)}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          pendingPhotoUrl[task.id]
+                            ? "text-primary bg-primary/10"
+                            : "text-muted/50 hover:text-primary hover:bg-primary/5"
+                        }`}
+                        aria-label={t("tasks.photo.addPhoto")}
+                        aria-pressed={photoTaskId === task.id}
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTask(task.id)}
+                        className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors"
+                        aria-label={t("tasks.deleteTask")}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </motion.div>
                 );
               })}
@@ -987,6 +1164,13 @@ export default function TasksPage() {
           />
         )}
       </AnimatePresence>
+
+      {/* Task Template Picker */}
+      <TaskTemplatePicker
+        open={showTemplatePicker}
+        onClose={() => setShowTemplatePicker(false)}
+        onAddTasks={handleAddFromTemplate}
+      />
     </div>
   );
 }

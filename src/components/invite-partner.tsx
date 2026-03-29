@@ -14,12 +14,14 @@ import {
   Send,
   Users,
   Home,
+  QrCode,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase";
+import { QRInvite } from "@/components/qr-invite";
 
 interface InviteData {
   inviteCode: string;
@@ -43,6 +45,7 @@ export function InvitePartner() {
   const [linkCopied, setLinkCopied] = useState(false);
   const [showCode, setShowCode] = useState(false);
   const [codeCopied, setCodeCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<"link" | "qr" | "whatsapp">("link");
 
   // Fetch partner info if profile has a partner_id
   useEffect(() => {
@@ -192,61 +195,115 @@ export function InvitePartner() {
               <p>{t("invite.instruction3")}</p>
             </div>
 
-            {/* Primary: WhatsApp share (full width, prominent) */}
-            <button
-              onClick={handleWhatsAppShare}
-              className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition-opacity active:scale-[0.98] transition-transform shadow-md shadow-[#25D366]/20"
-            >
-              <MessageCircle className="w-5 h-5" />
-              {t("invite.shareWhatsapp")}
-            </button>
-
-            {/* Secondary: Copy link */}
-            <button
-              onClick={handleCopyLink}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-border bg-background text-foreground text-sm font-medium hover:bg-surface-hover transition-colors active:scale-[0.98] transition-transform"
-            >
-              {linkCopied ? (
-                <Check className="w-4 h-4 text-success" />
-              ) : (
-                <LinkIcon className="w-4 h-4 text-muted" />
-              )}
-              {linkCopied ? t("invite.linkCopied") : t("invite.copyLink")}
-            </button>
-
-            {/* Tertiary: Show code (collapsed) */}
-            <button
-              onClick={() => setShowCode((prev) => !prev)}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs text-muted hover:text-foreground transition-colors"
-            >
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showCode ? "rotate-180" : ""}`} />
-              {showCode ? t("invite.hideCode") : t("invite.showCode")}
-            </button>
-
-            <AnimatePresence>
-              {showCode && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  className="overflow-hidden"
+            {/* Tab switcher */}
+            <div className="flex rounded-xl border border-border overflow-hidden">
+              {(
+                [
+                  { id: "link", label: t("invite.tabLink"), icon: <LinkIcon className="w-3.5 h-3.5" /> },
+                  { id: "qr",   label: t("invite.tabQR"),   icon: <QrCode className="w-3.5 h-3.5" /> },
+                  { id: "whatsapp", label: t("invite.tabWhatsapp"), icon: <MessageCircle className="w-3.5 h-3.5" /> },
+                ] as const
+              ).map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex-1 flex items-center justify-center gap-1 py-2 text-xs font-medium transition-colors ${
+                    activeTab === tab.id
+                      ? "bg-primary text-white"
+                      : "bg-background text-muted hover:bg-surface-hover hover:text-foreground"
+                  }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <code className="flex-1 bg-background border border-border rounded-lg px-3 py-2.5 text-base font-mono font-bold tracking-widest text-primary text-center">
-                      {inviteData.inviteCode}
-                    </code>
-                    <button
-                      onClick={handleCopyCode}
-                      className="p-2.5 rounded-lg bg-background border border-border hover:bg-surface-hover transition-colors"
-                      aria-label={t("invite.copyCodeLabel")}
-                    >
-                      {codeCopied ? (
-                        <Check className="w-4 h-4 text-success" />
-                      ) : (
-                        <Copy className="w-4 h-4 text-muted" />
-                      )}
-                    </button>
-                  </div>
+                  {tab.icon}
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Tab content */}
+            <AnimatePresence mode="wait">
+              {activeTab === "link" && (
+                <motion.div
+                  key="link"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  className="space-y-3"
+                >
+                  <button
+                    onClick={handleCopyLink}
+                    className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-border bg-background text-foreground text-sm font-medium hover:bg-surface-hover transition-colors active:scale-[0.98]"
+                  >
+                    {linkCopied ? (
+                      <Check className="w-4 h-4 text-success" />
+                    ) : (
+                      <LinkIcon className="w-4 h-4 text-muted" />
+                    )}
+                    {linkCopied ? t("invite.linkCopied") : t("invite.copyLink")}
+                  </button>
+
+                  {/* Show invite code */}
+                  <button
+                    onClick={() => setShowCode((prev) => !prev)}
+                    className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs text-muted hover:text-foreground transition-colors"
+                  >
+                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showCode ? "rotate-180" : ""}`} />
+                    {showCode ? t("invite.hideCode") : t("invite.showCode")}
+                  </button>
+                  <AnimatePresence>
+                    {showCode && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="flex items-center gap-2">
+                          <code className="flex-1 bg-background border border-border rounded-lg px-3 py-2.5 text-base font-mono font-bold tracking-widest text-primary text-center">
+                            {inviteData.inviteCode}
+                          </code>
+                          <button
+                            onClick={handleCopyCode}
+                            className="p-2.5 rounded-lg bg-background border border-border hover:bg-surface-hover transition-colors"
+                            aria-label={t("invite.copyCodeLabel")}
+                          >
+                            {codeCopied ? (
+                              <Check className="w-4 h-4 text-success" />
+                            ) : (
+                              <Copy className="w-4 h-4 text-muted" />
+                            )}
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )}
+
+              {activeTab === "qr" && (
+                <motion.div
+                  key="qr"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                >
+                  <QRInvite inviteCode={inviteData.inviteCode} inviteLink={inviteData.link} />
+                </motion.div>
+              )}
+
+              {activeTab === "whatsapp" && (
+                <motion.div
+                  key="whatsapp"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                >
+                  <button
+                    onClick={handleWhatsAppShare}
+                    className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-xl bg-[#25D366] text-white text-sm font-bold hover:opacity-90 transition-opacity active:scale-[0.98] shadow-md shadow-[#25D366]/20"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    {t("invite.shareWhatsapp")}
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>

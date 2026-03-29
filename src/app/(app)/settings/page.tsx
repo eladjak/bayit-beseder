@@ -29,7 +29,8 @@ import { MembersSection } from "@/components/settings/members-section";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
 import { useTranslation } from "@/hooks/useTranslation";
-import { LayoutGrid, AlertTriangle, Keyboard, Download } from "lucide-react";
+import { exportTasksToCSV, exportCompletionsToCSV, downloadCSV, type ExportTask, type ExportCompletion } from "@/lib/export";
+import { LayoutGrid, AlertTriangle, Keyboard, Download, FileDown } from "lucide-react";
 import Link from "next/link";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
 
@@ -117,6 +118,66 @@ export default function SettingsPage() {
   // PWA install
   const { canInstall, isInstalled, promptInstall } = usePWAInstall();
   const [deactivatingSeasonal, setDeactivatingSeasonal] = useState(false);
+
+  // Export state
+  const [exportingTasks, setExportingTasks] = useState(false);
+  const [exportingCompletions, setExportingCompletions] = useState(false);
+
+  const handleExportTasks = async () => {
+    if (!user) { toast.error(t("export.loginRequired")); return; }
+    setExportingTasks(true);
+    try {
+      const supabase = (await import("@/lib/supabase")).createClient();
+      const { data: tasks } = await supabase.from("tasks").select("id,title,category_id,recurring,status,due_date,created_at");
+      const exportData: ExportTask[] = (tasks ?? []).map((task) => ({
+        id: task.id,
+        title: task.title,
+        category: null,
+        recurring: task.recurring,
+        status: task.status,
+        due_date: task.due_date,
+        created_at: task.created_at,
+      }));
+      const csv = exportTasksToCSV(exportData);
+      downloadCSV(csv, "tasks.csv");
+      toast.success(t("export.tasksSuccess"));
+    } catch {
+      toast.error(t("export.error"));
+    } finally {
+      setExportingTasks(false);
+    }
+  };
+
+  const handleExportCompletions = async () => {
+    if (!user) { toast.error(t("export.loginRequired")); return; }
+    setExportingCompletions(true);
+    try {
+      const supabase = (await import("@/lib/supabase")).createClient();
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      const { data: completions } = await supabase
+        .from("task_completions")
+        .select("task_id, completed_at, tasks(title), profiles(display_name)")
+        .gte("completed_at", startOfMonth.toISOString())
+        .order("completed_at", { ascending: false });
+      const exportData: ExportCompletion[] = (completions ?? []).map((c: Record<string, unknown>) => ({
+        task_id: c.task_id as string,
+        task_title: (c.tasks as Record<string, string> | null)?.title,
+        completed_at: c.completed_at as string,
+        user_name: (c.profiles as Record<string, string> | null)?.display_name,
+      }));
+      const now = new Date();
+      const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      const csv = exportCompletionsToCSV(exportData);
+      downloadCSV(csv, `completions-${monthStr}.csv`);
+      toast.success(t("export.completionsSuccess"));
+    } catch {
+      toast.error(t("export.error"));
+    } finally {
+      setExportingCompletions(false);
+    }
+  };
 
   // WhatsApp state
   const [whatsappEnabled, setWhatsappEnabled] = useState(false);
@@ -557,6 +618,41 @@ export default function SettingsPage() {
             </button>
           </div>
         )}
+
+        {/* Data Export */}
+        <div className="card-elevated p-4 space-y-3">
+          <h2 className="font-semibold text-foreground text-sm flex items-center gap-2">
+            <FileDown className="w-4 h-4" />
+            {t("export.title")}
+          </h2>
+          <p className="text-xs text-muted">{t("export.description")}</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={() => { void handleExportTasks(); }}
+              disabled={exportingTasks || isDemo}
+              className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border bg-background hover:bg-surface-hover transition-colors text-sm font-medium text-foreground disabled:opacity-40 active:scale-[0.97]"
+            >
+              {exportingTasks ? (
+                <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 text-muted" />
+              )}
+              {t("export.tasks")}
+            </button>
+            <button
+              onClick={() => { void handleExportCompletions(); }}
+              disabled={exportingCompletions || isDemo}
+              className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-border bg-background hover:bg-surface-hover transition-colors text-sm font-medium text-foreground disabled:opacity-40 active:scale-[0.97]"
+            >
+              {exportingCompletions ? (
+                <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 text-muted" />
+              )}
+              {t("export.completions")}
+            </button>
+          </div>
+        </div>
 
         {/* Keyboard Shortcuts */}
         <div className="card-elevated p-4">

@@ -43,11 +43,18 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh bg-background lg:bg-muted/30">
+      {/* Skip to main content — visible on keyboard focus, RTL-aware */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:right-4 focus:z-[100] focus:bg-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg focus:outline-none"
+      >
+        דלג לתוכן הראשי
+      </a>
       <NotificationBanner />
       <PWAInstallBanner />
       <ServiceWorkerRegistrar />
       <ServiceWorkerUpdateToast />
-      <main className="pb-safe max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto lg:bg-background lg:min-h-dvh lg:shadow-xl lg:border-x lg:border-border/50">
+      <main id="main-content" className="pb-safe max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto lg:bg-background lg:min-h-dvh lg:shadow-xl lg:border-x lg:border-border/50">
         <PageTransition>{children}</PageTransition>
       </main>
       <BottomNav />

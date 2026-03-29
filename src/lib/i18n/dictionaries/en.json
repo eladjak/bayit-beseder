@@ -230,7 +230,20 @@
     "tryOtherCategory": "Try another category",
     "addFirstTask": "Add your first task",
     "completedSection": "Done",
-    "weDid": "Done 💪"
+    "weDid": "Done 💪",
+    "photo": {
+      "addPhoto": "Add photo",
+      "preview": "Preview",
+      "confirm": "Confirm",
+      "ready": "Photo ready 📷",
+      "attached": "Photo attached",
+      "uploadFailed": "Couldn't upload photo — try again"
+    },
+    "skip": {
+      "skip": "Skip today",
+      "unskip": "Undo skip",
+      "skipped": "Skipped"
+    }
   },
   "shopping": {
     "title": "Shopping List",
@@ -257,7 +270,16 @@
     "pesachShopping": "🫓 Add Pesach shopping list",
     "pesachItemsAdded": "Pesach items added to list 🫓",
     "pesachAddError": "Error adding Pesach items",
-    "items": "items"
+    "items": "items",
+    "share": {
+      "title": "Share list",
+      "whatsapp": "Share via WhatsApp",
+      "native": "Share...",
+      "copy": "Copy to clipboard",
+      "copied": "List copied ✓",
+      "copyFailed": "Couldn't copy — try again",
+      "emptyList": "No unchecked items to share"
+    }
   },
   "weekly": {
     "title": "Weekly Plan",
@@ -526,7 +548,10 @@
     "hideCode": "Hide code",
     "copyCodeLabel": "Copy invite code",
     "generateDescription": "Create an invite code and send it to your partner to start managing the home together",
-    "generateButton": "Create invite code"
+    "generateButton": "Create invite code",
+    "tabLink": "Link",
+    "tabQR": "QR",
+    "tabWhatsapp": "WhatsApp"
   },
   "voice": {
     "record": "Record voice",
@@ -697,6 +722,35 @@
     "typeHousehold": "Household",
     "typeIndividual": "Individual",
     "completed": "Completed"
+  },
+  "export": {
+    "title": "Export Data",
+    "description": "Download your data as a CSV file (Excel compatible)",
+    "tasks": "Export Tasks",
+    "completions": "Export Completions",
+    "tasksSuccess": "Tasks exported successfully 📥",
+    "completionsSuccess": "Completions exported successfully 📥",
+    "error": "Export error — try again",
+    "loginRequired": "Login required to export data"
+  },
+  "templates": {
+    "title": "Task Templates",
+    "subtitle": "Add a pre-built set of tasks",
+    "taskCount": "tasks",
+    "addAll": "Add {n} tasks",
+    "adding": "Adding...",
+    "addedToast": "Added {n} tasks from template {name} 🎉",
+    "addError": "Error adding tasks — try again",
+    "backToList": "Back to list",
+    "taskPreview": "Tasks in template:",
+    "minutes": "min"
+  },
+  "qr": {
+    "scanInstruction": "Scan with your phone to join the household",
+    "share": "Share QR",
+    "download": "Download QR",
+    "shareTitle": "Join Bayit BeSeder",
+    "downloaded": "QR downloaded successfully 📲"
   },
   "leaderboard": {
     "title": "Leaderboard",

@@ -1083,12 +1083,12 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
         {isRealData && (
           <button
             onClick={handleAddButtonClick}
-            className={`flex-shrink-0 ms-2 me-3 w-7 h-7 rounded-full flex items-center justify-center transition-colors ${
+            aria-label="הוסף משימה ליום זה"
+            className={`flex-shrink-0 ms-2 me-3 w-11 h-11 rounded-full flex items-center justify-center transition-colors ${
               showAddForm
                 ? "bg-primary text-white"
                 : "bg-border/30 text-muted hover:bg-primary/10 hover:text-primary"
             }`}
-            title="הוסף משימה ליום זה"
           >
             <Plus className="w-4 h-4" />
           </button>
