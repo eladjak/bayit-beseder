@@ -21,6 +21,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase";
+import { trackEvent } from "@/lib/analytics";
 
 // ShoppingCategory is now an open string type to support custom categories
 export type ShoppingCategory = string;
@@ -260,6 +261,7 @@ export function useShoppingList(): UseShoppingListReturn {
           saveToLocalStorage(updated);
           return updated;
         });
+        trackEvent("shopping_add");
         return;
       }
 
@@ -297,6 +299,7 @@ export function useShoppingList(): UseShoppingListReturn {
           unit: unit ?? null,
           added_by: user.id,
         });
+        trackEvent("shopping_add");
         // Realtime subscription will handle the state update
       } catch {
         // If Supabase insert fails, add locally as fallback

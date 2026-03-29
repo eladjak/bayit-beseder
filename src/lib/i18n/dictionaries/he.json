@@ -357,7 +357,23 @@
     "last30Days": "30 יום אחרונים",
     "completionsCount": "השלמות",
     "dayLabel": "יום",
-    "tasksLabel": "משימות"
+    "tasksLabel": "משימות",
+    "advancedStats": "סטטיסטיקות מתקדמות",
+    "weeklyTrendTitle": "מגמת השלמות — 4 שבועות",
+    "myCompletions": "אני",
+    "householdAvg": "ממוצע בית",
+    "activityHeatmap": "מפת פעילות — 28 ימים",
+    "personalRecordsTitle": "שיאים אישיים",
+    "achievementsTitle": "הישגים ותגים",
+    "records": {
+      "mostProductiveDay": "היום הכי פרודוקטיבי",
+      "tasksOnDay": "משימות",
+      "longestStreak": "רצף הכי ארוך",
+      "days": "ימים",
+      "favoriteCategory": "קטגוריה אהובה",
+      "timeSaved": "זמן שנחסך",
+      "totalCompletions": "השלמות סה״כ"
+    }
   },
   "auth": {
     "welcome": "ברוכים הבאים לבית בסדר",
@@ -477,6 +493,13 @@
     "message": "אבל אל דאגה — הבית בסדר!",
     "toHome": "לדף הבית",
     "toDashboard": "לדשבורד"
+  },
+  "errorPage": {
+    "title": "משהו השתבש",
+    "subtitle": "אירעה שגיאה לא צפויה. אנחנו מצטערים על אי הנוחות.",
+    "tryAgain": "נסו שוב",
+    "toHome": "לדף הבית",
+    "errorCode": "קוד שגיאה"
   },
   "invite": {
     "title": "הזמן/י שותף/ה",

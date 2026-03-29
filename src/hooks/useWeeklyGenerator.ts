@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { trackEvent } from "@/lib/analytics";
 import {
   generateWeekPlan,
   moveTaskInPlan,
@@ -160,6 +161,7 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
       }
 
       setState("done");
+      trackEvent("weekly_generated");
       return { created, errors };
     },
     [plan]

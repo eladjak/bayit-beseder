@@ -109,6 +109,13 @@ export default function RootLayout({
     <html lang="he" dir="rtl">
       <head>
         <ThemeScript />
+        {process.env.NODE_ENV === "production" && (
+          <script
+            defer
+            data-domain="bayitbeseder.com"
+            src="https://plausible.io/js/script.js"
+          />
+        )}
       </head>
       <body className={`${heebo.variable} font-sans antialiased`}>
         <ThemeProvider>

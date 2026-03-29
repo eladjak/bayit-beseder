@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import type { Locale } from "@/lib/i18n";
+import { trackEvent } from "@/lib/analytics";
 
 const STORAGE_KEY = "bayit-beseder-language";
 
@@ -36,6 +37,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
     localStorage.setItem(STORAGE_KEY, next);
+    trackEvent("language_switch", { lang: next });
   }, []);
 
   return (

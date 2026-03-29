@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSupabase } from "@/components/SupabaseProvider";
+import { trackEvent } from "@/lib/analytics";
 import type {
   TaskCompletionRow,
   TaskCompletionInsert,
@@ -173,6 +174,7 @@ export function useCompletions(
         }
 
         setCompletions((prev) => [data, ...prev]);
+        trackEvent("task_complete");
         return data;
       } catch (err) {
         console.error("Unexpected error in markComplete:", err);

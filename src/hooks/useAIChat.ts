@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -120,6 +121,8 @@ export function useAIChat(): UseAIChatResult {
     (text: string) => {
       const trimmed = text.trim();
       if (!trimmed) return;
+
+      trackEvent("ai_chat");
 
       // Add user message immediately
       const userMsg: ChatMessage = {

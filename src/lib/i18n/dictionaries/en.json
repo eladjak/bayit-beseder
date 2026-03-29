@@ -357,7 +357,23 @@
     "last30Days": "Last 30 days",
     "completionsCount": "completions",
     "dayLabel": "Day",
-    "tasksLabel": "tasks"
+    "tasksLabel": "tasks",
+    "advancedStats": "Advanced Statistics",
+    "weeklyTrendTitle": "Completion Trend — 4 Weeks",
+    "myCompletions": "Me",
+    "householdAvg": "Household avg",
+    "activityHeatmap": "Activity Map — 28 Days",
+    "personalRecordsTitle": "Personal Records",
+    "achievementsTitle": "Achievements & Badges",
+    "records": {
+      "mostProductiveDay": "Most productive day",
+      "tasksOnDay": "tasks",
+      "longestStreak": "Longest streak",
+      "days": "days",
+      "favoriteCategory": "Favorite category",
+      "timeSaved": "Time saved",
+      "totalCompletions": "total completions"
+    }
   },
   "auth": {
     "welcome": "Welcome to Bayit BeSeder",
@@ -477,6 +493,13 @@
     "message": "But don't worry — the house is fine!",
     "toHome": "Home page",
     "toDashboard": "Dashboard"
+  },
+  "errorPage": {
+    "title": "Something went wrong",
+    "subtitle": "An unexpected error occurred. We're sorry for the inconvenience.",
+    "tryAgain": "Try again",
+    "toHome": "Home page",
+    "errorCode": "Error code"
   },
   "invite": {
     "title": "Invite a partner",

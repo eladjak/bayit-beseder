@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
-import { Trophy, History, TrendingUp, Users } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Trophy, History, TrendingUp, Users, ChevronDown } from "lucide-react";
 
 import { ACHIEVEMENTS } from "@/lib/achievements";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -37,6 +37,7 @@ const WeeklyShareCard = dynamic(
 );
 import { useTranslation } from "@/hooks/useTranslation";
 import { StatCardSkeleton, RingSkeleton } from "@/components/skeleton";
+import { useAdvancedStats } from "@/hooks/useAdvancedStats";
 
 // Recharts is ~200 KB — lazy-load the two chart panels independently
 const WeeklyBarChart = dynamic(
@@ -52,6 +53,30 @@ const CategoryPieChart = dynamic(
   {
     ssr: false,
     loading: () => <div className="h-36 bg-muted/30 rounded-xl animate-pulse" />,
+  }
+);
+
+const WeeklyTrendChart = dynamic(
+  () => import("@/components/stats/weekly-trend-chart").then((m) => m.WeeklyTrendChart),
+  {
+    ssr: false,
+    loading: () => <div className="h-52 bg-muted/30 rounded-xl animate-pulse" />,
+  }
+);
+
+const ActivityHeatmap = dynamic(
+  () => import("@/components/stats/activity-heatmap").then((m) => m.ActivityHeatmap),
+  {
+    ssr: false,
+    loading: () => <div className="h-32 bg-muted/30 rounded-xl animate-pulse" />,
+  }
+);
+
+const PersonalRecordsSection = dynamic(
+  () => import("@/components/stats/personal-records").then((m) => m.PersonalRecordsSection),
+  {
+    ssr: false,
+    loading: () => <div className="h-32 bg-muted/30 rounded-xl animate-pulse" />,
   }
 );
 
@@ -377,6 +402,7 @@ export default function StatsPage() {
   const { partner } = usePartner(profile?.partner_id, today);
   const { members: householdMembers } = useHouseholdMembers(profile?.household_id ?? null, today);
   const { dbUnlockedCodes, hasDbData: hasAchievementsDbData } = useUserAchievements();
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   // Build category_id -> key mapping
   const categoryIdToKey = useMemo(() => {
@@ -388,6 +414,15 @@ export default function StatsPage() {
   }, [categoryMap]);
 
   const hasDbData = tasks.length > 0 || completions.length > 0;
+
+  // Advanced stats hook
+  const { weeklyTrend, categoryDistribution, heatmapData, personalRecords } = useAdvancedStats({
+    completions,
+    tasks,
+    categoryIdToKey,
+    today,
+    userId: profile?.id,
+  });
 
   // Compute weekly trend from real data (falls back to mock)
   const weeklyData = useMemo(() => {
@@ -687,6 +722,76 @@ export default function StatsPage() {
           })}
         </div>
       </motion.div>
+
+      {/* ── Advanced Statistics Accordion ─────────────────────────── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.7 }}
+      >
+        {/* Accordion header */}
+        <button
+          type="button"
+          onClick={() => setAdvancedOpen((v) => !v)}
+          className="w-full card-elevated p-4 flex items-center justify-between active:scale-[0.99] transition-transform"
+          aria-expanded={advancedOpen}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-base">📊</span>
+            <h2 className="font-semibold text-sm">{t("stats.advancedStats")}</h2>
+          </div>
+          <motion.div
+            animate={{ rotate: advancedOpen ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ChevronDown className="w-4 h-4 text-muted" />
+          </motion.div>
+        </button>
+
+        {/* Accordion content */}
+        <AnimatePresence initial={false}>
+          {advancedOpen && (
+            <motion.div
+              key="advanced-stats"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="overflow-hidden space-y-4 mt-4"
+            >
+              {/* Weekly Completion Trend — Line chart */}
+              <div className="card-elevated p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-sm">📈 {t("stats.weeklyTrendTitle")}</h3>
+                  {hasDbData && (
+                    <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">
+                      {t("stats.ourData")}
+                    </span>
+                  )}
+                </div>
+                <WeeklyTrendChart
+                  data={weeklyTrend}
+                  myName={profile?.name ?? t("stats.myCompletions")}
+                  avgLabel={t("stats.householdAvg")}
+                />
+              </div>
+
+              {/* Activity Heatmap */}
+              <div className="card-elevated p-4">
+                <h3 className="font-semibold text-sm mb-3">🗺️ {t("stats.activityHeatmap")}</h3>
+                <ActivityHeatmap data={heatmapData} />
+              </div>
+
+              {/* Personal Records */}
+              <div className="card-elevated p-4">
+                <h3 className="font-semibold text-sm mb-3">🏅 {t("stats.personalRecordsTitle")}</h3>
+                <PersonalRecordsSection records={personalRecords} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
       </div>
     </div>
   );

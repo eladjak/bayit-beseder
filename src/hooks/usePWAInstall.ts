@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -59,6 +60,7 @@ export function usePWAInstall() {
     setDeferredPrompt(null);
     if (outcome === "accepted") {
       setIsInstalled(true);
+      trackEvent("pwa_install");
       return true;
     }
     return false;

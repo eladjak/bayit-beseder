@@ -8,6 +8,7 @@ import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles } from "lucide-react";
 import { signIn, signInWithGoogle, resetPassword } from "@/lib/auth";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
+import { trackEvent } from "@/lib/analytics";
 
 export default function LoginPage() {
   return (
@@ -61,6 +62,7 @@ function LoginContent() {
       return;
     }
 
+    trackEvent("login", { method: "email" });
     router.push(getPostLoginRedirect());
   }
 
@@ -76,6 +78,8 @@ function LoginContent() {
     if (result.error) {
       toast.error(result.error);
       setGoogleLoading(false);
+    } else {
+      trackEvent("login", { method: "google" });
     }
   }
 
