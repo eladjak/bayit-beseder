@@ -6,9 +6,30 @@
 ## Domain: bayitbeseder.com (Namecheap → Cloudflare DNS → Vercel)
 
 ## Current State
-App is fully functional with: Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input (5 locations), Gemini AI chat, full i18n (650+ keys, 12 pages + 30+ components), beta feedback CTAs, list virtualization, page transitions, SW v5, zone wizard D&D step, multi-user members management, Upstash Redis rate limiting, WhatsApp reply-to-complete. Vercel auto-deploys from master. 178 files, 20K+ lines of code.
+App is fully functional with: Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input (5 locations), Gemini AI chat, full i18n (700+ keys, 12 pages + 30+ components), beta feedback CTAs, list virtualization, page transitions, SW v5, zone wizard D&D step, multi-user members management, Upstash Redis rate limiting, WhatsApp reply-to-complete, push notifications, Sentry error monitoring, Plausible analytics, 24 achievements, advanced stats (trend/heatmap/records), Playwright E2E (14 tests), calendar auto-sync cron. Vercel auto-deploys from master. 190+ files, 22K+ lines of code.
 
 ## Recent Work
+
+### Iteration: 2026-03-29 (cont.) — Push, Monitoring, Achievements, Stats, E2E
+
+**Commit 95**: Zone wizard + multi-user UI + app facelift (see above)
+
+**Commit 96**: Upstash Redis rate limiting (see above)
+
+**Commit 97**: Vercel bun install fix
+
+**Commit 98**: Push notifications, Sentry, Plausible, achievements, stats, E2E, error pages
+- **Push Notifications**: usePushNotifications hook, toggle component, VAPID keys. Calendar auto-sync cron (Sundays 6AM)
+- **Sentry**: client/server/edge configs, global-error.tsx RTL, withSentryConfig wrapper
+- **Plausible Analytics**: privacy-first script tag + trackEvent() in 7 hooks (login, task_complete, shopping_add, weekly_generated, ai_chat, pwa_install, language_switch)
+- **Achievements**: expanded 15→24 across 6 categories (consistency, collaboration, mastery, milestones)
+- **Advanced Stats**: weekly trend LineChart, activity heatmap (4×7 grid), personal records cards — all lazy-loaded
+- **E2E Tests**: Playwright setup, 14 tests across 4 spec files (landing, auth, static, navigation), mobile+desktop
+- **Error Pages**: improved not-found.tsx (illustration + 404 badge), error.tsx (dev logging + Hebrew UI)
+- **i18n**: 40+ new keys (stats, error pages, achievements)
+
+**Session totals**: 4 commits, 59 files changed, ~3,330 lines added, 7 parallel agents used
+**Codebase**: 190+ files, 22,000+ lines, 24 achievements, 14 E2E tests, 84 unit tests
 
 ### Iteration: 2026-03-29 — Zone Wizard + Multi-User UI + Facelift + Redis
 
