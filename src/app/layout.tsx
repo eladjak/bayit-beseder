@@ -119,8 +119,7 @@ export default function RootLayout({
         {process.env.NODE_ENV === "production" && (
           <script
             defer
-            data-domain="bayitbeseder.com"
-            src="https://plausible.io/js/script.js"
+            src="https://plausible.io/js/pa-NZ0Fcei1zpOAEbuBVEy5g.js"
           />
         )}
       </head>
