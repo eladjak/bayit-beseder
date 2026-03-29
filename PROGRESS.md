@@ -6,7 +6,7 @@
 ## Domain: bayitbeseder.com (Namecheap → Cloudflare DNS → Vercel)
 
 ## Current State
-App is fully functional with: Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input (5 locations), Gemini AI chat, full i18n (800+ keys), beta feedback CTAs, list virtualization, page transitions, SW v5, zone wizard D&D, multi-user members, Upstash Redis rate limiting, WhatsApp reply-to-complete, push notifications, Sentry error monitoring, Plausible analytics, 24 achievements, 14 weekly challenges, leaderboard, advanced stats, Playwright E2E (14 tests), 204 unit tests, calendar auto-sync cron, offline queue, Web Share API, keyboard shortcuts, bundle analyzer. Vercel auto-deploys from master. 200+ files, 25K+ lines of code.
+App is fully functional with: Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input (5 locations), Gemini AI chat, full i18n (900+ keys), beta feedback CTAs, list virtualization, page transitions, SW v5, zone wizard D&D, multi-user members, Upstash Redis rate limiting, WhatsApp reply-to-complete, push notifications, Sentry error monitoring, Plausible analytics, 24 achievements, 14 weekly challenges, leaderboard, advanced stats, Playwright E2E (14 tests), 158 unit tests, calendar auto-sync cron, offline queue, Web Share API, keyboard shortcuts, bundle analyzer, CSV data export, 5 task templates, QR code invite, shopping list sharing, task photo capture, streak badges, skip tasks, sitemap.ts, FAQ structured data, per-page metadata. Vercel auto-deploys from master. 220+ files, 27K+ lines of code.
 
 ## Recent Work
 
