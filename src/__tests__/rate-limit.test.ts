@@ -11,75 +11,75 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 // ============================================
 
 describe("rateLimit — basic behavior", () => {
-  it("allows the first request", () => {
+  it("allows the first request", async () => {
     const limiter = rateLimit({ windowMs: 60_000, max: 5 });
-    const result = limiter.check("ip-1");
+    const result = await limiter.check("ip-1");
     expect(result.success).toBe(true);
   });
 
-  it("returns correct limit value", () => {
+  it("returns correct limit value", async () => {
     const limiter = rateLimit({ windowMs: 60_000, max: 3 });
-    const result = limiter.check("ip-1");
+    const result = await limiter.check("ip-1");
     expect(result.limit).toBe(3);
   });
 
-  it("decrements remaining after each request", () => {
+  it("decrements remaining after each request", async () => {
     const limiter = rateLimit({ windowMs: 60_000, max: 3 });
-    const r1 = limiter.check("ip-1");
-    const r2 = limiter.check("ip-1");
+    const r1 = await limiter.check("ip-1");
+    const r2 = await limiter.check("ip-1");
     expect(r1.remaining).toBe(2); // 3 - 1
     expect(r2.remaining).toBe(1); // 3 - 2
   });
 
-  it("remaining is 0 at the limit boundary", () => {
+  it("remaining is 0 at the limit boundary", async () => {
     const limiter = rateLimit({ windowMs: 60_000, max: 2 });
-    limiter.check("ip-1");
-    const r2 = limiter.check("ip-1");
+    await limiter.check("ip-1");
+    const r2 = await limiter.check("ip-1");
     expect(r2.remaining).toBe(0);
     expect(r2.success).toBe(true);
   });
 
-  it("blocks the request that exceeds max", () => {
+  it("blocks the request that exceeds max", async () => {
     const limiter = rateLimit({ windowMs: 60_000, max: 2 });
-    limiter.check("ip-1");
-    limiter.check("ip-1");
-    const blocked = limiter.check("ip-1");
+    await limiter.check("ip-1");
+    await limiter.check("ip-1");
+    const blocked = await limiter.check("ip-1");
     expect(blocked.success).toBe(false);
     expect(blocked.remaining).toBe(0);
   });
 
-  it("different tokens are tracked independently", () => {
+  it("different tokens are tracked independently", async () => {
     const limiter = rateLimit({ windowMs: 60_000, max: 1 });
-    limiter.check("ip-1");
+    await limiter.check("ip-1");
     // ip-1 is now at limit; ip-2 should still pass
-    const r = limiter.check("ip-2");
+    const r = await limiter.check("ip-2");
     expect(r.success).toBe(true);
     // ip-1 should be blocked
-    const blocked = limiter.check("ip-1");
+    const blocked = await limiter.check("ip-1");
     expect(blocked.success).toBe(false);
   });
 
-  it("blocked result has a positive reset time", () => {
+  it("blocked result has a positive reset time", async () => {
     const limiter = rateLimit({ windowMs: 60_000, max: 1 });
-    limiter.check("ip-1");
-    const blocked = limiter.check("ip-1");
+    await limiter.check("ip-1");
+    const blocked = await limiter.check("ip-1");
     expect(blocked.reset).toBeGreaterThan(0);
   });
 });
 
 describe("rateLimit — default options", () => {
-  it("defaults to max=10", () => {
+  it("defaults to max=10", async () => {
     const limiter = rateLimit();
-    const result = limiter.check("ip-default");
+    const result = await limiter.check("ip-default");
     expect(result.limit).toBe(10);
   });
 
-  it("allows 10 requests before blocking", () => {
+  it("allows 10 requests before blocking", async () => {
     const limiter = rateLimit(); // max=10
     for (let i = 0; i < 10; i++) {
-      expect(limiter.check("ip-x").success).toBe(true);
+      expect((await limiter.check("ip-x")).success).toBe(true);
     }
-    expect(limiter.check("ip-x").success).toBe(false);
+    expect((await limiter.check("ip-x")).success).toBe(false);
   });
 });
 
@@ -92,36 +92,36 @@ describe("rateLimit — window expiry (fake timers)", () => {
     vi.useRealTimers();
   });
 
-  it("allows new requests after the window expires", () => {
+  it("allows new requests after the window expires", async () => {
     const windowMs = 1_000;
     const limiter = rateLimit({ windowMs, max: 2 });
 
-    limiter.check("ip-time");
-    limiter.check("ip-time");
+    await limiter.check("ip-time");
+    await limiter.check("ip-time");
     // At limit — this should be blocked
-    expect(limiter.check("ip-time").success).toBe(false);
+    expect((await limiter.check("ip-time")).success).toBe(false);
 
     // Advance past the window
     vi.advanceTimersByTime(windowMs + 1);
 
     // Should be allowed again
-    expect(limiter.check("ip-time").success).toBe(true);
+    expect((await limiter.check("ip-time")).success).toBe(true);
   });
 
-  it("sliding window: request at t=0 expires at t=windowMs", () => {
+  it("sliding window: request at t=0 expires at t=windowMs", async () => {
     const windowMs = 1_000;
     const limiter = rateLimit({ windowMs, max: 1 });
 
-    limiter.check("ip-slide"); // first hit at t=0
-    expect(limiter.check("ip-slide").success).toBe(false); // blocked
+    await limiter.check("ip-slide"); // first hit at t=0
+    expect((await limiter.check("ip-slide")).success).toBe(false); // blocked
 
     // Move forward just before expiry — still blocked
     vi.advanceTimersByTime(windowMs - 1);
-    expect(limiter.check("ip-slide").success).toBe(false);
+    expect((await limiter.check("ip-slide")).success).toBe(false);
 
     // Move past expiry
     vi.advanceTimersByTime(2);
-    expect(limiter.check("ip-slide").success).toBe(true);
+    expect((await limiter.check("ip-slide")).success).toBe(true);
   });
 });
 
