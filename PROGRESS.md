@@ -6,7 +6,7 @@
 ## Domain: bayitbeseder.com (Namecheap → Cloudflare DNS → Vercel)
 
 ## Current State
-App is fully functional with: Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input (5 locations), Gemini AI chat, full i18n (700+ keys, 12 pages + 30+ components), beta feedback CTAs, list virtualization, page transitions, SW v5, zone wizard D&D step, multi-user members management, Upstash Redis rate limiting, WhatsApp reply-to-complete, push notifications, Sentry error monitoring, Plausible analytics, 24 achievements, advanced stats (trend/heatmap/records), Playwright E2E (14 tests), calendar auto-sync cron. Vercel auto-deploys from master. 190+ files, 22K+ lines of code.
+App is fully functional with: Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input (5 locations), Gemini AI chat, full i18n (800+ keys), beta feedback CTAs, list virtualization, page transitions, SW v5, zone wizard D&D, multi-user members, Upstash Redis rate limiting, WhatsApp reply-to-complete, push notifications, Sentry error monitoring, Plausible analytics, 24 achievements, 14 weekly challenges, leaderboard, advanced stats, Playwright E2E (14 tests), 204 unit tests, calendar auto-sync cron, offline queue, Web Share API, keyboard shortcuts, bundle analyzer. Vercel auto-deploys from master. 200+ files, 25K+ lines of code.
 
 ## Recent Work
 
@@ -28,8 +28,26 @@ App is fully functional with: Pesach mode, zone-based scheduling, custom domain,
 - **Error Pages**: improved not-found.tsx (illustration + 404 badge), error.tsx (dev logging + Hebrew UI)
 - **i18n**: 40+ new keys (stats, error pages, achievements)
 
-**Session totals**: 4 commits, 59 files changed, ~3,330 lines added, 7 parallel agents used
-**Codebase**: 190+ files, 22,000+ lines, 24 achievements, 14 E2E tests, 84 unit tests
+**Commit 99**: Gamification, performance, offline, sharing, dark mode, 60 tests
+- **Weekly Challenges**: 14-challenge pool, 3 per week (deterministic by ISO week), progress tracking, confetti on completion
+- **Leaderboard**: Household ranking with medals/crown, week/all-time tabs, animated re-ranking
+- **Performance**: Bundle analyzer, DNS prefetch headers, SW no-cache headers, Google Fonts preconnect, maskable PWA icon
+- **Dark Mode Audit**: 11 components checked, global-error.tsx fixed (CSS variables)
+- **Offline Queue**: useOfflineQueue with localStorage, optimistic UI, amber indicator with pending count
+- **Web Share API**: useWebShare hook + ShareButton (native share on mobile, clipboard on desktop), on weekly + stats
+- **Keyboard Shortcuts**: Ctrl+N (new task), Ctrl+/ (AI chat), ? (help modal), Escape (close) — desktop only
+- **PWA Install Enhancement**: 3-dismiss → 30-day suppression, install card in settings
+- **60 New Tests**: achievements (11), analytics (7), challenges (14), push notifications (11), advanced stats (17)
+- **90+ i18n keys** added
+
+**External Services Connected:**
+- Upstash Redis (rate limiting) — DB created, env vars set
+- Sentry (error monitoring) — project "bayit-beseder" created, DSN in Vercel
+- VAPID Push Keys — generated and set in Vercel (3 env vars)
+- Plausible Analytics — script tag ready, needs plausible.io signup
+
+**Session totals**: 7 commits, 90+ files changed, ~6,400 lines added, 11 parallel agents used
+**Codebase**: 200+ files, 25,000+ lines, 24 achievements, 14 challenges, 14 E2E tests, 204 unit tests
 
 ### Iteration: 2026-03-29 — Zone Wizard + Multi-User UI + Facelift + Redis
 
