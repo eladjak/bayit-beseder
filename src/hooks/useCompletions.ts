@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSupabase } from "@/components/SupabaseProvider";
 import { trackEvent } from "@/lib/analytics";
+import { useOfflineQueue } from "@/hooks/useOfflineQueue";
 import type {
   TaskCompletionRow,
   TaskCompletionInsert,
@@ -56,6 +57,7 @@ export function useCompletions(
   const [completions, setCompletions] = useState<TaskCompletionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { queueAction, isOnline } = useOfflineQueue();
 
   const fetchCompletions = useCallback(async () => {
     setLoading(true);
@@ -137,6 +139,32 @@ export function useCompletions(
       /** If true, don't permanently change the task status (for recurring tasks) */
       recurring?: boolean;
     }): Promise<TaskCompletionRow | null> => {
+      // When offline, queue the action and return an optimistic result
+      if (!isOnline) {
+        queueAction("complete_task", {
+          taskId: params.taskId,
+          userId: params.userId,
+          householdId: params.householdId ?? null,
+          photoUrl: params.photoUrl ?? null,
+          notes: params.notes ?? null,
+          recurring: params.recurring ?? false,
+          timestamp: new Date().toISOString(),
+        });
+
+        // Optimistic completion row (will be replaced when queue processes)
+        const optimisticRow: TaskCompletionRow = {
+          id: `offline-${Date.now()}`,
+          task_id: params.taskId,
+          user_id: params.userId,
+          completed_at: new Date().toISOString(),
+          photo_url: params.photoUrl ?? null,
+          notes: params.notes ?? null,
+        };
+        setCompletions((prev) => [optimisticRow, ...prev]);
+        trackEvent("task_complete");
+        return optimisticRow;
+      }
+
       try {
         const insertion: TaskCompletionInsert = {
           task_id: params.taskId,
@@ -152,6 +180,25 @@ export function useCompletions(
           .single();
 
         if (insertError) {
+          // Network error — queue for later
+          if (!navigator.onLine) {
+            queueAction("complete_task", {
+              taskId: params.taskId,
+              userId: params.userId,
+              recurring: params.recurring ?? false,
+              timestamp: new Date().toISOString(),
+            });
+            const optimisticRow: TaskCompletionRow = {
+              id: `offline-${Date.now()}`,
+              task_id: params.taskId,
+              user_id: params.userId,
+              completed_at: new Date().toISOString(),
+              photo_url: null,
+              notes: null,
+            };
+            setCompletions((prev) => [optimisticRow, ...prev]);
+            return optimisticRow;
+          }
           console.error("Failed to insert task completion:", insertError);
           setError(insertError.message);
           return null;
@@ -177,12 +224,26 @@ export function useCompletions(
         trackEvent("task_complete");
         return data;
       } catch (err) {
-        console.error("Unexpected error in markComplete:", err);
-        setError(err instanceof Error ? err.message : "שגיאה לא צפויה");
-        return null;
+        // Network failure — queue the action
+        queueAction("complete_task", {
+          taskId: params.taskId,
+          userId: params.userId,
+          recurring: params.recurring ?? false,
+          timestamp: new Date().toISOString(),
+        });
+        const optimisticRow: TaskCompletionRow = {
+          id: `offline-${Date.now()}`,
+          task_id: params.taskId,
+          user_id: params.userId,
+          completed_at: new Date().toISOString(),
+          photo_url: null,
+          notes: null,
+        };
+        setCompletions((prev) => [optimisticRow, ...prev]);
+        return optimisticRow;
       }
     },
-    [supabase]
+    [supabase, isOnline, queueAction]
   );
 
   const getHistory = useCallback(

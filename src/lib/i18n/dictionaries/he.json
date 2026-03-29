@@ -646,11 +646,31 @@
     "closeLabel": "סגירה"
   },
   "offline": {
-    "title": "אין חיבור לאינטרנט",
-    "subtitle": "נראה שאתם לא מחוברים כרגע",
+    "title": "אופליין — שינויים יישמרו",
+    "subtitle": "שינויים יישמרו כשתחזרו לרשת",
+    "pendingActions": "{count} פעולות ממתינות לסנכרון",
+    "dismiss": "סגירת הודעת אופליין",
     "description": "בדקו את חיבור ה-WiFi או הניידים שלכם ונסו שוב.",
     "retry": "נסו שוב",
     "retrying": "מנסה להתחבר..."
+  },
+  "share": {
+    "button": "שיתוף",
+    "label": "שיתוף",
+    "copied": "הקישור הועתק ✓",
+    "weeklyPlan": "התוכנית השבועית שלנו",
+    "statsTitle": "הסטטיסטיקה שלנו",
+    "weeklyText": "הנה התוכנית השבועית שלנו ב-בית בסדר 🏠",
+    "statsText": "הסטטיסטיקה שלנו מהשבוע האחרון ב-בית בסדר 🏠"
+  },
+  "shortcuts": {
+    "modalTitle": "קיצורי מקלדת",
+    "newTask": "משימה חדשה",
+    "openAIChat": "פתיחת שיחת AI",
+    "closeModal": "סגירת חלון פעיל",
+    "showHelp": "הצגת קיצורי מקלדת",
+    "desktopOnly": "קיצורי המקלדת זמינים בדסקטופ בלבד",
+    "settingsLink": "קיצורי מקלדת"
   },
   "gamification": {
     "challengeStart": "בואו נתחיל את האתגר!",
@@ -666,5 +686,27 @@
     "challengeFinished": "מעולה! סיימתם את האתגר השבועי 🎉",
     "rewardsSubtitle": "השלימו משימות יחד כדי לפתוח פרסים",
     "rewardUnlocked": "נפתח!"
+  },
+  "challenges": {
+    "sectionTitle": "אתגרי השבוע",
+    "weekLabel": "שבוע",
+    "done": "הושלמו",
+    "completedLabel": "הושלם!",
+    "points": "נק'",
+    "allDone": "כל האתגרים הושלמו השבוע! 🎉",
+    "typeHousehold": "בית",
+    "typeIndividual": "אישי",
+    "completed": "הושלם"
+  },
+  "leaderboard": {
+    "title": "לוח מנצחים",
+    "thisWeek": "השבוע",
+    "allTime": "כל הזמן",
+    "rank": "מקום",
+    "you": "את/ה",
+    "completions": "השלמות",
+    "pts": "נק'",
+    "empty": "עדיין אין פעילות השבוע",
+    "periodLabel": "בחירת תקופה"
   }
 }

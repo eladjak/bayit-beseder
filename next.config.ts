@@ -1,5 +1,9 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
 
 const nextConfig: NextConfig = {
   // Enable gzip/brotli compression
@@ -28,7 +32,7 @@ const nextConfig: NextConfig = {
   // Remove X-Powered-By header
   poweredByHeader: false,
 
-  // Security headers
+  // Security + performance headers
   async headers() {
     return [
       {
@@ -49,9 +53,28 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      // Service worker must never be cached by the browser itself —
+      // otherwise users get stuck on old SW versions after deploys.
+      {
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+          {
+            key: "Service-Worker-Allowed",
+            value: "/",
+          },
+        ],
+      },
       {
         source: "/(.*)",
         headers: [
+          {
+            key: "X-DNS-Prefetch-Control",
+            value: "on",
+          },
           {
             key: "X-Frame-Options",
             value: "DENY",
@@ -78,7 +101,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+export default withSentryConfig(withBundleAnalyzer(nextConfig), {
   silent: true,
   org: "eladjak",
   project: "bayit-beseder",

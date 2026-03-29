@@ -36,6 +36,7 @@ const WeeklyShareCard = dynamic(
   { ssr: false }
 );
 import { useTranslation } from "@/hooks/useTranslation";
+import { ShareButton } from "@/components/share-button";
 import { StatCardSkeleton, RingSkeleton } from "@/components/skeleton";
 import { useAdvancedStats } from "@/hooks/useAdvancedStats";
 
@@ -531,7 +532,15 @@ export default function StatsPage() {
       {/* Header with gradient */}
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
         <div className="flex items-center justify-between relative z-10">
-          <h1 className="text-xl font-bold text-white tracking-tight">📊 {t("stats.pageTitle")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-bold text-white tracking-tight">📊 {t("stats.pageTitle")}</h1>
+            <ShareButton
+              title={t("share.statsTitle")}
+              text={t("share.statsText")}
+              url={typeof window !== "undefined" ? window.location.href : "https://www.bayitbeseder.com/stats"}
+              className="!bg-white/20 !text-white border border-white/20 hover:!bg-white/30"
+            />
+          </div>
           <Link
             href="/history"
             className="flex items-center gap-1.5 text-xs text-white bg-white/12 px-3.5 py-1.5 rounded-xl font-medium backdrop-blur-sm border border-white/10 hover:bg-white/20 transition-colors"

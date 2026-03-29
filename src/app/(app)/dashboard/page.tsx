@@ -13,6 +13,8 @@ import { RoomConditions } from "@/components/dashboard/room-conditions";
 const StreakTracker = dynamic(() => import("@/components/gamification/streak-tracker").then(m => ({ default: m.StreakTracker })), { ssr: false });
 const WeeklyChallenge = dynamic(() => import("@/components/gamification/weekly-challenge").then(m => ({ default: m.WeeklyChallenge })), { ssr: false });
 const CoupleRewards = dynamic(() => import("@/components/gamification/couple-rewards").then(m => ({ default: m.CoupleRewards })), { ssr: false });
+const WeeklyChallenges = dynamic(() => import("@/components/gamification/weekly-challenges").then(m => ({ default: m.WeeklyChallenges })), { ssr: false });
+const Leaderboard = dynamic(() => import("@/components/gamification/leaderboard").then(m => ({ default: m.Leaderboard })), { ssr: false });
 import { getRandomMessage } from "@/lib/coaching-messages";
 import { computeRoomHealth } from "@/lib/room-health";
 import { computeRewardsProgress } from "@/lib/rewards";
@@ -27,6 +29,8 @@ import { useAppSounds } from "@/hooks/useAppSound";
 import { useNotifications } from "@/hooks/useNotifications";
 import { usePartner } from "@/hooks/usePartner";
 import { useHouseholdMembers } from "@/hooks/useHouseholdMembers";
+import { useWeeklyChallenges } from "@/hooks/useWeeklyChallenges";
+import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { TaskListSkeleton } from "@/components/skeleton";
 import { toast } from "sonner";
 import { CATEGORY_NAME_TO_KEY, CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS } from "@/lib/categories";
@@ -48,6 +52,7 @@ const TaskCompletionModal = dynamic(() => import("@/components/task-completion-m
 const PesachActivationModal = dynamic(() => import("@/components/seasonal/pesach-activation-modal").then(m => ({ default: m.PesachActivationModal })), { ssr: false });
 const ConversationalOnboarding = dynamic(() => import("@/components/onboarding/conversational-onboarding").then(m => ({ default: m.ConversationalOnboarding })), { ssr: false });
 import { useHousehold } from "@/hooks/useHousehold";
+import { OfflineIndicator } from "@/components/offline-indicator";
 
 // ============================================
 // Mock data (fallback when Supabase not connected)
@@ -140,6 +145,18 @@ export default function DashboardPage() {
   );
   // Members other than the current user (for the "household activity" section)
   const otherMembers = householdMembers.filter((m) => m.id !== profile?.id);
+
+  // ---- Gamification: weekly challenges & leaderboard ----
+  const { progress: challengeProgress, weekNum } = useWeeklyChallenges({
+    completions: allCompletions,
+    userId: profile?.id,
+  });
+  const { rankings, period: lbPeriod, setPeriod: setLbPeriod } = useLeaderboard({
+    members: householdMembers,
+    completions: allCompletions,
+    userId: profile?.id,
+  });
+
   const seasonalMode = useSeasonalMode();
   const [showSeasonalModal, setShowSeasonalModal] = useState(false);
 
@@ -466,6 +483,9 @@ export default function DashboardPage() {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
+      {/* Offline indicator */}
+      <OfflineIndicator />
+
       {/* Pull-to-refresh indicator */}
       <AnimatePresence>
         {(isPulling && pullDistance > 5) || isRefreshing ? (
@@ -558,6 +578,17 @@ export default function DashboardPage() {
               />
 
               <CoupleRewards rewardsProgress={rewardsProgress} />
+
+              <WeeklyChallenges progress={challengeProgress} weekNum={weekNum} />
+
+              {householdMembers.length > 1 && (
+                <Leaderboard
+                  rankings={rankings}
+                  period={lbPeriod}
+                  onSetPeriod={setLbPeriod}
+                  myUserId={profile?.id}
+                />
+              )}
             </div>
           )}
         </div>

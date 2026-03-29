@@ -29,8 +29,9 @@ import { MembersSection } from "@/components/settings/members-section";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
 import { useTranslation } from "@/hooks/useTranslation";
-import { LayoutGrid, AlertTriangle } from "lucide-react";
+import { LayoutGrid, AlertTriangle, Keyboard, Download } from "lucide-react";
 import Link from "next/link";
+import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 // ============================================
 // Theme helpers
@@ -112,6 +113,9 @@ export default function SettingsPage() {
 
   // Zone config
   const zoneConfig = useZoneConfig();
+
+  // PWA install
+  const { canInstall, isInstalled, promptInstall } = usePWAInstall();
   const [deactivatingSeasonal, setDeactivatingSeasonal] = useState(false);
 
   // WhatsApp state
@@ -535,6 +539,52 @@ export default function SettingsPage() {
             )}
           </div>
         )}
+
+        {/* PWA Install */}
+        {!isInstalled && canInstall && (
+          <div className="card-elevated p-4 space-y-3">
+            <h2 className="font-semibold text-foreground text-sm flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              {t("pwa.installTitle")}
+            </h2>
+            <p className="text-xs text-muted">{t("pwa.installSubtitle")}</p>
+            <button
+              type="button"
+              onClick={promptInstall}
+              className="w-full py-2.5 rounded-xl gradient-primary text-white text-sm font-semibold active:scale-[0.97] transition-transform"
+            >
+              {t("pwa.installButton")}
+            </button>
+          </div>
+        )}
+
+        {/* Keyboard Shortcuts */}
+        <div className="card-elevated p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Keyboard className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">{t("shortcuts.settingsLink")}</span>
+            </div>
+            <span className="text-[10px] text-muted bg-surface-hover px-2 py-0.5 rounded-md">
+              {t("shortcuts.desktopOnly")}
+            </span>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-1.5">
+            {[
+              { keys: "Ctrl+N", desc: t("shortcuts.newTask") },
+              { keys: "Ctrl+/", desc: t("shortcuts.openAIChat") },
+              { keys: "Esc", desc: t("shortcuts.closeModal") },
+              { keys: "?", desc: t("shortcuts.showHelp") },
+            ].map((s) => (
+              <div key={s.keys} className="flex items-center gap-2 text-xs text-muted">
+                <kbd className="px-1.5 py-0.5 rounded-md bg-surface border border-border font-mono text-[10px] shrink-0">
+                  {s.keys}
+                </kbd>
+                <span className="truncate">{s.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <DangerZone
           isDemo={isDemo}

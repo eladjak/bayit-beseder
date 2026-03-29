@@ -53,6 +53,7 @@ import type { ClientCalendarEvent } from "@/lib/types/calendar";
 import type { TaskRow, TaskInsert } from "@/lib/types/database";
 import { haptic } from "@/lib/haptics";
 import { useTranslation } from "@/hooks/useTranslation";
+import { ShareButton } from "@/components/share-button";
 import {
   CATEGORY_BG_CLASSES,
   CATEGORY_LABELS,
@@ -538,7 +539,15 @@ export default function WeeklyPage() {
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
         <div className="flex items-center justify-between mb-3 relative z-10">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">{t("weekly.title")} 🗓️</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-bold text-white tracking-tight">{t("weekly.title")} 🗓️</h1>
+              <ShareButton
+                title={t("share.weeklyPlan")}
+                text={t("share.weeklyText")}
+                url={typeof window !== "undefined" ? window.location.href : "https://www.bayitbeseder.com"}
+                className="!bg-white/20 !text-white border border-white/20 hover:!bg-white/30"
+              />
+            </div>
             <p className="text-sm text-white/60 mt-0.5">{weekRange}</p>
             <p className="text-xs text-white/70 mt-1">מי עושה מה ומתי? בואו נחלק בהוגן</p>
           </div>

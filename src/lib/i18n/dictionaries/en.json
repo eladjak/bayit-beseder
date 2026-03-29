@@ -646,11 +646,31 @@
     "closeLabel": "Close"
   },
   "offline": {
-    "title": "No Internet Connection",
-    "subtitle": "Looks like you're offline right now",
+    "title": "Offline — changes will be saved",
+    "subtitle": "Changes will sync when you're back online",
+    "pendingActions": "{count} actions waiting to sync",
+    "dismiss": "Dismiss offline notice",
     "description": "Check your WiFi or mobile data connection and try again.",
     "retry": "Try again",
     "retrying": "Reconnecting..."
+  },
+  "share": {
+    "button": "Share",
+    "label": "Share",
+    "copied": "Link copied ✓",
+    "weeklyPlan": "Our Weekly Plan",
+    "statsTitle": "Our Stats",
+    "weeklyText": "Here's our weekly plan in BayitBeSeder 🏠",
+    "statsText": "Our stats from this week in BayitBeSeder 🏠"
+  },
+  "shortcuts": {
+    "modalTitle": "Keyboard Shortcuts",
+    "newTask": "New task",
+    "openAIChat": "Open AI chat",
+    "closeModal": "Close active modal",
+    "showHelp": "Show keyboard shortcuts",
+    "desktopOnly": "Keyboard shortcuts are available on desktop only",
+    "settingsLink": "Keyboard shortcuts"
   },
   "gamification": {
     "challengeStart": "Let's start the challenge!",
@@ -666,5 +686,27 @@
     "challengeFinished": "Amazing! You finished the weekly challenge 🎉",
     "rewardsSubtitle": "Complete tasks together to unlock rewards",
     "rewardUnlocked": "Unlocked!"
+  },
+  "challenges": {
+    "sectionTitle": "Weekly Challenges",
+    "weekLabel": "Week",
+    "done": "done",
+    "completedLabel": "Done!",
+    "points": "pts",
+    "allDone": "All challenges completed this week! 🎉",
+    "typeHousehold": "Household",
+    "typeIndividual": "Individual",
+    "completed": "Completed"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "thisWeek": "This Week",
+    "allTime": "All Time",
+    "rank": "Rank",
+    "you": "You",
+    "completions": "completions",
+    "pts": "pts",
+    "empty": "No activity this week yet",
+    "periodLabel": "Select period"
   }
 }

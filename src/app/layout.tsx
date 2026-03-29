@@ -109,6 +109,13 @@ export default function RootLayout({
     <html lang="he" dir="rtl">
       <head>
         <ThemeScript />
+        {/* Preconnect to Google Fonts to reduce font loading latency */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
         {process.env.NODE_ENV === "production" && (
           <script
             defer
