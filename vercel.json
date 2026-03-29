@@ -1,5 +1,6 @@
 {
   "framework": "nextjs",
+  "installCommand": "bun install --frozen-lockfile",
   "crons": [
     {
       "path": "/api/cron/daily-brief",
