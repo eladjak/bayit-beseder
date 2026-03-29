@@ -1,15 +1,26 @@
 /**
- * Simple in-memory sliding window rate limiter.
+ * Distributed sliding-window rate limiter backed by Upstash Redis.
  *
- * Works per-instance (state resets on deploy / cold start).
- * Suitable for basic protection against brute-force and abuse on
- * Next.js API routes running in a long-lived server process.
+ * Required environment variables (set in Vercel project settings):
+ *   UPSTASH_REDIS_REST_URL   — e.g. https://xxx.upstash.io
+ *   UPSTASH_REDIS_REST_TOKEN — AX... (REST token from Upstash console)
  *
- * Usage:
+ * When those variables are absent (local dev without Redis) the limiter
+ * automatically falls back to an in-memory implementation so the rest of
+ * the codebase continues to work unchanged.
+ *
+ * All 7 API routes import this module with the same interface:
  *   const limiter = rateLimit({ windowMs: 60_000, max: 10 });
- *   const result = limiter.check(ip);
+ *   const result  = limiter.check(getClientIp(request));
  *   if (!result.success) return 429 response;
  */
+
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+// ---------------------------------------------------------------------------
+// Public types (unchanged from the original in-memory implementation)
+// ---------------------------------------------------------------------------
 
 export interface RateLimitResult {
   /** Whether the request is within the allowed limit. */
@@ -31,19 +42,72 @@ export interface RateLimitOptions {
 
 export interface RateLimiter {
   /** Check (and record) a request for the given token (e.g. IP address). */
+  check(token: string): Promise<RateLimitResult> | RateLimitResult;
+}
+
+// ---------------------------------------------------------------------------
+// Lazy Redis singleton — created once per process, never on import
+// ---------------------------------------------------------------------------
+
+let _redis: Redis | null = null;
+
+function getRedis(): Redis | null {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (!url || !token) return null;
+  if (!_redis) {
+    _redis = new Redis({ url, token });
+  }
+  return _redis;
+}
+
+// ---------------------------------------------------------------------------
+// Upstash-backed limiter
+// ---------------------------------------------------------------------------
+
+interface UpstashLimiter extends RateLimiter {
+  check(token: string): Promise<RateLimitResult>;
+}
+
+function createUpstashLimiter(
+  redis: Redis,
+  windowMs: number,
+  max: number
+): UpstashLimiter {
+  // @upstash/ratelimit uses seconds for the window duration.
+  const windowSeconds = Math.ceil(windowMs / 1000);
+
+  const rl = new Ratelimit({
+    redis,
+    limiter: Ratelimit.slidingWindow(max, `${windowSeconds} s`),
+    // Prefix keeps keys from colliding with other app data.
+    prefix: "bb:rl",
+  });
+
+  return {
+    async check(token: string): Promise<RateLimitResult> {
+      const { success, limit, remaining, reset } = await rl.limit(token);
+      return {
+        success,
+        limit,
+        remaining,
+        // reset from Upstash is a Unix timestamp in milliseconds;
+        // convert to milliseconds-until-reset to match the original interface.
+        reset: Math.max(0, reset - Date.now()),
+      };
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// In-memory fallback (verbatim from original implementation)
+// ---------------------------------------------------------------------------
+
+interface SyncLimiter extends RateLimiter {
   check(token: string): RateLimitResult;
 }
 
-/**
- * Creates a rate limiter instance.
- *
- * The internal Map is cleaned up every 5 minutes to prevent unbounded growth
- * in long-running server processes.
- */
-export function rateLimit(options: RateLimitOptions = {}): RateLimiter {
-  const windowMs = options.windowMs ?? 60_000;
-  const max = options.max ?? 10;
-
+function createInMemoryLimiter(windowMs: number, max: number): SyncLimiter {
   /** Map from token → sorted array of hit timestamps (oldest first). */
   const hits = new Map<string, number[]>();
 
@@ -76,8 +140,6 @@ export function rateLimit(options: RateLimitOptions = {}): RateLimiter {
       );
 
       if (timestamps.length >= max) {
-        // Rate limit exceeded.  `reset` is how long until the oldest hit
-        // slides out of the window.
         return {
           success: false,
           limit: max,
@@ -86,7 +148,6 @@ export function rateLimit(options: RateLimitOptions = {}): RateLimiter {
         };
       }
 
-      // Record this hit and persist.
       timestamps.push(now);
       hits.set(token, timestamps);
 
@@ -99,6 +160,44 @@ export function rateLimit(options: RateLimitOptions = {}): RateLimiter {
     },
   };
 }
+
+// ---------------------------------------------------------------------------
+// Unified wrapper — async-first, syncs in-memory fallback transparently
+// ---------------------------------------------------------------------------
+
+/**
+ * Creates a rate limiter instance.
+ *
+ * When UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN are set the limiter
+ * uses Upstash Redis (distributed, survives cold starts). Otherwise it falls
+ * back to the original in-memory sliding window (suitable for local dev).
+ *
+ * The returned `check()` always returns a Promise so callers should await it.
+ * The in-memory fallback wraps its synchronous result in Promise.resolve()
+ * automatically.
+ */
+export function rateLimit(options: RateLimitOptions = {}): {
+  check: (token: string) => Promise<RateLimitResult>;
+} {
+  const windowMs = options.windowMs ?? 60_000;
+  const max = options.max ?? 10;
+
+  const redis = getRedis();
+
+  if (redis) {
+    return createUpstashLimiter(redis, windowMs, max);
+  }
+
+  // In-memory fallback: wrap the sync result so callers get a uniform Promise.
+  const inMemory = createInMemoryLimiter(windowMs, max);
+  return {
+    check: (token: string) => Promise.resolve(inMemory.check(token)),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Utility (unchanged from original)
+// ---------------------------------------------------------------------------
 
 /**
  * Extracts the best-effort client IP from common proxy headers.

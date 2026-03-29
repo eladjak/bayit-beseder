@@ -13,7 +13,7 @@ const limiter = rateLimit({ windowMs: 60_000, max: 3 });
  */
 export async function POST(request: NextRequest) {
   // A6: Rate limiting — prevent repeated seed attempts.
-  const rateLimitResult = limiter.check(getClientIp(request));
+  const rateLimitResult = await limiter.check(getClientIp(request));
   if (!rateLimitResult.success) {
     return NextResponse.json(
       { error: "Too many requests" },

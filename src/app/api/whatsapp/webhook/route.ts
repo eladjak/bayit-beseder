@@ -21,7 +21,7 @@ const limiter = rateLimit({ windowMs: 60_000, max: 30 });
  */
 export async function POST(request: NextRequest) {
   // A6: Rate limiting — protect against webhook flooding.
-  const rateLimitResult = limiter.check(getClientIp(request));
+  const rateLimitResult = await limiter.check(getClientIp(request));
   if (!rateLimitResult.success) {
     return NextResponse.json(
       { error: "Too many requests" },

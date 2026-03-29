@@ -56,7 +56,7 @@ interface GeminiSSEData {
 export async function POST(request: NextRequest) {
   // 1. Rate limit check
   const ip = getClientIp(request);
-  const rateLimitResult = limiter.check(ip);
+  const rateLimitResult = await limiter.check(ip);
 
   if (!rateLimitResult.success) {
     const retryAfter = Math.ceil(rateLimitResult.reset / 1000);

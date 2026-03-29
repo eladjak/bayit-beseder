@@ -23,7 +23,7 @@ function generateInviteCode(): string {
  */
 export async function POST(request: NextRequest) {
   // A6: Rate limiting — prevent spam household creation.
-  const rateLimitResult = postLimiter.check(getClientIp(request));
+  const rateLimitResult = await postLimiter.check(getClientIp(request));
   if (!rateLimitResult.success) {
     return NextResponse.json(
       { error: "Too many requests" },

@@ -36,6 +36,8 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.95.3",
     "@tanstack/react-virtual": "^3.13.23",
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.37.0",
     "better-result": "^2.7.0",
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.34.0",
@@ -64,7 +66,7 @@
     "eslint-config-next": "16.1.6",
     "jsdom": "^29.0.1",
     "tailwindcss": "^4",
-    "typescript": "^5",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.2"
   }
 }

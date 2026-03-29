@@ -19,7 +19,7 @@ const limiter = rateLimit({ windowMs: 60_000, max: 5 });
  */
 export async function GET(request: NextRequest) {
   // A6: Rate limiting — prevent OAuth-initiation spam.
-  const rateLimitResult = limiter.check(getClientIp(request));
+  const rateLimitResult = await limiter.check(getClientIp(request));
   if (!rateLimitResult.success) {
     return NextResponse.json(
       { error: "Too many requests" },
