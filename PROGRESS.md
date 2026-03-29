@@ -1,14 +1,34 @@
 # BayitBeSeder (בית בסדר) - Progress
 
 ## Status: LIVE
-## Last Updated: 2026-03-26
+## Last Updated: 2026-03-29
 ## URL: https://www.bayitbeseder.com
 ## Domain: bayitbeseder.com (Namecheap → Cloudflare DNS → Vercel)
 
 ## Current State
-App is fully functional with: Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input (5 locations), Gemini AI chat, full i18n (600+ keys, 12 pages + 30+ components), beta feedback CTAs, list virtualization, page transitions, SW v5, zone wizard step. Vercel auto-deploys from master. 167 files, 19K+ lines of code.
+App is fully functional with: Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input (5 locations), Gemini AI chat, full i18n (650+ keys, 12 pages + 30+ components), beta feedback CTAs, list virtualization, page transitions, SW v5, zone wizard D&D step, multi-user members management, Upstash Redis rate limiting, WhatsApp reply-to-complete. Vercel auto-deploys from master. 178 files, 20K+ lines of code.
 
 ## Recent Work
+
+### Iteration: 2026-03-29 — Zone Wizard + Multi-User UI + Facelift + Redis
+
+**Commit 93**: Zone wizard D&D step + multi-user members UI + app facelift
+- **Zone Wizard Step**: New `zone-wizard-step.tsx` — drag-and-drop zone-to-day assignment with @dnd-kit, mobile tap fallback (bottom-sheet day picker), DragOverlay, integrated as wizard step with step dots + navigation
+- **Multi-User Phase 2 UI**: New `members-section.tsx` — household members management in settings (gradient avatars, role badges owner/member, task progress bars, kebab menu for role change/remove, confirm dialog, invite CTA)
+- **Dashboard Manage Link**: Partner status shows "ניהול חברי הבית" link when 3+ members
+- **App Facelift**: Micro-interactions (active:scale) on all buttons across 15 files, card hover shadows, bottom nav press feedback + shadow
+- **i18n**: 50+ new translation keys (zone wizard + members management)
+
+**Commit 94**: Upstash Redis rate limiting
+- **Migration**: In-memory rate limiter → @upstash/ratelimit with @upstash/redis (distributed, survives deploys)
+- **7 API routes updated**: All use async check(), same interface, zero behavior change
+- **Graceful fallback**: In-memory for local dev when env vars not set
+- **Env vars**: UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN (need Upstash dashboard setup)
+
+**Discovery**: WhatsApp reply-to-complete was already fully implemented from previous sessions ✅
+
+**Session totals**: 2 commits, 31 files changed, ~1,380 lines added, 3 parallel agents used
+**Codebase**: 178 files, 20,000+ lines
 
 ### Iteration: 2026-03-26 — i18n Expansion + Beta Feedback + Voice UX
 
