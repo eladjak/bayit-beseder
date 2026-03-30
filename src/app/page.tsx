@@ -311,12 +311,14 @@ export default function LandingPage() {
             <Link href="/shopping" className="text-primary hover:underline">קניות</Link>
             <Link href="/weekly" className="text-primary hover:underline">שבועי</Link>
             <Link href="/stats" className="text-primary hover:underline">סטטיסטיקות</Link>
+            <Link href="/blog" className="text-primary hover:underline">בלוג</Link>
           </div>
 
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-6 text-xs">
             <Link href="/privacy" className="text-muted hover:text-foreground hover:underline">מדיניות פרטיות</Link>
             <Link href="/terms" className="text-muted hover:text-foreground hover:underline">תנאי שימוש</Link>
             <Link href="/contact" className="text-muted hover:text-foreground hover:underline">צור קשר</Link>
+            <Link href="/blog" className="text-muted hover:text-foreground hover:underline">טיפים לניהול הבית</Link>
           </div>
 
           <p className="text-muted/60">בית בסדר © 2026 — נבנה באהבה בישראל 🇮🇱</p>

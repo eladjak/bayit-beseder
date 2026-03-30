@@ -79,6 +79,22 @@ export function DangerZone({ isDemo, onLogout, onClearLocalData }: DangerZonePro
             >
               {t("settings.dangerSection.contact")}
             </Link>
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+            >
+              <ExternalLink className="w-3 h-3" />
+              {t("common.login") === "Login" ? "Blog" : "בלוג"}
+            </Link>
+            <a
+              href="https://github.com/eladjak/bayit-beseder"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+            >
+              <ExternalLink className="w-3 h-3" />
+              GitHub
+            </a>
           </div>
         </div>
 
