@@ -10,6 +10,33 @@ App is fully functional with: Pesach mode, zone-based scheduling, custom domain,
 
 ## Recent Work
 
+### Iteration: 2026-03-30 — Fixes, Blog, AI Chat, Calendar, Sanity CMS
+
+**11 commits this session:**
+
+1. **Calendar sync fix** — `calendarList` API required wrong scope, switched to "primary" alias
+2. **"Open my calendar" link** — added to calendar settings after sync
+3. **Activity feed 400 fix** — removed FK joins, separate queries instead
+4. **Notifications 406 fix** — `.single()` → `.maybeSingle()` for partner lookup
+5. **Analytics guard** — safer `typeof plausible === "function"` check
+6. **AI Chat model upgrade** — `gemini-2.0-flash` (deprecated) → `gemini-2.5-flash`
+7. **Theme customizer** — 6-color picker, flash-free ThemeScript init
+8. **WhatsApp messages** — per-member stats, tomorrow preview, Friday celebration
+9. **GitHub Stars CTA** — settings + landing page
+10. **Blog /blog** — premium design, 6 articles, i18n (he/en), SEO JSON-LD, illustrations
+11. **Sanity CMS integration** — `@sanity/client` installed, project b0hm1i34 connected
+12. **Dashboard links** — prominent cards to blog + landing page
+
+**Still TODO (next session):**
+- [ ] Populate Sanity with blog posts (siteId: "bayit-beseder", status: "published")
+- [ ] Blog: pull live posts from Sanity (currently static fallback)
+- [ ] Blog notification subscription (opt-in for new content alerts)
+- [ ] Notification tone: warm, humorous, friendly self-deprecating humor
+- [ ] Add /blog to sitemap.ts
+- [ ] hreflang tags for he/en
+- [ ] Generate real illustrations with Gemini (replace CSS gradients)
+- [ ] Proactive notification banner on dashboard for push permissions
+
 ### Iteration: 2026-03-29 (cont.) — Push, Monitoring, Achievements, Stats, E2E
 
 **Commit 95**: Zone wizard + multi-user UI + app facelift (see above)
