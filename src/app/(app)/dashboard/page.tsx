@@ -15,6 +15,7 @@ const WeeklyChallenge = dynamic(() => import("@/components/gamification/weekly-c
 const CoupleRewards = dynamic(() => import("@/components/gamification/couple-rewards").then(m => ({ default: m.CoupleRewards })), { ssr: false });
 const WeeklyChallenges = dynamic(() => import("@/components/gamification/weekly-challenges").then(m => ({ default: m.WeeklyChallenges })), { ssr: false });
 const Leaderboard = dynamic(() => import("@/components/gamification/leaderboard").then(m => ({ default: m.Leaderboard })), { ssr: false });
+const ActivityFeed = dynamic(() => import("@/components/dashboard/activity-feed").then(m => ({ default: m.ActivityFeed })), { ssr: false });
 import { getRandomMessage } from "@/lib/coaching-messages";
 import { computeRoomHealth } from "@/lib/room-health";
 import { computeRewardsProgress } from "@/lib/rewards";
@@ -627,6 +628,14 @@ export default function DashboardPage() {
         )}
 
         <CoachingTips completedCount={completedCount} totalCount={filteredTasks.length} />
+
+        {/* Activity Feed */}
+        <div>
+          <h2 className="font-semibold text-foreground px-1 mb-2 text-sm">
+            {t("activity.sectionTitle")}
+          </h2>
+          <ActivityFeed />
+        </div>
 
         <CoachingInsight />
 

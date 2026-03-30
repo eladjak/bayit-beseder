@@ -1,9 +1,10 @@
 "use client";
 
-import { Bell, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Bell, CheckCircle2, XCircle, AlertCircle, Moon } from "lucide-react";
 import { isNotificationSupported } from "@/lib/notifications";
 import type { NotificationPrefs } from "@/lib/notifications";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useNotificationPrefs } from "@/hooks/useNotificationPrefs";
 
 interface ToggleRowProps {
   label: string;
@@ -71,6 +72,7 @@ export function NotificationSettings({
   onTogglePushSubscription,
 }: NotificationSettingsProps) {
   const { t } = useTranslation();
+  const { prefs: granularPrefs, updatePref, isQuietHours } = useNotificationPrefs();
 
   return (
     <section className="card-elevated p-4 space-y-3">
@@ -136,6 +138,80 @@ export function NotificationSettings({
             enabled={notifPrefs.partnerActivity}
             onToggle={() => onTogglePref("partnerActivity")}
           />
+
+          {/* Granular notification type toggles */}
+          <div className="border-t border-border pt-3 mt-1 space-y-2.5">
+            <p className="text-xs text-muted font-medium">
+              {t("settings.notificationSection.granularTitle")}
+            </p>
+            <ToggleRow
+              label={t("settings.notificationSection.taskReminders")}
+              enabled={granularPrefs.taskReminders}
+              onToggle={() => updatePref("taskReminders", !granularPrefs.taskReminders)}
+            />
+            <ToggleRow
+              label={t("settings.notificationSection.dailyDigest")}
+              enabled={granularPrefs.dailyDigest}
+              onToggle={() => updatePref("dailyDigest", !granularPrefs.dailyDigest)}
+            />
+            <ToggleRow
+              label={t("settings.notificationSection.achievements")}
+              enabled={granularPrefs.achievements}
+              onToggle={() => updatePref("achievements", !granularPrefs.achievements)}
+            />
+            <ToggleRow
+              label={t("settings.notificationSection.weeklyChallenges")}
+              enabled={granularPrefs.weeklyChallenges}
+              onToggle={() => updatePref("weeklyChallenges", !granularPrefs.weeklyChallenges)}
+            />
+            <ToggleRow
+              label={t("settings.notificationSection.partnerUpdates")}
+              enabled={granularPrefs.partnerUpdates}
+              onToggle={() => updatePref("partnerUpdates", !granularPrefs.partnerUpdates)}
+            />
+          </div>
+
+          {/* Quiet hours */}
+          <div className="border-t border-border pt-3 mt-1 space-y-2">
+            <div className="flex items-center gap-1.5">
+              <Moon className="w-3.5 h-3.5 text-muted" />
+              <p className="text-xs text-muted font-medium">
+                {t("settings.notificationSection.quietHoursTitle")}
+                {isQuietHours() && (
+                  <span className="mr-1.5 text-primary text-[10px] font-semibold">● פעיל כעת</span>
+                )}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex-1">
+                <label className="text-xs text-muted block mb-1">
+                  {t("settings.notificationSection.quietStart")}
+                </label>
+                <input
+                  type="time"
+                  value={granularPrefs.quietStart}
+                  onChange={(e) => updatePref("quietStart", e.target.value)}
+                  className="w-full text-sm bg-surface-hover border border-border rounded-lg px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  dir="ltr"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="text-xs text-muted block mb-1">
+                  {t("settings.notificationSection.quietEnd")}
+                </label>
+                <input
+                  type="time"
+                  value={granularPrefs.quietEnd}
+                  onChange={(e) => updatePref("quietEnd", e.target.value)}
+                  className="w-full text-sm bg-surface-hover border border-border rounded-lg px-2 py-1.5 text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  dir="ltr"
+                />
+              </div>
+            </div>
+            <p className="text-[11px] text-muted">
+              {t("settings.notificationSection.quietHoursHint")}
+            </p>
+          </div>
         </>
       )}
 

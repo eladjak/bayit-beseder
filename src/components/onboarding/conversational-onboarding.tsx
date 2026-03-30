@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Check, Sparkles, Home, Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
@@ -663,10 +663,102 @@ function TaskGroup({
 }
 
 // ────────────────────────────────────────────────────────────────────────────
+// Step: Completion celebration
+// ────────────────────────────────────────────────────────────────────────────
+
+function StepDone({ homeName, t }: { homeName: string; t: TFn }) {
+  const didFire = useRef(false);
+
+  useEffect(() => {
+    if (didFire.current) return;
+    didFire.current = true;
+
+    // Dynamically import confetti so it doesn't bloat the initial bundle
+    import("canvas-confetti").then((mod) => {
+      const confetti = mod.default;
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.55 },
+        colors: ["#6366F1", "#8B5CF6", "#D946EF", "#EC4899", "#F59E0B"],
+      });
+    });
+  }, []);
+
+  const displayName = homeName.trim() || t("onboarding.planReadyDefaultHome");
+
+  return (
+    <div className="flex flex-col items-center justify-center text-center h-full px-4">
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", damping: 14, stiffness: 200, delay: 0.1 }}
+        className="w-20 h-20 rounded-full bg-success/15 flex items-center justify-center mb-5"
+      >
+        <motion.span
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", delay: 0.3, damping: 12 }}
+          className="text-4xl"
+        >
+          ✅
+        </motion.span>
+      </motion.div>
+
+      <motion.h1
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.25 }}
+        className="text-2xl font-bold text-foreground mb-2"
+      >
+        {t("onboarding.doneTitle").replace("{homeName}", displayName)}
+      </motion.h1>
+
+      <motion.p
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.35 }}
+        className="text-sm text-muted leading-relaxed max-w-xs mb-2"
+      >
+        {t("onboarding.doneSubtitle")}
+      </motion.p>
+
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.55 }}
+        className="text-xs text-muted/60"
+      >
+        {t("onboarding.doneAutoRedirect")}
+      </motion.p>
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Slim progress bar (top of screen)
+// ────────────────────────────────────────────────────────────────────────────
+
+function SlimProgressBar({ current, total }: { current: number; total: number }) {
+  const pct = Math.round(((current) / (total - 1)) * 100);
+  return (
+    <div className="w-full h-1 bg-border overflow-hidden rounded-full">
+      <motion.div
+        className="h-full rounded-full"
+        style={{ background: "linear-gradient(90deg, #6366F1, #8B5CF6, #D946EF)" }}
+        animate={{ width: `${pct}%` }}
+        initial={{ width: "0%" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
+      />
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 // Main Component
 // ────────────────────────────────────────────────────────────────────────────
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 7; // 0=welcome,1=name,2=rooms,3=residents,4=personality,5=generating+plan,6=done
 
 export function ConversationalOnboarding({ open, onComplete, onSkip }: ConversationalOnboardingProps) {
   const { t } = useTranslation();
@@ -680,6 +772,9 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
   const [dailyMinutes, setDailyMinutes] = useState<DailyMinutes>(30);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedTasks, setGeneratedTasks] = useState<TaskTemplate[] | null>(null);
+
+  // step 6 = done/celebration screen
+  const [showDone, setShowDone] = useState(false);
 
   const goNext = useCallback(() => {
     if (step === 4) {
@@ -710,15 +805,20 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
 
   const handleFinish = useCallback(() => {
     if (!generatedTasks) return;
-    onComplete({
-      homeName,
-      roomCount,
-      residents,
-      kidCount,
-      style,
-      dailyMinutes,
-      tasks: generatedTasks,
-    });
+    // Show celebration screen first, then call onComplete after 2s
+    setShowDone(true);
+    setStep(6);
+    setTimeout(() => {
+      onComplete({
+        homeName,
+        roomCount,
+        residents,
+        kidCount,
+        style,
+        dailyMinutes,
+        tasks: generatedTasks,
+      });
+    }, 2200);
   }, [generatedTasks, homeName, roomCount, residents, kidCount, style, dailyMinutes, onComplete]);
 
   const canProceed = useMemo(() => {
@@ -728,10 +828,14 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
     if (step === 3) return true;
     if (step === 4) return true;
     if (step === 5) return !isGenerating && generatedTasks !== null;
+    if (step === 6) return false; // auto-redirects
     return false;
   }, [step, isGenerating, generatedTasks]);
 
   if (!open) return null;
+
+  // Compute visible step index for the progress bar (exclude welcome=0 and done=6)
+  const progressStep = step === 0 ? 0 : step === 6 ? TOTAL_STEPS - 2 : step;
 
   return (
     <div
@@ -742,22 +846,30 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
       className="fixed inset-0 z-[100] bg-background flex flex-col"
       dir="rtl"
     >
-      {/* Header — skip + progress */}
+      {/* Slim progress bar — full width at top */}
       {step > 0 && (
+        <SlimProgressBar current={progressStep} total={TOTAL_STEPS - 1} />
+      )}
+
+      {/* Header — back arrow + skip */}
+      {step > 0 && step < 6 && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="flex items-center justify-between px-5 pt-safe-top pt-4 pb-2"
+          className="flex items-center justify-between px-5 pt-safe-top pt-3 pb-1"
         >
-          <ProgressDots current={step - 1} total={TOTAL_STEPS - 1} />
-          <button
-            type="button"
-            onClick={onSkip}
-            aria-label={t("onboarding.skipAriaLabel")}
-            className="text-xs text-muted hover:text-foreground transition-colors px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
-          >
-            {t("common.skip")}
-          </button>
+          {/* Dot indicator below the bar */}
+          <ProgressDots current={step - 1} total={TOTAL_STEPS - 2} />
+          {step < 6 && (
+            <button
+              type="button"
+              onClick={onSkip}
+              aria-label={t("onboarding.skipAriaLabel")}
+              className="text-xs text-muted hover:text-foreground transition-colors px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
+            >
+              {t("common.skip")}
+            </button>
+          )}
         </motion.div>
       )}
 
@@ -771,7 +883,7 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
             animate="center"
             exit="exit"
             transition={{ duration: 0.25, ease: "easeOut" }}
-            className={step === 0 || (step === 5 && isGenerating) ? "h-full flex items-center justify-center" : ""}
+            className={step === 0 || (step === 5 && isGenerating) || step === 6 ? "h-full flex items-center justify-center" : ""}
           >
             {step === 0 && <StepWelcome onNext={() => setStep(1)} t={t} />}
             {step === 1 && <StepHomeName value={homeName} onChange={setHomeName} t={t} />}
@@ -790,12 +902,13 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
             {step === 5 && !isGenerating && generatedTasks && (
               <StepPlanReady tasks={generatedTasks} homeName={homeName} t={t} />
             )}
+            {step === 6 && showDone && <StepDone homeName={homeName} t={t} />}
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Footer — navigation buttons */}
-      {step > 0 && !(step === 5 && isGenerating) && (
+      {step > 0 && !(step === 5 && isGenerating) && step < 6 && (
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}

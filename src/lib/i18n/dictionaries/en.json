@@ -59,7 +59,17 @@
       "statusDenied": "Blocked",
       "statusDefault": "Not enabled",
       "statusActive": "Active",
-      "statusInactive": "Inactive"
+      "statusInactive": "Inactive",
+      "granularTitle": "Notification types",
+      "taskReminders": "Task reminders",
+      "dailyDigest": "Daily digest",
+      "achievements": "Achievements",
+      "weeklyChallenges": "Weekly challenges",
+      "partnerUpdates": "Partner updates",
+      "quietHoursTitle": "Quiet hours",
+      "quietStart": "Start",
+      "quietEnd": "End",
+      "quietHoursHint": "No push notifications during quiet hours"
     },
     "appearanceSection": {
       "soundsTitle": "Sounds",
@@ -472,7 +482,10 @@
     "backAriaLabel": "Go back to previous step",
     "continueAriaLabel": "Continue to next step",
     "finishButton": "Let's go!",
-    "continueButton": "Continue"
+    "continueButton": "Continue",
+    "doneTitle": "Ready! {homeName} is all set 🎉",
+    "doneSubtitle": "Your plan is ready. Taking you to the dashboard!",
+    "doneAutoRedirect": "Redirecting to dashboard..."
   },
   "aiChat": {
     "title": "Smart Assistant",
@@ -762,5 +775,29 @@
     "pts": "pts",
     "empty": "No activity this week yet",
     "periodLabel": "Select period"
+  },
+  "activity": {
+    "title": "Household Activity",
+    "noActivity": "No activity yet",
+    "sectionTitle": "Recent Activity"
+  },
+  "badges": {
+    "title": "Badges",
+    "sectionTitle": "Badge Collection",
+    "earned": "Earned",
+    "progress": "Progress",
+    "points": "points",
+    "unlocked": "badges unlocked",
+    "locked": "Locked"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "sectionTitle": "Task Calendar",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "allDone": "All done",
+    "partial": "Partial",
+    "noTasksDay": "No tasks completed on this day",
+    "completions": "tasks completed"
   }
 }

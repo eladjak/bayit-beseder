@@ -40,6 +40,17 @@ import { ShareButton } from "@/components/share-button";
 import { StatCardSkeleton, RingSkeleton } from "@/components/skeleton";
 import { useAdvancedStats } from "@/hooks/useAdvancedStats";
 
+// Badges + Calendar — lazy-load
+const BadgesDisplay = dynamic(
+  () => import("@/components/gamification/badges-display").then((m) => m.BadgesDisplay),
+  { ssr: false, loading: () => <div className="h-40 bg-muted/30 rounded-xl animate-pulse" /> }
+);
+
+const CalendarView = dynamic(
+  () => import("@/components/tasks/calendar-view").then((m) => m.CalendarView),
+  { ssr: false, loading: () => <div className="h-64 bg-muted/30 rounded-xl animate-pulse" /> }
+);
+
 // Recharts is ~200 KB — lazy-load the two chart panels independently
 const WeeklyBarChart = dynamic(
   () => import("@/components/stats/weekly-bar-chart").then((m) => m.WeeklyBarChart),
@@ -686,7 +697,7 @@ export default function StatsPage() {
         </motion.div>
       )}
 
-      {/* Achievements */}
+      {/* Badges Display Case */}
       <motion.div
         className="card-elevated p-4"
         initial={{ opacity: 0, y: 20 }}
@@ -695,41 +706,23 @@ export default function StatsPage() {
       >
         <div className="flex items-center gap-2 mb-3">
           <Trophy className="w-5 h-5 text-amber-500" />
-          <h2 className="font-semibold text-sm">🏆 {t("stats.achievements")}</h2>
-          <span className="text-xs text-muted">
-            {unlockedAchievements.size}/{ACHIEVEMENTS.length}
-          </span>
+          <h2 className="font-semibold text-sm">🏆 {t("badges.sectionTitle")}</h2>
         </div>
-        <Image
-          src="/illustrations/stats-achievements.jpg"
-          alt="הישגים ופרסים"
-          width={512}
-          height={128}
-          className="w-full h-32 object-cover rounded-xl mb-3"
-        />
-        <div className="grid grid-cols-3 gap-3">
-          {ACHIEVEMENTS.map((achievement, idx) => {
-            const unlocked = unlockedAchievements.has(achievement.code);
-            return (
-              <motion.div
-                key={achievement.code}
-                className={`card-elevated p-3 text-center ${
-                  unlocked ? "" : "opacity-40 grayscale"
-                }`}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.2, delay: 0.7 + idx * 0.05 }}
-                whileTap={unlocked ? { scale: 0.95 } : undefined}
-                title={achievement.description}
-              >
-                <span className="text-2xl block mb-1">{achievement.icon}</span>
-                <p className="text-[10px] font-medium text-foreground leading-tight">
-                  {achievement.title}
-                </p>
-              </motion.div>
-            );
-          })}
+        <BadgesDisplay />
+      </motion.div>
+
+      {/* Task Calendar */}
+      <motion.div
+        className="card-elevated p-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.65 }}
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <History className="w-5 h-5 text-primary" />
+          <h2 className="font-semibold text-sm">📅 {t("calendar.sectionTitle")}</h2>
         </div>
+        <CalendarView />
       </motion.div>
 
       {/* ── Advanced Statistics Accordion ─────────────────────────── */}

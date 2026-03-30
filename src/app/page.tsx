@@ -5,8 +5,12 @@ import {
   SocialProofSection,
   TestimonialsSection,
   FloatingCta,
+  AnimatedFeatureCard,
+  AnimatedHowItWorksSection,
+  PulsingCtaButton,
 } from "@/components/landing/landing-interactive";
 import { FaqChat } from "@/components/landing/faq-chat";
+import { StickyCta } from "@/components/landing/sticky-cta";
 
 export const metadata: Metadata = {
   title: "בית בסדר — ניהול הבית ביחד, בכיף",
@@ -149,17 +153,12 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <Link
-              href="/login"
-              className="px-8 py-3.5 bg-white text-indigo-700 font-bold rounded-2xl text-lg shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95"
-            >
-              🚀 התחילו בחינם
-            </Link>
+            <PulsingCtaButton />
             <a
               href="#features"
               className="px-6 py-3 bg-white/15 backdrop-blur-sm text-white font-medium rounded-2xl border border-white/20 hover:bg-white/25 transition-colors"
             >
-              מה בפנים? ↓
+              צפו בהדגמה ↓
             </a>
           </div>
 
@@ -200,44 +199,20 @@ export default function LandingPage() {
             { icon: "🫓", title: "מצב פסח", desc: "37 משימות ב-4 שלבים, 25 פריטי קניות, ספירה לאחור לליל הסדר." },
             { icon: "📱", title: "WhatsApp + PWA", desc: "סיכום יומי בוואטסאפ, התראות, ועובד כאפליקציה מהנייד." },
             { icon: "🏠", title: "אזורים בבית", desc: "ארגון לפי חדרים — מטבח ביום ראשון, סלון ביום שני." },
-          ].map((f) => (
-            <div
+          ].map((f, i) => (
+            <AnimatedFeatureCard
               key={f.title}
-              className="bg-surface border border-border rounded-2xl p-5 hover:shadow-lg transition-shadow"
-            >
-              <div className="text-3xl mb-3">{f.icon}</div>
-              <h3 className="font-bold text-foreground mb-1">{f.title}</h3>
-              <p className="text-sm text-muted leading-relaxed">{f.desc}</p>
-            </div>
+              icon={f.icon}
+              title={f.title}
+              desc={f.desc}
+              index={i}
+            />
           ))}
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="bg-surface border-y border-border py-12">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-xl font-bold text-foreground mb-6">
-            איך זה עובד?
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center text-xl">1️⃣</div>
-              <h3 className="font-semibold text-foreground mb-1">נרשמים</h3>
-              <p className="text-sm text-muted">חשבון Google ותוך שניות אתם בפנים</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center text-xl">2️⃣</div>
-              <h3 className="font-semibold text-foreground mb-1">מזמינים שותף/ה</h3>
-              <p className="text-sm text-muted">שליחת הזמנה בוואטסאפ בלחיצה אחת</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center text-xl">3️⃣</div>
-              <h3 className="font-semibold text-foreground mb-1">הבית בסדר!</h3>
-              <p className="text-sm text-muted">משימות, נקודות, ועוד קצת שקט בבית 😊</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* How it works — animated */}
+      <AnimatedHowItWorksSection />
 
       {/* Testimonials */}
       <TestimonialsSection />
@@ -330,8 +305,11 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* Floating CTA — appears on scroll */}
+      {/* Floating CTA — appears on scroll (desktop pill) */}
       <FloatingCta />
+
+      {/* Sticky bottom CTA — mobile only */}
+      <StickyCta />
     </div>
   );
 }

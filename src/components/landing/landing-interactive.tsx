@@ -4,6 +4,121 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion, useInView, useMotionValue, animate, AnimatePresence } from "framer-motion";
 
+/* ── Scroll-animated feature card ─────────────────────────────── */
+export function AnimatedFeatureCard({
+  icon,
+  title,
+  desc,
+  index,
+}: {
+  icon: string;
+  title: string;
+  desc: string;
+  index: number;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-100px" });
+  // Alternate: odd indices come from left, even from right (RTL-aware)
+  const xFrom = index % 2 === 0 ? -40 : 40;
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, x: xFrom, y: 20 }}
+      animate={inView ? { opacity: 1, x: 0, y: 0 } : {}}
+      transition={{ duration: 0.5, delay: (index % 3) * 0.1, ease: "easeOut" }}
+      className="bg-surface border border-border rounded-2xl p-5 hover:shadow-lg transition-shadow"
+    >
+      <div className="text-3xl mb-3">{icon}</div>
+      <h3 className="font-bold text-foreground mb-1">{title}</h3>
+      <p className="text-sm text-muted leading-relaxed">{desc}</p>
+    </motion.div>
+  );
+}
+
+/* ── Animated "How it works" step ─────────────────────────────── */
+export function AnimatedHowItWorksSection() {
+  const steps = [
+    {
+      emoji: "1️⃣",
+      title: "נרשמים",
+      desc: "חשבון Google ותוך שניות אתם בפנים",
+    },
+    {
+      emoji: "2️⃣",
+      title: "מזמינים שותף/ה",
+      desc: "שליחת הזמנה בוואטסאפ בלחיצה אחת",
+    },
+    {
+      emoji: "3️⃣",
+      title: "הבית בסדר!",
+      desc: "משימות, נקודות, ועוד קצת שקט בבית 😊",
+    },
+  ];
+
+  return (
+    <section className="bg-surface border-y border-border py-12">
+      <div className="max-w-4xl mx-auto px-6 text-center">
+        <motion.h2
+          initial={{ opacity: 0, y: -8 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-xl font-bold text-foreground mb-8"
+        >
+          איך זה עובד?
+        </motion.h2>
+        <div className="grid md:grid-cols-3 gap-6 relative">
+          {/* Dotted connector line — desktop only */}
+          <div
+            className="hidden md:block absolute top-6 inset-x-0 mx-auto h-px border-t-2 border-dashed border-primary/20"
+            aria-hidden="true"
+            style={{ width: "66%", left: "17%" }}
+          />
+          {steps.map((step, i) => (
+            <motion.div
+              key={step.title}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.45, delay: i * 0.13 }}
+              className="text-center relative z-10"
+            >
+              <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center text-xl ring-4 ring-background">
+                {step.emoji}
+              </div>
+              <h3 className="font-semibold text-foreground mb-1">{step.title}</h3>
+              <p className="text-sm text-muted">{step.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Pulsing hero CTA ─────────────────────────────────────────── */
+export function PulsingCtaButton() {
+  return (
+    <div className="relative inline-flex">
+      {/* Pulse ring */}
+      <motion.span
+        className="absolute inset-0 rounded-2xl"
+        style={{ background: "rgba(255,255,255,0.3)" }}
+        animate={{ scale: [1, 1.12, 1], opacity: [0.6, 0, 0.6] }}
+        transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+        aria-hidden="true"
+      />
+      <Link
+        href="/login"
+        className="relative px-8 py-3.5 bg-white text-indigo-700 font-bold rounded-2xl text-lg shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95"
+      >
+        🚀 התחילו בחינם
+      </Link>
+    </div>
+  );
+}
+
 /* ── Animated counter ─────────────────────────────────────────── */
 function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);

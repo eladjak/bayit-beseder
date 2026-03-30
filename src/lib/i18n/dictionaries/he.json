@@ -59,7 +59,17 @@
       "statusDenied": "חסום",
       "statusDefault": "לא הופעל",
       "statusActive": "פעיל",
-      "statusInactive": "לא פעיל"
+      "statusInactive": "לא פעיל",
+      "granularTitle": "סוגי התראות",
+      "taskReminders": "תזכורות משימות",
+      "dailyDigest": "סיכום יומי",
+      "achievements": "הישגים",
+      "weeklyChallenges": "אתגרים שבועיים",
+      "partnerUpdates": "עדכוני שותפים",
+      "quietHoursTitle": "שעות שקט",
+      "quietStart": "התחלה",
+      "quietEnd": "סיום",
+      "quietHoursHint": "בשעות השקט לא ישלחו התראות Push"
     },
     "appearanceSection": {
       "soundsTitle": "צלילים",
@@ -472,7 +482,10 @@
     "backAriaLabel": "חזור לשלב הקודם",
     "continueAriaLabel": "המשך לשלב הבא",
     "finishButton": "מתחילים!",
-    "continueButton": "המשך"
+    "continueButton": "המשך",
+    "doneTitle": "מוכנים! {homeName} בסדר גמור 🎉",
+    "doneSubtitle": "התוכנית שלכם מוכנה. עכשיו הולכים לדשבורד ומתחילים!",
+    "doneAutoRedirect": "מעביר אתכם לדשבורד..."
   },
   "aiChat": {
     "title": "העוזר החכם",
@@ -762,5 +775,29 @@
     "pts": "נק'",
     "empty": "עדיין אין פעילות השבוע",
     "periodLabel": "בחירת תקופה"
+  },
+  "activity": {
+    "title": "פעילות הבית",
+    "noActivity": "אין פעילות עדיין",
+    "sectionTitle": "פעילות אחרונה"
+  },
+  "badges": {
+    "title": "הישגים",
+    "sectionTitle": "תיק הישגים",
+    "earned": "הושג",
+    "progress": "התקדמות",
+    "points": "נקודות",
+    "unlocked": "הישגים פתוחים",
+    "locked": "נעול"
+  },
+  "calendar": {
+    "title": "לוח שנה",
+    "sectionTitle": "לוח שנה — היסטוריה",
+    "prevMonth": "חודש קודם",
+    "nextMonth": "חודש הבא",
+    "allDone": "הכל הושלם",
+    "partial": "חלקי",
+    "noTasksDay": "לא הושלמו משימות ביום זה",
+    "completions": "משימות הושלמו"
   }
 }
