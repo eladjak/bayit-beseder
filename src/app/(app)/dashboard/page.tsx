@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { TodayOverview, type TaskItem } from "@/components/dashboard/today-overview";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
@@ -638,6 +639,41 @@ export default function DashboardPage() {
         </div>
 
         <CoachingInsight />
+
+        {/* Blog & Website links */}
+        <div className="space-y-2">
+          <Link
+            href="/blog"
+            className="block card-elevated p-4 hover:scale-[0.99] active:scale-[0.97] transition-transform"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white text-lg flex-shrink-0">
+                {"\u270D\uFE0F"}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground">{t("common.login") === "Login" ? "Tips & Guides" : "טיפים ומדריכים"}</p>
+                <p className="text-xs text-muted truncate">{t("common.login") === "Login" ? "Home management articles from the blog" : "מאמרים לניהול הבית מהבלוג"}</p>
+              </div>
+              <span className="text-muted text-xs">{t("common.login") === "Login" ? "→" : "←"}</span>
+            </div>
+          </Link>
+
+          <a
+            href="/"
+            className="block card-elevated p-4 hover:scale-[0.99] active:scale-[0.97] transition-transform"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-lg flex-shrink-0">
+                🏠
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-foreground">{t("common.login") === "Login" ? "About BayitBeSeder" : "אודות בית בסדר"}</p>
+                <p className="text-xs text-muted truncate">{t("common.login") === "Login" ? "Our landing page — share with friends!" : "דף הנחיתה שלנו — שתפו עם חברים!"}</p>
+              </div>
+              <span className="text-muted text-xs">{t("common.login") === "Login" ? "→" : "←"}</span>
+            </div>
+          </a>
+        </div>
 
         <EmergencyToggle
           active={emergencyMode}
