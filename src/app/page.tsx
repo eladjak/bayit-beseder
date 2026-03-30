@@ -254,27 +254,36 @@ export default function LandingPage() {
         </Link>
       </section>
 
-      {/* Beta Feedback Banner */}
-      <section className="bg-amber-50 dark:bg-amber-950/20 border-y border-amber-200/50 dark:border-amber-800/30 py-8 px-6 text-center">
+      {/* Community & Open Source Banner */}
+      <section className="bg-gradient-to-b from-primary/5 to-transparent border-y border-primary/10 py-10 px-6 text-center">
         <div className="max-w-2xl mx-auto">
-          <p className="text-lg font-bold text-amber-900 dark:text-amber-100 mb-2">🧪 גרסה ראשונה — המשוב שלכם חשוב!</p>
-          <p className="text-sm text-amber-700 dark:text-amber-300 mb-4 leading-relaxed">
-            אנחנו בונים את &quot;בית בסדר&quot; ומשפרים כל הזמן. נתקלתם בבאג? חסר לכם פיצ&apos;ר? יש רעיון?
+          <p className="text-lg font-bold text-foreground mb-2">קוד פתוח — בנו איתנו!</p>
+          <p className="text-sm text-muted mb-5 leading-relaxed">
+            &quot;בית בסדר&quot; הוא פרויקט קוד פתוח. אהבתם? תנו לנו כוכב ב-GitHub!
             <br />
-            כל משוב — גם קטן — עוזר לנו לבנות אפליקציה טובה יותר.
+            נתקלתם בבאג או יש לכם רעיון? נשמח לשמוע.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <a
-              href="mailto:contact@bayitbeseder.com?subject=משוב על בית בסדר"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-600 text-white font-semibold text-sm shadow-md hover:bg-amber-700 transition-colors active:scale-95"
+              href="https://github.com/eladjak/bayit-beseder"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#24292f] dark:bg-white text-white dark:text-[#24292f] font-semibold text-sm shadow-md hover:opacity-90 active:scale-95 transition-all"
             >
-              ✉️ שלחו משוב במייל
+              <svg className="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+              Star on GitHub
+            </a>
+            <a
+              href="mailto:contact@bayitbeseder.com?subject=משוב על בית בסדר"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-primary text-white font-semibold text-sm shadow-md shadow-primary/20 active:scale-95 transition-transform"
+            >
+              ✉️ שלחו משוב
             </a>
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-200 font-medium text-sm hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-border text-muted font-medium text-sm hover:text-foreground transition-colors"
             >
-              💬 דף יצירת קשר
+              💬 צור קשר
             </Link>
           </div>
         </div>
@@ -286,7 +295,13 @@ export default function LandingPage() {
           {/* Brand */}
           <p className="font-bold text-base text-foreground mb-1">🏠 בית בסדר</p>
           <p className="text-muted mb-2">ניהול הבית ביחד, בכיף — חינם לחלוטין</p>
-          <p className="inline-flex items-center gap-1.5 text-[10px] font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary mb-4">🧪 גרסה ראשונה — <a href="/contact" className="underline hover:text-primary/80">נשמח למשוב!</a></p>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <a href="https://github.com/eladjak/bayit-beseder" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-full bg-[#24292f]/10 dark:bg-white/10 text-foreground hover:bg-[#24292f]/20 transition-colors">
+              <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+              GitHub
+            </a>
+            <a href="/contact" className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">נשמח למשוב!</a>
+          </div>
 
           {/* Links grid */}
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-6 text-xs">
