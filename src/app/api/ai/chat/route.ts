@@ -14,7 +14,7 @@ const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 // ---------------------------------------------------------------------------
 
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse";
 
 const SYSTEM_PROMPT =
   "אתה עוזר חכם לניהול בית. אתה עוזר לזוגות לתכנן ולנהל את תחזוקת הבית. עונה בעברית, בטון חם וידידותי. תשובות קצרות וענייניות. אתה מכיר את אפליקציית 'בית בסדר'.";
