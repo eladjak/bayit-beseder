@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import {
   getValidAccessToken,
-  getPrimaryCalendarId,
   listEvents,
   createEvent,
   taskToCalendarEvent,
@@ -81,24 +80,8 @@ export async function POST() {
       .eq("id", user.id);
   }
 
-  // Resolve primary calendar id (cache in profile if missing)
-  let calendarId = (profile.google_calendar_id as string | null) ?? null;
-  if (!calendarId) {
-    try {
-      calendarId = await getPrimaryCalendarId(accessToken);
-      // Cache it
-      await supabase
-        .from("profiles")
-        .update({ google_calendar_id: calendarId })
-        .eq("id", user.id);
-    } catch (err) {
-      console.error("[calendar/sync] Failed to get calendar id:", err);
-      return NextResponse.json(
-        { error: "Failed to access Google Calendar" },
-        { status: 502 }
-      );
-    }
-  }
+  // Use "primary" alias — works with calendar.events scope, no calendarList permission needed
+  const calendarId = (profile.google_calendar_id as string | null) ?? "primary";
 
   // Date range: today → 7 days from now (in ISO format, Israel timezone)
   const now = new Date();
