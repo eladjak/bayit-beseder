@@ -53,12 +53,26 @@ export function ThemeScript() {
     var dark = t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
     if (dark) document.documentElement.classList.add('dark');
   } catch(e){}
+  try {
+    var colorMap = {
+      indigo: '239 68% 58%',
+      blue: '221 83% 53%',
+      purple: '263 70% 58%',
+      pink: '328 73% 53%',
+      green: '160 84% 39%',
+      orange: '21 90% 48%'
+    };
+    var c = localStorage.getItem('bayit-theme-color');
+    if (c && colorMap[c]) {
+      document.documentElement.style.setProperty('--color-primary', colorMap[c]);
+    }
+  } catch(e){}
 })();
 `.trim();
 
   return (
     <script
-      // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional theme init script
+      // biome-ignore lint/security/noDangerouslySetInnerHtml: intentional theme + color init script
       dangerouslySetInnerHTML={{ __html: script }}
     />
   );

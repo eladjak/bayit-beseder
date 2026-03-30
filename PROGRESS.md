@@ -1,12 +1,12 @@
 # BayitBeSeder (בית בסדר) - Progress
 
 ## Status: LIVE
-## Last Updated: 2026-03-29
+## Last Updated: 2026-03-30
 ## URL: https://www.bayitbeseder.com
 ## Domain: bayitbeseder.com (Namecheap → Cloudflare DNS → Vercel)
 
 ## Current State
-App is fully functional with: Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input, Gemini AI chat, full i18n (1000+ keys), list virtualization, page transitions, SW v5, zone wizard D&D, multi-user members, Upstash Redis rate limiting, WhatsApp reply-to-complete, push notifications, Sentry, Plausible analytics, 24 achievements, 14 weekly challenges, leaderboard, advanced stats + calendar view, activity feed, badges display, Playwright E2E (14 tests), 260+ unit tests, calendar auto-sync cron, offline queue, Web Share API, keyboard shortcuts, bundle analyzer, CSV export, 5 task templates, QR invite, shopping share, task photos, streak badges, skip tasks, sitemap.ts, FAQ schema, per-page metadata, scroll animations, sticky CTA, confetti onboarding, notification preferences + quiet hours. Vercel auto-deploys from master. 240+ files, 30K+ lines of code.
+App is fully functional with: Pesach mode, zone-based scheduling, custom domain, security hardening, UI facelift, conversational onboarding, voice input, Gemini AI chat, full i18n (1000+ keys), list virtualization, page transitions, SW v5, zone wizard D&D, multi-user members, Upstash Redis rate limiting, WhatsApp reply-to-complete, push notifications, Sentry, Plausible analytics, 24 achievements, 14 weekly challenges, leaderboard, advanced stats + calendar view, activity feed, badges display, Playwright E2E (14 tests), 260+ unit tests, calendar auto-sync cron, offline queue, Web Share API, keyboard shortcuts, bundle analyzer, CSV export, 5 task templates, QR invite, shopping share, task photos, streak badges, skip tasks, sitemap.ts, FAQ schema, per-page metadata, scroll animations, sticky CTA, confetti onboarding, notification preferences + quiet hours, PERFORMANCE FIXES (LaunchCrew 0/F). Vercel auto-deploys from master. 240+ files, 30K+ lines of code.
 
 ## Recent Work
 

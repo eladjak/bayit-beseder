@@ -57,6 +57,17 @@ export async function GET(request: NextRequest) {
   const completed = allTasks.filter((t) => t.status === "completed");
   const remaining = allTasks.filter((t) => t.status !== "completed");
 
+  // Tomorrow's task count for preview in evening summary
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = tomorrow.toISOString().slice(0, 10);
+  const { data: tomorrowTasks } = await supabase
+    .from("tasks")
+    .select("id")
+    .eq("due_date", tomorrowStr)
+    .neq("status", "completed");
+  const tomorrowCount = tomorrowTasks?.length ?? 0;
+
   // Get streak
   const { data: streaks } = await supabase
     .from("streaks")
@@ -104,13 +115,23 @@ export async function GET(request: NextRequest) {
       remaining.map((t) => t.title)
     );
   } else {
-    // Fetch member names dynamically
+    // Fetch member names + ids dynamically
     const { data: memberProfiles } = await supabase
       .from("profiles")
-      .select("display_name")
+      .select("id, display_name")
       .not("display_name", "is", null)
       .limit(10);
     const memberNames = (memberProfiles ?? []).map((p) => p.display_name).filter(Boolean) as string[];
+
+    // Per-member completion count
+    const memberStats = (memberProfiles ?? [])
+      .filter((p) => p.display_name)
+      .map((p) => ({
+        name: p.display_name as string,
+        completed: allTasks.filter(
+          (t) => t.assigned_to === p.id && t.status === "completed"
+        ).length,
+      }));
 
     const summaryData: DailySummaryData = {
       names: memberNames.length > 0 ? memberNames : ["משתמש"],
@@ -120,6 +141,8 @@ export async function GET(request: NextRequest) {
       remainingTasks: remaining.map((t) => t.title),
       streak,
       topPerformer: null, // "We" framing - no individual scores
+      memberStats: memberStats.length >= 2 ? memberStats : undefined,
+      tomorrowCount,
     };
     message = buildEveningSummary(summaryData);
   }

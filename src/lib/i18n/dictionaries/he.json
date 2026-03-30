@@ -81,6 +81,10 @@
       "languageTitle": "שפה",
       "languageSoon": "English translation is coming soon. The app will remain in Hebrew for now."
     },
+    "themeCustomizer": {
+      "title": "ערכת צבעים",
+      "description": "בחרו צבע ראשי לאפליקציה"
+    },
     "whatsappSection": {
       "description": "קבלו סיכום יומי בוואטסאפ - תזכורת בוקר (08:00) וסיכום ערב (20:00)",
       "toggle": "הודעות וואטסאפ",
@@ -121,10 +125,16 @@
       "disconnectLabel": "נתק Google Calendar",
       "syncHint": "הסנכרון יוסיף את המשימות השבועיות שלכם ל-Google Calendar אוטומטית.",
       "connectHint": "חברו את Google Calendar כדי לראות את המשימות הביתיות ישירות בלוח השנה שלכם.",
+      "reconnectHint": "לחצו על הכפתור להתחבר מחדש ולאמת מחדש את הגישה.",
       "connect": "חבר Google Calendar",
+      "reconnect": "חבר מחדש",
       "connecting": "מתחבר...",
       "connectLabel": "חבר Google Calendar",
-      "securityHint": "הנתונים שלכם מאובטחים. אנחנו מבקשים גישה ליצירת אירועים בלבד."
+      "reconnectLabel": "חבר מחדש את Google Calendar",
+      "securityHint": "הנתונים שלכם מאובטחים. אנחנו מבקשים גישה ליצירת אירועים בלבד.",
+      "errorTokenExpired": "פג תוקף החיבור. לחצו להתחבר מחדש.",
+      "errorGeneral": "לא הצלחנו לגשת ל-Google Calendar. נסו שוב.",
+      "syncError": "שגיאה בסנכרון"
     },
     "members": {
       "title": "חברי הבית",
@@ -405,6 +415,17 @@
       "favoriteCategory": "קטגוריה אהובה",
       "timeSaved": "זמן שנחסך",
       "totalCompletions": "השלמות סה״כ"
+    },
+    "comparison": {
+      "title": "השוואת חברי הבית",
+      "weeklyPct": "אחוז השלמה השבוע",
+      "completionPct": "אחוז השלמה",
+      "goldenRuleBalance": "מאזן כלל הזהב",
+      "goldenTarget": "יעד",
+      "otherMembers": "שאר הבית",
+      "balanced": "מאוזן",
+      "imbalanced": "לא מאוזן",
+      "sparklineLabel": "4 שבועות אחרונים"
     }
   },
   "auth": {
@@ -799,5 +820,14 @@
     "partial": "חלקי",
     "noTasksDay": "לא הושלמו משימות ביום זה",
     "completions": "משימות הושלמו"
+  },
+  "whatsapp": {
+    "morningGreeting": "בוקר טוב!",
+    "eveningSummaryTitle": "סיכום יומי",
+    "replyHint": "השיבו עם מספר המשימה כדי לסמן כבוצעה",
+    "streakMessage": "רצף של {streak} ימים!",
+    "tomorrowPreview": "מחר ממתינות לכם {count} משימות",
+    "badgeEarned": "השגתם תג חדש היום: \"{badge}\"",
+    "estimatedTime": "בערך {time}"
   }
 }

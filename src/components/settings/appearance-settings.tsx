@@ -2,6 +2,7 @@
 
 import { Moon, Sun, Globe, Volume2, MessageCircle, Save, Loader2 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { ThemeCustomizer } from "@/components/settings/theme-customizer";
 
 type Theme = "light" | "dark" | "system";
 type Language = "he" | "en";
@@ -131,6 +132,9 @@ export function AppearanceSettings({
           />
         </div>
       </section>
+
+      {/* Color Theme */}
+      <ThemeCustomizer />
 
       {/* Language */}
       <section className="card-elevated p-4 space-y-3">

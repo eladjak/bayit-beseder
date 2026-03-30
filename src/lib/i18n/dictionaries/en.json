@@ -81,6 +81,10 @@
       "languageTitle": "Language",
       "languageSoon": "English translation is coming soon. The app will remain in Hebrew for now."
     },
+    "themeCustomizer": {
+      "title": "Color Theme",
+      "description": "Choose the primary color for the app"
+    },
     "whatsappSection": {
       "description": "Receive a daily summary on WhatsApp — morning reminder (08:00) and evening summary (20:00)",
       "toggle": "WhatsApp messages",
@@ -121,10 +125,16 @@
       "disconnectLabel": "Disconnect Google Calendar",
       "syncHint": "Sync will automatically add your weekly tasks to Google Calendar.",
       "connectHint": "Connect Google Calendar to see your home tasks directly in your calendar.",
+      "reconnectHint": "Click the button below to reconnect and re-authorize access.",
       "connect": "Connect Google Calendar",
+      "reconnect": "Reconnect",
       "connecting": "Connecting...",
       "connectLabel": "Connect Google Calendar",
-      "securityHint": "Your data is secure. We only request access to create events."
+      "reconnectLabel": "Reconnect Google Calendar",
+      "securityHint": "Your data is secure. We only request access to create events.",
+      "errorTokenExpired": "Connection expired. Click to reconnect.",
+      "errorGeneral": "Could not access Google Calendar. Please try again.",
+      "syncError": "Sync error"
     },
     "members": {
       "title": "Household Members",
@@ -405,6 +415,17 @@
       "favoriteCategory": "Favorite category",
       "timeSaved": "Time saved",
       "totalCompletions": "total completions"
+    },
+    "comparison": {
+      "title": "Household Comparison",
+      "weeklyPct": "Weekly completion rate",
+      "completionPct": "Completion rate",
+      "goldenRuleBalance": "Golden rule balance",
+      "goldenTarget": "Target",
+      "otherMembers": "Others",
+      "balanced": "Balanced",
+      "imbalanced": "Imbalanced",
+      "sparklineLabel": "Last 4 weeks"
     }
   },
   "auth": {
@@ -799,5 +820,14 @@
     "partial": "Partial",
     "noTasksDay": "No tasks completed on this day",
     "completions": "tasks completed"
+  },
+  "whatsapp": {
+    "morningGreeting": "Good morning!",
+    "eveningSummaryTitle": "Daily Summary",
+    "replyHint": "Reply with the task number to mark as done",
+    "streakMessage": "{streak}-day streak!",
+    "tomorrowPreview": "Tomorrow you have {count} tasks waiting",
+    "badgeEarned": "You earned a new badge today: \"{badge}\"",
+    "estimatedTime": "About {time}"
   }
 }

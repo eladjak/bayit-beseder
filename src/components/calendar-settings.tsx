@@ -9,6 +9,7 @@ import {
   Loader2,
   Link2Off,
   ExternalLink,
+  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
@@ -27,7 +28,10 @@ interface CalendarStatus {
   connected: boolean;
   calendarId: string | null;
   lastSync?: string;
+  error?: string;
 }
+
+type CalendarError = "token_expired" | "access_error" | null;
 
 export function CalendarSettings() {
   const { t } = useTranslation();
@@ -42,6 +46,7 @@ export function CalendarSettings() {
   const [syncing, setSyncing] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [lastSyncResult, setLastSyncResult] = useState<SyncResult | null>(null);
+  const [calendarError, setCalendarError] = useState<CalendarError>(null);
 
   // Fetch current connection status
   const fetchStatus = useCallback(async () => {
@@ -49,11 +54,21 @@ export function CalendarSettings() {
     try {
       const res = await fetch("/api/calendar/sync");
       if (res.ok) {
-        const data = (await res.json()) as CalendarStatus;
+        const data = (await res.json()) as CalendarStatus & { error?: string };
         setStatus(data);
+        // Detect token-expired error (API clears tokens and returns connected: false)
+        if (!data.connected && data.error) {
+          const isTokenError =
+            data.error.includes("פגו") ||
+            data.error.toLowerCase().includes("expired") ||
+            data.error.toLowerCase().includes("revoked");
+          setCalendarError(isTokenError ? "token_expired" : "access_error");
+        } else {
+          setCalendarError(null);
+        }
       }
     } catch {
-      // Ignore — not critical
+      // Network error — not critical, don't block UI
     }
   }, [user]);
 
@@ -106,7 +121,14 @@ export function CalendarSettings() {
       const res = await fetch("/api/calendar/sync", { method: "POST" });
       if (!res.ok) {
         const data = (await res.json()) as { error?: string };
-        toast.error(data.error ?? "שגיאה בסנכרון");
+        // If 401 — token expired, show reconnect UI instead of blocking error
+        if (res.status === 401) {
+          setStatus({ connected: false, calendarId: null });
+          setCalendarError("token_expired");
+          toast.warning(t("settings.calendarSection.errorTokenExpired"));
+          return;
+        }
+        toast.error(data.error ?? t("settings.calendarSection.syncError"));
         return;
       }
       const result = (await res.json()) as SyncResult;
@@ -262,15 +284,33 @@ export function CalendarSettings() {
             exit={{ opacity: 0 }}
             className="space-y-3"
           >
+            {/* Error state banner */}
+            {calendarError && (
+              <div className="flex items-start gap-2 bg-warning/10 border border-warning/20 rounded-xl px-4 py-3">
+                <AlertCircle className="w-4 h-4 text-warning flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-foreground">
+                  {calendarError === "token_expired"
+                    ? t("settings.calendarSection.errorTokenExpired")
+                    : t("settings.calendarSection.errorGeneral")}
+                </p>
+              </div>
+            )}
+
             <p className="text-xs text-muted">
-              {t("settings.calendarSection.connectHint")}
+              {calendarError
+                ? t("settings.calendarSection.reconnectHint")
+                : t("settings.calendarSection.connectHint")}
             </p>
 
             <button
               onClick={handleConnect}
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 py-3 gradient-primary text-white rounded-2xl font-semibold text-sm shadow-md shadow-primary/20 disabled:opacity-50 active:scale-95 transition-transform"
-              aria-label={t("settings.calendarSection.connectLabel")}
+              aria-label={
+                calendarError
+                  ? t("settings.calendarSection.reconnectLabel")
+                  : t("settings.calendarSection.connectLabel")
+              }
             >
               {loading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -279,7 +319,9 @@ export function CalendarSettings() {
               )}
               {loading
                 ? t("settings.calendarSection.connecting")
-                : t("settings.calendarSection.connect")}
+                : calendarError
+                  ? t("settings.calendarSection.reconnect")
+                  : t("settings.calendarSection.connect")}
             </button>
 
             <p className="text-[10px] text-muted">
