@@ -83,10 +83,10 @@ export function NotificationSettings({
 
       {/* Permission status */}
       {isNotificationSupported() && notifPermission !== "granted" && (
-        <div className="bg-primary/5 border border-primary/10 rounded-xl p-3">
-          <p className="text-xs text-muted mb-2">
+        <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
+          <p className="text-xs text-amber-800 dark:text-amber-200 mb-2">
             {notifPermission === "denied"
-              ? t("settings.notificationSection.permissionDenied")
+              ? "ההתראות חסומות. לחצו על הסמל 🔒 בשורת הכתובת → אפשרו התראות → רעננו"
               : t("settings.notificationSection.permissionPrompt")}
           </p>
           {notifPermission === "default" && (
@@ -95,6 +95,14 @@ export function NotificationSettings({
               className="px-3 py-1.5 gradient-primary text-white rounded-xl text-xs font-semibold shadow-sm shadow-primary/20 transition-transform duration-100 active:scale-[0.95]"
             >
               {t("settings.notificationSection.enableNotifications")}
+            </button>
+          )}
+          {notifPermission === "denied" && (
+            <button
+              onClick={() => window.location.reload()}
+              className="px-3 py-1.5 bg-amber-600 text-white rounded-xl text-xs font-semibold transition-transform duration-100 active:scale-[0.95]"
+            >
+              רעננו לאחר שינוי ההרשאה
             </button>
           )}
         </div>
