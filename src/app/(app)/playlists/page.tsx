@@ -41,6 +41,7 @@ export default function PlaylistsPage() {
           alt={t("playlists.imageAlt")}
           width={512}
           height={144}
+          sizes="(max-width: 512px) 100vw, 512px"
           className="w-full h-36 object-cover opacity-60"
         />
         <div className="text-center px-4 pt-4 pb-8 -mt-4 relative z-10">

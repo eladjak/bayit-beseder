@@ -8,7 +8,10 @@ import "./globals.css";
 const heebo = Heebo({
   variable: "--font-heebo",
   subsets: ["hebrew", "latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  // Reduced from 5 weights to 4 — 300 is rarely used; saves ~15KB
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {

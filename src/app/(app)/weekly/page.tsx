@@ -640,6 +640,7 @@ export default function WeeklyPage() {
             alt="תכנון שבועי"
             width={512}
             height={128}
+            sizes="(max-width: 512px) 100vw, 512px"
             className="w-full h-32 object-cover"
           />
         </div>

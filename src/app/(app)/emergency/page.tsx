@@ -201,6 +201,7 @@ export default function EmergencyPage() {
           alt="מצב חירום"
           width={512}
           height={144}
+          sizes="(max-width: 512px) 100vw, 512px"
           className="w-full h-36 object-cover"
         />
         <div className="p-4">

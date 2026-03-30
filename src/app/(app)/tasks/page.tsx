@@ -683,6 +683,7 @@ export default function TasksPage() {
               alt={activeCategory === "all" ? t("tasks.allDone") : t("tasks.noCategoryTasks")}
               width={192}
               height={192}
+              sizes="192px"
               className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
             />
             <p className="font-medium text-foreground">

@@ -1,6 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+
+// Dynamic imports live in landing-dynamics.tsx (a Client Component).
+// ssr:false is only valid inside Client Components in the App Router.
 import {
   SocialProofSection,
   TestimonialsSection,
@@ -8,9 +11,9 @@ import {
   AnimatedFeatureCard,
   AnimatedHowItWorksSection,
   PulsingCtaButton,
-} from "@/components/landing/landing-interactive";
-import { FaqChat } from "@/components/landing/faq-chat";
-import { StickyCta } from "@/components/landing/sticky-cta";
+  FaqChat,
+  StickyCta,
+} from "@/components/landing/landing-dynamics";
 
 export const metadata: Metadata = {
   title: "בית בסדר — ניהול הבית ביחד, בכיף",

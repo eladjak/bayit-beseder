@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
   images: {
     // Serve modern formats for smaller file sizes
     formats: ["image/avif", "image/webp"],
+    // Limit image sizes to only what we actually use — reduces cache variants
+    deviceSizes: [375, 640, 750, 828, 1080, 1200],
+    imageSizes: [16, 32, 64, 128, 256, 320],
+    // Aggressive caching: 30 days for optimized images
+    minimumCacheTTL: 2592000,
     remotePatterns: [
       {
         protocol: "https",
