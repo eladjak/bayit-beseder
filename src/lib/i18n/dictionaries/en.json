@@ -134,7 +134,8 @@
       "securityHint": "Your data is secure. We only request access to create events.",
       "errorTokenExpired": "Connection expired. Click to reconnect.",
       "errorGeneral": "Could not access Google Calendar. Please try again.",
-      "syncError": "Sync error"
+      "syncError": "Sync error",
+      "openCalendar": "Open my calendar to see →"
     },
     "members": {
       "title": "Household Members",

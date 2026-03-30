@@ -272,9 +272,19 @@ export function CalendarSettings() {
               </button>
             </div>
 
-            <p className="text-xs text-muted">
-              {t("settings.calendarSection.syncHint")}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-muted">
+                {t("settings.calendarSection.syncHint")}
+              </p>
+              <a
+                href="https://calendar.google.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-medium text-primary hover:underline whitespace-nowrap flex-shrink-0 mr-2"
+              >
+                {t("settings.calendarSection.openCalendar")}
+              </a>
+            </div>
           </motion.div>
         ) : (
           <motion.div

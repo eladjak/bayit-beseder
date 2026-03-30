@@ -105,17 +105,10 @@ export function useActivityFeed(): UseActivityFeedReturn {
         return;
       }
 
-      // Fetch last 20 completions joined with profiles and tasks
+      // Fetch last 20 completions (no FK joins — avoids 400 if relations missing)
       const { data, error } = await supabase
         .from("task_completions")
-        .select(`
-          id,
-          task_id,
-          user_id,
-          completed_at,
-          tasks (title),
-          profiles (display_name, avatar_url)
-        `)
+        .select("id, task_id, user_id, completed_at")
         .order("completed_at", { ascending: false })
         .limit(20);
 
@@ -125,21 +118,30 @@ export function useActivityFeed(): UseActivityFeedReturn {
         return;
       }
 
+      // Fetch task titles and profile info in parallel
+      const taskIds = [...new Set(data.map((r) => r.task_id))];
+      const userIds = [...new Set(data.map((r) => r.user_id))];
+
+      const [tasksRes, profilesRes] = await Promise.all([
+        supabase.from("tasks").select("id, title").in("id", taskIds),
+        supabase.from("profiles").select("id, display_name, avatar_url").in("id", userIds),
+      ]);
+
+      const taskMap = new Map((tasksRes.data ?? []).map((t) => [t.id, t.title]));
+      const profileMap = new Map(
+        (profilesRes.data ?? []).map((p) => [p.id, { name: p.display_name, avatar: p.avatar_url }])
+      );
+
       const items: ActivityItem[] = data.map((row) => {
-        const taskTitle =
-          (row.tasks as { title?: string } | null)?.title ?? "משימה";
-        const profile = row.profiles as {
-          display_name?: string;
-          avatar_url?: string | null;
-        } | null;
-        const displayName = profile?.display_name ?? "משתמש";
+        const taskTitle = taskMap.get(row.task_id) ?? "משימה";
+        const profile = profileMap.get(row.user_id);
 
         return {
           id: row.id,
           type: "task_completed" as const,
           userId: row.user_id,
-          userName: displayName,
-          avatarUrl: profile?.avatar_url ?? null,
+          userName: profile?.name ?? "משתמש",
+          avatarUrl: profile?.avatar ?? null,
           title: `השלים/ה: ${taskTitle}`,
           timestamp: new Date(row.completed_at),
           icon: "✅",

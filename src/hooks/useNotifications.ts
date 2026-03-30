@@ -235,7 +235,7 @@ async function fetchNotificationsFromSupabase(): Promise<SupabaseNotificationDat
         .eq("household_id", hId)
         .neq("id", user.id)
         .limit(1)
-        .single();
+        .maybeSingle();
       if (members?.display_name) {
         partnerName = members.display_name;
       }

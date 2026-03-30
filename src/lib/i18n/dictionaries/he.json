@@ -134,7 +134,8 @@
       "securityHint": "הנתונים שלכם מאובטחים. אנחנו מבקשים גישה ליצירת אירועים בלבד.",
       "errorTokenExpired": "פג תוקף החיבור. לחצו להתחבר מחדש.",
       "errorGeneral": "לא הצלחנו לגשת ל-Google Calendar. נסו שוב.",
-      "syncError": "שגיאה בסנכרון"
+      "syncError": "שגיאה בסנכרון",
+      "openCalendar": "פתחו את היומן שלי לראות →"
     },
     "members": {
       "title": "חברי הבית",
