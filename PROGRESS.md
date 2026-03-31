@@ -10,6 +10,29 @@ App is fully functional with: Pesach mode, zone-based scheduling, custom domain,
 
 ## Recent Work
 
+### Iteration: 2026-03-31 — Competitor Analysis + 8 Feature Integration
+
+**Competitor reviewed:** pesach-app.vercel.app — guided room wizard, task claiming, difficulty levels
+
+**5 commits this session:**
+
+1. **Sanity CMS blog integration** — dynamic posts from Sanity above static fallback, blog email subscribe, hreflang, 6 Gemini illustrations
+2. **Notification tone upgrade** — warm humorous copy (he+en), landing page accessible when logged in
+3. **Mobile mic fix** — getUserMedia before SpeechRecognition for mobile PWA permission popup
+4. **8 competitor-inspired features** (2,639 new lines):
+   - F1: Guided Room-by-Room Setup Wizard (5 steps, 100+ task templates)
+   - F2: Difficulty Badges & Points (green/amber/red on task cards)
+   - F3: Self-Service Task Claiming ("I'll take it!" button)
+   - F4: House Map — Room Progress Cards (visual grid on dashboard)
+   - F5: Print Task Checklist (A4 RTL Hebrew, for the fridge!)
+   - F6: Enhanced Competition Scoreboard (daily/weekly/all-time tabs)
+   - F7: Prize System (progress bars, default prizes, admin manager)
+   - F8: Pesach Wizard Integration (room wizard pre-loaded with Pesach tasks)
+5. **Dashboard integration** — House Map + Prize Card wired into dashboard
+
+**New files:** 16 files created, 2,700+ lines added
+**i18n:** ~80 new translation keys (he + en)
+
 ### Iteration: 2026-03-30 — Fixes, Blog, AI Chat, Calendar, Sanity CMS
 
 **11 commits this session:**
