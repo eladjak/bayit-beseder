@@ -55,8 +55,13 @@ export function VoiceInputButton({
     }
   }, [error, t]);
 
-  // Hide button completely if permission was denied
-  if (permissionDenied.current || !isSupported) {
+  // Hide button if permission was explicitly denied
+  if (permissionDenied.current) {
+    return null;
+  }
+
+  // On unsupported browsers (Firefox, some iOS), hide gracefully
+  if (!isSupported) {
     return null;
   }
 

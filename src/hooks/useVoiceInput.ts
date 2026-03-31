@@ -191,7 +191,27 @@ export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInput
     };
 
     recognitionRef.current = recognition;
-    recognition.start();
+
+    // On mobile browsers (especially PWA mode), SpeechRecognition.start() may
+    // silently fail without showing a permission prompt. Explicitly requesting
+    // microphone access first via getUserMedia ensures the browser prompt appears.
+    if (navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          // Got permission — stop the stream immediately (we only needed the prompt)
+          stream.getTracks().forEach((t) => t.stop());
+          recognition.start();
+        })
+        .catch(() => {
+          setError("גישה למיקרופון נדחתה");
+          setIsListening(false);
+          recognitionRef.current = null;
+        });
+    } else {
+      // Fallback: just try starting directly
+      recognition.start();
+    }
   }, [isSupported, lang, continuous, interimResults]);
 
   // Clean up on unmount
