@@ -830,5 +830,89 @@
     "tomorrowPreview": "מחר ממתינות לכם {count} משימות",
     "badgeEarned": "השגתם תג חדש היום: \"{badge}\"",
     "estimatedTime": "בערך {time}"
+  },
+  "claiming": {
+    "claimTask": "אני לוקח/ת!",
+    "claimed": "נלקח/ה",
+    "claimedBy": "נלקח ע\"י {name}",
+    "unclaim": "ביטול לקיחה",
+    "openTasks": "משימות פתוחות",
+    "myTasks": "המשימות שלי"
+  },
+  "difficulty": {
+    "easy": "קל",
+    "medium": "בינוני",
+    "hard": "קשה",
+    "points": "{n} נק'",
+    "filterAll": "כל הרמות",
+    "filterEasy": "קל בלבד",
+    "filterMedium": "בינוני",
+    "filterHard": "קשה"
+  },
+  "houseMap": {
+    "title": "מפת הבית",
+    "progress": "{done}/{total}",
+    "addTasks": "הוסף משימות",
+    "allDone": "הכל בוצע!",
+    "noRooms": "אין חדרים עדיין"
+  },
+  "print": {
+    "title": "הדפסת רשימת משימות",
+    "button": "הדפסה",
+    "subtitle": "תלו על המקרר!",
+    "generatedBy": "נוצר ע\"י בית בסדר",
+    "printDate": "תאריך הדפסה",
+    "roomSummary": "{rooms} חדרים · {tasks} משימות"
+  },
+  "prizes": {
+    "title": "פרסים",
+    "nextPrize": "הפרס הבא",
+    "pointsNeeded": "עוד {n} נקודות",
+    "unlocked": "הגעת! 🎉",
+    "addPrize": "הוסף פרס",
+    "prizeName": "שם הפרס",
+    "prizePoints": "סף נקודות",
+    "defaultIceCream": "גלידה לכולם",
+    "defaultMovie": "ערב סרט משפחתי",
+    "defaultRestaurant": "ארוחת מסעדה",
+    "defaultTrip": "טיול משפחתי"
+  },
+  "scoreboard": {
+    "daily": "יומי",
+    "weekly": "שבועי",
+    "allTime": "כל הזמנים",
+    "leader": "מוביל/ה!",
+    "pointsBreakdown": "פירוט נקודות",
+    "easyTasks": "משימות קלות",
+    "mediumTasks": "משימות בינוניות",
+    "hardTasks": "משימות קשות",
+    "noActivity": "אין פעילות עדיין"
+  },
+  "setupWizard": {
+    "title": "הגדרת הבית",
+    "subtitle": "בואו נבנה את רשימת המשימות שלכם",
+    "stepLevel": "רמת ניקיון",
+    "stepRooms": "בחירת חדרים",
+    "stepTasks": "משימות לחדר",
+    "stepReview": "סקירה",
+    "stepCreate": "יצירה!",
+    "levelBasic": "בסיסי",
+    "levelBasicDesc": "משימות יומיות — הכי קל",
+    "levelThorough": "יסודי",
+    "levelThoroughDesc": "יומי + שבועי — רוב המשפחות",
+    "levelDeep": "עמוק",
+    "levelDeepDesc": "הכל כולל ניקיון עמוק",
+    "roomCount": "{count} משימות",
+    "addCustomTask": "הוסף משימה",
+    "review": "סקירת הכל",
+    "totalTasks": "סה\"כ {count} משימות ב-{rooms} חדרים",
+    "creating": "יוצר משימות...",
+    "created": "נוצרו {count} משימות!",
+    "back": "חזרה",
+    "next": "הבא",
+    "finish": "סיום ויצירה",
+    "taskOn": "פעיל",
+    "taskOff": "לא פעיל",
+    "customTaskPlaceholder": "שם המשימה..."
   }
 }

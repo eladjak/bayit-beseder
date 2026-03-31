@@ -15,11 +15,15 @@ export interface TaskItem {
   estimated_minutes: number;
   assigned_to_name?: string;
   completed: boolean;
+  points?: number;
+  assigned_to?: string | null;
 }
 
 interface TodayOverviewProps {
   tasks: TaskItem[];
   onToggle: (taskId: string) => Promise<void>;
+  onClaim?: (taskId: string) => Promise<void>;
+  currentUserId?: string;
 }
 
 const listVariants = {
@@ -52,7 +56,7 @@ const itemVariants = {
   },
 };
 
-export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
+export function TodayOverview({ tasks, onToggle, onClaim, currentUserId }: TodayOverviewProps) {
   const { t } = useTranslation();
   const [completing, setCompleting] = useState<string | null>(null);
   const [optimisticCompleted, setOptimisticCompleted] = useState<Set<string>>(new Set());
@@ -226,12 +230,41 @@ export function TodayOverview({ tasks, onToggle }: TodayOverviewProps) {
                     >
                       {getCategoryLabel(task.category)}
                     </span>
+                    {task.points != null && task.points > 0 && (
+                      <span
+                        className="text-[10px] px-1.5 py-0.5 rounded-md font-bold"
+                        style={{
+                          backgroundColor: task.points >= 20 ? "#EF444420" : task.points >= 10 ? "#F59E0B20" : "#22C55E20",
+                          color: task.points >= 20 ? "#EF4444" : task.points >= 10 ? "#F59E0B" : "#22C55E",
+                        }}
+                      >
+                        {task.points} {t("difficulty.points")?.replace("{n}", "") || "pts"}
+                      </span>
+                    )}
                     <span className="text-[10px] text-muted flex items-center gap-0.5">
                       <Clock className="w-3 h-3" />
                       {task.estimated_minutes} {t("common.minutes")}
                     </span>
                   </div>
                 </div>
+
+                {/* Claim button for unassigned tasks */}
+                {onClaim && !isCompleted && !task.assigned_to && (
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => onClaim(task.id)}
+                    className="flex-shrink-0 px-3 py-1.5 rounded-lg border-2 border-primary text-primary text-[11px] font-bold hover:bg-primary hover:text-white transition-colors"
+                  >
+                    {t("claiming.claimTask")}
+                  </motion.button>
+                )}
+
+                {/* Show who claimed */}
+                {task.assigned_to_name && task.assigned_to !== currentUserId && (
+                  <span className="flex-shrink-0 text-[10px] text-muted bg-muted/30 px-2 py-1 rounded-lg">
+                    {task.assigned_to_name}
+                  </span>
+                )}
               </motion.div>
             );
           })}

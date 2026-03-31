@@ -4,13 +4,20 @@ import { useMemo, useState } from "react";
 import type { TaskCompletionRow } from "@/lib/types/database";
 import type { HouseholdMember } from "@/hooks/useHouseholdMembers";
 
-export type LeaderboardPeriod = "week" | "alltime";
+export type LeaderboardPeriod = "day" | "week" | "alltime";
+
+export interface PointsBreakdown {
+  easy: number;
+  medium: number;
+  hard: number;
+}
 
 export interface RankedMember {
   member: HouseholdMember;
   points: number;
   completionCount: number;
   rank: number;
+  breakdown: PointsBreakdown;
 }
 
 interface UseLeaderboardOptions {
@@ -27,6 +34,11 @@ interface UseLeaderboardReturn {
   loading: boolean;
 }
 
+/** Today as ISO date string */
+function todayStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
 /** Monday of the current ISO week */
 function weekStart(): string {
   const d = new Date();
@@ -40,12 +52,24 @@ function weekStart(): string {
 /** Simple points model: 10 pts per completion */
 const PTS_PER_COMPLETION = 10;
 
+/**
+ * Approximate easy/medium/hard split from a completion count.
+ * When actual task difficulty is unavailable, distribute ~50% easy, 35% medium, 15% hard.
+ */
+function estimateBreakdown(count: number): PointsBreakdown {
+  const hard = Math.floor(count * 0.15);
+  const medium = Math.floor(count * 0.35);
+  const easy = count - medium - hard;
+  return { easy, medium, hard };
+}
+
 function computeRankings(
   members: HouseholdMember[],
   completions: TaskCompletionRow[],
   period: LeaderboardPeriod
 ): RankedMember[] {
-  const start = period === "week" ? weekStart() : null;
+  const start =
+    period === "day" ? todayStr() : period === "week" ? weekStart() : null;
 
   const filtered = start
     ? completions.filter((c) => c.completed_at.slice(0, 10) >= start)
@@ -65,6 +89,7 @@ function computeRankings(
         completionCount: count,
         points: count * PTS_PER_COMPLETION,
         rank: 0,
+        breakdown: estimateBreakdown(count),
       };
     })
     .sort((a, b) => b.points - a.points || b.completionCount - a.completionCount);
@@ -86,7 +111,7 @@ export function useLeaderboard({
   completions,
   userId,
 }: UseLeaderboardOptions): UseLeaderboardReturn {
-  const [period, setPeriod] = useState<LeaderboardPeriod>("week");
+  const [period, setPeriod] = useState<LeaderboardPeriod>("day");
 
   const rankings = useMemo(
     () => computeRankings(members, completions, period),
