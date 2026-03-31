@@ -698,11 +698,11 @@
     "markAllRead": "Mark all as read",
     "markAllReadLabel": "Mark all as read",
     "emptyTitle": "No new notifications",
-    "enableTitle": "Enable Notifications",
-    "enableSubtitle": "Get reminders for tasks, daily summaries and partner status",
-    "enableButton": "Enable",
-    "enabling": "Enabling...",
-    "notNow": "Not now",
+    "enableTitle": "Your house wants to talk",
+    "enableSubtitle": "We'll remind you about tasks, celebrate wins, and gently nudge when things pile up",
+    "enableButton": "Let's chat",
+    "enabling": "Connecting...",
+    "notNow": "Maybe later",
     "closeLabel": "Close"
   },
   "offline": {

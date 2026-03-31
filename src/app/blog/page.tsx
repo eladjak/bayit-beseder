@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
+import { getBlogPosts, type SanityPost } from "@/lib/sanity/client";
 import { BlogContent } from "./blog-content";
 
 export const metadata: Metadata = {
   title: "בלוג | בית בסדר — טיפים לניהול הבית",
   description:
     "טיפים, מדריכים ורעיונות לניהול בית משותף בצורה חכמה ויעילה. מניקיון ועד חלוקת משימות הוגנת — כל מה שצריך לדעת.",
-  alternates: { canonical: "https://www.bayitbeseder.com/blog" },
+  alternates: {
+    canonical: "https://www.bayitbeseder.com/blog",
+    languages: {
+      "he-IL": "https://www.bayitbeseder.com/blog",
+      "en-US": "https://www.bayitbeseder.com/blog",
+    },
+  },
   openGraph: {
     title: "בלוג בית בסדר — טיפים לניהול הבית",
     description:
@@ -108,14 +115,16 @@ const jsonLd = {
   ],
 };
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const sanityPosts = await getBlogPosts();
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <BlogContent />
+      <BlogContent sanityPosts={sanityPosts} />
     </>
   );
 }

@@ -1,8 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 import { LanguageToggle } from "@/components/language-toggle";
+import type { SanityPost } from "@/lib/sanity/client";
 
 interface BlogPost {
   id: string;
@@ -25,10 +28,12 @@ interface BlogPost {
   icon: string;
   /** Tailwind classes for the category badge */
   categoryColor: string;
-  /** CSS gradient string for the illustration area */
+  /** CSS gradient string for the illustration area (fallback) */
   illustrationGradient: string;
   /** Accent bar gradient (top of card) */
   accentGradient: string;
+  /** Optional real image path */
+  imagePath?: string;
 }
 
 const BLOG_POSTS: BlogPost[] = [
@@ -40,6 +45,7 @@ const BLOG_POSTS: BlogPost[] = [
     illustrationGradient:
       "linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 50%, #93C5FD 100%)",
     accentGradient: "linear-gradient(90deg, #3B82F6, #6366F1)",
+    imagePath: "/images/blog/weekly-planning.png",
     he: {
       category: "תכנון",
       readTime: "3 דקות",
@@ -79,6 +85,7 @@ const BLOG_POSTS: BlogPost[] = [
     illustrationGradient:
       "linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 50%, #6EE7B7 100%)",
     accentGradient: "linear-gradient(90deg, #10B981, #34D399)",
+    imagePath: "/images/blog/cleaning-hacks.png",
     he: {
       category: "ניקיון",
       readTime: "4 דקות",
@@ -128,6 +135,7 @@ const BLOG_POSTS: BlogPost[] = [
     illustrationGradient:
       "linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 50%, #C4B5FD 100%)",
     accentGradient: "linear-gradient(90deg, #8B5CF6, #A855F7)",
+    imagePath: "/images/blog/fair-division.png",
     he: {
       category: "שיתוף פעולה",
       readTime: "3 דקות",
@@ -169,6 +177,7 @@ const BLOG_POSTS: BlogPost[] = [
     illustrationGradient:
       "linear-gradient(135deg, #FEF3C7 0%, #FDE68A 50%, #FCD34D 100%)",
     accentGradient: "linear-gradient(90deg, #F59E0B, #F97316)",
+    imagePath: "/images/blog/motivation.png",
     he: {
       category: "מוטיבציה",
       readTime: "3 דקות",
@@ -210,6 +219,7 @@ const BLOG_POSTS: BlogPost[] = [
     illustrationGradient:
       "linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 50%, #A5B4FC 100%)",
     accentGradient: "linear-gradient(90deg, #6366F1, #8B5CF6)",
+    imagePath: "/images/blog/zones.png",
     he: {
       category: "שיטות",
       readTime: "3 דקות",
@@ -249,6 +259,7 @@ const BLOG_POSTS: BlogPost[] = [
     illustrationGradient:
       "linear-gradient(135deg, #FFE4E6 0%, #FECDD3 50%, #FDA4AF 100%)",
     accentGradient: "linear-gradient(90deg, #F43F5E, #EC4899)",
+    imagePath: "/images/blog/quick-clean.png",
     he: {
       category: "טיפים מהירים",
       readTime: "2 דקות",
@@ -285,11 +296,22 @@ const BLOG_POSTS: BlogPost[] = [
   },
 ];
 
-export function BlogContent() {
+interface BlogContentProps {
+  sanityPosts?: SanityPost[];
+}
+
+export function BlogContent({ sanityPosts = [] }: BlogContentProps) {
   const { locale } = useTranslation();
   const isRtl = locale === "he";
   const dir = isRtl ? "rtl" : "ltr";
   const lang = isRtl ? "he" : "en";
+
+  // Filter Sanity posts by locale
+  const dynamicPosts = sanityPosts.filter(
+    (p) => p.language === locale || p.language === lang
+  );
+
+  const totalCount = dynamicPosts.length + BLOG_POSTS.length;
 
   const heroTitle = isRtl ? "טיפים לניהול הבית" : "Home Management Tips";
   const heroSubtitle = isRtl
@@ -297,8 +319,8 @@ export function BlogContent() {
     : "Guides, methods and ideas to help you manage your home together — without arguments, without overload";
   const backLabel = isRtl ? "← חזרה לדף הבית" : "← Back to home";
   const articleCountLabel = isRtl
-    ? `${BLOG_POSTS.length} מאמרים`
-    : `${BLOG_POSTS.length} articles`;
+    ? `${totalCount} מאמרים`
+    : `${totalCount} articles`;
   const readLabel = isRtl ? "קריאה" : "read";
   const expandLabel = isRtl ? "קראו את המאמר" : "Read article";
   const collapseLabel = isRtl ? "סגירה" : "Close";
@@ -401,6 +423,108 @@ export function BlogContent() {
       {/* Posts */}
       <main className="max-w-3xl mx-auto px-6 py-10">
         <div className="space-y-8">
+          {/* Dynamic Sanity CMS posts */}
+          {dynamicPosts.map((post) => (
+            <article
+              key={post._id}
+              id={post.slug.current}
+              className="card-elevated overflow-hidden scroll-mt-28"
+            >
+              {/* Accent bar */}
+              <div
+                className="h-1.5 w-full"
+                style={{ background: "linear-gradient(90deg, #6366F1, #8B5CF6)" }}
+              />
+
+              {/* Image or gradient fallback */}
+              {post.mainImageUrl ? (
+                <div className="relative w-full" style={{ height: 180 }}>
+                  <Image
+                    src={post.mainImageUrl}
+                    alt={post.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 768px"
+                  />
+                </div>
+              ) : (
+                <div
+                  className="relative flex items-center justify-center"
+                  style={{
+                    height: 120,
+                    background: "linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 50%, #A5B4FC 100%)",
+                  }}
+                >
+                  <span className="text-5xl select-none" aria-hidden="true">
+                    {"\u270D\uFE0F"}
+                  </span>
+                </div>
+              )}
+
+              <div className="p-6 md:p-8">
+                {/* Meta */}
+                <div className="flex items-center gap-2 flex-wrap mb-4">
+                  {post.tags?.slice(0, 2).map((tag) => (
+                    <span
+                      key={tag}
+                      className="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                  {post.publishedAt && (
+                    <span className="text-[11px] text-muted">
+                      {new Date(post.publishedAt).toLocaleDateString(
+                        isRtl ? "he-IL" : "en-US",
+                        { year: "numeric", month: "short", day: "numeric" }
+                      )}
+                    </span>
+                  )}
+                  <span className="text-[10px] font-medium text-white bg-primary rounded-full px-2 py-0.5">
+                    {isRtl ? "חדש" : "New"}
+                  </span>
+                </div>
+
+                {/* Title */}
+                <h2 className="text-xl md:text-2xl font-bold text-foreground mb-2 leading-snug">
+                  {post.title}
+                </h2>
+
+                {/* Excerpt */}
+                {post.excerpt && (
+                  <p className="text-sm text-muted leading-relaxed mb-5">
+                    {post.excerpt}
+                  </p>
+                )}
+
+                {/* Body */}
+                {post.bodyText && (
+                  <details className="group">
+                    <summary className="inline-flex items-center gap-2 text-sm font-semibold text-primary cursor-pointer hover:opacity-80 transition-opacity select-none list-none">
+                      <span className="group-open:hidden">
+                        {isRtl ? "קראו את המאמר" : "Read article"} ↓
+                      </span>
+                      <span className="hidden group-open:inline">
+                        {isRtl ? "סגירה" : "Close"} ↑
+                      </span>
+                    </summary>
+                    <div className="mt-5 pt-5 border-t border-border/50 space-y-4">
+                      {post.bodyText.split("\n\n").map((paragraph, i) => (
+                        <p
+                          key={i}
+                          className="text-sm text-foreground/80 leading-7"
+                        >
+                          {paragraph}
+                        </p>
+                      ))}
+                    </div>
+                  </details>
+                )}
+              </div>
+            </article>
+          ))}
+
+          {/* Static fallback posts */}
           {BLOG_POSTS.map((post, index) => {
             const copy = post[locale];
             return (
@@ -415,37 +539,53 @@ export function BlogContent() {
                   style={{ background: post.accentGradient }}
                 />
 
-                {/* Decorative illustration area */}
-                <div
-                  className="relative flex items-center justify-center"
-                  style={{
-                    height: 120,
-                    background: post.illustrationGradient,
-                  }}
-                >
-                  {/* Subtle radial overlay for depth */}
+                {/* Illustration area — real image or gradient fallback */}
+                {post.imagePath ? (
+                  <div className="relative w-full" style={{ height: 160 }}>
+                    <Image
+                      src={post.imagePath}
+                      alt={copy.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 768px"
+                    />
+                    <span
+                      className="absolute bottom-3 text-[10px] font-bold tracking-widest opacity-40 uppercase"
+                      style={{ [isRtl ? "right" : "left"]: "1rem" }}
+                    >
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                ) : (
                   <div
-                    className="absolute inset-0 opacity-30"
+                    className="relative flex items-center justify-center"
                     style={{
-                      backgroundImage:
-                        "radial-gradient(circle at 70% 30%, rgba(255,255,255,0.6) 0%, transparent 60%)",
+                      height: 120,
+                      background: post.illustrationGradient,
                     }}
-                  />
-                  <span
-                    className="relative z-10 select-none"
-                    style={{ fontSize: 64, lineHeight: 1 }}
-                    aria-hidden="true"
                   >
-                    {post.icon}
-                  </span>
-                  {/* Article number badge */}
-                  <span
-                    className="absolute bottom-3 text-[10px] font-bold tracking-widest opacity-40 uppercase"
-                    style={{ [isRtl ? "right" : "left"]: "1rem" }}
-                  >
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                </div>
+                    <div
+                      className="absolute inset-0 opacity-30"
+                      style={{
+                        backgroundImage:
+                          "radial-gradient(circle at 70% 30%, rgba(255,255,255,0.6) 0%, transparent 60%)",
+                      }}
+                    />
+                    <span
+                      className="relative z-10 select-none"
+                      style={{ fontSize: 64, lineHeight: 1 }}
+                      aria-hidden="true"
+                    >
+                      {post.icon}
+                    </span>
+                    <span
+                      className="absolute bottom-3 text-[10px] font-bold tracking-widest opacity-40 uppercase"
+                      style={{ [isRtl ? "right" : "left"]: "1rem" }}
+                    >
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </div>
+                )}
 
                 <div className="p-6 md:p-8">
                   {/* Meta row */}
@@ -551,6 +691,9 @@ export function BlogContent() {
           })}
         </div>
 
+        {/* Blog notification subscription */}
+        <BlogSubscribe isRtl={isRtl} />
+
         {/* Bottom CTA */}
         <section className="mt-16 relative overflow-hidden rounded-3xl">
           <div
@@ -621,5 +764,75 @@ export function BlogContent() {
         </footer>
       </main>
     </div>
+  );
+}
+
+// ============================================
+// Blog subscription component
+// ============================================
+function BlogSubscribe({ isRtl }: { isRtl: boolean }) {
+  const [subscribed, setSubscribed] = useState(false);
+  const [email, setEmail] = useState("");
+
+  const handleSubscribe = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+
+    // Store subscription locally (future: send to Sanity/API)
+    const subs = JSON.parse(localStorage.getItem("bayit-blog-subscribers") ?? "[]") as string[];
+    if (!subs.includes(email)) {
+      subs.push(email);
+      localStorage.setItem("bayit-blog-subscribers", JSON.stringify(subs));
+    }
+    setSubscribed(true);
+  };
+
+  if (subscribed) {
+    return (
+      <section className="mt-12 card-elevated p-8 text-center">
+        <div className="text-4xl mb-3">{"🎉"}</div>
+        <h3 className="text-lg font-bold text-foreground mb-1">
+          {isRtl ? "נרשמתם בהצלחה!" : "You're subscribed!"}
+        </h3>
+        <p className="text-sm text-muted">
+          {isRtl
+            ? "נעדכן אתכם כשיהיה תוכן חדש. הבית מודה לכם."
+            : "We'll let you know when new content drops. Your house thanks you."}
+        </p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="mt-12 card-elevated p-8">
+      <div className="text-center mb-6">
+        <div className="text-3xl mb-2">{"📬"}</div>
+        <h3 className="text-lg font-bold text-foreground mb-1">
+          {isRtl ? "רוצים לדעת כשיש מאמר חדש?" : "Want to know when new articles drop?"}
+        </h3>
+        <p className="text-sm text-muted">
+          {isRtl
+            ? "נשלח לכם עדכון פעם בשבוע-שבועיים. בלי ספאם, מבטיחים (הבית שלנו מסודר מדי בשביל ספאם)."
+            : "We'll send updates every 1-2 weeks. No spam, we promise (our house is too tidy for spam)."}
+        </p>
+      </div>
+      <form onSubmit={handleSubscribe} className="flex gap-2 max-w-sm mx-auto">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder={isRtl ? "הכניסו אימייל" : "Enter your email"}
+          required
+          className="flex-1 px-4 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary/30"
+          dir="ltr"
+        />
+        <button
+          type="submit"
+          className="px-5 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold hover:opacity-90 active:scale-95 transition-all flex-shrink-0"
+        >
+          {isRtl ? "הרשמה" : "Subscribe"}
+        </button>
+      </form>
+    </section>
   );
 }

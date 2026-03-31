@@ -698,11 +698,11 @@
     "markAllRead": "סמן הכל כנקרא",
     "markAllReadLabel": "סמן הכל כנקרא",
     "emptyTitle": "אין התראות חדשות",
-    "enableTitle": "הפעלת התראות",
-    "enableSubtitle": "קבלו תזכורות על משימות, סיכומים יומיים וסטטוס השותף/ה",
-    "enableButton": "הפעלה",
-    "enabling": "מפעיל...",
-    "notNow": "לא עכשיו",
+    "enableTitle": "הבית רוצה לדבר איתכם",
+    "enableSubtitle": "נזכיר לכם על משימות, נעדכן מה עשיתם (ומה לא...), ונחגוג כשמגיעים ליעד",
+    "enableButton": "בואו נדבר",
+    "enabling": "רגע, מתחברים...",
+    "notNow": "אולי אחר כך",
     "closeLabel": "סגירה"
   },
   "offline": {
