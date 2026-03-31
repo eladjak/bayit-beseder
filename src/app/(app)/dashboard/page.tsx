@@ -17,6 +17,8 @@ const CoupleRewards = dynamic(() => import("@/components/gamification/couple-rew
 const WeeklyChallenges = dynamic(() => import("@/components/gamification/weekly-challenges").then(m => ({ default: m.WeeklyChallenges })), { ssr: false });
 const Leaderboard = dynamic(() => import("@/components/gamification/leaderboard").then(m => ({ default: m.Leaderboard })), { ssr: false });
 const ActivityFeed = dynamic(() => import("@/components/dashboard/activity-feed").then(m => ({ default: m.ActivityFeed })), { ssr: false });
+const HouseMap = dynamic(() => import("@/components/dashboard/house-map").then(m => ({ default: m.HouseMap })), { ssr: false });
+const PrizeCard = dynamic(() => import("@/components/prizes/prize-card").then(m => ({ default: m.PrizeCard })), { ssr: false });
 import { getRandomMessage } from "@/lib/coaching-messages";
 import { computeRoomHealth } from "@/lib/room-health";
 import { computeRewardsProgress } from "@/lib/rewards";
@@ -639,6 +641,15 @@ export default function DashboardPage() {
         </div>
 
         <CoachingInsight />
+
+        {/* House Map — Room Progress */}
+        <HouseMap
+          tasks={tasks.map((t: TaskItem) => ({ id: t.id, category_id: t.category, status: t.completed ? "completed" : "pending" }))}
+          categories={categories.map((c: { key: string; label: string; color: string }) => ({ id: c.key, name: c.label, icon: "", color: c.color }))}
+        />
+
+        {/* Prize Card */}
+        <PrizeCard currentPoints={completedCount * 10} />
 
         {/* Blog & Website links */}
         <div className="space-y-2">
