@@ -217,6 +217,12 @@
     "days": "days",
     "dismissTip": "Dismiss tip"
   },
+  "quickStats": {
+    "tasks": "Tasks",
+    "streakLabel": "days",
+    "pts": "pts",
+    "rankLabel": "Rank"
+  },
   "tasks": {
     "title": "Tasks",
     "addTask": "Add task",
@@ -759,7 +765,19 @@
     "challengeGoalSuffix": " tasks this week",
     "challengeFinished": "Amazing! You finished the weekly challenge 🎉",
     "rewardsSubtitle": "Complete tasks together to unlock rewards",
-    "rewardUnlocked": "Unlocked!"
+    "rewardUnlocked": "Unlocked!",
+    "row": {
+      "streakHeader": "Streak 🔥",
+      "streakDays": "days",
+      "streakRemaining": "{remaining} to {target}",
+      "prizeHeader": "Next Prize",
+      "prizeRemaining": "{remaining} pts to go",
+      "challengeHeader": "Weekly Challenge",
+      "challengeDone": "{progress}% done",
+      "challengeActive": "Active",
+      "emptyTitle": "Let's get started!",
+      "emptySubtitle": "Complete tasks to earn points and build a streak"
+    }
   },
   "challenges": {
     "sectionTitle": "Weekly Challenges",

@@ -217,6 +217,12 @@
     "days": "ימים",
     "dismissTip": "סגור טיפ"
   },
+  "quickStats": {
+    "tasks": "משימות",
+    "streakLabel": "ימים",
+    "pts": "נק'",
+    "rankLabel": "דירוג"
+  },
   "tasks": {
     "title": "משימות",
     "addTask": "הוספת משימה",
@@ -759,7 +765,19 @@
     "challengeGoalSuffix": " משימות השבוע",
     "challengeFinished": "מעולה! סיימתם את האתגר השבועי 🎉",
     "rewardsSubtitle": "השלימו משימות יחד כדי לפתוח פרסים",
-    "rewardUnlocked": "נפתח!"
+    "rewardUnlocked": "נפתח!",
+    "row": {
+      "streakHeader": "רצף 🔥",
+      "streakDays": "ימים",
+      "streakRemaining": "עוד {remaining} ל-{target}",
+      "prizeHeader": "הפרס הבא",
+      "prizeRemaining": "עוד {remaining} נק'",
+      "challengeHeader": "אתגר שבועי",
+      "challengeDone": "{progress}% הושלם",
+      "challengeActive": "פעיל",
+      "emptyTitle": "בואו נתחיל!",
+      "emptySubtitle": "השלימו משימות כדי לצבור נקודות ורצף"
+    }
   },
   "challenges": {
     "sectionTitle": "אתגרי השבוע",
