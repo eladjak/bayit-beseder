@@ -552,15 +552,25 @@ export default function WeeklyPage() {
             <p className="text-xs text-white/70 mt-1">מי עושה מה ומתי? בואו נחלק בהוגן</p>
           </div>
           <div className="flex flex-col items-end gap-2">
-            {/* Primary CTA: wizard button */}
-            <button
-              onClick={handleOpenWizard}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-primary text-sm font-bold shadow-lg active:scale-95 transition-transform"
-              title="יצירת תוכנית שבועית"
-            >
-              <Wand2 className="w-4 h-4" />
-              <span>{t("weekly.wizardCta")}</span>
-            </button>
+            {/* Primary CTA: wizard OR manual */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleOpenWizard}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-primary text-sm font-bold shadow-lg active:scale-95 transition-transform"
+                title="יצירת תוכנית שבועית עם הקוסם"
+              >
+                <Wand2 className="w-4 h-4" />
+                <span>{t("weekly.wizardCta")}</span>
+              </button>
+              <button
+                onClick={() => toast.info("הוסיפו משימות ידנית בכל יום")}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 text-white text-xs font-medium border border-white/20 active:scale-95 transition-transform"
+                title="הוספה ידנית"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>ידני</span>
+              </button>
+            </div>
             {/* Secondary controls row */}
             <div className="flex items-center gap-1.5">
               <button

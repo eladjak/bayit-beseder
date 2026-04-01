@@ -623,9 +623,9 @@ export default function DashboardPage() {
             <span className="text-2xl">{"🖨️"}</span>
             <span className="text-xs font-semibold text-foreground">{t("print.button") || "הדפסה"}</span>
           </Link>
-          <a href="/" className="card-elevated p-3 flex flex-col items-center gap-1.5 text-center hover:scale-[0.98] active:scale-[0.96] transition-transform">
-            <span className="text-2xl">{"🏠"}</span>
-            <span className="text-xs font-semibold text-foreground">{t("common.login") === "Login" ? "About" : "אודות"}</span>
+          <a href="/" className="card-elevated p-3 flex flex-col items-center gap-1.5 text-center hover:scale-[0.98] active:scale-[0.96] transition-transform bg-gradient-to-br from-primary/5 to-purple-500/5 border border-primary/20">
+            <span className="text-2xl">{"🌐"}</span>
+            <span className="text-xs font-semibold text-primary">{t("common.login") === "Login" ? "Our Site" : "דף הנחיתה"}</span>
           </a>
           <button onClick={() => setEmergencyMode((prev) => !prev)} className={`card-elevated p-3 flex flex-col items-center gap-1.5 text-center hover:scale-[0.98] active:scale-[0.96] transition-transform ${emergencyMode ? "ring-2 ring-red-500" : ""}`}>
             <span className="text-2xl">{"⚡"}</span>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Clock } from "lucide-react";
+import { Check, Clock, Trash2 } from "lucide-react";
 import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
 import { haptic } from "@/lib/haptics";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -23,6 +23,7 @@ interface TodayOverviewProps {
   tasks: TaskItem[];
   onToggle: (taskId: string) => Promise<void>;
   onClaim?: (taskId: string) => Promise<void>;
+  onClearCompleted?: () => void;
   currentUserId?: string;
   /** Max tasks to show before "show more" button. 0 = show all. */
   maxItems?: number;
@@ -58,7 +59,7 @@ const itemVariants = {
   },
 };
 
-export function TodayOverview({ tasks, onToggle, onClaim, currentUserId, maxItems = 0 }: TodayOverviewProps) {
+export function TodayOverview({ tasks, onToggle, onClaim, onClearCompleted, currentUserId, maxItems = 0 }: TodayOverviewProps) {
   const { t } = useTranslation();
   const [completing, setCompleting] = useState<string | null>(null);
   const [optimisticCompleted, setOptimisticCompleted] = useState<Set<string>>(new Set());
@@ -123,14 +124,26 @@ export function TodayOverview({ tasks, onToggle, onClaim, currentUserId, maxItem
     <div className="space-y-2">
       <div className="flex items-center justify-between px-1">
         <h2 className="font-semibold text-foreground">{t("dashboard.todayHeader")} 🏠</h2>
-        <span
-          className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-primary/10 text-primary"
-          aria-live="polite"
-          aria-atomic="true"
-          aria-label={`${completed} מתוך ${tasks.length} משימות הושלמו`}
-        >
-          {completed}/{tasks.length}
-        </span>
+        <div className="flex items-center gap-2">
+          {onClearCompleted && completed > 0 && (
+            <button
+              onClick={onClearCompleted}
+              className="text-[10px] px-2 py-0.5 rounded-md text-muted hover:text-danger hover:bg-danger/10 transition-colors flex items-center gap-1"
+              aria-label={t("dashboard.clearCompleted") || "נקה הושלמו"}
+            >
+              <Trash2 className="w-3 h-3" />
+              {t("dashboard.clearCompleted") || "נקה הכל"}
+            </button>
+          )}
+          <span
+            className="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-primary/10 text-primary"
+            aria-live="polite"
+            aria-atomic="true"
+            aria-label={`${completed} מתוך ${tasks.length} משימות הושלמו`}
+          >
+            {completed}/{tasks.length}
+          </span>
+        </div>
       </div>
       <motion.div
         className="space-y-2"

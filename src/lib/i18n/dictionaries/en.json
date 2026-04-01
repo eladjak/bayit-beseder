@@ -210,6 +210,7 @@
     "achievementsSection": "Achievements & Gamification",
     "showMore": "Show {count} more tasks",
     "showLess": "Show less",
+    "clearCompleted": "Clear completed",
     "todayHeader": "Today",
     "noTasksToday": "No tasks today — excellent! 🥳",
     "enjoySilence": "Enjoy the quiet, you've earned it",
