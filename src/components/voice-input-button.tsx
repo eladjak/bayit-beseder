@@ -114,6 +114,18 @@ export function VoiceInputButton({
         <MicIcon isListening={isListening} />
       </motion.button>
 
+      {/* Live transcription preview while listening */}
+      {isListening && transcript && (
+        <motion.span
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute bottom-full mb-2 text-[11px] text-primary font-medium bg-primary/10 px-2.5 py-1 rounded-lg whitespace-nowrap max-w-[200px] truncate pointer-events-none"
+          dir="rtl"
+        >
+          {transcript}
+        </motion.span>
+      )}
+
       {/* Inline error hint below the button */}
       {error && !isListening && (
         <span

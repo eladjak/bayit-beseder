@@ -107,7 +107,7 @@ export interface UseVoiceInputResult {
  *  - Calling abort() mid-result drops the current utterance; stop() commits it.
  */
 export function useVoiceInput(options: UseVoiceInputOptions = {}): UseVoiceInputResult {
-  const { lang = "he-IL", continuous = false, interimResults = false } = options;
+  const { lang = "he-IL", continuous = false, interimResults = true } = options;
 
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
