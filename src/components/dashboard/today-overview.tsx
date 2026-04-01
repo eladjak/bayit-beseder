@@ -24,6 +24,8 @@ interface TodayOverviewProps {
   onToggle: (taskId: string) => Promise<void>;
   onClaim?: (taskId: string) => Promise<void>;
   currentUserId?: string;
+  /** Max tasks to show before "show more" button. 0 = show all. */
+  maxItems?: number;
 }
 
 const listVariants = {
@@ -56,10 +58,11 @@ const itemVariants = {
   },
 };
 
-export function TodayOverview({ tasks, onToggle, onClaim, currentUserId }: TodayOverviewProps) {
+export function TodayOverview({ tasks, onToggle, onClaim, currentUserId, maxItems = 0 }: TodayOverviewProps) {
   const { t } = useTranslation();
   const [completing, setCompleting] = useState<string | null>(null);
   const [optimisticCompleted, setOptimisticCompleted] = useState<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState(false);
 
   async function handleToggle(taskId: string) {
     const task = tasks.find((t) => t.id === taskId);
@@ -136,7 +139,7 @@ export function TodayOverview({ tasks, onToggle, onClaim, currentUserId }: Today
         animate="visible"
       >
         <AnimatePresence mode="popLayout">
-          {tasks.map((task) => {
+          {(maxItems > 0 && !expanded ? tasks.slice(0, maxItems) : tasks).map((task) => {
             const catColor = getCategoryColor(task.category);
             const isCompleted = task.completed || optimisticCompleted.has(task.id);
             const isLoading = completing === task.id;
@@ -270,6 +273,27 @@ export function TodayOverview({ tasks, onToggle, onClaim, currentUserId }: Today
           })}
         </AnimatePresence>
       </motion.div>
+
+      {/* Show more button when tasks are truncated */}
+      {maxItems > 0 && tasks.length > maxItems && !expanded && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onClick={() => setExpanded(true)}
+          className="w-full py-2.5 text-xs font-semibold text-primary hover:bg-primary/5 rounded-xl border border-dashed border-primary/30 transition-colors active:scale-[0.98]"
+        >
+          {t("dashboard.showMore") || `הצג עוד ${tasks.length - maxItems} משימות`} ▼
+        </motion.button>
+      )}
+
+      {maxItems > 0 && expanded && tasks.length > maxItems && (
+        <button
+          onClick={() => setExpanded(false)}
+          className="w-full py-2 text-xs text-muted hover:text-foreground transition-colors"
+        >
+          {t("dashboard.showLess") || "הצג פחות"} ▲
+        </button>
+      )}
     </div>
   );
 }

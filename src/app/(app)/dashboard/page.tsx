@@ -7,9 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { TodayOverview, type TaskItem } from "@/components/dashboard/today-overview";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { PartnerStatus, MembersStatus } from "@/components/dashboard/partner-status";
-import { EmergencyToggle } from "@/components/dashboard/emergency-toggle";
-import { WeeklySummaryCards } from "@/components/dashboard/weekly-summary-cards";
-import { RoomConditions } from "@/components/dashboard/room-conditions";
+// Moved to settings/weekly: EmergencyToggle (in quick links), WeeklySummaryCards, RoomConditions
 // These are inside the collapsible achievements accordion — lazy-load them
 const StreakTracker = dynamic(() => import("@/components/gamification/streak-tracker").then(m => ({ default: m.StreakTracker })), { ssr: false });
 const WeeklyChallenge = dynamic(() => import("@/components/gamification/weekly-challenge").then(m => ({ default: m.WeeklyChallenge })), { ssr: false });
@@ -19,6 +17,8 @@ const Leaderboard = dynamic(() => import("@/components/gamification/leaderboard"
 const ActivityFeed = dynamic(() => import("@/components/dashboard/activity-feed").then(m => ({ default: m.ActivityFeed })), { ssr: false });
 const HouseMap = dynamic(() => import("@/components/dashboard/house-map").then(m => ({ default: m.HouseMap })), { ssr: false });
 const PrizeCard = dynamic(() => import("@/components/prizes/prize-card").then(m => ({ default: m.PrizeCard })), { ssr: false });
+const QuickStatsBar = dynamic(() => import("@/components/dashboard/quick-stats-bar").then(m => ({ default: m.QuickStatsBar })), { ssr: false });
+const GamificationRow = dynamic(() => import("@/components/dashboard/gamification-row").then(m => ({ default: m.GamificationRow })), { ssr: false });
 import { getRandomMessage } from "@/lib/coaching-messages";
 import { computeRoomHealth } from "@/lib/room-health";
 import { computeRewardsProgress } from "@/lib/rewards";
@@ -542,20 +542,56 @@ export default function DashboardPage() {
           />
         )}
 
-        <EnergyModeSection
-          energyLevel={energyLevel}
-          onToggle={cycleEnergyLevel}
-          filteredCount={filteredTasks.length}
-          totalCount={tasks.length}
+        {/* ═══ SECTION 1: Quick Stats Bar ═══ */}
+        <QuickStatsBar
+          tasksCompleted={completedCount}
+          tasksTotal={filteredTasks.length}
+          streakDays={streakCount}
+          totalPoints={completedCount * 10}
+          rank={householdMembers.length > 1 ? 1 : 0}
         />
 
+        {/* ═══ SECTION 2: Today's Tasks (limited to 5, expandable) ═══ */}
         {tasksLoading ? (
           <TaskListSkeleton count={5} />
         ) : (
-          <TodayOverview tasks={filteredTasks} onToggle={handleToggle} />
+          <TodayOverview tasks={filteredTasks} onToggle={handleToggle} maxItems={5} />
         )}
 
-        {/* Collapsible gamification section */}
+        {/* ═══ SECTION 3: House Map — Room Progress ═══ */}
+        <HouseMap
+          tasks={(tasks ?? []).map((t: TaskItem) => ({ id: t.id, category_id: t.category ?? "", status: t.completed ? "completed" : "pending" }))}
+          categories={Object.entries(CATEGORY_ICONS).map(([key, icon]) => ({ id: key, name: CATEGORY_LABELS[key] ?? key, icon: icon ?? "📦", color: CATEGORY_COLORS[key] ?? "#6366F1" }))}
+        />
+
+        {/* ═══ SECTION 4: Gamification Row (horizontal scroll) ═══ */}
+        <GamificationRow
+          streakDays={streakCount}
+          streakTarget={streakCount < 7 ? 7 : streakCount < 14 ? 14 : streakCount < 30 ? 30 : 60}
+          currentPoints={completedCount * 10}
+          nextPrizeThreshold={50}
+          nextPrizeName="גלידה לכולם"
+          nextPrizeEmoji="🍦"
+          challengeTitle={t("dashboard.achievementsSection") || "אתגר שבועי"}
+          challengeProgress={Math.min(100, Math.round((completedCount / Math.max(filteredTasks.length, 1)) * 100))}
+          challengeActive={true}
+        />
+
+        {/* ═══ SECTION 5: AI Coaching Tip ═══ */}
+        <CoachingTips completedCount={completedCount} totalCount={filteredTasks.length} />
+
+        {/* ═══ SECTION 6: Prize Card ═══ */}
+        <PrizeCard currentPoints={completedCount * 10} />
+
+        {/* ═══ SECTION 7: Activity Feed (limited) ═══ */}
+        <div>
+          <h2 className="font-semibold text-foreground px-1 mb-2 text-sm">
+            {t("activity.sectionTitle")}
+          </h2>
+          <ActivityFeed />
+        </div>
+
+        {/* ═══ SECTION 8: Gamification Details (collapsible) ═══ */}
         <div>
           <button
             type="button"
@@ -568,130 +604,34 @@ export default function DashboardPage() {
           {showAdvanced && (
             <div className="space-y-4 mt-2">
               <GoldenRuleSection percentage={percentage} target={target} loading={tasksLoading} />
-
               <StreakDisplay count={streakCount} bestCount={bestStreak} />
-
-              <StreakTracker
-                completionDates={completionDates}
-                today={todayStr}
-                bestStreak={bestStreak}
-              />
-
-              <WeeklyChallenge
-                completionDates={completionDates}
-                today={todayStr}
-                target={5}
-              />
-
-              <CoupleRewards rewardsProgress={rewardsProgress} />
-
               <WeeklyChallenges progress={challengeProgress} weekNum={weekNum} />
-
               {householdMembers.length > 1 && (
-                <Leaderboard
-                  rankings={rankings}
-                  period={lbPeriod}
-                  onSetPeriod={setLbPeriod}
-                  myUserId={profile?.id}
-                />
+                <Leaderboard rankings={rankings} period={lbPeriod} onSetPeriod={setLbPeriod} myUserId={profile?.id} />
               )}
             </div>
           )}
         </div>
 
-        <PlaylistCard />
-
-        <WeeklySummaryCards
-          tasks={dbTasks}
-          completions={allCompletions}
-          streak={streakCount}
-          today={todayStr}
-        />
-
-        <RoomConditions categoryHealthData={categoryHealthData} />
-
-        {/* Household members activity — uses N-member hook when available, falls back to partner */}
-        {!membersLoading && otherMembers.length > 0 ? (
-          <div>
-            <h2 className="font-semibold text-foreground px-1 mb-2">
-              {otherMembers.length === 1 ? otherMembers[0].name : "חברי הבית"}
-            </h2>
-            <MembersStatus members={otherMembers} />
-          </div>
-        ) : (
-          !membersLoading && profile?.partner_id && (
-            <div>
-              <h2 className="font-semibold text-foreground px-1 mb-2">{partner.name}</h2>
-              <PartnerStatus
-                name={partner.name}
-                completedCount={partner.completedCount}
-                totalCount={partner.totalCount}
-                recentTasks={partner.recentTasks}
-              />
-            </div>
-          )
-        )}
-
-        <CoachingTips completedCount={completedCount} totalCount={filteredTasks.length} />
-
-        {/* Activity Feed */}
-        <div>
-          <h2 className="font-semibold text-foreground px-1 mb-2 text-sm">
-            {t("activity.sectionTitle")}
-          </h2>
-          <ActivityFeed />
-        </div>
-
-        <CoachingInsight />
-
-        {/* House Map — Room Progress (safe: renders empty state when no tasks) */}
-        <HouseMap
-          tasks={(tasks ?? []).map((t: TaskItem) => ({ id: t.id, category_id: t.category ?? "", status: t.completed ? "completed" : "pending" }))}
-          categories={Object.entries(CATEGORY_ICONS).map(([key, icon]) => ({ id: key, name: CATEGORY_LABELS[key] ?? key, icon: icon ?? "📦", color: CATEGORY_COLORS[key] ?? "#6366F1" }))}
-        />
-
-        {/* Prize Card */}
-        <PrizeCard currentPoints={completedCount * 10} />
-
-        {/* Blog & Website links */}
-        <div className="space-y-2">
-          <Link
-            href="/blog"
-            className="block card-elevated p-4 hover:scale-[0.99] active:scale-[0.97] transition-transform"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white text-lg flex-shrink-0">
-                {"\u270D\uFE0F"}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-foreground">{t("common.login") === "Login" ? "Tips & Guides" : "טיפים ומדריכים"}</p>
-                <p className="text-xs text-muted truncate">{t("common.login") === "Login" ? "Home management articles from the blog" : "מאמרים לניהול הבית מהבלוג"}</p>
-              </div>
-              <span className="text-muted text-xs">{t("common.login") === "Login" ? "→" : "←"}</span>
-            </div>
+        {/* ═══ SECTION 9: Quick Links (2x2 grid) ═══ */}
+        <div className="grid grid-cols-2 gap-2">
+          <Link href="/blog" className="card-elevated p-3 flex flex-col items-center gap-1.5 text-center hover:scale-[0.98] active:scale-[0.96] transition-transform">
+            <span className="text-2xl">{"✍️"}</span>
+            <span className="text-xs font-semibold text-foreground">{t("common.login") === "Login" ? "Blog" : "טיפים"}</span>
           </Link>
-
-          <a
-            href="/"
-            className="block card-elevated p-4 hover:scale-[0.99] active:scale-[0.97] transition-transform"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500 flex items-center justify-center text-white text-lg flex-shrink-0">
-                🏠
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-foreground">{t("common.login") === "Login" ? "About BayitBeSeder" : "אודות בית בסדר"}</p>
-                <p className="text-xs text-muted truncate">{t("common.login") === "Login" ? "Our landing page — share with friends!" : "דף הנחיתה שלנו — שתפו עם חברים!"}</p>
-              </div>
-              <span className="text-muted text-xs">{t("common.login") === "Login" ? "→" : "←"}</span>
-            </div>
+          <Link href="/tasks/print" className="card-elevated p-3 flex flex-col items-center gap-1.5 text-center hover:scale-[0.98] active:scale-[0.96] transition-transform">
+            <span className="text-2xl">{"🖨️"}</span>
+            <span className="text-xs font-semibold text-foreground">{t("print.button") || "הדפסה"}</span>
+          </Link>
+          <a href="/" className="card-elevated p-3 flex flex-col items-center gap-1.5 text-center hover:scale-[0.98] active:scale-[0.96] transition-transform">
+            <span className="text-2xl">{"🏠"}</span>
+            <span className="text-xs font-semibold text-foreground">{t("common.login") === "Login" ? "About" : "אודות"}</span>
           </a>
+          <button onClick={() => setEmergencyMode((prev) => !prev)} className={`card-elevated p-3 flex flex-col items-center gap-1.5 text-center hover:scale-[0.98] active:scale-[0.96] transition-transform ${emergencyMode ? "ring-2 ring-red-500" : ""}`}>
+            <span className="text-2xl">{"⚡"}</span>
+            <span className="text-xs font-semibold text-foreground">{emergencyMode ? "🔴 חירום" : "חירום"}</span>
+          </button>
         </div>
-
-        <EmergencyToggle
-          active={emergencyMode}
-          onToggle={() => setEmergencyMode((prev) => !prev)}
-        />
       </div>
 
       <CelebrationOverlay
