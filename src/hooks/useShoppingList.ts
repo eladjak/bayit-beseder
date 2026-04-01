@@ -88,6 +88,8 @@ interface UseShoppingListReturn {
   addItem: (title: string, category: ShoppingCategory, quantity?: number, unit?: string) => void;
   toggleItem: (id: string) => void;
   removeItem: (id: string) => void;
+  editItem: (itemId: string, updates: { title?: string; quantity?: number; unit?: string; category?: string }) => Promise<void>;
+  moveItemToCategory: (itemId: string, newCategory: string) => Promise<void>;
   clearChecked: () => void;
 }
 
@@ -382,7 +384,7 @@ export function useShoppingList(): UseShoppingListReturn {
     }
 
     // Optimistic update
-    const previousItems = items;
+    const previousItems = itemsRef.current;
     setItems((prev) => prev.filter((item) => item.id !== id));
 
     try {
@@ -398,7 +400,50 @@ export function useShoppingList(): UseShoppingListReturn {
     } catch {
       setItems(previousItems);
     }
-  }, [items, saveToLocalStorage]);
+  }, [saveToLocalStorage]);
+
+  const editItem = useCallback(async (itemId: string, updates: { title?: string; quantity?: number; unit?: string; category?: string }) => {
+    // Optimistic update
+    const previousItems = itemsRef.current;
+    setItems(prev => prev.map(item =>
+      item.id === itemId ? { ...item, ...updates } : item
+    ));
+
+    if (usingMockRef.current) {
+      // localStorage mode
+      setItems(prev => {
+        saveToLocalStorage(prev);
+        return prev;
+      });
+      return;
+    }
+
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        // localStorage-only fallback
+        const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]");
+        const updated = stored.map((item: ShoppingItem) =>
+          item.id === itemId ? { ...item, ...updates } : item
+        );
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        return;
+      }
+
+      const { error } = await supabase.from("shopping_items").update(updates).eq("id", itemId);
+      if (error) {
+        console.error("[shopping] edit error:", error);
+        setItems(previousItems);
+      }
+    } catch {
+      setItems(previousItems);
+    }
+  }, [saveToLocalStorage]);
+
+  const moveItemToCategory = useCallback(async (itemId: string, newCategory: string) => {
+    await editItem(itemId, { category: newCategory });
+  }, [editItem]);
 
   const clearChecked = useCallback(async () => {
     if (usingMockRef.current) {
@@ -411,7 +456,7 @@ export function useShoppingList(): UseShoppingListReturn {
     }
 
     // Optimistic update
-    const previousItems = items;
+    const previousItems = itemsRef.current;
     setItems((prev) => prev.filter((item) => !item.checked));
 
     try {
@@ -452,5 +497,5 @@ export function useShoppingList(): UseShoppingListReturn {
   // Keep ref in sync with state so async callbacks read the latest value
   itemsRef.current = items;
 
-  return { items, loading, addItem, toggleItem, removeItem, clearChecked };
+  return { items, loading, addItem, toggleItem, removeItem, editItem, moveItemToCategory, clearChecked };
 }
