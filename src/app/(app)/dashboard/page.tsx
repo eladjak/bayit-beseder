@@ -17,8 +17,9 @@ const CoupleRewards = dynamic(() => import("@/components/gamification/couple-rew
 const WeeklyChallenges = dynamic(() => import("@/components/gamification/weekly-challenges").then(m => ({ default: m.WeeklyChallenges })), { ssr: false });
 const Leaderboard = dynamic(() => import("@/components/gamification/leaderboard").then(m => ({ default: m.Leaderboard })), { ssr: false });
 const ActivityFeed = dynamic(() => import("@/components/dashboard/activity-feed").then(m => ({ default: m.ActivityFeed })), { ssr: false });
-const HouseMap = dynamic(() => import("@/components/dashboard/house-map").then(m => ({ default: m.HouseMap })), { ssr: false });
-const PrizeCard = dynamic(() => import("@/components/prizes/prize-card").then(m => ({ default: m.PrizeCard })), { ssr: false });
+// TODO: Re-enable after verifying props work in production
+// const HouseMap = dynamic(() => import("@/components/dashboard/house-map").then(m => ({ default: m.HouseMap })), { ssr: false });
+// const PrizeCard = dynamic(() => import("@/components/prizes/prize-card").then(m => ({ default: m.PrizeCard })), { ssr: false });
 import { getRandomMessage } from "@/lib/coaching-messages";
 import { computeRoomHealth } from "@/lib/room-health";
 import { computeRewardsProgress } from "@/lib/rewards";
@@ -136,7 +137,7 @@ export default function DashboardPage() {
     realtime: true,
   });
   const { completions: allCompletions, markComplete, isCompletedToday } = useCompletions({ limit: 500 });
-  const { categoryMap, categories } = useCategories();
+  const { categoryMap } = useCategories();
   const { playComplete, playAchievement, playStreak } = useAppSounds();
   const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
@@ -641,15 +642,6 @@ export default function DashboardPage() {
         </div>
 
         <CoachingInsight />
-
-        {/* House Map — Room Progress */}
-        <HouseMap
-          tasks={tasks.map((t: TaskItem) => ({ id: t.id, category_id: t.category, status: t.completed ? "completed" : "pending" }))}
-          categories={categories.map((c) => { const key = CATEGORY_NAME_TO_KEY[c.name] ?? c.name; return { id: c.id, name: c.name, icon: CATEGORY_ICONS[key] ?? "📦", color: CATEGORY_COLORS[key] ?? "#6366F1" }; })}
-        />
-
-        {/* Prize Card */}
-        <PrizeCard currentPoints={completedCount * 10} />
 
         {/* Blog & Website links */}
         <div className="space-y-2">
