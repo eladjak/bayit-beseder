@@ -136,7 +136,7 @@ export default function DashboardPage() {
     realtime: true,
   });
   const { completions: allCompletions, markComplete, isCompletedToday } = useCompletions({ limit: 500 });
-  const { categoryMap } = useCategories();
+  const { categoryMap, categories } = useCategories();
   const { playComplete, playAchievement, playStreak } = useAppSounds();
   const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
@@ -645,7 +645,7 @@ export default function DashboardPage() {
         {/* House Map — Room Progress */}
         <HouseMap
           tasks={tasks.map((t: TaskItem) => ({ id: t.id, category_id: t.category, status: t.completed ? "completed" : "pending" }))}
-          categories={categories.map((c: { key: string; label: string; color: string }) => ({ id: c.key, name: c.label, icon: "", color: c.color }))}
+          categories={categories.map((c) => { const key = CATEGORY_NAME_TO_KEY[c.name] ?? c.name; return { id: c.id, name: c.name, icon: CATEGORY_ICONS[key] ?? "📦", color: CATEGORY_COLORS[key] ?? "#6366F1" }; })}
         />
 
         {/* Prize Card */}
