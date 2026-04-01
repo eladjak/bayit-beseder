@@ -13,11 +13,13 @@ import { useShoppingCategories } from "@/hooks/useShoppingCategories";
 import { ShoppingItemCard } from "@/components/shopping/shopping-item";
 import { CategoryManager } from "@/components/shopping/category-manager";
 import { ShoppingShareSheet } from "@/components/shopping/shopping-share-sheet";
+import { PurchasedSection } from "@/components/shopping/purchased-section";
+import { searchSuggestions, getEmojiForItem } from "@/lib/shopping-autocomplete";
 import { haptic } from "@/lib/haptics";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useProfile } from "@/hooks/useProfile";
 import { useTranslation } from "@/hooks/useTranslation";
-import { Loader2 } from "lucide-react";
+import { Loader2, Printer } from "lucide-react";
 
 const VIRTUALIZE_THRESHOLD = 10;
 const ITEM_HEIGHT = 52; // px — estimated height of each ShoppingItemCard + gap
@@ -95,7 +97,7 @@ const VoiceInputButton = dynamic(
 );
 
 export default function ShoppingPage() {
-  const { items, loading, addItem, toggleItem, removeItem, clearChecked } =
+  const { items, loading, addItem, toggleItem, removeItem, editItem, moveItemToCategory, clearChecked } =
     useShoppingList();
   const {
     categories: dynamicCategories,
@@ -116,8 +118,14 @@ export default function ShoppingPage() {
   // Which category section triggered the add form (pre-selects category)
   const [formPresetCategory, setFormPresetCategory] = useState<string | null>(null);
 
-  // Collapsed state per category name
-  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+  // Collapsed state per category name (persisted in localStorage)
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(() => {
+    if (typeof window === "undefined") return new Set<string>();
+    try {
+      const saved = localStorage.getItem("bayit-shopping-collapsed");
+      return saved ? new Set(JSON.parse(saved) as string[]) : new Set<string>();
+    } catch { return new Set<string>(); }
+  });
 
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
@@ -147,35 +155,47 @@ export default function ShoppingPage() {
     return Object.keys(SHOPPING_CATEGORY_ICONS);
   }, [dynamicCategories]);
 
-  // Group items by category, keeping category order from orderedCategoryNames
+  // Separate purchased items from active items
+  const purchasedItems = useMemo(
+    () => items.filter((i) => i.checked).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
+    [items]
+  );
+
+  const activeItems = useMemo(
+    () => items.filter((i) => !i.checked),
+    [items]
+  );
+
+  // Group ACTIVE items by category (purchased go to separate section)
   const groupedItems = useMemo(() => {
     const groups: { categoryName: string; items: typeof items }[] = [];
-
-    // Categories in defined order that actually have items
-    const categoriesWithItems = new Set(items.map((i) => i.category));
+    const categoriesWithItems = new Set(activeItems.map((i) => i.category));
 
     for (const catName of orderedCategoryNames) {
       if (!categoriesWithItems.has(catName)) continue;
-      const catItems = items.filter((i) => i.category === catName);
-      // Sort: unchecked first (by creation date desc), then checked (by creation date desc)
-      const unchecked = catItems
-        .filter((i) => !i.checked)
+      const catItems = activeItems
+        .filter((i) => i.category === catName)
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      const checked = catItems
-        .filter((i) => i.checked)
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      groups.push({ categoryName: catName, items: [...unchecked, ...checked] });
+      groups.push({ categoryName: catName, items: catItems });
     }
 
-    // Any items in categories not in orderedCategoryNames go to a fallback group
     const knownCatNames = new Set(orderedCategoryNames);
-    const unknownItems = items.filter((i) => !knownCatNames.has(i.category));
+    const unknownItems = activeItems.filter((i) => !knownCatNames.has(i.category));
     if (unknownItems.length > 0) {
       groups.push({ categoryName: "שונות", items: unknownItems });
     }
 
     return groups;
-  }, [items, orderedCategoryNames]);
+  }, [activeItems, orderedCategoryNames]);
+
+  // Autocomplete suggestions
+  const suggestions = useMemo(
+    () => newTitle.length >= 2 ? searchSuggestions(newTitle, 6) : [],
+    [newTitle]
+  );
+
+  // Move category modal state
+  const [movingItemId, setMovingItemId] = useState<string | null>(null);
 
   const totalCount = items.length;
   const checkedCount = items.filter((i) => i.checked).length;
@@ -188,6 +208,7 @@ export default function ShoppingPage() {
       } else {
         next.add(categoryName);
       }
+      try { localStorage.setItem("bayit-shopping-collapsed", JSON.stringify([...next])); } catch {}
       return next;
     });
   }
@@ -453,8 +474,11 @@ export default function ShoppingPage() {
                                 item={item}
                                 onToggle={handleToggle}
                                 onRemove={handleRemove}
+                                onEdit={(id, updates) => { editItem(id, updates); toast.success(t("shopping.itemUpdated")); }}
+                                onMoveCategory={(id) => setMovingItemId(id)}
                                 categoryColor={color}
                                 categoryIcon={icon}
+                                itemEmoji={getEmojiForItem(item.title)}
                               />
                             ))}
                           </AnimatePresence>
@@ -468,15 +492,80 @@ export default function ShoppingPage() {
           })}
         </AnimatePresence>
 
-        {/* Manage categories link */}
-        <button
-          onClick={() => setShowCategoryManager(true)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border text-muted text-sm font-medium hover:border-primary hover:text-primary transition-all duration-100 active:scale-[0.98]"
-        >
-          <Settings className="w-4 h-4" />
-          {t("shopping.editCategories")}
-        </button>
+        {/* Purchased items section (at bottom) */}
+        {purchasedItems.length > 0 && (
+          <PurchasedSection
+            items={purchasedItems.map((i) => ({ ...i, emoji: getEmojiForItem(i.title) }))}
+            onUncheck={(id) => toggleItem(id)}
+            onClearAll={clearChecked}
+            categoryIcons={categoryIconMap}
+          />
+        )}
+
+        {/* Manage categories + Print */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowCategoryManager(true)}
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border text-muted text-sm font-medium hover:border-primary hover:text-primary transition-all duration-100 active:scale-[0.98]"
+          >
+            <Settings className="w-4 h-4" />
+            {t("shopping.editCategories")}
+          </button>
+          <a
+            href="/tasks/print"
+            className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 border-dashed border-border text-muted text-sm font-medium hover:border-primary hover:text-primary transition-all duration-100 active:scale-[0.98]"
+          >
+            <Printer className="w-4 h-4" />
+          </a>
+        </div>
       </div>
+
+      {/* Move category modal */}
+      <AnimatePresence>
+        {movingItemId && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm"
+              onClick={() => setMovingItemId(null)}
+            />
+            <motion.div
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed bottom-0 left-0 right-0 z-50 bg-surface rounded-t-2xl px-4 pt-4 pb-10 shadow-xl max-w-lg mx-auto"
+              dir="rtl"
+            >
+              <h3 className="font-semibold text-foreground text-sm mb-3">{t("shopping.selectCategory")}</h3>
+              <div className="grid grid-cols-3 gap-2 max-h-[50vh] overflow-y-auto">
+                {orderedCategoryNames.map((catName) => (
+                  <button
+                    key={catName}
+                    onClick={() => {
+                      moveItemToCategory(movingItemId, catName);
+                      toast.success(t("shopping.itemMoved"));
+                      setMovingItemId(null);
+                    }}
+                    className="flex flex-col items-center gap-1 p-3 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all active:scale-95"
+                  >
+                    <span className="text-xl">{categoryIconMap[catName] ?? "📦"}</span>
+                    <span className="text-[11px] text-foreground font-medium truncate w-full text-center">{catName}</span>
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setMovingItemId(null)}
+                className="w-full mt-3 py-2.5 text-sm text-muted rounded-xl border border-border"
+              >
+                {t("setupWizard.back")}
+              </button>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* ---- Add item form (bottom sheet style) ---- */}
       <AnimatePresence>
@@ -530,6 +619,28 @@ export default function ShoppingPage() {
                   className="flex-shrink-0 w-8 h-8"
                 />
               </div>
+
+              {/* Autocomplete suggestions */}
+              {suggestions.length > 0 && (
+                <div className="mb-3 flex flex-wrap gap-1.5">
+                  {suggestions.map((s) => (
+                    <button
+                      key={`${s.name}-${s.category}`}
+                      onClick={() => {
+                        setNewTitle(s.name);
+                        // Auto-select the matching category
+                        if (orderedCategoryNames.includes(s.category)) {
+                          setNewCategory(s.category);
+                        }
+                      }}
+                      className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors active:scale-95"
+                    >
+                      <span>{s.emoji}</span>
+                      <span>{s.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {/* Category selector */}
               <div className="flex flex-wrap gap-1.5 mb-3 max-h-36 overflow-y-auto">
