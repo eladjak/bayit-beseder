@@ -5,7 +5,8 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Camera, Check, Clock, Filter, LayoutTemplate, Plus, Settings, Trash2 } from "lucide-react";
+import { Camera, Check, Clock, Filter, LayoutTemplate, Plus, Printer, Settings, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
 import {
@@ -50,6 +51,8 @@ interface DbTaskView {
   recurrenceLabel: string;
   dueDate?: string;
   isOverdue: boolean;
+  points: number;
+  assigned_to: string | null;
 }
 
 export default function TasksPage() {
@@ -203,6 +206,8 @@ export default function TasksPage() {
           recurrenceLabel: dbTask.recurring ? t("common.recurring") : t("common.oneTime"),
           dueDate: dbTask.due_date ?? undefined,
           isOverdue: !!isOverdue,
+          points: dbTask.points ?? 0,
+          assigned_to: dbTask.assigned_to ?? null,
         };
       }),
     [dbTasks, categoryMap, dynamicCategoryNameToKey, optimisticCompleted, optimisticUncompleted, isCompletedToday, t]
@@ -405,6 +410,18 @@ export default function TasksPage() {
     [deleteTask, t]
   );
 
+  // Claim an unassigned task
+  const claimTask = useCallback(
+    async (taskId: string) => {
+      if (!profile?.id) return;
+      const supabase = (await import("@/lib/supabase")).createClient();
+      await supabase.from("tasks").update({ assigned_to: profile.id }).eq("id", taskId);
+      toast.success("המשימה שלך!");
+      await refetchTasks();
+    },
+    [profile, refetchTasks]
+  );
+
   // Add tasks from a template
   const handleAddFromTemplate = useCallback(
     async (template: TaskTemplate) => {
@@ -511,6 +528,13 @@ export default function TasksPage() {
                 <LayoutTemplate className="w-4 h-4" />
               </button>
             )}
+            <Link
+              href="/tasks/print"
+              className="p-2 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white/70 transition-colors border border-white/10"
+              aria-label="Print tasks"
+            >
+              <Printer className="w-4 h-4" />
+            </Link>
             <button
               onClick={() => setShowFilters((prev) => !prev)}
               className="relative p-2 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white/70 transition-colors border border-white/10"
@@ -854,6 +878,15 @@ export default function TasksPage() {
                           <Clock className="w-3 h-3" />
                           {task.estimated_minutes} {t("common.minutes")}
                         </span>
+                        {/* Difficulty badge */}
+                        {task.points > 0 && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold" style={{
+                            backgroundColor: task.points >= 16 ? "#EF444420" : task.points >= 6 ? "#F59E0B20" : "#22C55E20",
+                            color: task.points >= 16 ? "#EF4444" : task.points >= 6 ? "#F59E0B" : "#22C55E",
+                          }}>
+                            {task.points >= 16 ? "קשה" : task.points >= 6 ? "בינוני" : "קל"} {task.points}
+                          </span>
+                        )}
                         {/* Streak badge for recurring tasks */}
                         {isRecurring && (() => {
                           const streak = getStreak(task.id);
@@ -908,6 +941,15 @@ export default function TasksPage() {
                       </AnimatePresence>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
+                      {/* Claim button (unassigned tasks only) */}
+                      {!task.assigned_to && profile?.id && (
+                        <button
+                          onClick={() => claimTask(task.id)}
+                          className="text-[11px] px-2 py-1 rounded-lg border border-primary text-primary font-bold hover:bg-primary hover:text-white transition-colors"
+                        >
+                          אני לוקח/ת!
+                        </button>
+                      )}
                       {/* Skip button (recurring only) */}
                       {isRecurring && (
                         <button

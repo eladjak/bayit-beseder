@@ -17,9 +17,8 @@ const CoupleRewards = dynamic(() => import("@/components/gamification/couple-rew
 const WeeklyChallenges = dynamic(() => import("@/components/gamification/weekly-challenges").then(m => ({ default: m.WeeklyChallenges })), { ssr: false });
 const Leaderboard = dynamic(() => import("@/components/gamification/leaderboard").then(m => ({ default: m.Leaderboard })), { ssr: false });
 const ActivityFeed = dynamic(() => import("@/components/dashboard/activity-feed").then(m => ({ default: m.ActivityFeed })), { ssr: false });
-// TODO: Re-enable after verifying props work in production
-// const HouseMap = dynamic(() => import("@/components/dashboard/house-map").then(m => ({ default: m.HouseMap })), { ssr: false });
-// const PrizeCard = dynamic(() => import("@/components/prizes/prize-card").then(m => ({ default: m.PrizeCard })), { ssr: false });
+const HouseMap = dynamic(() => import("@/components/dashboard/house-map").then(m => ({ default: m.HouseMap })), { ssr: false });
+const PrizeCard = dynamic(() => import("@/components/prizes/prize-card").then(m => ({ default: m.PrizeCard })), { ssr: false });
 import { getRandomMessage } from "@/lib/coaching-messages";
 import { computeRoomHealth } from "@/lib/room-health";
 import { computeRewardsProgress } from "@/lib/rewards";
@@ -235,6 +234,8 @@ export default function DashboardPage() {
           category: categoryKey,
           estimated_minutes: 10,
           completed,
+          points: t.points ?? 0,
+          assigned_to: t.assigned_to,
         };
       }),
     [dbTasks, categoryMap, isCompletedToday]
@@ -642,6 +643,15 @@ export default function DashboardPage() {
         </div>
 
         <CoachingInsight />
+
+        {/* House Map — Room Progress (safe: renders empty state when no tasks) */}
+        <HouseMap
+          tasks={(tasks ?? []).map((t: TaskItem) => ({ id: t.id, category_id: t.category ?? "", status: t.completed ? "completed" : "pending" }))}
+          categories={Object.entries(CATEGORY_ICONS).map(([key, icon]) => ({ id: key, name: CATEGORY_LABELS[key] ?? key, icon: icon ?? "📦", color: CATEGORY_COLORS[key] ?? "#6366F1" }))}
+        />
+
+        {/* Prize Card */}
+        <PrizeCard currentPoints={completedCount * 10} />
 
         {/* Blog & Website links */}
         <div className="space-y-2">

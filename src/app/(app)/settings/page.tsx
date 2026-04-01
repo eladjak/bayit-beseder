@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
@@ -33,6 +34,9 @@ import { exportTasksToCSV, exportCompletionsToCSV, downloadCSV, type ExportTask,
 import { LayoutGrid, AlertTriangle, Keyboard, Download, FileDown } from "lucide-react";
 import Link from "next/link";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
+
+const SetupWizard = dynamic(() => import("@/components/setup-wizard/setup-wizard").then(m => ({ default: m.SetupWizard })), { ssr: false });
+const PrizeManager = dynamic(() => import("@/components/prizes/prize-manager").then(m => ({ default: m.PrizeManager })), { ssr: false });
 
 // ============================================
 // Theme helpers
@@ -118,6 +122,9 @@ export default function SettingsPage() {
   // PWA install
   const { canInstall, isInstalled, promptInstall } = usePWAInstall();
   const [deactivatingSeasonal, setDeactivatingSeasonal] = useState(false);
+
+  // Setup wizard state
+  const [showSetupWizard, setShowSetupWizard] = useState(false);
 
   // Export state
   const [exportingTasks, setExportingTasks] = useState(false);
@@ -424,6 +431,22 @@ export default function SettingsPage() {
           onSave={handleSaveProfile}
         />
 
+        {/* Room Setup Wizard */}
+        <div className="card-elevated p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-purple-500 flex items-center justify-center text-white text-lg flex-shrink-0">
+              🏠
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">{t("setupWizard.title")}</p>
+              <p className="text-xs text-muted">{t("setupWizard.subtitle")}</p>
+            </div>
+            <button onClick={() => setShowSetupWizard(true)} className="px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold">
+              {t("setupWizard.next")}
+            </button>
+          </div>
+        </div>
+
         <HouseholdSection
           householdName={householdName}
           goldenTarget={goldenTarget}
@@ -654,6 +677,25 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        {/* Prize Manager */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-foreground px-1">🏆 {t("prizes.title")}</h3>
+          <PrizeManager />
+        </div>
+
+        {/* Print Tasks */}
+        <Link href="/tasks/print" className="card-elevated p-4 block hover:scale-[0.99] active:scale-[0.97] transition-transform">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-lg flex-shrink-0">
+              🖨️
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">{t("print.title")}</p>
+              <p className="text-xs text-muted">{t("print.subtitle")}</p>
+            </div>
+          </div>
+        </Link>
+
         {/* Keyboard Shortcuts */}
         <div className="card-elevated p-4">
           <div className="flex items-center justify-between">
@@ -734,6 +776,19 @@ export default function SettingsPage() {
 
         <div className="pb-4" />
       </div>
+
+      {/* Setup Wizard Modal */}
+      {showSetupWizard && (
+        <div className="fixed inset-0 z-50 bg-background">
+          <SetupWizard
+            onComplete={(_tasks) => {
+              setShowSetupWizard(false);
+              toast.success("המשימות נוצרו!");
+            }}
+            onClose={() => setShowSetupWizard(false)}
+          />
+        </div>
+      )}
     </div>
   );
 }

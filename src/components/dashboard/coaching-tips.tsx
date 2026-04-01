@@ -157,11 +157,38 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
   // Deterministic starting index based on day of month so it doesn't flicker on re-render
   const [tipIndex, setTipIndex] = useState<number>(() => new Date().getDate() % pool.length);
   const [view, setView] = useState<ViewState>("tip");
+  const [aiTip, setAiTip] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  // Fetch AI-powered tip on mount
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchAiTip() {
+      setAiLoading(true);
+      try {
+        const res = await fetch("/api/ai/coaching-tip", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ completedCount, totalCount, trigger }),
+        });
+        if (!res.ok) throw new Error("API error");
+        const data = await res.json();
+        if (!cancelled && data.tip) setAiTip(data.tip);
+      } catch {
+        // Silently fall back to static tips
+      } finally {
+        if (!cancelled) setAiLoading(false);
+      }
+    }
+    fetchAiTip();
+    return () => { cancelled = true; };
+  }, [trigger, completedCount, totalCount]);
 
   // When trigger changes (e.g. user completes more tasks), reset to a fresh tip
   useEffect(() => {
     setTipIndex(new Date().getDate() % pool.length);
     setView("tip");
+    setAiTip(null);
   }, [trigger, pool.length]);
 
   const tip = pool[tipIndex] ?? pool[0];
@@ -229,7 +256,7 @@ export function CoachingTips({ completedCount, totalCount }: CoachingTipsProps) 
           )}
 
           {view === "tip" && (
-            <CoachBubble key={`tip-${tipIndex}`} emoji={tip.emoji} text={tip.message} avatarLabel={t("coaching.avatarLabel")} />
+            <CoachBubble key={`tip-${tipIndex}`} emoji={aiTip ? "🤖" : tip.emoji} text={aiTip ?? tip.message} avatarLabel={t("coaching.avatarLabel")} />
           )}
 
           {view === "why" && (
