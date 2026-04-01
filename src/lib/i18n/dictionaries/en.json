@@ -208,6 +208,8 @@
     "allDone": "Perfect day! You completed everything together",
     "noTasks": "House is clean! (or you haven't added tasks yet...)",
     "achievementsSection": "Achievements & Gamification",
+    "showMore": "Show {count} more tasks",
+    "showLess": "Show less",
     "todayHeader": "Today",
     "noTasksToday": "No tasks today — excellent! 🥳",
     "enjoySilence": "Enjoy the quiet, you've earned it",

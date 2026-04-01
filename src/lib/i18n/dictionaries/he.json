@@ -208,6 +208,8 @@
     "allDone": "יום מושלם! סיימתם הכל ביחד",
     "noTasks": "הבית נקי! (או שעדיין לא הוספתם משימות...)",
     "achievementsSection": "הישגים וגיימיפיקציה",
+    "showMore": "הצג עוד {count} משימות",
+    "showLess": "הצג פחות",
     "todayHeader": "היום",
     "noTasksToday": "אין משימות להיום — מצוין! 🥳",
     "enjoySilence": "נהנים מהשקט, מגיע לכם",

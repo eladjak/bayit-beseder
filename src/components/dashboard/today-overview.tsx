@@ -282,7 +282,7 @@ export function TodayOverview({ tasks, onToggle, onClaim, currentUserId, maxItem
           onClick={() => setExpanded(true)}
           className="w-full py-2.5 text-xs font-semibold text-primary hover:bg-primary/5 rounded-xl border border-dashed border-primary/30 transition-colors active:scale-[0.98]"
         >
-          {t("dashboard.showMore") || `הצג עוד ${tasks.length - maxItems} משימות`} ▼
+          {(t("dashboard.showMore") || "הצג עוד {count} משימות").replace("{count}", String(tasks.length - maxItems))} ▼
         </motion.button>
       )}
 
