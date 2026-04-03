@@ -90,6 +90,7 @@ export function PlaylistPlayer({
 
   // Fire confetti when playlist completes
   const fireCompletion = useCallback(async () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const { default: confetti } = await import("canvas-confetti");
     const duration = 2500;
     const end = Date.now() + duration;

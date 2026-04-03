@@ -24,6 +24,7 @@ interface HouseholdInfo {
 }
 
 async function fireConfetti() {
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
   const { default: confetti } = await import("canvas-confetti");
   confetti({
     particleCount: 120,

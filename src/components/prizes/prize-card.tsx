@@ -90,8 +90,8 @@ export function PrizeCard({ currentPoints }: PrizeCardProps) {
     if ((newlyUnlocked || crossedThreshold) && !confettiFired.current) {
       confettiFired.current = true;
       setJustUnlocked(true);
-      import("canvas-confetti").then(({ default: confetti }) => {
-        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+      import("@/lib/safe-confetti").then(({ fireConfetti }) => {
+        fireConfetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
       });
       const timer = setTimeout(() => {
         setJustUnlocked(false);

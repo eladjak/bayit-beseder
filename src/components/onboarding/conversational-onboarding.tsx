@@ -673,10 +673,9 @@ function StepDone({ homeName, t }: { homeName: string; t: TFn }) {
     if (didFire.current) return;
     didFire.current = true;
 
-    // Dynamically import confetti so it doesn't bloat the initial bundle
-    import("canvas-confetti").then((mod) => {
-      const confetti = mod.default;
-      confetti({
+    // Dynamically import confetti (respects reduced-motion via safe-confetti)
+    import("@/lib/safe-confetti").then(({ fireConfetti }) => {
+      fireConfetti({
         particleCount: 120,
         spread: 80,
         origin: { y: 0.55 },

@@ -22,8 +22,8 @@ function ChallengeCard({ item, index }: { item: ChallengeProgress; index: number
     if (confettiFired.current || !item.isCompleted) return;
     confettiFired.current = true;
     try {
-      const confetti = (await import("canvas-confetti")).default;
-      confetti({ particleCount: 60, spread: 60, origin: { y: 0.7 } });
+      const { fireConfetti } = await import("@/lib/safe-confetti");
+      await fireConfetti({ particleCount: 60, spread: 60, origin: { y: 0.7 } });
     } catch {
       // ignore
     }

@@ -4,6 +4,7 @@ import { useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
 import { haptic } from "@/lib/haptics";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 type CelebrationType = "task" | "all_daily" | "golden_rule" | "streak";
 
@@ -30,6 +31,8 @@ export function CelebrationOverlay({
   onDismiss,
 }: CelebrationOverlayProps) {
   const fireConfetti = useCallback(async () => {
+    // Respect reduced motion preference
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const { default: confetti } = await import("canvas-confetti");
     if (type === "task") {
       confetti({
