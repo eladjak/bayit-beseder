@@ -2,8 +2,6 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { NotificationCenter } from "@/components/notifications/NotificationCenter";
-import type { Notification } from "@/hooks/useNotifications";
 
 interface DashboardHeaderProps {
   displayName: string;
@@ -13,11 +11,6 @@ interface DashboardHeaderProps {
   avatarUrl?: string | null;
   completedCount: number;
   totalCount: number;
-  notifications: Notification[];
-  unreadCount: number;
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
-  dismiss: (id: string) => void;
 }
 
 export function DashboardHeader({
@@ -28,11 +21,6 @@ export function DashboardHeader({
   avatarUrl,
   completedCount,
   totalCount,
-  notifications,
-  unreadCount,
-  markAsRead,
-  markAllAsRead,
-  dismiss,
 }: DashboardHeaderProps) {
   return (
     <div className="relative gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-10 -mx-0 overflow-hidden">
@@ -40,16 +28,6 @@ export function DashboardHeader({
       <Link href="/" className="absolute top-4 right-4 z-10 text-white/50 hover:text-white/80 text-xs font-medium transition-colors">
         🏠 בית בסדר
       </Link>
-      {/* Notification bell - positioned top-left (RTL: visually top-right) */}
-      <div className="absolute top-4 left-4 z-10">
-        <NotificationCenter
-          notifications={notifications}
-          unreadCount={unreadCount}
-          markAsRead={markAsRead}
-          markAllAsRead={markAllAsRead}
-          dismiss={dismiss}
-        />
-      </div>
       <div className="text-center relative z-10">
         {/* User avatar in header */}
         <div className="flex justify-center mb-3">

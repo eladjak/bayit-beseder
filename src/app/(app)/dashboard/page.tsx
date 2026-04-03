@@ -30,7 +30,7 @@ import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
 import { useAppSounds } from "@/hooks/useAppSound";
-import { useNotifications } from "@/hooks/useNotifications";
+
 import { usePartner } from "@/hooks/usePartner";
 import { useHouseholdMembers } from "@/hooks/useHouseholdMembers";
 import { useWeeklyChallenges } from "@/hooks/useWeeklyChallenges";
@@ -138,7 +138,6 @@ export default function DashboardPage() {
   const { completions: allCompletions, markComplete, isCompletedToday } = useCompletions({ limit: 500 });
   const { categoryMap } = useCategories();
   const { playComplete, playAchievement, playStreak } = useAppSounds();
-  const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const { partner } = usePartner(profile?.partner_id, todayStr);
   const { household } = useHousehold(profile?.household_id ?? null);
@@ -525,11 +524,6 @@ export default function DashboardPage() {
         avatarUrl={profile?.avatar_url}
         completedCount={completedCount}
         totalCount={filteredTasks.length}
-        notifications={notifications}
-        unreadCount={unreadCount}
-        markAsRead={markAsRead}
-        markAllAsRead={markAllAsRead}
-        dismiss={dismiss}
       />
 
       {/* Content area with padding */}

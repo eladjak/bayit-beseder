@@ -211,8 +211,8 @@ async function fetchNotificationsFromSupabase(): Promise<SupabaseNotificationDat
 
         // Today's pending tasks for reminders
         supabase
-          .from("tasks")
-          .select("id, title, category_id, due_date")
+          .from("task_instances")
+          .select("id, due_date, status, template_id, task_templates(title, category)")
           .eq("status", "pending")
           .eq("due_date", todayStr)
           .limit(10),
@@ -297,13 +297,15 @@ async function fetchNotificationsFromSupabase(): Promise<SupabaseNotificationDat
     const pendingCount = tasksResult.data?.length ?? 0;
     const taskReminders: Notification[] = [];
     if (pendingCount > 0) {
+      const firstTemplate = tasksResult.data![0].task_templates as unknown as { title: string; category: string } | null;
+      const firstTitle = firstTemplate?.title ?? "משימה";
       taskReminders.push({
         id: `reminder-today-${todayStr}`,
         type: "task_reminder" as NotificationType,
         title: "תזכורת משימה",
         message:
           pendingCount === 1
-            ? `${tasksResult.data![0].title} ממתינה להיום`
+            ? `${firstTitle} ממתינה להיום`
             : `${pendingCount} משימות ממתינות להיום`,
         icon: pendingCount === 1 ? "📋" : "📝",
         read: false,

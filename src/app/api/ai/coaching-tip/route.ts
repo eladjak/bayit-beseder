@@ -43,6 +43,8 @@ export async function POST(req: NextRequest) {
     });
 
     if (!response.ok) {
+      const errorText = await response.text().catch(() => "unknown");
+      console.error(`[coaching-tip] Gemini API error ${response.status}: ${errorText}`);
       return NextResponse.json({ tip: getRandomFallbackTip() });
     }
 
@@ -50,6 +52,7 @@ export async function POST(req: NextRequest) {
     const tip = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
     if (!tip) {
+      console.error("[coaching-tip] Gemini returned no tip. Response:", JSON.stringify(data).slice(0, 500));
       return NextResponse.json({ tip: getRandomFallbackTip() });
     }
 

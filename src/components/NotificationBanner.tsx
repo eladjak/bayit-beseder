@@ -30,9 +30,13 @@ export function NotificationBanner() {
     const permission = getNotificationPermission();
     if (permission !== "default") return;
 
-    // Check if user already dismissed this banner
-    const dismissed = localStorage.getItem("bayit-notification-banner-dismissed");
-    if (dismissed === "true") return;
+    // Check if user dismissed this banner (re-show after 7 days)
+    const dismissedAt = localStorage.getItem("bayit-notification-banner-dismissed");
+    if (dismissedAt) {
+      const dismissedTime = parseInt(dismissedAt, 10);
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      if (!isNaN(dismissedTime) && Date.now() - dismissedTime < sevenDays) return;
+    }
 
     // Show the banner after a short delay (let the page load first)
     const timer = setTimeout(() => setVisible(true), 2000);
@@ -55,17 +59,17 @@ export function NotificationBanner() {
         subscribeToPush(user.id);
       }
       setVisible(false);
-      localStorage.setItem("bayit-notification-banner-dismissed", "true");
+      localStorage.setItem("bayit-notification-banner-dismissed", String(Date.now()));
     } else {
       // User denied - dismiss the banner
       setVisible(false);
-      localStorage.setItem("bayit-notification-banner-dismissed", "true");
+      localStorage.setItem("bayit-notification-banner-dismissed", String(Date.now()));
     }
   }, [user]);
 
   const handleDismiss = useCallback(() => {
     setVisible(false);
-    localStorage.setItem("bayit-notification-banner-dismissed", "true");
+    localStorage.setItem("bayit-notification-banner-dismissed", String(Date.now()));
   }, []);
 
   if (!visible) return null;

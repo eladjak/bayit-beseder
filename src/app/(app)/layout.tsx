@@ -14,6 +14,8 @@ import { PWAInstallBanner } from "@/components/pwa-install-banner";
 import { LanguageToggle } from "@/components/language-toggle";
 import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { NotificationCenter } from "@/components/notifications/NotificationCenter";
+import { useNotifications } from "@/hooks/useNotifications";
 
 // Lazy-load the AI chat components to keep the initial bundle lean
 const ChatFAB = dynamic(
@@ -30,6 +32,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [chatOpen, setChatOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
 
   useKeyboardShortcuts({
     onNewTask: () => router.push("/tasks"),
@@ -50,6 +53,16 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       >
         דלג לתוכן הראשי
       </a>
+      {/* Global notification bell — fixed top-left, offset below language toggle (RTL: visually top-right) */}
+      <div className="fixed top-14 left-3 z-50">
+        <NotificationCenter
+          notifications={notifications}
+          unreadCount={unreadCount}
+          markAsRead={markAsRead}
+          markAllAsRead={markAllAsRead}
+          dismiss={dismiss}
+        />
+      </div>
       <NotificationBanner />
       <PWAInstallBanner />
       <ServiceWorkerRegistrar />
