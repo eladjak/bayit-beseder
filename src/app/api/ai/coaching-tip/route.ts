@@ -1,4 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 
 // Gemini API for generating smart coaching tips
 const GEMINI_API_URL =
@@ -16,6 +20,19 @@ const SYSTEM_PROMPT = `אתה מאמן ביתי חכם ומצחיק באפליק
 - אורך: 2-3 משפטים בלבד, לא יותר`;
 
 export async function POST(req: NextRequest) {
+  // Rate limiting
+  const rateLimitResult = await limiter.check(getClientIp(req));
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
+  // Auth check
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ tip: getRandomFallbackTip() });
+  }
+
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json({ tip: getRandomFallbackTip() });
