@@ -136,7 +136,7 @@ function HistoryItem({ task, completion, categoryKey }: HistoryItemProps) {
         <div className="flex items-center gap-2 mt-1 flex-wrap">
           <span
             className="text-[10px] px-1.5 py-0.5 rounded-full"
-            style={{ backgroundColor: `${color}20`, color }}
+            style={{ backgroundColor: `color-mix(in srgb, ${color} 20%, var(--color-surface, #fff))`, color: `color-mix(in srgb, ${color} 70%, var(--color-foreground, #1a1a1a))` }}
           >
             {label}
           </span>

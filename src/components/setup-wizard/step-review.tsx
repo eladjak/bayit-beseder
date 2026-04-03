@@ -91,7 +91,7 @@ export function StepReview({ selectedRooms, totalTasks, isCreating, onFinish, on
                     <span
                       key={d}
                       className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                      style={{ backgroundColor: `${color}20`, color }}
+                      style={{ backgroundColor: `color-mix(in srgb, ${color} 20%, var(--color-surface, #fff))`, color: `color-mix(in srgb, ${color} 70%, var(--color-foreground, #1a1a1a))` }}
                     >
                       {count} {isRtl ? label.he : label.en}
                     </span>

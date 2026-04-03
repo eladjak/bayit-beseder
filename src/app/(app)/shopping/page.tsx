@@ -404,7 +404,7 @@ export default function ShoppingPage() {
                   {/* Color dot + icon */}
                   <span
                     className="w-7 h-7 rounded-lg flex items-center justify-center text-base flex-shrink-0"
-                    style={{ backgroundColor: `${color}22` }}
+                    style={{ backgroundColor: `color-mix(in srgb, ${color} 18%, var(--color-surface, #fafaf9))` }}
                     aria-hidden
                   >
                     {icon}
@@ -416,7 +416,7 @@ export default function ShoppingPage() {
                   </span>
 
                   {/* Item count badge */}
-                  <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: `${color}22`, color }}>
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ backgroundColor: `color-mix(in srgb, ${color} 18%, var(--color-surface, #fafaf9))`, color: `color-mix(in srgb, ${color} 70%, var(--color-foreground, #1a1a1a))` }}>
                     {checkedInCat > 0 ? `${checkedInCat}/${totalInCat}` : totalInCat}
                   </span>
 
@@ -443,7 +443,7 @@ export default function ShoppingPage() {
                 </div>
 
                 {/* Colored divider line */}
-                <div className="h-px mx-3" style={{ backgroundColor: `${color}40` }} />
+                <div className="h-px mx-3" style={{ backgroundColor: `color-mix(in srgb, ${color} 30%, var(--color-surface, #fafaf9))` }} />
 
                 {/* Items list */}
                 <AnimatePresence initial={false}>

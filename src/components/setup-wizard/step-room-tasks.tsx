@@ -127,8 +127,8 @@ export function StepRoomTasks({
                 <span
                   className="text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0"
                   style={{
-                    backgroundColor: `${diffColor}20`,
-                    color: diffColor,
+                    backgroundColor: `color-mix(in srgb, ${diffColor} 20%, var(--color-surface, #fff))`,
+                    color: `color-mix(in srgb, ${diffColor} 70%, var(--color-foreground, #1a1a1a))`,
                   }}
                 >
                   {isRtl ? diffLabel.he : diffLabel.en}

@@ -199,7 +199,7 @@ export function TaskCategoryManager({
                   <div className="flex items-center gap-3">
                     <span
                       className="w-8 h-8 rounded-lg flex items-center justify-center text-lg flex-shrink-0"
-                      style={{ backgroundColor: `${cat.color}15` }}
+                      style={{ backgroundColor: `color-mix(in srgb, ${cat.color} 15%, var(--color-surface, #fff))` }}
                     >
                       {cat.icon}
                     </span>
