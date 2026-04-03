@@ -262,6 +262,32 @@ export default function WeeklyPage() {
     [updateTask]
   );
 
+  const handleClaimTask = useCallback(
+    async (taskId: string) => {
+      if (!profile?.id || taskId.startsWith("mock-")) return;
+      haptic("success");
+      const ok = await updateTask(taskId, { assigned_to: profile.id });
+      if (ok) {
+        const taskTitle = weekTasks.find((t) => t.id === taskId)?.title ?? "";
+        toast.success(t("tasks.claim.claimed").replace("{task}", taskTitle));
+      } else {
+        toast.error(t("weekly.moveFailed"));
+      }
+    },
+    [profile, updateTask, weekTasks, t]
+  );
+
+  const handleUnclaimTask = useCallback(
+    async (taskId: string) => {
+      if (!profile?.id || taskId.startsWith("mock-")) return;
+      haptic("tap");
+      const ok = await updateTask(taskId, { assigned_to: null });
+      if (ok) toast.success(t("tasks.claim.unclaimed"));
+      else toast.error(t("weekly.moveFailed"));
+    },
+    [profile, updateTask, t]
+  );
+
   const handleMoveTaskToDay = useCallback(
     async (taskId: string, newDate: string) => {
       if (taskId.startsWith("mock-")) return;
@@ -482,12 +508,15 @@ export default function WeeklyPage() {
                 calendarEvents={eventsByDate.get(dayLoad.date) ?? []}
                 memberNames={memberNames}
                 memberIds={memberIds}
+                currentUserId={profile?.id}
                 isDragTarget={
                   activeDragTask !== null && activeDragTask.fromDate !== dayLoad.date
                 }
                 onAddTask={handleAddTask}
                 onToggleComplete={handleToggleComplete}
                 onReassignTask={handleReassignTask}
+                onClaimTask={handleClaimTask}
+                onUnclaimTask={handleUnclaimTask}
                 zoneMode={zoneConfig.zoneMode}
               />
             ))}

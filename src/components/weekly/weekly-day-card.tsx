@@ -47,8 +47,11 @@ interface DraggableWeekTaskProps {
   date: string;
   memberNames: Record<string, string>;
   memberIds: string[];
+  currentUserId?: string;
   onToggleComplete: (task: TaskRow) => Promise<void>;
   onReassignTask: (taskId: string, newUserId: string) => Promise<void>;
+  onClaimTask?: (taskId: string) => Promise<void>;
+  onUnclaimTask?: (taskId: string) => Promise<void>;
 }
 
 function DraggableWeekTask({
@@ -56,8 +59,11 @@ function DraggableWeekTask({
   date,
   memberNames,
   memberIds,
+  currentUserId,
   onToggleComplete,
   onReassignTask,
+  onClaimTask,
+  onUnclaimTask,
 }: DraggableWeekTaskProps) {
   const { t } = useTranslation();
   const category = getCategoryFromId(task.category_id);
@@ -157,6 +163,42 @@ function DraggableWeekTask({
           {assigneeName}
         </span>
       )}
+
+      {/* Unassigned indicator + claim button */}
+      {!task.assigned_to && !isMock && (
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <span
+            className="w-4 h-4 rounded-full border border-dashed border-muted/50 flex items-center justify-center text-[9px] text-muted/60 flex-shrink-0"
+            title={t("tasks.claim.unassigned")}
+          >
+            ?
+          </span>
+          {onClaimTask && currentUserId && (
+            <motion.button
+              onClick={() => onClaimTask(task.id)}
+              whileTap={{ scale: 0.88 }}
+              transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
+              className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 border border-primary/30 text-primary font-bold hover:bg-primary hover:text-white transition-colors whitespace-nowrap"
+              title={t("tasks.claim.button")}
+            >
+              {t("tasks.claim.button")}
+            </motion.button>
+          )}
+        </div>
+      )}
+
+      {/* Unclaim button — for tasks assigned to current user */}
+      {task.assigned_to && task.assigned_to === currentUserId && onUnclaimTask && !isMock && (
+        <motion.button
+          onClick={() => onUnclaimTask(task.id)}
+          whileTap={{ scale: 0.88 }}
+          transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
+          className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/15 border border-primary/40 text-primary font-medium hover:bg-red-50 hover:border-red-300 hover:text-red-500 dark:hover:bg-red-950/30 transition-colors whitespace-nowrap flex-shrink-0"
+          title={t("tasks.claim.unclaim")}
+        >
+          ✓
+        </motion.button>
+      )}
     </div>
   );
 }
@@ -172,6 +214,7 @@ export interface WeeklyDayCardProps {
   calendarEvents: ClientCalendarEvent[];
   memberNames: Record<string, string>;
   memberIds: string[];
+  currentUserId?: string;
   isDragTarget: boolean;
   onAddTask: (
     dueDate: string,
@@ -180,6 +223,8 @@ export interface WeeklyDayCardProps {
   ) => Promise<boolean>;
   onToggleComplete: (task: TaskRow) => Promise<void>;
   onReassignTask: (taskId: string, newUserId: string) => Promise<void>;
+  onClaimTask?: (taskId: string) => Promise<void>;
+  onUnclaimTask?: (taskId: string) => Promise<void>;
   zoneMode?: boolean;
 }
 
@@ -190,10 +235,13 @@ export function WeeklyDayCard({
   calendarEvents,
   memberNames,
   memberIds,
+  currentUserId,
   isDragTarget,
   onAddTask,
   onToggleComplete,
   onReassignTask,
+  onClaimTask,
+  onUnclaimTask,
   zoneMode,
 }: WeeklyDayCardProps) {
   const { t } = useTranslation();
@@ -489,8 +537,11 @@ export function WeeklyDayCard({
                               date={dayLoad.date}
                               memberNames={memberNames}
                               memberIds={memberIds}
+                              currentUserId={currentUserId}
                               onToggleComplete={onToggleComplete}
                               onReassignTask={onReassignTask}
+                              onClaimTask={onClaimTask}
+                              onUnclaimTask={onUnclaimTask}
                             />
                           ))}
                         </ZoneGroupCard>
@@ -508,8 +559,11 @@ export function WeeklyDayCard({
                     date={dayLoad.date}
                     memberNames={memberNames}
                     memberIds={memberIds}
+                    currentUserId={currentUserId}
                     onToggleComplete={onToggleComplete}
                     onReassignTask={onReassignTask}
+                    onClaimTask={onClaimTask}
+                    onUnclaimTask={onUnclaimTask}
                   />
                 ))}
             </div>

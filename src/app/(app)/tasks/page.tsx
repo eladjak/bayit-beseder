@@ -412,14 +412,45 @@ export default function TasksPage() {
 
   // Claim an unassigned task
   const claimTask = useCallback(
+    async (taskId: string, taskTitle: string) => {
+      if (!profile?.id) {
+        toast.error(t("tasks.claim.loginRequired"));
+        return;
+      }
+      haptic("success");
+      const supabase = (await import("@/lib/supabase")).createClient();
+      const { error } = await supabase
+        .from("tasks")
+        .update({ assigned_to: profile.id })
+        .eq("id", taskId);
+      if (!error) {
+        toast.success(t("tasks.claim.claimed").replace("{task}", taskTitle));
+        await refetchTasks();
+      } else {
+        toast.error(t("tasks.operationFailed"));
+      }
+    },
+    [profile, refetchTasks, t]
+  );
+
+  // Unclaim a task (remove assignment)
+  const unclaimTask = useCallback(
     async (taskId: string) => {
       if (!profile?.id) return;
+      haptic("tap");
       const supabase = (await import("@/lib/supabase")).createClient();
-      await supabase.from("tasks").update({ assigned_to: profile.id }).eq("id", taskId);
-      toast.success("המשימה שלך!");
-      await refetchTasks();
+      const { error } = await supabase
+        .from("tasks")
+        .update({ assigned_to: null })
+        .eq("id", taskId);
+      if (!error) {
+        toast.success(t("tasks.claim.unclaimed"));
+        await refetchTasks();
+      } else {
+        toast.error(t("tasks.operationFailed"));
+      }
     },
-    [profile, refetchTasks]
+    [profile, refetchTasks, t]
   );
 
   // Add tasks from a template
@@ -807,13 +838,39 @@ export default function TasksPage() {
                             </span>
                           </div>
                         </div>
-                        <button
-                          onClick={() => handleDeleteTask(task.id)}
-                          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                          aria-label={t("tasks.deleteTask")}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                          {/* Claim button (unassigned tasks only) */}
+                          {!task.assigned_to && profile?.id && (
+                            <motion.button
+                              onClick={() => claimTask(task.id, task.title)}
+                              whileTap={{ scale: 0.88 }}
+                              transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
+                              className="text-[11px] px-2 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary font-bold hover:bg-primary hover:text-white transition-colors"
+                              aria-label={t("tasks.claim.button")}
+                            >
+                              {t("tasks.claim.button")}
+                            </motion.button>
+                          )}
+                          {/* Unclaim button */}
+                          {task.assigned_to && task.assigned_to === profile?.id && (
+                            <motion.button
+                              onClick={() => unclaimTask(task.id)}
+                              whileTap={{ scale: 0.88 }}
+                              transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
+                              className="text-[11px] px-2 py-1 rounded-full bg-primary/15 border border-primary/40 text-primary font-medium hover:bg-red-50 hover:border-red-300 hover:text-red-500 dark:hover:bg-red-950/30 transition-colors"
+                              aria-label={t("tasks.claim.unclaim")}
+                            >
+                              ✓ {t("tasks.claim.unclaim")}
+                            </motion.button>
+                          )}
+                          <button
+                            onClick={() => handleDeleteTask(task.id)}
+                            className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                            aria-label={t("tasks.deleteTask")}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -943,12 +1000,29 @@ export default function TasksPage() {
                     <div className="flex items-center gap-1 flex-shrink-0">
                       {/* Claim button (unassigned tasks only) */}
                       {!task.assigned_to && profile?.id && (
-                        <button
-                          onClick={() => claimTask(task.id)}
-                          className="text-[11px] px-2 py-1 rounded-lg border border-primary text-primary font-bold hover:bg-primary hover:text-white transition-colors"
+                        <motion.button
+                          onClick={() => claimTask(task.id, task.title)}
+                          whileTap={{ scale: 0.88 }}
+                          transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
+                          className="text-[11px] px-2 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary font-bold hover:bg-primary hover:text-white transition-colors"
+                          aria-label={t("tasks.claim.button")}
+                          title={t("tasks.claim.button")}
                         >
-                          אני לוקח/ת!
-                        </button>
+                          {t("tasks.claim.button")}
+                        </motion.button>
+                      )}
+                      {/* Unclaim button (tasks claimed by current user) */}
+                      {task.assigned_to && task.assigned_to === profile?.id && (
+                        <motion.button
+                          onClick={() => unclaimTask(task.id)}
+                          whileTap={{ scale: 0.88 }}
+                          transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
+                          className="text-[11px] px-2 py-1 rounded-full bg-primary/15 border border-primary/40 text-primary font-medium hover:bg-red-50 hover:border-red-300 hover:text-red-500 dark:hover:bg-red-950/30 transition-colors"
+                          aria-label={t("tasks.claim.unclaim")}
+                          title={t("tasks.claim.unclaim")}
+                        >
+                          ✓ {t("tasks.claim.unclaim")}
+                        </motion.button>
                       )}
                       {/* Skip button (recurring only) */}
                       {isRecurring && (

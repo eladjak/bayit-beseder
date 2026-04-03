@@ -292,6 +292,14 @@
       "skip": "Skip today",
       "unskip": "Undo skip",
       "skipped": "Skipped"
+    },
+    "claim": {
+      "button": "I'll take it!",
+      "claimed": "You claimed {task} 🙌",
+      "unclaim": "Unclaim",
+      "unclaimed": "Task unclaimed",
+      "unassigned": "Unassigned",
+      "loginRequired": "Login required to claim tasks"
     }
   },
   "shopping": {

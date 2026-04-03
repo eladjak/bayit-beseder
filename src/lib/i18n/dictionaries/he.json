@@ -292,6 +292,14 @@
       "skip": "דילוג להיום",
       "unskip": "ביטול דילוג",
       "skipped": "דולג"
+    },
+    "claim": {
+      "button": "אני לוקח/ת!",
+      "claimed": "לקחת את {task} 🙌",
+      "unclaim": "ביטול לקיחה",
+      "unclaimed": "ביטלת את הלקיחה",
+      "unassigned": "לא שויך",
+      "loginRequired": "יש להתחבר כדי לקחת משימה"
     }
   },
   "shopping": {
