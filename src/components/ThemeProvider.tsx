@@ -19,7 +19,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     if (isDark) {
       document.documentElement.classList.add("dark");
+      document.documentElement.classList.remove("light");
     } else {
+      document.documentElement.classList.add("light");
       document.documentElement.classList.remove("dark");
     }
 
@@ -30,7 +32,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (current === "light" || current === "dark") return; // user override
       if (e.matches) {
         document.documentElement.classList.add("dark");
+        document.documentElement.classList.remove("light");
       } else {
+        document.documentElement.classList.add("light");
         document.documentElement.classList.remove("dark");
       }
     };
@@ -51,7 +55,13 @@ export function ThemeScript() {
   try {
     var t = localStorage.getItem('bayit-beseder-theme');
     var dark = t === 'dark' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    if (dark) document.documentElement.classList.add('dark');
+    if (dark) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('light');
+    } else {
+      document.documentElement.classList.add('light');
+      document.documentElement.classList.remove('dark');
+    }
   } catch(e){}
   try {
     var colorMap = {

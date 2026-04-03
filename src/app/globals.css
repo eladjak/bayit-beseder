@@ -36,6 +36,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* CSS-only dark mode fallback for environments where JS hasn't run yet.
+   The ThemeScript in <head> will add the 'dark' class before first paint,
+   but this @media rule covers the very brief window before that. */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --color-background: #0F0D1A !important;
+    --color-surface: #1A1730 !important;
+    --color-surface-hover: #252240 !important;
+    --color-foreground: #E2E0F0 !important;
+    --color-muted: #B0ACCC !important;
+    --color-border: #2D2A45 !important;
+    color-scheme: dark;
+  }
+}
+
 /* Dark mode overrides — !important needed to beat @theme inline specificity */
 :root.dark,
 .dark {

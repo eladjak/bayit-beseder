@@ -209,7 +209,7 @@ export function InviteContent() {
         </div>
 
         {/* Card */}
-        <div className="w-full rounded-2xl bg-white/90 backdrop-blur-xl p-6 shadow-xl border border-white/50">
+        <div className="w-full rounded-2xl bg-white/90 dark:bg-surface/95 backdrop-blur-xl p-6 shadow-xl border border-white/50 dark:border-border">
           <AnimatePresence mode="wait">
             {pageState === "loading" && (
               <motion.div

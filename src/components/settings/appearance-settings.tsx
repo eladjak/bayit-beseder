@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun, Globe, Volume2, MessageCircle, Save, Loader2 } from "lucide-react";
+import { Moon, Sun, Globe, Monitor, Volume2, MessageCircle, Save, Loader2 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { ThemeCustomizer } from "@/components/settings/theme-customizer";
 
@@ -101,6 +101,8 @@ export function AppearanceSettings({
         <div className="flex items-center gap-2">
           {theme === "dark" ? (
             <Moon className="w-4 h-4 text-muted" />
+          ) : theme === "system" ? (
+            <Monitor className="w-4 h-4 text-muted" />
           ) : (
             <Sun className="w-4 h-4 text-muted" />
           )}
@@ -127,7 +129,7 @@ export function AppearanceSettings({
             label={t("settings.appearanceSection.themeSystem")}
             value="system"
             current={theme}
-            icon={<Globe className="w-4 h-4" />}
+            icon={<Monitor className="w-4 h-4" />}
             onSelect={onThemeChange}
           />
         </div>
