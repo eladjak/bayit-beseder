@@ -627,11 +627,15 @@ export default function ShoppingPage() {
                     <button
                       key={`${s.name}-${s.category}`}
                       onClick={() => {
-                        setNewTitle(s.name);
-                        // Auto-select the matching category
-                        if (orderedCategoryNames.includes(s.category)) {
-                          setNewCategory(s.category);
-                        }
+                        const category = orderedCategoryNames.includes(s.category)
+                          ? s.category
+                          : newCategory;
+                        addItem(s.name, category);
+                        haptic("success");
+                        toast.success(t("shopping.itemAdded"));
+                        setNewTitle("");
+                        setShowForm(false);
+                        setFormPresetCategory(null);
                       }}
                       className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors active:scale-95"
                     >
