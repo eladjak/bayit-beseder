@@ -585,7 +585,7 @@ export default function ShoppingPage() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 z-40 bg-surface rounded-t-2xl px-4 pt-4 pb-10 shadow-xl max-w-lg mx-auto"
+              className="fixed bottom-0 left-0 right-0 z-40 bg-surface rounded-t-2xl px-4 pt-4 pb-10 shadow-xl max-w-lg mx-auto max-h-[85dvh] overflow-y-auto"
               dir="rtl"
             >
               <div className="flex items-center justify-between mb-3">
