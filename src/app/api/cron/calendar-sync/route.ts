@@ -199,7 +199,7 @@ export async function GET(request: NextRequest) {
     .filter((r) => r.status === "success")
     .reduce((sum, r) => sum + (r.created ?? 0), 0);
 
-  console.log(`[cron/calendar-sync] Done: ${successful}/${profiles.length} users synced, ${totalCreated} events created`);
+  console.info(`[cron/calendar-sync] Done: ${successful}/${profiles.length} users synced, ${totalCreated} events created`);
 
   return NextResponse.json({
     success: true,

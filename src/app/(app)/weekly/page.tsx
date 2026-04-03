@@ -265,13 +265,13 @@ export default function WeeklyPage() {
   const handleApplyWizard = useCallback(async () => {
     const { created, errors } = await wizard.applyPlan();
     if (created > 0) {
-      toast.success(`${created} משימות נוספו לשבוע 🙌`);
+      toast.success(`${created} ${t("weekly.tasksAddedToWeek")}`);
       haptic("success");
       await refetch();
     }
     if (errors.length > 0) {
       // Show the actual Supabase error so we can diagnose the issue
-      toast.error(`שגיאה ב-${errors.length} משימות: ${errors[0]}`, {
+      toast.error(`${t("weekly.addFailed")} (${errors.length}): ${errors[0]}`, {
         duration: 10000,
       });
     }
@@ -434,7 +434,7 @@ export default function WeeklyPage() {
       haptic("tap");
       const ok = await updateTask(taskToMove.id, { due_date: targetDate });
       if (ok) {
-        toast.success(`"${taskToMove.title}" הועברה בהצלחה`);
+        toast.success(`"${taskToMove.title}" ${t("weekly.taskMovedSuccess")}`);
       } else {
         toast.error(t("weekly.moveError"));
       }
@@ -549,7 +549,7 @@ export default function WeeklyPage() {
               />
             </div>
             <p className="text-sm text-white/60 mt-0.5">{weekRange}</p>
-            <p className="text-xs text-white/70 mt-1">מי עושה מה ומתי? בואו נחלק בהוגן</p>
+            <p className="text-xs text-white/70 mt-1">{t("weekly.subtitle")}</p>
           </div>
           <div className="flex flex-col items-end gap-2">
             {/* Primary CTA: wizard OR manual */}
@@ -557,18 +557,18 @@ export default function WeeklyPage() {
               <button
                 onClick={handleOpenWizard}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-primary text-sm font-bold shadow-lg active:scale-95 transition-transform"
-                title="יצירת תוכנית שבועית עם הקוסם"
+                title={t("weekly.wizardCreateTitle")}
               >
                 <Wand2 className="w-4 h-4" />
                 <span>{t("weekly.wizardCta")}</span>
               </button>
               <button
-                onClick={() => toast.info("הוסיפו משימות ידנית בכל יום")}
+                onClick={() => toast.info(t("weekly.manualModeToast"))}
                 className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 text-white text-xs font-medium border border-white/20 active:scale-95 transition-transform"
-                title="הוספה ידנית"
+                title={t("weekly.manualModeTitle")}
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>ידני</span>
+                <span>{t("weekly.manualMode")}</span>
               </button>
             </div>
             {/* Secondary controls row */}
@@ -588,23 +588,23 @@ export default function WeeklyPage() {
                   <List className="w-3.5 h-3.5 text-white" />
                 )}
                 <span className="text-[11px] font-medium text-white">
-                  {zoneConfig.zoneMode ? "אזורים" : "רשימה"}
+                  {zoneConfig.zoneMode ? t("weekly.viewZones") : t("weekly.viewList")}
                 </span>
               </button>
               {zoneConfig.zoneMode && (
                 <button
                   onClick={() => setShowZonePicker(true)}
                   className="flex items-center gap-1 px-2.5 py-1.5 bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/30 transition-colors active:scale-95"
-                  title="הגדרת אזורים"
+                  title={t("weekly.configureZonesTitle")}
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5 text-white" />
-                  <span className="text-[11px] font-medium text-white">אזורים</span>
+                  <span className="text-[11px] font-medium text-white">{t("weekly.viewZones")}</span>
                 </button>
               )}
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/12 backdrop-blur-sm rounded-xl border border-white/10">
                 <Calendar className="w-3.5 h-3.5 text-white" />
                 <span className="text-[11px] font-medium text-white">
-                  {stats.total} משימות
+                  {stats.total} {t("weekly.taskCount")}
                 </span>
               </div>
             </div>
@@ -614,18 +614,18 @@ export default function WeeklyPage() {
         {/* Week summary */}
         <div className={`grid gap-2 ${calendarConnected ? "grid-cols-4" : "grid-cols-3"}`}>
           <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
-            <div className="text-xs text-white/70 mb-0.5">הושלם</div>
+            <div className="text-xs text-white/70 mb-0.5">{t("weekly.statCompleted")}</div>
             <div className="text-lg font-bold text-white">
               {stats.completionRate}%
             </div>
           </div>
           <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
-            <div className="text-xs text-white/70 mb-0.5">שלך</div>
+            <div className="text-xs text-white/70 mb-0.5">{t("weekly.statMine")}</div>
             <div className="text-lg font-bold text-white">{stats.myTasks}</div>
           </div>
           <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
             <div className="text-xs text-white/70 mb-0.5">
-              {partner?.name || "שותף"}
+              {partner?.name || t("weekly.statPartnerFallback")}
             </div>
             <div className="text-lg font-bold text-white">
               {stats.partnerTasks}
@@ -633,7 +633,7 @@ export default function WeeklyPage() {
           </div>
           {calendarConnected && (
             <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
-              <div className="text-xs text-white/70 mb-0.5">יומן</div>
+              <div className="text-xs text-white/70 mb-0.5">{t("weekly.statCalendar")}</div>
               <div className="text-lg font-bold text-white">
                 {calendarEvents.length}
               </div>
@@ -662,14 +662,14 @@ export default function WeeklyPage() {
               <Calendar className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">חברו Google Calendar</p>
-              <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">ראו פגישות לצד המשימות לתכנון חכם יותר</p>
+              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">{t("weekly.calendarConnectTitle")}</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">{t("weekly.calendarConnectDesc")}</p>
             </div>
             <a
               href="/settings"
               className="px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors flex-shrink-0"
             >
-              חיבור
+              {t("weekly.calendarConnectBtn")}
             </a>
           </div>
         )}
@@ -677,9 +677,9 @@ export default function WeeklyPage() {
         {/* Mock mode banner - login prompt when not authenticated */}
         {!isRealData && !loading && (
           <div className="card-elevated p-4 text-center bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 rounded-xl">
-            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">מצב תצוגה בלבד</p>
-            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">התחברו כדי לעדכן ולנהל משימות</p>
-            <a href="/login" className="inline-block mt-2 px-4 py-1.5 rounded-xl gradient-primary text-white text-xs font-semibold">התחברו עכשיו</a>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">{t("weekly.demoBannerTitle")}</p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">{t("weekly.demoBannerDesc")}</p>
+            <a href="/login" className="inline-block mt-2 px-4 py-1.5 rounded-xl gradient-primary text-white text-xs font-semibold">{t("weekly.demoBannerCta")}</a>
           </div>
         )}
 
@@ -696,10 +696,10 @@ export default function WeeklyPage() {
                 </div>
                 <div className="text-right">
                   <div className="font-semibold text-foreground">
-                    המלצות חכמות
+                    {t("weekly.smartSuggestionsTitle")}
                   </div>
                   <div className="text-xs text-muted">
-                    {suggestions.length} הצעות לשיפור
+                    {suggestions.length} {t("weekly.suggestionsCount")}
                   </div>
                 </div>
               </div>
@@ -760,7 +760,7 @@ export default function WeeklyPage() {
                               className="mt-2 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors active:scale-95"
                             >
                               <ArrowLeftRight className="w-3 h-3" />
-                              העבר משימה
+                              {t("weekly.moveTask")}
                             </button>
                           )}
                         </div>
@@ -827,7 +827,7 @@ export default function WeeklyPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-muted" />
-                <span className="text-sm text-foreground">איזון משימות</span>
+                <span className="text-sm text-foreground">{t("weekly.taskBalance")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="text-sm font-medium text-foreground">
@@ -846,10 +846,10 @@ export default function WeeklyPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-muted" />
-                <span className="text-sm text-foreground">זמן משימות</span>
+                <span className="text-sm text-foreground">{t("weekly.taskTime")}</span>
               </div>
               <div className="text-sm font-medium text-foreground">
-                {dailyLoads.reduce((sum, d) => sum + d.totalMinutes, 0)} דקות
+                {dailyLoads.reduce((sum, d) => sum + d.totalMinutes, 0)} {t("weekly.minutes")}
               </div>
             </div>
 
@@ -858,10 +858,10 @@ export default function WeeklyPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-blue-500" />
-                  <span className="text-sm text-foreground">פגישות ביומן</span>
+                  <span className="text-sm text-foreground">{t("weekly.calendarMeetings")}</span>
                 </div>
                 <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                  {calendarEvents.length} אירועים
+                  {calendarEvents.length} {t("weekly.calendarEventsLabel")}
                 </div>
               </div>
             )}
@@ -870,7 +870,7 @@ export default function WeeklyPage() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-muted" />
-                <span className="text-sm text-foreground">אחוז השלמה</span>
+                <span className="text-sm text-foreground">{t("weekly.completionRateLabel")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-foreground">
@@ -928,11 +928,11 @@ export default function WeeklyPage() {
             >
               {/* Modal header */}
               <div className="flex items-center justify-between px-4 pt-4 pb-2">
-                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">הגדרת אזורים לימים</h2>
+                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">{t("weekly.zoneDayPickerTitle")}</h2>
                 <button
                   onClick={() => setShowZonePicker(false)}
                   className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  aria-label="סגור"
+                  aria-label={t("weekly.close")}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -972,6 +972,7 @@ interface DayCardProps {
 }
 
 function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memberIds, isDragTarget, onAddTask, onToggleComplete, onReassignTask, zoneMode }: DayCardProps) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -985,9 +986,9 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
   };
 
   const difficultyLabels = {
-    light: "קל",
-    moderate: "בינוני",
-    heavy: "כבד",
+    light: t("weekly.difficultyLight"),
+    moderate: t("weekly.difficultyModerate"),
+    heavy: t("weekly.difficultyHeavy"),
   };
 
   const handleSaveTask = async () => {
@@ -1058,10 +1059,10 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 text-xs text-muted">
                 <Clock className="w-3 h-3" />
-                {dayLoad.totalMinutes} דק'
+                {dayLoad.totalMinutes} {t("weekly.minutesShort")}
               </div>
               <div className="text-sm font-medium text-muted">
-                {dayLoad.tasks.length} משימות
+                {dayLoad.tasks.length} {t("weekly.taskCount")}
               </div>
             </div>
           </div>
@@ -1071,7 +1072,7 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
             <div className="flex flex-wrap gap-1 items-center">
               {calendarEvents.length > 0 && (
                 <span className="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-full">
-                  {calendarEvents.length} פגישות
+                  {calendarEvents.length} {t("weekly.meetingsCount")}
                 </span>
               )}
               {Array.from(
@@ -1094,7 +1095,7 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
         {isRealData && (
           <button
             onClick={handleAddButtonClick}
-            aria-label="הוסף משימה ליום זה"
+            aria-label={t("weekly.addTaskToDay")}
             className={`flex-shrink-0 ms-2 me-3 w-11 h-11 rounded-full flex items-center justify-center transition-colors ${
               showAddForm
                 ? "bg-primary text-white"
@@ -1130,14 +1131,14 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
                       setNewTitle("");
                     }
                   }}
-                  placeholder="משימה חדשה..."
+                  placeholder={t("weekly.newTaskPlaceholder")}
                   dir="rtl"
                   autoFocus
                   className="flex-1 px-3 py-2 text-sm rounded-lg bg-background border border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/30 text-foreground placeholder:text-muted"
                 />
                 <VoiceInputButton
                   onTranscript={(text) => setNewTitle(text)}
-                  ariaLabel="הוספה בקול"
+                  ariaLabel={t("weekly.voiceAdd")}
                   className="flex-shrink-0 w-8 h-8"
                 />
               </div>
@@ -1170,7 +1171,7 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
                   className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-xl border border-border text-muted hover:bg-surface-hover transition-colors"
                 >
                   <X className="w-3 h-3" />
-                  ביטול
+                  {t("weekly.cancel")}
                 </button>
                 <button
                   type="button"
@@ -1179,7 +1180,7 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
                   className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-xl gradient-primary text-white disabled:opacity-50 transition-colors"
                 >
                   <Check className="w-3 h-3" />
-                  {saving ? "שומר..." : "הוסף"}
+                  {saving ? t("weekly.saving") : t("weekly.add")}
                 </button>
               </div>
             </div>
@@ -1203,7 +1204,7 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
                 <div className="space-y-1.5 mb-2">
                   <div className="text-xs font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    פגישות ביומן ({calendarEvents.length})
+                    {t("weekly.calendarMeetingsLabel")} ({calendarEvents.length})
                   </div>
                   {calendarEvents.map((event, eventIdx) => (
                     <CalendarEventItem key={event.id} event={event} index={eventIdx} />
@@ -1213,7 +1214,7 @@ function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memb
 
               {dayLoad.tasks.length === 0 && calendarEvents.length === 0 && (
                 <div className="text-xs text-muted text-center py-2">
-                  אין משימות או פגישות ליום זה
+                  {t("weekly.noTasksOrMeetings")}
                 </div>
               )}
 
@@ -1302,6 +1303,7 @@ function DraggableWeekTask({
   onToggleComplete: (task: TaskRow) => Promise<void>;
   onReassignTask: (taskId: string, newUserId: string) => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const category = getCategoryFromId(task.category_id);
   const isMock = task.id.startsWith("mock-");
   const isCompleted = task.status === "completed";
@@ -1341,7 +1343,7 @@ function DraggableWeekTask({
           {...attributes}
           {...listeners}
           className="p-0.5 rounded touch-none cursor-grab active:cursor-grabbing text-muted/40 hover:text-muted flex-shrink-0"
-          aria-label="גרור להעברה ליום אחר"
+          aria-label={t("weekly.dragToAnotherDay")}
         >
           <GripVertical className="w-3.5 h-3.5" />
         </button>
@@ -1358,7 +1360,7 @@ function DraggableWeekTask({
               ? "border-border/30 opacity-40 cursor-not-allowed"
               : "border-border/50 hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
         }`}
-        title={isCompleted ? "סמן כלא הושלם" : "סמן כהושלם"}
+        title={isCompleted ? t("weekly.markIncomplete") : t("weekly.markCompleted")}
       >
         {isCompleted && <Check className="w-3 h-3" />}
       </button>
@@ -1373,7 +1375,7 @@ function DraggableWeekTask({
           {task.title}
           {task.description?.startsWith("[pesach-") && (
             <span className="inline-flex items-center gap-0.5 me-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
-              🫓 פסח
+              {t("weekly.pesachBadgeLabel")}
             </span>
           )}
         </div>
@@ -1390,7 +1392,7 @@ function DraggableWeekTask({
             if (otherId) onReassignTask(task.id, otherId);
           }}
           className="px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors whitespace-nowrap flex-shrink-0"
-          title="החלף שותף"
+          title={t("weekly.switchAssignee")}
         >
           {assigneeName}
         </button>

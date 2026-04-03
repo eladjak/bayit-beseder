@@ -19,27 +19,24 @@ function makeCompletion(
     task_id: overrides.task_id ?? "task-1",
     user_id: overrides.user_id ?? "user-1",
     completed_at: overrides.completed_at,
-    created_at: overrides.completed_at,
-    notes: null,
-  } as TaskCompletionRow;
+    photo_url: overrides.photo_url ?? null,
+    notes: overrides.notes ?? null,
+  };
 }
 
 function makeTask(overrides: Partial<TaskRow> & { id: string }): TaskRow {
   return {
     id: overrides.id,
     title: overrides.title ?? "Test task",
+    description: overrides.description ?? null,
     category_id: overrides.category_id ?? null,
-    is_recurring: overrides.is_recurring ?? false,
-    frequency: overrides.frequency ?? null,
-    preferred_day: overrides.preferred_day ?? null,
-    estimated_minutes: overrides.estimated_minutes ?? 15,
-    active: overrides.active ?? true,
-    created_at: "2026-01-01T00:00:00Z",
-    updated_at: "2026-01-01T00:00:00Z",
-    created_by: "user-1",
-    description: null,
-    is_priority: false,
-  } as TaskRow;
+    assigned_to: overrides.assigned_to ?? null,
+    status: overrides.status ?? "pending",
+    due_date: overrides.due_date ?? null,
+    points: overrides.points ?? 10,
+    recurring: overrides.recurring ?? false,
+    created_at: overrides.created_at ?? "2026-01-01T00:00:00Z",
+  };
 }
 
 // ── Tests ──────────────────────────────────────────────────────────────────────
