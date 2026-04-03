@@ -10,6 +10,34 @@ App is fully functional with: Pesach mode, zone-based scheduling, custom domain,
 
 ## Recent Work
 
+### Iteration: 2026-04-03 — Landing, Notifications, UX Polish
+
+**Discovered bugs (to fix next session):**
+1. **Notifications CRITICAL**: `useNotifications.ts` queries non-existent `tasks` table (line 214) — always falls back to mock. Fix: change to `task_instances`
+2. **Notifications**: Bell icon only on dashboard, missing from all other pages. Fix: move to layout
+3. **Notifications**: RTL dropdown opens off-screen (left-0 should be right-0)
+4. **Notifications**: Push banner permanently dismissed with no reset
+5. **AI Coaching Tips**: GEMINI_API_KEY is set but tips still show static — investigate API response
+
+**Completed:**
+- Landing page: removed "גרסה ראשונה" badge, fixed "צפו בהדגמה" → "איך זה עובד?"
+- FAQ scroll bug fixed (scrollIntoView → container scrollTop)
+- Shopping autocomplete click now works (addItem directly)
+- 4 Gemini landing illustrations generated (features-tasks/planning/shopping/gamification)
+- Dashboard UX overhaul (QuickStatsBar, GamificationRow, maxItems=5, HouseMap promoted)
+- Clear completed button on task list
+- Weekly: wizard + manual dual CTA
+- Landing page link highlighted in quick links
+
+**TODO for next session:**
+- Wire landing illustrations into features section
+- Fix all 4 notification bugs
+- Debug AI coaching tips API
+- Landing page features section → use illustrations instead of emoji
+- Landing FAQ → connect to Gemini AI backend
+- UX persona simulation (5 user types)
+- Launch readiness audit
+
 ### Iteration: 2026-04-01 — Shopping List Overhaul
 
 **3 commits this session:**
