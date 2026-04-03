@@ -30,8 +30,9 @@ export function NotificationBanner() {
     const permission = getNotificationPermission();
     if (permission !== "default") return;
 
-    // Check if user dismissed this banner (re-show after 7 days)
+    // Check if user dismissed this banner
     const dismissedAt = localStorage.getItem("bayit-notification-banner-dismissed");
+    if (dismissedAt === "never") return; // permanent dismiss
     if (dismissedAt) {
       const dismissedTime = parseInt(dismissedAt, 10);
       const sevenDays = 7 * 24 * 60 * 60 * 1000;
@@ -72,6 +73,11 @@ export function NotificationBanner() {
     localStorage.setItem("bayit-notification-banner-dismissed", String(Date.now()));
   }, []);
 
+  const handleNeverShow = useCallback(() => {
+    setVisible(false);
+    localStorage.setItem("bayit-notification-banner-dismissed", "never");
+  }, []);
+
   if (!visible) return null;
 
   return (
@@ -99,6 +105,12 @@ export function NotificationBanner() {
                 className="px-4 py-1.5 bg-white/20 text-white rounded-lg text-xs font-medium hover:bg-white/30 transition-colors"
               >
                 {t("notifications.notNow")}
+              </button>
+              <button
+                onClick={handleNeverShow}
+                className="px-3 py-1.5 text-white/50 text-xs hover:text-white/80 transition-colors"
+              >
+                {t("notifications.neverShow")}
               </button>
             </div>
           </div>

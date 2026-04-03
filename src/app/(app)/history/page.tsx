@@ -221,7 +221,7 @@ export default function HistoryPage() {
   const { t } = useTranslation();
 
   // Fetch all tasks (no status filter - we need all to look up completions)
-  const { tasks, loading: tasksLoading } = useTasks({});
+  const { tasks, loading: tasksLoading, error: tasksError } = useTasks({});
   const { completions, loading: completionsLoading } = useCompletions({ limit: 200 });
   const { categoryMap } = useCategories();
 
@@ -348,8 +348,17 @@ export default function HistoryPage() {
         </div>
       )}
 
+      {/* Error State */}
+      {!loading && tasksError && (
+        <div className="text-center py-12">
+          <p className="text-4xl mb-3">⚠️</p>
+          <p className="text-sm font-medium text-foreground">{t("history.errorTitle")}</p>
+          <p className="text-xs text-muted mt-1">{t("history.errorSubtitle")}</p>
+        </div>
+      )}
+
       {/* Empty State */}
-      {!loading && sortedEntries.length === 0 && (
+      {!loading && !tasksError && sortedEntries.length === 0 && (
         <div className="text-center py-12">
           <p className="text-4xl mb-3">📋</p>
           <p className="text-sm font-medium text-foreground">{t("history.noResults")}</p>
