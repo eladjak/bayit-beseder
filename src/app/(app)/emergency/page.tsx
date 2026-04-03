@@ -318,10 +318,10 @@ export default function EmergencyPage() {
                       </span>
                       <span className="text-[10px] text-muted flex items-center gap-0.5">
                         <Clock className="w-3 h-3" />
-                        {task.estimated_minutes} דק׳
+                        {task.estimated_minutes} {t("common.minutes")}
                       </span>
                       {task.due_date && task.due_date < new Date().toISOString().slice(0, 10) && (
-                        <span className="text-[10px] text-red-500 font-medium">באיחור</span>
+                        <span className="text-[10px] text-red-500 font-medium">{t("common.overdue")}</span>
                       )}
                     </div>
                   </div>
@@ -332,8 +332,8 @@ export default function EmergencyPage() {
             {tasks.length === 0 && (
               <div className="text-center py-8 text-muted text-sm">
                 <Shield className="w-10 h-10 mx-auto mb-2 text-blue-300" />
-                <p>הכל הושלם! 🎉</p>
-                <p className="text-xs mt-1">ממש כל הכבוד — אתם מדהימים 💙</p>
+                <p>{t("emergency.allDone")}</p>
+                <p className="text-xs mt-1">{t("emergency.amazingMessage")}</p>
               </div>
             )}
           </div>

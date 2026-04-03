@@ -177,13 +177,13 @@ function StreakVisualization({
         <h2 className="font-semibold text-sm">🔥 {t("stats.streakActivity")}</h2>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
-            <span className="text-xs text-muted">עכשיו:</span>
+            <span className="text-xs text-muted">{t("stats.streakNow")}</span>
             <span className="text-xs font-bold text-primary">
               {currentStreak}
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-xs text-muted">שיא:</span>
+            <span className="text-xs text-muted">{t("stats.streakBest")}</span>
             <span className="text-xs font-bold text-amber-500">
               {bestStreak}
             </span>
@@ -207,7 +207,7 @@ function StreakVisualization({
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.02 * streakDays.indexOf(day) }}
-                title={`${dayOfMonth}/${date.getMonth() + 1} - ${day.hadActivity ? "בוצע" : "לא בוצע"}`}
+                title={`${dayOfMonth}/${date.getMonth() + 1} - ${day.hadActivity ? t("stats.streakDone") : t("stats.streakNotDone")}`}
               >
                 {day.hadActivity ? "V" : ""}
               </motion.div>
@@ -243,6 +243,7 @@ function PartnerComparisonSection({
   weeklyCompletedTotal,
   monthlyCompletedTotal,
 }: PartnerComparisonProps) {
+  const { t } = useTranslation();
   const total = myCount + partnerCount;
   const myPct = total > 0 ? Math.round((myCount / total) * 100) : 50;
   const partnerPct = total > 0 ? 100 - myPct : 50;
@@ -263,7 +264,7 @@ function PartnerComparisonSection({
               value={myCount}
               className="text-2xl font-bold text-primary"
             />
-            <p className="text-xs text-muted">משימות</p>
+            <p className="text-xs text-muted">{t("stats.tasksLabel")}</p>
           </div>
           <div className="text-center">
             <p className="text-xs text-muted mb-1">{partnerName}</p>
@@ -271,7 +272,7 @@ function PartnerComparisonSection({
               value={partnerCount}
               className="text-2xl font-bold text-primary-light"
             />
-            <p className="text-xs text-muted">משימות</p>
+            <p className="text-xs text-muted">{t("stats.tasksLabel")}</p>
           </div>
         </div>
 
@@ -334,6 +335,7 @@ function MembersComparisonSection({
   weeklyCompletedTotal,
   monthlyCompletedTotal,
 }: MembersComparisonProps) {
+  const { t } = useTranslation();
   const total = members.reduce((sum, m) => sum + m.count, 0);
   const COLORS = ["text-primary", "text-primary-light", "text-amber-500", "text-success", "text-rose-400", "text-sky-400"];
   const BAR_COLORS = ["bg-primary", "bg-primary-light", "bg-amber-400", "bg-success", "bg-rose-400", "bg-sky-400"];
@@ -351,7 +353,7 @@ function MembersComparisonSection({
           <div key={m.userId} className="text-center">
             <p className="text-xs text-muted mb-1 truncate">{m.name}</p>
             <AnimatedNumber value={m.count} className={`text-2xl font-bold ${COLORS[i % COLORS.length]}`} />
-            <p className="text-xs text-muted">משימות</p>
+            <p className="text-xs text-muted">{t("stats.tasksLabel")}</p>
           </div>
         ))}
       </div>
@@ -595,8 +597,8 @@ export default function StatsPage() {
             sizes="192px"
             className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
           />
-          <p className="font-medium text-foreground">עדיין אין מה להראות 🌱</p>
-          <p className="text-sm text-muted">השלימו כמה משימות ונתחיל לראות תמונה</p>
+          <p className="font-medium text-foreground">{t("stats.emptyTitle")}</p>
+          <p className="text-sm text-muted">{t("stats.emptySubtitle")}</p>
         </motion.div>
       )}
 

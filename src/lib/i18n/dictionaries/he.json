@@ -156,6 +156,25 @@
       "cannotRemoveSelf": "לא ניתן להסיר את עצמך",
       "lastOwner": "חייב להיות לפחות בעלים אחד",
       "manage": "ניהול"
+    },
+    "zonesSection": {
+      "description": "מארגנים לפי חדרים — מטבח ביום שני, סלון ביום שלישי וכו׳",
+      "zoneMode": "מצב אזורים",
+      "toggleLabel": "הפעלת מצב אזורים",
+      "currentConfig": "תצורה נוכחית:",
+      "resetDefault": "איפוס לברירת מחדל"
+    },
+    "emergencyPageTitle": "🚨 דף חירום",
+    "emergencyPageDesc": "מספרי חירום, ספקים, ונקודות כיבוי למקרה חירום בבית",
+    "seasonalSection": {
+      "status": "סטטוס",
+      "active": "פעיל",
+      "progress": "התקדמות",
+      "deactivateConfirm": "לבטל את מצב הפסח? המשימות העונתיות יסומנו כהושלמו.",
+      "deactivated": "מצב פסח בוטל 🫓",
+      "cancelling": "מבטל...",
+      "cancelSeasonal": "ביטול מצב פסח",
+      "availableHint": "זמין — הפעילו מהדשבורד 🏠"
     }
   },
   "common": {
@@ -500,7 +519,13 @@
       "balanced": "מאוזן",
       "imbalanced": "לא מאוזן",
       "sparklineLabel": "4 שבועות אחרונים"
-    }
+    },
+    "streakNow": "עכשיו:",
+    "streakBest": "שיא:",
+    "streakDone": "בוצע",
+    "streakNotDone": "לא בוצע",
+    "emptyTitle": "עדיין אין מה להראות 🌱",
+    "emptySubtitle": "השלימו כמה משימות ונתחיל לראות תמונה"
   },
   "auth": {
     "welcome": "ברוכים הבאים לבית בסדר",
@@ -684,7 +709,8 @@
     "activeSubtitle": "רק הדברים ההכרחיים. בלי לחץ.",
     "inactiveSubtitle": "כשאין כוח — רק הבסיס, בלי אשמה",
     "goal": "יעד: 50% — ואחר כך נושמים",
-    "allDone": "הכל הושלם! אתם מדהימים",
+    "allDone": "הכל הושלם! 🎉",
+    "amazingMessage": "ממש כל הכבוד — אתם מדהימים 💙",
     "activateButton": "הפעלת מצב חירום",
     "deactivateButton": "ביטול מצב חירום",
     "completedFromList": "הושלמו מהרשימה החיונית",

@@ -156,6 +156,25 @@
       "cannotRemoveSelf": "Cannot remove yourself",
       "lastOwner": "Must have at least one owner",
       "manage": "Manage"
+    },
+    "zonesSection": {
+      "description": "Organize by rooms — kitchen on Monday, living room on Tuesday, etc.",
+      "zoneMode": "Zone mode",
+      "toggleLabel": "Enable zone mode",
+      "currentConfig": "Current configuration:",
+      "resetDefault": "Reset to default"
+    },
+    "emergencyPageTitle": "🚨 Emergency Page",
+    "emergencyPageDesc": "Emergency numbers, vendors, and shutoff points for home emergencies",
+    "seasonalSection": {
+      "status": "Status",
+      "active": "Active",
+      "progress": "Progress",
+      "deactivateConfirm": "Cancel seasonal mode? Seasonal tasks will be marked as complete.",
+      "deactivated": "Seasonal mode cancelled 🫓",
+      "cancelling": "Cancelling...",
+      "cancelSeasonal": "Cancel seasonal mode",
+      "availableHint": "available — activate from dashboard 🏠"
     }
   },
   "common": {
@@ -500,7 +519,13 @@
       "balanced": "Balanced",
       "imbalanced": "Imbalanced",
       "sparklineLabel": "Last 4 weeks"
-    }
+    },
+    "streakNow": "Now:",
+    "streakBest": "Best:",
+    "streakDone": "Done",
+    "streakNotDone": "Not done",
+    "emptyTitle": "Nothing to show yet 🌱",
+    "emptySubtitle": "Complete a few tasks and we'll start showing stats"
   },
   "auth": {
     "welcome": "Welcome to Bayit BeSeder",
@@ -684,7 +709,8 @@
     "activeSubtitle": "Only the essentials. No pressure.",
     "inactiveSubtitle": "When you're low on energy — just the basics, guilt-free",
     "goal": "Goal: 50% — then breathe",
-    "allDone": "All done! You're amazing",
+    "allDone": "All done! 🎉",
+    "amazingMessage": "You're truly amazing 💙",
     "activateButton": "Activate Emergency Mode",
     "deactivateButton": "Deactivate Emergency Mode",
     "completedFromList": "Completed from essential list",

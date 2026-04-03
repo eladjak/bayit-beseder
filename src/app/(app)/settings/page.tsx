@@ -515,13 +515,13 @@ export default function SettingsPage() {
         <div className="card-elevated p-4 space-y-3">
           <h2 className="font-semibold text-foreground text-sm flex items-center gap-2">
             <LayoutGrid className="w-4 h-4" />
-            תזמון לפי אזורים
+            {t("settings.zones")}
           </h2>
           <p className="text-xs text-muted">
-            מארגנים לפי חדרים — מטבח ביום שני, סלון ביום שלישי וכו׳
+            {t("settings.zonesSection.description")}
           </p>
           <div className="flex items-center justify-between">
-            <span className="text-sm text-foreground">מצב אזורים</span>
+            <span className="text-sm text-foreground">{t("settings.zonesSection.zoneMode")}</span>
             <button
               onClick={zoneConfig.toggleZoneMode}
               className={`relative w-11 h-6 rounded-full transition-colors ${
@@ -529,7 +529,7 @@ export default function SettingsPage() {
               }`}
               role="switch"
               aria-checked={zoneConfig.zoneMode}
-              aria-label="הפעלת מצב אזורים"
+              aria-label={t("settings.zonesSection.toggleLabel")}
             >
               <span
                 className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
@@ -540,7 +540,7 @@ export default function SettingsPage() {
           </div>
           {zoneConfig.zoneMode && (
             <div className="space-y-2 pt-1">
-              <div className="text-xs font-medium text-muted">תצורה נוכחית:</div>
+              <div className="text-xs font-medium text-muted">{t("settings.zonesSection.currentConfig")}</div>
               {zoneConfig.zoneDaySummary
                 .filter((d) => d.zones.length > 0)
                 .map((day) => (
@@ -562,7 +562,7 @@ export default function SettingsPage() {
                 onClick={zoneConfig.resetMappings}
                 className="text-xs text-primary hover:text-primary-dark font-medium"
               >
-                איפוס לברירת מחדל
+                {t("settings.zonesSection.resetDefault")}
               </button>
             </div>
           )}
@@ -574,8 +574,8 @@ export default function SettingsPage() {
             <AlertTriangle className="w-5 h-5 text-red-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground">🚨 דף חירום</p>
-            <p className="text-xs text-muted mt-0.5">מספרי חירום, ספקים, ונקודות כיבוי למקרה חירום בבית</p>
+            <p className="text-sm font-semibold text-foreground">{t("settings.emergencyPageTitle")}</p>
+            <p className="text-xs text-muted mt-0.5">{t("settings.emergencyPageDesc")}</p>
           </div>
           <span className="text-muted text-lg leading-none">‹</span>
         </Link>
@@ -584,41 +584,41 @@ export default function SettingsPage() {
         {seasonalMode.activeTemplate && (
           <div className="card-elevated p-4 space-y-3">
             <h2 className="font-semibold text-foreground text-sm flex items-center gap-2">
-              {seasonalMode.activeTemplate.emoji} מצב עונתי
+              {seasonalMode.activeTemplate.emoji} {t("settings.seasonal")}
             </h2>
             {seasonalMode.activation ? (
               <>
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted">סטטוס</span>
+                  <span className="text-muted">{t("settings.seasonalSection.status")}</span>
                   <span className="text-green-600 dark:text-green-400 font-medium">
-                    {seasonalMode.activeTemplate.nameHe} — פעיל
+                    {seasonalMode.activeTemplate.nameHe} — {t("settings.seasonalSection.active")}
                   </span>
                 </div>
                 {seasonalMode.progress.total > 0 && (
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted">התקדמות</span>
+                    <span className="text-muted">{t("settings.seasonalSection.progress")}</span>
                     <span className="text-foreground font-medium">
-                      {seasonalMode.progress.completed}/{seasonalMode.progress.total} משימות
+                      {seasonalMode.progress.completed}/{seasonalMode.progress.total} {t("stats.tasksLabel")}
                     </span>
                   </div>
                 )}
                 <button
                   onClick={async () => {
-                    if (!confirm("לבטל את מצב הפסח? המשימות העונתיות יסומנו כהושלמו.")) return;
+                    if (!confirm(t("settings.seasonalSection.deactivateConfirm"))) return;
                     setDeactivatingSeasonal(true);
                     await seasonalMode.deactivate();
                     setDeactivatingSeasonal(false);
-                    toast.success("מצב פסח בוטל 🫓");
+                    toast.success(t("settings.seasonalSection.deactivated"));
                   }}
                   disabled={deactivatingSeasonal}
                   className="w-full py-2 rounded-xl border border-red-200 dark:border-red-800 text-red-500 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-40"
                 >
-                  {deactivatingSeasonal ? "מבטל..." : "ביטול מצב פסח"}
+                  {deactivatingSeasonal ? t("settings.seasonalSection.cancelling") : t("settings.seasonalSection.cancelSeasonal")}
                 </button>
               </>
             ) : (
               <p className="text-sm text-muted">
-                {seasonalMode.activeTemplate.nameHe} זמין — הפעילו מהדשבורד 🏠
+                {seasonalMode.activeTemplate.nameHe} {t("settings.seasonalSection.availableHint")}
               </p>
             )}
           </div>
