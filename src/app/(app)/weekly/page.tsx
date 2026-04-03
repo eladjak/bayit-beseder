@@ -2,32 +2,17 @@
 
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar,
-  TrendingUp,
-  Clock,
-  Users,
-  Lightbulb,
-  ChevronDown,
-  ChevronUp,
-  Plus,
-  Check,
-  X,
   Wand2,
-  GripVertical,
-  ArrowLeftRight,
+  Plus,
   LayoutGrid,
   List,
   SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
-import { ZoneGroupCard } from "@/components/weekly/zone-group";
 import { ZoneDaySummary } from "@/components/weekly/zone-day-summary";
-import { ZoneDayPicker } from "@/components/weekly/zone-day-picker";
-import { getZoneInfo, type ZoneGroup } from "@/lib/zones";
-import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
 import { useTasks } from "@/hooks/useTasks";
 import { useProfile } from "@/hooks/useProfile";
 import { usePartner } from "@/hooks/usePartner";
@@ -36,31 +21,27 @@ import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import dynamic from "next/dynamic";
 import { useWeeklyGenerator } from "@/hooks/useWeeklyGenerator";
 
-// Lazy-load the heavy wizard modal (includes @dnd-kit, recharts-like previews)
-const WeeklyGeneratorModal = dynamic(() => import("@/components/weekly/weekly-generator-modal").then(m => ({ default: m.WeeklyGeneratorModal })), { ssr: false });
-const VoiceInputButton = dynamic(() => import("@/components/voice-input-button").then(m => ({ default: m.VoiceInputButton })), { ssr: false });
+const WeeklyGeneratorModal = dynamic(
+  () =>
+    import("@/components/weekly/weekly-generator-modal").then((m) => ({
+      default: m.WeeklyGeneratorModal,
+    })),
+  { ssr: false }
+);
+
 import {
   analyzeDailyLoad,
   analyzeDailyLoadWithCalendar,
   generateSmartSuggestions,
   generateCalendarAwareSuggestions,
   getWeekRange,
-  type DayLoad,
-  type DayLoadWithCalendar,
   type Suggestion,
 } from "@/lib/smart-scheduler";
-import type { ClientCalendarEvent } from "@/lib/types/calendar";
 import type { TaskRow, TaskInsert } from "@/lib/types/database";
 import { haptic } from "@/lib/haptics";
 import { useTranslation } from "@/hooks/useTranslation";
 import { ShareButton } from "@/components/share-button";
-import {
-  CATEGORY_BG_CLASSES,
-  CATEGORY_LABELS,
-  CATEGORY_KEYS,
-  CATEGORY_ICONS,
-} from "@/lib/categories";
-import { CalendarEventItem } from "@/components/weekly/calendar-event-item";
+import { CATEGORY_ICONS } from "@/lib/categories";
 import {
   DndContext,
   closestCenter,
@@ -71,98 +52,32 @@ import {
   type DragEndEvent,
   type DragStartEvent,
   DragOverlay,
-  useDroppable,
 } from "@dnd-kit/core";
-import { useSortable } from "@dnd-kit/sortable";
-
-// Mock data for when Supabase is not connected
-function generateMockWeeklyTasks(): TaskRow[] {
-  const now = new Date();
-  const dayOfWeek = now.getDay();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - dayOfWeek);
-
-  const mockTasks: TaskRow[] = [];
-  const taskTemplates = [
-    { title: "שטיפת כלים / הפעלת מדיח", category: "kitchen", minutes: 15 },
-    { title: "ניקוי משטחי עבודה במטבח", category: "kitchen", minutes: 5 },
-    { title: "טאטוא רצפת מטבח", category: "kitchen", minutes: 5 },
-    { title: "הוצאת אשפה", category: "kitchen", minutes: 5 },
-    { title: "ניקוי כיריים", category: "kitchen", minutes: 20 },
-    { title: "ניקוי שירותים", category: "bathroom", minutes: 15 },
-    { title: "ניקוי מקלחת", category: "bathroom", minutes: 15 },
-    { title: "החלפת מגבות", category: "bathroom", minutes: 5 },
-    { title: "שאיבת אבק בסלון", category: "living", minutes: 15 },
-    { title: "ניגוב רצפות רטוב", category: "living", minutes: 20 },
-    { title: "ניקוי אבק מרהיטים", category: "living", minutes: 10 },
-    { title: "החלפת מצעים", category: "bedroom", minutes: 15 },
-    { title: "ניקוי אבק בחדר שינה", category: "bedroom", minutes: 10 },
-    { title: "שאיבת אבק בחדר שינה", category: "bedroom", minutes: 10 },
-    { title: "כביסה (2-3 מכונות)", category: "laundry", minutes: 30 },
-    { title: "קיפול וסידור כביסה", category: "laundry", minutes: 20 },
-    { title: "האכלת חתולים (בוקר)", category: "pets", minutes: 5 },
-    { title: "האכלת חתולים (ערב)", category: "pets", minutes: 5 },
-    { title: "מים טריים לחתולים", category: "pets", minutes: 2 },
-    { title: "ניקוי ארגז חול", category: "pets", minutes: 5 },
-    { title: "השקיית צמחים", category: "general", minutes: 10 },
-    { title: "איוורור הבית", category: "general", minutes: 2 },
-  ];
-
-  // Distribute tasks across the week
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(startOfWeek);
-    date.setDate(date.getDate() + i);
-    const dateStr = date.toISOString().split("T")[0];
-
-    // Assign 2-5 tasks per day
-    const numTasks = Math.floor(Math.random() * 4) + 2;
-    const shuffled = [...taskTemplates].sort(() => Math.random() - 0.5);
-
-    for (let j = 0; j < numTasks; j++) {
-      const template = shuffled[j % shuffled.length];
-      mockTasks.push({
-        id: `mock-${i}-${j}`,
-        title: template.title,
-        description: null,
-        category_id: template.category,
-        assigned_to: Math.random() > 0.5 ? "user1" : "user2",
-        status: Math.random() > 0.7 ? "completed" : "pending",
-        due_date: dateStr,
-        points: 10,
-        recurring: true,
-        created_at: new Date().toISOString(),
-      });
-    }
-  }
-
-  return mockTasks;
-}
-
-function getCategoryFromId(categoryId: string | null): string {
-  if (!categoryId) return "general";
-  // categoryId might be a key like "kitchen" or a UUID
-  if (categoryId in CATEGORY_LABELS) return categoryId;
-  return "general";
-}
+import { WeeklyDayCard } from "@/components/weekly/weekly-day-card";
+import { WeeklySmartSuggestions } from "@/components/weekly/weekly-smart-suggestions";
+import { WeeklyZonePanel } from "@/components/weekly/weekly-zone-panel";
+import { WeeklyStats } from "@/components/weekly/weekly-stats";
+import {
+  generateMockWeeklyTasks,
+  getCategoryFromId,
+} from "@/lib/weekly-mock-data";
 
 export default function WeeklyPage() {
   const { t } = useTranslation();
   const { profile } = useProfile();
   const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
   const { partner } = usePartner(profile?.partner_id, todayStr);
-  // N-member support: prefer household_members table; fall back to partner_id
   const { members: householdMembers } = useHouseholdMembers(
     profile?.household_id ?? null,
     todayStr
   );
   const [showSuggestions, setShowSuggestions] = useState(true);
-  // Generate mock data once (client-side only) to avoid SSR/client Math.random() mismatch.
+
   const mockTasksRef = useRef<ReturnType<typeof generateMockWeeklyTasks> | null>(null);
   if (mockTasksRef.current === null) {
     mockTasksRef.current = generateMockWeeklyTasks();
   }
 
-  // Get start of week (Sunday)
   const startOfWeek = useMemo(() => {
     const now = new Date();
     const dayOfWeek = now.getDay();
@@ -172,14 +87,12 @@ export default function WeeklyPage() {
     return start;
   }, []);
 
-  // Get end of week (Saturday)
   const endOfWeek = useMemo(() => {
     const end = new Date(startOfWeek);
     end.setDate(end.getDate() + 6);
     return end;
   }, [startOfWeek]);
 
-  // Fetch calendar events for this week
   const {
     events: calendarEvents,
     eventsByDate,
@@ -191,17 +104,12 @@ export default function WeeklyPage() {
     enabled: !!profile,
   });
 
-  // Fetch tasks for this week with write capability
   const { tasks, loading, createTask, updateTask, refetch } = useTasks({});
 
-  // Zone-based view
   const zoneConfig = useZoneConfig();
-
-  // Weekly generator wizard
   const wizard = useWeeklyGenerator();
   const [showWizard, setShowWizard] = useState(false);
   const [showZonePicker, setShowZonePicker] = useState(false);
-  // Local zone mappings for the wizard (separate from the zone-view config)
   const [wizardZoneMappings, setWizardZoneMappings] = useState(zoneConfig.zoneMappings);
 
   const handleOpenWizard = useCallback(() => {
@@ -209,7 +117,6 @@ export default function WeeklyPage() {
       toast.error(t("weekly.loginFirst"));
       return;
     }
-    // Use all household members when available, otherwise fall back to partner_id
     const memberIds =
       householdMembers.length > 0
         ? householdMembers.map((m) => m.id)
@@ -221,17 +128,14 @@ export default function WeeklyPage() {
       (t) => t.due_date && t.due_date >= startStr && t.due_date <= endStr
     );
 
-    // Sync wizard mappings with current zone config
     setWizardZoneMappings(zoneConfig.zoneMappings);
     wizard.generate(weekTasksForWizard, memberIds, startOfWeek, zoneConfig.zoneMode);
     setShowWizard(true);
     haptic("tap");
   }, [profile, partner, householdMembers, tasks, startOfWeek, endOfWeek, wizard, zoneConfig.zoneMappings, zoneConfig.zoneMode]);
 
-  // Regenerate the plan with the current wizardZoneMappings
   const handleRegenerateWithZones = useCallback(() => {
     if (!profile) return;
-    // Use all household members when available, otherwise fall back to partner_id
     const memberIds =
       householdMembers.length > 0
         ? householdMembers.map((m) => m.id)
@@ -244,16 +148,13 @@ export default function WeeklyPage() {
     );
 
     haptic("tap");
-    // Pass zoneMode=true so generator uses the mappings
     wizard.generate(weekTasksForWizard, memberIds, startOfWeek, true, wizardZoneMappings);
   }, [profile, householdMembers, tasks, startOfWeek, endOfWeek, wizard, wizardZoneMappings]);
 
   const wizardMembers = useMemo(() => {
-    // Prefer the household_members table (N members) when available
     if (householdMembers.length > 0) {
       return householdMembers.map((m) => ({ id: m.id, name: m.name }));
     }
-    // Fall back to profile + partner_id (2-user legacy)
     const m: Array<{ id: string; name: string }> = [];
     if (profile) m.push({ id: profile.id, name: profile.name });
     if (profile?.partner_id && partner) {
@@ -270,7 +171,6 @@ export default function WeeklyPage() {
       await refetch();
     }
     if (errors.length > 0) {
-      // Show the actual Supabase error so we can diagnose the issue
       toast.error(`${t("weekly.addFailed")} (${errors.length}): ${errors[0]}`, {
         duration: 10000,
       });
@@ -280,7 +180,6 @@ export default function WeeklyPage() {
     }
   }, [wizard, refetch]);
 
-  // Auto-seed tasks for authenticated users on first visit
   const seedAttempted = useRef(false);
   useEffect(() => {
     if (seedAttempted.current || loading || tasks.length > 0 || !profile) return;
@@ -288,35 +187,24 @@ export default function WeeklyPage() {
     fetch("/api/seed", { method: "POST" })
       .then((res) => res.json())
       .then((data) => {
-        if (data.seeded) {
-          refetch();
-        }
+        if (data.seeded) refetch();
       })
       .catch(() => {});
   }, [loading, tasks.length, profile, refetch]);
 
-  // Whether we're in real-data mode (Supabase connected and returned tasks)
   const isRealData = !loading && tasks.length > 0;
 
-  // Filter tasks for this week or use mock data
   const weekTasks = useMemo(() => {
     if (loading) return [];
-
-    if (tasks.length === 0) {
-      // No Supabase data - use stable mock (generated once to avoid SSR/client mismatch)
-      return mockTasksRef.current ?? [];
-    }
-
+    if (tasks.length === 0) return mockTasksRef.current ?? [];
     const startStr = startOfWeek.toISOString().split("T")[0];
     const endStr = endOfWeek.toISOString().split("T")[0];
-
     return tasks.filter((t) => {
       if (!t.due_date) return false;
       return t.due_date >= startStr && t.due_date <= endStr;
     });
   }, [tasks, loading, startOfWeek, endOfWeek]);
 
-  // Analyze daily loads (with calendar if connected)
   const dailyLoads = useMemo(
     () =>
       calendarConnected
@@ -325,7 +213,6 @@ export default function WeeklyPage() {
     [weekTasks, calendarEvents, calendarConnected, startOfWeek]
   );
 
-  // Generate smart suggestions (calendar-aware when connected)
   const suggestions = useMemo(
     () =>
       calendarConnected
@@ -334,24 +221,19 @@ export default function WeeklyPage() {
     [weekTasks, calendarEvents, calendarConnected]
   );
 
-  // Calculate summary stats
   const stats = useMemo(() => {
     const total = weekTasks.length;
     const completed = weekTasks.filter((t) => t.status === "completed").length;
     const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
-
     const myTasks = weekTasks.filter((t) => t.assigned_to === profile?.id);
-    // Partner tasks = all tasks not assigned to me
     const partnerTasks = weekTasks.filter(
       (t) => t.assigned_to && t.assigned_to !== profile?.id
     );
-
     const fairnessRatio =
       myTasks.length > 0 && partnerTasks.length > 0
         ? Math.min(myTasks.length, partnerTasks.length) /
           Math.max(myTasks.length, partnerTasks.length)
         : 1;
-
     return {
       total,
       completed,
@@ -362,7 +244,6 @@ export default function WeeklyPage() {
     };
   }, [weekTasks, profile?.id]);
 
-  // Build member name lookup for assignee display
   const memberNames = useMemo(() => {
     const map: Record<string, string> = {};
     if (profile) map[profile.id] = profile.name;
@@ -370,7 +251,6 @@ export default function WeeklyPage() {
     return map;
   }, [profile, partner]);
 
-  // All member IDs for reassignment toggle
   const memberIds = useMemo(() => {
     const ids: string[] = [];
     if (profile) ids.push(profile.id);
@@ -378,37 +258,28 @@ export default function WeeklyPage() {
     return ids;
   }, [profile]);
 
-  // Reassign a task to a different user
   const handleReassignTask = useCallback(
     async (taskId: string, newUserId: string) => {
       if (taskId.startsWith("mock-")) return;
       haptic("tap");
       const ok = await updateTask(taskId, { assigned_to: newUserId });
-      if (ok) {
-        toast.success(t("weekly.moved"));
-      } else {
-        toast.error(t("weekly.moveFailed"));
-      }
+      if (ok) toast.success(t("weekly.moved"));
+      else toast.error(t("weekly.moveFailed"));
     },
     [updateTask]
   );
 
-  // Move a task to a different day (for D&D)
   const handleMoveTaskToDay = useCallback(
     async (taskId: string, newDate: string) => {
       if (taskId.startsWith("mock-")) return;
       haptic("success");
       const ok = await updateTask(taskId, { due_date: newDate });
-      if (ok) {
-        toast.success(t("weekly.shifted"));
-      } else {
-        toast.error(t("weekly.shiftFailed"));
-      }
+      if (ok) toast.success(t("weekly.shifted"));
+      else toast.error(t("weekly.shiftFailed"));
     },
     [updateTask]
   );
 
-  // Apply a suggestion (move task from heavy day to lighter day)
   const handleApplySuggestion = useCallback(
     async (suggestion: Suggestion) => {
       if (!suggestion.affectedDates || suggestion.affectedDates.length < 2) return;
@@ -416,12 +287,11 @@ export default function WeeklyPage() {
         toast.info(t("weekly.loginToApply"));
         return;
       }
+      const [sourceDate, targetDate] =
+        suggestion.type === "empty_day"
+          ? [suggestion.affectedDates[1], suggestion.affectedDates[0]]
+          : [suggestion.affectedDates[0], suggestion.affectedDates[1]];
 
-      const [sourceDate, targetDate] = suggestion.type === "empty_day"
-        ? [suggestion.affectedDates[1], suggestion.affectedDates[0]] // heavy → empty
-        : [suggestion.affectedDates[0], suggestion.affectedDates[1]]; // heavy → next day
-
-      // Find the last non-completed task on the source day
       const sourceTasks = weekTasks.filter(
         (t) => t.due_date === sourceDate && t.status !== "completed"
       );
@@ -429,20 +299,15 @@ export default function WeeklyPage() {
         toast.info(t("weekly.noTasksToMove"));
         return;
       }
-
       const taskToMove = sourceTasks[sourceTasks.length - 1];
       haptic("tap");
       const ok = await updateTask(taskToMove.id, { due_date: targetDate });
-      if (ok) {
-        toast.success(`"${taskToMove.title}" ${t("weekly.taskMovedSuccess")}`);
-      } else {
-        toast.error(t("weekly.moveError"));
-      }
+      if (ok) toast.success(`"${taskToMove.title}" ${t("weekly.taskMovedSuccess")}`);
+      else toast.error(t("weekly.moveError"));
     },
     [weekTasks, updateTask, isRealData]
   );
 
-  // D&D state for dragging tasks between day cards
   const [activeDragTask, setActiveDragTask] = useState<{
     task: TaskRow;
     fromDate: string;
@@ -465,13 +330,10 @@ export default function WeeklyPage() {
     (event: DragEndEvent) => {
       const { active, over } = event;
       setActiveDragTask(null);
-
       if (!over || !active.data.current) return;
-
       const taskId = active.data.current.taskId as string;
       const fromDate = active.data.current.fromDate as string;
       const toDate = over.id as string;
-
       if (fromDate !== toDate && !taskId.startsWith("mock-")) {
         handleMoveTaskToDay(taskId, toDate);
       }
@@ -479,16 +341,12 @@ export default function WeeklyPage() {
     [handleMoveTaskToDay]
   );
 
-  const weekRange = getWeekRange(startOfWeek);
-
-  // Handle adding a task for a specific day
   const handleAddTask = useCallback(
     async (dueDate: string, title: string, categoryId: string) => {
       if (!profile?.id) {
         toast.error(t("weekly.loginFirst"));
         return false;
       }
-
       const taskData: TaskInsert = {
         title: title.trim(),
         category_id: categoryId,
@@ -497,21 +355,18 @@ export default function WeeklyPage() {
         points: 10,
         recurring: false,
       };
-
       const result = await createTask(taskData);
       if (result) {
         haptic("success");
         toast.success(t("weekly.taskAdded"));
         return true;
-      } else {
-        toast.error(t("weekly.addFailed"));
-        return false;
       }
+      toast.error(t("weekly.addFailed"));
+      return false;
     },
     [profile?.id, createTask]
   );
 
-  // Handle toggling task completion
   const handleToggleComplete = useCallback(
     async (task: TaskRow) => {
       if (task.id.startsWith("mock-")) {
@@ -533,6 +388,8 @@ export default function WeeklyPage() {
     [updateTask]
   );
 
+  const weekRange = getWeekRange(startOfWeek);
+
   return (
     <div className="space-y-5" dir="rtl">
       {/* Header with gradient */}
@@ -540,11 +397,17 @@ export default function WeeklyPage() {
         <div className="flex items-center justify-between mb-3 relative z-10">
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-white tracking-tight">{t("weekly.title")} 🗓️</h1>
+              <h1 className="text-xl font-bold text-white tracking-tight">
+                {t("weekly.title")} 🗓️
+              </h1>
               <ShareButton
                 title={t("share.weeklyPlan")}
                 text={t("share.weeklyText")}
-                url={typeof window !== "undefined" ? window.location.href : "https://www.bayitbeseder.com"}
+                url={
+                  typeof window !== "undefined"
+                    ? window.location.href
+                    : "https://www.bayitbeseder.com"
+                }
                 className="!bg-white/20 !text-white border border-white/20 hover:!bg-white/30"
               />
             </div>
@@ -580,7 +443,7 @@ export default function WeeklyPage() {
                     ? "bg-white/30 border-white/30"
                     : "bg-white/12 border-white/10 hover:bg-white/20"
                 }`}
-                title={zoneConfig.zoneMode ? t("weekly.zoneMode") : t("weekly.zoneMode")}
+                title={t("weekly.zoneMode")}
               >
                 {zoneConfig.zoneMode ? (
                   <LayoutGrid className="w-3.5 h-3.5 text-white" />
@@ -598,7 +461,9 @@ export default function WeeklyPage() {
                   title={t("weekly.configureZonesTitle")}
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5 text-white" />
-                  <span className="text-[11px] font-medium text-white">{t("weekly.viewZones")}</span>
+                  <span className="text-[11px] font-medium text-white">
+                    {t("weekly.viewZones")}
+                  </span>
                 </button>
               )}
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/12 backdrop-blur-sm rounded-xl border border-white/10">
@@ -611,13 +476,11 @@ export default function WeeklyPage() {
           </div>
         </div>
 
-        {/* Week summary */}
+        {/* Week summary stats */}
         <div className={`grid gap-2 ${calendarConnected ? "grid-cols-4" : "grid-cols-3"}`}>
           <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
             <div className="text-xs text-white/70 mb-0.5">{t("weekly.statCompleted")}</div>
-            <div className="text-lg font-bold text-white">
-              {stats.completionRate}%
-            </div>
+            <div className="text-lg font-bold text-white">{stats.completionRate}%</div>
           </div>
           <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
             <div className="text-xs text-white/70 mb-0.5">{t("weekly.statMine")}</div>
@@ -627,16 +490,12 @@ export default function WeeklyPage() {
             <div className="text-xs text-white/70 mb-0.5">
               {partner?.name || t("weekly.statPartnerFallback")}
             </div>
-            <div className="text-lg font-bold text-white">
-              {stats.partnerTasks}
-            </div>
+            <div className="text-lg font-bold text-white">{stats.partnerTasks}</div>
           </div>
           {calendarConnected && (
             <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
               <div className="text-xs text-white/70 mb-0.5">{t("weekly.statCalendar")}</div>
-              <div className="text-lg font-bold text-white">
-                {calendarEvents.length}
-              </div>
+              <div className="text-lg font-bold text-white">{calendarEvents.length}</div>
             </div>
           )}
         </div>
@@ -662,8 +521,12 @@ export default function WeeklyPage() {
               <Calendar className="w-4.5 h-4.5 text-blue-600 dark:text-blue-400" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">{t("weekly.calendarConnectTitle")}</p>
-              <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">{t("weekly.calendarConnectDesc")}</p>
+              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                {t("weekly.calendarConnectTitle")}
+              </p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
+                {t("weekly.calendarConnectDesc")}
+              </p>
             </div>
             <a
               href="/settings"
@@ -674,104 +537,32 @@ export default function WeeklyPage() {
           </div>
         )}
 
-        {/* Mock mode banner - login prompt when not authenticated */}
+        {/* Demo mode banner */}
         {!isRealData && !loading && (
           <div className="card-elevated p-4 text-center bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 rounded-xl">
-            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">{t("weekly.demoBannerTitle")}</p>
-            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">{t("weekly.demoBannerDesc")}</p>
-            <a href="/login" className="inline-block mt-2 px-4 py-1.5 rounded-xl gradient-primary text-white text-xs font-semibold">{t("weekly.demoBannerCta")}</a>
+            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+              {t("weekly.demoBannerTitle")}
+            </p>
+            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+              {t("weekly.demoBannerDesc")}
+            </p>
+            <a
+              href="/login"
+              className="inline-block mt-2 px-4 py-1.5 rounded-xl gradient-primary text-white text-xs font-semibold"
+            >
+              {t("weekly.demoBannerCta")}
+            </a>
           </div>
         )}
 
         {/* Smart Suggestions Panel */}
-        {suggestions.length > 0 && (
-          <div className="card-elevated bg-gradient-to-br from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 border border-purple-100/50 dark:border-purple-800/30 overflow-hidden">
-            <button
-              onClick={() => setShowSuggestions(!showSuggestions)}
-              className="w-full flex items-center justify-between p-4"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/50 flex items-center justify-center">
-                  <Lightbulb className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div className="text-right">
-                  <div className="font-semibold text-foreground">
-                    {t("weekly.smartSuggestionsTitle")}
-                  </div>
-                  <div className="text-xs text-muted">
-                    {suggestions.length} {t("weekly.suggestionsCount")}
-                  </div>
-                </div>
-              </div>
-              {showSuggestions ? (
-                <ChevronUp className="w-5 h-5 text-muted" />
-              ) : (
-                <ChevronDown className="w-5 h-5 text-muted" />
-              )}
-            </button>
-
-            {showSuggestions && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="px-4 pb-4 space-y-2"
-              >
-                {suggestions.map((suggestion: Suggestion, idx: number) => {
-                  const isActionable =
-                    (suggestion.type === "heavy_day" || suggestion.type === "empty_day" || suggestion.type === "busy_calendar_day") &&
-                    suggestion.affectedDates &&
-                    suggestion.affectedDates.length >= 2;
-
-                  return (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: idx * 0.05 }}
-                      className={`p-3 rounded-xl bg-white/60 dark:bg-surface/80 backdrop-blur-sm border ${
-                        suggestion.priority === "high"
-                          ? "border-red-200 dark:border-red-800/50"
-                          : suggestion.priority === "medium"
-                            ? "border-amber-200 dark:border-amber-800/50"
-                            : "border-slate-200 dark:border-slate-700/50"
-                      }`}
-                    >
-                      <div className="flex items-start gap-2">
-                        <div
-                          className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
-                            suggestion.priority === "high"
-                              ? "bg-red-500"
-                              : suggestion.priority === "medium"
-                                ? "bg-amber-500"
-                                : "bg-slate-400"
-                          }`}
-                        />
-                        <div className="flex-1">
-                          <div className="font-medium text-sm text-foreground">
-                            {suggestion.title}
-                          </div>
-                          <div className="text-xs text-muted mt-0.5">
-                            {suggestion.description}
-                          </div>
-                          {isActionable && isRealData && (
-                            <button
-                              onClick={() => handleApplySuggestion(suggestion)}
-                              className="mt-2 flex items-center gap-1 px-3 py-1.5 rounded-xl bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors active:scale-95"
-                            >
-                              <ArrowLeftRight className="w-3 h-3" />
-                              {t("weekly.moveTask")}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
-            )}
-          </div>
-        )}
+        <WeeklySmartSuggestions
+          suggestions={suggestions}
+          isRealData={isRealData}
+          showSuggestions={showSuggestions}
+          onToggle={() => setShowSuggestions(!showSuggestions)}
+          onApplySuggestion={handleApplySuggestion}
+        />
 
         {/* Zone summary bar (when zone mode active) */}
         {zoneConfig.zoneMode && (
@@ -787,7 +578,7 @@ export default function WeeklyPage() {
         >
           <div className="space-y-3">
             {dailyLoads.map((dayLoad, idx) => (
-              <DayCard
+              <WeeklyDayCard
                 key={dayLoad.date}
                 dayLoad={dayLoad}
                 index={idx}
@@ -795,7 +586,9 @@ export default function WeeklyPage() {
                 calendarEvents={eventsByDate.get(dayLoad.date) ?? []}
                 memberNames={memberNames}
                 memberIds={memberIds}
-                isDragTarget={activeDragTask !== null && activeDragTask.fromDate !== dayLoad.date}
+                isDragTarget={
+                  activeDragTask !== null && activeDragTask.fromDate !== dayLoad.date
+                }
                 onAddTask={handleAddTask}
                 onToggleComplete={handleToggleComplete}
                 onReassignTask={handleReassignTask}
@@ -808,7 +601,9 @@ export default function WeeklyPage() {
           <DragOverlay>
             {activeDragTask && (
               <div className="bg-primary/15 rounded-lg px-3 py-2 text-xs shadow-lg border-2 border-primary opacity-90 text-foreground">
-                <span className="ms-1">{CATEGORY_ICONS[getCategoryFromId(activeDragTask.task.category_id)] ?? "🏠"}</span>
+                <span className="ms-1">
+                  {CATEGORY_ICONS[getCategoryFromId(activeDragTask.task.category_id)] ?? "🏠"}
+                </span>
                 {activeDragTask.task.title}
               </div>
             )}
@@ -816,73 +611,13 @@ export default function WeeklyPage() {
         </DndContext>
 
         {/* This Week's Summary */}
-        <div className="card-elevated p-4">
-          <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold text-foreground">{t("weekly.weekSummary")}</h3>
-          </div>
-
-          <div className="space-y-3">
-            {/* Fairness ratio */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-muted" />
-                <span className="text-sm text-foreground">{t("weekly.taskBalance")}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="text-sm font-medium text-foreground">
-                  {Math.round(stats.fairnessRatio * 100)}%
-                </div>
-                <div className="w-24 h-2 bg-border/30 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all"
-                    style={{ width: `${stats.fairnessRatio * 100}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Time distribution */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-muted" />
-                <span className="text-sm text-foreground">{t("weekly.taskTime")}</span>
-              </div>
-              <div className="text-sm font-medium text-foreground">
-                {dailyLoads.reduce((sum, d) => sum + d.totalMinutes, 0)} {t("weekly.minutes")}
-              </div>
-            </div>
-
-            {/* Calendar busyness */}
-            {calendarConnected && calendarEvents.length > 0 && (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-blue-500" />
-                  <span className="text-sm text-foreground">{t("weekly.calendarMeetings")}</span>
-                </div>
-                <div className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                  {calendarEvents.length} {t("weekly.calendarEventsLabel")}
-                </div>
-              </div>
-            )}
-
-            {/* Completion rate */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-muted" />
-                <span className="text-sm text-foreground">{t("weekly.completionRateLabel")}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-foreground">
-                  {stats.completionRate}%
-                </span>
-                <div className="text-xs text-muted">
-                  ({stats.completed}/{stats.total})
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <WeeklyStats
+          stats={stats}
+          dailyLoads={dailyLoads}
+          calendarConnected={calendarConnected}
+          calendarEvents={calendarEvents}
+          partnerName={partner?.name}
+        />
       </div>
 
       {/* Weekly Generator Modal */}
@@ -907,501 +642,14 @@ export default function WeeklyPage() {
       />
 
       {/* Zone Day Picker Modal */}
-      <AnimatePresence>
-        {showZonePicker && (
-          <motion.div
-            key="zone-picker-backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm px-4 pb-4"
-            onClick={() => setShowZonePicker(false)}
-          >
-            <motion.div
-              key="zone-picker-card"
-              initial={{ y: 40, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 40, opacity: 0 }}
-              transition={{ type: "spring", damping: 24, stiffness: 300 }}
-              className="w-full max-w-lg rounded-2xl bg-white dark:bg-gray-900 shadow-xl overflow-hidden"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* Modal header */}
-              <div className="flex items-center justify-between px-4 pt-4 pb-2">
-                <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">{t("weekly.zoneDayPickerTitle")}</h2>
-                <button
-                  onClick={() => setShowZonePicker(false)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  aria-label={t("weekly.close")}
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="px-4 pb-4">
-                <ZoneDayPicker
-                  mappings={zoneConfig.zoneMappings}
-                  onChange={(updated) => {
-                    updated.forEach((m) => {
-                      if (m.preferredDays[0] !== undefined) {
-                        zoneConfig.moveZone(m.zone, m.preferredDays[0]);
-                      }
-                    });
-                  }}
-                />
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-interface DayCardProps {
-  dayLoad: DayLoad | DayLoadWithCalendar;
-  index: number;
-  isRealData: boolean;
-  calendarEvents: ClientCalendarEvent[];
-  memberNames: Record<string, string>;
-  memberIds: string[];
-  isDragTarget: boolean;
-  onAddTask: (dueDate: string, title: string, categoryId: string) => Promise<boolean>;
-  onToggleComplete: (task: TaskRow) => Promise<void>;
-  onReassignTask: (taskId: string, newUserId: string) => Promise<void>;
-  zoneMode?: boolean;
-}
-
-function DayCard({ dayLoad, index, isRealData, calendarEvents, memberNames, memberIds, isDragTarget, onAddTask, onToggleComplete, onReassignTask, zoneMode }: DayCardProps) {
-  const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [newCategory, setNewCategory] = useState("general");
-  const [saving, setSaving] = useState(false);
-
-  const difficultyColors = {
-    light: "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400",
-    moderate: "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-400",
-    heavy: "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400",
-  };
-
-  const difficultyLabels = {
-    light: t("weekly.difficultyLight"),
-    moderate: t("weekly.difficultyModerate"),
-    heavy: t("weekly.difficultyHeavy"),
-  };
-
-  const handleSaveTask = async () => {
-    if (!newTitle.trim()) return;
-    setSaving(true);
-    const ok = await onAddTask(dayLoad.date, newTitle, newCategory);
-    setSaving(false);
-    if (ok) {
-      setNewTitle("");
-      setNewCategory("general");
-      setShowAddForm(false);
-      setExpanded(true);
-    }
-  };
-
-  // Make this DayCard a droppable zone for D&D
-  const { isOver, setNodeRef: setDropRef } = useDroppable({ id: dayLoad.date });
-
-  const handleAddButtonClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    haptic("tap");
-    setShowAddForm((prev) => !prev);
-    setExpanded(true);
-  };
-
-  const handleCancelAdd = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowAddForm(false);
-    setNewTitle("");
-    setNewCategory("general");
-  };
-
-  return (
-    <motion.div
-      ref={setDropRef}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className={`card-elevated overflow-hidden transition-all ${
-        isOver
-          ? "ring-2 ring-primary bg-primary/5"
-          : isDragTarget
-            ? "ring-1 ring-primary/30"
-            : ""
-      } ${
-        dayLoad.isHeavy && !isOver
-          ? "ring-2 ring-red-200 dark:ring-red-800/50 shadow-lg shadow-red-500/10"
-          : !isOver
-            ? "shadow-lg shadow-purple-500/10 border border-purple-100/50 dark:border-purple-800/30"
-            : ""
-      }`}
-    >
-      {/* Day header row */}
-      <div className="flex items-center w-full">
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="flex-1 p-4 text-right"
-        >
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <div className="font-bold text-foreground">{dayLoad.dayName}</div>
-              <span
-                className={`text-xs px-2 py-0.5 rounded-full font-medium ${difficultyColors[dayLoad.difficulty]}`}
-              >
-                {difficultyLabels[dayLoad.difficulty]}
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-xs text-muted">
-                <Clock className="w-3 h-3" />
-                {dayLoad.totalMinutes} {t("weekly.minutesShort")}
-              </div>
-              <div className="text-sm font-medium text-muted">
-                {dayLoad.tasks.length} {t("weekly.taskCount")}
-              </div>
-            </div>
-          </div>
-
-          {/* Category badges preview */}
-          {!expanded && (
-            <div className="flex flex-wrap gap-1 items-center">
-              {calendarEvents.length > 0 && (
-                <span className="text-xs bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded-full">
-                  {calendarEvents.length} {t("weekly.meetingsCount")}
-                </span>
-              )}
-              {Array.from(
-                new Set(
-                  dayLoad.tasks.map((t) => getCategoryFromId(t.category_id))
-                )
-              )
-                .slice(0, 4)
-                .map((category) => (
-                  <span key={category} className="text-xs">{CATEGORY_ICONS[category] ?? "🏠"}</span>
-                ))}
-              {dayLoad.tasks.length > 4 && (
-                <div className="text-xs text-muted">+{dayLoad.tasks.length - 4}</div>
-              )}
-            </div>
-          )}
-        </button>
-
-        {/* Quick-add button */}
-        {isRealData && (
-          <button
-            onClick={handleAddButtonClick}
-            aria-label={t("weekly.addTaskToDay")}
-            className={`flex-shrink-0 ms-2 me-3 w-11 h-11 rounded-full flex items-center justify-center transition-colors ${
-              showAddForm
-                ? "bg-primary text-white"
-                : "bg-border/30 text-muted hover:bg-primary/10 hover:text-primary"
-            }`}
-          >
-            <Plus className="w-4 h-4" />
-          </button>
-        )}
-      </div>
-
-      {/* Inline add-task form */}
-      <AnimatePresence>
-        {showAddForm && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-3 pt-1 space-y-2 border-t border-border/20">
-              {/* Title input + voice */}
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") handleSaveTask();
-                    if (e.key === "Escape") {
-                      setShowAddForm(false);
-                      setNewTitle("");
-                    }
-                  }}
-                  placeholder={t("weekly.newTaskPlaceholder")}
-                  dir="rtl"
-                  autoFocus
-                  className="flex-1 px-3 py-2 text-sm rounded-lg bg-background border border-border/40 focus:outline-none focus:ring-2 focus:ring-primary/30 text-foreground placeholder:text-muted"
-                />
-                <VoiceInputButton
-                  onTranscript={(text) => setNewTitle(text)}
-                  ariaLabel={t("weekly.voiceAdd")}
-                  className="flex-shrink-0 w-8 h-8"
-                />
-              </div>
-              {/* Category selector */}
-              <div className="flex flex-wrap gap-1.5">
-                {CATEGORY_KEYS.map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setNewCategory(cat)}
-                    className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors ${
-                      newCategory === cat
-                        ? "bg-primary text-white"
-                        : "bg-border/20 text-muted hover:bg-border/40"
-                    }`}
-                  >
-                    <span
-                      className={`w-2 h-2 rounded-full flex-shrink-0 ${CATEGORY_BG_CLASSES[cat]}`}
-                    />
-                    {CATEGORY_LABELS[cat]}
-                  </button>
-                ))}
-              </div>
-
-              {/* Action buttons */}
-              <div className="flex gap-2 justify-end">
-                <button
-                  type="button"
-                  onClick={handleCancelAdd}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-xl border border-border text-muted hover:bg-surface-hover transition-colors"
-                >
-                  <X className="w-3 h-3" />
-                  {t("weekly.cancel")}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveTask}
-                  disabled={!newTitle.trim() || saving}
-                  className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-xl gradient-primary text-white disabled:opacity-50 transition-colors"
-                >
-                  <Check className="w-3 h-3" />
-                  {saving ? t("weekly.saving") : t("weekly.add")}
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Expanded task list */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.18 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 space-y-2">
-              {/* Calendar events */}
-              {calendarEvents.length > 0 && (
-                <div className="space-y-1.5 mb-2">
-                  <div className="text-xs font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {t("weekly.calendarMeetingsLabel")} ({calendarEvents.length})
-                  </div>
-                  {calendarEvents.map((event, eventIdx) => (
-                    <CalendarEventItem key={event.id} event={event} index={eventIdx} />
-                  ))}
-                </div>
-              )}
-
-              {dayLoad.tasks.length === 0 && calendarEvents.length === 0 && (
-                <div className="text-xs text-muted text-center py-2">
-                  {t("weekly.noTasksOrMeetings")}
-                </div>
-              )}
-
-              {/* Zone-grouped view */}
-              {zoneMode && dayLoad.tasks.length > 0 && (() => {
-                // Group tasks by category (= zone)
-                const zoneGroups = new Map<string, TaskRow[]>();
-                for (const task of dayLoad.tasks) {
-                  const catKey = getCategoryFromId(task.category_id);
-                  const existing = zoneGroups.get(catKey) ?? [];
-                  existing.push(task);
-                  zoneGroups.set(catKey, existing);
-                }
-
-                return Array.from(zoneGroups.entries()).map(([catKey, zoneTasks]) => {
-                  const info = getZoneInfo(catKey as import("@/lib/categories").CategoryKey);
-                  const zoneData: ZoneGroup = {
-                    zone: catKey as import("@/lib/categories").CategoryKey,
-                    label: info.label,
-                    icon: info.icon,
-                    color: info.color,
-                    tasks: zoneTasks.map((t) => ({
-                      title: t.title,
-                      assignee: t.assigned_to,
-                      estimated_minutes: 10,
-                      completed: t.status === "completed",
-                      taskId: t.id,
-                    })),
-                    totalMinutes: zoneTasks.length * 10,
-                  };
-
-                  return (
-                    <ZoneGroupCard key={catKey} zone={zoneData}>
-                      {zoneTasks.map((task) => (
-                        <DraggableWeekTask
-                          key={task.id}
-                          task={task}
-                          date={dayLoad.date}
-                          memberNames={memberNames}
-                          memberIds={memberIds}
-                          onToggleComplete={onToggleComplete}
-                          onReassignTask={onReassignTask}
-                        />
-                      ))}
-                    </ZoneGroupCard>
-                  );
-                });
-              })()}
-
-              {/* Flat view (default) */}
-              {!zoneMode && dayLoad.tasks.map((task) => (
-                <DraggableWeekTask
-                  key={task.id}
-                  task={task}
-                  date={dayLoad.date}
-                  memberNames={memberNames}
-                  memberIds={memberIds}
-                  onToggleComplete={onToggleComplete}
-                  onReassignTask={onReassignTask}
-                />
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
-  );
-}
-
-// ============================================
-// Draggable Task Item for Weekly D&D
-// ============================================
-
-function DraggableWeekTask({
-  task,
-  date,
-  memberNames,
-  memberIds,
-  onToggleComplete,
-  onReassignTask,
-}: {
-  task: TaskRow;
-  date: string;
-  memberNames: Record<string, string>;
-  memberIds: string[];
-  onToggleComplete: (task: TaskRow) => Promise<void>;
-  onReassignTask: (taskId: string, newUserId: string) => Promise<void>;
-}) {
-  const { t } = useTranslation();
-  const category = getCategoryFromId(task.category_id);
-  const isMock = task.id.startsWith("mock-");
-  const isCompleted = task.status === "completed";
-
-  // Make this task draggable (only for real DB tasks)
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: task.id,
-    data: { task, fromDate: date, taskId: task.id },
-    disabled: isMock,
-  });
-
-  const style = {
-    transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
-    transition,
-  };
-
-  const assigneeName = task.assigned_to ? memberNames[task.assigned_to] : null;
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`flex items-center gap-2 p-2 rounded-lg bg-background/50 dark:bg-background/30 transition-opacity ${
-        isDragging ? "opacity-40" : ""
-      }`}
-    >
-      {/* D&D handle */}
-      {!isMock && (
-        <button
-          {...attributes}
-          {...listeners}
-          className="p-0.5 rounded touch-none cursor-grab active:cursor-grabbing text-muted/40 hover:text-muted flex-shrink-0"
-          aria-label={t("weekly.dragToAnotherDay")}
-        >
-          <GripVertical className="w-3.5 h-3.5" />
-        </button>
-      )}
-
-      {/* Completion checkbox */}
-      <button
-        onClick={() => onToggleComplete(task)}
-        disabled={isMock}
-        className={`flex-shrink-0 w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-          isCompleted
-            ? "bg-green-500 border-green-500 text-white"
-            : isMock
-              ? "border-border/30 opacity-40 cursor-not-allowed"
-              : "border-border/50 hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
-        }`}
-        title={isCompleted ? t("weekly.markIncomplete") : t("weekly.markCompleted")}
-      >
-        {isCompleted && <Check className="w-3 h-3" />}
-      </button>
-
-      <span className="text-sm flex-shrink-0">{CATEGORY_ICONS[category] ?? "🏠"}</span>
-      <div className="flex-1 min-w-0">
-        <div
-          className={`text-sm transition-all ${
-            isCompleted ? "line-through text-muted" : "text-foreground"
-          }`}
-        >
-          {task.title}
-          {task.description?.startsWith("[pesach-") && (
-            <span className="inline-flex items-center gap-0.5 me-1 px-1.5 py-0.5 rounded-full text-[9px] font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
-              {t("weekly.pesachBadgeLabel")}
-            </span>
-          )}
-        </div>
-        <div className="text-xs text-muted">
-          {CATEGORY_LABELS[category]}
-        </div>
-      </div>
-
-      {/* Assignee badge — click to toggle between members */}
-      {assigneeName && memberIds.length === 2 && !isMock && (
-        <button
-          onClick={() => {
-            const otherId = memberIds.find((id) => id !== task.assigned_to);
-            if (otherId) onReassignTask(task.id, otherId);
-          }}
-          className="px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors whitespace-nowrap flex-shrink-0"
-          title={t("weekly.switchAssignee")}
-        >
-          {assigneeName}
-        </button>
-      )}
-      {assigneeName && memberIds.length < 2 && (
-        <span className="px-2 py-0.5 rounded-full text-[10px] bg-primary/10 text-primary/70 font-medium whitespace-nowrap flex-shrink-0">
-          {assigneeName}
-        </span>
-      )}
+      <WeeklyZonePanel
+        show={showZonePicker}
+        onClose={() => setShowZonePicker(false)}
+        mappings={zoneConfig.zoneMappings}
+        onMoveZone={(zone, day) =>
+          zoneConfig.moveZone(zone as import("@/lib/categories").CategoryKey, day)
+        }
+      />
     </div>
   );
 }
