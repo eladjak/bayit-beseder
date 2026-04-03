@@ -5,6 +5,28 @@ export const metadata: Metadata = {
   title: "צור קשר",
   description: "צרו קשר עם הצוות של בית בסדר — ברוכים הבאים לכל שאלה, רעיון או דיווח על באג.",
   alternates: { canonical: "https://www.bayitbeseder.com/contact" },
+  openGraph: {
+    title: "צור קשר | בית בסדר",
+    description: "צרו קשר עם הצוות של בית בסדר — ברוכים הבאים לכל שאלה, רעיון או דיווח על באג.",
+    url: "https://www.bayitbeseder.com/contact",
+    siteName: "בית בסדר",
+    locale: "he_IL",
+    type: "website",
+    images: [
+      {
+        url: "https://www.bayitbeseder.com/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "בית בסדר — צור קשר",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "צור קשר | בית בסדר",
+    description: "צרו קשר עם הצוות של בית בסדר — ברוכים הבאים לכל שאלה, רעיון או דיווח על באג.",
+    images: ["https://www.bayitbeseder.com/og-image.jpg"],
+  },
 };
 
 const contacts = [

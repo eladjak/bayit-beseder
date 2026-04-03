@@ -17,7 +17,22 @@ import {
 
 export const metadata: Metadata = {
   title: "בית בסדר — ניהול הבית ביחד, בכיף",
-  description: "אפליקציה חינמית בעברית לניהול משימות הבית לזוגות ומשפחות. תכנון שבועי חכם, גיימיפיקציה, WhatsApp והכל בעברית!",
+  description: "אפליקציה חינמית בעברית לניהול משק הבית לזוגות ומשפחות. חלוקת תורנויות חכמה, תכנון שבועי, רשימת קניות משותפת וגיימיפיקציה!",
+  keywords: [
+    "ניהול בית",
+    "ניהול משק בית",
+    "אפליקציית ניהול משק בית",
+    "חלוקת תורנויות",
+    "חלוקת משימות בית",
+    "תכנון שבועי",
+    "ניקיון הבית",
+    "ארגון הבית",
+    "שלום בית",
+    "זוגות",
+    "משפחה",
+    "אפליקציה עברית",
+    "בית בסדר",
+  ],
   alternates: { canonical: "https://www.bayitbeseder.com" },
 };
 
@@ -27,12 +42,13 @@ const jsonLd = {
   name: "בית בסדר",
   alternateName: "Bayit Beseder",
   url: "https://www.bayitbeseder.com",
-  description: "אפליקציה חינמית בעברית לניהול משימות הבית לזוגות ומשפחות",
+  description: "אפליקציה חינמית בעברית לניהול משק הבית לזוגות ומשפחות — חלוקת תורנויות, תכנון שבועי, רשימת קניות משותפת וגיימיפיקציה",
   applicationCategory: "LifestyleApplication",
   operatingSystem: "Web, Android, iOS",
   browserRequirements: "Requires JavaScript. Requires HTML5.",
   inLanguage: "he",
   isAccessibleForFree: true,
+  keywords: "ניהול בית, ניהול משק בית, חלוקת תורנויות, חלוקת משימות בית, תכנון שבועי, ניקיון הבית, ארגון הבית, זוגות, משפחה, אפליקציה עברית",
   offers: {
     "@type": "Offer",
     price: "0",
@@ -41,6 +57,7 @@ const jsonLd = {
   },
   featureList: [
     "ניהול משימות תחזוקת הבית",
+    "חלוקת תורנויות חכמה בין בני הבית",
     "תכנון שבועי חכם",
     "רשימת קניות משותפת",
     "גיימיפיקציה — נקודות, רצפים והישגים",
@@ -56,13 +73,10 @@ const jsonLd = {
     "@type": "Organization",
     name: "בית בסדר",
     url: "https://www.bayitbeseder.com",
-  },
-  aggregateRating: {
-    "@type": "AggregateRating",
-    ratingValue: "5",
-    ratingCount: "1",
-    bestRating: "5",
-    worstRating: "1",
+    logo: {
+      "@type": "ImageObject",
+      url: "https://www.bayitbeseder.com/icons/icon-192.png",
+    },
   },
 };
 
@@ -113,6 +127,33 @@ const faqStructuredData = {
   ],
 };
 
+const organizationLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "בית בסדר",
+  alternateName: "Bayit Beseder",
+  url: "https://www.bayitbeseder.com",
+  logo: {
+    "@type": "ImageObject",
+    url: "https://www.bayitbeseder.com/icons/icon-192.png",
+    width: 192,
+    height: 192,
+  },
+  image: "https://www.bayitbeseder.com/og-image.jpg",
+  description: "אפליקציה חינמית בעברית לניהול משק הבית לזוגות ומשפחות — חלוקת תורנויות, תכנון שבועי וגיימיפיקציה",
+  email: "contact@bayitbeseder.com",
+  sameAs: [
+    "https://www.bayitbeseder.com",
+    "https://bayit-beseder.vercel.app",
+  ],
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "customer support",
+    email: "contact@bayitbeseder.com",
+    availableLanguage: ["Hebrew", "English"],
+  },
+};
+
 export default function LandingPage() {
   return (
     <div className="min-h-dvh bg-background" dir="rtl" lang="he">
@@ -123,6 +164,10 @@ export default function LandingPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
       />
 
       {/* Hero Section */}

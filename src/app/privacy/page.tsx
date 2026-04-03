@@ -5,6 +5,22 @@ export const metadata: Metadata = {
   title: "מדיניות פרטיות",
   description: "מדיניות הפרטיות של בית בסדר — איך אנחנו מגנים על המידע שלך",
   alternates: { canonical: "https://www.bayitbeseder.com/privacy" },
+  openGraph: {
+    title: "מדיניות פרטיות | בית בסדר",
+    description: "מדיניות הפרטיות של בית בסדר — איך אנחנו מגנים על המידע שלך",
+    url: "https://www.bayitbeseder.com/privacy",
+    siteName: "בית בסדר",
+    locale: "he_IL",
+    type: "website",
+    images: [
+      {
+        url: "https://www.bayitbeseder.com/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "בית בסדר — מדיניות פרטיות",
+      },
+    ],
+  },
 };
 
 export default function PrivacyPage() {

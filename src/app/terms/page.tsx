@@ -5,6 +5,22 @@ export const metadata: Metadata = {
   title: "תנאי שימוש",
   description: "תנאי השימוש של בית בסדר — מה מותר, מה אסור, ומה אנחנו מבטיחים",
   alternates: { canonical: "https://www.bayitbeseder.com/terms" },
+  openGraph: {
+    title: "תנאי שימוש | בית בסדר",
+    description: "תנאי השימוש של בית בסדר — מה מותר, מה אסור, ומה אנחנו מבטיחים",
+    url: "https://www.bayitbeseder.com/terms",
+    siteName: "בית בסדר",
+    locale: "he_IL",
+    type: "website",
+    images: [
+      {
+        url: "https://www.bayitbeseder.com/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "בית בסדר — תנאי שימוש",
+      },
+    ],
+  },
 };
 
 export default function TermsPage() {
