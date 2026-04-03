@@ -2,8 +2,12 @@
  * Confetti wrapper that respects prefers-reduced-motion.
  * Import this instead of canvas-confetti directly.
  */
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ConfettiOptions = Record<string, any>;
+
 export async function fireConfetti(
-  options?: Parameters<typeof import("canvas-confetti").default>[0]
+  options?: ConfettiOptions
 ): Promise<void> {
   // Skip confetti entirely if user prefers reduced motion
   if (
