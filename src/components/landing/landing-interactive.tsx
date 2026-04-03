@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useInView, useMotionValue, animate, AnimatePresence } from "framer-motion";
 
 /* ── Scroll-animated feature card ─────────────────────────────── */
@@ -10,11 +11,13 @@ export function AnimatedFeatureCard({
   title,
   desc,
   index,
+  image,
 }: {
   icon: string;
   title: string;
   desc: string;
   index: number;
+  image?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-100px" });
@@ -27,11 +30,24 @@ export function AnimatedFeatureCard({
       initial={{ opacity: 0, x: xFrom, y: 20 }}
       animate={inView ? { opacity: 1, x: 0, y: 0 } : {}}
       transition={{ duration: 0.5, delay: (index % 3) * 0.1, ease: "easeOut" }}
-      className="bg-surface border border-border rounded-2xl p-5 hover:shadow-lg transition-shadow"
+      className="bg-surface border border-border rounded-2xl overflow-hidden hover:shadow-lg transition-shadow"
     >
-      <div className="text-3xl mb-3">{icon}</div>
-      <h3 className="font-bold text-foreground mb-1">{title}</h3>
-      <p className="text-sm text-muted leading-relaxed">{desc}</p>
+      {image && (
+        <div className="relative w-full h-40 overflow-hidden">
+          <Image
+            src={image}
+            alt={title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="object-cover"
+          />
+        </div>
+      )}
+      <div className="p-5">
+        <div className="text-3xl mb-3">{icon}</div>
+        <h3 className="font-bold text-foreground mb-1">{title}</h3>
+        <p className="text-sm text-muted leading-relaxed">{desc}</p>
+      </div>
     </motion.div>
   );
 }

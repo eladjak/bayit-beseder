@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ── Q&A data ─────────────────────────────────────────────────── */
@@ -59,6 +59,12 @@ interface Message {
   type: "user" | "bot";
   text: string;
   followUps?: string[];
+  streaming?: boolean;
+}
+
+interface HistoryMessage {
+  role: "user" | "model";
+  content: string;
 }
 
 /* ── TypingDots ───────────────────────────────────────────────── */
@@ -158,9 +164,12 @@ export function FaqChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [askedIds, setAskedIds] = useState<Set<string>>(new Set());
+  const [inputValue, setInputValue] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [history, setHistory] = useState<HistoryMessage[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
-
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   /* Auto-scroll within chat container (not the page) */
   useEffect(() => {
@@ -174,25 +183,100 @@ export function FaqChat() {
     const greeting: Message = {
       id: "greeting",
       type: "bot",
-      text: "שלום! אני כאן לענות על כל שאלה שיש לכם על בית בסדר. בחרו שאלה:",
+      text: "שלום! אני כאן לענות על כל שאלה שיש לכם על בית בסדר. בחרו שאלה או כתבו בחופשיות:",
       followUps: FAQ_DATA.slice(0, 3).map((f) => f.q),
     };
     const timer = setTimeout(() => setMessages([greeting]), 400);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleQuestion = (questionText: string) => {
+  /* Ask Gemini for a free-text question */
+  const askGemini = useCallback(async (questionText: string) => {
+    setIsStreaming(true);
+
+    const botMsgId = `b-ai-${Date.now()}`;
+    const streamingMsg: Message = {
+      id: botMsgId,
+      type: "bot",
+      text: "",
+      streaming: true,
+    };
+    setMessages((prev) => [...prev, streamingMsg]);
+
+    try {
+      const res = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: questionText, history }),
+      });
+
+      if (!res.ok || !res.body) {
+        const err = await res.json().catch(() => ({ error: "שגיאה לא ידועה" })) as { error?: string };
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === botMsgId
+              ? { ...m, text: err.error ?? "שגיאה בקבלת תשובה. נסו שוב.", streaming: false }
+              : m
+          )
+        );
+        setIsStreaming(false);
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let fullText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        fullText += chunk;
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === botMsgId ? { ...m, text: fullText } : m
+          )
+        );
+      }
+
+      /* Finalise: remove streaming flag, add follow-up chips */
+      const suggestedFollowUps = FAQ_DATA.filter((f) => !askedIds.has(f.id))
+        .slice(0, 2)
+        .map((f) => f.q);
+
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === botMsgId
+            ? { ...m, streaming: false, followUps: suggestedFollowUps }
+            : m
+        )
+      );
+
+      /* Update history for multi-turn context */
+      setHistory((prev) => [
+        ...prev,
+        { role: "user", content: questionText },
+        { role: "model", content: fullText },
+      ]);
+    } catch {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === botMsgId
+            ? { ...m, text: "שגיאת תקשורת. בדקו את החיבור ונסו שוב.", streaming: false }
+            : m
+        )
+      );
+    } finally {
+      setIsStreaming(false);
+    }
+  }, [history, askedIds]);
+
+  const handleQuestion = useCallback((questionText: string) => {
     /* Find the FAQ item — either by exact q match or short label */
     const faqItem =
       FAQ_DATA.find((f) => f.q === questionText) ??
       SHORT_TO_FAQ[questionText] ??
       null;
-
-    if (!faqItem) return;
-
-    /* Prevent re-asking if already asked (optional UX) */
-    const alreadyAsked = askedIds.has(faqItem.id);
-    setAskedIds((prev) => new Set(prev).add(faqItem.id));
 
     /* Add user bubble */
     const userMsg: Message = {
@@ -211,15 +295,21 @@ export function FaqChat() {
       return [...updated, userMsg];
     });
 
-    /* Show typing indicator */
-    setIsTyping(true);
+    /* If no FAQ match — send to Gemini */
+    if (!faqItem) {
+      void askGemini(questionText);
+      return;
+    }
 
-    /* Simulate typing delay (600-900 ms) */
+    /* Static FAQ answer */
+    const alreadyAsked = askedIds.has(faqItem.id);
+    setAskedIds((prev) => new Set(prev).add(faqItem.id));
+
+    setIsTyping(true);
     const delay = alreadyAsked ? 400 : 700 + Math.random() * 200;
     setTimeout(() => {
       setIsTyping(false);
 
-      /* Pick follow-ups that haven't been asked yet */
       const freshFollowUps = (faqItem.followUps ?? []).filter((label) => {
         const linked = SHORT_TO_FAQ[label] ?? FAQ_DATA.find((f) => f.q === label);
         return linked ? !askedIds.has(linked.id) : true;
@@ -238,11 +328,27 @@ export function FaqChat() {
       };
 
       setMessages((prev) => [...prev, botMsg]);
+
+      /* Keep history for Gemini context */
+      setHistory((prev) => [
+        ...prev,
+        { role: "user", content: questionText },
+        { role: "model", content: faqItem.a },
+      ]);
     }, delay);
+  }, [askedIds, askGemini]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = inputValue.trim();
+    if (!trimmed || isTyping || isStreaming) return;
+    setInputValue("");
+    handleQuestion(trimmed);
   };
 
-  /* Question chips shown before conversation starts (after greeting rendered) */
+  /* Question chips shown before conversation starts */
   const showInitialChips = messages.length === 0;
+  const isBusy = isTyping || isStreaming;
 
   return (
     <section className="max-w-3xl mx-auto px-4 py-16" dir="rtl">
@@ -287,7 +393,9 @@ export function FaqChat() {
           </div>
           <div>
             <p className="text-white text-sm font-semibold leading-tight">בית בסדר</p>
-            <p className="text-white/70 text-xs">מענה מיידי לשאלות</p>
+            <p className="text-white/70 text-xs">
+              {isStreaming ? "מקליד..." : "מענה מיידי לשאלות"}
+            </p>
           </div>
           {/* Traffic lights decoration */}
           <div className="flex gap-1.5 ms-auto opacity-60">
@@ -329,13 +437,13 @@ export function FaqChat() {
                   key={msg.id}
                   message={msg}
                   onFollowUp={handleQuestion}
-                  isLast={isLast && !isTyping}
+                  isLast={isLast && !isBusy}
                 />
               );
             })}
           </AnimatePresence>
 
-          {/* Typing indicator */}
+          {/* Typing indicator — only for static FAQ delay */}
           <AnimatePresence>
             {isTyping && (
               <motion.div
@@ -359,12 +467,41 @@ export function FaqChat() {
           <div ref={bottomRef} />
         </div>
 
-        {/* Footer hint */}
-        <div className="border-t border-border px-5 py-3 bg-background/50 text-center">
-          <p className="text-xs text-muted">
-            לחצו על שאלה כדי לקבל תשובה מיידית ✨
-          </p>
-        </div>
+        {/* Input area */}
+        <form
+          onSubmit={handleSubmit}
+          className="border-t border-border px-4 py-3 bg-background/50 flex items-center gap-2"
+        >
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            placeholder="שאלו כל שאלה על בית בסדר..."
+            disabled={isBusy}
+            dir="rtl"
+            className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted disabled:opacity-50"
+          />
+          <button
+            type="submit"
+            disabled={!inputValue.trim() || isBusy}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-white disabled:opacity-40 transition-opacity flex-shrink-0"
+            style={{ background: "linear-gradient(135deg, #6366F1, #8B5CF6)" }}
+            aria-label="שלח שאלה"
+          >
+            {isStreaming ? (
+              <motion.span
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                className="block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full"
+              />
+            ) : (
+              <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+              </svg>
+            )}
+          </button>
+        </form>
       </motion.div>
     </section>
   );

@@ -196,12 +196,12 @@ export default function LandingPage() {
 
         <div className="grid md:grid-cols-3 gap-5">
           {[
-            { icon: "✅", title: "משימות עם גיימיפיקציה", desc: "נקודות, רצפים, הישגים ופרסים. ניקיון הפך לגיים." },
-            { icon: "📅", title: "תכנון שבועי חכם", desc: "אלגוריתם שמחלק משימות לפי אזורים בבית, יום ועומס." },
-            { icon: "🛒", title: "רשימת קניות משותפת", desc: "22 קטגוריות, סגנון Google Keep, סנכרון בזמן אמת." },
+            { icon: "✅", title: "משימות עם גיימיפיקציה", desc: "נקודות, רצפים, הישגים ופרסים. ניקיון הפך לגיים.", image: "/illustrations/landing/features-gamification.png" },
+            { icon: "📅", title: "תכנון שבועי חכם", desc: "אלגוריתם שמחלק משימות לפי אזורים בבית, יום ועומס.", image: "/illustrations/landing/features-planning.png" },
+            { icon: "🛒", title: "רשימת קניות משותפת", desc: "22 קטגוריות, סגנון Google Keep, סנכרון בזמן אמת.", image: "/illustrations/landing/features-shopping.png" },
             { icon: "🫓", title: "מצב פסח", desc: "37 משימות ב-4 שלבים, 25 פריטי קניות, ספירה לאחור לליל הסדר." },
             { icon: "📱", title: "WhatsApp + PWA", desc: "סיכום יומי בוואטסאפ, התראות, ועובד כאפליקציה מהנייד." },
-            { icon: "🏠", title: "אזורים בבית", desc: "ארגון לפי חדרים — מטבח ביום ראשון, סלון ביום שני." },
+            { icon: "🏠", title: "אזורים בבית", desc: "ארגון לפי חדרים — מטבח ביום ראשון, סלון ביום שני.", image: "/illustrations/landing/features-tasks.png" },
           ].map((f, i) => (
             <AnimatedFeatureCard
               key={f.title}
@@ -209,6 +209,7 @@ export default function LandingPage() {
               title={f.title}
               desc={f.desc}
               index={i}
+              image={f.image}
             />
           ))}
         </div>
