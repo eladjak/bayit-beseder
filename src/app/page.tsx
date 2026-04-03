@@ -139,7 +139,7 @@ export default function LandingPage() {
 
         <div className="relative z-10 max-w-4xl mx-auto px-6 py-20 text-center text-white">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/15 backdrop-blur-sm rounded-full text-sm font-medium mb-6 border border-white/20">
-            🏠 חינם לחלוטין — בעברית — מותאם לנייד — <span className="text-amber-200">🧪 גרסה ראשונה</span>
+            🏠 ניהול בית חכם לזוגות ומשפחות
           </div>
 
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4 tracking-tight">
@@ -158,10 +158,10 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <PulsingCtaButton />
             <a
-              href="#features"
+              href="#how-it-works"
               className="px-6 py-3 bg-white/15 backdrop-blur-sm text-white font-medium rounded-2xl border border-white/20 hover:bg-white/25 transition-colors"
             >
-              צפו בהדגמה ↓
+              איך זה עובד? ↓
             </a>
           </div>
 

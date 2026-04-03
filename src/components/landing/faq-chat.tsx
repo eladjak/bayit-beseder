@@ -160,9 +160,13 @@ export function FaqChat() {
   const [askedIds, setAskedIds] = useState<Set<string>>(new Set());
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  /* Auto-scroll to bottom */
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  /* Auto-scroll within chat container (not the page) */
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
   }, [messages, isTyping]);
 
   /* Initial greeting from bot */
@@ -295,7 +299,8 @@ export function FaqChat() {
 
         {/* Messages area */}
         <div
-          className="flex flex-col gap-4 px-4 py-5 overflow-y-auto"
+          ref={chatContainerRef}
+          className="flex flex-col gap-4 px-4 py-5 overflow-y-auto scroll-smooth"
           style={{ maxHeight: 420, direction: "rtl" }}
         >
           {showInitialChips && (
