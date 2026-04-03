@@ -2,14 +2,7 @@
 
 import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import Image from "next/image";
-import {
-  Calendar,
-  Wand2,
-  Plus,
-  LayoutGrid,
-  List,
-  SlidersHorizontal,
-} from "lucide-react";
+import { Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
 import { ZoneDaySummary } from "@/components/weekly/zone-day-summary";
@@ -40,7 +33,6 @@ import {
 import type { TaskRow, TaskInsert } from "@/lib/types/database";
 import { haptic } from "@/lib/haptics";
 import { useTranslation } from "@/hooks/useTranslation";
-import { ShareButton } from "@/components/share-button";
 import { CATEGORY_ICONS } from "@/lib/categories";
 import {
   DndContext,
@@ -57,6 +49,7 @@ import { WeeklyDayCard } from "@/components/weekly/weekly-day-card";
 import { WeeklySmartSuggestions } from "@/components/weekly/weekly-smart-suggestions";
 import { WeeklyZonePanel } from "@/components/weekly/weekly-zone-panel";
 import { WeeklyStats } from "@/components/weekly/weekly-stats";
+import { WeeklyHeader } from "@/components/weekly/weekly-header";
 import {
   generateMockWeeklyTasks,
   getCategoryFromId,
@@ -392,114 +385,17 @@ export default function WeeklyPage() {
 
   return (
     <div className="space-y-5" dir="rtl">
-      {/* Header with gradient */}
-      <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
-        <div className="flex items-center justify-between mb-3 relative z-10">
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-white tracking-tight">
-                {t("weekly.title")} 🗓️
-              </h1>
-              <ShareButton
-                title={t("share.weeklyPlan")}
-                text={t("share.weeklyText")}
-                url={
-                  typeof window !== "undefined"
-                    ? window.location.href
-                    : "https://www.bayitbeseder.com"
-                }
-                className="!bg-white/20 !text-white border border-white/20 hover:!bg-white/30"
-              />
-            </div>
-            <p className="text-sm text-white/60 mt-0.5">{weekRange}</p>
-            <p className="text-xs text-white/70 mt-1">{t("weekly.subtitle")}</p>
-          </div>
-          <div className="flex flex-col items-end gap-2">
-            {/* Primary CTA: wizard OR manual */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleOpenWizard}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-primary text-sm font-bold shadow-lg active:scale-95 transition-transform"
-                title={t("weekly.wizardCreateTitle")}
-              >
-                <Wand2 className="w-4 h-4" />
-                <span>{t("weekly.wizardCta")}</span>
-              </button>
-              <button
-                onClick={() => toast.info(t("weekly.manualModeToast"))}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 text-white text-xs font-medium border border-white/20 active:scale-95 transition-transform"
-                title={t("weekly.manualModeTitle")}
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{t("weekly.manualMode")}</span>
-              </button>
-            </div>
-            {/* Secondary controls row */}
-            <div className="flex items-center gap-1.5">
-              <button
-                onClick={zoneConfig.toggleZoneMode}
-                className={`flex items-center gap-1 px-2.5 py-1.5 backdrop-blur-sm rounded-xl border transition-colors active:scale-95 ${
-                  zoneConfig.zoneMode
-                    ? "bg-white/30 border-white/30"
-                    : "bg-white/12 border-white/10 hover:bg-white/20"
-                }`}
-                title={t("weekly.zoneMode")}
-              >
-                {zoneConfig.zoneMode ? (
-                  <LayoutGrid className="w-3.5 h-3.5 text-white" />
-                ) : (
-                  <List className="w-3.5 h-3.5 text-white" />
-                )}
-                <span className="text-[11px] font-medium text-white">
-                  {zoneConfig.zoneMode ? t("weekly.viewZones") : t("weekly.viewList")}
-                </span>
-              </button>
-              {zoneConfig.zoneMode && (
-                <button
-                  onClick={() => setShowZonePicker(true)}
-                  className="flex items-center gap-1 px-2.5 py-1.5 bg-white/20 backdrop-blur-sm rounded-xl border border-white/10 hover:bg-white/30 transition-colors active:scale-95"
-                  title={t("weekly.configureZonesTitle")}
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5 text-white" />
-                  <span className="text-[11px] font-medium text-white">
-                    {t("weekly.viewZones")}
-                  </span>
-                </button>
-              )}
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/12 backdrop-blur-sm rounded-xl border border-white/10">
-                <Calendar className="w-3.5 h-3.5 text-white" />
-                <span className="text-[11px] font-medium text-white">
-                  {stats.total} {t("weekly.taskCount")}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Week summary stats */}
-        <div className={`grid gap-2 ${calendarConnected ? "grid-cols-4" : "grid-cols-3"}`}>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
-            <div className="text-xs text-white/70 mb-0.5">{t("weekly.statCompleted")}</div>
-            <div className="text-lg font-bold text-white">{stats.completionRate}%</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
-            <div className="text-xs text-white/70 mb-0.5">{t("weekly.statMine")}</div>
-            <div className="text-lg font-bold text-white">{stats.myTasks}</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
-            <div className="text-xs text-white/70 mb-0.5">
-              {partner?.name || t("weekly.statPartnerFallback")}
-            </div>
-            <div className="text-lg font-bold text-white">{stats.partnerTasks}</div>
-          </div>
-          {calendarConnected && (
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl px-3 py-2">
-              <div className="text-xs text-white/70 mb-0.5">{t("weekly.statCalendar")}</div>
-              <div className="text-lg font-bold text-white">{calendarEvents.length}</div>
-            </div>
-          )}
-        </div>
-      </div>
+      <WeeklyHeader
+        weekRange={weekRange}
+        stats={stats}
+        zoneMode={zoneConfig.zoneMode}
+        calendarConnected={calendarConnected}
+        calendarEventsCount={calendarEvents.length}
+        partnerName={partner?.name}
+        onOpenWizard={handleOpenWizard}
+        onToggleZoneMode={zoneConfig.toggleZoneMode}
+        onOpenZonePicker={() => setShowZonePicker(true)}
+      />
 
       <div className="px-4 space-y-5">
         {/* Weekly planning illustration */}
