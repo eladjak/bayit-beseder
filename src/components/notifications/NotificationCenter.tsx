@@ -91,8 +91,7 @@ export function NotificationCenter({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute top-full right-0 left-auto mt-2 w-80 max-w-[90vw] max-h-96 bg-surface dark:bg-surface rounded-2xl shadow-xl dark:shadow-black/50 border border-border overflow-hidden z-50"
-            style={{ minWidth: "300px" }}
+            className="absolute top-full left-0 right-auto mt-2 w-80 max-w-[calc(100vw-1.5rem)] max-h-96 bg-surface dark:bg-surface rounded-2xl shadow-xl dark:shadow-black/50 border border-border overflow-hidden z-50"
             role="menu"
             aria-label={t("notifications.listLabel")}
           >
