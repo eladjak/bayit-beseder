@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
   Users,
   MoreVertical,
@@ -223,6 +224,7 @@ interface ConfirmRemoveProps {
 
 function ConfirmRemoveDialog({ name, onConfirm, onCancel }: ConfirmRemoveProps) {
   const { t } = useTranslation();
+  const focusRef = useFocusTrap<HTMLDivElement>(true, onCancel);
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -232,6 +234,7 @@ function ConfirmRemoveDialog({ name, onConfirm, onCancel }: ConfirmRemoveProps) 
       onClick={onCancel}
     >
       <motion.div
+        ref={focusRef}
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}

@@ -6,6 +6,7 @@ import { X, ChevronRight, CheckCircle2, Loader2 } from "lucide-react";
 import { TASK_TEMPLATES, type TaskTemplate } from "@/lib/task-templates";
 import { useTranslation } from "@/hooks/useTranslation";
 import { toast } from "sonner";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface TaskTemplatePicker {
   open: boolean;
@@ -15,6 +16,7 @@ interface TaskTemplatePicker {
 
 export function TaskTemplatePicker({ open, onClose, onAddTasks }: TaskTemplatePicker) {
   const { t } = useTranslation();
+  const focusRef = useFocusTrap<HTMLDivElement>(open, onClose);
   const [selectedTemplate, setSelectedTemplate] = useState<TaskTemplate | null>(null);
   const [adding, setAdding] = useState(false);
 
@@ -56,6 +58,7 @@ export function TaskTemplatePicker({ open, onClose, onAddTasks }: TaskTemplatePi
           {/* Drawer */}
           <motion.div
             key="drawer"
+            ref={focusRef}
             initial={{ opacity: 0, y: "100%" }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "100%" }}

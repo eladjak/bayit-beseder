@@ -6,6 +6,7 @@ import { X, SkipForward, Pause, Play, Square } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase";
 import type { PlaylistTimerState, PlaylistTimerActions } from "@/hooks/usePlaylistTimer";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface PlaylistPlayerProps
   extends PlaylistTimerState,
@@ -86,6 +87,7 @@ export function PlaylistPlayer({
   skip,
   stop,
 }: PlaylistPlayerProps) {
+  const focusRef = useFocusTrap<HTMLDivElement>(!!currentPlaylist, stop);
   const completionRecordedRef = useRef(false);
 
   // Fire confetti when playlist completes
@@ -155,6 +157,7 @@ export function PlaylistPlayer({
 
   return (
     <motion.div
+      ref={focusRef}
       className="fixed inset-0 z-50 flex flex-col"
       style={{ background: "var(--color-background)" }}
       initial={{ opacity: 0, y: 40 }}

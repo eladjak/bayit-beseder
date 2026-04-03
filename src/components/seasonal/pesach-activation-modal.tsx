@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { X, Calendar, ShoppingCart, Check, Loader2 } from "lucide-react";
 import type { SeasonalTemplate } from "@/lib/seasonal/types";
 import type { SeasonalActivation } from "@/lib/seasonal/types";
@@ -48,6 +49,7 @@ export function PesachActivationModal({
   const [deactivating, setDeactivating] = useState(false);
 
   const { t } = useTranslation();
+  const focusRef = useFocusTrap<HTMLDivElement>(isOpen, onClose);
   const daysUntil = useMemo(() => getDaysUntilHoliday(template), [template]);
   const holidayDateStr = useMemo(() => {
     const d = template.getHolidayDate(new Date().getFullYear());
@@ -105,6 +107,7 @@ export function PesachActivationModal({
 
           {/* Modal */}
           <motion.div
+            ref={focusRef}
             initial={{ y: "100%", opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: "100%", opacity: 0 }}

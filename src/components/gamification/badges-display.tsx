@@ -8,6 +8,7 @@ import { useEarnedBadges } from "@/hooks/useEarnedBadges";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useTasks } from "@/hooks/useTasks";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface BadgeDetailModalProps {
   code: string;
@@ -18,6 +19,7 @@ interface BadgeDetailModalProps {
 
 function BadgeDetailModal({ code, onClose, isEarned, progress }: BadgeDetailModalProps) {
   const { t } = useTranslation();
+  const focusRef = useFocusTrap<HTMLDivElement>(true, onClose);
   const ach = ACHIEVEMENTS.find((a) => a.code === code);
   if (!ach) return null;
 
@@ -37,6 +39,7 @@ function BadgeDetailModal({ code, onClose, isEarned, progress }: BadgeDetailModa
 
         {/* Sheet */}
         <motion.div
+          ref={focusRef}
           className="relative w-full max-w-lg bg-background rounded-t-3xl p-6 pb-8 shadow-2xl"
           initial={{ y: "100%" }}
           animate={{ y: 0 }}

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Keyboard, X } from "lucide-react";
 import { KEYBOARD_SHORTCUTS } from "@/hooks/useKeyboardShortcuts";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface KeyboardShortcutsHelpProps {
   isOpen: boolean;
@@ -28,16 +28,7 @@ export function KeyboardShortcutsHelp({
   onClose,
 }: KeyboardShortcutsHelpProps) {
   const { t } = useTranslation();
-
-  // Close on Escape
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [isOpen, onClose]);
+  const focusRef = useFocusTrap<HTMLDivElement>(isOpen, onClose);
 
   // Detect Mac for key display
   const isMac =
@@ -62,6 +53,7 @@ export function KeyboardShortcutsHelp({
           {/* Modal */}
           <motion.div
             key="kb-modal"
+            ref={focusRef}
             role="dialog"
             aria-modal="true"
             aria-label={t("shortcuts.modalTitle")}

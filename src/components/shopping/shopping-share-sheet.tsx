@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useShoppingShare } from "@/hooks/useShoppingShare";
 import type { ShoppingItem } from "@/hooks/useShoppingList";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 
 interface ShoppingShareSheetProps {
   open: boolean;
@@ -15,6 +16,7 @@ interface ShoppingShareSheetProps {
 
 export function ShoppingShareSheet({ open, onClose, items }: ShoppingShareSheetProps) {
   const { t } = useTranslation();
+  const focusRef = useFocusTrap<HTMLDivElement>(open, onClose);
   const { formatShoppingList, shareViaWhatsApp, shareNative, copyToClipboard } =
     useShoppingShare();
 
@@ -66,6 +68,7 @@ export function ShoppingShareSheet({ open, onClose, items }: ShoppingShareSheetP
           {/* Bottom sheet */}
           <motion.div
             key="sheet"
+            ref={focusRef}
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}

@@ -30,6 +30,7 @@ export function CelebrationOverlay({
   visible,
   onDismiss,
 }: CelebrationOverlayProps) {
+  const focusRef = useFocusTrap<HTMLDivElement>(visible, onDismiss);
   const fireConfetti = useCallback(async () => {
     // Respect reduced motion preference
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -103,6 +104,7 @@ export function CelebrationOverlay({
     <AnimatePresence>
       {visible && (
         <motion.div
+          ref={focusRef}
           role="status"
           aria-live="polite"
           className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none"

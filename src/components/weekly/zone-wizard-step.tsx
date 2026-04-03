@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import {
   DndContext,
   DragOverlay,
@@ -243,6 +244,7 @@ interface MobileDayPickerProps {
 
 function MobileDayPicker({ zone, currentDay, onSelect, onClose }: MobileDayPickerProps) {
   const { t } = useTranslation();
+  const focusRef = useFocusTrap<HTMLDivElement>(true, onClose);
   const info = getZoneInfo(zone);
 
   return (
@@ -254,6 +256,7 @@ function MobileDayPicker({ zone, currentDay, onSelect, onClose }: MobileDayPicke
     >
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <motion.div
+        ref={focusRef}
         className="relative w-full max-w-lg bg-background rounded-t-2xl p-4 pb-safe-bottom"
         initial={{ y: 60 }}
         animate={{ y: 0 }}
