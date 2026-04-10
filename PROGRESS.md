@@ -10,9 +10,27 @@ App is fully functional with: Pesach mode, zone-based scheduling, custom domain,
 
 ## Recent Work
 
+### Iteration: 2026-04-10 — Competitor Inspiration + UX Simplicity + Pricing
+
+**7 new commits:**
+
+1. **Task claiming**: "אני לוקח/ת!" button on unassigned tasks (tasks + weekly pages)
+2. **SEO improvements**: 21 Hebrew keywords, Organization JSON-LD, sitemap with blog URLs, OG cards
+3. **Dark mode polish**: CSS @media fallback, System icon fix, invite card dark variant
+4. **Points visibility**: ⭐ points badge on weekly task cards (was missing)
+5. **Mini leaderboard**: always-visible scoreboard on dashboard (was buried in accordion)
+6. **Dashboard reorder**: Activity Feed → accordion, Leaderboard → always visible
+7. **Notification regression fix**: restored useNotifications.ts after perf agent truncated it
+
+**Competitor analysis:** Lovable-built cleaning app — learned: visible points, prominent leaderboard, category gradients
+**UX philosophy defined:** "powerful but simple" — great capabilities, easy to operate
+**Pricing model:** in progress (freemium, NIS pricing)
+
+**Codebase stats:** 270+ files, 52K+ lines, 280+ commits
+
 ### Iteration: 2026-04-03 (cont.) — Full Audit + Bug Sweep
 
-**13 commits this session — 20+ issues resolved:**
+**22 commits — 25+ issues resolved:**
 
 **Bugs Fixed (12):**
 1. Notifications: task_instances query, global bell, RTL dropdown, push banner 7-day reset, AI logging
