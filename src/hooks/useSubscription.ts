@@ -79,7 +79,9 @@ export interface UseSubscriptionReturn {
 export function useSubscription(): UseSubscriptionReturn {
   // TODO: Connect to Stripe/payment system
   // Replace this with real subscription data from Supabase once payments are built.
-  const tier: SubscriptionTier = "free";
+  // Using a type assertion to prevent TypeScript from narrowing this to a literal type,
+  // which would break the comparisons below when we swap in a real dynamic value.
+  const tier = "free" as SubscriptionTier;
 
   const canUse = (feature: GatedFeature): boolean => {
     return FEATURE_MATRIX[tier].has(feature);
