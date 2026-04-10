@@ -771,7 +771,7 @@ export default function SettingsPage() {
             </a>
           </div>
 
-          <p className="text-[10px] text-muted/60">v1.0 — {t("settings.developer")} Elad Jayousi</p>
+          <p className="text-[10px] text-muted/60">v1.0 — {t("settings.developer")} Elad Yakovovich</p>
         </div>
 
         <div className="pb-4" />

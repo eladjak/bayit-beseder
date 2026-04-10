@@ -1,7 +1,7 @@
 "use client";
 
 import { Lock, Sparkles } from "lucide-react";
-import Link from "next/link";
+
 import { useTranslation } from "@/hooks/useTranslation";
 import type { GatedFeature } from "@/hooks/useSubscription";
 
@@ -58,12 +58,9 @@ export function UpgradePrompt({
         <span className="text-xs text-indigo-700 dark:text-indigo-300 font-medium flex-1">
           {label}
         </span>
-        <Link
-          href="/settings"
-          className="text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-2.5 py-1 rounded-lg transition-colors active:scale-95 flex-shrink-0"
-        >
-          {cta}
-        </Link>
+        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 px-2.5 py-1 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 flex-shrink-0">
+          {t("upgrade.comingSoon")}
+        </span>
       </div>
     );
   }
@@ -98,13 +95,10 @@ export function UpgradePrompt({
             {t("upgrade.fromPrice")}
           </span>
         </div>
-        <Link
-          href="/settings"
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition-colors active:scale-95 shadow-sm"
-        >
+        <span className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-sm font-bold">
           <Sparkles className="w-3.5 h-3.5" />
-          {cta}
-        </Link>
+          {t("upgrade.comingSoon")}
+        </span>
       </div>
     </div>
   );
