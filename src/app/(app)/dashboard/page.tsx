@@ -482,6 +482,18 @@ export default function DashboardPage() {
     }
   }, [isPulling, pullDistance, refetchTasks]);
 
+  const handleClearCompleted = useCallback(() => {
+    if (hasDbTasks) {
+      // For DB tasks: recurring tasks auto-reset daily, so "clear" just refreshes
+      refetchTasks();
+      toast.success(t("dashboard.tasksAutoReset") || "המשימות מתאפסות אוטומטית כל יום 🔄");
+    } else {
+      // Mock mode: clear all completed
+      setMockCompletedIds(new Set());
+      toast.success(t("dashboard.clearedCompleted") || "סומנו כלא-הושלמו");
+    }
+  }, [hasDbTasks, refetchTasks, t]);
+
   const pullProgress = Math.min(pullDistance / PULL_THRESHOLD, 1);
 
   return (
@@ -553,7 +565,7 @@ export default function DashboardPage() {
           {tasksLoading ? (
             <TaskListSkeleton count={5} />
           ) : (
-            <TodayOverview tasks={filteredTasks} onToggle={handleToggle} maxItems={5} />
+            <TodayOverview tasks={filteredTasks} onToggle={handleToggle} onClearCompleted={handleClearCompleted} maxItems={5} />
           )}
           <FeatureTooltip
             visible={showDashboardTip && !tasksLoading}

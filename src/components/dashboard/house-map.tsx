@@ -115,16 +115,16 @@ export function HouseMap({ tasks, categories }: HouseMapProps) {
                     focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-2xl"
                   aria-label={`${category.name}: ${completed}/${total}`}
                 >
-                  {/* All-done overlay */}
+                  {/* All-done badge (top-left corner, doesn't obscure content) */}
                   {isAllDone && (
                     <motion.div
-                      className="absolute inset-0 bg-success/10 flex items-center justify-center rounded-2xl z-10"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.25 }}
-                      aria-hidden="true"
+                      className="absolute top-1.5 left-1.5 z-10 bg-success text-white rounded-full p-0.5 shadow-sm"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                      aria-label={t("houseMap.allDone") || "הכל הושלם"}
                     >
-                      <CheckCircle2 className="w-8 h-8 text-success" strokeWidth={2} />
+                      <CheckCircle2 className="w-4 h-4" strokeWidth={2.5} />
                     </motion.div>
                   )}
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Clock, Trash2 } from "lucide-react";
+import { Check, Clock, Trash2, RefreshCw } from "lucide-react";
 import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
 import { haptic } from "@/lib/haptics";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -145,6 +145,13 @@ export function TodayOverview({ tasks, onToggle, onClaim, onClearCompleted, curr
           </span>
         </div>
       </div>
+      {/* Daily auto-reset hint */}
+      {completed > 0 && completed < tasks.length && (
+        <p className="text-[10px] text-muted px-1 flex items-center gap-1">
+          <RefreshCw className="w-3 h-3" />
+          {t("dashboard.autoResetHint") || "המשימות מתאפסות אוטומטית כל יום"}
+        </p>
+      )}
       <motion.div
         className="space-y-2"
         variants={listVariants}
