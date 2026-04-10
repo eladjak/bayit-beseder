@@ -3,7 +3,7 @@
 /* Enable Tailwind dark mode using the 'dark' class on <html> */
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme inline {
+@theme {
   --color-primary: #6366F1;
   --color-primary-light: #818CF8;
   --color-primary-dark: #4F46E5;

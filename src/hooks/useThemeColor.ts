@@ -22,6 +22,20 @@ export const THEME_COLORS: Record<ThemeColorKey, ThemeColor> = {
 const STORAGE_KEY = "bayit-theme-color";
 const DEFAULT_COLOR: ThemeColorKey = "indigo";
 
+function hslToHex(h: number, s: number, l: number): string {
+  const sNorm = s / 100;
+  const lNorm = l / 100;
+  const a = sNorm * Math.min(lNorm, 1 - lNorm);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = lNorm - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color)
+      .toString(16)
+      .padStart(2, "0");
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
 function hexToHsl(hex: string): string {
   const r = parseInt(hex.slice(1, 3), 16) / 255;
   const g = parseInt(hex.slice(3, 5), 16) / 255;
@@ -55,8 +69,20 @@ function hexToHsl(hex: string): string {
 export function applyThemeColor(colorKey: ThemeColorKey): void {
   if (typeof window === "undefined") return;
   const color = THEME_COLORS[colorKey];
+  // Set as hex directly — Tailwind v4 @theme uses CSS custom properties
+  // and the value must be a valid CSS color.
+  document.documentElement.style.setProperty("--color-primary", color.primary);
+
+  // Also derive light/dark variants
   const hsl = hexToHsl(color.primary);
-  document.documentElement.style.setProperty("--color-primary", hsl);
+  const parts = hsl.split(" ");
+  const h = parseInt(parts[0]);
+  const s = parseInt(parts[1]);
+  const l = parseInt(parts[2]);
+  const lightHex = hslToHex(h, Math.min(s + 10, 100), Math.min(l + 12, 95));
+  const darkHex = hslToHex(h, s, Math.max(l - 8, 10));
+  document.documentElement.style.setProperty("--color-primary-light", lightHex);
+  document.documentElement.style.setProperty("--color-primary-dark", darkHex);
 }
 
 export function getStoredThemeColor(): ThemeColorKey {
