@@ -53,8 +53,9 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       >
         דלג לתוכן הראשי
       </a>
-      {/* Global notification bell — fixed top-left, offset below language toggle (RTL: visually top-right) */}
-      <div className="fixed top-14 left-3 z-50">
+      {/* Global utility bar — bell + language toggle, grouped to avoid overlap */}
+      <div className="fixed top-2 left-2 z-40 flex items-center gap-1">
+        <LanguageToggle />
         <NotificationCenter
           notifications={notifications}
           unreadCount={unreadCount}
@@ -71,9 +72,6 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
         <PageTransition>{children}</PageTransition>
       </main>
       <BottomNav />
-
-      {/* Language toggle — fixed top-left */}
-      <LanguageToggle />
 
       {/* AI Chat floating button */}
       <ChatFAB onClick={() => setChatOpen(true)} />

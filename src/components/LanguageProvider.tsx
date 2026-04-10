@@ -37,8 +37,17 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
     localStorage.setItem(STORAGE_KEY, next);
+    // Update document direction and lang immediately
+    document.documentElement.dir = next === "he" ? "rtl" : "ltr";
+    document.documentElement.lang = next;
     trackEvent("language_switch", { lang: next });
   }, []);
+
+  // Sync dir/lang on mount and locale changes
+  useEffect(() => {
+    document.documentElement.dir = locale === "he" ? "rtl" : "ltr";
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   return (
     <LanguageContext.Provider value={{ locale, setLocale }}>

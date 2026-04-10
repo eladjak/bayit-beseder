@@ -23,7 +23,7 @@ export function LanguageToggle() {
       onClick={() => setLocale(isHebrew ? "en" : "he")}
       aria-label={isHebrew ? "Switch to English" : "עבור לעברית"}
       className={[
-        "fixed top-3 left-3 z-30",
+        "",
         "h-7 min-w-[28px] px-2",
         "rounded-full",
         "bg-background/70 backdrop-blur-sm",
