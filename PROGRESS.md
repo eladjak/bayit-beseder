@@ -37,7 +37,9 @@ App is fully functional with: Pesach mode, zone-based scheduling, custom domain,
 10. Stats dual calendar → removed duplicate MonthlyCalendar
 11. About section → redesigned with gradient header + stats
 12. Shopping duplicate settings button → removed
-13. Emergency page, weekly page, settings link — agent fixing
+13. Emergency page: rewrote to use `tasks` table (was querying non-existent `task_instances`/`task_templates`), localStorage for emergency mode toggle
+14. Notifications hook: rewrote to use `tasks`/`task_completions` tables (was querying non-existent `task_instances`/`task_templates`), fixed Realtime subscription
+15. Settings emergency button: was dead button with no onClick; now navigates to /emergency page
 
 **Codebase stats:** 275+ files, 52K+ lines, 295+ commits
 
