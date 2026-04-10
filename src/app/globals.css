@@ -25,6 +25,9 @@
   --color-accent: #8B5CF6;
   --color-accent-light: #A78BFA;
 
+  --color-muted-foreground: #6B7280;
+  --color-ring: #6366F1;
+
   --font-sans: var(--font-heebo);
 }
 
@@ -46,12 +49,14 @@ body {
     --color-surface-hover: #252240 !important;
     --color-foreground: #E2E0F0 !important;
     --color-muted: #B0ACCC !important;
+    --color-muted-foreground: #9896B0 !important;
     --color-border: #2D2A45 !important;
+    --color-ring: #818CF8 !important;
     color-scheme: dark;
   }
 }
 
-/* Dark mode overrides — !important needed to beat @theme inline specificity */
+/* Dark mode overrides — !important needed to beat @theme specificity */
 :root.dark,
 .dark {
   --color-background: #0F0D1A !important;
@@ -59,19 +64,16 @@ body {
   --color-surface-hover: #252240 !important;
   --color-foreground: #E2E0F0 !important;
   --color-muted: #B0ACCC !important;
+  --color-muted-foreground: #9896B0 !important;
   --color-border: #2D2A45 !important;
+  --color-ring: #818CF8 !important;
   color-scheme: dark;
 }
 
-/* Belt and suspenders — force dark on body and all bg-background elements */
-.dark body,
-.dark .bg-background {
-  background-color: #0F0D1A !important;
-  color: #E2E0F0;
-}
-
-.dark .bg-surface {
-  background-color: #1A1730 !important;
+/* Ensure body inherits dark variables */
+.dark body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
 }
 
 ::-webkit-scrollbar {
@@ -202,11 +204,11 @@ body {
    ============================================ */
 
 .gradient-primary {
-  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #A78BFA 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 50%, var(--color-accent-light) 100%);
 }
 
 .gradient-hero {
-  background: linear-gradient(135deg, #4338CA 0%, #6366F1 30%, #8B5CF6 55%, #A78BFA 80%, #C4B5FD 100%);
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 30%, var(--color-accent) 55%, var(--color-accent-light) 80%, #C4B5FD 100%);
   background-size: 200% 200%;
   animation: gradient-shift 12s ease infinite;
 }
@@ -220,7 +222,7 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #6366F1, #8B5CF6, #A78BFA);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent), var(--color-accent-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;

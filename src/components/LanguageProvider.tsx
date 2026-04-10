@@ -26,17 +26,24 @@ const LanguageContext = createContext<LanguageContextValue>({
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("he");
 
-  // Hydrate from localStorage on mount
+  // Hydrate from localStorage on mount (check both keys for backwards compat)
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as Locale | null;
-    if (stored === "he" || stored === "en") {
-      setLocaleState(stored);
+    const legacy = localStorage.getItem("bayit-language") as Locale | null;
+    const value = stored ?? legacy;
+    if (value === "he" || value === "en") {
+      setLocaleState(value);
+      // Ensure both keys are in sync
+      localStorage.setItem(STORAGE_KEY, value);
+      localStorage.setItem("bayit-language", value);
     }
   }, []);
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
     localStorage.setItem(STORAGE_KEY, next);
+    // Also sync the legacy key used by the settings page
+    localStorage.setItem("bayit-language", next);
     // Update document direction and lang immediately
     document.documentElement.dir = next === "he" ? "rtl" : "ltr";
     document.documentElement.lang = next;

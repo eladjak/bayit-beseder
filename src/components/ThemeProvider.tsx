@@ -65,12 +65,12 @@ export function ThemeScript() {
   } catch(e){}
   try {
     var colorMap = {
-      indigo: '239 68% 58%',
-      blue: '221 83% 53%',
-      purple: '263 70% 58%',
-      pink: '328 73% 53%',
-      green: '160 84% 39%',
-      orange: '21 90% 48%'
+      indigo: '#4F46E5',
+      blue: '#2563EB',
+      purple: '#7C3AED',
+      pink: '#DB2777',
+      green: '#059669',
+      orange: '#EA580C'
     };
     var c = localStorage.getItem('bayit-theme-color');
     if (c && colorMap[c]) {

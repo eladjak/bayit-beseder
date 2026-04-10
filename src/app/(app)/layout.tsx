@@ -53,8 +53,8 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       >
         דלג לתוכן הראשי
       </a>
-      {/* Global utility bar — bell + language toggle, grouped to avoid overlap */}
-      <div className="fixed top-2 left-2 z-40 flex items-center gap-1">
+      {/* Global utility bar — bell + language toggle, sticky top bar inside content flow */}
+      <div className="sticky top-0 z-40 flex items-center gap-1.5 px-3 py-1.5 max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto justify-end">
         <LanguageToggle />
         <NotificationCenter
           notifications={notifications}
