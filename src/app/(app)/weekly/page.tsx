@@ -13,6 +13,8 @@ import { useHouseholdMembers } from "@/hooks/useHouseholdMembers";
 import { useCalendarEvents } from "@/hooks/useCalendarEvents";
 import dynamic from "next/dynamic";
 import { useWeeklyGenerator } from "@/hooks/useWeeklyGenerator";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradePrompt } from "@/components/upgrade-prompt";
 
 const WeeklyGeneratorModal = dynamic(
   () =>
@@ -99,15 +101,22 @@ export default function WeeklyPage() {
 
   const { tasks, loading, createTask, updateTask, refetch } = useTasks({});
 
+  const { canUse } = useSubscription();
   const zoneConfig = useZoneConfig();
   const wizard = useWeeklyGenerator();
   const [showWizard, setShowWizard] = useState(false);
+  const [showWizardUpgradePrompt, setShowWizardUpgradePrompt] = useState(false);
   const [showZonePicker, setShowZonePicker] = useState(false);
   const [wizardZoneMappings, setWizardZoneMappings] = useState(zoneConfig.zoneMappings);
 
   const handleOpenWizard = useCallback(() => {
     if (!profile) {
       toast.error(t("weekly.loginFirst"));
+      return;
+    }
+    if (!canUse("wizard")) {
+      setShowWizardUpgradePrompt(true);
+      haptic("tap");
       return;
     }
     const memberIds =
@@ -125,7 +134,7 @@ export default function WeeklyPage() {
     wizard.generate(weekTasksForWizard, memberIds, startOfWeek, zoneConfig.zoneMode);
     setShowWizard(true);
     haptic("tap");
-  }, [profile, partner, householdMembers, tasks, startOfWeek, endOfWeek, wizard, zoneConfig.zoneMappings, zoneConfig.zoneMode]);
+  }, [profile, partner, householdMembers, tasks, startOfWeek, endOfWeek, wizard, zoneConfig.zoneMappings, zoneConfig.zoneMode, canUse]);
 
   const handleRegenerateWithZones = useCallback(() => {
     if (!profile) return;
@@ -456,6 +465,24 @@ export default function WeeklyPage() {
             >
               {t("weekly.calendarConnectBtn")}
             </a>
+          </div>
+        )}
+
+        {/* Wizard upgrade prompt — shown when free user clicks wizard CTA */}
+        {showWizardUpgradePrompt && (
+          <div className="relative">
+            <UpgradePrompt
+              feature="wizard"
+              description={t("upgrade.wizardBlurDesc")}
+            />
+            <button
+              type="button"
+              onClick={() => setShowWizardUpgradePrompt(false)}
+              className="absolute top-3 left-3 w-6 h-6 rounded-full bg-black/20 flex items-center justify-center text-white text-xs hover:bg-black/40 transition-colors"
+              aria-label="סגור"
+            >
+              ✕
+            </button>
           </div>
         )}
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   Calendar,
   Wand2,
@@ -31,6 +32,8 @@ interface WeeklyHeaderProps {
   onOpenZonePicker: () => void;
 }
 
+const HINT_KEY = "bayit-weekly-hint-shown";
+
 export function WeeklyHeader({
   weekRange,
   stats,
@@ -43,6 +46,31 @@ export function WeeklyHeader({
   onOpenZonePicker,
 }: WeeklyHeaderProps) {
   const { t } = useTranslation();
+
+  const [showHint, setShowHint] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem(HINT_KEY)) {
+        setShowHint(true);
+        const timer = setTimeout(() => {
+          localStorage.setItem(HINT_KEY, "1");
+          setShowHint(false);
+        }, 10000);
+        return () => clearTimeout(timer);
+      }
+    } catch {
+      // localStorage unavailable — skip hint
+    }
+  }, []);
+
+  function handleWizardClick() {
+    if (showHint) {
+      try { localStorage.setItem(HINT_KEY, "1"); } catch {}
+      setShowHint(false);
+    }
+    onOpenWizard();
+  }
 
   return (
     <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
@@ -70,14 +98,22 @@ export function WeeklyHeader({
         <div className="flex flex-col items-end gap-2">
           {/* Primary CTA: wizard OR manual */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={onOpenWizard}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-primary text-sm font-bold shadow-lg active:scale-95 transition-transform"
-              title={t("weekly.wizardCreateTitle")}
-            >
-              <Wand2 className="w-4 h-4" />
-              <span>{t("weekly.wizardCta")}</span>
-            </button>
+            <div className="relative">
+              {showHint && (
+                <span
+                  className="absolute inset-0 rounded-xl animate-ping bg-white/60 pointer-events-none"
+                  aria-hidden
+                />
+              )}
+              <button
+                onClick={handleWizardClick}
+                className="relative flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-primary text-sm font-bold shadow-lg active:scale-95 transition-transform"
+                title={t("weekly.wizardCreateTitle")}
+              >
+                <Wand2 className="w-4 h-4" />
+                <span>{t("weekly.wizardCta")}</span>
+              </button>
+            </div>
             <button
               onClick={() => toast.info(t("weekly.manualModeToast"))}
               className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 text-white text-xs font-medium border border-white/20 active:scale-95 transition-transform"

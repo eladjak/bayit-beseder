@@ -20,6 +20,8 @@ import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useProfile } from "@/hooks/useProfile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Loader2, Printer } from "lucide-react";
+import { useFirstVisit } from "@/hooks/useFirstVisit";
+import { FeatureTooltip } from "@/components/feature-tooltip";
 
 const VIRTUALIZE_THRESHOLD = 10;
 const ITEM_HEIGHT = 52; // px — estimated height of each ShoppingItemCard + gap
@@ -97,6 +99,7 @@ const VoiceInputButton = dynamic(
 );
 
 export default function ShoppingPage() {
+  const { isFirstVisit: showShoppingTip, dismiss: dismissShoppingTip } = useFirstVisit("shopping");
   const { items, loading, addItem, toggleItem, removeItem, editItem, moveItemToCategory, clearChecked } =
     useShoppingList();
   const {
@@ -502,15 +505,8 @@ export default function ShoppingPage() {
           />
         )}
 
-        {/* Manage categories + Print */}
+        {/* Print */}
         <div className="flex gap-2">
-          <button
-            onClick={() => setShowCategoryManager(true)}
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-border text-muted text-sm font-medium hover:border-primary hover:text-primary transition-all duration-100 active:scale-[0.98]"
-          >
-            <Settings className="w-4 h-4" />
-            {t("shopping.editCategories")}
-          </button>
           <a
             href="/tasks/print"
             className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border-2 border-dashed border-border text-muted text-sm font-medium hover:border-primary hover:text-primary transition-all duration-100 active:scale-[0.98]"
@@ -682,16 +678,24 @@ export default function ShoppingPage() {
 
       {/* Floating add button */}
       {!showForm && (
-        <motion.button
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => openAddForm()}
-          aria-label={t("shopping.addItem")}
-          className="fixed bottom-24 left-4 w-14 h-14 rounded-2xl gradient-primary text-white shadow-xl shadow-primary/40 flex items-center justify-center z-20 border border-white/20"
-        >
-          <Plus className="w-7 h-7" />
-        </motion.button>
+        <div className="fixed bottom-24 left-4 z-20">
+          <motion.button
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => { dismissShoppingTip(); openAddForm(); }}
+            aria-label={t("shopping.addItem")}
+            className="w-14 h-14 rounded-2xl gradient-primary text-white shadow-xl shadow-primary/40 flex items-center justify-center border border-white/20"
+          >
+            <Plus className="w-7 h-7" />
+          </motion.button>
+          <FeatureTooltip
+            visible={showShoppingTip}
+            text="לחצו על + כדי להוסיף פריט לרשימה"
+            onDismiss={dismissShoppingTip}
+            position="above"
+          />
+        </div>
       )}
 
       {/* Category Manager Modal */}
