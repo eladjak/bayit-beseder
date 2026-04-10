@@ -10,23 +10,36 @@ App is fully functional with: Pesach mode, zone-based scheduling, custom domain,
 
 ## Recent Work
 
-### Iteration: 2026-04-10 — Competitor Inspiration + UX Simplicity + Pricing
+### Iteration: 2026-04-10 — Pre-Launch Bug Sweep + Features + Pricing
 
-**7 new commits:**
+**20+ commits this session — 16 bugs from user testing:**
 
-1. **Task claiming**: "אני לוקח/ת!" button on unassigned tasks (tasks + weekly pages)
-2. **SEO improvements**: 21 Hebrew keywords, Organization JSON-LD, sitemap with blog URLs, OG cards
-3. **Dark mode polish**: CSS @media fallback, System icon fix, invite card dark variant
-4. **Points visibility**: ⭐ points badge on weekly task cards (was missing)
-5. **Mini leaderboard**: always-visible scoreboard on dashboard (was buried in accordion)
-6. **Dashboard reorder**: Activity Feed → accordion, Leaderboard → always visible
-7. **Notification regression fix**: restored useNotifications.ts after perf agent truncated it
+**Features built:**
+1. Task claiming: "אני לוקח/ת!" button on unassigned tasks
+2. SEO: 21 Hebrew keywords, Organization JSON-LD, sitemap, OG cards
+3. Points visibility: ⭐ badges on weekly task cards
+4. Mini leaderboard: always-visible scoreboard on dashboard
+5. Freemium infrastructure: useSubscription, UpgradePrompt, feature gating
+6. Feature discovery tooltips: useFirstVisit + FeatureTooltip on 4 pages
+7. Pricing model document: 3 tiers (הבית/בית+/בית משפחה)
+8. Wizard first-visit pulse hint
 
-**Competitor analysis:** Lovable-built cleaning app — learned: visible points, prominent leaderboard, category gradients
-**UX philosophy defined:** "powerful but simple" — great capabilities, easy to operate
-**Pricing model:** in progress (freemium, NIS pricing)
+**Pre-launch bugs FIXED (from Elad's testing):**
+1. Dark mode text invisible → root cause: `@theme inline` + missing CSS vars
+2. Color theme picker broken → hex values instead of raw HSL
+3. Language toggle not switching → dual localStorage key sync + dir/lang update
+4. Bell/toggle overlap → sticky utility bar (not fixed)
+5. Developer name "Jayousi" → "Yakovovich"
+6. Upgrade prompt → "בקרוב!" (no real payment yet)
+7. Dashboard checkmarks on zones → corner badge instead of overlay
+8. Reset tasks button missing → connected + daily auto-reset hint
+9. AI chat empty response → enriched Gemini system prompt with app context
+10. Stats dual calendar → removed duplicate MonthlyCalendar
+11. About section → redesigned with gradient header + stats
+12. Shopping duplicate settings button → removed
+13. Emergency page, weekly page, settings link — agent fixing
 
-**Codebase stats:** 270+ files, 52K+ lines, 280+ commits
+**Codebase stats:** 275+ files, 52K+ lines, 295+ commits
 
 ### Iteration: 2026-04-03 (cont.) — Full Audit + Bug Sweep
 
