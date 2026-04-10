@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase";
+import { useSubscription } from "@/hooks/useSubscription";
 
 export interface TaskCategoryRow {
   id: string;
@@ -28,6 +29,7 @@ const DEFAULT_TASK_CATEGORIES: Omit<TaskCategoryRow, "id" | "household_id" | "cr
 interface UseTaskCategoriesReturn {
   taskCategories: TaskCategoryRow[];
   loading: boolean;
+  canAddCustomCategories: boolean;
   addTaskCategory: (name: string, icon: string, color: string) => Promise<void>;
   updateTaskCategory: (id: string, updates: { name?: string; icon?: string; color?: string }) => Promise<void>;
   deleteTaskCategory: (id: string) => Promise<void>;
@@ -39,6 +41,7 @@ export function useTaskCategories(): UseTaskCategoriesReturn {
   const [taskCategories, setTaskCategories] = useState<TaskCategoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const seedingRef = useRef(false);
+  const { canUse } = useSubscription();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const catTable = () => createClient().from("task_categories" as any);
@@ -178,6 +181,12 @@ export function useTaskCategories(): UseTaskCategoriesReturn {
 
   const addTaskCategory = useCallback(
     async (name: string, icon: string, color: string) => {
+      // Custom categories are a plus/family feature
+      if (!canUse("custom_categories")) {
+        // Callers should check canAddCustomCategories first and show UpgradePrompt.
+        // This is a safety guard in case they don't.
+        return;
+      }
       const householdId = await getHouseholdId();
       if (!householdId) return;
 
@@ -194,7 +203,7 @@ export function useTaskCategories(): UseTaskCategoriesReturn {
       });
       // Realtime will update state
     },
-    [taskCategories, getHouseholdId] // eslint-disable-line react-hooks/exhaustive-deps
+    [taskCategories, getHouseholdId, canUse] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const updateTaskCategory = useCallback(
@@ -245,6 +254,7 @@ export function useTaskCategories(): UseTaskCategoriesReturn {
   return {
     taskCategories,
     loading,
+    canAddCustomCategories: canUse("custom_categories"),
     addTaskCategory,
     updateTaskCategory,
     deleteTaskCategory,

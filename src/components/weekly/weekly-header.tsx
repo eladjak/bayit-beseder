@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   Calendar,
   Wand2,
@@ -12,6 +11,8 @@ import {
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
 import { ShareButton } from "@/components/share-button";
+import { useFirstVisit } from "@/hooks/useFirstVisit";
+import { FeatureTooltip } from "@/components/feature-tooltip";
 
 interface WeeklyHeaderStats {
   total: number;
@@ -32,8 +33,6 @@ interface WeeklyHeaderProps {
   onOpenZonePicker: () => void;
 }
 
-const HINT_KEY = "bayit-weekly-hint-shown";
-
 export function WeeklyHeader({
   weekRange,
   stats,
@@ -46,29 +45,10 @@ export function WeeklyHeader({
   onOpenZonePicker,
 }: WeeklyHeaderProps) {
   const { t } = useTranslation();
-
-  const [showHint, setShowHint] = useState(false);
-
-  useEffect(() => {
-    try {
-      if (!localStorage.getItem(HINT_KEY)) {
-        setShowHint(true);
-        const timer = setTimeout(() => {
-          localStorage.setItem(HINT_KEY, "1");
-          setShowHint(false);
-        }, 10000);
-        return () => clearTimeout(timer);
-      }
-    } catch {
-      // localStorage unavailable — skip hint
-    }
-  }, []);
+  const { isFirstVisit: showWizardTip, dismiss: dismissWizardTip } = useFirstVisit("weekly");
 
   function handleWizardClick() {
-    if (showHint) {
-      try { localStorage.setItem(HINT_KEY, "1"); } catch {}
-      setShowHint(false);
-    }
+    dismissWizardTip();
     onOpenWizard();
   }
 
@@ -99,12 +79,6 @@ export function WeeklyHeader({
           {/* Primary CTA: wizard OR manual */}
           <div className="flex items-center gap-2">
             <div className="relative">
-              {showHint && (
-                <span
-                  className="absolute inset-0 rounded-xl animate-ping bg-white/60 pointer-events-none"
-                  aria-hidden
-                />
-              )}
               <button
                 onClick={handleWizardClick}
                 className="relative flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-primary text-sm font-bold shadow-lg active:scale-95 transition-transform"
@@ -113,6 +87,12 @@ export function WeeklyHeader({
                 <Wand2 className="w-4 h-4" />
                 <span>{t("weekly.wizardCta")}</span>
               </button>
+              <FeatureTooltip
+                visible={showWizardTip}
+                text="לחצו כאן כדי ליצור תוכנית שבועית אוטומטית!"
+                onDismiss={dismissWizardTip}
+                position="below"
+              />
             </div>
             <button
               onClick={() => toast.info(t("weekly.manualModeToast"))}
