@@ -836,6 +836,11 @@ export default function TasksPage() {
                               <Clock className="w-3 h-3" />
                               {task.estimated_minutes} {t("common.minutes")}
                             </span>
+                            {task.points > 0 && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-700/40">
+                                ⭐ {task.points} נק&apos;
+                              </span>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0">
@@ -935,13 +940,10 @@ export default function TasksPage() {
                           <Clock className="w-3 h-3" />
                           {task.estimated_minutes} {t("common.minutes")}
                         </span>
-                        {/* Difficulty badge */}
+                        {/* Points badge */}
                         {task.points > 0 && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold" style={{
-                            backgroundColor: task.points >= 16 ? "#EF444420" : task.points >= 6 ? "#F59E0B20" : "#22C55E20",
-                            color: task.points >= 16 ? "#EF4444" : task.points >= 6 ? "#F59E0B" : "#22C55E",
-                          }}>
-                            {task.points >= 16 ? "קשה" : task.points >= 6 ? "בינוני" : "קל"} {task.points}
+                          <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-700/40">
+                            ⭐ {task.points} נק&apos;
                           </span>
                         )}
                         {/* Streak badge for recurring tasks */}
@@ -1214,6 +1216,11 @@ export default function TasksPage() {
                                 <span className="text-[10px] text-muted px-2 py-0.5 rounded-md bg-background border border-border/50">
                                   {task.recurrenceLabel}
                                 </span>
+                                {task.points > 0 && (
+                                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-700/40">
+                                    ⭐ {task.points} נק&apos;
+                                  </span>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1255,6 +1262,11 @@ export default function TasksPage() {
                             <span className="text-[10px] text-muted px-2 py-0.5 rounded-md bg-background border border-border/50">
                               {task.recurrenceLabel}
                             </span>
+                            {task.points > 0 && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-700/40">
+                                ⭐ {task.points} נק&apos;
+                              </span>
+                            )}
                           </div>
                         </div>
                       </motion.div>

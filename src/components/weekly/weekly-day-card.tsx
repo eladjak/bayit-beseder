@@ -142,7 +142,14 @@ function DraggableWeekTask({
             </span>
           )}
         </div>
-        <div className="text-xs text-muted">{CATEGORY_LABELS[category]}</div>
+        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+          <span className="text-xs text-muted">{CATEGORY_LABELS[category]}</span>
+          {(task.points ?? 0) > 0 && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded-full font-bold bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-700/40">
+              ⭐ {task.points} נק&apos;
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Assignee badge — click to toggle between members */}

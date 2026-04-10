@@ -577,22 +577,92 @@ export default function DashboardPage() {
         {/* ═══ SECTION 6: Prize Card ═══ */}
         <PrizeCard currentPoints={completedCount * 10} />
 
-        {/* ═══ SECTION 7: Activity Feed (limited) ═══ */}
-        <div>
-          <h2 className="font-semibold text-foreground px-1 mb-2 text-sm">
-            {t("activity.sectionTitle")}
-          </h2>
-          <ActivityFeed />
-        </div>
+        {/* ═══ SECTION 7: Mini Leaderboard — always visible when 2+ members ═══ */}
+        {householdMembers.length > 1 && rankings.length > 0 && (
+          <div className="card-elevated overflow-hidden">
+            <div className="flex items-center justify-between px-3 pt-3 pb-2 border-b border-border/20">
+              <div className="flex items-center gap-1.5">
+                <span className="text-base">🏆</span>
+                <span className="text-sm font-bold text-foreground">{t("leaderboard.title")}</span>
+              </div>
+              <div className="flex gap-1">
+                {(["day", "week", "alltime"] as const).map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setLbPeriod(p)}
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors ${
+                      lbPeriod === p
+                        ? "bg-primary text-white"
+                        : "text-muted hover:text-foreground"
+                    }`}
+                  >
+                    {p === "day" ? t("scoreboard.daily") : p === "week" ? t("scoreboard.weekly") : t("scoreboard.allTime")}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="divide-y divide-border/10">
+              {rankings.slice(0, 3).map((entry) => {
+                const medals: Record<number, string> = { 1: "🥇", 2: "🥈", 3: "🥉" };
+                const isSelf = entry.member.id === profile?.id;
+                const isFirst = entry.rank === 1;
+                return (
+                  <div
+                    key={entry.member.id}
+                    className={`flex items-center gap-3 px-3 py-2.5 transition-colors ${
+                      isSelf ? "bg-primary/5" : ""
+                    }`}
+                  >
+                    <span className="w-6 text-center text-base flex-shrink-0">
+                      {medals[entry.rank] ?? <span className="text-sm font-bold text-muted">{entry.rank}</span>}
+                    </span>
+                    {entry.member.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={entry.member.avatarUrl}
+                        alt={entry.member.name}
+                        className="w-8 h-8 rounded-full object-cover border-2 border-border/30 flex-shrink-0"
+                      />
+                    ) : (
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border-2 flex-shrink-0 ${
+                        isFirst ? "bg-amber-100 dark:bg-amber-900/30 border-amber-300/50 text-amber-700 dark:text-amber-400" : "bg-surface-hover border-border/30 text-muted"
+                      }`}>
+                        {entry.member.name.slice(0, 1)}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-semibold text-foreground truncate">{entry.member.name}</span>
+                        {isSelf && (
+                          <span className="text-[9px] bg-primary/15 text-primary px-1 py-0.5 rounded-full flex-shrink-0">{t("leaderboard.you")}</span>
+                        )}
+                      </div>
+                      <span className="text-[10px] text-muted">{entry.completionCount} {t("leaderboard.completions")}</span>
+                    </div>
+                    <div className="text-end flex-shrink-0">
+                      <div className={`text-sm font-bold ${isFirst ? "text-amber-500" : isSelf ? "text-primary" : "text-foreground"}`}>
+                        {entry.points}
+                      </div>
+                      <div className="text-[10px] text-muted">{t("leaderboard.pts")}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
-        {/* ═══ SECTION 8: Gamification Details (collapsible) ═══ */}
+        {/* ═══ SECTION 8: Activity Feed (inside gamification accordion) ═══ */}
+
+        {/* ═══ SECTION 9: More Details (collapsible) ═══ */}
         <div>
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
             className="w-full flex items-center justify-between p-3 card-elevated text-sm font-medium text-foreground hover:bg-surface-hover transition-colors duration-150 active:scale-[0.99]"
           >
-            <span>🏆 {t("dashboard.achievementsSection")}</span>
+            <span>🎖️ {t("dashboard.achievementsSection")}</span>
             <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
           </button>
           {showAdvanced && (
@@ -600,9 +670,12 @@ export default function DashboardPage() {
               <GoldenRuleSection percentage={percentage} target={target} loading={tasksLoading} />
               <StreakDisplay count={streakCount} bestCount={bestStreak} />
               <WeeklyChallenges progress={challengeProgress} weekNum={weekNum} />
-              {householdMembers.length > 1 && (
-                <Leaderboard rankings={rankings} period={lbPeriod} onSetPeriod={setLbPeriod} myUserId={profile?.id} />
-              )}
+              <div>
+                <h3 className="font-semibold text-foreground px-1 mb-2 text-sm">
+                  {t("activity.sectionTitle")}
+                </h3>
+                <ActivityFeed />
+              </div>
             </div>
           )}
         </div>
