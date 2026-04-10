@@ -34,6 +34,8 @@ import { TaskPhotoCapture } from "@/components/task-photo-capture";
 import { useTranslation } from "@/hooks/useTranslation";
 import { TaskTemplatePicker } from "@/components/task-template-picker";
 import type { TaskTemplate } from "@/lib/task-templates";
+import { useFirstVisit } from "@/hooks/useFirstVisit";
+import { FeatureTooltip } from "@/components/feature-tooltip";
 
 const VoiceInputButton = dynamic(
   () => import("@/components/voice-input-button").then((m) => m.VoiceInputButton),
@@ -56,6 +58,7 @@ interface DbTaskView {
 }
 
 export default function TasksPage() {
+  const { isFirstVisit: showTasksTip, dismiss: dismissTasksTip } = useFirstVisit("tasks");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [showAddForm, setShowAddForm] = useState(false);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
@@ -535,20 +538,29 @@ export default function TasksPage() {
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                if (hasDbTasks) {
-                  setShowAddForm((prev) => !prev);
-                } else {
-                  toast(t("tasks.loginToAdd"));
-                }
-              }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl gradient-primary text-white text-sm font-semibold shadow-lg shadow-primary/30 active:scale-95 transition-transform border border-white/20"
-              aria-label={t("tasks.addTask")}
-            >
-              <Plus className="w-4 h-4" />
-              <span>{t("tasks.addTaskShort")}</span>
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => {
+                  dismissTasksTip();
+                  if (hasDbTasks) {
+                    setShowAddForm((prev) => !prev);
+                  } else {
+                    toast(t("tasks.loginToAdd"));
+                  }
+                }}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl gradient-primary text-white text-sm font-semibold shadow-lg shadow-primary/30 active:scale-95 transition-transform border border-white/20"
+                aria-label={t("tasks.addTask")}
+              >
+                <Plus className="w-4 h-4" />
+                <span>{t("tasks.addTaskShort")}</span>
+              </button>
+              <FeatureTooltip
+                visible={showTasksTip}
+                text="לחצו כאן כדי להוסיף משימה חדשה"
+                onDismiss={dismissTasksTip}
+                position="below"
+              />
+            </div>
             {hasDbTasks && (
               <button
                 onClick={() => setShowTemplatePicker(true)}

@@ -57,6 +57,8 @@ const PesachActivationModal = dynamic(() => import("@/components/seasonal/pesach
 const ConversationalOnboarding = dynamic(() => import("@/components/onboarding/conversational-onboarding").then(m => ({ default: m.ConversationalOnboarding })), { ssr: false });
 import { useHousehold } from "@/hooks/useHousehold";
 import { OfflineIndicator } from "@/components/offline-indicator";
+import { useFirstVisit } from "@/hooks/useFirstVisit";
+import { FeatureTooltip } from "@/components/feature-tooltip";
 
 // ============================================
 // Mock data (fallback when Supabase not connected)
@@ -130,6 +132,7 @@ const CATEGORY_INFO = Object.fromEntries(
 
 export default function DashboardPage() {
   const { t } = useTranslation();
+  const { isFirstVisit: showDashboardTip, dismiss: dismissDashboardTip } = useFirstVisit("dashboard");
   // ---- Supabase hooks ----
   const { profile } = useProfile();
   const { tasks: dbTasks, loading: tasksLoading, refetch: refetchTasks } = useTasks({
@@ -546,11 +549,20 @@ export default function DashboardPage() {
         />
 
         {/* ═══ SECTION 2: Today's Tasks (limited to 5, expandable) ═══ */}
-        {tasksLoading ? (
-          <TaskListSkeleton count={5} />
-        ) : (
-          <TodayOverview tasks={filteredTasks} onToggle={handleToggle} maxItems={5} />
-        )}
+        <div className="relative">
+          {tasksLoading ? (
+            <TaskListSkeleton count={5} />
+          ) : (
+            <TodayOverview tasks={filteredTasks} onToggle={handleToggle} maxItems={5} />
+          )}
+          <FeatureTooltip
+            visible={showDashboardTip && !tasksLoading}
+            text="הנה המשימות שלכם להיום. לחצו על V כשמסיימים!"
+            onDismiss={dismissDashboardTip}
+            position="below"
+            className="left-0 right-auto"
+          />
+        </div>
 
         {/* ═══ SECTION 3: House Map — Room Progress ═══ */}
         <HouseMap

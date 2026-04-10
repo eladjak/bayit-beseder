@@ -1036,5 +1036,31 @@
     "taskOn": "פעיל",
     "taskOff": "לא פעיל",
     "customTaskPlaceholder": "שם המשימה..."
+  },
+  "upgrade": {
+    "title": "שדרגו לבית בסדר+",
+    "cta": "שדרגו עכשיו",
+    "fromPrice": "מ-₪15 בלבד לחודש",
+    "statsBlurTitle": "סטטיסטיקות מלאות",
+    "statsBlurDesc": "גלו מי עושה מה, מגמות לאורך זמן, ונתונים מפורטים על הבית שלכם",
+    "wizardBlurTitle": "תכנון שבועי אוטומטי",
+    "wizardBlurDesc": "הוסיפו תוכנית שבוע מלאה בלחיצה אחת עם חלוקה הוגנת",
+    "features": {
+      "wizard": "תכנון שבועי אוטומטי",
+      "stats": "סטטיסטיקות מלאות",
+      "categories": "קטגוריות מותאמות",
+      "coaching": "AI Coaching יומי",
+      "seasonal": "מצבים עונתיים (פסח, קיץ...)",
+      "zone_scheduling": "תזמון לפי אזורים",
+      "whatsapp": "תזכורות WhatsApp",
+      "unlimited_tasks": "משימות ללא הגבלה",
+      "achievements_full": "כל 24 ההישגים",
+      "weekly_challenges": "אתגרי שבוע",
+      "leaderboard": "לוח מובילים",
+      "export": "ייצוא CSV / PDF",
+      "family_members": "עד 6 בני משק בית",
+      "child_profiles": "פרופילי ילדים",
+      "parent_approval": "אישורי הורה"
+    }
   }
 }

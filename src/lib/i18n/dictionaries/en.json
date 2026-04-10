@@ -1036,5 +1036,31 @@
     "taskOn": "Active",
     "taskOff": "Inactive",
     "customTaskPlaceholder": "Task name..."
+  },
+  "upgrade": {
+    "title": "Upgrade to BayitBeSeder+",
+    "cta": "Upgrade now",
+    "fromPrice": "From ₪15/month",
+    "statsBlurTitle": "Full statistics",
+    "statsBlurDesc": "See who does what, trends over time, and detailed household data",
+    "wizardBlurTitle": "Automatic weekly planning",
+    "wizardBlurDesc": "Add a complete weekly plan in one tap with fair distribution",
+    "features": {
+      "wizard": "Automatic weekly planning",
+      "stats": "Full statistics",
+      "categories": "Custom categories",
+      "coaching": "Daily AI coaching",
+      "seasonal": "Seasonal modes (Pesach, summer...)",
+      "zone_scheduling": "Zone-based scheduling",
+      "whatsapp": "WhatsApp reminders",
+      "unlimited_tasks": "Unlimited tasks",
+      "achievements_full": "All 24 achievements",
+      "weekly_challenges": "Weekly challenges",
+      "leaderboard": "Household leaderboard",
+      "export": "CSV / PDF export",
+      "family_members": "Up to 6 household members",
+      "child_profiles": "Child profiles",
+      "parent_approval": "Parent approval"
+    }
   }
 }

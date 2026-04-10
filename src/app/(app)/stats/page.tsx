@@ -39,6 +39,8 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { ShareButton } from "@/components/share-button";
 import { StatCardSkeleton, RingSkeleton } from "@/components/skeleton";
 import { useAdvancedStats } from "@/hooks/useAdvancedStats";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradePrompt } from "@/components/upgrade-prompt";
 
 // Badges + Calendar — lazy-load
 const BadgesDisplay = dynamic(
@@ -417,6 +419,7 @@ export default function StatsPage() {
   const { members: householdMembers } = useHouseholdMembers(profile?.household_id ?? null, today);
   const { dbUnlockedCodes, hasDbData: hasAchievementsDbData } = useUserAchievements();
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const { canUse } = useSubscription();
 
   // Build category_id -> key mapping
   const categoryIdToKey = useMemo(() => {
@@ -566,6 +569,35 @@ export default function StatsPage() {
       </div>
 
       <div className="px-4 space-y-4">
+
+      {/* Stats upgrade gate — free tier sees a preview with upgrade prompt */}
+      {!canUse("stats_full") && (
+        <div className="relative">
+          {/* Blurred preview of what stats look like */}
+          <div className="pointer-events-none select-none blur-sm opacity-40 space-y-4" aria-hidden>
+            <div className="card-elevated p-4 h-32 bg-muted/30 rounded-xl" />
+            <div className="grid grid-cols-2 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="card-elevated p-4 h-20 bg-muted/30 rounded-xl" />
+              ))}
+            </div>
+          </div>
+          {/* Upgrade prompt overlaid on top */}
+          <div className="absolute inset-0 flex items-start justify-center pt-6 px-2">
+            <div className="w-full max-w-sm">
+              <UpgradePrompt
+                feature="stats_full"
+                description={t("upgrade.statsBlurDesc")}
+              />
+            </div>
+          </div>
+          {/* Spacer so page doesn't collapse */}
+          <div className="h-80" />
+        </div>
+      )}
+
+      {/* Rest of stats — only shown to plus/family */}
+      {canUse("stats_full") && (<>
 
       {/* Weekly share card */}
       <WeeklyShareCard
@@ -796,6 +828,8 @@ export default function StatsPage() {
           )}
         </AnimatePresence>
       </motion.div>
+
+      </>)} {/* end canUse("stats_full") */}
 
       </div>
     </div>
