@@ -9,7 +9,6 @@ import { Trophy, History, TrendingUp, Users, ChevronDown } from "lucide-react";
 
 import { ACHIEVEMENTS } from "@/lib/achievements";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
-import { MonthlyCalendar } from "@/components/dashboard/monthly-calendar";
 import {
   computeWeeklyTrend,
   computeCategoryBreakdown,
@@ -677,15 +676,6 @@ export default function StatsPage() {
           </span>
         </div>
         <WeeklyBarChart data={weeklyData} />
-      </motion.div>
-
-      {/* Monthly Calendar */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.3 }}
-      >
-        <MonthlyCalendar tasks={tasks} completions={completions} today={today} />
       </motion.div>
 
       {/* Category Breakdown - now uses real data when available */}
