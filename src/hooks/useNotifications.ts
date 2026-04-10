@@ -181,15 +181,14 @@ async function fetchNotificationsFromSupabase(): Promise<SupabaseNotificationDat
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
     const todayStr = now.toISOString().slice(0, 10);
 
-    // Fetch all data sources in parallel
+    // Fetch all data sources in parallel using the actual production tables
     const [completionsResult, streaksResult, achievementsResult, tasksResult, profileResult] =
       await Promise.all([
-        // Partner completions in last 24h (task_instances completed by others)
+        // Partner completions in last 24h (task_completions by others)
         supabase
-          .from("task_instances")
-          .select("id, template_id, completed_at, completed_by, task_templates(title, category)")
-          .eq("status", "completed")
-          .neq("completed_by", user.id)
+          .from("task_completions")
+          .select("id, task_id, completed_at, user_id, tasks(title, category_id)")
+          .neq("user_id", user.id)
           .gte("completed_at", twentyFourHoursAgo)
           .order("completed_at", { ascending: false })
           .limit(10),
@@ -209,10 +208,10 @@ async function fetchNotificationsFromSupabase(): Promise<SupabaseNotificationDat
           .order("unlocked_at", { ascending: false })
           .limit(5),
 
-        // Today's pending tasks for reminders
+        // Today's pending tasks for reminders (from tasks table)
         supabase
-          .from("task_instances")
-          .select("id, due_date, status, template_id, task_templates(title, category)")
+          .from("tasks")
+          .select("id, title, category_id, due_date, status")
           .eq("status", "pending")
           .eq("due_date", todayStr)
           .limit(10),
@@ -243,13 +242,13 @@ async function fetchNotificationsFromSupabase(): Promise<SupabaseNotificationDat
 
     // Build partner completion notifications
     const partnerCompletions: Notification[] = (completionsResult.data ?? []).map((c) => {
-      const template = c.task_templates as unknown as { title: string; category: string } | null;
-      const category = template?.category ?? "general";
+      const task = c.tasks as unknown as { title: string; category_id: string } | null;
+      const category = task?.category_id ?? "general";
       return {
         id: `partner-${c.id}`,
         type: "partner_activity" as NotificationType,
         title: "פעילות שותף/ה",
-        message: `${partnerName} סיימ/ה ${template?.title ?? "משימה"}`,
+        message: `${partnerName} סיימ/ה ${task?.title ?? "משימה"}`,
         icon: CATEGORY_ICONS[category] ?? "✅",
         read: false,
         timestamp: c.completed_at ?? now.toISOString(),
@@ -297,8 +296,8 @@ async function fetchNotificationsFromSupabase(): Promise<SupabaseNotificationDat
     const pendingCount = tasksResult.data?.length ?? 0;
     const taskReminders: Notification[] = [];
     if (pendingCount > 0) {
-      const firstTemplate = tasksResult.data![0].task_templates as unknown as { title: string; category: string } | null;
-      const firstTitle = firstTemplate?.title ?? "משימה";
+      const firstTask = tasksResult.data![0];
+      const firstTitle = firstTask.title ?? "משימה";
       taskReminders.push({
         id: `reminder-today-${todayStr}`,
         type: "task_reminder" as NotificationType,
@@ -388,65 +387,57 @@ export function useNotifications(): UseNotificationsReturn {
     };
   }, []);
 
-  // Set up Supabase Realtime subscription for live partner completions
+  // Set up Supabase Realtime subscription for live task completions
   useEffect(() => {
     if (!isSupabaseConfigured()) return;
 
     try {
       const supabase = createClient();
       const channel = supabase
-        .channel("notifications-task-instances")
+        .channel("notifications-tasks")
         .on(
           "postgres_changes",
           {
             event: "UPDATE",
             schema: "public",
-            table: "task_instances",
+            table: "tasks",
             filter: "status=eq.completed",
           },
           async (payload) => {
             const updated = payload.new as {
               id: string;
-              completed_by: string | null;
-              completed_at: string | null;
-              template_id: string;
+              title: string;
+              category_id: string | null;
+              assigned_to: string | null;
+              status: string;
             };
 
             // Only notify for partner completions
             const {
               data: { user },
             } = await supabase.auth.getUser();
-            if (!user || updated.completed_by === user.id) return;
-
-            // Fetch template info for the notification message
-            const { data: template } = await supabase
-              .from("task_templates")
-              .select("title, category")
-              .eq("id", updated.template_id)
-              .single();
+            if (!user || updated.assigned_to === user.id || !updated.assigned_to) return;
 
             // Fetch partner name
             let partnerName = "השותף/ה";
-            if (updated.completed_by) {
-              const { data: partnerProfile } = await supabase
-                .from("profiles")
-                .select("display_name")
-                .eq("id", updated.completed_by)
-                .single();
-              if (partnerProfile?.display_name) {
-                partnerName = partnerProfile.display_name;
-              }
+            const { data: partnerProfile } = await supabase
+              .from("profiles")
+              .select("display_name")
+              .eq("id", updated.assigned_to)
+              .single();
+            if (partnerProfile?.display_name) {
+              partnerName = partnerProfile.display_name;
             }
 
-            const category = template?.category ?? "general";
+            const category = updated.category_id ?? "general";
             const newNotification: Notification = {
               id: `partner-${updated.id}`,
               type: "partner_activity",
               title: "פעילות שותף/ה",
-              message: `${partnerName} סיימ/ה ${template?.title ?? "משימה"}`,
+              message: `${partnerName} סיימ/ה ${updated.title ?? "משימה"}`,
               icon: CATEGORY_ICONS[category] ?? "✅",
               read: false,
-              timestamp: updated.completed_at ?? new Date().toISOString(),
+              timestamp: new Date().toISOString(),
             };
 
             setNotifications((prev) => [newNotification, ...prev.filter((n) => n.id !== newNotification.id)]);

@@ -17,17 +17,33 @@ interface EmergencyTask {
   due_date: string | null;
 }
 
+// Emergency mode state is stored in localStorage since the households table
+// does not have an emergency_mode column in the production schema.
+const EMERGENCY_MODE_KEY = "bayit-beseder-emergency-mode";
+
+function getStoredEmergencyMode(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(EMERGENCY_MODE_KEY) === "true";
+}
+
+function setStoredEmergencyMode(value: boolean): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(EMERGENCY_MODE_KEY, String(value));
+}
+
 export default function EmergencyPage() {
   const { t } = useTranslation();
   const [tasks, setTasks] = useState<EmergencyTask[]>([]);
   const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [emergencyMode, setEmergencyMode] = useState(false);
-  const [householdId, setHouseholdId] = useState<string | null>(null);
   const [togglingEmergency, setTogglingEmergency] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
+    // Restore emergency mode from localStorage
+    setEmergencyMode(getStoredEmergencyMode());
+
     try {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
@@ -37,58 +53,25 @@ export default function EmergencyPage() {
         return;
       }
 
-      // Get user's household
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("household_id")
-        .eq("id", user.id)
-        .single();
+      // Fetch today's and overdue pending tasks from the tasks table
+      const today = new Date().toISOString().slice(0, 10);
+      const { data: pendingTasks } = await supabase
+        .from("tasks")
+        .select("id, title, category_id, due_date, status, points")
+        .lte("due_date", today)
+        .eq("status", "pending")
+        .order("due_date", { ascending: true });
 
-      const hId = profile?.household_id ?? null;
-      setHouseholdId(hId);
-
-      if (hId) {
-        // Get emergency_mode from household
-        const { data: household } = await supabase
-          .from("households")
-          .select("emergency_mode")
-          .eq("id", hId)
-          .single();
-
-        setEmergencyMode(household?.emergency_mode ?? false);
-
-        // Get today + overdue task_instances marked as emergency from task_templates
-        const today = new Date().toISOString().slice(0, 10);
-        const { data: instances } = await supabase
-          .from("task_instances")
-          .select("id, due_date, status, template_id, task_templates(title, category, estimated_minutes, is_emergency)")
-          .eq("household_id", hId)
-          .lte("due_date", today)
-          .eq("status", "pending");
-
-        type InstanceRow = {
-          id: string;
-          due_date: string;
-          status: string;
-          template_id: string;
-          task_templates: { title: string; category: string; estimated_minutes: number; is_emergency: boolean } | null;
-        };
-
-        if (instances) {
-          const emergencyTasks: EmergencyTask[] = (instances as InstanceRow[])
-            .filter((inst: InstanceRow) => inst.task_templates?.is_emergency === true)
-            .map((inst: InstanceRow) => {
-              const tmpl = inst.task_templates!;
-              return {
-                id: inst.id,
-                title: tmpl.title,
-                category: tmpl.category,
-                estimated_minutes: tmpl.estimated_minutes,
-                due_date: inst.due_date,
-              };
-            });
-          setTasks(emergencyTasks);
-        }
+      if (pendingTasks && pendingTasks.length > 0) {
+        // In emergency mode, show all pending + overdue tasks as essential
+        const emergencyTasks: EmergencyTask[] = pendingTasks.map((task) => ({
+          id: task.id,
+          title: task.title,
+          category: task.category_id ?? "general",
+          estimated_minutes: (task.points ?? 10) <= 5 ? 5 : (task.points ?? 10) <= 15 ? 15 : 30,
+          due_date: task.due_date,
+        }));
+        setTasks(emergencyTasks);
       }
     } catch {
       // Graceful fallback - no data
@@ -121,17 +104,10 @@ export default function EmergencyPage() {
     if (isNowCompleted) {
       try {
         const supabase = createClient();
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          await supabase
-            .from("task_instances")
-            .update({
-              status: "completed",
-              completed_at: new Date().toISOString(),
-              completed_by: user.id,
-            })
-            .eq("id", taskId);
-        }
+        await supabase
+          .from("tasks")
+          .update({ status: "completed" })
+          .eq("id", taskId);
       } catch {
         // Silently ignore - optimistic update still works
       }
@@ -140,8 +116,8 @@ export default function EmergencyPage() {
       try {
         const supabase = createClient();
         await supabase
-          .from("task_instances")
-          .update({ status: "pending", completed_at: null, completed_by: null })
+          .from("tasks")
+          .update({ status: "pending" })
           .eq("id", taskId);
       } catch {
         // Silently ignore
@@ -149,31 +125,13 @@ export default function EmergencyPage() {
     }
   }
 
-  async function toggleEmergencyMode() {
-    if (!householdId) {
-      toast.error("לא נמצא בית משויך לחשבון");
-      return;
-    }
+  function toggleEmergencyMode() {
     setTogglingEmergency(true);
-    try {
-      const supabase = createClient();
-      const newMode = !emergencyMode;
-      const { error } = await supabase
-        .from("households")
-        .update({ emergency_mode: newMode })
-        .eq("id", householdId);
-
-      if (error) {
-        toast.error("לא הצלחנו לעדכן — נסו שוב");
-      } else {
-        setEmergencyMode(newMode);
-        toast.success(newMode ? "⚡ מצב חירום הופעל" : "✓ חזרנו לשגרה");
-      }
-    } catch {
-      toast.error("שגיאה בחיבור לשרת");
-    } finally {
-      setTogglingEmergency(false);
-    }
+    const newMode = !emergencyMode;
+    setEmergencyMode(newMode);
+    setStoredEmergencyMode(newMode);
+    toast.success(newMode ? "מצב חירום הופעל" : "חזרנו לשגרה");
+    setTogglingEmergency(false);
   }
 
   if (loading) {
