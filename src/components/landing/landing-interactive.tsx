@@ -165,12 +165,14 @@ function CountUp({ to, suffix = "" }: { to: number; suffix?: string }) {
   );
 }
 
-/* ── Social Proof / Stats Bar ─────────────────────────────────── */
+/* ── Why It Matters Section (replaced fake stats per Wave-12 compliance) ─── */
 export function SocialProofSection() {
+  // Wave-12: removed unproven stats per payment provider compliance.
+  // Replaced with concrete benefit-driven copy.
   const stats = [
-    { value: 340, suffix: "+", label: "זוגות ומשפחות" },
-    { value: 12800, suffix: "+", label: "משימות הושלמו" },
-    { value: 98, suffix: "%", label: "ממליצים לחברים" },
+    { value: "🏠", suffix: "", label: "הבית מסודר ביחד" },
+    { value: "⚡", suffix: "", label: "פחות ויכוחים" },
+    { value: "🇮🇱", suffix: "", label: "100% עברית · בחינם" },
   ];
 
   return (
@@ -199,7 +201,7 @@ export function SocialProofSection() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="text-2xl md:text-3xl font-extrabold text-foreground mb-10"
         >
-          כבר{" "}
+          ניהול הבית{" "}
           <span
             className="bg-clip-text text-transparent"
             style={{
@@ -207,9 +209,8 @@ export function SocialProofSection() {
                 "linear-gradient(135deg, #6366F1, #8B5CF6, #D946EF)",
             }}
           >
-            מאות בתים
-          </span>{" "}
-          מנוהלים בשקט
+            בלי כאב ראש
+          </span>
         </motion.h2>
 
         <div className="grid grid-cols-3 gap-4 md:gap-8">
@@ -223,13 +224,9 @@ export function SocialProofSection() {
               className="bg-surface border border-border rounded-2xl p-5 shadow-sm"
             >
               <div
-                className="text-3xl md:text-4xl font-extrabold bg-clip-text text-transparent mb-1"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(135deg, #6366F1, #8B5CF6)",
-                }}
+                className="text-4xl md:text-5xl font-extrabold mb-1"
               >
-                <CountUp to={s.value} suffix={s.suffix} />
+                {s.value}
               </div>
               <p className="text-xs md:text-sm text-muted font-medium">
                 {s.label}

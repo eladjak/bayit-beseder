@@ -263,8 +263,8 @@ export default function LandingPage() {
       {/* How it works — animated */}
       <AnimatedHowItWorksSection />
 
-      {/* Testimonials */}
-      <TestimonialsSection />
+      {/* Testimonials hidden until we have real, attributed reviews (Wave-12 compliance) */}
+      {/* <TestimonialsSection /> */}
 
       {/* Visual break */}
       <section className="max-w-4xl mx-auto px-6 py-8">
