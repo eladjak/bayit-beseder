@@ -106,7 +106,7 @@ function LoginContent() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center px-6 relative overflow-hidden">
+    <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-8 relative overflow-y-auto overflow-x-hidden">
       {/* Animated gradient background */}
       <div className="absolute inset-0 gradient-hero animate-gradient opacity-90" />
 
