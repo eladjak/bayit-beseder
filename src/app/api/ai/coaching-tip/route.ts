@@ -6,7 +6,7 @@ const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 
 // Gemini API for generating smart coaching tips
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent";
 
 const SYSTEM_PROMPT = `אתה מאמן ביתי חכם ומצחיק באפליקציית "בית בסדר" — אפליקציה לניהול תחזוקת הבית לזוגות ומשפחות.
 תפקידך לתת טיפ אחד קצר ומעשי (2-3 משפטים) על ניהול בית, ניקיון, ארגון, מוטיבציה או שיתוף פעולה.

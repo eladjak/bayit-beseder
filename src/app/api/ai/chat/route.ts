@@ -14,7 +14,7 @@ const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 // ---------------------------------------------------------------------------
 
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:streamGenerateContent?alt=sse";
 
 const SYSTEM_PROMPT = `אתה העוזר החכם של אפליקציית "בית בסדר" — אפליקציה לניהול תחזוקת הבית המשותף.
 
