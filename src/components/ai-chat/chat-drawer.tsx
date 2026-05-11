@@ -33,7 +33,7 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
   // Scroll to bottom when messages change
   useEffect(() => {
     if (open) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      if (messages.length > 0) messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   }, [messages, isTyping, open]);
 
