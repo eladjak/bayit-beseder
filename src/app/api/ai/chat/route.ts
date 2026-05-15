@@ -233,46 +233,50 @@ export async function POST(request: NextRequest) {
   const decoder = new TextDecoder();
   let buffer = "";
 
+  // Sprint 7.25e fix (2026-05-15): use `start()` instead of `pull()` so the
+  // stream begins consuming Gemini SSE eagerly the moment the response is
+  // returned to the client. With `pull()`, the loop only ran when the client
+  // explicitly requested the next chunk — Turbopack dev server held the
+  // headers/connection until first byte arrived, manifesting as a 12s+ hang
+  // on every chat request even though Gemini itself replied in <500ms.
   const stream = new ReadableStream({
-    async pull(controller) {
-      while (true) {
-        let done: boolean;
-        let value: Uint8Array | undefined;
-
+    start(controller) {
+      (async () => {
         try {
-          ({ done, value } = await geminiReader.read());
-        } catch {
-          controller.close();
-          return;
-        }
-
-        if (done) {
-          controller.close();
-          return;
-        }
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        // Keep last (possibly incomplete) line in buffer
-        buffer = lines.pop() ?? "";
-
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const jsonStr = line.slice(6).trim();
-          if (!jsonStr || jsonStr === "[DONE]") continue;
-
-          try {
-            const parsed = JSON.parse(jsonStr) as GeminiSSEData;
-            const text =
-              parsed.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
-            if (text) {
-              controller.enqueue(encoder.encode(text));
+          while (true) {
+            const { done, value } = await geminiReader.read();
+            if (done) {
+              controller.close();
+              return;
             }
-          } catch {
-            // Skip malformed JSON lines
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split("\n");
+            // Keep last (possibly incomplete) line in buffer
+            buffer = lines.pop() ?? "";
+
+            for (const line of lines) {
+              if (!line.startsWith("data: ")) continue;
+              const jsonStr = line.slice(6).trim();
+              if (!jsonStr || jsonStr === "[DONE]") continue;
+
+              try {
+                const parsed = JSON.parse(jsonStr) as GeminiSSEData;
+                const text =
+                  parsed.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+                if (text) {
+                  controller.enqueue(encoder.encode(text));
+                }
+              } catch {
+                // Skip malformed JSON lines
+              }
+            }
           }
+        } catch {
+          // Network or parse error mid-stream — close gracefully
+          try { controller.close(); } catch { /* already closed */ }
         }
-      }
+      })();
     },
     cancel() {
       geminiReader.cancel().catch(() => {});

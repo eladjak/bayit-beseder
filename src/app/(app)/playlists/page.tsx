@@ -42,7 +42,9 @@ export default function PlaylistsPage() {
           width={512}
           height={144}
           sizes="(max-width: 512px) 100vw, 512px"
+          priority
           className="w-full h-36 object-cover opacity-60"
+          style={{ width: "100%", height: "9rem" }}
         />
         <div className="text-center px-4 pt-4 pb-8 -mt-4 relative z-10">
           <h1 className="text-2xl font-bold text-white">{t("playlists.title")}</h1>

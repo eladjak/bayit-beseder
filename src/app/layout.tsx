@@ -117,7 +117,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl">
+    // suppressHydrationWarning: ThemeScript runs in <head> BEFORE React hydration
+    // and adds "light"/"dark" + --color-primary to <html>. Without this flag, every
+    // page logs a hydration-mismatch warning to the console (the "1 Issue" badge).
+    <html lang="he" dir="rtl" suppressHydrationWarning>
       <head>
         <ThemeScript />
         {/* Preconnect to Google Fonts to reduce font loading latency */}

@@ -11,17 +11,24 @@ import {
 } from "@/lib/notifications";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
+import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 /**
  * In-app banner that asks the user to enable push notifications.
  * Shows only once on first login (if notifications not yet granted).
  * Persists dismissal in localStorage.
+ *
+ * Banner-queue rule (added 2026-05-15 Sprint 7.25e): yields to PWAInstallBanner
+ * when both are eligible — install prompt is higher priority on first visit.
+ * NotificationBanner appears 30s after page load (was 2s) AND only if PWA
+ * banner isn't currently shown. This eliminates the triple-popup pileup.
  */
 export function NotificationBanner() {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [requesting, setRequesting] = useState(false);
   const { user } = useAuth();
+  const { canInstall: pwaCanInstall } = usePWAInstall();
 
   useEffect(() => {
     // Don't show if not supported or already granted/denied
@@ -39,10 +46,13 @@ export function NotificationBanner() {
       if (!isNaN(dismissedTime) && Date.now() - dismissedTime < sevenDays) return;
     }
 
-    // Show the banner after a short delay (let the page load first)
-    const timer = setTimeout(() => setVisible(true), 2000);
+    // Yield to PWA install banner — it's higher priority on first visit
+    if (pwaCanInstall) return;
+
+    // Show the banner after a longer delay so it doesn't stack with PWA on first paint
+    const timer = setTimeout(() => setVisible(true), 30_000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [pwaCanInstall]);
 
   const handleEnable = useCallback(async () => {
     setRequesting(true);
