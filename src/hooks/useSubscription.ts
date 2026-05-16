@@ -1,12 +1,12 @@
 "use client";
 
-// TODO: Connect to Stripe/payment system
-// When payments are ready, replace the hardcoded tier with a real lookup:
-//   1. Add a `subscriptions` table to Supabase (see docs/pricing-model.md §6)
-//   2. Fetch the household's subscription row here
-//   3. Return the real tier from that row
-//
-// For now, ALL users are on the free tier.
+// Sumit (sumit.co.il) integration — migrated from Stripe stub on 2026-05-14.
+// The hook now fetches the real tier from `public.subscriptions` (migration 010+011).
+// Sumit webhook at /api/sumit/webhook upserts subscription rows.
+// Fallback to "free" when no row exists.
+
+import { useEffect, useState } from "react";
+import { createClient, isSupabaseConfigured } from "@/lib/supabase";
 
 export type SubscriptionTier = "free" | "plus" | "family";
 
@@ -76,12 +76,29 @@ export interface UseSubscriptionReturn {
   maxMembers: number;
 }
 
-export function useSubscription(): UseSubscriptionReturn {
-  // TODO: Connect to Stripe/payment system
-  // Replace this with real subscription data from Supabase once payments are built.
-  // Using a type assertion to prevent TypeScript from narrowing this to a literal type,
-  // which would break the comparisons below when we swap in a real dynamic value.
-  const tier = "free" as SubscriptionTier;
+export function useSubscription(householdId?: string | null): UseSubscriptionReturn {
+  const [tier, setTier] = useState<SubscriptionTier>("free");
+
+  useEffect(() => {
+    if (!householdId || !isSupabaseConfigured()) return;
+    const supabase = createClient();
+    let cancelled = false;
+    supabase
+      .from("subscriptions")
+      .select("tier,status")
+      .eq("household_id", householdId)
+      .eq("status", "active")
+      .maybeSingle()
+      .then(({ data }: { data: { tier: SubscriptionTier; status: string } | null }) => {
+        if (cancelled) return;
+        if (data?.tier && (data.tier === "plus" || data.tier === "family")) {
+          setTier(data.tier);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [householdId]);
 
   const canUse = (feature: GatedFeature): boolean => {
     return FEATURE_MATRIX[tier].has(feature);

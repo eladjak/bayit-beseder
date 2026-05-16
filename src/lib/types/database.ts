@@ -777,6 +777,128 @@ export type Database = {
           },
         ];
       };
+      subscriptions: {
+        Row: {
+          id: string;
+          household_id: string;
+          user_id: string;
+          tier: "free" | "plus" | "family";
+          status:
+            | "active"
+            | "past_due"
+            | "canceled"
+            | "trialing"
+            | "incomplete";
+          stripe_customer_id: string | null;
+          stripe_subscription_id: string | null;
+          stripe_price_id: string | null;
+          sumit_customer_id: string | null;
+          sumit_subscription_id: string | null;
+          sumit_payment_method_id: string | null;
+          sumit_last_document_id: string | null;
+          current_period_start: string | null;
+          current_period_end: string | null;
+          cancel_at: string | null;
+          canceled_at: string | null;
+          trial_end: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          user_id: string;
+          tier: "free" | "plus" | "family";
+          status:
+            | "active"
+            | "past_due"
+            | "canceled"
+            | "trialing"
+            | "incomplete";
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          stripe_price_id?: string | null;
+          sumit_customer_id?: string | null;
+          sumit_subscription_id?: string | null;
+          sumit_payment_method_id?: string | null;
+          sumit_last_document_id?: string | null;
+          current_period_start?: string | null;
+          current_period_end?: string | null;
+          cancel_at?: string | null;
+          canceled_at?: string | null;
+          trial_end?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          household_id?: string;
+          user_id?: string;
+          tier?: "free" | "plus" | "family";
+          status?:
+            | "active"
+            | "past_due"
+            | "canceled"
+            | "trialing"
+            | "incomplete";
+          stripe_customer_id?: string | null;
+          stripe_subscription_id?: string | null;
+          stripe_price_id?: string | null;
+          sumit_customer_id?: string | null;
+          sumit_subscription_id?: string | null;
+          sumit_payment_method_id?: string | null;
+          sumit_last_document_id?: string | null;
+          current_period_start?: string | null;
+          current_period_end?: string | null;
+          cancel_at?: string | null;
+          canceled_at?: string | null;
+          trial_end?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_household_id_fkey";
+            columns: ["household_id"];
+            isOneToOne: false;
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      billing_events: {
+        Row: {
+          id: string;
+          stripe_event_id: string | null;
+          sumit_payment_id: string | null;
+          sumit_document_id: string | null;
+          event_type: string;
+          raw_payload: Json;
+          processed_at: string;
+          error: string | null;
+        };
+        Insert: {
+          id?: string;
+          stripe_event_id?: string | null;
+          sumit_payment_id?: string | null;
+          sumit_document_id?: string | null;
+          event_type: string;
+          raw_payload: Json;
+          processed_at?: string;
+          error?: string | null;
+        };
+        Update: {
+          id?: string;
+          stripe_event_id?: string | null;
+          sumit_payment_id?: string | null;
+          sumit_document_id?: string | null;
+          event_type?: string;
+          raw_payload?: Json;
+          processed_at?: string;
+          error?: string | null;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
