@@ -13,7 +13,7 @@
  *   Family: 39 NIS monthly / 390 NIS yearly
  */
 import { NextRequest, NextResponse } from 'next/server';
-import { createSumitClient } from '@elad/sumit-client';
+import { createSumitClient } from '@/lib/sumit-client-inline';
 import { createClient } from '@/lib/supabase/server';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
 
