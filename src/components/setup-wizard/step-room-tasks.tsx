@@ -1,12 +1,46 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Check, Save, X } from "lucide-react";
+import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getDifficultyColor, getDifficultyLabel, getDifficultyPoints } from "@/lib/room-task-templates";
 import type { RoomDefinition, RoomTaskTemplate } from "@/lib/room-task-templates";
 
 type TaskWithState = RoomTaskTemplate & { enabled: boolean; custom?: boolean };
+
+const CUSTOM_TEMPLATES_STORAGE_KEY = "bayit-custom-templates";
+
+interface CustomTaskTemplate {
+  title: string;
+  category: string;
+  addedAt: string;
+}
+
+function getTemplateKey(title: string, category: string): string {
+  return `${category}:${title.trim().toLowerCase()}`;
+}
+
+function readCustomTemplates(): CustomTaskTemplate[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const parsed = JSON.parse(localStorage.getItem(CUSTOM_TEMPLATES_STORAGE_KEY) ?? "[]");
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (item): item is CustomTaskTemplate =>
+        typeof item?.title === "string" &&
+        typeof item?.category === "string" &&
+        typeof item?.addedAt === "string"
+    );
+  } catch {
+    return [];
+  }
+}
+
+function writeCustomTemplates(templates: CustomTaskTemplate[]) {
+  localStorage.setItem(CUSTOM_TEMPLATES_STORAGE_KEY, JSON.stringify(templates));
+}
 
 interface StepRoomTasksProps {
   room: RoomDefinition;
@@ -30,6 +64,40 @@ export function StepRoomTasks({
   const { t, locale } = useTranslation();
   const isRtl = locale === "he";
   const [newTaskName, setNewTaskName] = useState("");
+  const [savedTemplateKeys, setSavedTemplateKeys] = useState<Set<string>>(new Set());
+  const hydratedRoomsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const storedTemplates = readCustomTemplates();
+    setSavedTemplateKeys(
+      new Set(storedTemplates.map((template) => getTemplateKey(template.title, template.category)))
+    );
+
+    if (hydratedRoomsRef.current.has(room.id)) return;
+    hydratedRoomsRef.current.add(room.id);
+
+    const existingKeys = new Set(tasks.map((task) => getTemplateKey(task.title, room.id)));
+    const templatesForRoom = storedTemplates.filter(
+      (template) =>
+        template.category === room.id &&
+        !existingKeys.has(getTemplateKey(template.title, template.category))
+    );
+
+    if (templatesForRoom.length === 0) return;
+
+    onUpdate([
+      ...tasks,
+      ...templatesForRoom.map((template) => ({
+        title: template.title,
+        titleEn: template.title,
+        difficulty: 1 as const,
+        level: "basic" as const,
+        estimatedMinutes: 10,
+        enabled: true,
+        custom: true,
+      })),
+    ]);
+  }, [room.id, tasks, onUpdate]);
 
   const toggleTask = useCallback((index: number) => {
     onUpdate(
@@ -59,6 +127,34 @@ export function StepRoomTasks({
   const removeTask = useCallback((index: number) => {
     onUpdate(tasks.filter((_, i) => i !== index));
   }, [tasks, onUpdate]);
+
+  const saveCustomTaskAsTemplate = useCallback((task: TaskWithState) => {
+    const title = (isRtl ? task.title : task.titleEn).trim();
+    if (!title) return;
+
+    const key = getTemplateKey(title, room.id);
+    try {
+      const storedTemplates = readCustomTemplates();
+      if (storedTemplates.some((template) => getTemplateKey(template.title, template.category) === key)) {
+        setSavedTemplateKeys((prev) => new Set(prev).add(key));
+        toast.info(t("setupWizard.templateAlreadySaved"));
+        return;
+      }
+
+      writeCustomTemplates([
+        ...storedTemplates,
+        {
+          title,
+          category: room.id,
+          addedAt: new Date().toISOString(),
+        },
+      ]);
+      setSavedTemplateKeys((prev) => new Set(prev).add(key));
+      toast.success(t("setupWizard.templateSaved"));
+    } catch {
+      toast.error(t("setupWizard.templateSaveFailed"));
+    }
+  }, [isRtl, room.id, t]);
 
   const enabledCount = tasks.filter((t) => t.enabled).length;
 
@@ -102,6 +198,12 @@ export function StepRoomTasks({
                 {/* Toggle */}
                 <button
                   onClick={() => toggleTask(index)}
+                  aria-label={
+                    task.enabled
+                      ? `${t("setupWizard.taskOn")}: ${isRtl ? task.title : task.titleEn}`
+                      : `${t("setupWizard.taskOff")}: ${isRtl ? task.title : task.titleEn}`
+                  }
+                  aria-pressed={task.enabled}
                   className={[
                     "w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-colors",
                     task.enabled
@@ -110,9 +212,7 @@ export function StepRoomTasks({
                   ].join(" ")}
                 >
                   {task.enabled && (
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3}>
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
+                    <Check className="h-3 w-3 text-white" strokeWidth={3} />
                   )}
                 </button>
 
@@ -139,16 +239,30 @@ export function StepRoomTasks({
                   {points}
                 </span>
 
-                {/* Remove custom task */}
+                {/* Save/remove custom task */}
                 {task.custom && (
-                  <button
-                    onClick={() => removeTask(index)}
-                    className="text-red-400 hover:text-red-600 flex-shrink-0"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                      <path d="M18 6L6 18M6 6l12 12" />
-                    </svg>
-                  </button>
+                  <>
+                    <button
+                      onClick={() => saveCustomTaskAsTemplate(task)}
+                      disabled={savedTemplateKeys.has(getTemplateKey(isRtl ? task.title : task.titleEn, room.id))}
+                      className="flex flex-shrink-0 items-center gap-1 rounded-lg border border-primary/25 px-2 py-1 text-[10px] font-medium text-primary transition-colors hover:bg-primary/5 disabled:border-border disabled:text-muted"
+                      aria-label={`${t("setupWizard.saveAsTemplate")}: ${isRtl ? task.title : task.titleEn}`}
+                    >
+                      <Save className="h-3 w-3" />
+                      <span>
+                        {savedTemplateKeys.has(getTemplateKey(isRtl ? task.title : task.titleEn, room.id))
+                          ? t("setupWizard.savedAsTemplate")
+                          : t("setupWizard.saveAsTemplate")}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => removeTask(index)}
+                      className="text-red-400 hover:text-red-600 flex-shrink-0 rounded-lg p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                      aria-label={`${t("setupWizard.removeCustomTask")}: ${isRtl ? task.title : task.titleEn}`}
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </>
                 )}
               </motion.div>
             );

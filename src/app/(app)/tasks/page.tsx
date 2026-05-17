@@ -1,11 +1,30 @@
 "use client";
 
-import { useState, useMemo, useCallback, useRef, useEffect } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { Camera, Check, Clock, Filter, LayoutTemplate, Plus, Printer, Settings, Trash2 } from "lucide-react";
+import { Camera, Check, Clock, Filter, GripVertical, LayoutTemplate, Loader2, Pencil, Plus, Printer, Settings, Trash2 } from "lucide-react";
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import Link from "next/link";
 import { toast } from "sonner";
 import { haptic } from "@/lib/haptics";
@@ -27,11 +46,12 @@ import { useTasks } from "@/hooks/useTasks";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useProfile } from "@/hooks/useProfile";
 import { useCategories } from "@/hooks/useCategories";
-import { useTaskCategories } from "@/hooks/useTaskCategories";
+import { useTaskCategories, type TaskCategoryRow } from "@/hooks/useTaskCategories";
 import { useTaskStreaks } from "@/hooks/useTaskStreaks";
 import { useTaskPhoto } from "@/hooks/useTaskPhoto";
 import { TaskPhotoCapture } from "@/components/task-photo-capture";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { TaskTemplatePicker } from "@/components/task-template-picker";
 import type { TaskTemplate } from "@/lib/task-templates";
 import { useFirstVisit } from "@/hooks/useFirstVisit";
@@ -45,6 +65,7 @@ const VoiceInputButton = dynamic(
 interface DbTaskView {
   id: string;
   title: string;
+  category_id: string | null;
   categoryKey: string;
   estimated_minutes: number;
   isCompleted: boolean;
@@ -54,6 +75,8 @@ interface DbTaskView {
   dueDate?: string;
   isOverdue: boolean;
   points: number;
+  position: number | null;
+  created_at: string;
   assigned_to: string | null;
 }
 
@@ -66,6 +89,8 @@ export default function TasksPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskCategory, setNewTaskCategory] = useState("general");
+  const [editingTask, setEditingTask] = useState<DbTaskView | null>(null);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
   const { t } = useTranslation();
 
   // Supabase hooks
@@ -201,6 +226,7 @@ export default function TasksPage() {
         return {
           id: dbTask.id,
           title: dbTask.title,
+          category_id: dbTask.category_id,
           categoryKey,
           estimated_minutes: 10,
           isCompleted,
@@ -210,8 +236,15 @@ export default function TasksPage() {
           dueDate: dbTask.due_date ?? undefined,
           isOverdue: !!isOverdue,
           points: dbTask.points ?? 0,
+          position: dbTask.position ?? null,
+          created_at: dbTask.created_at,
           assigned_to: dbTask.assigned_to ?? null,
         };
+      }).sort((a, b) => {
+        const aPosition = a.position ?? Number.MAX_SAFE_INTEGER;
+        const bPosition = b.position ?? Number.MAX_SAFE_INTEGER;
+        if (aPosition !== bPosition) return aPosition - bPosition;
+        return b.created_at.localeCompare(a.created_at) || a.id.localeCompare(b.id);
       }),
     [dbTasks, categoryMap, dynamicCategoryNameToKey, optimisticCompleted, optimisticUncompleted, isCompletedToday, t]
   );
@@ -233,6 +266,11 @@ export default function TasksPage() {
         ? dbTaskViews
         : dbTaskViews.filter((t) => t.categoryKey === activeCategory),
     [activeCategory, dbTaskViews]
+  );
+
+  const allPendingDbTasks = useMemo(
+    () => dbTaskViews.filter((t) => !t.isCompleted),
+    [dbTaskViews]
   );
 
   const pendingDbTasks = useMemo(
@@ -399,6 +437,28 @@ export default function TasksPage() {
     }
   }, [newTaskTitle, newTaskCategory, categories, profile, createTask, t]);
 
+  const handleSaveTaskEdit = useCallback(
+    async (title: string, categoryName: string) => {
+      if (!editingTask) return;
+
+      setIsSavingEdit(true);
+      const category = categories.find((c) => c.name === categoryName);
+      const success = await updateTask(editingTask.id, {
+        title: title.trim(),
+        category_id: category?.id ?? null,
+      });
+
+      setIsSavingEdit(false);
+      if (success) {
+        toast.success(t("tasks.editSaved"));
+        setEditingTask(null);
+      } else {
+        toast.error(t("tasks.editFailed"));
+      }
+    },
+    [categories, editingTask, updateTask, t]
+  );
+
   // Delete task from DB
   const handleDeleteTask = useCallback(
     async (taskId: string) => {
@@ -503,6 +563,53 @@ export default function TasksPage() {
     [taskCategories]
   );
 
+  const reorderSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 180, tolerance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const pendingTaskIds = useMemo(() => pendingDbTasks.map((task) => task.id), [pendingDbTasks]);
+
+  const handleTaskDragEnd = useCallback(
+    async ({ active, over }: DragEndEvent) => {
+      if (!over || active.id === over.id) return;
+
+      const oldIndex = pendingTaskIds.indexOf(String(active.id));
+      const newIndex = pendingTaskIds.indexOf(String(over.id));
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      const visibleReordered = arrayMove(pendingDbTasks, oldIndex, newIndex);
+      const visibleIds = new Set(pendingTaskIds);
+      let visibleIndex = 0;
+      const reorderedPending = allPendingDbTasks.map((task) => {
+        if (!visibleIds.has(task.id)) return task;
+        const nextTask = visibleReordered[visibleIndex];
+        visibleIndex += 1;
+        return nextTask ?? task;
+      });
+
+      haptic("tap");
+      const updates = reorderedPending
+        .map((task, index) => ({ task, position: index }))
+        .filter(({ task, position }) => task.position !== position);
+
+      if (updates.length === 0) return;
+
+      const results = await Promise.all(
+        updates.map(({ task, position }) => updateTask(task.id, { position }))
+      );
+
+      if (results.every(Boolean)) {
+        toast.success(t("tasks.reordered"));
+      } else {
+        toast.error(t("tasks.reorderFailed"));
+        await refetchTasks();
+      }
+    },
+    [allPendingDbTasks, pendingDbTasks, pendingTaskIds, refetchTasks, updateTask, t]
+  );
+
   // Virtualizer for pending tasks (enabled when >= 15 items)
   const VIRTUALIZE_THRESHOLD = 15;
   const TASK_ROW_HEIGHT = 80; // px estimate per task card
@@ -521,7 +628,7 @@ export default function TasksPage() {
     enabled: completedDbTasks.length >= VIRTUALIZE_THRESHOLD && showCompleted,
   });
 
-  const usePendingVirtual = pendingDbTasks.length >= VIRTUALIZE_THRESHOLD;
+  const usePendingVirtual = false; // Pending rows stay fully mounted so sortable keyboard/pointer DnD is reliable.
   const useCompletedVirtual = completedDbTasks.length >= VIRTUALIZE_THRESHOLD && showCompleted;
 
   return (
@@ -777,7 +884,14 @@ export default function TasksPage() {
 
         {/* ---- Pending Tasks ---- */}
         {tasksLoading && !sawDbTasks.current ? null : hasDbTasks ? (
-          usePendingVirtual ? (
+          <DndContext
+            sensors={reorderSensors}
+            collisionDetection={closestCenter}
+            modifiers={[restrictToVerticalAxis]}
+            onDragEnd={handleTaskDragEnd}
+          >
+            <SortableContext items={pendingTaskIds} strategy={verticalListSortingStrategy}>
+          {usePendingVirtual ? (
             /* Virtual list for large pending task sets */
             <div
               ref={pendingListRef}
@@ -902,12 +1016,9 @@ export default function TasksPage() {
                 const isRecurring = task.recurrenceLabel === t("common.recurring");
                 const skipped = isRecurring && isSkippedToday(task.id);
                 return (
-                  <motion.div
+                  <SortableTaskRow
                     key={task.id}
-                    layout
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    whileTap={{ scale: 0.99 }}
+                    id={task.id}
                     className={`card-elevated p-3.5 flex items-start gap-3 relative overflow-hidden hover:shadow-md transition-shadow duration-150 ${
                       task.isOverdue ? "ring-1 ring-red-500/20" : ""
                     } ${skipped ? "opacity-50" : ""}`}
@@ -915,11 +1026,25 @@ export default function TasksPage() {
                       borderInlineStart: `3px solid ${task.isOverdue ? "#EF4444" : display.color}`,
                     }}
                   >
+                    {({ attributes, listeners, setActivatorNodeRef, disabled }) => (
+                      <>
                     {task.isOverdue && (
                       <div className="absolute top-2 start-2 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">
                         ⏰ {t("common.overdue")}
                       </div>
                     )}
+                    <button
+                      ref={setActivatorNodeRef}
+                      {...attributes}
+                      {...listeners}
+                      type="button"
+                      disabled={disabled}
+                      className="mt-0.5 p-1 rounded-lg touch-none cursor-grab active:cursor-grabbing text-muted/40 hover:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-30"
+                      aria-label={`${t("tasks.dragHandle")}: ${task.title}`}
+                      title={t("tasks.dragHandle")}
+                    >
+                      <GripVertical className="w-4 h-4" />
+                    </button>
                     <motion.button
                       onClick={() => toggleDbTask(task.id)}
                       aria-label={`${t("tasks.markComplete")}: ${task.title}`}
@@ -1056,6 +1181,14 @@ export default function TasksPage() {
                           ⏭
                         </button>
                       )}
+                      <button
+                        onClick={() => setEditingTask(task)}
+                        className="p-1.5 rounded-lg text-muted/50 hover:text-primary hover:bg-primary/5 transition-colors"
+                        aria-label={`${t("tasks.editTask")}: ${task.title}`}
+                        title={t("tasks.editTask")}
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
                       {/* Camera button */}
                       <button
                         onClick={() => setPhotoTaskId((prev) => prev === task.id ? null : task.id)}
@@ -1077,11 +1210,15 @@ export default function TasksPage() {
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                  </motion.div>
+                      </>
+                    )}
+                  </SortableTaskRow>
                 );
               })}
             </AnimatePresence>
-          )
+          )}
+            </SortableContext>
+          </DndContext>
         ) : (
           /* ---- Mock Tasks (fallback) ---- */
           <AnimatePresence mode="popLayout">
@@ -1235,6 +1372,14 @@ export default function TasksPage() {
                                 )}
                               </div>
                             </div>
+                            <button
+                              onClick={() => setEditingTask(task)}
+                              className="p-1.5 rounded-lg text-muted/60 hover:text-primary hover:bg-primary/5 transition-colors"
+                              aria-label={`${t("tasks.editTask")}: ${task.title}`}
+                              title={t("tasks.editTask")}
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         </div>
                       );
@@ -1281,6 +1426,14 @@ export default function TasksPage() {
                             )}
                           </div>
                         </div>
+                        <button
+                          onClick={() => setEditingTask(task)}
+                          className="p-1.5 rounded-lg text-muted/60 hover:text-primary hover:bg-primary/5 transition-colors"
+                          aria-label={`${t("tasks.editTask")}: ${task.title}`}
+                          title={t("tasks.editTask")}
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
                       </motion.div>
                     );
                   })}
@@ -1312,6 +1465,216 @@ export default function TasksPage() {
         onClose={() => setShowTemplatePicker(false)}
         onAddTasks={handleAddFromTemplate}
       />
+
+      <AnimatePresence>
+        {editingTask && (
+          <EditTaskModal
+            task={editingTask}
+            taskCategories={taskCategories}
+            categoryMap={categoryMap}
+            saving={isSavingEdit}
+            onClose={() => {
+              if (!isSavingEdit) setEditingTask(null);
+            }}
+            onSave={handleSaveTaskEdit}
+          />
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+
+type SortableTaskRowRenderProps = {
+  attributes: ReturnType<typeof useSortable>["attributes"];
+  listeners: ReturnType<typeof useSortable>["listeners"];
+  setActivatorNodeRef: ReturnType<typeof useSortable>["setActivatorNodeRef"];
+  disabled: boolean;
+};
+
+function SortableTaskRow({
+  id,
+  className,
+  style,
+  children,
+}: {
+  id: string;
+  className: string;
+  style?: CSSProperties;
+  children: (props: SortableTaskRowRenderProps) => ReactNode;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  return (
+    <motion.div
+      ref={setNodeRef}
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileTap={{ scale: 0.99 }}
+      className={`${className} ${isDragging ? "opacity-40 z-10" : ""}`}
+      style={{
+        ...style,
+        transform: CSS.Transform.toString(transform),
+        transition,
+      }}
+    >
+      {children({ attributes, listeners, setActivatorNodeRef, disabled: false })}
+    </motion.div>
+  );
+}
+
+function resolveTaskCategoryName({
+  task,
+  taskCategories,
+  categoryMap,
+}: {
+  task: DbTaskView;
+  taskCategories: TaskCategoryRow[];
+  categoryMap: Record<string, string>;
+}) {
+  const fromCategoryId = task.category_id ? categoryMap[task.category_id] : null;
+  if (fromCategoryId) return fromCategoryId;
+
+  const dynamicCategory = taskCategories.find((category) => category.id === task.categoryKey);
+  if (dynamicCategory) return dynamicCategory.name;
+
+  return CATEGORY_KEY_TO_NAME[task.categoryKey] ?? taskCategories[0]?.name ?? "";
+}
+
+function EditTaskModal({
+  task,
+  taskCategories,
+  categoryMap,
+  saving,
+  onClose,
+  onSave,
+}: {
+  task: DbTaskView;
+  taskCategories: TaskCategoryRow[];
+  categoryMap: Record<string, string>;
+  saving: boolean;
+  onClose: () => void;
+  onSave: (title: string, categoryName: string) => Promise<void>;
+}) {
+  const { t } = useTranslation();
+  const [title, setTitle] = useState(task.title);
+  const [categoryName, setCategoryName] = useState(() =>
+    resolveTaskCategoryName({ task, taskCategories, categoryMap })
+  );
+  const focusRef = useFocusTrap<HTMLFormElement>(true, onClose);
+
+  useEffect(() => {
+    setTitle(task.title);
+    setCategoryName(resolveTaskCategoryName({ task, taskCategories, categoryMap }));
+  }, [task, taskCategories, categoryMap]);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!title.trim() || saving) return;
+    await onSave(title, categoryName);
+  };
+
+  return (
+    <>
+      <motion.div
+        key="edit-task-backdrop"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.16 }}
+        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+        onClick={saving ? undefined : onClose}
+      />
+      <motion.form
+        key="edit-task-modal"
+        ref={focusRef}
+        onSubmit={handleSubmit}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="edit-task-title"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 24 }}
+        transition={{ duration: 0.18, ease: "easeOut" }}
+        className="fixed inset-x-4 bottom-4 z-50 mx-auto max-w-lg rounded-2xl border border-border bg-background p-4 shadow-2xl"
+        dir="rtl"
+      >
+        <div className="mb-4">
+          <h2 id="edit-task-title" className="text-base font-bold text-foreground">
+            {t("tasks.editTask")}
+          </h2>
+          <p className="mt-0.5 text-xs text-muted">{t("tasks.editTaskSubtitle")}</p>
+        </div>
+
+        <label className="block text-xs font-medium text-muted" htmlFor="edit-task-title-input">
+          {t("tasks.editTitleLabel")}
+        </label>
+        <input
+          id="edit-task-title-input"
+          type="text"
+          value={title}
+          onChange={(event) => setTitle(event.target.value)}
+          className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder={t("tasks.editTitlePlaceholder")}
+          dir="rtl"
+          disabled={saving}
+          autoFocus
+        />
+
+        <div className="mt-4">
+          <p className="mb-2 text-xs font-medium text-muted">{t("tasks.editCategoryLabel")}</p>
+          <div role="radiogroup" aria-label={t("tasks.editCategoryLabel")} className="flex flex-wrap gap-2">
+            {taskCategories.map((category) => {
+              const selected = categoryName === category.name;
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => setCategoryName(category.name)}
+                  disabled={saving}
+                  className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+                    selected
+                      ? "text-white"
+                      : "border border-border bg-background text-muted hover:bg-surface-hover"
+                  }`}
+                  style={selected ? { backgroundColor: category.color } : undefined}
+                >
+                  {category.icon} {category.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-5 flex gap-2">
+          <button
+            type="submit"
+            disabled={!title.trim() || saving}
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl gradient-primary py-3 text-sm font-semibold text-white shadow-md shadow-primary/20 transition-transform duration-100 active:scale-[0.97] disabled:opacity-50"
+          >
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {t("common.save")}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            className="rounded-xl border border-border px-4 py-3 text-sm text-muted transition-transform duration-100 active:scale-[0.95] disabled:opacity-50"
+          >
+            {t("common.cancel")}
+          </button>
+        </div>
+      </motion.form>
+    </>
   );
 }

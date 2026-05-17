@@ -43,6 +43,7 @@ export type Database = {
           status: "pending" | "in_progress" | "completed" | "skipped";
           due_date: string | null;
           points: number;
+          position?: number | null;
           recurring: boolean;
           created_at: string;
         };
@@ -55,6 +56,7 @@ export type Database = {
           status?: "pending" | "in_progress" | "completed" | "skipped";
           due_date?: string | null;
           points?: number;
+          position?: number | null;
           recurring?: boolean;
           created_at?: string;
         };
@@ -67,6 +69,7 @@ export type Database = {
           status?: "pending" | "in_progress" | "completed" | "skipped";
           due_date?: string | null;
           points?: number;
+          position?: number | null;
           recurring?: boolean;
         };
         Relationships: [
