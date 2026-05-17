@@ -1,12 +1,14 @@
 "use client";
 
-// Sumit (sumit.co.il) integration — migrated from Stripe stub on 2026-05-14.
-// The hook now fetches the real tier from `public.subscriptions` (migration 010+011).
-// Sumit webhook at /api/sumit/webhook upserts subscription rows.
-// Fallback to "free" when no row exists.
+// Sumit integration deferred (2026-05-17).
+// Migrations 010+011 reference `public.households` / `public.household_members` tables
+// that do not exist in this database. Hardcoded "free" tier for every user until a
+// proper subscription schema is decided.
+//
+// If/when subscription DB is ready: re-enable the supabase lookup below by uncommenting
+// the useEffect block. Hook signature stays the same — call sites unchanged.
 
-import { useEffect, useState } from "react";
-import { createClient, isSupabaseConfigured } from "@/lib/supabase";
+import { useState } from "react";
 
 export type SubscriptionTier = "free" | "plus" | "family";
 
@@ -76,29 +78,9 @@ export interface UseSubscriptionReturn {
   maxMembers: number;
 }
 
-export function useSubscription(householdId?: string | null): UseSubscriptionReturn {
-  const [tier, setTier] = useState<SubscriptionTier>("free");
-
-  useEffect(() => {
-    if (!householdId || !isSupabaseConfigured()) return;
-    const supabase = createClient();
-    let cancelled = false;
-    supabase
-      .from("subscriptions")
-      .select("tier,status")
-      .eq("household_id", householdId)
-      .eq("status", "active")
-      .maybeSingle()
-      .then(({ data }: { data: { tier: SubscriptionTier; status: string } | null }) => {
-        if (cancelled) return;
-        if (data?.tier && (data.tier === "plus" || data.tier === "family")) {
-          setTier(data.tier);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [householdId]);
+export function useSubscription(_householdId?: string | null): UseSubscriptionReturn {
+  // Hardcoded "free" until subscription schema is decided. See banner comment above.
+  const [tier] = useState<SubscriptionTier>("free");
 
   const canUse = (feature: GatedFeature): boolean => {
     return FEATURE_MATRIX[tier].has(feature);
