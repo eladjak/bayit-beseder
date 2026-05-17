@@ -84,17 +84,35 @@ function createUpstashLimiter(
     prefix: "bb:rl",
   });
 
+  // Memory fallback for when Redis is unreachable mid-request (e.g. Upstash
+  // instance deleted, DNS ENOTFOUND, network blip). Without this, every
+  // rate-limited route 500s instead of degrading gracefully.
+  const memoryFallback = createInMemoryLimiter(windowMs, max);
+  let upstreamHealthy = true;
+  let lastFailureTs = 0;
+
   return {
     async check(token: string): Promise<RateLimitResult> {
-      const { success, limit, remaining, reset } = await rl.limit(token);
-      return {
-        success,
-        limit,
-        remaining,
-        // reset from Upstash is a Unix timestamp in milliseconds;
-        // convert to milliseconds-until-reset to match the original interface.
-        reset: Math.max(0, reset - Date.now()),
-      };
+      // Circuit-breaker: if Upstash recently failed, skip it for 60s to avoid
+      // adding 5s of DNS-timeout latency to every API call.
+      if (!upstreamHealthy && Date.now() - lastFailureTs < 60_000) {
+        return memoryFallback.check(token);
+      }
+      try {
+        const { success, limit, remaining, reset } = await rl.limit(token);
+        upstreamHealthy = true;
+        return {
+          success,
+          limit,
+          remaining,
+          reset: Math.max(0, reset - Date.now()),
+        };
+      } catch (err) {
+        upstreamHealthy = false;
+        lastFailureTs = Date.now();
+        console.error("[rate-limit] Upstash unreachable, using in-memory fallback:", err instanceof Error ? err.message : err);
+        return memoryFallback.check(token);
+      }
     },
   };
 }
