@@ -85,14 +85,18 @@ export async function POST(req: NextRequest) {
         EmailAddress: user.email || null,
         ExternalIdentifier: householdId,
       },
-      Items: [
-        {
-          Description: plan.description,
-          Quantity: 1,
-          UnitPrice: plan.amount,
-          SKU: plan.sku,
-        },
-      ],
+      // Sumit REST V11 requires Items.Item nested object (NOT flat array)
+      // Verified 2026-05-18: flat array caused 502 "שדה חסר: Items.Item"
+      Items: {
+        Item: [
+          {
+            Description: plan.description,
+            Quantity: 1,
+            UnitPrice: plan.amount,
+            SKU: plan.sku,
+          },
+        ],
+      },
       RedirectURL: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://bayit-beseder.vercel.app'}/settings?upgrade=success`,
       IssueInvoice: true,
       ExternalIdentifier: householdId,
