@@ -1,8 +1,38 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE
-## Last Updated: 2026-04-01
+## Status: LIVE · Sumit wiring 100% type-clean + SECURITY-PATCHED (2026-05-15)
+## Last Updated: 2026-05-15 11:05 IDT
 ## URL: https://www.bayitbeseder.com
+
+### Session 2026-05-15 — Sumit security audit + smoke (Sprint 7.25d, Claude + Codex parallel)
+**Status:** typecheck 0 errors · 262/262 tests pass · build OK · 3 critical Sumit bugs patched (uncommitted)
+
+| # | What | Status | File |
+|---|------|--------|------|
+| 1 | **CRITICAL** — `/api/sumit/checkout/route.ts` read `SUMIT_API_TOKEN` but `.env.local` has `SUMIT_API_KEY` → 500 in prod | FIXED | accepts either name, prefers `SUMIT_API_KEY` |
+| 2 | **CRITICAL** — `/api/sumit/checkout` had no auth check (anyone could create checkouts for any householdId) | FIXED | added `supabase.auth.getUser()` + `household_members` membership check |
+| 3 | **CRITICAL** — `/api/sumit/checkout` passed client-supplied email/name to Sumit unsanitized (spoof risk) | FIXED | uses server-side `user.email` / `user.user_metadata.full_name` |
+| 4 | Missing rate limit on checkout | FIXED | added `rateLimit({windowMs:60_000, max:10})` |
+| 5 | **CRITICAL** — `/api/sumit/webhook` skipped signature check entirely if `SUMIT_WEBHOOK_SECRET` empty (which it currently is) → anyone could grant themselves Family tier free | FIXED | rejects with 503 in production when secret unset · loud warn in dev |
+| 6 | Tier-inference accepted any SKU containing "family" substring (e.g. `wrong-family-1` → family tier) | FIXED | strict whitelist against PRICING SKUs (plus-monthly/yearly + family-monthly/yearly) · unknown → 'free' + skip upsert |
+| 7 | tsconfig missing `vitest/globals` types → 37 test errors | FIXED | added `"types": ["vitest/globals"]` |
+
+**Pre-deploy checklist for Elad:**
+- [ ] `SUMIT_WEBHOOK_SECRET` MUST be set in production env (Vercel) BEFORE merging — without it the webhook returns 503 (safe-fail).
+- [ ] Verify the `household_members` query path works for both Elad + Inbal (they're already members of same household).
+- [ ] Test end-to-end with a real ₪19 charge before declaring Sumit live.
+- [ ] Codex parallel pass: started but died around reading better-result type defs (no code patches from codex this round — Claude's audit covered the security surface).
+
+
+
+### Session 2026-05-14 — Sumit type completion
+- [x] `bun add "@elad/sumit-client@file:../_lib/sumit-client"` — Bun Windows `file:` EPERM workaround via manual copy into `node_modules/@elad/sumit-client/`
+- [x] `src/lib/types/database.ts` — added `subscriptions` table (Row/Insert/Update + Stripe + Sumit columns) + `billing_events` table
+- [x] `_lib/sumit-client/src/index.d.ts` (new) + `_lib/sumit-client/package.json` updated with `types` + `exports.types`
+- [x] `src/app/api/sumit/checkout/route.ts` — added `as { RedirectURL?; PaymentURL?; PaymentID? }` cast on Sumit response
+- [x] `bunx tsc --noEmit` → 0 real errors (only preexisting test-runner type gaps remain)
+- [ ] Open: regenerate types from live Supabase (`bunx supabase gen types`) once authenticated — manual additions above match migrations 010+011 byte-for-byte but should be replaced by gen output later
+- [ ] Open: rotate Sumit API token (appeared in chat 2026-05-14)
 ## Domain: bayitbeseder.com (Namecheap → Cloudflare DNS → Vercel)
 
 ## Current State
