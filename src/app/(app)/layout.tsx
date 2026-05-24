@@ -28,6 +28,12 @@ const ChatDrawer = dynamic(
   { ssr: false },
 );
 
+// Alopik v2 #1: Quick Love button (FAB). Lazy-loaded to keep initial bundle lean.
+const QuickLoveButton = dynamic(
+  () => import("@/components/quick-love-button").then((m) => ({ default: m.QuickLoveButton })),
+  { ssr: false },
+);
+
 function AppLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [chatOpen, setChatOpen] = useState(false);
@@ -75,6 +81,9 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 
       {/* AI Chat floating button */}
       <ChatFAB onClick={() => setChatOpen(true)} />
+
+      {/* Alopik v2 #1: Quick Love floating button (bidirectional household member micro-recognition) */}
+      <QuickLoveButton />
 
       {/* AI Chat drawer */}
       <ChatDrawer open={chatOpen} onClose={() => setChatOpen(false)} />
