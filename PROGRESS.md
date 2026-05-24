@@ -1,8 +1,30 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: LIVE · Sumit wiring 100% type-clean + SECURITY-PATCHED (2026-05-15)
-## Last Updated: 2026-05-15 11:05 IDT
+## Status: Sprint 7.30 Alopik integration — Phase 1+2 SHIPPED · Phase 3 lib ready · ממתין למיגרציות 012+013 ידניות
+## Last Updated: 2026-05-24 09:55 IDT (Loop D autonomous)
 ## URL: https://www.bayitbeseder.com
+
+### Sprint 7.30 (2026-05-24) — Alopik integration · 5 commits autonomous
+
+5 commits in master from morning loops B/C/D after deep hands-on Alopik review
+(https://mytask-app-7dce0.web.app) via Chrome MCP. Stack discovered = Expo Router
++ SDK 54; we translate IDEAS to Next.js.
+
+| # | Feature | Commit | Files |
+|---|---|---|---|
+| 1 | Quick Love FAB (bidirectional, rate-limit 6/day) | `2980e89` | quick-love-button.tsx, love-tokens.ts, migration 012 |
+| 2 | Daily Surprise Box (70/25/5 reward roll, time-aware) | `e988713` | surprise-box.tsx, surprise-box.ts |
+| 3 | Adult Onboarding Wizard (5 steps, skippable) | `e988713` | onboarding/onboarding-wizard.tsx |
+| 4 | Smart Guards (missing-reward / missing-task) | `e988713` | smart-guard.tsx, useHouseholdCounts.ts |
+| 5 | Weekly Wheel of Fortune (Fri 14→Sat night, 8 segs) | `75cb108` | weekly-wheel.tsx, weekly-wheel.ts |
+| 6 | UX Preferences 4-axis (Theme/Haptics/Sounds/Night-mode) | `75cb108` + `fa0e901` | ux-preferences-panel.tsx, ux-preferences.ts |
+| 7 | Migration 013 — auto-medal trigger @ 50 stars | `fa0e901` | 013_alopik_v2_medal_trigger.sql |
+| 8 | Pets collection lib (20 pets, streak unlocks) — Phase 3 prep | Loop D | lib/pets.ts |
+| 9 | Vitest 32 new tests (surprise-box+weekly-wheel+love-tokens+pets) | Loop D | __tests__/*.test.ts |
+
+**Verification:** tsc clean · 32/32 new vitest pass · 11/11 kaylee-smoke · 11/11 agent-verify
+**Ship blocker:** migration 012 + 013 manual run in Supabase prod (guide: `~/Documents/reports/sprint-7-30-migration-run-instructions-2026-05-24.html`)
+**Type debt:** `AnySupabase` cast in 3 libs — removable after `bunx supabase gen types --linked` regen post-migration
 
 ### Session 2026-05-15 — Sumit security audit + smoke (Sprint 7.25d, Claude + Codex parallel)
 **Status:** typecheck 0 errors · 262/262 tests pass · build OK · 3 critical Sumit bugs patched (uncommitted)
