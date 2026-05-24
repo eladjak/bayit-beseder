@@ -7,12 +7,14 @@
   --color-primary: #6366F1;
   --color-primary-light: #818CF8;
   --color-primary-dark: #4F46E5;
-  --color-background: #F8F7FF;
+  /* Warm Joy layer (Sprint 7.31): cream-lavender background instead of cold white.
+     Instantly warms the whole app while keeping indigo/violet brand identity. */
+  --color-background: #FAF6F0;
   --color-surface: #FFFFFF;
-  --color-surface-hover: #F3F2FF;
-  --color-foreground: #1E1B4B;
-  --color-muted: #6B7280;
-  --color-border: #E5E7EB;
+  --color-surface-hover: #F6F1EA;
+  --color-foreground: #2A2440;
+  --color-muted: #7A7290;
+  --color-border: #ECE6DC;
 
   --color-success: #10B981;
   --color-warning: #F59E0B;
@@ -25,7 +27,15 @@
   --color-accent: #8B5CF6;
   --color-accent-light: #A78BFA;
 
-  --color-muted-foreground: #6B7280;
+  /* Warm "joy" accent palette — friendly secondary colors for delight moments */
+  --color-honey: #FBBF24;
+  --color-peach: #FB923C;
+  --color-coral: #FB7185;
+  --color-sky: #38BDF8;
+  --color-mint: #34D399;
+  --color-cream: #FFF7EC;
+
+  --color-muted-foreground: #7A7290;
   --color-ring: #6366F1;
 
   --font-sans: var(--font-heebo);
@@ -435,3 +445,80 @@ textarea:focus-visible {
   50% { opacity: 1; transform: scale(1.03); }
 }
 .alopik-shimmer { animation: alopikShimmer 1.4s ease-in-out infinite; }
+
+/* ============================================================
+   WARM JOY LAYER — Sprint 7.31 (Elad: "יפה אבל מטאלי/הייטקי מדי → כיפי ונעים")
+   Goal: keep indigo/violet identity, kill the cold "metallic SaaS" feel.
+   Strategy: warm shadows (not indigo glow), softer rounder surfaces,
+   playful tactile feedback, illustration-forward helpers.
+   ============================================================ */
+
+/* Warm soft shadows — brown-grey instead of cold indigo glow.
+   This single change removes most of the "hi-tech metallic" feeling. */
+:root {
+  --shadow-warm-sm: 0 2px 8px -2px rgba(120, 90, 60, 0.10);
+  --shadow-warm-md: 0 6px 20px -6px rgba(120, 90, 60, 0.14);
+  --shadow-warm-lg: 0 14px 38px -12px rgba(120, 90, 60, 0.18);
+}
+.dark {
+  --shadow-warm-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.30);
+  --shadow-warm-md: 0 6px 20px -6px rgba(0, 0, 0, 0.40);
+  --shadow-warm-lg: 0 14px 38px -12px rgba(0, 0, 0, 0.50);
+}
+
+/* Re-warm the existing signature cards (override the cold indigo/violet shadows). */
+.alopik-card {
+  box-shadow: var(--shadow-warm-md);
+  border: 1px solid var(--color-border);
+}
+.card-elevated {
+  box-shadow: var(--shadow-warm-sm), var(--shadow-warm-md);
+  border: 1px solid var(--color-border);
+}
+.card-elevated:hover { box-shadow: var(--shadow-warm-md), var(--shadow-warm-lg); }
+
+/* Friendly card — rounder, warmer, the default for cozy content surfaces */
+.bb-card {
+  border-radius: 22px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-warm-md);
+  border: 1px solid var(--color-border);
+}
+
+/* Soft warm tinted "joy" panels — for welcoming/empty/celebration moments */
+.bb-joy {
+  border-radius: 22px;
+  background: linear-gradient(135deg, var(--color-cream) 0%, #FDEFE3 100%);
+  border: 1px solid rgba(251, 146, 60, 0.18);
+}
+.dark .bb-joy {
+  background: linear-gradient(135deg, rgba(251,191,36,0.06), rgba(139,92,246,0.08));
+  border: 1px solid rgba(251, 191, 60, 0.12);
+}
+
+/* Organic blob — a soft pastel background shape that adds 'life' behind content.
+   Position with absolute + low opacity; pointer-events:none. */
+.bb-blob {
+  position: absolute;
+  border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+  filter: blur(2px);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Playful tactile feedback — gentle pop on press (transform only, ≤200ms) */
+.bb-pop { transition: transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1); }
+.bb-pop:active { transform: scale(0.94); }
+
+/* Friendly bob — a tiny life-giving idle motion for mascots/illustrations */
+@keyframes bbBob { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-5px) rotate(1deg); } }
+.bb-bob { animation: bbBob 4s ease-in-out infinite; }
+
+/* Illustration helper — soft rounded frame so raster illustrations sit warmly */
+.bb-illus { border-radius: 18px; object-fit: cover; }
+
+/* Warm focus ring (keeps a11y, less clinical than pure indigo) */
+@media (prefers-reduced-motion: reduce) {
+  .bb-bob, .bb-pop { animation: none; transition: none; }
+}

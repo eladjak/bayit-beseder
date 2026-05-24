@@ -1,6 +1,8 @@
 /**
  * WhatsApp message templates for BayitBeSeder.
- * All messages in Hebrew with warm, couple-friendly tone.
+ * Hebrew, warm, household-friendly tone — works for couples, families,
+ * roommates AND solo (Sprint 7.31). Centered on "the home" / "together",
+ * never couple-only, so no household type feels excluded.
  * Uses "We" framing (not individual scores) per research findings.
  */
 
@@ -27,10 +29,11 @@ export interface DailySummaryData {
 }
 
 const MORNING_GREETINGS = [
-  "בוקר טוב לזוג הכי מסודר!",
+  "בוקר טוב לבית הכי מסודר!",
   "בוקר אור! הנה התוכנית להיום:",
   "שלום בוקר! יום חדש, הזדמנות חדשה:",
   "בוקר טוב! ביחד מסדרים את הבית:",
+  "בוקר טוב לכל מי שבבית! מתחילים:",
 ];
 
 const EVENING_CLOSINGS = [

@@ -41,9 +41,32 @@ export function saveHousehold(cfg: HouseholdConfig): void {
   }
 }
 
-export const TYPE_LABELS: Record<HouseholdType, { label: string; emoji: string; desc: string }> = {
-  couple: { label: "זוג", emoji: "👫", desc: "אני והשותף/ה — לחלק את הבית בסדר" },
-  family: { label: "משפחה", emoji: "👨‍👩‍👧", desc: "הורים + ילדים — לארגן ביחד בלי קרבות" },
-  roommates: { label: "שותפים", emoji: "🤝", desc: "שכנים-לדירה — חלוקה הוגנת בלי דרמות" },
-  solo: { label: "אני לבד", emoji: "🙋", desc: "מארגן את עצמי. בלי תיאומים." },
+export const TYPE_LABELS: Record<
+  HouseholdType,
+  { label: string; emoji: string; desc: string; illustration: string }
+> = {
+  couple: {
+    label: "זוג",
+    emoji: "👫",
+    desc: "אני והשותף/ה — לחלק את הבית יפה ובלי ויכוחים",
+    illustration: "/illustrations/household-couple.jpg",
+  },
+  family: {
+    label: "משפחה",
+    emoji: "👨‍👩‍👧",
+    desc: "הורים וילדים — מנהלים את הבית ביחד, כל אחד תורם",
+    illustration: "/illustrations/household-family.jpg",
+  },
+  roommates: {
+    label: "שותפים",
+    emoji: "🤝",
+    desc: "שותפים לדירה — חלוקה הוגנת ושקטה, בלי דרמות",
+    illustration: "/illustrations/household-roommates.jpg",
+  },
+  solo: {
+    label: "אני לבד",
+    emoji: "🙋",
+    desc: "מארגן/ת את הבית שלי, בקצב שלי",
+    illustration: "/illustrations/household-solo.jpg",
+  },
 };

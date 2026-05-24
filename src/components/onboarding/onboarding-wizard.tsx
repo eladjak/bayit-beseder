@@ -187,14 +187,26 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
                       type="button"
                       onClick={() => setSelectedType(t)}
                       aria-pressed={isSelected}
-                      className={`text-start p-3 rounded-xl border-2 transition-transform duration-150 ${
+                      className={`bb-pop text-start p-3 rounded-2xl border-2 overflow-hidden ${
                         isSelected
-                          ? "border-indigo-600 bg-indigo-50"
-                          : "border-gray-200 hover:border-gray-300"
+                          ? "border-indigo-500 bg-indigo-50/70 shadow-[0_8px_24px_-8px_rgba(99,102,241,0.35)]"
+                          : "border-transparent bg-white hover:border-indigo-200"
                       }`}
                     >
-                      <div className="text-2xl mb-1" aria-hidden="true">
-                        {label.emoji}
+                      <div className="relative mb-2 rounded-xl overflow-hidden aspect-[4/3] bg-indigo-50/40">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={label.illustration}
+                          alt={`איור: ${label.label}`}
+                          loading="lazy"
+                          className="bb-illus size-full"
+                        />
+                        <span
+                          className="absolute bottom-1 left-1 text-lg drop-shadow-sm"
+                          aria-hidden="true"
+                        >
+                          {label.emoji}
+                        </span>
                       </div>
                       <div className="text-sm font-bold text-gray-900">{label.label}</div>
                       <div className="text-[11px] text-gray-500 mt-0.5 text-pretty">
