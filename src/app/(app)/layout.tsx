@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useProfile } from "@/hooks/useProfile";
+import { usePetCollectionSync } from "@/hooks/usePetCollectionSync";
+import { syncBackgroundCollectionWithStreak } from "@/lib/backgrounds";
+import { registerKonamiListener } from "@/lib/easter-eggs";
+import { toast } from "sonner";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { BottomNav } from "@/components/bottom-nav";
@@ -52,6 +57,12 @@ const ActivePetBadge = dynamic(
   { ssr: false },
 );
 
+// Alopik v2 Phase 3: Celebration toast for newly-unlocked pets/backgrounds.
+const CelebrationToast = dynamic(
+  () => import("@/components/celebration-toast").then((m) => ({ default: m.CelebrationToast })),
+  { ssr: false },
+);
+
 // Alopik v2 #3: Onboarding Wizard. Lazy-loaded.
 const OnboardingWizard = dynamic(
   () => import("@/components/onboarding/onboarding-wizard").then((m) => ({ default: m.OnboardingWizard })),
@@ -70,6 +81,32 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") return;
     const done = localStorage.getItem("bayit-onboarding-done-v1");
     if (!done) setOnboardingOpen(true);
+  }, []);
+
+  // Alopik v2 Phase 3: auto-unlock pets + backgrounds when streak advances
+  const { profile } = useProfile();
+  const streak = profile?.streak ?? 0;
+  const newPets = usePetCollectionSync(streak);
+  const [newBgs, setNewBgs] = useState<readonly { id: string; emoji: string; name: string }[]>([]);
+  useEffect(() => {
+    const bgs = syncBackgroundCollectionWithStreak(streak);
+    if (bgs.length > 0) setNewBgs(bgs);
+  }, [streak]);
+
+  const celebrationItems = useMemo(
+    () => [
+      ...newPets.map((p) => ({ id: `pet-${p.id}`, emoji: p.emoji, title: p.name })),
+      ...newBgs.map((b) => ({ id: `bg-${b.id}`, emoji: b.emoji, title: b.name, subtitle: "רקע חדש נפתח" })),
+    ],
+    [newPets, newBgs],
+  );
+
+  // Easter egg: Konami code unlocks epic tier
+  useEffect(() => {
+    const cleanup = registerKonamiListener(() => {
+      toast.success("🐉 קוד הקונאמי! פתחת את הדרקון והחדים-קרן! 🦄");
+    });
+    return cleanup;
   }, []);
 
   useKeyboardShortcuts({
@@ -123,6 +160,9 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 
       {/* Alopik v2 Phase 2: Weekly Wheel — appears Fri 14:00 → Sat night */}
       <WeeklyWheel />
+
+      {/* Alopik v2 Phase 3: Celebration toast for new pet/background unlocks */}
+      <CelebrationToast items={celebrationItems} />
 
       {/* Alopik v2 #3: Adult-toned onboarding wizard (once per user, re-trigger from settings) */}
       <OnboardingWizard
