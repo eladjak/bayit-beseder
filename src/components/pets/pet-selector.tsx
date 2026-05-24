@@ -12,6 +12,7 @@
 import { useEffect, useState } from "react";
 import { Check, Lock } from "lucide-react";
 import { PETS, getActivePet, setActivePet, getCollection, type Pet } from "@/lib/pets";
+import { copy } from "@/lib/copy-resolver";
 
 type Props = {
   /** Current streak (used to determine which pets are unlocked) */
@@ -42,7 +43,7 @@ export function PetSelector({ currentStreak }: Props) {
   return (
     <div className="rounded-xl bg-white border border-gray-100 p-4">
       <div className="flex items-baseline justify-between mb-3">
-        <h3 className="text-sm font-bold text-gray-900">החבר/ה שלך לדרך</h3>
+        <h3 className="text-sm font-bold text-gray-900">{copy("petsHeader")}</h3>
         <span className="text-[11px] text-gray-500 tabular-nums">
           {collected.size}/{PETS.length} נאספו
         </span>

@@ -10,11 +10,14 @@
  */
 
 import { useEffect, useState } from "react";
-import { Moon, Sun, Volume2, Vibrate, Bell, MonitorSmartphone } from "lucide-react";
+import { Moon, Sun, Volume2, Vibrate, Bell, MonitorSmartphone, Type } from "lucide-react";
 import {
   DEFAULT_PREFS,
+  FONT_LABELS,
+  applyFontToDom,
   loadPreferences,
   savePreferences,
+  type FontFamily,
   type Theme,
   type UxPreferences,
 } from "@/lib/ux-preferences";
@@ -67,7 +70,9 @@ export function UxPreferencesPanel() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setPrefs(loadPreferences());
+    const loaded = loadPreferences();
+    setPrefs(loaded);
+    applyFontToDom(loaded.fontFamily);
     setMounted(true);
   }, []);
 
@@ -75,6 +80,7 @@ export function UxPreferencesPanel() {
     const next = { ...prefs, ...patch };
     setPrefs(next);
     savePreferences(next);
+    if (patch.fontFamily) applyFontToDom(patch.fontFamily);
   };
 
   if (!mounted) return null;
@@ -143,6 +149,36 @@ export function UxPreferencesPanel() {
           checked={prefs.nightMode}
           onChange={(v) => update({ nightMode: v })}
         />
+      </div>
+
+      {/* Font family picker (Sprint 7.30 Loop I — Elad: "more fonts that render on all devices") */}
+      <div className="rounded-xl bg-white border border-gray-100 p-4">
+        <h3 className="text-sm font-bold text-gray-900 mb-1 flex items-center gap-2">
+          <Type className="size-4 text-rose-500" aria-hidden="true" />
+          פונט
+        </h3>
+        <p className="text-xs text-gray-500 mb-3">כל הפונטים נטענים בעת הצורך, רצים יפה בכל מכשיר.</p>
+        <div className="grid grid-cols-2 gap-2">
+          {(Object.keys(FONT_LABELS) as FontFamily[]).map((f) => {
+            const cfg = FONT_LABELS[f];
+            const isSelected = prefs.fontFamily === f;
+            return (
+              <button
+                key={f}
+                type="button"
+                onClick={() => update({ fontFamily: f })}
+                aria-pressed={isSelected}
+                className={`p-3 rounded-lg border-2 text-center transition-transform duration-150 ${
+                  isSelected ? "border-rose-500 bg-rose-50" : "border-gray-200"
+                }`}
+                style={{ fontFamily: cfg.stack }}
+              >
+                <div className="text-xl font-bold text-gray-900 mb-0.5">{cfg.preview}</div>
+                <div className="text-[11px] text-gray-600">{cfg.label}</div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Onboarding re-trigger */}

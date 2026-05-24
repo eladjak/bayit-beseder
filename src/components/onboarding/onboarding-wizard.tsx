@@ -12,6 +12,12 @@
 
 import { useState } from "react";
 import { ChevronLeft, ChevronRight, X, Sparkles } from "lucide-react";
+import {
+  loadHousehold,
+  saveHousehold,
+  TYPE_LABELS,
+  type HouseholdType,
+} from "@/lib/household-type";
 
 type Step = {
   readonly id: string;
@@ -19,6 +25,7 @@ type Step = {
   readonly title: string;
   readonly body: string;
   readonly cta?: string;
+  readonly customRender?: boolean;
 };
 
 const STEPS: ReadonlyArray<Step> = [
@@ -30,10 +37,18 @@ const STEPS: ReadonlyArray<Step> = [
     cta: "בואו נתחיל",
   },
   {
+    id: "household-type",
+    emoji: "🏘️",
+    title: "מי גרים אצלכם?",
+    body: "בחרו את ההרכב — כל מסך יותאם לפי זה.",
+    cta: "הבא",
+    customRender: true,
+  },
+  {
     id: "couple",
     emoji: "👥",
-    title: "הזוג שלכם — הליבה",
-    body: "תוסיפו את השותף/ה. כל מה שתעשו יהיה בינכם בלבד — אין הורים, אין שיפוט, אין השוואות חיצוניות. רק אתם.",
+    title: "הצוות שלכם — הליבה",
+    body: "תוסיפו את כל מי שגר בבית. כל מה שתעשו יהיה ביניכם בלבד — אין שיפוט, אין השוואות חיצוניות. רק אתם.",
     cta: "הבא",
   },
   {
@@ -67,6 +82,12 @@ type Props = {
 
 export function OnboardingWizard({ open, onClose, onComplete }: Props) {
   const [stepIndex, setStepIndex] = useState(0);
+  const [selectedType, setSelectedType] = useState<HouseholdType>(() =>
+    typeof window !== "undefined" ? loadHousehold().type : "couple",
+  );
+  const [hasKids, setHasKids] = useState<boolean>(() =>
+    typeof window !== "undefined" ? loadHousehold().hasKids : false,
+  );
 
   if (!open) return null;
   const step = STEPS[stepIndex];
@@ -76,6 +97,14 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
   const isFirst = stepIndex === 0;
 
   const handleNext = () => {
+    // Persist household type when leaving the household-type step
+    if (step.id === "household-type") {
+      saveHousehold({
+        type: selectedType,
+        hasKids,
+        memberCount: selectedType === "solo" ? 1 : selectedType === "family" ? (hasKids ? 4 : 3) : 2,
+      });
+    }
     if (isLast) {
       onComplete();
       setStepIndex(0);
@@ -142,9 +171,50 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
           <h2 id="ob-title" className="text-xl font-bold text-gray-900 mb-3 text-balance">
             {step.title}
           </h2>
-          <p className="text-sm text-gray-600 leading-relaxed text-pretty mb-6">
+          <p className="text-sm text-gray-600 leading-relaxed text-pretty mb-4">
             {step.body}
           </p>
+
+          {step.customRender && step.id === "household-type" && (
+            <div className="mb-4">
+              <div className="grid grid-cols-2 gap-2 mb-4">
+                {(Object.keys(TYPE_LABELS) as HouseholdType[]).map((t) => {
+                  const label = TYPE_LABELS[t];
+                  const isSelected = selectedType === t;
+                  return (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setSelectedType(t)}
+                      aria-pressed={isSelected}
+                      className={`text-start p-3 rounded-xl border-2 transition-transform duration-150 ${
+                        isSelected
+                          ? "border-rose-500 bg-rose-50"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="text-2xl mb-1" aria-hidden="true">
+                        {label.emoji}
+                      </div>
+                      <div className="text-sm font-bold text-gray-900">{label.label}</div>
+                      <div className="text-[11px] text-gray-500 mt-0.5 text-pretty">
+                        {label.desc}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              <label className="flex items-center justify-center gap-2 p-2 rounded-lg bg-gray-50 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hasKids}
+                  onChange={(e) => setHasKids(e.target.checked)}
+                  className="size-4 accent-rose-500"
+                />
+                <span className="text-sm text-gray-700">יש לנו ילדים 👶</span>
+              </label>
+            </div>
+          )}
 
           {/* Navigation */}
           <div className="flex gap-2">

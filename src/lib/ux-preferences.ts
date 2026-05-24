@@ -9,6 +9,7 @@
 
 export type Theme = "light" | "dark" | "auto";
 export type Toggle = boolean;
+export type FontFamily = "heebo" | "rubik" | "assistant" | "open-sans";
 
 export type UxPreferences = {
   readonly theme: Theme;
@@ -16,6 +17,7 @@ export type UxPreferences = {
   readonly sounds: Toggle;
   readonly notifications: Toggle;
   readonly nightMode: Toggle;
+  readonly fontFamily: FontFamily;
 };
 
 export const DEFAULT_PREFS: UxPreferences = {
@@ -24,7 +26,20 @@ export const DEFAULT_PREFS: UxPreferences = {
   sounds: true,
   notifications: true,
   nightMode: false,
+  fontFamily: "heebo",
 };
+
+export const FONT_LABELS: Record<FontFamily, { label: string; preview: string; stack: string }> = {
+  heebo: { label: "Heebo (ברירת מחדל)", preview: "אבגד", stack: '"Heebo", system-ui, sans-serif' },
+  rubik: { label: "Rubik", preview: "אבגד", stack: '"Rubik", system-ui, sans-serif' },
+  assistant: { label: "Assistant", preview: "אבגד", stack: '"Assistant", system-ui, sans-serif' },
+  "open-sans": { label: "Open Sans", preview: "אבגד", stack: '"Open Sans Hebrew", "Open Sans", sans-serif' },
+};
+
+export function applyFontToDom(font: FontFamily): void {
+  if (typeof document === "undefined") return;
+  document.documentElement.style.setProperty("--alopik-font-family", FONT_LABELS[font].stack);
+}
 
 const STORAGE_KEY = "bayit-ux-preferences-v1";
 
