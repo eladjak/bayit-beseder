@@ -21,6 +21,7 @@ import {
 } from "@/lib/surprise-box";
 import { playSparkle } from "@/lib/sound-effects";
 import { tryHaptic } from "@/lib/ux-preferences";
+import { copy } from "@/lib/copy-resolver";
 
 type Props = {
   /** Trigger: parent calls onAvailable() when first task completed today */
