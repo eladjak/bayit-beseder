@@ -164,6 +164,101 @@
 
 ---
 
+## Nuances captured on second pass — what makes "good" → "professional"
+
+Per Elad 24.5: "מנסיוני - זה מה שהופך כל דבר מ-טוב ל-מקצועי ממש." These are the small things that elevate.
+
+### Copy nuances
+- **Time-aware greeting**: "בוקר טוב, אלעד!" / "צהריים טובים" / "ערב טוב" — never just "Hi user"
+- **Invitational empty-state**: "ברוך הבא לאלופיק 🏆 בואו נמשיך להפוך משימות להצלחות!" — not "no data yet"
+- **Soft rate-limit messaging**: "אפשר לשלוח שוב כל 3 שעות ⏳" — not "BLOCKED" or error toast
+- **Inline why-explanation in forms**: "אם תזין עלות — הילד יראה פס התקדמות. אם תשאיר ריק — נדרש דרך מדליה." — every optional field explains its implication
+- **Plural-as-default**: "כל הילדים קיבלו עידוד" — generic copy works for 0/1/N states
+- **Pronoun inclusion**: "אשר/י", "תזין/הזיני" — gender-aware Hebrew where it matters
+
+### Interaction nuances
+- **Persistent offline pill** at bottom — non-blocking, just informative
+- **PWA update banner** — user-controlled refresh, never forced. "✨ עדכון חדש זמין — לחץ לטעון"
+- **Smart guard** with friendly framing: "רגע — עוד לא הגדרת פרס למדליה 🏅... בוא נגדיר אחד עכשיו (חצי דקה)"
+- **Re-trigger onboarding** from settings — "המסכים הראשוניים יוצגו עכשיו" — adults forget, allow re-learn
+- **Test notifications button** in settings — verify before relying on it
+- **Quick suggestions** in modals — emoji-led pre-defined options eliminate blank-page anxiety
+
+### Settings nuances (4 distinct UX axes — not just "dark/light")
+1. **Theme** (light/auto/dark) — visual
+2. **Haptics** (on/off) — physical feedback
+3. **Sounds** (on/off) — audio
+4. **Night-mode** (on/off) — SEPARATE from dark theme — mutes audio + reduces brightness + reduces motion (for "not waking partner" use-case)
+
+### Information architecture
+- **Bottom nav exactly 6 tabs** — within max-thumb-reach. We currently have 5; consider expansion.
+- **Tab order matters**: most-used → least-used left-to-right (RTL: right-to-left in Hebrew)
+- **Top of every screen = 2 quick-actions** (bonus + encouragement) — friction-free critical paths
+
+---
+
+## NEW v3 module — Kids section (inspired by Alopik, integrated under one roof)
+
+**Per Elad 24.5: "אפשר להתאים בהשראתו סקשן ילדים בתוך אפליקציית בית בסדר שלנו".**
+
+bayit-beseder already covers couple-level household tasks. Adding a KIDS module:
+
+### Use-cases
+- Family with kids 5-13 — adults manage household + kids do age-appropriate tasks
+- Each kid has own login (PIN-based) — Alopik pattern
+- Kids see kid-friendly UI; parents see admin view (Alopik split)
+- Tasks ladder: kid-tasks → reward redemption → parent approval → stars award (full Alopik loop)
+
+### Architecture (under bayit-beseder roof)
+```
+src/app/(app)/family/        → new family hub
+src/app/(app)/family/kids/   → kids management (parent view)
+src/app/(app)/family/me/     → kid view (when logged in as kid)
+src/app/(app)/family/approvals/ → parent approval queue
+supabase/migrations/013_family_kids.sql  → kids table + kid_tasks + kid_rewards
+```
+
+### Differentiators vs Alopik
+- **Inherits family infrastructure** — no separate household_id, kids belong to the couple's existing household
+- **Adult+kid shared tasks** — some tasks (e.g., "טיול משפחתי בשבת") earn EVERYONE points
+- **Kid → adult mutual recognition** — kid can also send heart to parent ("איזה אבא טוב")
+- **Family streak** — couples streak extends to family streak when kids participate
+- **Privacy-tight** — only family members see family data. Each kid sees ONLY own data + family aggregates
+- **Kid-content guard** — kids never see relationship-content (the couple's date features, the surprise box content)
+
+### Module-on/off toggle
+- Couples without kids → KIDS module hidden by default
+- Settings → "אפשר מודול ילדים" → unlocks
+- Solo individual → still works (always-on personal jar)
+
+### Ship phase
+**Phase 4** (post v2 launch). Implement after couple-features are battle-tested in market. Kids module = expansion, not blocker for market launch.
+
+---
+
+## Updated ship plan (timeline)
+
+| Phase | Features | Week | Gate |
+|---|---|---|---|
+| **v2 P0** | Quick Love, Surprise Box, Onboarding, Smart Guards | THIS WEEK | typecheck + RLS test + mobile UX live test |
+| **v2 P1** | Settings 4-axis, Weekly Wheel | next week | Friday wheel goes live |
+| **v2 P2** | Pets, Backgrounds, Calendar-aware suggestions | week after | non-blocking polish |
+| **v3 Kids** | Family hub, kid login, parent approvals | post-launch + market signal | only if couples with kids actually request |
+
+---
+
+## Council questions (updated)
+
+For council-of-sages second-pass:
+1. The 4-axis Settings split (Theme/Haptics/Sounds/Night-mode) — is the Night-mode logic ("mute sounds + reduce brightness + reduce motion") the right bundle, or should we split further?
+2. "Smart guard" pattern — Alopik blocks task creation without ≥1 reward. For ADULTS, is this paternalistic? Or is the friendly tone enough?
+3. Plural-as-default copy — works for kids (always "the kids"), works for couples ("we", "us"). Translates well to solo users?
+4. Kids module ship-gate — wait for couple-market signal first, or build alongside for parallel demo?
+
+
+
+---
+
 ## Council brief (for parallel review)
 
 Send to GPT-5.5 + Grok-4.20 + Gemini-3.1-Pro via `council-of-sages`:
