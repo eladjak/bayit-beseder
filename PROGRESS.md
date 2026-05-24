@@ -1,8 +1,18 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## Status: Sprint 7.30 Alopik integration — Phase 1+2 SHIPPED · Phase 3 lib ready · ממתין למיגרציות 012+013 ידניות
-## Last Updated: 2026-05-24 09:55 IDT (Loop D autonomous)
+## Status: Sprint 7.31 — Warm Joy redesign + multi-household + Fairness Meter · PUSHED to master (Vercel deploy triggered)
+## Last Updated: 2026-05-24 21:15 IDT
 ## URL: https://www.bayitbeseder.com
+
+### Sprint 7.31 (2026-05-24 PM) — 5 commits, PUSHED 8e73c20→099a956
+- **Warm Joy redesign** (`5172b40`): bg cold→cream-lavender, warm shadows (not cold indigo glow), honey/peach/coral tokens, `.bb-card .bb-joy .bb-blob .bb-pop .bb-bob .bb-illus` · 5 new Gemini illustrations (household types + mascot)
+- **Multi-household copy sweep** (`48c93e7`): couples+families+roommates+kids+solo · 3 stale "coming soon" FAQs fixed · copy-resolver 3x · SEO/meta marketing line · coaching/rewards/notifications de-coupled · 0 couple-only strings remain
+- **Warm empty states** (`31950ff`): `.bb-joy` panels on tasks/shopping/stats/weekly
+- **Mascot** (`6f0fd15`): friendly house companion in dashboard header
+- **Fairness Balance Meter** (`099a956`): council #1 moat — weekly per-member load split, non-shaming, dashboard SECTION 2.5 · 5 tests
+- Onboarding household picker → illustration-forward
+- tsc clean · build passing · copy+fairness tests pass
+- **DEPLOY: pushed to origin/master 21:15 → Vercel auto-deploy in progress**
 
 ### Sprint 7.30 (2026-05-24) — Alopik integration · 5 commits autonomous
 
