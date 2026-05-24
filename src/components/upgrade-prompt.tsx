@@ -87,18 +87,22 @@ export function UpgradePrompt({
         )}
       </div>
 
-      {/* CTA footer */}
+      {/* CTA footer — Sprint 7.30+ Elad: real upgrade CTA, not "comingSoon" dead-end */}
       <div className="bg-white dark:bg-zinc-900 px-5 py-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span className="text-xs font-medium">
-            {t("upgrade.fromPrice")}
-          </span>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-1.5 text-indigo-600 dark:text-indigo-400">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span className="text-xs font-medium">{t("upgrade.fromPrice")}</span>
+          </div>
+          <span className="text-[11px] text-gray-500 mt-0.5">בחינם ל-30 יום · ביטול בכל רגע</span>
         </div>
-        <span className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-sm font-bold">
+        <a
+          href="/upgrade"
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-l from-indigo-600 to-violet-600 text-white text-sm font-bold shadow-md hover:shadow-lg active:scale-95 transition-transform"
+        >
           <Sparkles className="w-3.5 h-3.5" />
-          {t("upgrade.comingSoon")}
-        </span>
+          {cta}
+        </a>
       </div>
     </div>
   );
