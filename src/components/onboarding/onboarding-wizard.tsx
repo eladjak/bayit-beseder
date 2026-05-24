@@ -124,7 +124,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
       aria-labelledby="ob-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
     >
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden">
+      <div className="alopik-settle w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden">
         {/* Progress bar */}
         <div className="h-1.5 bg-gray-100">
           <div

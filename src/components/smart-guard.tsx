@@ -66,7 +66,7 @@ export function SmartGuard({ kind, open, onDismiss }: Props) {
       onClick={onDismiss}
     >
       <div
-        className="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden"
+        className="alopik-settle w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-end px-3 pt-3">

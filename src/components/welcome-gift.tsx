@@ -46,7 +46,7 @@ export function WelcomeGiftModal() {
       aria-labelledby="wg-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
     >
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden">
+      <div className="alopik-settle w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden">
         <div className="flex justify-end px-3 pt-3">
           <button
             type="button"
@@ -91,7 +91,7 @@ export function WelcomeGiftModal() {
           <button
             type="button"
             onClick={handleClaim}
-            className="w-full py-3 rounded-xl bg-gradient-to-l from-indigo-600 to-violet-500 text-white font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-transform"
+            className="w-full py-3 rounded-xl alopik-brand-gradient text-white font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-transform"
           >
             🎉 פתחתי את המתנה!
           </button>

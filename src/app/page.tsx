@@ -224,15 +224,25 @@ export default function LandingPage() {
             לא צריך להוריד מחנות. עובד ישר מהדפדפן.
           </p>
 
+          {/* Custom brand hero illustration (Gemini-generated, indigo/violet) */}
+          <Image
+            src="/hero-illustration.jpg"
+            alt="זוג מסדר את הבית ביחד — בית בסדר"
+            width={1376}
+            height={768}
+            priority
+            sizes="(max-width: 768px) 100vw, 768px"
+            className="mt-8 mx-auto w-full max-w-2xl rounded-2xl shadow-2xl border border-white/10"
+          />
+
           {/* App mockup */}
           <Image
             src="/illustrations/app-mockup.jpg"
             alt="תצוגת האפליקציה — בית בסדר"
             width={320}
             height={640}
-            priority
             sizes="(max-width: 768px) 256px, 320px"
-            className="mt-8 mx-auto w-64 md:w-80 rounded-2xl shadow-2xl border-2 border-white/10"
+            className="mt-6 mx-auto w-64 md:w-80 rounded-2xl shadow-2xl border-2 border-white/10"
           />
         </div>
       </section>

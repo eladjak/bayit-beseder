@@ -78,11 +78,11 @@ export function SurpriseBox({ trigger = 0 }: Props) {
           onClick={handleOpen}
           disabled={pending}
           aria-label="פתח את קופסת ההפתעה היומית"
-          className="fixed bottom-44 end-4 z-40 size-14 rounded-full bg-gradient-to-br from-violet-400 to-indigo-600 text-white shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
+          className="alopik-brand-gradient alopik-shimmer fixed bottom-44 end-4 z-40 size-14 rounded-full text-white shadow-xl flex items-center justify-center hover:brightness-110 active:scale-95 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
         >
           <Gift className="size-7" aria-hidden="true" />
           <Sparkles
-            className="absolute -top-1 -end-1 size-4 text-yellow-200 animate-pulse"
+            className="absolute -top-1 -end-1 size-4 text-violet-200 animate-pulse"
             aria-hidden="true"
           />
         </button>
@@ -98,7 +98,7 @@ export function SurpriseBox({ trigger = 0 }: Props) {
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-[min(360px,90vw)] rounded-2xl bg-white p-6 shadow-2xl text-center"
+            className="alopik-settle w-[min(360px,90vw)] rounded-2xl bg-white p-6 shadow-2xl text-center"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -111,9 +111,8 @@ export function SurpriseBox({ trigger = 0 }: Props) {
             </button>
 
             <div
-              className="text-6xl mb-3 animate-bounce"
+              className="alopik-shimmer text-6xl mb-3"
               aria-hidden="true"
-              style={{ animationDuration: "0.6s", animationIterationCount: 3 }}
             >
               {reward.emoji}
             </div>
