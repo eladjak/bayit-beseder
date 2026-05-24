@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { BottomNav } from "@/components/bottom-nav";
@@ -34,11 +34,31 @@ const QuickLoveButton = dynamic(
   { ssr: false },
 );
 
+// Alopik v2 #2: Daily Surprise Box. Lazy-loaded.
+const SurpriseBox = dynamic(
+  () => import("@/components/surprise-box").then((m) => ({ default: m.SurpriseBox })),
+  { ssr: false },
+);
+
+// Alopik v2 #3: Onboarding Wizard. Lazy-loaded.
+const OnboardingWizard = dynamic(
+  () => import("@/components/onboarding/onboarding-wizard").then((m) => ({ default: m.OnboardingWizard })),
+  { ssr: false },
+);
+
 function AppLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [chatOpen, setChatOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
+
+  // Alopik v2 #3: Show onboarding wizard once per user (localStorage flag)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const done = localStorage.getItem("bayit-onboarding-done-v1");
+    if (!done) setOnboardingOpen(true);
+  }, []);
 
   useKeyboardShortcuts({
     onNewTask: () => router.push("/tasks"),
@@ -84,6 +104,26 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 
       {/* Alopik v2 #1: Quick Love floating button (bidirectional household member micro-recognition) */}
       <QuickLoveButton />
+
+      {/* Alopik v2 #2: Daily Surprise Box (first task of day) */}
+      <SurpriseBox />
+
+      {/* Alopik v2 #3: Adult-toned onboarding wizard (once per user, re-trigger from settings) */}
+      <OnboardingWizard
+        open={onboardingOpen}
+        onClose={() => {
+          setOnboardingOpen(false);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("bayit-onboarding-done-v1", "1");
+          }
+        }}
+        onComplete={() => {
+          setOnboardingOpen(false);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("bayit-onboarding-done-v1", "1");
+          }
+        }}
+      />
 
       {/* AI Chat drawer */}
       <ChatDrawer open={chatOpen} onClose={() => setChatOpen(false)} />
