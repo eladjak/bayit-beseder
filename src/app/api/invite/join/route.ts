@@ -49,10 +49,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing invite code" }, { status: 400 });
   }
 
-  // Fetch the current user's profile
+  // Fetch the current user's profile.
+  // NOTE: the household relationship is modeled via household_members + profiles.household_id.
+  // There is NO partner_id column on profiles (legacy field, never created in prod) — selecting
+  // it makes PostgREST 400 and silently breaks the entire join. Do not reference it.
   const { data: joinerProfile, error: joinerError } = await supabase
     .from("profiles")
-    .select("id, display_name, household_id, partner_id")
+    .select("id, display_name, household_id")
     .eq("id", user.id)
     .single();
 
@@ -126,13 +129,10 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Update joiner's profile: set household_id and partner_id
+  // Update joiner's profile: set household_id (partnership is via household_members).
   const { error: joinerUpdateError } = await serviceClient
     .from("profiles")
-    .update({
-      household_id: household.id,
-      partner_id: ownerMember.user_id,
-    })
+    .update({ household_id: household.id })
     .eq("id", user.id);
 
   if (joinerUpdateError) {
@@ -141,17 +141,6 @@ export async function POST(request: NextRequest) {
       { error: "Failed to update profile" },
       { status: 500 }
     );
-  }
-
-  // Update owner's profile: set partner_id to joiner
-  const { error: ownerUpdateError } = await serviceClient
-    .from("profiles")
-    .update({ partner_id: user.id })
-    .eq("id", ownerMember.user_id);
-
-  if (ownerUpdateError) {
-    console.error("[invite/join] Failed to update owner profile:", ownerUpdateError);
-    // Non-fatal: joiner is still in the household
   }
 
   // Fetch owner display name for response
