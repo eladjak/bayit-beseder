@@ -63,6 +63,12 @@ const CelebrationToast = dynamic(
   { ssr: false },
 );
 
+// Alopik v2 Loop L: Welcome Gift modal — auto-pops after onboarding once.
+const WelcomeGiftModal = dynamic(
+  () => import("@/components/welcome-gift").then((m) => ({ default: m.WelcomeGiftModal })),
+  { ssr: false },
+);
+
 // Alopik v2 #3: Onboarding Wizard. Lazy-loaded.
 const OnboardingWizard = dynamic(
   () => import("@/components/onboarding/onboarding-wizard").then((m) => ({ default: m.OnboardingWizard })),
@@ -163,6 +169,9 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 
       {/* Alopik v2 Phase 3: Celebration toast for new pet/background unlocks */}
       <CelebrationToast items={celebrationItems} />
+
+      {/* Alopik v2 Loop L: Welcome Gift modal (one-shot after onboarding) */}
+      <WelcomeGiftModal />
 
       {/* Alopik v2 #3: Adult-toned onboarding wizard (once per user, re-trigger from settings) */}
       <OnboardingWizard
