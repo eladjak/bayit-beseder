@@ -8,6 +8,7 @@ import {
   List,
   SlidersHorizontal,
 } from "lucide-react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
 import { ShareButton } from "@/components/share-button";
@@ -94,6 +95,16 @@ export function WeeklyHeader({
                 position="below"
               />
             </div>
+            {/* Alopik v2 — secondary path to personalize before planning (per Elad 24.5) */}
+            <Link
+              href="/settings#pets"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 text-white text-xs font-medium border border-white/20 hover:bg-white/20 active:scale-95 transition-transform"
+              title="התאם את החבר/ה שלך לדרך והרקעים"
+              aria-label="העדפות חוויה — חבר/ה לדרך ורקעים"
+            >
+              <span aria-hidden="true">🐾</span>
+              <span>העדפות</span>
+            </Link>
             <button
               onClick={() => toast.info(t("weekly.manualModeToast"))}
               className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/20 text-white text-xs font-medium border border-white/20 active:scale-95 transition-transform"
