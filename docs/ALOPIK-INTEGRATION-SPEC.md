@@ -236,6 +236,34 @@ supabase/migrations/013_family_kids.sql  → kids table + kid_tasks + kid_reward
 
 ---
 
+## Alopik FINAL corners (Loop J — 24.5 12:30 IDT)
+
+Visited `/onboarding/parent` — 3-step wizard (vs our 6):
+
+1. **Welcome** — "אפליקציה שהופכת משימות יומיומיות למשחק שכל המשפחה אוהבת" · "ילדים מתלהבים · פותחים פרסים מדליות וסקינים · הורים רואים גאווה אמיתית"
+2. **How it works** — 3-step loop: "1️⃣ אתם מקצים משימה לילד · 2️⃣ הילד מסיים ושולח לאישור · 3️⃣ אתם מאשרים — והילד מקבל כוכבים!"
+3. **Let's start** — "ילד ראשון תוך דקה" · "כל ילד יקבל קוד אישי" · "PIN בן 4 ספרות" · "🎁 מתנת ברוכים הבאים מחכה"
+
+### Things Alopik DOES that we MISSED in our spec
+- **Welcome gift on first onboarding finish** — instant gratification before any work done. We should add: "🎁 פתחו את מתנת ההצטרפות" auto-popped post-onboarding (could be 50 bonus points + 1 free Surprise Box redeem)
+- **"3-step loop" explainer with numbered cards** — Alopik's killer onboarding moment; ours is 6 abstract steps. Consider adding a "How it works" page accessible from any time.
+- **Time-bounded promise** — "ילד ראשון תוך דקה" sets a clock. We could promise "פיצ'ר ראשון פעיל תוך 30 שניות".
+- **`/legal/terms` + `/legal/privacy`** — Alopik has them as separate routes; ours probably bundle elsewhere. Verify Israeli Chok HaSpam + IS 5568 compliance.
+
+### What Alopik DOESN'T have that we do
+- Multi-household-type (couple/family/roommates/solo) — Alopik is family-only
+- Adult emotional layer (Quick Love, Surprise Box for ADULTS, not just kids)
+- Premium tastings (Alopik has nothing paywalled — free for everyone but no monetization path)
+- Easter eggs
+- Background themes + pets collection (Alopik mentions "סקינים" but doesn't appear to have a selector)
+- Hebrew RTL polish on FAB (Alopik's offline indicator slides correctly but its FAB positioning is desktop-first)
+
+### Action items added to backlog
+- [ ] Welcome gift mechanic (post-onboarding)
+- [ ] "How it works" 3-card page (always-accessible)
+- [ ] Time-bounded onboarding promise ("פיצ'ר חי תוך 30 שניות")
+- [ ] /legal/terms + /legal/privacy compliance verification
+
 ## Updated ship plan (timeline)
 
 | Phase | Features | Week | Gate |
