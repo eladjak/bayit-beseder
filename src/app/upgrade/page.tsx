@@ -73,10 +73,10 @@ const PLANS: ReadonlyArray<Plan> = [
 
 export default function UpgradePage() {
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-rose-50 via-white to-amber-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950" dir="rtl">
+    <div className="min-h-dvh bg-gradient-to-b from-indigo-50 via-white to-violet-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950" dir="rtl">
       <div className="max-w-5xl mx-auto px-5 py-12">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-bold mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold mb-4">
             <Sparkles className="size-3.5" aria-hidden="true" />
             30 יום ניסיון חינם · ביטול בכל רגע
           </div>
@@ -94,7 +94,7 @@ export default function UpgradePage() {
               key={plan.id}
               className={`rounded-2xl p-6 border-2 shadow-sm transition-transform hover:scale-[1.01] ${
                 plan.highlight
-                  ? "bg-gradient-to-br from-rose-500 to-violet-600 text-white border-rose-600"
+                  ? "bg-gradient-to-br from-indigo-600 to-violet-600 text-white border-indigo-600"
                   : "bg-white dark:bg-zinc-900 text-gray-900 dark:text-white border-gray-200 dark:border-zinc-800"
               }`}
             >
@@ -124,7 +124,7 @@ export default function UpgradePage() {
                   href="/dashboard"
                   className={`w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm ${
                     plan.highlight
-                      ? "bg-white text-rose-700 hover:bg-white/95"
+                      ? "bg-white text-indigo-700 hover:bg-white/95"
                       : "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300"
                   }`}
                 >
@@ -135,8 +135,8 @@ export default function UpgradePage() {
                   href={`mailto:hello@bayitbeseder.com?subject=שדרוג%20ל-${encodeURIComponent(plan.name)}`}
                   className={`w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm ${
                     plan.highlight
-                      ? "bg-white text-rose-700 hover:bg-white/95"
-                      : "bg-rose-500 text-white hover:bg-rose-600"
+                      ? "bg-white text-indigo-700 hover:bg-white/95"
+                      : "bg-indigo-600 text-white hover:bg-indigo-700"
                   }`}
                 >
                   {plan.ctaLabel}

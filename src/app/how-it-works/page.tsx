@@ -43,12 +43,12 @@ const STEPS: ReadonlyArray<Step> = [
 export default function HowItWorksPage() {
   return (
     <div
-      className="min-h-dvh bg-gradient-to-b from-rose-50 via-white to-amber-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950"
+      className="min-h-dvh bg-gradient-to-b from-indigo-50 via-white to-violet-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950"
       dir="rtl"
     >
       <div className="max-w-3xl mx-auto px-5 py-12">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-bold mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-bold mb-4">
             <Sparkles className="size-3.5" aria-hidden="true" />
             הסבר 30 שניות
           </div>
@@ -66,7 +66,7 @@ export default function HowItWorksPage() {
               key={step.number}
               className="rounded-2xl bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 p-6 shadow-sm flex items-start gap-4"
             >
-              <div className="shrink-0 size-14 rounded-2xl bg-gradient-to-br from-rose-500 to-violet-600 text-white text-2xl font-extrabold flex items-center justify-center shadow-md tabular-nums">
+              <div className="shrink-0 size-14 rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white text-2xl font-extrabold flex items-center justify-center shadow-md tabular-nums">
                 {step.number}
               </div>
               <div className="min-w-0">
@@ -89,7 +89,7 @@ export default function HowItWorksPage() {
         <div className="text-center">
           <Link
             href="/login"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-l from-rose-500 to-violet-600 text-white font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-transform"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-l from-indigo-600 to-violet-600 text-white font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-transform"
           >
             <Sparkles className="size-4" aria-hidden="true" />
             בואו נתחיל — חינם

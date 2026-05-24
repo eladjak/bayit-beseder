@@ -60,7 +60,7 @@ export function FeatureTasting({
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-white dark:to-zinc-900" />
         {/* Top-end teaser badge */}
         {showTeaserBadge && (
-          <span className="absolute top-3 end-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[11px] font-bold border border-amber-200 shadow-sm">
+          <span className="absolute top-3 end-3 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-violet-100 text-violet-900 text-[11px] font-bold border border-violet-200 shadow-sm">
             <Sparkles className="size-3" aria-hidden="true" />
             טעימה
           </span>
@@ -89,7 +89,7 @@ export function FeatureTasting({
           <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-1.5 mb-4 ps-1">
             {benefits.slice(0, 3).map((b) => (
               <li key={b} className="flex items-start gap-2">
-                <Sparkles className="size-3.5 text-amber-500 mt-0.5 shrink-0" aria-hidden="true" />
+                <Sparkles className="size-3.5 text-violet-500 mt-0.5 shrink-0" aria-hidden="true" />
                 <span>{b}</span>
               </li>
             ))}

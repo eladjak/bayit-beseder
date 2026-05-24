@@ -124,7 +124,7 @@ export function QuickLoveButton() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={copy("quickLoveAria")}
-        className="fixed bottom-24 end-4 z-40 size-14 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-transform duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
+        className="alopik-brand-gradient fixed bottom-24 end-4 z-40 size-14 rounded-full text-white shadow-lg flex items-center justify-center hover:brightness-110 active:scale-95 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
       >
         <Heart className="size-6" fill="currentColor" aria-hidden="true" />
       </button>
@@ -139,7 +139,7 @@ export function QuickLoveButton() {
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-md rounded-t-2xl bg-white p-5 shadow-2xl"
+            className="alopik-settle w-full max-w-md rounded-t-2xl bg-white p-5 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3">
