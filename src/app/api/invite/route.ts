@@ -158,7 +158,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing code parameter" }, { status: 400 });
   }
 
-  const supabase = await createClient();
+  // Invite validation must work for NOT-yet-logged-in visitors (the invitee opens
+  // the link before signing up). RLS on `households` requires auth.uid() IS NOT NULL,
+  // so the anon client would 404 a valid code. The invite code is a secret bearer
+  // token — look it up with the service-role client and return only minimal info.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return NextResponse.json({ error: "Server not configured" }, { status: 500 });
+  }
+
+  const supabase = createServiceClient<Database>(supabaseUrl, supabaseServiceKey);
 
   const { data: household, error } = await supabase
     .from("households")
