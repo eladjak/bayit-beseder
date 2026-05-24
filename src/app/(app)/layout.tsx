@@ -40,6 +40,12 @@ const SurpriseBox = dynamic(
   { ssr: false },
 );
 
+// Alopik v2 Phase 2: Weekly Wheel of Fortune (Friday-Sat). Lazy-loaded.
+const WeeklyWheel = dynamic(
+  () => import("@/components/gamification/weekly-wheel").then((m) => ({ default: m.WeeklyWheel })),
+  { ssr: false },
+);
+
 // Alopik v2 #3: Onboarding Wizard. Lazy-loaded.
 const OnboardingWizard = dynamic(
   () => import("@/components/onboarding/onboarding-wizard").then((m) => ({ default: m.OnboardingWizard })),
@@ -107,6 +113,9 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 
       {/* Alopik v2 #2: Daily Surprise Box (first task of day) */}
       <SurpriseBox />
+
+      {/* Alopik v2 Phase 2: Weekly Wheel — appears Fri 14:00 → Sat night */}
+      <WeeklyWheel />
 
       {/* Alopik v2 #3: Adult-toned onboarding wizard (once per user, re-trigger from settings) */}
       <OnboardingWizard
