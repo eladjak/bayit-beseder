@@ -28,6 +28,16 @@ export function DashboardHeader({
       <Link href="/" className="absolute top-4 right-4 z-10 text-white/50 hover:text-white/80 text-xs font-medium transition-colors">
         🏠 בית בסדר
       </Link>
+      {/* Friendly house companion — adds warmth/life (decorative) */}
+      <Image
+        src="/illustrations/mascot-home.jpg"
+        alt=""
+        aria-hidden="true"
+        width={72}
+        height={72}
+        sizes="72px"
+        className="bb-bob pointer-events-none absolute top-3 left-3 z-0 w-14 h-14 rounded-2xl object-cover border border-white/40 shadow-lg shadow-black/15 opacity-95"
+      />
       <div className="text-center relative z-10">
         {/* User avatar in header */}
         <div className="flex justify-center mb-3">
