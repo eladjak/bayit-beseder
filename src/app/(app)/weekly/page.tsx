@@ -434,7 +434,7 @@ export default function WeeklyPage() {
 
       <div className="px-4 space-y-5">
         {/* Weekly planning illustration */}
-        <div className="card-elevated overflow-hidden">
+        <div className="bb-joy overflow-hidden">
           <Image
             src="/illustrations/weekly-plan.jpg"
             alt="תכנון שבועי"

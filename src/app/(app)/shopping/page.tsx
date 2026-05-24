@@ -352,7 +352,7 @@ export default function ShoppingPage() {
         {/* ---- Empty state ---- */}
         {items.length === 0 && (
           <motion.div
-            className="card-elevated p-8 text-center"
+            className="bb-joy p-8 text-center"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}

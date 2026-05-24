@@ -850,7 +850,7 @@ export default function TasksPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="card-elevated p-8 text-center"
+            className="bb-joy p-8 text-center"
           >
             <Image
               src={activeCategory === "all" ? "/illustrations/tasks-done.jpg" : "/illustrations/empty-tasks.jpg"}
