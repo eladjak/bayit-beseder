@@ -24,6 +24,8 @@ import {
   MAX_MESSAGE_LEN,
   DAILY_SEND_LIMIT,
 } from "@/lib/love-tokens";
+import { playHeartPop } from "@/lib/sound-effects";
+import { tryHaptic } from "@/lib/ux-preferences";
 
 type HouseholdMember = {
   readonly id: string;
@@ -97,6 +99,8 @@ export function QuickLoveButton() {
         message: message.trim() || undefined,
       });
       if (result.ok) {
+        playHeartPop();
+        tryHaptic([10, 30, 10]);
         toast.success(`💖 ${valueToSend} לבבות נשלחו!`);
         setOpen(false);
         setMessage("");

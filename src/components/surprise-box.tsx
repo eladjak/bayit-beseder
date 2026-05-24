@@ -19,6 +19,8 @@ import {
   getTimeAwareGreeting,
   type Reward,
 } from "@/lib/surprise-box";
+import { playSparkle } from "@/lib/sound-effects";
+import { tryHaptic } from "@/lib/ux-preferences";
 
 type Props = {
   /** Trigger: parent calls onAvailable() when first task completed today */
@@ -54,6 +56,8 @@ export function SurpriseBox({ trigger = 0 }: Props) {
         toast.info("כבר פתחת היום את הקופסה ✨");
         return;
       }
+      playSparkle();
+      tryHaptic([10, 20, 10, 20, 30]);
       setReward(result.reward);
       setOpen(true);
       setAvailable(false);

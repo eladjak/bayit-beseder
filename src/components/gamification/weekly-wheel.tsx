@@ -19,6 +19,8 @@ import {
   redeemSpin,
   type WheelSegment,
 } from "@/lib/weekly-wheel";
+import { playSpinChime, playSuccessChord } from "@/lib/sound-effects";
+import { tryHaptic } from "@/lib/ux-preferences";
 
 type State =
   | { kind: "idle" }
@@ -46,6 +48,8 @@ export function WeeklyWheel() {
 
   const handleSpin = () => {
     setState({ kind: "spinning" });
+    playSpinChime();
+    tryHaptic([20, 40, 20]);
     startTransition(async () => {
       // Visual spin animation (1.8s)
       await new Promise((resolve) => setTimeout(resolve, 1800));
@@ -60,6 +64,7 @@ export function WeeklyWheel() {
         setOpen(false);
         return;
       }
+      playSuccessChord();
       setState({
         kind: "result",
         segment: result.segment,
