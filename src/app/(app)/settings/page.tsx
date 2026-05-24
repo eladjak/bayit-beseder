@@ -773,7 +773,7 @@ export default function SettingsPage() {
               <div>
                 <h3 className="text-lg font-bold text-white tracking-tight">בית בסדר</h3>
                 <p className="text-xs text-white/70 mt-0.5">
-                  {t("common.login") === "Login" ? "Smart home maintenance for two" : "ניהול הבית החכם לזוג"}
+                  {t("common.login") === "Login" ? "Smart home maintenance for every home" : "ניהול הבית החכם לכל בית"}
                 </p>
               </div>
               {/* Version badge */}

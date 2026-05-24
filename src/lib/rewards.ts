@@ -48,7 +48,7 @@ export const REWARDS: Reward[] = [
     id: "movie-night",
     emoji: "🎬",
     title: "ערב צפייה",
-    description: "שני בני הזוג משלימים משימות 3 ימים ברצף",
+    description: "כל בני הבית משלימים משימות 3 ימים ברצף",
     requirement: { type: "both_daily", threshold: 3 },
   },
   {
@@ -90,7 +90,7 @@ export const REWARDS: Reward[] = [
     id: "shopping-together",
     emoji: "🛍️",
     title: "קניות משותפות",
-    description: "כל אחד מבני הזוג השלים 10 משימות השבוע",
+    description: "כל אחד מבני הבית השלים 10 משימות השבוע",
     requirement: { type: "weekly_tasks", threshold: 10 },
   },
   {

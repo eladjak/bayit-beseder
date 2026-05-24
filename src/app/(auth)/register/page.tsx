@@ -3,7 +3,7 @@ import { RegisterForm } from "./register-form";
 
 export const metadata: Metadata = {
   title: "הרשמה",
-  description: "צרו חשבון חינמי ב-בית בסדר — אפליקציה לניהול הבית לזוגות ומשפחות",
+  description: "צרו חשבון חינמי ב-בית בסדר — אפליקציה לניהול הבית לזוגות, משפחות ושותפים",
   robots: { index: false, follow: false },
 };
 

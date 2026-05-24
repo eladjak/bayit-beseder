@@ -17,7 +17,7 @@ import {
 
 export const metadata: Metadata = {
   title: "בית בסדר — ניהול הבית ביחד, בכיף",
-  description: "אפליקציה חינמית בעברית לניהול משק הבית לזוגות ומשפחות. חלוקת תורנויות חכמה, תכנון שבועי, רשימת קניות משותפת וגיימיפיקציה!",
+  description: "אפליקציה חינמית בעברית לניהול משק הבית לזוגות, משפחות ושותפים. חלוקת תורנויות חכמה, תכנון שבועי, רשימת קניות משותפת וגיימיפיקציה!",
   keywords: [
     "ניהול בית",
     "ניהול משק בית",
@@ -42,7 +42,7 @@ const jsonLd = {
   name: "בית בסדר",
   alternateName: "Bayit Beseder",
   url: "https://www.bayitbeseder.com",
-  description: "אפליקציה חינמית בעברית לניהול משק הבית לזוגות ומשפחות — חלוקת תורנויות, תכנון שבועי, רשימת קניות משותפת וגיימיפיקציה",
+  description: "אפליקציה חינמית בעברית לניהול משק הבית לזוגות, משפחות ושותפים — חלוקת תורנויות, תכנון שבועי, רשימת קניות משותפת וגיימיפיקציה",
   applicationCategory: "LifestyleApplication",
   operatingSystem: "Web, Android, iOS",
   browserRequirements: "Requires JavaScript. Requires HTML5.",
@@ -140,7 +140,7 @@ const organizationLd = {
     height: 192,
   },
   image: "https://www.bayitbeseder.com/og-image.jpg",
-  description: "אפליקציה חינמית בעברית לניהול משק הבית לזוגות ומשפחות — חלוקת תורנויות, תכנון שבועי וגיימיפיקציה",
+  description: "אפליקציה חינמית בעברית לניהול משק הבית לזוגות, משפחות ושותפים — חלוקת תורנויות, תכנון שבועי וגיימיפיקציה",
   email: "contact@bayitbeseder.com",
   sameAs: [
     "https://www.bayitbeseder.com",

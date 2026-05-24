@@ -26,7 +26,7 @@ export const COACHING_MESSAGES: CoachingMessage[] = [
   { trigger: "task_complete", message: "איזה כיף! משימה ירדה מהרשימה", emoji: "📋" },
   { trigger: "task_complete", message: "בום! עוד משימה עפה", emoji: "💥" },
   { trigger: "task_complete", message: "כל הכבוד! עוד קצת ואת/ה תהיה/י מרי קונדו ישראלי/ת", emoji: "🧹" },
-  { trigger: "task_complete", message: "שטפת כלים? בן/בת הזוג שלך כנראה לא מאמין/ה", emoji: "😱" },
+  { trigger: "task_complete", message: "שטפת כלים? שאר הבית כנראה לא מאמין/ה", emoji: "😱" },
   { trigger: "task_complete", message: "ניקית את זה כמו שצריך! הבית שואף להיות כמוך", emoji: "🫧" },
   { trigger: "task_complete", message: "גאאאל! הבית מרוצה ממך ברמות", emoji: "🥹" },
   { trigger: "task_complete", message: "מישהו יגיד שאת/ה חרוץ/ה? נכון מאוד", emoji: "🏅" },
@@ -87,7 +87,7 @@ export const COACHING_MESSAGES: CoachingMessage[] = [
   { trigger: "partner_complete", message: "עוד משימה בוצעה! צוות מנצח", emoji: "🏠" },
   { trigger: "partner_complete", message: "ביחד אתם בלתי ניתנים לעצירה!", emoji: "💑" },
   { trigger: "partner_complete", message: "שיתוף פעולה מושלם!", emoji: "🙌" },
-  { trigger: "partner_complete", message: "בן/בת הזוג שלך עבד/ה — הגיע תורך 😄", emoji: "👀" },
+  { trigger: "partner_complete", message: "מישהו בבית עבד/ה — הגיע תורך 😄", emoji: "👀" },
   { trigger: "partner_complete", message: "מישהו כאן מרוויח נקודות. עדיף שתהיה/י את/ה", emoji: "😏" },
   { trigger: "partner_complete", message: "הצוות הביתי שלכם יותר מסונכרן מרוב קבוצות כדורגל", emoji: "⚽" },
 ];

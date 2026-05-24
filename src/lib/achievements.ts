@@ -91,7 +91,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     code: "clean_team",
     title: "צוות נקי",
-    description: "שניכם סיימתם את כל המשימות באותו יום 5 פעמים",
+    description: "כל בני הבית סיימו את כל המשימות באותו יום 5 פעמים",
     icon: "🤝",
     threshold: 5,
     category: "collaboration",
