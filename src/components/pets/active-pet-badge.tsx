@@ -37,7 +37,7 @@ export function ActivePetBadge({ onClick }: Props) {
       type="button"
       onClick={onClick}
       aria-label={`החבר/ה שלך: ${pet.name}. לחץ להחלפה.`}
-      className="inline-flex items-center justify-center size-9 rounded-full bg-rose-50 border border-rose-100 text-xl hover:scale-110 active:scale-95 transition-transform duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300"
+      className="inline-flex items-center justify-center size-9 rounded-full bg-indigo-50 border border-indigo-100 text-xl hover:scale-110 active:scale-95 transition-transform duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
     >
       <span aria-hidden="true" className="select-none">{pet.emoji}</span>
     </button>

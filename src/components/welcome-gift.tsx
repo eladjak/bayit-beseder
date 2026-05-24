@@ -66,21 +66,21 @@ export function WelcomeGiftModal() {
           >
             {WELCOME_GIFT.emoji}
           </div>
-          <h2 id="wg-title" className="text-xl font-bold text-rose-700 mb-2 text-balance">
+          <h2 id="wg-title" className="text-xl font-bold text-indigo-700 mb-2 text-balance">
             {WELCOME_GIFT.title}
           </h2>
           <p className="text-sm text-gray-600 mb-5 text-pretty">{WELCOME_GIFT.subtitle}</p>
 
-          <div className="bg-amber-50 rounded-xl p-4 mb-5 border border-amber-200">
+          <div className="bg-violet-50 rounded-xl p-4 mb-5 border border-violet-200">
             <ul className="text-start space-y-2 text-sm">
               <li className="flex items-center gap-2">
-                <Sparkles className="size-4 text-amber-600 shrink-0" aria-hidden="true" />
+                <Sparkles className="size-4 text-violet-600 shrink-0" aria-hidden="true" />
                 <span>
                   <b>{WELCOME_GIFT.bonusPoints} נקודות בונוס</b> כדי שלא תתחילו מאפס
                 </span>
               </li>
               <li className="flex items-center gap-2">
-                <Sparkles className="size-4 text-amber-600 shrink-0" aria-hidden="true" />
+                <Sparkles className="size-4 text-violet-600 shrink-0" aria-hidden="true" />
                 <span>
                   <b>{WELCOME_GIFT.freeSurpriseBoxes} קופסת הפתעה</b> שאתם יכולים לפתוח עכשיו
                 </span>
@@ -91,7 +91,7 @@ export function WelcomeGiftModal() {
           <button
             type="button"
             onClick={handleClaim}
-            className="w-full py-3 rounded-xl bg-gradient-to-l from-rose-500 to-amber-500 text-white font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-transform"
+            className="w-full py-3 rounded-xl bg-gradient-to-l from-indigo-600 to-violet-500 text-white font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-transform"
           >
             🎉 פתחתי את המתנה!
           </button>

@@ -63,7 +63,7 @@ export function BackgroundSelector({ currentStreak }: Props) {
                 unlocked
                   ? "border-gray-200 hover:scale-105 active:scale-95 cursor-pointer"
                   : "border-gray-100 opacity-40 cursor-not-allowed"
-              } ${isActive ? "!border-rose-500 ring-2 ring-rose-200" : ""}`}
+              } ${isActive ? "!border-indigo-600 ring-2 ring-indigo-200" : ""}`}
               style={{ background: bg.gradient }}
             >
               <span
@@ -74,7 +74,7 @@ export function BackgroundSelector({ currentStreak }: Props) {
               </span>
               {isActive && (
                 <Check
-                  className="absolute -top-1 -end-1 size-4 text-white bg-rose-500 rounded-full p-0.5"
+                  className="absolute -top-1 -end-1 size-4 text-white bg-indigo-600 rounded-full p-0.5"
                   aria-hidden="true"
                 />
               )}

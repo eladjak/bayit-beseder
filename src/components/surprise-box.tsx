@@ -78,7 +78,7 @@ export function SurpriseBox({ trigger = 0 }: Props) {
           onClick={handleOpen}
           disabled={pending}
           aria-label="פתח את קופסת ההפתעה היומית"
-          className="fixed bottom-44 end-4 z-40 size-14 rounded-full bg-gradient-to-br from-amber-400 to-rose-500 text-white shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-300"
+          className="fixed bottom-44 end-4 z-40 size-14 rounded-full bg-gradient-to-br from-violet-400 to-indigo-600 text-white shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
         >
           <Gift className="size-7" aria-hidden="true" />
           <Sparkles
@@ -118,20 +118,20 @@ export function SurpriseBox({ trigger = 0 }: Props) {
               {reward.emoji}
             </div>
 
-            <h2 id="sb-title" className="text-xl font-bold text-rose-700 mb-2">
+            <h2 id="sb-title" className="text-xl font-bold text-indigo-700 mb-2">
               {greeting.greeting}
             </h2>
             <p className="text-sm text-gray-600 mb-4">{greeting.ctaPrefix}</p>
 
-            <div className="bg-amber-50 rounded-lg p-4 mb-4 border border-amber-200">
-              <p className="text-xs text-amber-700 mb-1">קיבלת:</p>
-              <p className="text-lg font-bold text-amber-900">{reward.displayLabel}</p>
+            <div className="bg-violet-50 rounded-lg p-4 mb-4 border border-violet-200">
+              <p className="text-xs text-violet-700 mb-1">קיבלת:</p>
+              <p className="text-lg font-bold text-violet-900">{reward.displayLabel}</p>
             </div>
 
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="w-full py-3 rounded-lg bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors duration-200"
+              className="w-full py-3 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors duration-200"
             >
               איזה כיף! 💖
             </button>

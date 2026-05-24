@@ -98,7 +98,7 @@ export function SmartGuard({ kind, open, onDismiss }: Props) {
             <button
               type="button"
               onClick={handleProceed}
-              className="w-full py-3 rounded-lg bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors duration-200 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center gap-2"
             >
               <Sparkles className="size-4" aria-hidden="true" />
               {config.cta}

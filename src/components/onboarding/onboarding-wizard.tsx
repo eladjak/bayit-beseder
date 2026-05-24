@@ -128,7 +128,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
         {/* Progress bar */}
         <div className="h-1.5 bg-gray-100">
           <div
-            className="h-full bg-rose-500 transition-transform duration-300 ease-out origin-right"
+            className="h-full bg-indigo-600 transition-transform duration-300 ease-out origin-right"
             style={{
               transform: `scaleX(${(stepIndex + 1) / STEPS.length})`,
             }}
@@ -189,7 +189,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
                       aria-pressed={isSelected}
                       className={`text-start p-3 rounded-xl border-2 transition-transform duration-150 ${
                         isSelected
-                          ? "border-rose-500 bg-rose-50"
+                          ? "border-indigo-600 bg-indigo-50"
                           : "border-gray-200 hover:border-gray-300"
                       }`}
                     >
@@ -209,7 +209,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
                   type="checkbox"
                   checked={hasKids}
                   onChange={(e) => setHasKids(e.target.checked)}
-                  className="size-4 accent-rose-500"
+                  className="size-4 accent-indigo-600"
                 />
                 <span className="text-sm text-gray-700">יש לנו ילדים 👶</span>
               </label>
@@ -231,7 +231,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
             <button
               type="button"
               onClick={handleNext}
-              className="flex-1 py-3 rounded-lg bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors duration-200 flex items-center justify-center gap-1"
+              className="flex-1 py-3 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center gap-1"
             >
               {isLast && <Sparkles className="size-4" aria-hidden="true" />}
               {step.cta ?? "הבא"}

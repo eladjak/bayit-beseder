@@ -51,7 +51,7 @@ export function CelebrationToast({ items }: Props) {
       {visible.map((item, idx) => (
         <div
           key={item.id}
-          className="bg-white rounded-xl shadow-2xl border-2 border-amber-300 px-5 py-3 flex items-center gap-3 max-w-xs"
+          className="bg-white rounded-xl shadow-2xl border-2 border-violet-300 px-5 py-3 flex items-center gap-3 max-w-xs"
           style={{
             animation: `celebRise 400ms ease-out`,
             animationDelay: `${idx * 100}ms`,
@@ -60,9 +60,9 @@ export function CelebrationToast({ items }: Props) {
         >
           <span className="text-3xl" aria-hidden="true">{item.emoji}</span>
           <div className="text-start">
-            <p className="text-sm font-bold text-amber-900">פתחת: {item.title}</p>
+            <p className="text-sm font-bold text-violet-900">פתחת: {item.title}</p>
             {item.subtitle && (
-              <p className="text-[11px] text-amber-700">{item.subtitle}</p>
+              <p className="text-[11px] text-violet-700">{item.subtitle}</p>
             )}
           </div>
         </div>

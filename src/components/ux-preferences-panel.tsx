@@ -35,7 +35,7 @@ function ToggleRow({ icon, title, description, checked, onChange, id }: ToggleRo
   return (
     <div className="flex items-center justify-between gap-3 py-3 border-b border-gray-100 last:border-b-0">
       <div className="flex items-start gap-3 min-w-0">
-        <div className="size-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0" aria-hidden="true">
+        <div className="size-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0" aria-hidden="true">
           {icon}
         </div>
         <div className="min-w-0">
@@ -51,8 +51,8 @@ function ToggleRow({ icon, title, description, checked, onChange, id }: ToggleRo
         role="switch"
         aria-checked={checked}
         onClick={() => onChange(!checked)}
-        className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300 ${
-          checked ? "bg-rose-500" : "bg-gray-300"
+        className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300 ${
+          checked ? "bg-indigo-600" : "bg-gray-300"
         }`}
       >
         <span
@@ -90,7 +90,7 @@ export function UxPreferencesPanel() {
       {/* Theme */}
       <div className="rounded-xl bg-white border border-gray-100 p-4">
         <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-          <MonitorSmartphone className="size-4 text-rose-500" aria-hidden="true" />
+          <MonitorSmartphone className="size-4 text-indigo-600" aria-hidden="true" />
           תצוגה
         </h3>
         <div className="grid grid-cols-3 gap-2">
@@ -100,7 +100,7 @@ export function UxPreferencesPanel() {
               type="button"
               onClick={() => update({ theme: t as Theme })}
               className={`py-2 rounded-lg text-xs font-medium border ${
-                prefs.theme === t ? "border-rose-500 bg-rose-50 text-rose-700" : "border-gray-200 text-gray-600"
+                prefs.theme === t ? "border-indigo-600 bg-indigo-50 text-indigo-700" : "border-gray-200 text-gray-600"
               }`}
             >
               {t === "light" ? "בהיר" : t === "dark" ? "כהה" : "אוטו"}
@@ -154,7 +154,7 @@ export function UxPreferencesPanel() {
       {/* Font family picker (Sprint 7.30 Loop I — Elad: "more fonts that render on all devices") */}
       <div className="rounded-xl bg-white border border-gray-100 p-4">
         <h3 className="text-sm font-bold text-gray-900 mb-1 flex items-center gap-2">
-          <Type className="size-4 text-rose-500" aria-hidden="true" />
+          <Type className="size-4 text-indigo-600" aria-hidden="true" />
           פונט
         </h3>
         <p className="text-xs text-gray-500 mb-3">כל הפונטים נטענים בעת הצורך, רצים יפה בכל מכשיר.</p>
@@ -169,7 +169,7 @@ export function UxPreferencesPanel() {
                 onClick={() => update({ fontFamily: f })}
                 aria-pressed={isSelected}
                 className={`p-3 rounded-lg border-2 text-center transition-transform duration-150 ${
-                  isSelected ? "border-rose-500 bg-rose-50" : "border-gray-200"
+                  isSelected ? "border-indigo-600 bg-indigo-50" : "border-gray-200"
                 }`}
                 style={{ fontFamily: cfg.stack }}
               >

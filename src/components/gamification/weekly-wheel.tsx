@@ -100,7 +100,7 @@ export function WeeklyWheel() {
             handleSpin();
           }}
           aria-label="פתח את גלגל המזל השבועי"
-          className="fixed bottom-64 end-4 z-40 size-14 rounded-full bg-gradient-to-br from-fuchsia-500 to-amber-500 text-white shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-300"
+          className="fixed bottom-64 end-4 z-40 size-14 rounded-full bg-gradient-to-br from-violet-500 to-violet-500 text-white shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-transform duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fuchsia-300"
         >
           <span aria-hidden="true" className="text-2xl">🎡</span>
         </button>
@@ -137,7 +137,7 @@ export function WeeklyWheel() {
               {/* Wheel visual */}
               <div className="relative mx-auto size-64 mb-5">
                 <div
-                  className="size-full rounded-full border-4 border-amber-300 shadow-inner relative overflow-hidden"
+                  className="size-full rounded-full border-4 border-violet-300 shadow-inner relative overflow-hidden"
                   style={{
                     transition: "transform 1.8s cubic-bezier(0.16, 1, 0.3, 1)",
                     transform:
@@ -175,31 +175,31 @@ export function WeeklyWheel() {
                 </div>
                 {/* Center pointer */}
                 <div
-                  className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1 size-0 border-x-8 border-x-transparent border-t-[14px] border-t-rose-600 z-10"
+                  className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1 size-0 border-x-8 border-x-transparent border-t-[14px] border-t-indigo-600 z-10"
                   aria-hidden="true"
                 />
                 {/* Spin badge */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="size-16 rounded-full bg-white border-2 border-amber-400 flex items-center justify-center shadow-lg">
-                    <Sparkles className="size-6 text-amber-500" aria-hidden="true" />
+                  <div className="size-16 rounded-full bg-white border-2 border-violet-400 flex items-center justify-center shadow-lg">
+                    <Sparkles className="size-6 text-violet-500" aria-hidden="true" />
                   </div>
                 </div>
               </div>
 
               {state.kind === "spinning" && (
-                <p className="text-sm text-rose-600 font-medium animate-pulse">מסתובב...</p>
+                <p className="text-sm text-indigo-600 font-medium animate-pulse">מסתובב...</p>
               )}
 
               {(state.kind === "result" || state.kind === "redeemed") && (
                 <>
-                  <div className="bg-amber-50 rounded-lg p-4 mb-4 border border-amber-200">
+                  <div className="bg-violet-50 rounded-lg p-4 mb-4 border border-violet-200">
                     <div className="text-4xl mb-2" aria-hidden="true">{state.segment.emoji}</div>
-                    <p className="text-lg font-bold text-amber-900">{state.segment.label}</p>
+                    <p className="text-lg font-bold text-violet-900">{state.segment.label}</p>
                     {state.segment.description && (
-                      <p className="text-xs text-amber-700 mt-1">{state.segment.description}</p>
+                      <p className="text-xs text-violet-700 mt-1">{state.segment.description}</p>
                     )}
                     {"alreadySpun" in state && state.alreadySpun && (
-                      <p className="text-[11px] text-amber-600 mt-2">
+                      <p className="text-[11px] text-violet-600 mt-2">
                         כבר סובבתם השבוע. זה מה שיצא.
                       </p>
                     )}
@@ -211,7 +211,7 @@ export function WeeklyWheel() {
                         type="button"
                         onClick={() => handleRedeem(state.spinId, state.segment)}
                         disabled={pending}
-                        className="flex-1 py-3 rounded-lg bg-rose-500 text-white font-bold hover:bg-rose-600 disabled:opacity-50 transition-colors duration-200"
+                        className="flex-1 py-3 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 disabled:opacity-50 transition-colors duration-200"
                       >
                         סמן כממומש
                       </button>
@@ -235,7 +235,7 @@ export function WeeklyWheel() {
                         setOpen(false);
                         setState({ kind: "idle" });
                       }}
-                      className="w-full py-3 rounded-lg bg-rose-500 text-white font-bold hover:bg-rose-600 transition-colors duration-200"
+                      className="w-full py-3 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors duration-200"
                     >
                       סגור 💖
                     </button>

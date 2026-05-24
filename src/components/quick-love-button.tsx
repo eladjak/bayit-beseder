@@ -124,7 +124,7 @@ export function QuickLoveButton() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={copy("quickLoveAria")}
-        className="fixed bottom-24 end-4 z-40 size-14 rounded-full bg-rose-500 text-white shadow-lg flex items-center justify-center hover:bg-rose-600 active:scale-95 transition-transform duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300"
+        className="fixed bottom-24 end-4 z-40 size-14 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center hover:bg-indigo-700 active:scale-95 transition-transform duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
       >
         <Heart className="size-6" fill="currentColor" aria-hidden="true" />
       </button>
@@ -143,7 +143,7 @@ export function QuickLoveButton() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3">
-              <h2 id="qlb-title" className="text-lg font-bold text-rose-700">
+              <h2 id="qlb-title" className="text-lg font-bold text-indigo-700">
                 💖 שלח לב
               </h2>
               <button
@@ -173,7 +173,7 @@ export function QuickLoveButton() {
                           onClick={() => setRecipientId(m.id)}
                           className={`flex-1 px-3 py-2 rounded-lg border text-sm ${
                             recipientId === m.id
-                              ? "border-rose-500 bg-rose-50 text-rose-700"
+                              ? "border-indigo-600 bg-indigo-50 text-indigo-700"
                               : "border-gray-200"
                           }`}
                         >
@@ -197,7 +197,7 @@ export function QuickLoveButton() {
                         }}
                         className={`py-2 rounded-lg border tabular-nums text-sm ${
                           selectedValue === v && !customValue
-                            ? "border-rose-500 bg-rose-50 text-rose-700"
+                            ? "border-indigo-600 bg-indigo-50 text-indigo-700"
                             : "border-gray-200"
                         }`}
                       >
@@ -235,7 +235,7 @@ export function QuickLoveButton() {
                   type="button"
                   onClick={handleSend}
                   disabled={pending || !recipientId || remaining === 0}
-                  className="w-full py-3 rounded-lg bg-rose-500 text-white font-bold hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200"
+                  className="w-full py-3 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity duration-200"
                 >
                   {pending ? "שולח..." : "💖 שלח עכשיו"}
                 </button>
