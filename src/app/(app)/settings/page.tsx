@@ -40,6 +40,10 @@ const SetupWizard = dynamic(() => import("@/components/setup-wizard/setup-wizard
 const PrizeManager = dynamic(() => import("@/components/prizes/prize-manager").then(m => ({ default: m.PrizeManager })), { ssr: false });
 // Alopik v2 Phase 2 #6 — 4-axis UX preferences (Theme/Haptics/Sounds/Night-mode)
 const UxPreferencesPanel = dynamic(() => import("@/components/ux-preferences-panel").then(m => ({ default: m.UxPreferencesPanel })), { ssr: false });
+// Alopik v2 Phase 3 #7 — Pet collection selector
+const PetSelector = dynamic(() => import("@/components/pets/pet-selector").then(m => ({ default: m.PetSelector })), { ssr: false });
+// Alopik v2 Phase 3 #8 — Background themes selector
+const BackgroundSelector = dynamic(() => import("@/components/backgrounds/background-selector").then(m => ({ default: m.BackgroundSelector })), { ssr: false });
 
 // ============================================
 // Theme helpers
@@ -731,6 +735,18 @@ export default function SettingsPage() {
         <div className="space-y-3">
           <h2 className="text-base font-bold text-gray-900 px-2">העדפות חוויה</h2>
           <UxPreferencesPanel />
+        </div>
+
+        {/* Alopik v2 Phase 3 #7 — Pet collection */}
+        <div id="pets" className="space-y-3">
+          <h2 className="text-base font-bold text-gray-900 px-2">החבר/ה לדרך 🐾</h2>
+          <PetSelector currentStreak={profile?.streak ?? 0} />
+        </div>
+
+        {/* Alopik v2 Phase 3 #8 — Background themes */}
+        <div id="backgrounds" className="space-y-3">
+          <h2 className="text-base font-bold text-gray-900 px-2">רקעים</h2>
+          <BackgroundSelector currentStreak={profile?.streak ?? 0} />
         </div>
 
         <DangerZone

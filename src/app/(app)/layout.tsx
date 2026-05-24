@@ -46,6 +46,12 @@ const WeeklyWheel = dynamic(
   { ssr: false },
 );
 
+// Alopik v2 Phase 3 #7: Active pet badge in top utility bar.
+const ActivePetBadge = dynamic(
+  () => import("@/components/pets/active-pet-badge").then((m) => ({ default: m.ActivePetBadge })),
+  { ssr: false },
+);
+
 // Alopik v2 #3: Onboarding Wizard. Lazy-loaded.
 const OnboardingWizard = dynamic(
   () => import("@/components/onboarding/onboarding-wizard").then((m) => ({ default: m.OnboardingWizard })),
@@ -87,6 +93,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       </a>
       {/* Global utility bar — bell + language toggle, sticky top bar inside content flow */}
       <div className="sticky top-0 z-40 flex items-center gap-1.5 px-3 py-1.5 max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto justify-end">
+        <ActivePetBadge onClick={() => router.push("/settings#pets")} />
         <LanguageToggle />
         <NotificationCenter
           notifications={notifications}
