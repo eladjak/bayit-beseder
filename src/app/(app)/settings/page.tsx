@@ -38,6 +38,8 @@ import { usePWAInstall } from "@/hooks/usePWAInstall";
 
 const SetupWizard = dynamic(() => import("@/components/setup-wizard/setup-wizard").then(m => ({ default: m.SetupWizard })), { ssr: false });
 const PrizeManager = dynamic(() => import("@/components/prizes/prize-manager").then(m => ({ default: m.PrizeManager })), { ssr: false });
+// Alopik v2 Phase 2 #6 — 4-axis UX preferences (Theme/Haptics/Sounds/Night-mode)
+const UxPreferencesPanel = dynamic(() => import("@/components/ux-preferences-panel").then(m => ({ default: m.UxPreferencesPanel })), { ssr: false });
 
 // ============================================
 // Theme helpers
@@ -723,6 +725,12 @@ export default function SettingsPage() {
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Alopik v2 Phase 2 #6 — 4-axis UX preferences (independent of theme): Haptics / Sounds / Notifications / Night-mode */}
+        <div className="space-y-3">
+          <h2 className="text-base font-bold text-gray-900 px-2">העדפות חוויה</h2>
+          <UxPreferencesPanel />
         </div>
 
         <DangerZone

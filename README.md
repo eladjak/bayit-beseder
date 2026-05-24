@@ -55,6 +55,14 @@ If you find this project useful, please star the repo — it helps others discov
 - Streaks and XP points per task
 - Couple achievements and rewards
 - Celebration animations (canvas-confetti)
+- **Alopik v2 mechanics** (Sprint 7.30, May 2026):
+  - **Quick Love (FAB)** — bidirectional micro-recognition, rate-limited 6/recipient/day
+  - **Daily Surprise Box** — first task of day reveals random reward (70% small / 25% medium / 5% large)
+  - **Weekly Wheel of Fortune** — Friday 14:00 → Saturday night IDT, 8 weighted segments (experiences + gestures), 1 spin per household per ISO week
+  - **Adult-toned Onboarding Wizard** — 5 steps, skippable, re-triggerable from settings
+  - **Smart Guards** — block adding tasks without a reward (and vice-versa) — forces a complete game loop
+  - **4-axis UX Preferences** — Theme / Haptics / Sounds / Night-mode (independent; Night-mode mutes audio + haptics + motion for not waking partner)
+  - **Auto-medal trigger** — every 50 stars in `profiles.points` awards a numbered medal (PostgreSQL trigger, no client-side compute)
 
 ### Notifications & Integrations
 - **WhatsApp Daily Briefs** — Morning summary via Green API
