@@ -39,6 +39,7 @@ import { TaskListSkeleton } from "@/components/skeleton";
 import { toast } from "sonner";
 import { CATEGORY_NAME_TO_KEY, CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS } from "@/lib/categories";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { FairnessBalanceMeter } from "@/components/dashboard/fairness-balance-meter";
 import { GoldenRuleSection } from "@/components/dashboard/golden-rule-section";
 import { PlaylistCard } from "@/components/dashboard/playlist-card";
 import { EnergyModeSection } from "@/components/dashboard/energy-mode-section";
@@ -575,6 +576,13 @@ export default function DashboardPage() {
             className="left-0 right-auto"
           />
         </div>
+
+        {/* ═══ SECTION 2.5: Fairness Balance Meter (the painkiller — council #1) ═══ */}
+        <FairnessBalanceMeter
+          completions={allCompletions}
+          members={householdMembers.map((m) => ({ id: m.id, name: m.name }))}
+          today={todayStr}
+        />
 
         {/* ═══ SECTION 3: House Map — Room Progress ═══ */}
         <HouseMap
