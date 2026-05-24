@@ -26,6 +26,7 @@ import {
 } from "@/lib/love-tokens";
 import { playHeartPop } from "@/lib/sound-effects";
 import { tryHaptic } from "@/lib/ux-preferences";
+import { copy } from "@/lib/copy-resolver";
 
 type HouseholdMember = {
   readonly id: string;
@@ -122,7 +123,7 @@ export function QuickLoveButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="שלח לב לשותף"
+        aria-label={copy("quickLoveAria")}
         className="fixed bottom-24 end-4 z-40 size-14 rounded-full bg-rose-500 text-white shadow-lg flex items-center justify-center hover:bg-rose-600 active:scale-95 transition-transform duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-300"
       >
         <Heart className="size-6" fill="currentColor" aria-hidden="true" />

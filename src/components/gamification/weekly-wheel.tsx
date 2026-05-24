@@ -21,6 +21,7 @@ import {
 } from "@/lib/weekly-wheel";
 import { playSpinChime, playSuccessChord } from "@/lib/sound-effects";
 import { tryHaptic } from "@/lib/ux-preferences";
+import { copy } from "@/lib/copy-resolver";
 
 type State =
   | { kind: "idle" }
@@ -131,7 +132,7 @@ export function WeeklyWheel() {
               <h2 id="ww-title" className="text-xl font-bold text-gray-900 mb-1 text-balance">
                 גלגל המזל השבועי
               </h2>
-              <p className="text-xs text-gray-500 mb-4">פעם בשבוע. ביחד.</p>
+              <p className="text-xs text-gray-500 mb-4">{copy("wheelDesc")}</p>
 
               {/* Wheel visual */}
               <div className="relative mx-auto size-64 mb-5">

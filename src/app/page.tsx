@@ -184,7 +184,7 @@ export default function LandingPage() {
 
         <div className="relative z-10 max-w-4xl mx-auto px-6 py-20 text-center text-white">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/15 backdrop-blur-sm rounded-full text-sm font-medium mb-6 border border-white/20">
-            🏠 ניהול בית חכם לזוגות ומשפחות
+            🏡 הבית שלך · מותאם לך
           </div>
 
           <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4 tracking-tight">
@@ -193,11 +193,21 @@ export default function LandingPage() {
             <span className="text-white/90">ביחד. בסדר. בכיף.</span>
           </h1>
 
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-5 text-sm text-white/85">
+            <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15">👫 זוגות</span>
+            <span className="text-white/40">·</span>
+            <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15">👨‍👩‍👧 משפחות</span>
+            <span className="text-white/40">·</span>
+            <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15">🤝 שותפים</span>
+            <span className="text-white/40">·</span>
+            <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15">🙋 סינגלים</span>
+          </div>
+
           <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-8 leading-relaxed">
-            אפליקציה לניהול הבית לזוגות ומשפחות — משימות עם נקודות,
-            תכנון שבועי חכם, רשימת קניות משותפת, ואפילו הכנות לפסח.
+            משימות עם נקודות, תכנון שבועי חכם, רשימת קניות משותפת,
+            פטים ורקעים שנפתחים עם הרצף שלכם, וגלגל מזל יום שישי.
             <br />
-            <span className="text-white/60 text-base">בלי ויכוחים על &quot;מי עשה יותר&quot; 😉</span>
+            <span className="text-white/60 text-base">בלי ויכוחים. בלי שיפוט. רק אתם והבית. 💖</span>
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
