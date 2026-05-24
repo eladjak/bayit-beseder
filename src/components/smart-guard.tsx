@@ -30,7 +30,7 @@ const GUARDS: Record<GuardKind, GuardConfig> = {
     title: "רגע — לפני שמוסיפים משימה, צריך פרס",
     body: "משימות עובדות יחד עם פרסים. כשמשלימים יעד — חוגגים עם משהו אמיתי. בלי פרס, המשחק לא מתחיל. זה לוקח 30 שניות.",
     cta: "ניצור פרס משותף (30 שניות)",
-    target: "/rewards?focus=first",
+    target: "/settings#prizes",
   },
   "missing-task": {
     emoji: "✅",

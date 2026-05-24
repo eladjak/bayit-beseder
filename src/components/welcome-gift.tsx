@@ -32,6 +32,18 @@ export function WelcomeGiftModal() {
     tryHaptic([10, 30, 10, 30, 50]);
     markWelcomeGiftClaimed();
     setOpen(false);
+    // Actually GRANT the bonus points (atomic RPC, migration 014). Non-blocking.
+    void (async () => {
+      try {
+        const { createClient } = await import("@/lib/supabase");
+        const supabase = createClient() as ReturnType<typeof createClient> & {
+          rpc: (n: string, a?: Record<string, unknown>) => Promise<unknown>;
+        };
+        await supabase.rpc("increment_user_points", { p_amount: WELCOME_GIFT.bonusPoints });
+      } catch {
+        /* non-blocking */
+      }
+    })();
     toast.success(
       `🎁 קיבלתם ${WELCOME_GIFT.bonusPoints} נקודות בונוס + ${WELCOME_GIFT.freeSurpriseBoxes} קופסת הפתעה חינם!`,
     );

@@ -14,7 +14,7 @@ import { createClient } from "@/lib/supabase";
 
 // NOTE: surprise_box_opens table added in migration 012 — Database type
 // regen pending. Cast to bypass stale types until regen runs post-deploy.
-type AnySupabase = ReturnType<typeof createClient> & { from: (t: string) => any };
+type AnySupabase = ReturnType<typeof createClient> & { from: (t: string) => any; rpc: (n: string, a?: any) => any };
 
 export type RewardTier = "small" | "medium" | "large";
 export type RewardType =
@@ -167,6 +167,15 @@ export async function openTodayBox(): Promise<OpenBoxResult> {
     // Unique-constraint violation = race condition, treat as already opened
     if (insertErr.code === "23505") return { ok: true, reward: null, alreadyOpened: true };
     return { ok: false, error: "DB_ERROR", details: insertErr.message };
+  }
+
+  // Actually GRANT the reward — bonus_points credit profiles.points (atomic RPC).
+  // Medal trigger (migration 013) auto-fires on 50-point crossings.
+  if (reward.type === "bonus_points") {
+    const pts = (reward.value as { points?: number }).points;
+    if (typeof pts === "number" && pts > 0) {
+      await supabase.rpc("increment_user_points", { p_amount: pts });
+    }
   }
 
   return { ok: true, reward, alreadyOpened: false };

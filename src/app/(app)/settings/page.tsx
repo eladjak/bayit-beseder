@@ -685,7 +685,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Prize Manager */}
-        <div className="space-y-2">
+        <div id="prizes" className="space-y-2 scroll-mt-20">
           <h3 className="text-sm font-semibold text-foreground px-1">🏆 {t("prizes.title")}</h3>
           <PrizeManager />
         </div>
