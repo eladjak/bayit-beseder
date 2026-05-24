@@ -39,7 +39,7 @@ export function BackgroundSelector({ currentStreak }: Props) {
   };
 
   return (
-    <div className="rounded-xl bg-white border border-gray-100 p-4">
+    <div className="alopik-card p-4">
       <div className="flex items-baseline justify-between mb-3">
         <h3 className="text-sm font-bold text-gray-900">רקע האפליקציה</h3>
         <span className="text-[11px] text-gray-500 tabular-nums">

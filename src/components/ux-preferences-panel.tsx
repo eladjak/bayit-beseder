@@ -88,7 +88,7 @@ export function UxPreferencesPanel() {
   return (
     <div className="space-y-4">
       {/* Theme */}
-      <div className="rounded-xl bg-white border border-gray-100 p-4">
+      <div className="alopik-card p-4">
         <h3 className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
           <MonitorSmartphone className="size-4 text-indigo-600" aria-hidden="true" />
           תצוגה
@@ -110,7 +110,7 @@ export function UxPreferencesPanel() {
       </div>
 
       {/* Experience toggles */}
-      <div className="rounded-xl bg-white border border-gray-100 p-4">
+      <div className="alopik-card p-4">
         <h3 className="text-sm font-bold text-gray-900 mb-1">חוויה</h3>
         <p className="text-xs text-gray-500 mb-3">ארבעה צירים נפרדים. כל אחד עצמאי.</p>
 
@@ -152,7 +152,7 @@ export function UxPreferencesPanel() {
       </div>
 
       {/* Font family picker (Sprint 7.30 Loop I — Elad: "more fonts that render on all devices") */}
-      <div className="rounded-xl bg-white border border-gray-100 p-4">
+      <div className="alopik-card p-4">
         <h3 className="text-sm font-bold text-gray-900 mb-1 flex items-center gap-2">
           <Type className="size-4 text-indigo-600" aria-hidden="true" />
           פונט
@@ -182,7 +182,7 @@ export function UxPreferencesPanel() {
       </div>
 
       {/* Onboarding re-trigger */}
-      <div className="rounded-xl bg-white border border-gray-100 p-4">
+      <div className="alopik-card p-4">
         <h3 className="text-sm font-bold text-gray-900 mb-3">הסבר מקדים</h3>
         <button
           type="button"
