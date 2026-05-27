@@ -6,7 +6,7 @@ const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 
 // Gemini API for generating smart coaching tips
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent";
 
 const SYSTEM_PROMPT = `אתה מאמן ביתי חכם ומצחיק באפליקציית "בית בסדר" — אפליקציה לניהול תחזוקת הבית לכל סוג בית: זוגות, משפחות עם ילדים, שותפים לדירה וגם מי שגר לבד. התאם את הטון לסוג הבית ואל תניח שמדובר בזוג.
 תפקידך לתת טיפ אחד קצר ומעשי (2-3 משפטים) על ניהול בית, ניקיון, ארגון, מוטיבציה או שיתוף פעולה.
@@ -53,8 +53,12 @@ export async function POST(req: NextRequest) {
         system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
         contents: [{ role: "user", parts: [{ text: contextPrompt }] }],
         generationConfig: {
-          maxOutputTokens: 150,
+          // thinkingBudget:0 — Gemini 3.5 Flash enables "thinking" by default, which would
+          // consume maxOutputTokens and leave no room for the visible tip (it then came back
+          // empty and the coach silently fell back to a canned tip every time).
+          maxOutputTokens: 600,
           temperature: 0.9,
+          thinkingConfig: { thinkingBudget: 0 },
         },
       }),
     });
