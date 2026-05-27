@@ -14,7 +14,7 @@ const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 // ---------------------------------------------------------------------------
 
 const GEMINI_API_URL =
-  "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:streamGenerateContent?alt=sse";
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:streamGenerateContent?alt=sse";
 
 const SYSTEM_PROMPT = `אתה העוזר החכם של אפליקציית "בית בסדר" — אפליקציה לניהול תחזוקת הבית המשותף.
 
@@ -195,9 +195,12 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents,
+        // thinkingBudget:0 — Gemini 3.5 Flash enables "thinking" by default, which would
+        // consume maxOutputTokens and truncate the streamed answer.
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 512,
+          maxOutputTokens: 600,
+          thinkingConfig: { thinkingBudget: 0 },
         },
       }),
     });
