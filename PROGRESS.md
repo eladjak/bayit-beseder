@@ -1,5 +1,17 @@
 # BayitBeSeder (בית בסדר) - Progress
 
+## 2026-06-07 — Critical fixes #1+#2 (auth) DONE · #3 (migration) validated, staged
+- **#1 auth-gating + #2 invite service-role** APPLIED + committed `d3a4a57` (local, NOT pushed — deploy=Elad's tap). tsc + `bun run build` pass. Council 2 lenses CLEAR (security: invite codes 32-bit crypto-hex, rate-limited 5/min, auth-gated; behavior: no flash/loop, clean demo-button removal). Also fixed stale middleware comment.
+- **#3 tasks-household-scope migration (014):** VALIDATED schema-correct against the REAL schema (`001_initial.sql` ≡ `database.ts`: tasks has assigned_to/status/due_date/recurring; task_completions.user_id; profiles.household_id all exist). NOT applied — irreversible prod surgery requiring (a) coordinated migration+code deploy (useTasks/database.ts/createTask — column is NOT NULL, app breaks if mismatched), (b) Supabase branch validation for zero task-loss, (c) Elad's tap.
+- **⚠️ HAZARD flagged:** `supabase/migrations/001_initial_schema.sql` is a STALE DECOY — a contradictory abandoned schema (template-style tasks, completed_by, no profiles.household_id). It is NOT the live schema and misled the Codex audit. Quarantine/delete it (kept for now to avoid noise near pending migration).
+
+
+## 2026-05-28 — entry from deep-work session
+**Coaching-tip Gemini bug fixed + deployed.** Root cause: `gemini-2.5-flash-lite` + `maxOutputTokens:150` + no `thinkingConfig` → model burned tokens on hidden 'thinking', visible tip came back empty, coach silently fell back to canned tips. Fix: `gemini-3.5-flash` + `thinkingBudget:0` + `600` tokens (matches the working chat route). Verified live on bayitbeseder.com — coach now returns real AI tips.
+
+---
+
+
 ## Status: Sprint 7.31 — Warm Joy redesign + multi-household + Fairness Meter · PUSHED to master (Vercel deploy triggered)
 ## Last Updated: 2026-05-24 21:15 IDT
 ## URL: https://www.bayitbeseder.com
