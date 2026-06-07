@@ -101,10 +101,6 @@ function LoginContent() {
     setResetEmail("");
   }
 
-  async function handleDemoMode() {
-    router.push("/dashboard");
-  }
-
   return (
     <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-8 relative overflow-y-auto overflow-x-hidden">
       {/* Animated gradient background */}
@@ -290,14 +286,6 @@ function LoginContent() {
                   </svg>
                 )}
                 {googleLoading ? t("common.loading") : t("auth.loginWithGoogle")}
-              </button>
-
-              {/* Demo Mode */}
-              <button
-                onClick={handleDemoMode}
-                className="w-full py-2.5 bg-background/60 dark:bg-surface/60 border border-border rounded-xl text-sm text-muted hover:text-foreground hover:bg-surface-hover transition-all"
-              >
-                {t("auth.demoMode")}
               </button>
 
               {/* Register Link */}

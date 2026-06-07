@@ -46,10 +46,11 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Allow unauthenticated access to app pages (demo mode).
-  // The AuthGuard component handles client-side auth check with demo fallback.
-  // This means the middleware does NOT force redirect to /login anymore.
-  // Instead, the app works in "demo mode" with mock data when no user is present.
+  // Demo mode is disabled (launch). Auth on (app) routes is enforced
+  // client-side by the AuthGuard component (allowDemo=false), which redirects
+  // unauthenticated users to /login. Data is additionally protected by Supabase
+  // RLS. Middleware does not gate (app) paths today; a server-side redirect here
+  // would be a reasonable post-launch defense-in-depth addition.
 
   return supabaseResponse;
 }

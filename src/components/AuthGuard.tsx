@@ -17,7 +17,7 @@ interface AuthGuardProps {
  * - If allowDemo is true and no auth -> renders children (demo mode)
  * - Otherwise redirects to /login
  */
-export function AuthGuard({ children, allowDemo = true }: AuthGuardProps) {
+export function AuthGuard({ children, allowDemo = false }: AuthGuardProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [ready, setReady] = useState(false);
@@ -26,6 +26,7 @@ export function AuthGuard({ children, allowDemo = true }: AuthGuardProps) {
     if (loading) return;
 
     if (!user && !allowDemo) {
+      setReady(false);
       router.replace("/login");
       return;
     }

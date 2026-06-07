@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { MotionConfig } from "framer-motion";
 import { useProfile } from "@/hooks/useProfile";
 import { usePetCollectionSync } from "@/hooks/usePetCollectionSync";
 import { syncBackgroundCollectionWithStreak } from "@/lib/backgrounds";
@@ -205,8 +206,10 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SupabaseProvider>
-      <AuthGuard allowDemo={true}>
-        <AppLayoutInner>{children}</AppLayoutInner>
+      <AuthGuard allowDemo={false}>
+        <MotionConfig reducedMotion="user">
+          <AppLayoutInner>{children}</AppLayoutInner>
+        </MotionConfig>
       </AuthGuard>
     </SupabaseProvider>
   );

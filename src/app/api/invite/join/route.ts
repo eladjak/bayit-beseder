@@ -71,8 +71,21 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Use service role client for invite-code lookups AND writes.
+  // RLS blocks a non-member from reading another household / its members, which
+  // would make a valid invite code 404. The invite code itself is the bearer
+  // secret (rate-limited above), so resolving it via the service client is safe.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return NextResponse.json({ error: "Server not configured" }, { status: 500 });
+  }
+
+  const serviceClient = createServiceClient<Database>(supabaseUrl, supabaseServiceKey);
+
   // Find the household by invite code
-  const { data: household, error: householdError } = await supabase
+  const { data: household, error: householdError } = await serviceClient
     .from("households")
     .select("id, name, invite_code")
     .eq("invite_code", code.toUpperCase())
@@ -83,7 +96,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Find the owner of this household
-  const { data: ownerMember, error: ownerError } = await supabase
+  const { data: ownerMember, error: ownerError } = await serviceClient
     .from("household_members")
     .select("user_id")
     .eq("household_id", household.id)
@@ -101,16 +114,6 @@ export async function POST(request: NextRequest) {
       { status: 409 }
     );
   }
-
-  // Use service role client to bypass RLS for writes
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !supabaseServiceKey) {
-    return NextResponse.json({ error: "Server not configured" }, { status: 500 });
-  }
-
-  const serviceClient = createServiceClient<Database>(supabaseUrl, supabaseServiceKey);
 
   // Add joiner to household_members
   const { error: memberError } = await serviceClient
