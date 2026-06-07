@@ -27,6 +27,7 @@ function makeCompletion(
 function makeTask(overrides: Partial<TaskRow> & { id: string }): TaskRow {
   return {
     id: overrides.id,
+    household_id: overrides.household_id ?? "test-household",
     title: overrides.title ?? "Test task",
     description: overrides.description ?? null,
     category_id: overrides.category_id ?? null,

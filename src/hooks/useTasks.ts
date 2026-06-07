@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSupabase } from "@/components/SupabaseProvider";
+import { useProfile } from "@/hooks/useProfile";
 import type { TaskRow, TaskInsert, TaskUpdate } from "@/lib/types/database";
 
 interface UseTasksOptions {
@@ -33,6 +34,8 @@ interface UseTasksReturn {
  */
 export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
   const supabase = useSupabase();
+  const { profile } = useProfile();
+  const householdId = profile?.household_id ?? null;
   const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,8 +48,17 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
     }
     setError(null);
 
+    // Tasks are household-scoped (migration 014). Without a household there is
+    // nothing to show, and RLS would reject the query anyway.
+    if (!householdId) {
+      setTasks([]);
+      setLoading(false);
+      initialLoadDone.current = true;
+      return;
+    }
+
     try {
-      let query = supabase.from("tasks").select("*");
+      let query = supabase.from("tasks").select("*").eq("household_id", householdId);
 
       if (options.assignedTo) {
         query = query.eq("assigned_to", options.assignedTo);
@@ -80,7 +92,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
       setLoading(false);
       initialLoadDone.current = true;
     }
-  }, [supabase, options.assignedTo, options.status, options.dueDate, options.categoryId]);
+  }, [supabase, householdId, options.assignedTo, options.status, options.dueDate, options.categoryId]);
 
   useEffect(() => {
     fetchTasks();
@@ -88,14 +100,19 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
 
   // Realtime subscription for live task updates
   useEffect(() => {
-    if (!options.realtime) return;
+    if (!options.realtime || !householdId) return;
 
     try {
       const channel = supabase
-        .channel("tasks-realtime")
+        .channel(`tasks-realtime-${householdId}`)
         .on(
           "postgres_changes",
-          { event: "*", schema: "public", table: "tasks" },
+          {
+            event: "*",
+            schema: "public",
+            table: "tasks",
+            filter: `household_id=eq.${householdId}`,
+          },
           (payload) => {
             if (payload.eventType === "INSERT") {
               const newTask = payload.new as TaskRow;
@@ -119,14 +136,20 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
     } catch {
       // Realtime not available - silently ignore
     }
-  }, [supabase, options.realtime]);
+  }, [supabase, options.realtime, householdId]);
 
   const createTask = useCallback(
     async (task: TaskInsert): Promise<TaskRow | null> => {
+      // household_id is NOT NULL (migration 014) — inject the caller's household.
+      const resolvedHouseholdId = task.household_id ?? householdId;
+      if (!resolvedHouseholdId) {
+        setError("No household — cannot create task");
+        return null;
+      }
       try {
         const { data, error: insertError } = await supabase
           .from("tasks")
-          .insert(task)
+          .insert({ ...task, household_id: resolvedHouseholdId })
           .select()
           .single();
 
@@ -143,7 +166,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
         return null;
       }
     },
-    [supabase]
+    [supabase, householdId]
   );
 
   const updateTask = useCallback(

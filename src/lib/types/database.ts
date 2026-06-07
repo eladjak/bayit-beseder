@@ -36,6 +36,7 @@ export type Database = {
       tasks: {
         Row: {
           id: string;
+          household_id: string;
           title: string;
           description: string | null;
           category_id: string | null;
@@ -49,6 +50,9 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          // Required at the DB level (NOT NULL after migration 014); optional in the
+          // type because useTasks.createTask and the server routes inject it. Always set it.
+          household_id?: string;
           title: string;
           description?: string | null;
           category_id?: string | null;
@@ -62,6 +66,7 @@ export type Database = {
         };
         Update: {
           id?: string;
+          household_id?: string;
           title?: string;
           description?: string | null;
           category_id?: string | null;
@@ -73,6 +78,13 @@ export type Database = {
           recurring?: boolean;
         };
         Relationships: [
+          {
+            foreignKeyName: "tasks_household_id_fkey";
+            columns: ["household_id"];
+            isOneToOne: false;
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "tasks_category_id_fkey";
             columns: ["category_id"];

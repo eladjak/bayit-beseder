@@ -51,6 +51,7 @@ export function generateMockWeeklyTasks(): TaskRow[] {
       const template = shuffled[j % shuffled.length];
       mockTasks.push({
         id: `mock-${i}-${j}`,
+        household_id: "mock-household",
         title: template.title,
         description: null,
         category_id: template.category,

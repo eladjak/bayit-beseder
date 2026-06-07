@@ -1,6 +1,14 @@
--- BayitBeSeder (בית בסדר) - Phase 3: Initial Schema
+-- ⚠️⚠️⚠️ STALE / ABANDONED DECOY — DO NOT USE, DO NOT RUN ⚠️⚠️⚠️
+-- This is an EARLY abandoned schema design that does NOT match production.
+-- The LIVE schema is `001_initial.sql` (tasks has assigned_to/status/due_date/recurring;
+-- task_completions.user_id; profiles.household_id) — confirmed by src/lib/types/database.ts.
+-- This file's design (template-style tasks, task_completions.completed_by, no profiles.household_id)
+-- is WRONG and already misled an automated audit (2026-06). Kept only for history.
+-- If you are reading the schema, read 001_initial.sql, NOT this file.
+--
+-- BayitBeSeder (בית בסדר) - Phase 3: Initial Schema [ABANDONED]
 -- Consolidated schema with profiles, categories, tasks, task_completions
--- Run in Supabase SQL Editor
+-- Run in Supabase SQL Editor [DO NOT — superseded by 001_initial.sql]
 
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";

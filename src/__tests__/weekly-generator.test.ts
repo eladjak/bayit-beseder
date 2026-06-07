@@ -185,6 +185,7 @@ describe("generateWeekPlan", () => {
       existingTasks: [
         {
           id: "existing-1",
+          household_id: "test-household",
           title: "ניקוי מטבח",
           due_date: targetDate,
           assigned_to: "user-a",
