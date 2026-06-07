@@ -50,9 +50,10 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          // Required at the DB level (NOT NULL after migration 014); optional in the
-          // type because useTasks.createTask and the server routes inject it. Always set it.
-          household_id?: string;
+          // Required (NOT NULL after migration 014). Kept required here as a
+          // compile-time guard so every tasks insert must set it. useTasks.createTask
+          // injects it (its param omits household_id), so UI callers don't pass it.
+          household_id: string;
           title: string;
           description?: string | null;
           category_id?: string | null;

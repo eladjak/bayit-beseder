@@ -375,11 +375,12 @@ export default function WeeklyPage() {
         toast.error(t("weekly.loginFirst"));
         return false;
       }
-      const taskData: TaskInsert = {
+      // household_id is injected by createTask (useTasks) — omit it here.
+      const taskData = {
         title: title.trim(),
         category_id: categoryId,
         due_date: dueDate,
-        status: "pending",
+        status: "pending" as const,
         points: 10,
         recurring: false,
       };

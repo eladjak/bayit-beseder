@@ -22,7 +22,7 @@ interface UseTasksReturn {
   tasks: TaskRow[];
   loading: boolean;
   error: string | null;
-  createTask: (task: TaskInsert) => Promise<TaskRow | null>;
+  createTask: (task: Omit<TaskInsert, "household_id"> & { household_id?: string }) => Promise<TaskRow | null>;
   updateTask: (id: string, updates: TaskUpdate) => Promise<boolean>;
   deleteTask: (id: string) => Promise<boolean>;
   refetch: () => Promise<void>;
@@ -139,7 +139,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
   }, [supabase, options.realtime, householdId]);
 
   const createTask = useCallback(
-    async (task: TaskInsert): Promise<TaskRow | null> => {
+    async (task: Omit<TaskInsert, "household_id"> & { household_id?: string }): Promise<TaskRow | null> => {
       // household_id is NOT NULL (migration 014) — inject the caller's household.
       const resolvedHouseholdId = task.household_id ?? householdId;
       if (!resolvedHouseholdId) {
