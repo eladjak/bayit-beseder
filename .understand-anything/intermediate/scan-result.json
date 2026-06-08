@@ -1,0 +1,816 @@
+{
+  "scriptCompleted": true,
+  "name": "bayit-beseder",
+  "description": "Household task-management PWA (Next.js App Router + Supabase) — chores, gamification, shopping, weekly planning, partner/household collaboration.",
+  "languages": [
+    "typescript"
+  ],
+  "frameworks": [
+    "Next.js",
+    "React",
+    "Supabase",
+    "TailwindCSS"
+  ],
+  "files": [
+    {
+      "path": "src/app/(app)/dashboard/layout.tsx",
+      "language": "typescript",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/dashboard/page.tsx",
+      "language": "typescript",
+      "sizeLines": 792,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/emergency/layout.tsx",
+      "language": "typescript",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/emergency/page.tsx",
+      "language": "typescript",
+      "sizeLines": 302,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/error.tsx",
+      "language": "typescript",
+      "sizeLines": 43,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/history/page.tsx",
+      "language": "typescript",
+      "sizeLines": 388,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/layout.tsx",
+      "language": "typescript",
+      "sizeLines": 216,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/loading.tsx",
+      "language": "typescript",
+      "sizeLines": 16,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/playlists/page.tsx",
+      "language": "typescript",
+      "sizeLines": 108,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/settings/layout.tsx",
+      "language": "typescript",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/settings/page.tsx",
+      "language": "typescript",
+      "sizeLines": 861,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/shopping/layout.tsx",
+      "language": "typescript",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/shopping/page.tsx",
+      "language": "typescript",
+      "sizeLines": 731,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/stats/layout.tsx",
+      "language": "typescript",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/stats/page.tsx",
+      "language": "typescript",
+      "sizeLines": 830,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/tasks/layout.tsx",
+      "language": "typescript",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/tasks/page.tsx",
+      "language": "typescript",
+      "sizeLines": 1680,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/tasks/print/page.tsx",
+      "language": "typescript",
+      "sizeLines": 186,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/weekly/layout.tsx",
+      "language": "typescript",
+      "sizeLines": 14,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/app/(app)/weekly/page.tsx",
+      "language": "typescript",
+      "sizeLines": 608,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useActivityFeed.ts",
+      "language": "typescript",
+      "sizeLines": 164,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useAdvancedStats.ts",
+      "language": "typescript",
+      "sizeLines": 292,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useAIChat.ts",
+      "language": "typescript",
+      "sizeLines": 242,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useAppSound.ts",
+      "language": "typescript",
+      "sizeLines": 64,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useAuth.ts",
+      "language": "typescript",
+      "sizeLines": 73,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useCalendarData.ts",
+      "language": "typescript",
+      "sizeLines": 263,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useCalendarEvents.ts",
+      "language": "typescript",
+      "sizeLines": 108,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useCategories.ts",
+      "language": "typescript",
+      "sizeLines": 78,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useCompletions.ts",
+      "language": "typescript",
+      "sizeLines": 282,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useEarnedBadges.ts",
+      "language": "typescript",
+      "sizeLines": 102,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useFirstVisit.ts",
+      "language": "typescript",
+      "sizeLines": 41,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useFocusTrap.ts",
+      "language": "typescript",
+      "sizeLines": 86,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useHousehold.ts",
+      "language": "typescript",
+      "sizeLines": 90,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useHouseholdCounts.ts",
+      "language": "typescript",
+      "sizeLines": 76,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useHouseholdMembers.ts",
+      "language": "typescript",
+      "sizeLines": 89,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useKeyboardShortcuts.ts",
+      "language": "typescript",
+      "sizeLines": 124,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useLeaderboard.ts",
+      "language": "typescript",
+      "sizeLines": 134,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useNotificationPrefs.ts",
+      "language": "typescript",
+      "sizeLines": 104,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useNotifications.ts",
+      "language": "typescript",
+      "sizeLines": 579,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useOfflineQueue.ts",
+      "language": "typescript",
+      "sizeLines": 121,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/usePartner.ts",
+      "language": "typescript",
+      "sizeLines": 82,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/usePetCollectionSync.ts",
+      "language": "typescript",
+      "sizeLines": 25,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/usePlaylistTimer.ts",
+      "language": "typescript",
+      "sizeLines": 238,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useProfile.ts",
+      "language": "typescript",
+      "sizeLines": 141,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/usePushNotifications.ts",
+      "language": "typescript",
+      "sizeLines": 182,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/usePWAInstall.ts",
+      "language": "typescript",
+      "sizeLines": 115,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useReducedMotion.ts",
+      "language": "typescript",
+      "sizeLines": 17,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useSeasonalMode.ts",
+      "language": "typescript",
+      "sizeLines": 269,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useShoppingCategories.ts",
+      "language": "typescript",
+      "sizeLines": 237,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useShoppingList.ts",
+      "language": "typescript",
+      "sizeLines": 528,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useShoppingShare.ts",
+      "language": "typescript",
+      "sizeLines": 129,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useSubscription.ts",
+      "language": "typescript",
+      "sizeLines": 98,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useTaskCategories.ts",
+      "language": "typescript",
+      "sizeLines": 298,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useTaskPhoto.ts",
+      "language": "typescript",
+      "sizeLines": 49,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useTasks.ts",
+      "language": "typescript",
+      "sizeLines": 230,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useTaskStreaks.ts",
+      "language": "typescript",
+      "sizeLines": 77,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useThemeColor.ts",
+      "language": "typescript",
+      "sizeLines": 117,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useTranslation.ts",
+      "language": "typescript",
+      "sizeLines": 49,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useUserAchievements.ts",
+      "language": "typescript",
+      "sizeLines": 79,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useVoiceInput.ts",
+      "language": "typescript",
+      "sizeLines": 228,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useWebShare.ts",
+      "language": "typescript",
+      "sizeLines": 62,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useWeeklyChallenges.ts",
+      "language": "typescript",
+      "sizeLines": 294,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useWeeklyGenerator.ts",
+      "language": "typescript",
+      "sizeLines": 207,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/hooks/useZoneConfig.ts",
+      "language": "typescript",
+      "sizeLines": 76,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/achievements.ts",
+      "language": "typescript",
+      "sizeLines": 241,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/analytics.ts",
+      "language": "typescript",
+      "sizeLines": 13,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/auth.ts",
+      "language": "typescript",
+      "sizeLines": 183,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/auto-scheduler.ts",
+      "language": "typescript",
+      "sizeLines": 338,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/backgrounds.ts",
+      "language": "typescript",
+      "sizeLines": 88,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/categories.ts",
+      "language": "typescript",
+      "sizeLines": 126,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/challenges.ts",
+      "language": "typescript",
+      "sizeLines": 187,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/coaching-messages-adaptive.ts",
+      "language": "typescript",
+      "sizeLines": 200,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/coaching-messages.ts",
+      "language": "typescript",
+      "sizeLines": 98,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/coaching-tracker.ts",
+      "language": "typescript",
+      "sizeLines": 254,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/copy-resolver.ts",
+      "language": "typescript",
+      "sizeLines": 185,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/easter-eggs.ts",
+      "language": "typescript",
+      "sizeLines": 138,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/energy-filter.ts",
+      "language": "typescript",
+      "sizeLines": 72,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/export.ts",
+      "language": "typescript",
+      "sizeLines": 101,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/fairness-balance.ts",
+      "language": "typescript",
+      "sizeLines": 98,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/google-calendar.ts",
+      "language": "typescript",
+      "sizeLines": 440,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/haptics.ts",
+      "language": "typescript",
+      "sizeLines": 21,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/household-type.ts",
+      "language": "typescript",
+      "sizeLines": 72,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/kid-profiles.ts",
+      "language": "typescript",
+      "sizeLines": 78,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/love-tokens.ts",
+      "language": "typescript",
+      "sizeLines": 130,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/notifications.ts",
+      "language": "typescript",
+      "sizeLines": 358,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/pets.ts",
+      "language": "typescript",
+      "sizeLines": 108,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/playlists.ts",
+      "language": "typescript",
+      "sizeLines": 89,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/push.ts",
+      "language": "typescript",
+      "sizeLines": 138,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/rate-limit.ts",
+      "language": "typescript",
+      "sizeLines": 230,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/rewards.ts",
+      "language": "typescript",
+      "sizeLines": 326,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/room-health.ts",
+      "language": "typescript",
+      "sizeLines": 74,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/room-task-templates.ts",
+      "language": "typescript",
+      "sizeLines": 247,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/safe-confetti.ts",
+      "language": "typescript",
+      "sizeLines": 41,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/seed-data.ts",
+      "language": "typescript",
+      "sizeLines": 849,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/shopping-autocomplete.ts",
+      "language": "typescript",
+      "sizeLines": 317,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/smart-scheduler.ts",
+      "language": "typescript",
+      "sizeLines": 369,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/sound-effects.ts",
+      "language": "typescript",
+      "sizeLines": 111,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/storage.ts",
+      "language": "typescript",
+      "sizeLines": 150,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/sumit-client-inline.ts",
+      "language": "typescript",
+      "sizeLines": 168,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/supabase.ts",
+      "language": "typescript",
+      "sizeLines": 30,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/surprise-box.ts",
+      "language": "typescript",
+      "sizeLines": 196,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/task-stats.ts",
+      "language": "typescript",
+      "sizeLines": 470,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/task-templates.ts",
+      "language": "typescript",
+      "sizeLines": 87,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/ux-preferences.ts",
+      "language": "typescript",
+      "sizeLines": 97,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/weekly-generator.ts",
+      "language": "typescript",
+      "sizeLines": 509,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/weekly-mock-data.ts",
+      "language": "typescript",
+      "sizeLines": 69,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/weekly-wheel.ts",
+      "language": "typescript",
+      "sizeLines": 167,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/welcome-gift.ts",
+      "language": "typescript",
+      "sizeLines": 47,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/whatsapp-messages.ts",
+      "language": "typescript",
+      "sizeLines": 200,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/whatsapp.ts",
+      "language": "typescript",
+      "sizeLines": 58,
+      "fileCategory": "code"
+    },
+    {
+      "path": "src/lib/zones.ts",
+      "language": "typescript",
+      "sizeLines": 157,
+      "fileCategory": "code"
+    }
+  ],
+  "totalFiles": 111,
+  "filteredByIgnore": 293,
+  "estimatedComplexity": "moderate",
+  "importMap": {
+    "src/app/(app)/dashboard/layout.tsx": [],
+    "src/app/(app)/dashboard/page.tsx": [],
+    "src/app/(app)/emergency/layout.tsx": [],
+    "src/app/(app)/emergency/page.tsx": [],
+    "src/app/(app)/error.tsx": [],
+    "src/app/(app)/history/page.tsx": [],
+    "src/app/(app)/layout.tsx": [],
+    "src/app/(app)/loading.tsx": [],
+    "src/app/(app)/playlists/page.tsx": [],
+    "src/app/(app)/settings/layout.tsx": [],
+    "src/app/(app)/settings/page.tsx": [],
+    "src/app/(app)/shopping/layout.tsx": [],
+    "src/app/(app)/shopping/page.tsx": [],
+    "src/app/(app)/stats/layout.tsx": [],
+    "src/app/(app)/stats/page.tsx": [],
+    "src/app/(app)/tasks/layout.tsx": [],
+    "src/app/(app)/tasks/page.tsx": [],
+    "src/app/(app)/tasks/print/page.tsx": [],
+    "src/app/(app)/weekly/layout.tsx": [],
+    "src/app/(app)/weekly/page.tsx": [],
+    "src/hooks/useActivityFeed.ts": [],
+    "src/hooks/useAdvancedStats.ts": [],
+    "src/hooks/useAIChat.ts": [],
+    "src/hooks/useAppSound.ts": [],
+    "src/hooks/useAuth.ts": [],
+    "src/hooks/useCalendarData.ts": [],
+    "src/hooks/useCalendarEvents.ts": [],
+    "src/hooks/useCategories.ts": [],
+    "src/hooks/useCompletions.ts": [],
+    "src/hooks/useEarnedBadges.ts": [],
+    "src/hooks/useFirstVisit.ts": [],
+    "src/hooks/useFocusTrap.ts": [],
+    "src/hooks/useHousehold.ts": [],
+    "src/hooks/useHouseholdCounts.ts": [],
+    "src/hooks/useHouseholdMembers.ts": [],
+    "src/hooks/useKeyboardShortcuts.ts": [],
+    "src/hooks/useLeaderboard.ts": [],
+    "src/hooks/useNotificationPrefs.ts": [],
+    "src/hooks/useNotifications.ts": [],
+    "src/hooks/useOfflineQueue.ts": [],
+    "src/hooks/usePartner.ts": [],
+    "src/hooks/usePetCollectionSync.ts": [],
+    "src/hooks/usePlaylistTimer.ts": [],
+    "src/hooks/useProfile.ts": [],
+    "src/hooks/usePushNotifications.ts": [],
+    "src/hooks/usePWAInstall.ts": [],
+    "src/hooks/useReducedMotion.ts": [],
+    "src/hooks/useSeasonalMode.ts": [],
+    "src/hooks/useShoppingCategories.ts": [],
+    "src/hooks/useShoppingList.ts": [],
+    "src/hooks/useShoppingShare.ts": [],
+    "src/hooks/useSubscription.ts": [],
+    "src/hooks/useTaskCategories.ts": [],
+    "src/hooks/useTaskPhoto.ts": [],
+    "src/hooks/useTasks.ts": [],
+    "src/hooks/useTaskStreaks.ts": [],
+    "src/hooks/useThemeColor.ts": [],
+    "src/hooks/useTranslation.ts": [],
+    "src/hooks/useUserAchievements.ts": [],
+    "src/hooks/useVoiceInput.ts": [],
+    "src/hooks/useWebShare.ts": [],
+    "src/hooks/useWeeklyChallenges.ts": [],
+    "src/hooks/useWeeklyGenerator.ts": [],
+    "src/hooks/useZoneConfig.ts": [],
+    "src/lib/achievements.ts": [],
+    "src/lib/analytics.ts": [],
+    "src/lib/auth.ts": [],
+    "src/lib/auto-scheduler.ts": [],
+    "src/lib/backgrounds.ts": [],
+    "src/lib/categories.ts": [],
+    "src/lib/challenges.ts": [],
+    "src/lib/coaching-messages-adaptive.ts": [
+      "src/lib/coaching-tracker.ts"
+    ],
+    "src/lib/coaching-messages.ts": [],
+    "src/lib/coaching-tracker.ts": [],
+    "src/lib/copy-resolver.ts": [],
+    "src/lib/easter-eggs.ts": [],
+    "src/lib/energy-filter.ts": [],
+    "src/lib/export.ts": [],
+    "src/lib/fairness-balance.ts": [],
+    "src/lib/google-calendar.ts": [],
+    "src/lib/haptics.ts": [],
+    "src/lib/household-type.ts": [],
+    "src/lib/kid-profiles.ts": [],
+    "src/lib/love-tokens.ts": [],
+    "src/lib/notifications.ts": [],
+    "src/lib/pets.ts": [],
+    "src/lib/playlists.ts": [],
+    "src/lib/push.ts": [],
+    "src/lib/rate-limit.ts": [],
+    "src/lib/rewards.ts": [],
+    "src/lib/room-health.ts": [],
+    "src/lib/room-task-templates.ts": [],
+    "src/lib/safe-confetti.ts": [],
+    "src/lib/seed-data.ts": [],
+    "src/lib/shopping-autocomplete.ts": [],
+    "src/lib/smart-scheduler.ts": [],
+    "src/lib/sound-effects.ts": [],
+    "src/lib/storage.ts": [],
+    "src/lib/sumit-client-inline.ts": [],
+    "src/lib/supabase.ts": [],
+    "src/lib/surprise-box.ts": [],
+    "src/lib/task-stats.ts": [],
+    "src/lib/task-templates.ts": [],
+    "src/lib/ux-preferences.ts": [],
+    "src/lib/weekly-generator.ts": [
+      "src/lib/auto-scheduler.ts",
+      "src/lib/categories.ts",
+      "src/lib/seed-data.ts",
+      "src/lib/zones.ts"
+    ],
+    "src/lib/weekly-mock-data.ts": [],
+    "src/lib/weekly-wheel.ts": [],
+    "src/lib/welcome-gift.ts": [],
+    "src/lib/whatsapp-messages.ts": [],
+    "src/lib/whatsapp.ts": [],
+    "src/lib/zones.ts": [
+      "src/lib/categories.ts"
+    ]
+  },
+  "stats": {
+    "filesScanned": 111,
+    "byCategory": {
+      "code": 111
+    },
+    "byLanguage": {
+      "typescript": 111
+    }
+  }
+}

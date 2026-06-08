@@ -1,0 +1,18 @@
+# Scoped UA run — business-logic core (cost control)
+/*
+!src/
+src/*
+!src/hooks/
+!src/lib/
+!src/app/
+src/app/*
+!src/app/(app)/
+# hooks: drop tests
+src/hooks/__tests__/
+# lib: top-level .ts only (drop subdir noise: i18n, seasonal, supabase, types, sanity, __tests__)
+src/lib/__tests__/
+src/lib/i18n/
+src/lib/seasonal/
+src/lib/supabase/
+src/lib/types/
+src/lib/sanity/

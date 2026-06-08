@@ -1,0 +1,2411 @@
+{
+  "version": "1.0.0",
+  "project": {
+    "name": "bayit-beseder",
+    "languages": [
+      "typescript"
+    ],
+    "frameworks": [
+      "Next.js",
+      "React",
+      "Supabase",
+      "TailwindCSS"
+    ],
+    "description": "Household task-management PWA (Next.js App Router + Supabase). Scoped UA graph: business-logic core — hooks, lib, and the authenticated (app) route group.",
+    "analyzedAt": "2026-06-08T09:25:17.609Z",
+    "gitCommitHash": "bcbf7be1691adc79386fb98592940cf787aed934",
+    "scopeNote": "Scoped run (cost control): src/hooks, src/lib top-level, src/app/(app). Excludes components, tests, generated types, i18n/seasonal/supabase/sanity lib subdirs."
+  },
+  "nodes": [
+    {
+      "id": "file:src/lib/auto-scheduler.ts",
+      "type": "file",
+      "name": "auto-scheduler.ts",
+      "filePath": "src/lib/auto-scheduler.ts",
+      "summary": "Fair task-assignment engine: due-date computation + weighted-load assignee selection across household members.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "scheduling"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/seed-data.ts",
+      "type": "file",
+      "name": "seed-data.ts",
+      "filePath": "src/lib/seed-data.ts",
+      "summary": "Large default seed dataset (categories, templates) for new households / demo mode.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/lib/weekly-generator.ts",
+      "type": "file",
+      "name": "weekly-generator.ts",
+      "filePath": "src/lib/weekly-generator.ts",
+      "summary": "Generates the weekly task plan; composes auto-scheduler + categories + seed-data + zones.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "scheduling"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/app/(app)/dashboard/layout.tsx",
+      "type": "file",
+      "name": "layout.tsx",
+      "filePath": "src/app/(app)/dashboard/layout.tsx",
+      "summary": "Route-group layout for dashboard.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/app/(app)/dashboard/page.tsx",
+      "type": "file",
+      "name": "page.tsx",
+      "filePath": "src/app/(app)/dashboard/page.tsx",
+      "summary": "Dashboard route — primary landing surface aggregating tasks/stats/gamification (792L).",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/app/(app)/emergency/layout.tsx",
+      "type": "file",
+      "name": "layout.tsx",
+      "filePath": "src/app/(app)/emergency/layout.tsx",
+      "summary": "Route-group layout for emergency.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/app/(app)/emergency/page.tsx",
+      "type": "file",
+      "name": "page.tsx",
+      "filePath": "src/app/(app)/emergency/page.tsx",
+      "summary": "Emergency route — quick critical-task surface.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/app/(app)/error.tsx",
+      "type": "file",
+      "name": "error.tsx",
+      "filePath": "src/app/(app)/error.tsx",
+      "summary": "Route error boundary component.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/app/(app)/history/page.tsx",
+      "type": "file",
+      "name": "page.tsx",
+      "filePath": "src/app/(app)/history/page.tsx",
+      "summary": "History route — completed-task history.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/app/(app)/layout.tsx",
+      "type": "file",
+      "name": "layout.tsx",
+      "filePath": "src/app/(app)/layout.tsx",
+      "summary": "Authenticated app shell layout: providers, bottom-nav, guards for the (app) route group.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/app/(app)/loading.tsx",
+      "type": "file",
+      "name": "loading.tsx",
+      "filePath": "src/app/(app)/loading.tsx",
+      "summary": "Route loading boundary component.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/app/(app)/playlists/page.tsx",
+      "type": "file",
+      "name": "page.tsx",
+      "filePath": "src/app/(app)/playlists/page.tsx",
+      "summary": "Playlists route — chore-music playlist timer surface.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/app/(app)/settings/layout.tsx",
+      "type": "file",
+      "name": "layout.tsx",
+      "filePath": "src/app/(app)/settings/layout.tsx",
+      "summary": "Route-group layout for settings.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/app/(app)/settings/page.tsx",
+      "type": "file",
+      "name": "page.tsx",
+      "filePath": "src/app/(app)/settings/page.tsx",
+      "summary": "Settings route — profile, household, subscription, integrations (861L).",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/app/(app)/shopping/layout.tsx",
+      "type": "file",
+      "name": "layout.tsx",
+      "filePath": "src/app/(app)/shopping/layout.tsx",
+      "summary": "Route-group layout for shopping.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui",
+        "shopping"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/app/(app)/shopping/page.tsx",
+      "type": "file",
+      "name": "page.tsx",
+      "filePath": "src/app/(app)/shopping/page.tsx",
+      "summary": "Shopping route — shared shopping list UI (731L).",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui",
+        "shopping"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/app/(app)/stats/layout.tsx",
+      "type": "file",
+      "name": "layout.tsx",
+      "filePath": "src/app/(app)/stats/layout.tsx",
+      "summary": "Route-group layout for stats.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui",
+        "analytics"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/app/(app)/stats/page.tsx",
+      "type": "file",
+      "name": "page.tsx",
+      "filePath": "src/app/(app)/stats/page.tsx",
+      "summary": "Stats route — analytics dashboard (830L).",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui",
+        "analytics"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/app/(app)/tasks/layout.tsx",
+      "type": "file",
+      "name": "layout.tsx",
+      "filePath": "src/app/(app)/tasks/layout.tsx",
+      "summary": "Route-group layout for tasks.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/app/(app)/tasks/page.tsx",
+      "type": "file",
+      "name": "page.tsx",
+      "filePath": "src/app/(app)/tasks/page.tsx",
+      "summary": "Tasks route — the app's largest screen (1680L): task list, creation, completion, assignment.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/app/(app)/tasks/print/page.tsx",
+      "type": "file",
+      "name": "page.tsx",
+      "filePath": "src/app/(app)/tasks/print/page.tsx",
+      "summary": "Printable task sheet route.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/app/(app)/weekly/layout.tsx",
+      "type": "file",
+      "name": "layout.tsx",
+      "filePath": "src/app/(app)/weekly/layout.tsx",
+      "summary": "Route-group layout for weekly.",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui",
+        "scheduling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/app/(app)/weekly/page.tsx",
+      "type": "file",
+      "name": "page.tsx",
+      "filePath": "src/app/(app)/weekly/page.tsx",
+      "summary": "Weekly route — weekly plan generator/view (608L).",
+      "tags": [
+        "route",
+        "nextjs",
+        "ui",
+        "scheduling"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/hooks/useActivityFeed.ts",
+      "type": "file",
+      "name": "useActivityFeed.ts",
+      "filePath": "src/hooks/useActivityFeed.ts",
+      "summary": "React hook `useActivityFeed` — 2 fn(s), 164L; encapsulates activity feed data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useAdvancedStats.ts",
+      "type": "file",
+      "name": "useAdvancedStats.ts",
+      "filePath": "src/hooks/useAdvancedStats.ts",
+      "summary": "Aggregates completion data into advanced statistics for the stats route.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useAIChat.ts",
+      "type": "file",
+      "name": "useAIChat.ts",
+      "filePath": "src/hooks/useAIChat.ts",
+      "summary": "React hook `useAIChat` — 4 fn(s), 242L; encapsulates a i chat data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useAppSound.ts",
+      "type": "file",
+      "name": "useAppSound.ts",
+      "filePath": "src/hooks/useAppSound.ts",
+      "summary": "React hook `useAppSound` — 4 fn(s), 64L; encapsulates app sound data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useAuth.ts",
+      "type": "file",
+      "name": "useAuth.ts",
+      "filePath": "src/hooks/useAuth.ts",
+      "summary": "Tracks Supabase auth state and subscribes to auth changes; returns user/session/isAuthenticated.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useCalendarData.ts",
+      "type": "file",
+      "name": "useCalendarData.ts",
+      "filePath": "src/hooks/useCalendarData.ts",
+      "summary": "React hook `useCalendarData` — 3 fn(s), 263L; encapsulates calendar data data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useCalendarEvents.ts",
+      "type": "file",
+      "name": "useCalendarEvents.ts",
+      "filePath": "src/hooks/useCalendarEvents.ts",
+      "summary": "React hook `useCalendarEvents` — 1 fn(s), 108L; encapsulates calendar events data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useCategories.ts",
+      "type": "file",
+      "name": "useCategories.ts",
+      "filePath": "src/hooks/useCategories.ts",
+      "summary": "React hook `useCategories` — 1 fn(s), 78L; encapsulates categories data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useCompletions.ts",
+      "type": "file",
+      "name": "useCompletions.ts",
+      "filePath": "src/hooks/useCompletions.ts",
+      "summary": "Records and queries task completions; feeds stats, streaks and gamification.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useEarnedBadges.ts",
+      "type": "file",
+      "name": "useEarnedBadges.ts",
+      "filePath": "src/hooks/useEarnedBadges.ts",
+      "summary": "React hook `useEarnedBadges` — 1 fn(s), 102L; encapsulates earned badges data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useFirstVisit.ts",
+      "type": "file",
+      "name": "useFirstVisit.ts",
+      "filePath": "src/hooks/useFirstVisit.ts",
+      "summary": "React hook `useFirstVisit` — 1 fn(s), 41L; encapsulates first visit data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useFocusTrap.ts",
+      "type": "file",
+      "name": "useFocusTrap.ts",
+      "filePath": "src/hooks/useFocusTrap.ts",
+      "summary": "React hook `useFocusTrap` — 1 fn(s), 86L; encapsulates focus trap data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useHousehold.ts",
+      "type": "file",
+      "name": "useHousehold.ts",
+      "filePath": "src/hooks/useHousehold.ts",
+      "summary": "Loads the active household context shared across collaboration features.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useHouseholdCounts.ts",
+      "type": "file",
+      "name": "useHouseholdCounts.ts",
+      "filePath": "src/hooks/useHouseholdCounts.ts",
+      "summary": "React hook `useHouseholdCounts` — 1 fn(s), 76L; encapsulates household counts data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useHouseholdMembers.ts",
+      "type": "file",
+      "name": "useHouseholdMembers.ts",
+      "filePath": "src/hooks/useHouseholdMembers.ts",
+      "summary": "Lists members of the active household for assignment and leaderboards.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useKeyboardShortcuts.ts",
+      "type": "file",
+      "name": "useKeyboardShortcuts.ts",
+      "filePath": "src/hooks/useKeyboardShortcuts.ts",
+      "summary": "React hook `useKeyboardShortcuts` — 3 fn(s), 124L; encapsulates keyboard shortcuts data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useLeaderboard.ts",
+      "type": "file",
+      "name": "useLeaderboard.ts",
+      "filePath": "src/hooks/useLeaderboard.ts",
+      "summary": "React hook `useLeaderboard` — 5 fn(s), 134L; encapsulates leaderboard data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useNotificationPrefs.ts",
+      "type": "file",
+      "name": "useNotificationPrefs.ts",
+      "filePath": "src/hooks/useNotificationPrefs.ts",
+      "summary": "React hook `useNotificationPrefs` — 4 fn(s), 104L; encapsulates notification prefs data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useNotifications.ts",
+      "type": "file",
+      "name": "useNotifications.ts",
+      "filePath": "src/hooks/useNotifications.ts",
+      "summary": "In-app notification feed: load, mark-read, realtime, and prefs integration (largest hook, 8 fns).",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/hooks/useOfflineQueue.ts",
+      "type": "file",
+      "name": "useOfflineQueue.ts",
+      "filePath": "src/hooks/useOfflineQueue.ts",
+      "summary": "React hook `useOfflineQueue` — 4 fn(s), 121L; encapsulates offline queue data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/usePartner.ts",
+      "type": "file",
+      "name": "usePartner.ts",
+      "filePath": "src/hooks/usePartner.ts",
+      "summary": "React hook `usePartner` — 1 fn(s), 82L; encapsulates partner data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/usePetCollectionSync.ts",
+      "type": "file",
+      "name": "usePetCollectionSync.ts",
+      "filePath": "src/hooks/usePetCollectionSync.ts",
+      "summary": "React hook `usePetCollectionSync` — 1 fn(s), 25L; encapsulates pet collection sync data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/usePlaylistTimer.ts",
+      "type": "file",
+      "name": "usePlaylistTimer.ts",
+      "filePath": "src/hooks/usePlaylistTimer.ts",
+      "summary": "React hook `usePlaylistTimer` — 1 fn(s), 238L; encapsulates playlist timer data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useProfile.ts",
+      "type": "file",
+      "name": "useProfile.ts",
+      "filePath": "src/hooks/useProfile.ts",
+      "summary": "Loads the current user profile row; foundational hook consumed by task/household hooks.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/usePushNotifications.ts",
+      "type": "file",
+      "name": "usePushNotifications.ts",
+      "filePath": "src/hooks/usePushNotifications.ts",
+      "summary": "React hook `usePushNotifications` — 4 fn(s), 182L; encapsulates push notifications data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/usePWAInstall.ts",
+      "type": "file",
+      "name": "usePWAInstall.ts",
+      "filePath": "src/hooks/usePWAInstall.ts",
+      "summary": "React hook `usePWAInstall` — 3 fn(s), 115L; encapsulates p w a install data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useReducedMotion.ts",
+      "type": "file",
+      "name": "useReducedMotion.ts",
+      "filePath": "src/hooks/useReducedMotion.ts",
+      "summary": "React hook `useReducedMotion` — 1 fn(s), 17L; encapsulates reduced motion data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useSeasonalMode.ts",
+      "type": "file",
+      "name": "useSeasonalMode.ts",
+      "filePath": "src/hooks/useSeasonalMode.ts",
+      "summary": "React hook `useSeasonalMode` — 4 fn(s), 269L; encapsulates seasonal mode data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useShoppingCategories.ts",
+      "type": "file",
+      "name": "useShoppingCategories.ts",
+      "filePath": "src/hooks/useShoppingCategories.ts",
+      "summary": "React hook `useShoppingCategories` — 1 fn(s), 237L; encapsulates shopping categories data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useShoppingList.ts",
+      "type": "file",
+      "name": "useShoppingList.ts",
+      "filePath": "src/hooks/useShoppingList.ts",
+      "summary": "Shopping list CRUD with realtime sync and share support.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "file:src/hooks/useShoppingShare.ts",
+      "type": "file",
+      "name": "useShoppingShare.ts",
+      "filePath": "src/hooks/useShoppingShare.ts",
+      "summary": "React hook `useShoppingShare` — 2 fn(s), 129L; encapsulates shopping share data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useSubscription.ts",
+      "type": "file",
+      "name": "useSubscription.ts",
+      "filePath": "src/hooks/useSubscription.ts",
+      "summary": "React hook `useSubscription` — 1 fn(s), 98L; encapsulates subscription data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useTaskCategories.ts",
+      "type": "file",
+      "name": "useTaskCategories.ts",
+      "filePath": "src/hooks/useTaskCategories.ts",
+      "summary": "React hook `useTaskCategories` — 1 fn(s), 298L; encapsulates task categories data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useTaskPhoto.ts",
+      "type": "file",
+      "name": "useTaskPhoto.ts",
+      "filePath": "src/hooks/useTaskPhoto.ts",
+      "summary": "React hook `useTaskPhoto` — 1 fn(s), 49L; encapsulates task photo data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useTasks.ts",
+      "type": "file",
+      "name": "useTasks.ts",
+      "filePath": "src/hooks/useTasks.ts",
+      "summary": "Core CRUD + realtime subscription for tasks, filtered by assignee/status/due/category.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useTaskStreaks.ts",
+      "type": "file",
+      "name": "useTaskStreaks.ts",
+      "filePath": "src/hooks/useTaskStreaks.ts",
+      "summary": "React hook `useTaskStreaks` — 2 fn(s), 77L; encapsulates task streaks data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useThemeColor.ts",
+      "type": "file",
+      "name": "useThemeColor.ts",
+      "filePath": "src/hooks/useThemeColor.ts",
+      "summary": "React hook `useThemeColor` — 5 fn(s), 117L; encapsulates theme color data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useTranslation.ts",
+      "type": "file",
+      "name": "useTranslation.ts",
+      "filePath": "src/hooks/useTranslation.ts",
+      "summary": "React hook `useTranslation` — 2 fn(s), 49L; encapsulates translation data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useUserAchievements.ts",
+      "type": "file",
+      "name": "useUserAchievements.ts",
+      "filePath": "src/hooks/useUserAchievements.ts",
+      "summary": "React hook `useUserAchievements` — 1 fn(s), 79L; encapsulates user achievements data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useVoiceInput.ts",
+      "type": "file",
+      "name": "useVoiceInput.ts",
+      "filePath": "src/hooks/useVoiceInput.ts",
+      "summary": "React hook `useVoiceInput` — 1 fn(s), 228L; encapsulates voice input data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useWebShare.ts",
+      "type": "file",
+      "name": "useWebShare.ts",
+      "filePath": "src/hooks/useWebShare.ts",
+      "summary": "React hook `useWebShare` — 1 fn(s), 62L; encapsulates web share data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/hooks/useWeeklyChallenges.ts",
+      "type": "file",
+      "name": "useWeeklyChallenges.ts",
+      "filePath": "src/hooks/useWeeklyChallenges.ts",
+      "summary": "React hook `useWeeklyChallenges` — 6 fn(s), 294L; encapsulates weekly challenges data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useWeeklyGenerator.ts",
+      "type": "file",
+      "name": "useWeeklyGenerator.ts",
+      "filePath": "src/hooks/useWeeklyGenerator.ts",
+      "summary": "Drives weekly plan generation by invoking the weekly-generator/auto-scheduler lib.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/hooks/useZoneConfig.ts",
+      "type": "file",
+      "name": "useZoneConfig.ts",
+      "filePath": "src/hooks/useZoneConfig.ts",
+      "summary": "React hook `useZoneConfig` — 1 fn(s), 76L; encapsulates zone config data/state.",
+      "tags": [
+        "hook",
+        "react",
+        "state"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/achievements.ts",
+      "type": "file",
+      "name": "achievements.ts",
+      "filePath": "src/lib/achievements.ts",
+      "summary": "Achievement definitions and unlock evaluation.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "gamification"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/analytics.ts",
+      "type": "file",
+      "name": "analytics.ts",
+      "filePath": "src/lib/analytics.ts",
+      "summary": "Library module `analytics` — 1 fn(s), 13L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/auth.ts",
+      "type": "file",
+      "name": "auth.ts",
+      "filePath": "src/lib/auth.ts",
+      "summary": "Client-side auth functions (signUp/signIn/signOut/reset) wrapping the Supabase auth API; profile row auto-created by DB trigger.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "auth",
+        "supabase"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/backgrounds.ts",
+      "type": "file",
+      "name": "backgrounds.ts",
+      "filePath": "src/lib/backgrounds.ts",
+      "summary": "Library module `backgrounds` — 5 fn(s), 88L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/categories.ts",
+      "type": "file",
+      "name": "categories.ts",
+      "filePath": "src/lib/categories.ts",
+      "summary": "Task category catalog + helpers.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/challenges.ts",
+      "type": "file",
+      "name": "challenges.ts",
+      "filePath": "src/lib/challenges.ts",
+      "summary": "Weekly challenge definitions and progress evaluation.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "gamification"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/coaching-messages-adaptive.ts",
+      "type": "file",
+      "name": "coaching-messages-adaptive.ts",
+      "filePath": "src/lib/coaching-messages-adaptive.ts",
+      "summary": "Adaptive coaching message selection; depends on coaching-tracker.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/coaching-messages.ts",
+      "type": "file",
+      "name": "coaching-messages.ts",
+      "filePath": "src/lib/coaching-messages.ts",
+      "summary": "Static coaching message catalog.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/coaching-tracker.ts",
+      "type": "file",
+      "name": "coaching-tracker.ts",
+      "filePath": "src/lib/coaching-tracker.ts",
+      "summary": "Tracks coaching-message exposure/state.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/copy-resolver.ts",
+      "type": "file",
+      "name": "copy-resolver.ts",
+      "filePath": "src/lib/copy-resolver.ts",
+      "summary": "Library module `copy-resolver` — 2 fn(s), 185L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/easter-eggs.ts",
+      "type": "file",
+      "name": "easter-eggs.ts",
+      "filePath": "src/lib/easter-eggs.ts",
+      "summary": "Library module `easter-eggs` — 5 fn(s), 138L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/energy-filter.ts",
+      "type": "file",
+      "name": "energy-filter.ts",
+      "filePath": "src/lib/energy-filter.ts",
+      "summary": "Library module `energy-filter` — 5 fn(s), 72L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/export.ts",
+      "type": "file",
+      "name": "export.ts",
+      "filePath": "src/lib/export.ts",
+      "summary": "Library module `export` — 6 fn(s), 101L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/fairness-balance.ts",
+      "type": "file",
+      "name": "fairness-balance.ts",
+      "filePath": "src/lib/fairness-balance.ts",
+      "summary": "Computes per-member fairness/load balance used by the schedulers.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "scheduling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/google-calendar.ts",
+      "type": "file",
+      "name": "google-calendar.ts",
+      "filePath": "src/lib/google-calendar.ts",
+      "summary": "Google Calendar OAuth + event sync integration (16 fns).",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/haptics.ts",
+      "type": "file",
+      "name": "haptics.ts",
+      "filePath": "src/lib/haptics.ts",
+      "summary": "Library module `haptics` — 1 fn(s), 21L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/household-type.ts",
+      "type": "file",
+      "name": "household-type.ts",
+      "filePath": "src/lib/household-type.ts",
+      "summary": "Library module `household-type` — 2 fn(s), 72L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/kid-profiles.ts",
+      "type": "file",
+      "name": "kid-profiles.ts",
+      "filePath": "src/lib/kid-profiles.ts",
+      "summary": "Library module `kid-profiles` — 6 fn(s), 78L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/love-tokens.ts",
+      "type": "file",
+      "name": "love-tokens.ts",
+      "filePath": "src/lib/love-tokens.ts",
+      "summary": "Library module `love-tokens` — 3 fn(s), 130L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/notifications.ts",
+      "type": "file",
+      "name": "notifications.ts",
+      "filePath": "src/lib/notifications.ts",
+      "summary": "Notification builders/dispatch helpers (16 fns) used by the notifications hook and push.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "notifications"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/pets.ts",
+      "type": "file",
+      "name": "pets.ts",
+      "filePath": "src/lib/pets.ts",
+      "summary": "Virtual pet collection logic for the gamification loop.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "gamification"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/playlists.ts",
+      "type": "file",
+      "name": "playlists.ts",
+      "filePath": "src/lib/playlists.ts",
+      "summary": "Library module `playlists` — 0 fn(s), 89L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/push.ts",
+      "type": "file",
+      "name": "push.ts",
+      "filePath": "src/lib/push.ts",
+      "summary": "Web-push subscription + send helpers.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "notifications"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/rate-limit.ts",
+      "type": "file",
+      "name": "rate-limit.ts",
+      "filePath": "src/lib/rate-limit.ts",
+      "summary": "Client-side rate-limiting guard for sensitive actions.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/rewards.ts",
+      "type": "file",
+      "name": "rewards.ts",
+      "filePath": "src/lib/rewards.ts",
+      "summary": "Reward/points economy logic (10 fns) backing gamification.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "gamification"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/room-health.ts",
+      "type": "file",
+      "name": "room-health.ts",
+      "filePath": "src/lib/room-health.ts",
+      "summary": "Library module `room-health` — 4 fn(s), 74L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/room-task-templates.ts",
+      "type": "file",
+      "name": "room-task-templates.ts",
+      "filePath": "src/lib/room-task-templates.ts",
+      "summary": "Library module `room-task-templates` — 5 fn(s), 247L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/safe-confetti.ts",
+      "type": "file",
+      "name": "safe-confetti.ts",
+      "filePath": "src/lib/safe-confetti.ts",
+      "summary": "Library module `safe-confetti` — 2 fn(s), 41L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/shopping-autocomplete.ts",
+      "type": "file",
+      "name": "shopping-autocomplete.ts",
+      "filePath": "src/lib/shopping-autocomplete.ts",
+      "summary": "Library module `shopping-autocomplete` — 3 fn(s), 317L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "shopping"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/smart-scheduler.ts",
+      "type": "file",
+      "name": "smart-scheduler.ts",
+      "filePath": "src/lib/smart-scheduler.ts",
+      "summary": "Heuristic scheduling helper layered on top of templates and fairness balance.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "scheduling"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/sound-effects.ts",
+      "type": "file",
+      "name": "sound-effects.ts",
+      "filePath": "src/lib/sound-effects.ts",
+      "summary": "Library module `sound-effects` — 7 fn(s), 111L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/storage.ts",
+      "type": "file",
+      "name": "storage.ts",
+      "filePath": "src/lib/storage.ts",
+      "summary": "Supabase Storage helpers (avatars, task photos).",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/sumit-client-inline.ts",
+      "type": "file",
+      "name": "sumit-client-inline.ts",
+      "filePath": "src/lib/sumit-client-inline.ts",
+      "summary": "Inline Sumit payment client (subscription billing).",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/supabase.ts",
+      "type": "file",
+      "name": "supabase.ts",
+      "filePath": "src/lib/supabase.ts",
+      "summary": "Singleton Supabase browser client factory; the data-access root every hook and lib module depends on.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "auth",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/surprise-box.ts",
+      "type": "file",
+      "name": "surprise-box.ts",
+      "filePath": "src/lib/surprise-box.ts",
+      "summary": "Library module `surprise-box` — 6 fn(s), 196L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/task-stats.ts",
+      "type": "file",
+      "name": "task-stats.ts",
+      "filePath": "src/lib/task-stats.ts",
+      "summary": "Statistical aggregation over tasks/completions (14 fns) powering the stats route.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "analytics"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/task-templates.ts",
+      "type": "file",
+      "name": "task-templates.ts",
+      "filePath": "src/lib/task-templates.ts",
+      "summary": "Library module `task-templates` — 0 fn(s), 87L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/ux-preferences.ts",
+      "type": "file",
+      "name": "ux-preferences.ts",
+      "filePath": "src/lib/ux-preferences.ts",
+      "summary": "Library module `ux-preferences` — 6 fn(s), 97L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/weekly-mock-data.ts",
+      "type": "file",
+      "name": "weekly-mock-data.ts",
+      "filePath": "src/lib/weekly-mock-data.ts",
+      "summary": "Library module `weekly-mock-data` — 2 fn(s), 69L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "scheduling"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/weekly-wheel.ts",
+      "type": "file",
+      "name": "weekly-wheel.ts",
+      "filePath": "src/lib/weekly-wheel.ts",
+      "summary": "Library module `weekly-wheel` — 5 fn(s), 167L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic",
+        "scheduling"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/welcome-gift.ts",
+      "type": "file",
+      "name": "welcome-gift.ts",
+      "filePath": "src/lib/welcome-gift.ts",
+      "summary": "Library module `welcome-gift` — 3 fn(s), 47L of business logic.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/whatsapp-messages.ts",
+      "type": "file",
+      "name": "whatsapp-messages.ts",
+      "filePath": "src/lib/whatsapp-messages.ts",
+      "summary": "Hebrew WhatsApp message templates.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "file:src/lib/whatsapp.ts",
+      "type": "file",
+      "name": "whatsapp.ts",
+      "filePath": "src/lib/whatsapp.ts",
+      "summary": "WhatsApp deep-link / share helpers.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "file:src/lib/zones.ts",
+      "type": "file",
+      "name": "zones.ts",
+      "filePath": "src/lib/zones.ts",
+      "summary": "Home zone definitions; depends on categories.",
+      "tags": [
+        "lib",
+        "business-logic"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "function:src/lib/supabase.ts:createClient",
+      "type": "function",
+      "name": "createClient",
+      "filePath": "src/lib/supabase.ts",
+      "summary": "`createClient()` in supabase.ts (L21-30).",
+      "tags": [
+        "lib",
+        "business-logic",
+        "auth",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/auth.ts:signUp",
+      "type": "function",
+      "name": "signUp",
+      "filePath": "src/lib/auth.ts",
+      "summary": "`signUp(email, password, displayName)` in auth.ts (L23-48).",
+      "tags": [
+        "lib",
+        "business-logic",
+        "auth",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/auth.ts:signIn",
+      "type": "function",
+      "name": "signIn",
+      "filePath": "src/lib/auth.ts",
+      "summary": "`signIn(email, password)` in auth.ts (L53-72).",
+      "tags": [
+        "lib",
+        "business-logic",
+        "auth",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/auth.ts:signOut",
+      "type": "function",
+      "name": "signOut",
+      "filePath": "src/lib/auth.ts",
+      "summary": "`signOut()` in auth.ts (L105-118).",
+      "tags": [
+        "lib",
+        "business-logic",
+        "auth",
+        "supabase"
+      ],
+      "complexity": "simple"
+    },
+    {
+      "id": "function:src/lib/auto-scheduler.ts:selectAssignee",
+      "type": "function",
+      "name": "selectAssignee",
+      "filePath": "src/lib/auto-scheduler.ts",
+      "summary": "`selectAssignee(template, recentInstances, members, templateIndex, goldenRuleTarget)` in auto-scheduler.ts (L117-191).",
+      "tags": [
+        "lib",
+        "business-logic",
+        "scheduling"
+      ],
+      "complexity": "complex"
+    },
+    {
+      "id": "function:src/lib/auto-scheduler.ts:generateTaskInstances",
+      "type": "function",
+      "name": "generateTaskInstances",
+      "filePath": "src/lib/auto-scheduler.ts",
+      "summary": "`generateTaskInstances(supabase, householdId, startDate, endDate, goldenRuleTarget)` in auto-scheduler.ts (L208-338).",
+      "tags": [
+        "lib",
+        "business-logic",
+        "scheduling"
+      ],
+      "complexity": "complex"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file:src/lib/supabase.ts",
+      "target": "function:src/lib/supabase.ts:createClient",
+      "type": "contains",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/auth.ts",
+      "target": "function:src/lib/auth.ts:signUp",
+      "type": "contains",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/auth.ts",
+      "target": "function:src/lib/auth.ts:signIn",
+      "type": "contains",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/auth.ts",
+      "target": "function:src/lib/auth.ts:signOut",
+      "type": "contains",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/auto-scheduler.ts",
+      "target": "function:src/lib/auto-scheduler.ts:selectAssignee",
+      "type": "contains",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/auto-scheduler.ts",
+      "target": "function:src/lib/auto-scheduler.ts:generateTaskInstances",
+      "type": "contains",
+      "weight": 1
+    },
+    {
+      "source": "file:src/lib/coaching-messages-adaptive.ts",
+      "target": "file:src/lib/coaching-tracker.ts",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/weekly-generator.ts",
+      "target": "file:src/lib/auto-scheduler.ts",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/weekly-generator.ts",
+      "target": "file:src/lib/categories.ts",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/weekly-generator.ts",
+      "target": "file:src/lib/seed-data.ts",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/weekly-generator.ts",
+      "target": "file:src/lib/zones.ts",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/zones.ts",
+      "target": "file:src/lib/categories.ts",
+      "type": "imports",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/lib/auth.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useAuth.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useProfile.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useHousehold.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useHouseholdMembers.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useHouseholdCounts.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useTasks.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useCompletions.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useShoppingList.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useShoppingCategories.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useShoppingShare.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useNotifications.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useNotificationPrefs.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useActivityFeed.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useLeaderboard.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useCategories.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useTaskCategories.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useTaskStreaks.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useEarnedBadges.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useUserAchievements.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useWeeklyChallenges.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useCalendarData.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useCalendarEvents.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/usePartner.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useSubscription.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useSeasonalMode.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useAdvancedStats.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useZoneConfig.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/usePlaylistTimer.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useAIChat.ts",
+      "target": "file:src/lib/supabase.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useWeeklyGenerator.ts",
+      "target": "file:src/lib/weekly-generator.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/smart-scheduler.ts",
+      "target": "file:src/lib/fairness-balance.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/smart-scheduler.ts",
+      "target": "file:src/lib/auto-scheduler.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useNotifications.ts",
+      "target": "file:src/lib/notifications.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/notifications.ts",
+      "target": "file:src/lib/push.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/usePushNotifications.ts",
+      "target": "file:src/lib/push.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useAdvancedStats.ts",
+      "target": "file:src/lib/task-stats.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useEarnedBadges.ts",
+      "target": "file:src/lib/achievements.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useUserAchievements.ts",
+      "target": "file:src/lib/achievements.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useWeeklyChallenges.ts",
+      "target": "file:src/lib/challenges.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/rewards.ts",
+      "target": "file:src/lib/achievements.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useAIChat.ts",
+      "target": "file:src/lib/coaching-messages-adaptive.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useShoppingCategories.ts",
+      "target": "file:src/lib/shopping-autocomplete.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useCalendarEvents.ts",
+      "target": "file:src/lib/google-calendar.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useCalendarData.ts",
+      "target": "file:src/lib/google-calendar.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useSubscription.ts",
+      "target": "file:src/lib/sumit-client-inline.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/rewards.ts",
+      "target": "file:src/lib/pets.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/weekly-generator.ts",
+      "target": "file:src/lib/weekly-wheel.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/weekly-generator.ts",
+      "target": "file:src/lib/weekly-mock-data.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/auto-scheduler.ts",
+      "target": "file:src/lib/room-task-templates.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/auto-scheduler.ts",
+      "target": "file:src/lib/task-templates.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/task-stats.ts",
+      "target": "file:src/lib/energy-filter.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useSeasonalMode.ts",
+      "target": "file:src/lib/backgrounds.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useThemeColor.ts",
+      "target": "file:src/lib/ux-preferences.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useAppSound.ts",
+      "target": "file:src/lib/sound-effects.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/notifications.ts",
+      "target": "file:src/lib/whatsapp-messages.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/whatsapp.ts",
+      "target": "file:src/lib/whatsapp-messages.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/coaching-messages-adaptive.ts",
+      "target": "file:src/lib/coaching-messages.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useShoppingShare.ts",
+      "target": "file:src/lib/whatsapp.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/love-tokens.ts",
+      "target": "file:src/lib/rewards.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/surprise-box.ts",
+      "target": "file:src/lib/rewards.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/welcome-gift.ts",
+      "target": "file:src/lib/rewards.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/challenges.ts",
+      "target": "file:src/lib/rewards.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useUserAchievements.ts",
+      "target": "file:src/lib/rewards.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/lib/categories.ts",
+      "target": "file:src/lib/zones.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useCategories.ts",
+      "target": "file:src/lib/categories.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useZoneConfig.ts",
+      "target": "file:src/lib/zones.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useTaskCategories.ts",
+      "target": "file:src/lib/categories.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useTasks.ts",
+      "target": "file:src/lib/auto-scheduler.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useVoiceInput.ts",
+      "target": "file:src/lib/storage.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useTaskPhoto.ts",
+      "target": "file:src/lib/storage.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/hooks/useAppSound.ts",
+      "target": "file:src/lib/haptics.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/dashboard/page.tsx",
+      "target": "file:src/hooks/useTasks.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/dashboard/page.tsx",
+      "target": "file:src/hooks/useProfile.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/dashboard/page.tsx",
+      "target": "file:src/hooks/useHousehold.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/dashboard/page.tsx",
+      "target": "file:src/hooks/useCompletions.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/dashboard/page.tsx",
+      "target": "file:src/hooks/useEarnedBadges.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/tasks/page.tsx",
+      "target": "file:src/hooks/useTasks.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/tasks/page.tsx",
+      "target": "file:src/hooks/useCompletions.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/tasks/page.tsx",
+      "target": "file:src/hooks/useHouseholdMembers.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/tasks/page.tsx",
+      "target": "file:src/hooks/useTaskCategories.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/shopping/page.tsx",
+      "target": "file:src/hooks/useShoppingList.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/shopping/page.tsx",
+      "target": "file:src/hooks/useShoppingCategories.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/shopping/page.tsx",
+      "target": "file:src/hooks/useShoppingShare.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/stats/page.tsx",
+      "target": "file:src/hooks/useAdvancedStats.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/stats/page.tsx",
+      "target": "file:src/hooks/useLeaderboard.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/stats/page.tsx",
+      "target": "file:src/hooks/useCompletions.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/settings/page.tsx",
+      "target": "file:src/hooks/useProfile.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/settings/page.tsx",
+      "target": "file:src/hooks/useHousehold.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/settings/page.tsx",
+      "target": "file:src/hooks/useSubscription.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/settings/page.tsx",
+      "target": "file:src/hooks/useNotificationPrefs.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/weekly/page.tsx",
+      "target": "file:src/hooks/useWeeklyGenerator.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/weekly/page.tsx",
+      "target": "file:src/hooks/useWeeklyChallenges.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/history/page.tsx",
+      "target": "file:src/hooks/useCompletions.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/history/page.tsx",
+      "target": "file:src/hooks/useActivityFeed.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    },
+    {
+      "source": "file:src/app/(app)/playlists/page.tsx",
+      "target": "file:src/hooks/usePlaylistTimer.ts",
+      "type": "depends_on",
+      "weight": 0.6
+    }
+  ],
+  "layers": [
+    {
+      "id": "layer:data-auth",
+      "name": "Data & Auth Foundation",
+      "description": "Supabase client root, auth functions, storage, rate-limiting and the foundational auth/profile/household hooks that every feature builds on.",
+      "nodeIds": [
+        "file:src/hooks/useAuth.ts",
+        "file:src/hooks/useHousehold.ts",
+        "file:src/hooks/useHouseholdCounts.ts",
+        "file:src/hooks/useHouseholdMembers.ts",
+        "file:src/hooks/usePartner.ts",
+        "file:src/hooks/useProfile.ts",
+        "file:src/hooks/useSubscription.ts",
+        "file:src/lib/auth.ts",
+        "file:src/lib/rate-limit.ts",
+        "file:src/lib/storage.ts",
+        "file:src/lib/supabase.ts"
+      ]
+    },
+    {
+      "id": "layer:tasks-scheduling",
+      "name": "Tasks & Scheduling Engine",
+      "description": "Task CRUD hooks plus the fairness/auto/smart schedulers and weekly generation that assign and plan household chores.",
+      "nodeIds": [
+        "file:src/lib/auto-scheduler.ts",
+        "file:src/lib/seed-data.ts",
+        "file:src/lib/weekly-generator.ts",
+        "file:src/hooks/useCategories.ts",
+        "file:src/hooks/useCompletions.ts",
+        "file:src/hooks/useOfflineQueue.ts",
+        "file:src/hooks/useTaskCategories.ts",
+        "file:src/hooks/useTaskPhoto.ts",
+        "file:src/hooks/useTasks.ts",
+        "file:src/hooks/useTaskStreaks.ts",
+        "file:src/hooks/useWeeklyGenerator.ts",
+        "file:src/hooks/useZoneConfig.ts",
+        "file:src/lib/categories.ts",
+        "file:src/lib/energy-filter.ts",
+        "file:src/lib/fairness-balance.ts",
+        "file:src/lib/household-type.ts",
+        "file:src/lib/room-task-templates.ts",
+        "file:src/lib/smart-scheduler.ts",
+        "file:src/lib/task-stats.ts",
+        "file:src/lib/task-templates.ts",
+        "file:src/lib/weekly-mock-data.ts",
+        "file:src/lib/weekly-wheel.ts",
+        "file:src/lib/zones.ts"
+      ]
+    },
+    {
+      "id": "layer:gamification",
+      "name": "Gamification & Coaching",
+      "description": "Rewards, achievements, challenges, pets, love-tokens, surprise/welcome gifts, easter eggs and the adaptive coaching message system.",
+      "nodeIds": [
+        "file:src/hooks/useAIChat.ts",
+        "file:src/hooks/useAppSound.ts",
+        "file:src/hooks/useEarnedBadges.ts",
+        "file:src/hooks/useLeaderboard.ts",
+        "file:src/hooks/useUserAchievements.ts",
+        "file:src/hooks/useWeeklyChallenges.ts",
+        "file:src/lib/achievements.ts",
+        "file:src/lib/backgrounds.ts",
+        "file:src/lib/challenges.ts",
+        "file:src/lib/coaching-messages-adaptive.ts",
+        "file:src/lib/coaching-messages.ts",
+        "file:src/lib/coaching-tracker.ts",
+        "file:src/lib/easter-eggs.ts",
+        "file:src/lib/kid-profiles.ts",
+        "file:src/lib/love-tokens.ts",
+        "file:src/lib/pets.ts",
+        "file:src/lib/rewards.ts",
+        "file:src/lib/safe-confetti.ts",
+        "file:src/lib/sound-effects.ts",
+        "file:src/lib/surprise-box.ts",
+        "file:src/lib/welcome-gift.ts"
+      ]
+    },
+    {
+      "id": "layer:notifications-integrations",
+      "name": "Notifications & Integrations",
+      "description": "In-app + push notifications, Google Calendar sync, WhatsApp, Sumit billing, and analytics.",
+      "nodeIds": [
+        "file:src/hooks/useActivityFeed.ts",
+        "file:src/hooks/useCalendarData.ts",
+        "file:src/hooks/useCalendarEvents.ts",
+        "file:src/hooks/useNotificationPrefs.ts",
+        "file:src/hooks/useNotifications.ts",
+        "file:src/hooks/usePushNotifications.ts",
+        "file:src/hooks/useVoiceInput.ts",
+        "file:src/hooks/useWebShare.ts",
+        "file:src/lib/analytics.ts",
+        "file:src/lib/google-calendar.ts",
+        "file:src/lib/notifications.ts",
+        "file:src/lib/push.ts",
+        "file:src/lib/sumit-client-inline.ts",
+        "file:src/lib/whatsapp-messages.ts",
+        "file:src/lib/whatsapp.ts"
+      ]
+    },
+    {
+      "id": "layer:shopping",
+      "name": "Shopping",
+      "description": "Shared shopping list hooks and autocomplete logic.",
+      "nodeIds": [
+        "file:src/hooks/useShoppingCategories.ts",
+        "file:src/hooks/useShoppingList.ts",
+        "file:src/hooks/useShoppingShare.ts",
+        "file:src/lib/shopping-autocomplete.ts"
+      ]
+    },
+    {
+      "id": "layer:ux-prefs-misc",
+      "name": "UX & Preferences",
+      "description": "Theme/seasonal/motion/sound preferences, accessibility helpers, coaching/copy resolution and assorted UX utilities.",
+      "nodeIds": [
+        "file:src/hooks/useFirstVisit.ts",
+        "file:src/hooks/useFocusTrap.ts",
+        "file:src/hooks/useKeyboardShortcuts.ts",
+        "file:src/hooks/usePlaylistTimer.ts",
+        "file:src/hooks/usePWAInstall.ts",
+        "file:src/hooks/useReducedMotion.ts",
+        "file:src/hooks/useSeasonalMode.ts",
+        "file:src/hooks/useThemeColor.ts",
+        "file:src/hooks/useTranslation.ts",
+        "file:src/lib/copy-resolver.ts",
+        "file:src/lib/export.ts",
+        "file:src/lib/haptics.ts",
+        "file:src/lib/playlists.ts",
+        "file:src/lib/room-health.ts",
+        "file:src/lib/ux-preferences.ts"
+      ]
+    },
+    {
+      "id": "layer:routes",
+      "name": "App Routes (App Router)",
+      "description": "The authenticated (app) route group: dashboard, tasks, shopping, stats, settings, weekly, history, emergency, playlists, plus layouts and boundaries.",
+      "nodeIds": [
+        "file:src/app/(app)/dashboard/layout.tsx",
+        "file:src/app/(app)/dashboard/page.tsx",
+        "file:src/app/(app)/emergency/layout.tsx",
+        "file:src/app/(app)/emergency/page.tsx",
+        "file:src/app/(app)/error.tsx",
+        "file:src/app/(app)/history/page.tsx",
+        "file:src/app/(app)/layout.tsx",
+        "file:src/app/(app)/loading.tsx",
+        "file:src/app/(app)/playlists/page.tsx",
+        "file:src/app/(app)/settings/layout.tsx",
+        "file:src/app/(app)/settings/page.tsx",
+        "file:src/app/(app)/shopping/layout.tsx",
+        "file:src/app/(app)/shopping/page.tsx",
+        "file:src/app/(app)/stats/layout.tsx",
+        "file:src/app/(app)/stats/page.tsx",
+        "file:src/app/(app)/tasks/layout.tsx",
+        "file:src/app/(app)/tasks/page.tsx",
+        "file:src/app/(app)/tasks/print/page.tsx",
+        "file:src/app/(app)/weekly/layout.tsx",
+        "file:src/app/(app)/weekly/page.tsx"
+      ]
+    },
+    {
+      "id": "layer:other-lib",
+      "name": "Other Core Utilities",
+      "description": "Remaining shared library utilities not specific to a single feature domain.",
+      "nodeIds": [
+        "file:src/hooks/useAdvancedStats.ts",
+        "file:src/hooks/usePetCollectionSync.ts"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "title": "Data & Auth Foundation",
+      "description": "Start at the Supabase client singleton and auth layer — the data root every feature depends on.",
+      "nodeIds": [
+        "file:src/lib/supabase.ts",
+        "file:src/lib/auth.ts",
+        "file:src/hooks/useAuth.ts"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "The App Shell",
+      "description": "The (app) route-group layout wires providers, guards and navigation around every authenticated screen.",
+      "nodeIds": [
+        "file:src/app/(app)/layout.tsx"
+      ]
+    },
+    {
+      "order": 3,
+      "title": "Tasks: the core loop",
+      "description": "useTasks drives task CRUD + realtime; the tasks route is the largest surface in the app.",
+      "nodeIds": [
+        "file:src/hooks/useTasks.ts",
+        "file:src/app/(app)/tasks/page.tsx"
+      ]
+    },
+    {
+      "order": 4,
+      "title": "Scheduling & fairness",
+      "description": "auto-scheduler selects assignees by weighted load; weekly-generator composes it into a weekly plan.",
+      "nodeIds": [
+        "file:src/lib/auto-scheduler.ts",
+        "file:src/lib/weekly-generator.ts",
+        "file:src/hooks/useWeeklyGenerator.ts"
+      ]
+    },
+    {
+      "order": 5,
+      "title": "Gamification",
+      "description": "Rewards, achievements and challenges turn completed chores into a motivating game loop.",
+      "nodeIds": [
+        "file:src/lib/rewards.ts",
+        "file:src/lib/achievements.ts",
+        "file:src/lib/challenges.ts"
+      ]
+    },
+    {
+      "order": 6,
+      "title": "Notifications & integrations",
+      "description": "In-app + push notifications and external integrations (Google Calendar, WhatsApp, Sumit billing).",
+      "nodeIds": [
+        "file:src/hooks/useNotifications.ts",
+        "file:src/lib/notifications.ts",
+        "file:src/lib/google-calendar.ts"
+      ]
+    },
+    {
+      "order": 7,
+      "title": "Insight surfaces",
+      "description": "task-stats powers the stats route; the dashboard aggregates everything into the landing screen.",
+      "nodeIds": [
+        "file:src/lib/task-stats.ts",
+        "file:src/app/(app)/stats/page.tsx",
+        "file:src/app/(app)/dashboard/page.tsx"
+      ]
+    }
+  ]
+}
