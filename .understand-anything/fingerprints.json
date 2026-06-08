@@ -1,0 +1,7451 @@
+{
+  "version": "1.0.0",
+  "gitCommitHash": "bcbf7be1691adc79386fb98592940cf787aed934",
+  "generatedAt": "2026-06-08T09:25:39.537Z",
+  "files": {
+    "src/app/(app)/dashboard/layout.tsx": {
+      "filePath": "src/app/(app)/dashboard/layout.tsx",
+      "contentHash": "7c77eeaaa23571a6aa2da1e1783de914be7cb1eba224b280563163be54f1ace9",
+      "functions": [
+        {
+          "name": "DashboardLayout",
+          "params": [
+            "{\r\n  children,\r\n}"
+          ],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "next",
+          "specifiers": [
+            "Metadata"
+          ]
+        }
+      ],
+      "exports": [
+        "metadata",
+        "DashboardLayout"
+      ],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/dashboard/page.tsx": {
+      "filePath": "src/app/(app)/dashboard/page.tsx",
+      "contentHash": "3f728836d4f0d68fb55b5b2503df1c9a4681f216d93dfeeebdda73a8621b1ca8",
+      "functions": [
+        {
+          "name": "getHebrewDate",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "pickSubtitle",
+          "params": [
+            "arr"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "getTimeGreeting",
+          "params": [
+            "name"
+          ],
+          "returnType": "{ greeting: string; subtitle: string }",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "DashboardPage",
+          "params": [],
+          "exported": true,
+          "lineCount": 659
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useCallback",
+            "useMemo",
+            "useEffect",
+            "useRef"
+          ]
+        },
+        {
+          "source": "next/dynamic",
+          "specifiers": [
+            "dynamic"
+          ]
+        },
+        {
+          "source": "next/link",
+          "specifiers": [
+            "Link"
+          ]
+        },
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion",
+            "AnimatePresence"
+          ]
+        },
+        {
+          "source": "@/components/dashboard/today-overview",
+          "specifiers": [
+            "TodayOverview",
+            "TaskItem"
+          ]
+        },
+        {
+          "source": "@/components/dashboard/streak-display",
+          "specifiers": [
+            "StreakDisplay"
+          ]
+        },
+        {
+          "source": "@/components/dashboard/partner-status",
+          "specifiers": [
+            "PartnerStatus",
+            "MembersStatus"
+          ]
+        },
+        {
+          "source": "@/lib/coaching-messages",
+          "specifiers": [
+            "getRandomMessage"
+          ]
+        },
+        {
+          "source": "@/lib/room-health",
+          "specifiers": [
+            "computeRoomHealth"
+          ]
+        },
+        {
+          "source": "@/lib/rewards",
+          "specifiers": [
+            "computeRewardsProgress"
+          ]
+        },
+        {
+          "source": "@/lib/task-stats",
+          "specifiers": [
+            "computeBestStreak"
+          ]
+        },
+        {
+          "source": "@/lib/energy-filter",
+          "specifiers": [
+            "filterTasksByEnergy"
+          ]
+        },
+        {
+          "source": "@/lib/energy-filter",
+          "specifiers": [
+            "EnergyLevel"
+          ]
+        },
+        {
+          "source": "@/hooks/useProfile",
+          "specifiers": [
+            "useProfile"
+          ]
+        },
+        {
+          "source": "@/hooks/useTasks",
+          "specifiers": [
+            "useTasks"
+          ]
+        },
+        {
+          "source": "@/hooks/useCompletions",
+          "specifiers": [
+            "useCompletions"
+          ]
+        },
+        {
+          "source": "@/hooks/useCategories",
+          "specifiers": [
+            "useCategories"
+          ]
+        },
+        {
+          "source": "@/hooks/useAppSound",
+          "specifiers": [
+            "useAppSounds"
+          ]
+        },
+        {
+          "source": "@/hooks/usePartner",
+          "specifiers": [
+            "usePartner"
+          ]
+        },
+        {
+          "source": "@/hooks/useHouseholdMembers",
+          "specifiers": [
+            "useHouseholdMembers"
+          ]
+        },
+        {
+          "source": "@/hooks/useWeeklyChallenges",
+          "specifiers": [
+            "useWeeklyChallenges"
+          ]
+        },
+        {
+          "source": "@/hooks/useLeaderboard",
+          "specifiers": [
+            "useLeaderboard"
+          ]
+        },
+        {
+          "source": "@/components/skeleton",
+          "specifiers": [
+            "TaskListSkeleton"
+          ]
+        },
+        {
+          "source": "sonner",
+          "specifiers": [
+            "toast"
+          ]
+        },
+        {
+          "source": "@/lib/categories",
+          "specifiers": [
+            "CATEGORY_NAME_TO_KEY",
+            "CATEGORY_LABELS",
+            "CATEGORY_ICONS",
+            "CATEGORY_COLORS"
+          ]
+        },
+        {
+          "source": "@/components/dashboard/dashboard-header",
+          "specifiers": [
+            "DashboardHeader"
+          ]
+        },
+        {
+          "source": "@/components/dashboard/fairness-balance-meter",
+          "specifiers": [
+            "FairnessBalanceMeter"
+          ]
+        },
+        {
+          "source": "@/components/dashboard/golden-rule-section",
+          "specifiers": [
+            "GoldenRuleSection"
+          ]
+        },
+        {
+          "source": "@/components/dashboard/playlist-card",
+          "specifiers": [
+            "PlaylistCard"
+          ]
+        },
+        {
+          "source": "@/components/dashboard/energy-mode-section",
+          "specifiers": [
+            "EnergyModeSection"
+          ]
+        },
+        {
+          "source": "@/components/dashboard/coaching-insight",
+          "specifiers": [
+            "CoachingInsight"
+          ]
+        },
+        {
+          "source": "@/components/dashboard/coaching-tips",
+          "specifiers": [
+            "CoachingTips"
+          ]
+        },
+        {
+          "source": "@/hooks/useSeasonalMode",
+          "specifiers": [
+            "useSeasonalMode"
+          ]
+        },
+        {
+          "source": "@/hooks/useTranslation",
+          "specifiers": [
+            "useTranslation"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "ChevronDown"
+          ]
+        },
+        {
+          "source": "@/hooks/useHousehold",
+          "specifiers": [
+            "useHousehold"
+          ]
+        },
+        {
+          "source": "@/components/offline-indicator",
+          "specifiers": [
+            "OfflineIndicator"
+          ]
+        },
+        {
+          "source": "@/hooks/useFirstVisit",
+          "specifiers": [
+            "useFirstVisit"
+          ]
+        },
+        {
+          "source": "@/components/feature-tooltip",
+          "specifiers": [
+            "FeatureTooltip"
+          ]
+        }
+      ],
+      "exports": [
+        "DashboardPage"
+      ],
+      "totalLines": 793,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/emergency/layout.tsx": {
+      "filePath": "src/app/(app)/emergency/layout.tsx",
+      "contentHash": "665712891bd21ecf80ff430b82e910cc615a64e18fbdef447cc4ed653079b9d2",
+      "functions": [
+        {
+          "name": "EmergencyLayout",
+          "params": [
+            "{\r\n  children,\r\n}"
+          ],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "next",
+          "specifiers": [
+            "Metadata"
+          ]
+        }
+      ],
+      "exports": [
+        "metadata",
+        "EmergencyLayout"
+      ],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/emergency/page.tsx": {
+      "filePath": "src/app/(app)/emergency/page.tsx",
+      "contentHash": "3f3726adbe513736555f6a1a8eb4a0a6b13febfc39c39e95ad508e379199bdc5",
+      "functions": [
+        {
+          "name": "getStoredEmergencyMode",
+          "params": [],
+          "returnType": "boolean",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "setStoredEmergencyMode",
+          "params": [
+            "value"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "EmergencyPage",
+          "params": [],
+          "exported": true,
+          "lineCount": 269
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        },
+        {
+          "source": "next/image",
+          "specifiers": [
+            "Image"
+          ]
+        },
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Shield",
+            "Check",
+            "Clock",
+            "Loader2",
+            "AlertTriangle"
+          ]
+        },
+        {
+          "source": "@/lib/seed-data",
+          "specifiers": [
+            "getCategoryColor",
+            "getCategoryLabel"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        },
+        {
+          "source": "sonner",
+          "specifiers": [
+            "toast"
+          ]
+        },
+        {
+          "source": "@/hooks/useTranslation",
+          "specifiers": [
+            "useTranslation"
+          ]
+        }
+      ],
+      "exports": [
+        "EmergencyPage"
+      ],
+      "totalLines": 303,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/error.tsx": {
+      "filePath": "src/app/(app)/error.tsx",
+      "contentHash": "ee20a299e95281ff4c0ea2eee2bb5ce2fd17aefb0f70b3eeef7fe84c95b6fbeb",
+      "functions": [
+        {
+          "name": "Error",
+          "params": [
+            "{\r\n  reset,\r\n}"
+          ],
+          "exported": true,
+          "lineCount": 39
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/hooks/useTranslation",
+          "specifiers": [
+            "useTranslation"
+          ]
+        }
+      ],
+      "exports": [
+        "Error"
+      ],
+      "totalLines": 44,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/history/page.tsx": {
+      "filePath": "src/app/(app)/history/page.tsx",
+      "contentHash": "e30fc0bbcf0f2b3e33a93903848b194322e4826698946a9cf5601a5879ffdc06",
+      "functions": [
+        {
+          "name": "CategoryFilter",
+          "params": [
+            "{ selected, onChange }"
+          ],
+          "exported": false,
+          "lineCount": 30
+        },
+        {
+          "name": "getRelativeDate",
+          "params": [
+            "completedAt"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "HistoryItem",
+          "params": [
+            "{ task, completion, categoryKey }"
+          ],
+          "exported": false,
+          "lineCount": 51
+        },
+        {
+          "name": "buildMockHistory",
+          "params": [],
+          "returnType": "MockHistoryEntry[]",
+          "exported": false,
+          "lineCount": 42
+        },
+        {
+          "name": "HistoryPage",
+          "params": [],
+          "exported": true,
+          "lineCount": 172
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useMemo"
+          ]
+        },
+        {
+          "source": "next/dynamic",
+          "specifiers": [
+            "dynamic"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Search",
+            "Filter"
+          ]
+        },
+        {
+          "source": "@/hooks/useTasks",
+          "specifiers": [
+            "useTasks"
+          ]
+        },
+        {
+          "source": "@/hooks/useCompletions",
+          "specifiers": [
+            "useCompletions"
+          ]
+        },
+        {
+          "source": "@/hooks/useCategories",
+          "specifiers": [
+            "useCategories"
+          ]
+        },
+        {
+          "source": "@/hooks/useTranslation",
+          "specifiers": [
+            "useTranslation"
+          ]
+        },
+        {
+          "source": "@/lib/seed-data",
+          "specifiers": [
+            "getCategoryColor",
+            "getCategoryLabel"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskRow",
+            "TaskCompletionRow"
+          ]
+        },
+        {
+          "source": "@/lib/categories",
+          "specifiers": [
+            "CATEGORY_NAME_TO_KEY"
+          ]
+        }
+      ],
+      "exports": [
+        "HistoryPage"
+      ],
+      "totalLines": 389,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/layout.tsx": {
+      "filePath": "src/app/(app)/layout.tsx",
+      "contentHash": "a3ffc9e5e8f49c5eff816bbf35357be08f123fe2c25553a794f76fdff90d4c3f",
+      "functions": [
+        {
+          "name": "AppLayoutInner",
+          "params": [
+            "{ children }"
+          ],
+          "exported": false,
+          "lineCount": 126
+        },
+        {
+          "name": "AppLayout",
+          "params": [
+            "{ children }"
+          ],
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useMemo",
+            "useState"
+          ]
+        },
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "MotionConfig"
+          ]
+        },
+        {
+          "source": "@/hooks/useProfile",
+          "specifiers": [
+            "useProfile"
+          ]
+        },
+        {
+          "source": "@/hooks/usePetCollectionSync",
+          "specifiers": [
+            "usePetCollectionSync"
+          ]
+        },
+        {
+          "source": "@/lib/backgrounds",
+          "specifiers": [
+            "syncBackgroundCollectionWithStreak"
+          ]
+        },
+        {
+          "source": "@/lib/easter-eggs",
+          "specifiers": [
+            "registerKonamiListener"
+          ]
+        },
+        {
+          "source": "sonner",
+          "specifiers": [
+            "toast"
+          ]
+        },
+        {
+          "source": "next/dynamic",
+          "specifiers": [
+            "dynamic"
+          ]
+        },
+        {
+          "source": "next/navigation",
+          "specifiers": [
+            "useRouter"
+          ]
+        },
+        {
+          "source": "@/components/bottom-nav",
+          "specifiers": [
+            "BottomNav"
+          ]
+        },
+        {
+          "source": "@/components/AuthGuard",
+          "specifiers": [
+            "AuthGuard"
+          ]
+        },
+        {
+          "source": "@/components/NotificationBanner",
+          "specifiers": [
+            "NotificationBanner"
+          ]
+        },
+        {
+          "source": "@/components/ServiceWorkerRegistrar",
+          "specifiers": [
+            "ServiceWorkerRegistrar"
+          ]
+        },
+        {
+          "source": "@/components/ServiceWorkerUpdateToast",
+          "specifiers": [
+            "ServiceWorkerUpdateToast"
+          ]
+        },
+        {
+          "source": "@/components/page-transition",
+          "specifiers": [
+            "PageTransition"
+          ]
+        },
+        {
+          "source": "@/components/SupabaseProvider",
+          "specifiers": [
+            "SupabaseProvider"
+          ]
+        },
+        {
+          "source": "@/components/pwa-install-banner",
+          "specifiers": [
+            "PWAInstallBanner"
+          ]
+        },
+        {
+          "source": "@/components/language-toggle",
+          "specifiers": [
+            "LanguageToggle"
+          ]
+        },
+        {
+          "source": "@/components/keyboard-shortcuts-help",
+          "specifiers": [
+            "KeyboardShortcutsHelp"
+          ]
+        },
+        {
+          "source": "@/hooks/useKeyboardShortcuts",
+          "specifiers": [
+            "useKeyboardShortcuts"
+          ]
+        },
+        {
+          "source": "@/components/notifications/NotificationCenter",
+          "specifiers": [
+            "NotificationCenter"
+          ]
+        },
+        {
+          "source": "@/hooks/useNotifications",
+          "specifiers": [
+            "useNotifications"
+          ]
+        }
+      ],
+      "exports": [
+        "AppLayout"
+      ],
+      "totalLines": 217,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/loading.tsx": {
+      "filePath": "src/app/(app)/loading.tsx",
+      "contentHash": "38029c99daaf82bc5d8c42441b9d45887a97fafcaf5bc4eb55d113a9af07804a",
+      "functions": [
+        {
+          "name": "Loading",
+          "params": [],
+          "exported": true,
+          "lineCount": 16
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "Loading"
+      ],
+      "totalLines": 17,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/playlists/page.tsx": {
+      "filePath": "src/app/(app)/playlists/page.tsx",
+      "contentHash": "1d2feb836ded96ef5a11aa6c5c4fe3a2dc2edea62f0f1f7e36575cc3fe86434d",
+      "functions": [
+        {
+          "name": "PlaylistsPage",
+          "params": [],
+          "exported": true,
+          "lineCount": 97
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState"
+          ]
+        },
+        {
+          "source": "next/image",
+          "specifiers": [
+            "Image"
+          ]
+        },
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion",
+            "AnimatePresence"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Clock",
+            "ListChecks"
+          ]
+        },
+        {
+          "source": "@/lib/playlists",
+          "specifiers": [
+            "PLAYLISTS"
+          ]
+        },
+        {
+          "source": "@/hooks/usePlaylistTimer",
+          "specifiers": [
+            "usePlaylistTimer"
+          ]
+        },
+        {
+          "source": "@/components/playlist-player",
+          "specifiers": [
+            "PlaylistPlayer"
+          ]
+        },
+        {
+          "source": "@/hooks/useTranslation",
+          "specifiers": [
+            "useTranslation"
+          ]
+        }
+      ],
+      "exports": [
+        "PlaylistsPage"
+      ],
+      "totalLines": 109,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/settings/layout.tsx": {
+      "filePath": "src/app/(app)/settings/layout.tsx",
+      "contentHash": "cf18d90d9d0b7c851fc440ec6298121b6f3205420732b3d048e74126ecfda7d9",
+      "functions": [
+        {
+          "name": "SettingsLayout",
+          "params": [
+            "{\r\n  children,\r\n}"
+          ],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "next",
+          "specifiers": [
+            "Metadata"
+          ]
+        }
+      ],
+      "exports": [
+        "metadata",
+        "SettingsLayout"
+      ],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/settings/page.tsx": {
+      "filePath": "src/app/(app)/settings/page.tsx",
+      "contentHash": "d4761bdf67f92acd8e783bab4209cb2c1c8a234d01c1e8643d68080c76c005fc",
+      "functions": [
+        {
+          "name": "getStoredTheme",
+          "params": [],
+          "returnType": "Theme",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "applyTheme",
+          "params": [
+            "theme"
+          ],
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "getStoredLanguage",
+          "params": [],
+          "returnType": "Language",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "setStoredLanguage",
+          "params": [
+            "lang"
+          ],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "SettingsPage",
+          "params": [],
+          "exported": true,
+          "lineCount": 773
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "Suspense"
+          ]
+        },
+        {
+          "source": "next/dynamic",
+          "specifiers": [
+            "dynamic"
+          ]
+        },
+        {
+          "source": "next/image",
+          "specifiers": [
+            "Image"
+          ]
+        },
+        {
+          "source": "next/navigation",
+          "specifiers": [
+            "useRouter"
+          ]
+        },
+        {
+          "source": "@/hooks/useAuth",
+          "specifiers": [
+            "useAuth"
+          ]
+        },
+        {
+          "source": "@/hooks/useProfile",
+          "specifiers": [
+            "useProfile"
+          ]
+        },
+        {
+          "source": "@/hooks/useHousehold",
+          "specifiers": [
+            "useHousehold"
+          ]
+        },
+        {
+          "source": "@/lib/auth",
+          "specifiers": [
+            "signOut"
+          ]
+        },
+        {
+          "source": "@/lib/notifications",
+          "specifiers": [
+            "getNotificationPrefs",
+            "saveNotificationPrefs",
+            "getNotificationPermission",
+            "requestNotificationPermission",
+            "isPushSubscribed",
+            "subscribeToPush",
+            "unsubscribeFromPush",
+            "NotificationPrefs"
+          ]
+        },
+        {
+          "source": "sonner",
+          "specifiers": [
+            "toast"
+          ]
+        },
+        {
+          "source": "@/hooks/useAppSound",
+          "specifiers": [
+            "setSoundEnabled"
+          ]
+        },
+        {
+          "source": "@/components/invite-partner",
+          "specifiers": [
+            "InvitePartner"
+          ]
+        },
+        {
+          "source": "@/components/calendar-settings",
+          "specifiers": [
+            "CalendarSettings"
+          ]
+        },
+        {
+          "source": "@/components/settings/profile-section",
+          "specifiers": [
+            "ProfileSection"
+          ]
+        },
+        {
+          "source": "@/components/settings/household-section",
+          "specifiers": [
+            "HouseholdSection"
+          ]
+        },
+        {
+          "source": "@/components/settings/notification-settings",
+          "specifiers": [
+            "NotificationSettings"
+          ]
+        },
+        {
+          "source": "@/components/settings/appearance-settings",
+          "specifiers": [
+            "AppearanceSettings",
+            "WhatsAppSettings"
+          ]
+        },
+        {
+          "source": "@/components/settings/danger-zone",
+          "specifiers": [
+            "DangerZone"
+          ]
+        },
+        {
+          "source": "@/components/settings/members-section",
+          "specifiers": [
+            "MembersSection"
+          ]
+        },
+        {
+          "source": "@/hooks/useSeasonalMode",
+          "specifiers": [
+            "useSeasonalMode"
+          ]
+        },
+        {
+          "source": "@/hooks/useZoneConfig",
+          "specifiers": [
+            "useZoneConfig"
+          ]
+        },
+        {
+          "source": "@/hooks/useTranslation",
+          "specifiers": [
+            "useTranslation"
+          ]
+        },
+        {
+          "source": "@/lib/export",
+          "specifiers": [
+            "exportTasksToCSV",
+            "exportCompletionsToCSV",
+            "downloadCSV",
+            "ExportTask",
+            "ExportCompletion"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "LayoutGrid",
+            "AlertTriangle",
+            "Keyboard",
+            "Download",
+            "FileDown"
+          ]
+        },
+        {
+          "source": "next/link",
+          "specifiers": [
+            "Link"
+          ]
+        },
+        {
+          "source": "@/hooks/usePWAInstall",
+          "specifiers": [
+            "usePWAInstall"
+          ]
+        }
+      ],
+      "exports": [
+        "SettingsPage"
+      ],
+      "totalLines": 862,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/shopping/layout.tsx": {
+      "filePath": "src/app/(app)/shopping/layout.tsx",
+      "contentHash": "4324389822d5b11251656b1fd0dbc2c27416f51d787fb281399bb61d66f4c8ff",
+      "functions": [
+        {
+          "name": "ShoppingLayout",
+          "params": [
+            "{\r\n  children,\r\n}"
+          ],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "next",
+          "specifiers": [
+            "Metadata"
+          ]
+        }
+      ],
+      "exports": [
+        "metadata",
+        "ShoppingLayout"
+      ],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/shopping/page.tsx": {
+      "filePath": "src/app/(app)/shopping/page.tsx",
+      "contentHash": "e9a23ebb8602ba9de714acccf0ef70db0a1fa5d787e0f59285069986c589f613",
+      "functions": [
+        {
+          "name": "VirtualizedCategoryItems",
+          "params": [
+            "{\r\n  items,\r\n  onToggle,\r\n  onRemove,\r\n  categoryColor,\r\n  categoryIcon,\r\n}"
+          ],
+          "exported": false,
+          "lineCount": 56
+        },
+        {
+          "name": "ShoppingPage",
+          "params": [],
+          "exported": true,
+          "lineCount": 631
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useMemo",
+            "useRef"
+          ]
+        },
+        {
+          "source": "next/dynamic",
+          "specifiers": [
+            "dynamic"
+          ]
+        },
+        {
+          "source": "next/image",
+          "specifiers": [
+            "Image"
+          ]
+        },
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion",
+            "AnimatePresence"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Plus",
+            "X",
+            "ChevronDown",
+            "ChevronUp",
+            "Trash2",
+            "Settings",
+            "Share2"
+          ]
+        },
+        {
+          "source": "sonner",
+          "specifiers": [
+            "toast"
+          ]
+        },
+        {
+          "source": "@tanstack/react-virtual",
+          "specifiers": [
+            "useVirtualizer"
+          ]
+        },
+        {
+          "source": "@/hooks/useShoppingList",
+          "specifiers": [
+            "useShoppingList",
+            "CATEGORY_COLORS",
+            "SHOPPING_CATEGORY_ICONS"
+          ]
+        },
+        {
+          "source": "@/hooks/useShoppingList",
+          "specifiers": [
+            "ShoppingCategory",
+            "ShoppingItem"
+          ]
+        },
+        {
+          "source": "@/hooks/useShoppingCategories",
+          "specifiers": [
+            "useShoppingCategories"
+          ]
+        },
+        {
+          "source": "@/components/shopping/shopping-item",
+          "specifiers": [
+            "ShoppingItemCard"
+          ]
+        },
+        {
+          "source": "@/components/shopping/category-manager",
+          "specifiers": [
+            "CategoryManager"
+          ]
+        },
+        {
+          "source": "@/components/shopping/shopping-share-sheet",
+          "specifiers": [
+            "ShoppingShareSheet"
+          ]
+        },
+        {
+          "source": "@/components/shopping/purchased-section",
+          "specifiers": [
+            "PurchasedSection"
+          ]
+        },
+        {
+          "source": "@/lib/shopping-autocomplete",
+          "specifiers": [
+            "searchSuggestions",
+            "getEmojiForItem"
+          ]
+        },
+        {
+          "source": "@/lib/haptics",
+          "specifiers": [
+            "haptic"
+          ]
+        },
+        {
+          "source": "@/hooks/useSeasonalMode",
+          "specifiers": [
+            "useSeasonalMode"
+          ]
+        },
+        {
+          "source": "@/hooks/useProfile",
+          "specifiers": [
+            "useProfile"
+          ]
+        },
+        {
+          "source": "@/hooks/useTranslation",
+          "specifiers": [
+            "useTranslation"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Loader2",
+            "Printer"
+          ]
+        },
+        {
+          "source": "@/hooks/useFirstVisit",
+          "specifiers": [
+            "useFirstVisit"
+          ]
+        },
+        {
+          "source": "@/components/feature-tooltip",
+          "specifiers": [
+            "FeatureTooltip"
+          ]
+        }
+      ],
+      "exports": [
+        "ShoppingPage"
+      ],
+      "totalLines": 732,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/stats/layout.tsx": {
+      "filePath": "src/app/(app)/stats/layout.tsx",
+      "contentHash": "76f2d6c5f6a6f70143ce31824b3d320d2a42ad699ed01ed945cb9299253f3b10",
+      "functions": [
+        {
+          "name": "StatsLayout",
+          "params": [
+            "{\r\n  children,\r\n}"
+          ],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "next",
+          "specifiers": [
+            "Metadata"
+          ]
+        }
+      ],
+      "exports": [
+        "metadata",
+        "StatsLayout"
+      ],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/stats/page.tsx": {
+      "filePath": "src/app/(app)/stats/page.tsx",
+      "contentHash": "656d349a05a0792c5b4607ae604289c7e5407121e0bda6c4057567e520c36bef",
+      "functions": [
+        {
+          "name": "computeUnlockedAchievements",
+          "params": [
+            "completions",
+            "streak",
+            "tasks"
+          ],
+          "returnType": "Set<string>",
+          "exported": false,
+          "lineCount": 40
+        },
+        {
+          "name": "StreakVisualization",
+          "params": [
+            "{\r\n  streakDays,\r\n  currentStreak,\r\n  bestStreak,\r\n}"
+          ],
+          "exported": false,
+          "lineCount": 58
+        },
+        {
+          "name": "PartnerComparisonSection",
+          "params": [
+            "{\r\n  myCount,\r\n  partnerCount,\r\n  myName,\r\n  partnerName,\r\n  weeklyCompletedTotal,\r\n  monthlyCompletedTotal,\r\n}"
+          ],
+          "exported": false,
+          "lineCount": 86
+        },
+        {
+          "name": "MembersComparisonSection",
+          "params": [
+            "{\r\n  members,\r\n  weeklyCompletedTotal,\r\n  monthlyCompletedTotal,\r\n}"
+          ],
+          "exported": false,
+          "lineCount": 72
+        },
+        {
+          "name": "StatsPage",
+          "params": [],
+          "exported": true,
+          "lineCount": 418
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useMemo",
+            "useState"
+          ]
+        },
+        {
+          "source": "next/image",
+          "specifiers": [
+            "Image"
+          ]
+        },
+        {
+          "source": "next/link",
+          "specifiers": [
+            "Link"
+          ]
+        },
+        {
+          "source": "next/dynamic",
+          "specifiers": [
+            "dynamic"
+          ]
+        },
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion",
+            "AnimatePresence"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Trophy",
+            "History",
+            "TrendingUp",
+            "Users",
+            "ChevronDown"
+          ]
+        },
+        {
+          "source": "@/lib/achievements",
+          "specifiers": [
+            "ACHIEVEMENTS"
+          ]
+        },
+        {
+          "source": "@/components/dashboard/dashboard-stats",
+          "specifiers": [
+            "DashboardStats"
+          ]
+        },
+        {
+          "source": "@/lib/task-stats",
+          "specifiers": [
+            "computeWeeklyTrend",
+            "computeCategoryBreakdown",
+            "computePartnerComparison",
+            "computeMembersComparison",
+            "buildStreakHistory",
+            "countCompletedThisWeek",
+            "countCompletedThisMonth",
+            "computeBestStreak"
+          ]
+        },
+        {
+          "source": "@/hooks/useTasks",
+          "specifiers": [
+            "useTasks"
+          ]
+        },
+        {
+          "source": "@/hooks/useCompletions",
+          "specifiers": [
+            "useCompletions"
+          ]
+        },
+        {
+          "source": "@/hooks/useCategories",
+          "specifiers": [
+            "useCategories"
+          ]
+        },
+        {
+          "source": "@/hooks/useProfile",
+          "specifiers": [
+            "useProfile"
+          ]
+        },
+        {
+          "source": "@/hooks/usePartner",
+          "specifiers": [
+            "usePartner"
+          ]
+        },
+        {
+          "source": "@/hooks/useHouseholdMembers",
+          "specifiers": [
+            "useHouseholdMembers"
+          ]
+        },
+        {
+          "source": "@/hooks/useUserAchievements",
+          "specifiers": [
+            "useUserAchievements"
+          ]
+        },
+        {
+          "source": "@/components/animated-number",
+          "specifiers": [
+            "AnimatedNumber"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskCompletionRow",
+            "TaskRow"
+          ]
+        },
+        {
+          "source": "@/lib/categories",
+          "specifiers": [
+            "CATEGORY_NAME_TO_KEY",
+            "CATEGORY_ICONS"
+          ]
+        },
+        {
+          "source": "@/hooks/useTranslation",
+          "specifiers": [
+            "useTranslation"
+          ]
+        },
+        {
+          "source": "@/components/share-button",
+          "specifiers": [
+            "ShareButton"
+          ]
+        },
+        {
+          "source": "@/components/skeleton",
+          "specifiers": [
+            "StatCardSkeleton",
+            "RingSkeleton"
+          ]
+        },
+        {
+          "source": "@/hooks/useAdvancedStats",
+          "specifiers": [
+            "useAdvancedStats"
+          ]
+        },
+        {
+          "source": "@/hooks/useSubscription",
+          "specifiers": [
+            "useSubscription"
+          ]
+        },
+        {
+          "source": "@/components/upgrade-prompt",
+          "specifiers": [
+            "UpgradePrompt"
+          ]
+        }
+      ],
+      "exports": [
+        "StatsPage"
+      ],
+      "totalLines": 831,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/tasks/layout.tsx": {
+      "filePath": "src/app/(app)/tasks/layout.tsx",
+      "contentHash": "94aa7566395fbd6f5bd5bb8be92ebe7da8661c57e9a2d293613b34fadbb58487",
+      "functions": [
+        {
+          "name": "TasksLayout",
+          "params": [
+            "{\r\n  children,\r\n}"
+          ],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "next",
+          "specifiers": [
+            "Metadata"
+          ]
+        }
+      ],
+      "exports": [
+        "metadata",
+        "TasksLayout"
+      ],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/tasks/page.tsx": {
+      "filePath": "src/app/(app)/tasks/page.tsx",
+      "contentHash": "12d836a6c452943fe8cb690b5efddc7749d742098ad65665ae7d8dab5140fd30",
+      "functions": [
+        {
+          "name": "TasksPage",
+          "params": [],
+          "exported": true,
+          "lineCount": 1403
+        },
+        {
+          "name": "SortableTaskRow",
+          "params": [
+            "{\n  id,\n  className,\n  style,\n  children,\n}"
+          ],
+          "exported": false,
+          "lineCount": 39
+        },
+        {
+          "name": "resolveTaskCategoryName",
+          "params": [
+            "{\n  task,\n  taskCategories,\n  categoryMap,\n}"
+          ],
+          "exported": false,
+          "lineCount": 17
+        },
+        {
+          "name": "EditTaskModal",
+          "params": [
+            "{\n  task,\n  taskCategories,\n  categoryMap,\n  saving,\n  onClose,\n  onSave,\n}"
+          ],
+          "exported": false,
+          "lineCount": 129
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useMemo",
+            "useCallback",
+            "useRef",
+            "useEffect",
+            "CSSProperties",
+            "FormEvent",
+            "ReactNode"
+          ]
+        },
+        {
+          "source": "next/dynamic",
+          "specifiers": [
+            "dynamic"
+          ]
+        },
+        {
+          "source": "next/image",
+          "specifiers": [
+            "Image"
+          ]
+        },
+        {
+          "source": "framer-motion",
+          "specifiers": [
+            "motion",
+            "AnimatePresence"
+          ]
+        },
+        {
+          "source": "@tanstack/react-virtual",
+          "specifiers": [
+            "useVirtualizer"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Camera",
+            "Check",
+            "Clock",
+            "Filter",
+            "GripVertical",
+            "LayoutTemplate",
+            "Loader2",
+            "Pencil",
+            "Plus",
+            "Printer",
+            "Settings",
+            "Trash2"
+          ]
+        },
+        {
+          "source": "@dnd-kit/core",
+          "specifiers": [
+            "DndContext",
+            "KeyboardSensor",
+            "PointerSensor",
+            "TouchSensor",
+            "closestCenter",
+            "useSensor",
+            "useSensors",
+            "DragEndEvent"
+          ]
+        },
+        {
+          "source": "@dnd-kit/modifiers",
+          "specifiers": [
+            "restrictToVerticalAxis"
+          ]
+        },
+        {
+          "source": "@dnd-kit/sortable",
+          "specifiers": [
+            "SortableContext",
+            "arrayMove",
+            "sortableKeyboardCoordinates",
+            "useSortable",
+            "verticalListSortingStrategy"
+          ]
+        },
+        {
+          "source": "@dnd-kit/utilities",
+          "specifiers": [
+            "CSS"
+          ]
+        },
+        {
+          "source": "next/link",
+          "specifiers": [
+            "Link"
+          ]
+        },
+        {
+          "source": "sonner",
+          "specifiers": [
+            "toast"
+          ]
+        },
+        {
+          "source": "@/lib/haptics",
+          "specifiers": [
+            "haptic"
+          ]
+        },
+        {
+          "source": "@/lib/seed-data",
+          "specifiers": [
+            "getRecurrenceLabel",
+            "TASK_TEMPLATES_SEED"
+          ]
+        },
+        {
+          "source": "@/lib/categories",
+          "specifiers": [
+            "CATEGORY_KEY_TO_NAME",
+            "CATEGORY_NAME_TO_KEY",
+            "CATEGORY_ILLUSTRATIONS",
+            "getCategoryColor",
+            "getCategoryLabel"
+          ]
+        },
+        {
+          "source": "@/components/category-card",
+          "specifiers": [
+            "CategoryCard"
+          ]
+        },
+        {
+          "source": "@/components/tasks/task-category-manager",
+          "specifiers": [
+            "TaskCategoryManager"
+          ]
+        },
+        {
+          "source": "@/components/skeleton",
+          "specifiers": [
+            "TaskListSkeleton"
+          ]
+        },
+        {
+          "source": "@/hooks/useTasks",
+          "specifiers": [
+            "useTasks"
+          ]
+        },
+        {
+          "source": "@/hooks/useCompletions",
+          "specifiers": [
+            "useCompletions"
+          ]
+        },
+        {
+          "source": "@/hooks/useProfile",
+          "specifiers": [
+            "useProfile"
+          ]
+        },
+        {
+          "source": "@/hooks/useCategories",
+          "specifiers": [
+            "useCategories"
+          ]
+        },
+        {
+          "source": "@/hooks/useTaskCategories",
+          "specifiers": [
+            "useTaskCategories",
+            "TaskCategoryRow"
+          ]
+        },
+        {
+          "source": "@/hooks/useTaskStreaks",
+          "specifiers": [
+            "useTaskStreaks"
+          ]
+        },
+        {
+          "source": "@/hooks/useTaskPhoto",
+          "specifiers": [
+            "useTaskPhoto"
+          ]
+        },
+        {
+          "source": "@/components/task-photo-capture",
+          "specifiers": [
+            "TaskPhotoCapture"
+          ]
+        },
+        {
+          "source": "@/hooks/useTranslation",
+          "specifiers": [
+            "useTranslation"
+          ]
+        },
+        {
+          "source": "@/hooks/useFocusTrap",
+          "specifiers": [
+            "useFocusTrap"
+          ]
+        },
+        {
+          "source": "@/components/task-template-picker",
+          "specifiers": [
+            "TaskTemplatePicker"
+          ]
+        },
+        {
+          "source": "@/lib/task-templates",
+          "specifiers": [
+            "TaskTemplate"
+          ]
+        },
+        {
+          "source": "@/hooks/useFirstVisit",
+          "specifiers": [
+            "useFirstVisit"
+          ]
+        },
+        {
+          "source": "@/components/feature-tooltip",
+          "specifiers": [
+            "FeatureTooltip"
+          ]
+        }
+      ],
+      "exports": [
+        "TasksPage"
+      ],
+      "totalLines": 1681,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/tasks/print/page.tsx": {
+      "filePath": "src/app/(app)/tasks/print/page.tsx",
+      "contentHash": "5307d82c3fd252e8271c848f17da6280278fecdea7dcc85edcf73544858e915d",
+      "functions": [
+        {
+          "name": "PrintPageSkeleton",
+          "params": [],
+          "exported": false,
+          "lineCount": 80
+        },
+        {
+          "name": "PrintPage",
+          "params": [],
+          "exported": true,
+          "lineCount": 93
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useMemo"
+          ]
+        },
+        {
+          "source": "next/link",
+          "specifiers": [
+            "Link"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "ArrowRight"
+          ]
+        },
+        {
+          "source": "@/hooks/useTasks",
+          "specifiers": [
+            "useTasks"
+          ]
+        },
+        {
+          "source": "@/hooks/useTaskCategories",
+          "specifiers": [
+            "useTaskCategories"
+          ]
+        },
+        {
+          "source": "@/hooks/useHouseholdMembers",
+          "specifiers": [
+            "useHouseholdMembers"
+          ]
+        },
+        {
+          "source": "@/hooks/useHousehold",
+          "specifiers": [
+            "useHousehold"
+          ]
+        },
+        {
+          "source": "@/hooks/useProfile",
+          "specifiers": [
+            "useProfile"
+          ]
+        },
+        {
+          "source": "@/components/print-tasks",
+          "specifiers": [
+            "PrintTasks",
+            "PrintMember"
+          ]
+        }
+      ],
+      "exports": [
+        "PrintPage"
+      ],
+      "totalLines": 187,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/weekly/layout.tsx": {
+      "filePath": "src/app/(app)/weekly/layout.tsx",
+      "contentHash": "2f8799de324c079a2b3be60f226557496bc0e4678ab3f4797e89c58f0abf1b46",
+      "functions": [
+        {
+          "name": "WeeklyLayout",
+          "params": [
+            "{\r\n  children,\r\n}"
+          ],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "next",
+          "specifiers": [
+            "Metadata"
+          ]
+        }
+      ],
+      "exports": [
+        "metadata",
+        "WeeklyLayout"
+      ],
+      "totalLines": 15,
+      "hasStructuralAnalysis": true
+    },
+    "src/app/(app)/weekly/page.tsx": {
+      "filePath": "src/app/(app)/weekly/page.tsx",
+      "contentHash": "e5909a635ef2b1b9591cf9471cfa451e18735c1414fc63a5b645e3bf2c15ce15",
+      "functions": [
+        {
+          "name": "WeeklyPage",
+          "params": [],
+          "exported": true,
+          "lineCount": 549
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useMemo",
+            "useState",
+            "useRef",
+            "useCallback"
+          ]
+        },
+        {
+          "source": "next/image",
+          "specifiers": [
+            "Image"
+          ]
+        },
+        {
+          "source": "lucide-react",
+          "specifiers": [
+            "Calendar"
+          ]
+        },
+        {
+          "source": "sonner",
+          "specifiers": [
+            "toast"
+          ]
+        },
+        {
+          "source": "@/hooks/useZoneConfig",
+          "specifiers": [
+            "useZoneConfig"
+          ]
+        },
+        {
+          "source": "@/components/weekly/zone-day-summary",
+          "specifiers": [
+            "ZoneDaySummary"
+          ]
+        },
+        {
+          "source": "@/hooks/useTasks",
+          "specifiers": [
+            "useTasks"
+          ]
+        },
+        {
+          "source": "@/hooks/useProfile",
+          "specifiers": [
+            "useProfile"
+          ]
+        },
+        {
+          "source": "@/hooks/usePartner",
+          "specifiers": [
+            "usePartner"
+          ]
+        },
+        {
+          "source": "@/hooks/useHouseholdMembers",
+          "specifiers": [
+            "useHouseholdMembers"
+          ]
+        },
+        {
+          "source": "@/hooks/useCalendarEvents",
+          "specifiers": [
+            "useCalendarEvents"
+          ]
+        },
+        {
+          "source": "next/dynamic",
+          "specifiers": [
+            "dynamic"
+          ]
+        },
+        {
+          "source": "@/hooks/useWeeklyGenerator",
+          "specifiers": [
+            "useWeeklyGenerator"
+          ]
+        },
+        {
+          "source": "@/hooks/useSubscription",
+          "specifiers": [
+            "useSubscription"
+          ]
+        },
+        {
+          "source": "@/components/upgrade-prompt",
+          "specifiers": [
+            "UpgradePrompt"
+          ]
+        },
+        {
+          "source": "@/lib/smart-scheduler",
+          "specifiers": [
+            "analyzeDailyLoad",
+            "analyzeDailyLoadWithCalendar",
+            "generateSmartSuggestions",
+            "generateCalendarAwareSuggestions",
+            "getWeekRange",
+            "Suggestion"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskRow",
+            "TaskInsert"
+          ]
+        },
+        {
+          "source": "@/lib/haptics",
+          "specifiers": [
+            "haptic"
+          ]
+        },
+        {
+          "source": "@/hooks/useTranslation",
+          "specifiers": [
+            "useTranslation"
+          ]
+        },
+        {
+          "source": "@/lib/categories",
+          "specifiers": [
+            "CATEGORY_ICONS"
+          ]
+        },
+        {
+          "source": "@dnd-kit/core",
+          "specifiers": [
+            "DndContext",
+            "closestCenter",
+            "PointerSensor",
+            "TouchSensor",
+            "useSensor",
+            "useSensors",
+            "DragEndEvent",
+            "DragStartEvent",
+            "DragOverlay"
+          ]
+        },
+        {
+          "source": "@/components/weekly/weekly-day-card",
+          "specifiers": [
+            "WeeklyDayCard"
+          ]
+        },
+        {
+          "source": "@/components/weekly/weekly-smart-suggestions",
+          "specifiers": [
+            "WeeklySmartSuggestions"
+          ]
+        },
+        {
+          "source": "@/components/weekly/weekly-zone-panel",
+          "specifiers": [
+            "WeeklyZonePanel"
+          ]
+        },
+        {
+          "source": "@/components/weekly/weekly-stats",
+          "specifiers": [
+            "WeeklyStats"
+          ]
+        },
+        {
+          "source": "@/components/weekly/weekly-header",
+          "specifiers": [
+            "WeeklyHeader"
+          ]
+        },
+        {
+          "source": "@/lib/weekly-mock-data",
+          "specifiers": [
+            "generateMockWeeklyTasks",
+            "getCategoryFromId"
+          ]
+        }
+      ],
+      "exports": [
+        "WeeklyPage"
+      ],
+      "totalLines": 609,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useActivityFeed.ts": {
+      "filePath": "src/hooks/useActivityFeed.ts",
+      "contentHash": "8c08e2120634ddcbaf0dc70a78ca41049a6e6fb0a458e2122726716987a4a358",
+      "functions": [
+        {
+          "name": "getRelativeTime",
+          "params": [
+            "date"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "useActivityFeed",
+          "params": [],
+          "returnType": "UseActivityFeedReturn",
+          "exported": true,
+          "lineCount": 73
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        }
+      ],
+      "exports": [
+        "useActivityFeed"
+      ],
+      "totalLines": 165,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useAdvancedStats.ts": {
+      "filePath": "src/hooks/useAdvancedStats.ts",
+      "contentHash": "973f93bcbb7d3951e785cc8318f9a1d68e66981f928b11fb5b8a17141ce4f22a",
+      "functions": [
+        {
+          "name": "isoWeekStart",
+          "params": [
+            "date"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "addDays",
+          "params": [
+            "base",
+            "days"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "hebrewWeekLabel",
+          "params": [
+            "weekStart",
+            "weekIndex"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "useAdvancedStats",
+          "params": [
+            "{\r\n  completions,\r\n  tasks,\r\n  categoryIdToKey,\r\n  today,\r\n  userId,\r\n}"
+          ],
+          "exported": true,
+          "lineCount": 191
+        },
+        {
+          "name": "buildMockTrend",
+          "params": [],
+          "returnType": "WeeklyTrendPoint[]",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "buildMockCategoryDist",
+          "params": [],
+          "returnType": "CategoryDistPoint[]",
+          "exported": false,
+          "lineCount": 10
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useMemo"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskCompletionRow",
+            "TaskRow"
+          ]
+        },
+        {
+          "source": "@/lib/categories",
+          "specifiers": [
+            "CATEGORY_LABELS",
+            "CATEGORY_COLORS",
+            "CATEGORY_ICONS"
+          ]
+        }
+      ],
+      "exports": [
+        "useAdvancedStats"
+      ],
+      "totalLines": 293,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useAIChat.ts": {
+      "filePath": "src/hooks/useAIChat.ts",
+      "contentHash": "9562ec1f51767f250a163efdb434dcd172b732f89cf7d92b3f81178717170a27",
+      "functions": [
+        {
+          "name": "getRandomTip",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "generateLocalResponse",
+          "params": [
+            "userText"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 26
+        },
+        {
+          "name": "makeTimestamp",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "useAIChat",
+          "params": [],
+          "returnType": "UseAIChatResult",
+          "exported": true,
+          "lineCount": 136
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useCallback",
+            "useRef"
+          ]
+        },
+        {
+          "source": "@/lib/analytics",
+          "specifiers": [
+            "trackEvent"
+          ]
+        }
+      ],
+      "exports": [
+        "QUICK_ACTIONS",
+        "useAIChat"
+      ],
+      "totalLines": 243,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useAppSound.ts": {
+      "filePath": "src/hooks/useAppSound.ts",
+      "contentHash": "3e6444c061f57b1fd8e2cf7fe518b47237ad9e9c041420a4d58110f34a998f50",
+      "functions": [
+        {
+          "name": "getSoundEnabled",
+          "params": [],
+          "returnType": "boolean",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "setSoundEnabled",
+          "params": [
+            "enabled"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "useAppSound",
+          "params": [
+            "sound"
+          ],
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "useAppSounds",
+          "params": [],
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useCallback"
+          ]
+        },
+        {
+          "source": "use-sound",
+          "specifiers": [
+            "useSound"
+          ]
+        }
+      ],
+      "exports": [
+        "setSoundEnabled",
+        "useAppSound",
+        "useAppSounds"
+      ],
+      "totalLines": 65,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useAuth.ts": {
+      "filePath": "src/hooks/useAuth.ts",
+      "contentHash": "af78c71881b7acaa079e1d7f7358fef44337326783047a53eab9238b884e26da",
+      "functions": [
+        {
+          "name": "useAuth",
+          "params": [],
+          "returnType": "UseAuthReturn",
+          "exported": true,
+          "lineCount": 53
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        },
+        {
+          "source": "@supabase/supabase-js",
+          "specifiers": [
+            "User",
+            "Session"
+          ]
+        }
+      ],
+      "exports": [
+        "useAuth"
+      ],
+      "totalLines": 74,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useCalendarData.ts": {
+      "filePath": "src/hooks/useCalendarData.ts",
+      "contentHash": "b54b5cbf0173178ab49dc9df7be86709f56e69e46850d41206bf1a55a8b22fb1",
+      "functions": [
+        {
+          "name": "buildMockCalendar",
+          "params": [
+            "month"
+          ],
+          "returnType": "CalendarDayData[]",
+          "exported": false,
+          "lineCount": 68
+        },
+        {
+          "name": "buildCalendarGrid",
+          "params": [
+            "month",
+            "completions",
+            "tasks"
+          ],
+          "returnType": "CalendarDayData[]",
+          "exported": false,
+          "lineCount": 75
+        },
+        {
+          "name": "useCalendarData",
+          "params": [],
+          "returnType": "UseCalendarDataReturn",
+          "exported": true,
+          "lineCount": 90
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useMemo"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskCompletionRow",
+            "TaskRow"
+          ]
+        }
+      ],
+      "exports": [
+        "useCalendarData"
+      ],
+      "totalLines": 264,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useCalendarEvents.ts": {
+      "filePath": "src/hooks/useCalendarEvents.ts",
+      "contentHash": "29ba836345404cbb5e2dde5f8569e8cda4fb07d012639ce8c7dfffa97587b193",
+      "functions": [
+        {
+          "name": "useCalendarEvents",
+          "params": [
+            "{\r\n  timeMin,\r\n  timeMax,\r\n  enabled = true,\r\n}"
+          ],
+          "returnType": "UseCalendarEventsReturn",
+          "exported": true,
+          "lineCount": 88
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useMemo",
+            "useRef"
+          ]
+        },
+        {
+          "source": "@/lib/types/calendar",
+          "specifiers": [
+            "ClientCalendarEvent",
+            "CalendarEventsResponse"
+          ]
+        }
+      ],
+      "exports": [
+        "useCalendarEvents"
+      ],
+      "totalLines": 109,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useCategories.ts": {
+      "filePath": "src/hooks/useCategories.ts",
+      "contentHash": "0fc42d3923317db3827aa9d8fa2e8ede856a20ecb9869641ca66422a29076ffa",
+      "functions": [
+        {
+          "name": "useCategories",
+          "params": [],
+          "returnType": "UseCategoriesReturn",
+          "exported": true,
+          "lineCount": 57
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useMemo"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "CategoryRow"
+          ]
+        }
+      ],
+      "exports": [
+        "useCategories"
+      ],
+      "totalLines": 79,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useCompletions.ts": {
+      "filePath": "src/hooks/useCompletions.ts",
+      "contentHash": "73d84a6be4c17b6ddba7bcd2b043204c74828e68cc6915c8d0b5648b7fd23068",
+      "functions": [
+        {
+          "name": "useCompletions",
+          "params": [
+            "options"
+          ],
+          "returnType": "UseCompletionsReturn",
+          "exported": true,
+          "lineCount": 230
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useMemo"
+          ]
+        },
+        {
+          "source": "@/components/SupabaseProvider",
+          "specifiers": [
+            "useSupabase"
+          ]
+        },
+        {
+          "source": "@/lib/analytics",
+          "specifiers": [
+            "trackEvent"
+          ]
+        },
+        {
+          "source": "@/hooks/useOfflineQueue",
+          "specifiers": [
+            "useOfflineQueue"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskCompletionRow",
+            "TaskCompletionInsert"
+          ]
+        }
+      ],
+      "exports": [
+        "useCompletions"
+      ],
+      "totalLines": 283,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useEarnedBadges.ts": {
+      "filePath": "src/hooks/useEarnedBadges.ts",
+      "contentHash": "aaafce5b776478bd93b25f463e683634748e5636cf8bf00a6b13cd3c285f213b",
+      "functions": [
+        {
+          "name": "useEarnedBadges",
+          "params": [
+            "{\r\n  completions,\r\n  tasks,\r\n  isDemo = false,\r\n}"
+          ],
+          "returnType": "UseEarnedBadgesReturn",
+          "exported": true,
+          "lineCount": 82
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useMemo"
+          ]
+        },
+        {
+          "source": "@/lib/achievements",
+          "specifiers": [
+            "ACHIEVEMENTS"
+          ]
+        },
+        {
+          "source": "@/lib/task-stats",
+          "specifiers": [
+            "computeBestStreak"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskCompletionRow",
+            "TaskRow"
+          ]
+        }
+      ],
+      "exports": [
+        "useEarnedBadges"
+      ],
+      "totalLines": 103,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useFirstVisit.ts": {
+      "filePath": "src/hooks/useFirstVisit.ts",
+      "contentHash": "cb18f305d1ff3e320bab666f0852861c4a9bd582dbddbcbae76ff4fb8c0eaff5",
+      "functions": [
+        {
+          "name": "useFirstVisit",
+          "params": [
+            "pageKey"
+          ],
+          "returnType": "UseFirstVisitReturn",
+          "exported": true,
+          "lineCount": 29
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        }
+      ],
+      "exports": [
+        "useFirstVisit"
+      ],
+      "totalLines": 42,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useFocusTrap.ts": {
+      "filePath": "src/hooks/useFocusTrap.ts",
+      "contentHash": "1d78b5b57a5db3d65904b07c50c49730ed2c3c5759b50d68b1d70544939dbc8a",
+      "functions": [
+        {
+          "name": "useFocusTrap",
+          "params": [
+            "isActive",
+            "onClose"
+          ],
+          "exported": true,
+          "lineCount": 69
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useRef",
+            "useCallback"
+          ]
+        }
+      ],
+      "exports": [
+        "useFocusTrap"
+      ],
+      "totalLines": 87,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useHousehold.ts": {
+      "filePath": "src/hooks/useHousehold.ts",
+      "contentHash": "6b407e27651da7527015efe858207bd6b7e0dfcf10cbf45556f8c4afe86460eb",
+      "functions": [
+        {
+          "name": "useHousehold",
+          "params": [
+            "householdId"
+          ],
+          "exported": true,
+          "lineCount": 69
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        }
+      ],
+      "exports": [
+        "useHousehold"
+      ],
+      "totalLines": 91,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useHouseholdCounts.ts": {
+      "filePath": "src/hooks/useHouseholdCounts.ts",
+      "contentHash": "42792b0040f2ff84e947f5c44b80fba15141544a63d10dbc37a226c2e276a065",
+      "functions": [
+        {
+          "name": "useHouseholdCounts",
+          "params": [],
+          "returnType": "HouseholdCounts",
+          "exported": true,
+          "lineCount": 57
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        }
+      ],
+      "exports": [
+        "useHouseholdCounts"
+      ],
+      "totalLines": 77,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useHouseholdMembers.ts": {
+      "filePath": "src/hooks/useHouseholdMembers.ts",
+      "contentHash": "d01b18b01cfcc84893bbececf41527975f6aaf8d2eccc208784c17e05245b027",
+      "functions": [
+        {
+          "name": "useHouseholdMembers",
+          "params": [
+            "householdId",
+            "todayStr"
+          ],
+          "exported": true,
+          "lineCount": 70
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        }
+      ],
+      "exports": [
+        "useHouseholdMembers"
+      ],
+      "totalLines": 90,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useKeyboardShortcuts.ts": {
+      "filePath": "src/hooks/useKeyboardShortcuts.ts",
+      "contentHash": "cf9d537feb3061d4007d5fb40301b34034fb3cc47fc5196353729aada3a988ee",
+      "functions": [
+        {
+          "name": "isDesktop",
+          "params": [],
+          "returnType": "boolean",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "isInputFocused",
+          "params": [],
+          "returnType": "boolean",
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "useKeyboardShortcuts",
+          "params": [
+            "config"
+          ],
+          "exported": true,
+          "lineCount": 50
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useCallback"
+          ]
+        },
+        {
+          "source": "next/navigation",
+          "specifiers": [
+            "useRouter"
+          ]
+        }
+      ],
+      "exports": [
+        "useKeyboardShortcuts",
+        "KEYBOARD_SHORTCUTS"
+      ],
+      "totalLines": 125,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useLeaderboard.ts": {
+      "filePath": "src/hooks/useLeaderboard.ts",
+      "contentHash": "9bf2615a8983e46d9b4d49288aa2cf410cf8eb9fa3b6428f405198b9acca6e01",
+      "functions": [
+        {
+          "name": "todayStr",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "weekStart",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "estimateBreakdown",
+          "params": [
+            "count"
+          ],
+          "returnType": "PointsBreakdown",
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "computeRankings",
+          "params": [
+            "members",
+            "completions",
+            "period"
+          ],
+          "returnType": "RankedMember[]",
+          "exported": false,
+          "lineCount": 42
+        },
+        {
+          "name": "useLeaderboard",
+          "params": [
+            "{\r\n  members,\r\n  completions,\r\n  userId,\r\n}"
+          ],
+          "returnType": "UseLeaderboardReturn",
+          "exported": true,
+          "lineCount": 26
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useMemo",
+            "useState"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskCompletionRow"
+          ]
+        },
+        {
+          "source": "@/hooks/useHouseholdMembers",
+          "specifiers": [
+            "HouseholdMember"
+          ]
+        }
+      ],
+      "exports": [
+        "useLeaderboard"
+      ],
+      "totalLines": 135,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useNotificationPrefs.ts": {
+      "filePath": "src/hooks/useNotificationPrefs.ts",
+      "contentHash": "1d84efe8ac24cf5c2a3b7fa0905e0a4b3bca3e4046b597f36fa9661cfd6ede2d",
+      "functions": [
+        {
+          "name": "loadPrefs",
+          "params": [],
+          "returnType": "NotificationPrefs",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "savePrefs",
+          "params": [
+            "prefs"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "checkIsQuietHours",
+          "params": [
+            "quietStart",
+            "quietEnd",
+            "now"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "useNotificationPrefs",
+          "params": [],
+          "exported": true,
+          "lineCount": 21
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useCallback"
+          ]
+        }
+      ],
+      "exports": [
+        "checkIsQuietHours",
+        "useNotificationPrefs"
+      ],
+      "totalLines": 105,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useNotifications.ts": {
+      "filePath": "src/hooks/useNotifications.ts",
+      "contentHash": "9a6a7eb344d03d9b1cd3b20f493aaceec484b27ea50a523bad70f538d1667378",
+      "functions": [
+        {
+          "name": "loadStorageSet",
+          "params": [
+            "key"
+          ],
+          "returnType": "Set<string>",
+          "exported": false,
+          "lineCount": 12
+        },
+        {
+          "name": "saveStorageSet",
+          "params": [
+            "key",
+            "set"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "generateId",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "fetchNotificationsFromSupabase",
+          "params": [],
+          "returnType": "Promise<SupabaseNotificationData | null>",
+          "exported": false,
+          "lineCount": 157
+        },
+        {
+          "name": "useNotifications",
+          "params": [],
+          "returnType": "UseNotificationsReturn",
+          "exported": true,
+          "lineCount": 179
+        },
+        {
+          "name": "formatRelativeTime",
+          "params": [
+            "timestamp"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "computeConsecutiveStreak",
+          "params": [
+            "completionDates",
+            "today"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 17
+        },
+        {
+          "name": "computeWeeklyChallengeProgress",
+          "params": [
+            "completionDates",
+            "today",
+            "target"
+          ],
+          "returnType": "{ completed: number; target: number; percentage: number }",
+          "exported": true,
+          "lineCount": 20
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useMemo",
+            "useRef"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient",
+            "isSupabaseConfigured"
+          ]
+        }
+      ],
+      "exports": [
+        "useNotifications",
+        "formatRelativeTime",
+        "computeConsecutiveStreak",
+        "computeWeeklyChallengeProgress"
+      ],
+      "totalLines": 580,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useOfflineQueue.ts": {
+      "filePath": "src/hooks/useOfflineQueue.ts",
+      "contentHash": "8ced44fc2d28b2cf84adeb512339ade91e9627b5ec2cf9ef07d8c46d36004834",
+      "functions": [
+        {
+          "name": "loadQueue",
+          "params": [],
+          "returnType": "QueuedAction[]",
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "saveQueue",
+          "params": [
+            "queue"
+          ],
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "generateId",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "useOfflineQueue",
+          "params": [
+            "processAction"
+          ],
+          "exported": true,
+          "lineCount": 80
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        }
+      ],
+      "exports": [
+        "useOfflineQueue"
+      ],
+      "totalLines": 122,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/usePartner.ts": {
+      "filePath": "src/hooks/usePartner.ts",
+      "contentHash": "c303eff2e8a6c7296bad6ccccc9e6499ecfd4f71794765f808dcc38abccfb03a",
+      "functions": [
+        {
+          "name": "usePartner",
+          "params": [
+            "partnerId",
+            "todayStr"
+          ],
+          "exported": true,
+          "lineCount": 57
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        }
+      ],
+      "exports": [
+        "usePartner"
+      ],
+      "totalLines": 83,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/usePetCollectionSync.ts": {
+      "filePath": "src/hooks/usePetCollectionSync.ts",
+      "contentHash": "a75666a417e7e6fcd7930d7cadd00fe69a7481bf380ae78f7e5c63ca5084ed60",
+      "functions": [
+        {
+          "name": "usePetCollectionSync",
+          "params": [
+            "currentStreak"
+          ],
+          "returnType": "readonly Pet[]",
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useState"
+          ]
+        },
+        {
+          "source": "@/lib/pets",
+          "specifiers": [
+            "syncCollectionWithStreak",
+            "Pet"
+          ]
+        }
+      ],
+      "exports": [
+        "usePetCollectionSync"
+      ],
+      "totalLines": 26,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/usePlaylistTimer.ts": {
+      "filePath": "src/hooks/usePlaylistTimer.ts",
+      "contentHash": "2845fe965bf2a8986743801e3c514f6210e965febade9bb2b3238eb14c848f9c",
+      "functions": [
+        {
+          "name": "usePlaylistTimer",
+          "params": [],
+          "returnType": "PlaylistTimerState & PlaylistTimerActions",
+          "exported": true,
+          "lineCount": 202
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useRef"
+          ]
+        },
+        {
+          "source": "@/lib/playlists",
+          "specifiers": [
+            "Playlist"
+          ]
+        },
+        {
+          "source": "@/lib/haptics",
+          "specifiers": [
+            "haptic"
+          ]
+        }
+      ],
+      "exports": [
+        "usePlaylistTimer"
+      ],
+      "totalLines": 239,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useProfile.ts": {
+      "filePath": "src/hooks/useProfile.ts",
+      "contentHash": "3f86061b67ae020252a3193eaa81a351950b6eb918580fea20c46ea9c2100dfa",
+      "functions": [
+        {
+          "name": "useProfile",
+          "params": [],
+          "returnType": "UseProfileReturn",
+          "exported": true,
+          "lineCount": 123
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        },
+        {
+          "source": "@/components/SupabaseProvider",
+          "specifiers": [
+            "useSupabase"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "ProfileRow",
+            "ProfileUpdate"
+          ]
+        }
+      ],
+      "exports": [
+        "useProfile"
+      ],
+      "totalLines": 142,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/usePushNotifications.ts": {
+      "filePath": "src/hooks/usePushNotifications.ts",
+      "contentHash": "86b4b7475f68bc60c6c57f9a2985fc8487153eb81aac5c1201b1aee31d12422e",
+      "functions": [
+        {
+          "name": "isPushSupported",
+          "params": [],
+          "returnType": "boolean",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "getPermission",
+          "params": [],
+          "returnType": "PushPermission",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "urlBase64ToUint8Array",
+          "params": [
+            "base64String"
+          ],
+          "returnType": "ArrayBuffer",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "usePushNotifications",
+          "params": [],
+          "returnType": "UsePushNotificationsReturn",
+          "exported": true,
+          "lineCount": 133
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        }
+      ],
+      "exports": [
+        "usePushNotifications"
+      ],
+      "totalLines": 183,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/usePWAInstall.ts": {
+      "filePath": "src/hooks/usePWAInstall.ts",
+      "contentHash": "a95bf56db9c045eea17a21e514a6ccfe03be6486e3b5c1f15327168224fdbfe2",
+      "functions": [
+        {
+          "name": "isDismissedLongTerm",
+          "params": [],
+          "returnType": "boolean",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "isRecentlyDismissed",
+          "params": [],
+          "returnType": "boolean",
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "usePWAInstall",
+          "params": [],
+          "exported": true,
+          "lineCount": 65
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        },
+        {
+          "source": "@/lib/analytics",
+          "specifiers": [
+            "trackEvent"
+          ]
+        }
+      ],
+      "exports": [
+        "usePWAInstall"
+      ],
+      "totalLines": 116,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useReducedMotion.ts": {
+      "filePath": "src/hooks/useReducedMotion.ts",
+      "contentHash": "6cb2401ee58fddab58f5ae9de708db7647c78324d72bfd1d68e44199c58ebebe",
+      "functions": [
+        {
+          "name": "useReducedMotion",
+          "params": [],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 13
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect",
+            "useState"
+          ]
+        }
+      ],
+      "exports": [
+        "useReducedMotion"
+      ],
+      "totalLines": 18,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useSeasonalMode.ts": {
+      "filePath": "src/hooks/useSeasonalMode.ts",
+      "contentHash": "1cbd23f0753c017be7a16ecc8c0e8c45c8c26026bdb9d91e2a227f643d233a4c",
+      "functions": [
+        {
+          "name": "loadActivation",
+          "params": [],
+          "returnType": "SeasonalActivation | null",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "saveActivation",
+          "params": [
+            "activation"
+          ],
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "buildCategoryMap",
+          "params": [],
+          "returnType": "Promise<Record<string, string>>",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "useSeasonalMode",
+          "params": [],
+          "returnType": "SeasonalModeReturn",
+          "exported": true,
+          "lineCount": 205
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useMemo"
+          ]
+        },
+        {
+          "source": "@/lib/seasonal/types",
+          "specifiers": [
+            "SeasonalTemplate",
+            "SeasonalActivation"
+          ]
+        },
+        {
+          "source": "@/lib/seasonal/registry",
+          "specifiers": [
+            "SEASONAL_TEMPLATES",
+            "getActiveTemplate",
+            "getDaysUntilHoliday"
+          ]
+        },
+        {
+          "source": "@/lib/seasonal/scheduler",
+          "specifiers": [
+            "schedulePesachTasks",
+            "buildTaskInserts"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        }
+      ],
+      "exports": [
+        "useSeasonalMode"
+      ],
+      "totalLines": 270,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useShoppingCategories.ts": {
+      "filePath": "src/hooks/useShoppingCategories.ts",
+      "contentHash": "95ce8662e91f718c0679b4ccd8f8ddf1d3fdda3355ef2825c7e9a35914936da4",
+      "functions": [
+        {
+          "name": "useShoppingCategories",
+          "params": [],
+          "returnType": "UseShoppingCategoriesReturn",
+          "exported": true,
+          "lineCount": 186
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useRef"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient",
+            "isSupabaseConfigured"
+          ]
+        }
+      ],
+      "exports": [
+        "useShoppingCategories"
+      ],
+      "totalLines": 238,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useShoppingList.ts": {
+      "filePath": "src/hooks/useShoppingList.ts",
+      "contentHash": "9c959a4d7f59fc44af935f3da1593d142e3f3049d2effe907fbab8dc2eccd31f",
+      "functions": [
+        {
+          "name": "toShoppingItem",
+          "params": [
+            "row"
+          ],
+          "returnType": "ShoppingItem",
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "useShoppingList",
+          "params": [],
+          "returnType": "UseShoppingListReturn",
+          "exported": true,
+          "lineCount": 397
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useRef"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient",
+            "isSupabaseConfigured"
+          ]
+        },
+        {
+          "source": "@/lib/analytics",
+          "specifiers": [
+            "trackEvent"
+          ]
+        }
+      ],
+      "exports": [
+        "CATEGORY_COLORS",
+        "SHOPPING_CATEGORY_ICONS",
+        "SHOPPING_CATEGORY_ILLUSTRATIONS",
+        "useShoppingList"
+      ],
+      "totalLines": 529,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useShoppingShare.ts": {
+      "filePath": "src/hooks/useShoppingShare.ts",
+      "contentHash": "f79f09b8ede81ce483d58bddf294a69b1b3452f18ca5a49781ffc6e3a802a91c",
+      "functions": [
+        {
+          "name": "getCategoryEmoji",
+          "params": [
+            "category"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "useShoppingShare",
+          "params": [],
+          "exported": true,
+          "lineCount": 87
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useCallback"
+          ]
+        },
+        {
+          "source": "@/hooks/useShoppingList",
+          "specifiers": [
+            "ShoppingItem"
+          ]
+        }
+      ],
+      "exports": [
+        "useShoppingShare"
+      ],
+      "totalLines": 130,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useSubscription.ts": {
+      "filePath": "src/hooks/useSubscription.ts",
+      "contentHash": "c2ca119ec804f81c2c01fae505e9a1f3d4d826d173728fb4cde2dc16632d5d75",
+      "functions": [
+        {
+          "name": "useSubscription",
+          "params": [
+            "_householdId"
+          ],
+          "returnType": "UseSubscriptionReturn",
+          "exported": true,
+          "lineCount": 18
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState"
+          ]
+        }
+      ],
+      "exports": [
+        "useSubscription"
+      ],
+      "totalLines": 99,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useTaskCategories.ts": {
+      "filePath": "src/hooks/useTaskCategories.ts",
+      "contentHash": "23107e77d04ea21e443063774062fab6f59ec2f9e2faf8e996bd3714668bffa9",
+      "functions": [
+        {
+          "name": "useTaskCategories",
+          "params": [],
+          "returnType": "UseTaskCategoriesReturn",
+          "exported": true,
+          "lineCount": 251
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useRef"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient",
+            "isSupabaseConfigured"
+          ]
+        },
+        {
+          "source": "@/hooks/useSubscription",
+          "specifiers": [
+            "useSubscription"
+          ]
+        }
+      ],
+      "exports": [
+        "useTaskCategories"
+      ],
+      "totalLines": 299,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useTaskPhoto.ts": {
+      "filePath": "src/hooks/useTaskPhoto.ts",
+      "contentHash": "629c47bc841a869f5612b00618715219c825e7baf8e26a1a1f16577d47e97364",
+      "functions": [
+        {
+          "name": "useTaskPhoto",
+          "params": [],
+          "exported": true,
+          "lineCount": 44
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useCallback"
+          ]
+        },
+        {
+          "source": "@/components/SupabaseProvider",
+          "specifiers": [
+            "useSupabase"
+          ]
+        }
+      ],
+      "exports": [
+        "useTaskPhoto"
+      ],
+      "totalLines": 50,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useTasks.ts": {
+      "filePath": "src/hooks/useTasks.ts",
+      "contentHash": "830cd5493b5e11e643552c88883ef9401a678e1118a6c81526ddaf73892ebe9e",
+      "functions": [
+        {
+          "name": "useTasks",
+          "params": [
+            "options"
+          ],
+          "returnType": "UseTasksReturn",
+          "exported": true,
+          "lineCount": 196
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useRef"
+          ]
+        },
+        {
+          "source": "@/components/SupabaseProvider",
+          "specifiers": [
+            "useSupabase"
+          ]
+        },
+        {
+          "source": "@/hooks/useProfile",
+          "specifiers": [
+            "useProfile"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskRow",
+            "TaskInsert",
+            "TaskUpdate"
+          ]
+        }
+      ],
+      "exports": [
+        "useTasks"
+      ],
+      "totalLines": 231,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useTaskStreaks.ts": {
+      "filePath": "src/hooks/useTaskStreaks.ts",
+      "contentHash": "9249cf22648815fd0eff07ff31e33ac559ce5445fa306624713ce94de68dec82",
+      "functions": [
+        {
+          "name": "calculateStreak",
+          "params": [
+            "completions",
+            "taskId"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 39
+        },
+        {
+          "name": "useTaskStreaks",
+          "params": [
+            "completions"
+          ],
+          "exported": true,
+          "lineCount": 16
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useMemo"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskCompletionRow"
+          ]
+        }
+      ],
+      "exports": [
+        "useTaskStreaks"
+      ],
+      "totalLines": 78,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useThemeColor.ts": {
+      "filePath": "src/hooks/useThemeColor.ts",
+      "contentHash": "bbd7e82b26364a742fcc19e3440866c340bad03b5637967140b4bee011a5fb7f",
+      "functions": [
+        {
+          "name": "hslToHex",
+          "params": [
+            "h",
+            "s",
+            "l"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "hexToHsl",
+          "params": [
+            "hex"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 29
+        },
+        {
+          "name": "applyThemeColor",
+          "params": [
+            "colorKey"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "getStoredThemeColor",
+          "params": [],
+          "returnType": "ThemeColorKey",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "useThemeColor",
+          "params": [],
+          "exported": true,
+          "lineCount": 23
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        }
+      ],
+      "exports": [
+        "THEME_COLORS",
+        "applyThemeColor",
+        "getStoredThemeColor",
+        "useThemeColor"
+      ],
+      "totalLines": 118,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useTranslation.ts": {
+      "filePath": "src/hooks/useTranslation.ts",
+      "contentHash": "4691b99bf4a68ca1fdb6c23ea2afc4a6afdfddb17d6289440b60e56050b1509e",
+      "functions": [
+        {
+          "name": "getNestedValue",
+          "params": [
+            "obj",
+            "path"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "useTranslation",
+          "params": [],
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useCallback"
+          ]
+        },
+        {
+          "source": "@/components/LanguageProvider",
+          "specifiers": [
+            "useLanguage"
+          ]
+        },
+        {
+          "source": "@/lib/i18n/dictionaries/he.json",
+          "specifiers": [
+            "heDict"
+          ]
+        },
+        {
+          "source": "@/lib/i18n/dictionaries/en.json",
+          "specifiers": [
+            "enDict"
+          ]
+        },
+        {
+          "source": "@/lib/i18n",
+          "specifiers": [
+            "Locale"
+          ]
+        }
+      ],
+      "exports": [
+        "useTranslation"
+      ],
+      "totalLines": 50,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useUserAchievements.ts": {
+      "filePath": "src/hooks/useUserAchievements.ts",
+      "contentHash": "a62008b87c7cd32b5834dfd1339bd198727110821d07ab1c55ba32559518e1c5",
+      "functions": [
+        {
+          "name": "useUserAchievements",
+          "params": [],
+          "returnType": "UseUserAchievementsReturn",
+          "exported": true,
+          "lineCount": 52
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        }
+      ],
+      "exports": [
+        "useUserAchievements"
+      ],
+      "totalLines": 80,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useVoiceInput.ts": {
+      "filePath": "src/hooks/useVoiceInput.ts",
+      "contentHash": "64c37ed182579d74792df2fff9bd1f46c6940756f8a572a7563b8a22860762c6",
+      "functions": [
+        {
+          "name": "useVoiceInput",
+          "params": [
+            "options"
+          ],
+          "returnType": "UseVoiceInputResult",
+          "exported": true,
+          "lineCount": 120
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useCallback",
+            "useEffect",
+            "useRef",
+            "useState"
+          ]
+        }
+      ],
+      "exports": [
+        "useVoiceInput"
+      ],
+      "totalLines": 229,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useWebShare.ts": {
+      "filePath": "src/hooks/useWebShare.ts",
+      "contentHash": "ee1ab8dff14975e4466408df00fa47d9e19d8384e874d1c348748ec1d2c7af3c",
+      "functions": [
+        {
+          "name": "useWebShare",
+          "params": [],
+          "exported": true,
+          "lineCount": 44
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useCallback"
+          ]
+        }
+      ],
+      "exports": [
+        "useWebShare"
+      ],
+      "totalLines": 63,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useWeeklyChallenges.ts": {
+      "filePath": "src/hooks/useWeeklyChallenges.ts",
+      "contentHash": "9162b04ab00e7594516368d38ab70196314a84e340fe5255bf6fb3cd14d65fcf",
+      "functions": [
+        {
+          "name": "getWeekStart",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "getWeekEnd",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "thisWeeksCompletions",
+          "params": [
+            "completions"
+          ],
+          "returnType": "TaskCompletionRow[]",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "countUniqueCategories",
+          "params": [
+            "taskIds",
+            "taskCategoryMap"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "computeProgress",
+          "params": [
+            "challenge",
+            "weekCompletions",
+            "householdWeekCompletions",
+            "taskCategoryMap",
+            "userId"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 124
+        },
+        {
+          "name": "useWeeklyChallenges",
+          "params": [
+            "{\r\n  completions,\r\n  taskCategoryMap = {},\r\n  userId,\r\n  householdCompletions,\r\n}"
+          ],
+          "returnType": "UseWeeklyChallengesReturn",
+          "exported": true,
+          "lineCount": 87
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useMemo",
+            "useCallback",
+            "useState",
+            "useEffect"
+          ]
+        },
+        {
+          "source": "@/lib/challenges",
+          "specifiers": [
+            "CHALLENGE_POOL",
+            "pickWeeklyChallenges",
+            "getISOWeekNumber",
+            "WeeklyChallenge"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskCompletionRow"
+          ]
+        }
+      ],
+      "exports": [
+        "useWeeklyChallenges"
+      ],
+      "totalLines": 295,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useWeeklyGenerator.ts": {
+      "filePath": "src/hooks/useWeeklyGenerator.ts",
+      "contentHash": "3a6e2e2b9d1dfa44db7580118a5d86cc0a5e738b89271f02bc80a2b58df1856b",
+      "functions": [
+        {
+          "name": "buildCategoryMap",
+          "params": [],
+          "returnType": "Promise<Record<string, string>>",
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "useWeeklyGenerator",
+          "params": [],
+          "returnType": "UseWeeklyGeneratorReturn",
+          "exported": true,
+          "lineCount": 151
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useCallback"
+          ]
+        },
+        {
+          "source": "@/lib/analytics",
+          "specifiers": [
+            "trackEvent"
+          ]
+        },
+        {
+          "source": "@/lib/weekly-generator",
+          "specifiers": [
+            "generateWeekPlan",
+            "moveTaskInPlan",
+            "removeTaskFromPlan",
+            "addTaskToPlan",
+            "reassignTaskInPlan",
+            "WeekPlan",
+            "PlannedTask"
+          ]
+        },
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        },
+        {
+          "source": "@/lib/categories",
+          "specifiers": [
+            "CATEGORY_KEY_TO_NAME"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskRow"
+          ]
+        }
+      ],
+      "exports": [
+        "useWeeklyGenerator"
+      ],
+      "totalLines": 208,
+      "hasStructuralAnalysis": true
+    },
+    "src/hooks/useZoneConfig.ts": {
+      "filePath": "src/hooks/useZoneConfig.ts",
+      "contentHash": "305c74791849e8b7c120430a1f767a75ad60c67877fcaab593f6c83eb4ab6eca",
+      "functions": [
+        {
+          "name": "useZoneConfig",
+          "params": [],
+          "returnType": "UseZoneConfigReturn",
+          "exported": true,
+          "lineCount": 47
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useState",
+            "useEffect",
+            "useCallback",
+            "useMemo"
+          ]
+        },
+        {
+          "source": "@/lib/zones",
+          "specifiers": [
+            "ZoneDayMapping",
+            "DEFAULT_ZONE_MAPPINGS",
+            "loadZoneMappings",
+            "saveZoneMappings",
+            "isZoneModeEnabled",
+            "setZoneModeEnabled",
+            "buildZoneDaySummary"
+          ]
+        },
+        {
+          "source": "@/lib/categories",
+          "specifiers": [
+            "CategoryKey"
+          ]
+        }
+      ],
+      "exports": [
+        "useZoneConfig"
+      ],
+      "totalLines": 77,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/achievements.ts": {
+      "filePath": "src/lib/achievements.ts",
+      "contentHash": "a879199313540b1e88df0b04fb503c5dd924ed3c69f6a4e7fe3d8df32c4cf473",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "ACHIEVEMENTS"
+      ],
+      "totalLines": 242,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/analytics.ts": {
+      "filePath": "src/lib/analytics.ts",
+      "contentHash": "3e7de9182641b0cc570ceae5b22f1beea83ed7102e0c382bdf915c7cedef7b07",
+      "functions": [
+        {
+          "name": "trackEvent",
+          "params": [
+            "name",
+            "props"
+          ],
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "trackEvent"
+      ],
+      "totalLines": 14,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/auth.ts": {
+      "filePath": "src/lib/auth.ts",
+      "contentHash": "950402bec61c27867d06c42f63af7dd7e9cb6381c7ffa5c65154cf0c37f37415",
+      "functions": [
+        {
+          "name": "signUp",
+          "params": [
+            "email",
+            "password",
+            "displayName"
+          ],
+          "returnType": "Promise<AuthResult<User>>",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "signIn",
+          "params": [
+            "email",
+            "password"
+          ],
+          "returnType": "Promise<AuthResult<User>>",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "signInWithGoogle",
+          "params": [
+            "next"
+          ],
+          "returnType": "Promise<AuthResult>",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "signOut",
+          "params": [],
+          "returnType": "Promise<AuthResult>",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "resetPassword",
+          "params": [
+            "email"
+          ],
+          "returnType": "Promise<AuthResult>",
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "getCurrentUser",
+          "params": [],
+          "returnType": "Promise<User | null>",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "mapAuthError",
+          "params": [
+            "error"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 24
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        },
+        {
+          "source": "@supabase/supabase-js",
+          "specifiers": [
+            "AuthError",
+            "User"
+          ]
+        }
+      ],
+      "exports": [
+        "signUp",
+        "signIn",
+        "signInWithGoogle",
+        "signOut",
+        "resetPassword",
+        "getCurrentUser"
+      ],
+      "totalLines": 184,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/auto-scheduler.ts": {
+      "filePath": "src/lib/auto-scheduler.ts",
+      "contentHash": "bb6d52327ce66a6f44f998601856964e0e64844e2b1015564cec91363f9aaf70",
+      "functions": [
+        {
+          "name": "formatDate",
+          "params": [
+            "date"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getISOWeekNumber",
+          "params": [
+            "date"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "getDayOfYear",
+          "params": [
+            "date"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "isTemplateDueOnDate",
+          "params": [
+            "template",
+            "date"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "getTemplatesDueOnDate",
+          "params": [
+            "templates",
+            "date"
+          ],
+          "returnType": "Pick<TaskTemplate, \"recurrence_type\" | \"recurrence_day\" | \"active\">[]",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "computeWeightedLoad",
+          "params": [
+            "instances",
+            "memberId"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "selectAssignee",
+          "params": [
+            "template",
+            "recentInstances",
+            "members",
+            "templateIndex",
+            "goldenRuleTarget"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 75
+        },
+        {
+          "name": "generateTaskInstances",
+          "params": [
+            "supabase",
+            "householdId",
+            "startDate",
+            "endDate",
+            "goldenRuleTarget"
+          ],
+          "returnType": "Promise<ScheduleResult>",
+          "exported": true,
+          "lineCount": 131
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@supabase/supabase-js",
+          "specifiers": [
+            "SupabaseClient"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "Database",
+            "TaskTemplate",
+            "TaskInstance"
+          ]
+        }
+      ],
+      "exports": [
+        "DIFFICULTY_WEIGHT",
+        "formatDate",
+        "getISOWeekNumber",
+        "getDayOfYear",
+        "isTemplateDueOnDate",
+        "getTemplatesDueOnDate",
+        "computeWeightedLoad",
+        "selectAssignee",
+        "generateTaskInstances"
+      ],
+      "totalLines": 339,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/backgrounds.ts": {
+      "filePath": "src/lib/backgrounds.ts",
+      "contentHash": "893fdd41c0a89ce55329bc65729743a6a81426aeff51c1f160c8634546bee81e",
+      "functions": [
+        {
+          "name": "getActiveBackground",
+          "params": [],
+          "returnType": "Background",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "setActiveBackground",
+          "params": [
+            "bgId"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "applyBackgroundToDom",
+          "params": [
+            "bg"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "getBackgroundCollection",
+          "params": [],
+          "returnType": "ReadonlySet<string>",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "syncBackgroundCollectionWithStreak",
+          "params": [
+            "currentStreak"
+          ],
+          "returnType": "readonly Background[]",
+          "exported": true,
+          "lineCount": 19
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "BACKGROUNDS",
+        "getActiveBackground",
+        "setActiveBackground",
+        "applyBackgroundToDom",
+        "getBackgroundCollection",
+        "syncBackgroundCollectionWithStreak"
+      ],
+      "totalLines": 89,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/categories.ts": {
+      "filePath": "src/lib/categories.ts",
+      "contentHash": "a06437a692fe7c2dfa9c6129f8d722cb72de4a39367db886dec64fffa362f642",
+      "functions": [
+        {
+          "name": "getCategoryColor",
+          "params": [
+            "key"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getCategoryLabel",
+          "params": [
+            "key"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getCategoryIcon",
+          "params": [
+            "key"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "CATEGORY_NAME_TO_KEY",
+        "CATEGORY_KEY_TO_NAME",
+        "CATEGORY_KEYS",
+        "CATEGORY_FILTER_KEYS",
+        "CATEGORY_COLORS",
+        "CATEGORY_LABELS",
+        "CATEGORY_ICONS",
+        "CATEGORY_BG_CLASSES",
+        "CATEGORY_ILLUSTRATIONS",
+        "getCategoryColor",
+        "getCategoryLabel",
+        "getCategoryIcon"
+      ],
+      "totalLines": 127,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/challenges.ts": {
+      "filePath": "src/lib/challenges.ts",
+      "contentHash": "8983eedeabd8b70067907dbbdb72444e0ee0b9494a1b43afa7fde22ee03a4f4e",
+      "functions": [
+        {
+          "name": "getISOWeekNumber",
+          "params": [
+            "date"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "pickWeeklyChallenges",
+          "params": [
+            "weekNum"
+          ],
+          "returnType": "WeeklyChallenge[]",
+          "exported": true,
+          "lineCount": 17
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "CHALLENGE_POOL",
+        "getISOWeekNumber",
+        "pickWeeklyChallenges"
+      ],
+      "totalLines": 188,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/coaching-messages-adaptive.ts": {
+      "filePath": "src/lib/coaching-messages-adaptive.ts",
+      "contentHash": "16f8aefc25e7fb70d8e434c1c883dc29debb6c9b15b88c9af7483329909c3555",
+      "functions": [
+        {
+          "name": "randomPick",
+          "params": [
+            "arr"
+          ],
+          "returnType": "T",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "interpolate",
+          "params": [
+            "template",
+            "vars"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "buildAdaptiveMorningBrief",
+          "params": [
+            "style",
+            "vars",
+            "taskList",
+            "dayOfWeek"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 28
+        },
+        {
+          "name": "buildAdaptiveEveningSummary",
+          "params": [
+            "style",
+            "vars",
+            "completedTasks",
+            "remainingTasks"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 30
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./coaching-tracker",
+          "specifiers": [
+            "CoachingStyle"
+          ]
+        }
+      ],
+      "exports": [
+        "MORNING_STYLES",
+        "EVENING_STYLES",
+        "buildAdaptiveMorningBrief",
+        "buildAdaptiveEveningSummary",
+        "COACHING_STYLE_LABELS",
+        "COACHING_STYLE_EMOJIS"
+      ],
+      "totalLines": 201,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/coaching-messages.ts": {
+      "filePath": "src/lib/coaching-messages.ts",
+      "contentHash": "40c616406869d1dce633382591d8264337ae122e7ae41acf67919bf9b704c967",
+      "functions": [
+        {
+          "name": "getRandomMessage",
+          "params": [
+            "trigger"
+          ],
+          "returnType": "CoachingMessage",
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "COACHING_MESSAGES",
+        "getRandomMessage"
+      ],
+      "totalLines": 99,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/coaching-tracker.ts": {
+      "filePath": "src/lib/coaching-tracker.ts",
+      "contentHash": "9ddf3300aafb3bae0f22e5ec128b1502d56307cf4c270aefea610bbab1f91b4c",
+      "functions": [
+        {
+          "name": "getSupabase",
+          "params": [],
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "recordCoachingSent",
+          "params": [
+            "event"
+          ],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "measureEffectiveness",
+          "params": [
+            "householdId",
+            "days"
+          ],
+          "returnType": "Promise<CoachingEffectiveness[]>",
+          "exported": true,
+          "lineCount": 77
+        },
+        {
+          "name": "getBestCoachingStyle",
+          "params": [
+            "householdId"
+          ],
+          "returnType": "Promise<CoachingStyle>",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "getStyleSummary",
+          "params": [
+            "householdId",
+            "days"
+          ],
+          "returnType": "Promise<\r\n  {\r\n    coaching_style: CoachingStyle;\r\n    total_sent: number;\r\n    completions_within_2h: number;\r\n    effectiveness_rate: number;\r\n  }[]\r\n>",
+          "exported": true,
+          "lineCount": 40
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@supabase/supabase-js",
+          "specifiers": [
+            "createServerClient"
+          ]
+        }
+      ],
+      "exports": [
+        "recordCoachingSent",
+        "measureEffectiveness",
+        "getBestCoachingStyle",
+        "getStyleSummary"
+      ],
+      "totalLines": 255,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/copy-resolver.ts": {
+      "filePath": "src/lib/copy-resolver.ts",
+      "contentHash": "4e313967e856031c4436abffbc184d8f08c7ceaecd57cb094ddab64c9a5d4b79",
+      "functions": [
+        {
+          "name": "resolveCopy",
+          "params": [
+            "variants"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "copy",
+          "params": [
+            "key"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/household-type",
+          "specifiers": [
+            "loadHousehold",
+            "HouseholdType"
+          ]
+        }
+      ],
+      "exports": [
+        "resolveCopy",
+        "COPY",
+        "copy"
+      ],
+      "totalLines": 186,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/easter-eggs.ts": {
+      "filePath": "src/lib/easter-eggs.ts",
+      "contentHash": "10402376893a1017d64cf1d6263d33b17487978344d4e59a48f3e505f830571e",
+      "functions": [
+        {
+          "name": "loadFired",
+          "params": [],
+          "returnType": "FiredEggs",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "markFired",
+          "params": [
+            "kind"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "unlockEpicTier",
+          "params": [],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "registerKonamiListener",
+          "params": [
+            "onTrigger"
+          ],
+          "returnType": "() => void",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "registerLogoTapListener",
+          "params": [
+            "el",
+            "onTrigger"
+          ],
+          "returnType": "() => void",
+          "exported": true,
+          "lineCount": 41
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/pets",
+          "specifiers": [
+            "addToCollection"
+          ]
+        }
+      ],
+      "exports": [
+        "loadFired",
+        "registerKonamiListener",
+        "registerLogoTapListener"
+      ],
+      "totalLines": 139,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/energy-filter.ts": {
+      "filePath": "src/lib/energy-filter.ts",
+      "contentHash": "916a933c5a9d2c6a9caff3383baf5d5744a868426b36ab1af302e5bb087c4acd",
+      "functions": [
+        {
+          "name": "inferDifficulty",
+          "params": [
+            "task"
+          ],
+          "returnType": "Difficulty",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "filterTasksByEnergy",
+          "params": [
+            "tasks",
+            "energyLevel"
+          ],
+          "returnType": "T[]",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "getEnergyLabel",
+          "params": [
+            "level"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "getEnergyEmoji",
+          "params": [
+            "level"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "getEnergyDescription",
+          "params": [
+            "level"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "inferDifficulty",
+        "filterTasksByEnergy",
+        "getEnergyLabel",
+        "getEnergyEmoji",
+        "getEnergyDescription"
+      ],
+      "totalLines": 73,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/export.ts": {
+      "filePath": "src/lib/export.ts",
+      "contentHash": "3df328594cd771c35ee5f6c5030a1c4c49bcf017714d09a01e69617a27f5b3fe",
+      "functions": [
+        {
+          "name": "escapeCSV",
+          "params": [
+            "value"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 7
+        },
+        {
+          "name": "getFrequencyLabel",
+          "params": [
+            "recurring"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "getStatusLabel",
+          "params": [
+            "status"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "exportTasksToCSV",
+          "params": [
+            "tasks"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "exportCompletionsToCSV",
+          "params": [
+            "completions"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "downloadCSV",
+          "params": [
+            "csv",
+            "filename"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "exportTasksToCSV",
+        "exportCompletionsToCSV",
+        "downloadCSV"
+      ],
+      "totalLines": 102,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/fairness-balance.ts": {
+      "filePath": "src/lib/fairness-balance.ts",
+      "contentHash": "84b8f117d9c197ebf4b7ead4a2b9f700d68d9a6b56296f2d3ea56079e0dc3744",
+      "functions": [
+        {
+          "name": "spread",
+          "params": [
+            "shares"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "classify",
+          "params": [
+            "gap"
+          ],
+          "returnType": "FairnessVerdict",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "buildHeadline",
+          "params": [
+            "shares",
+            "verdict"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 19
+        },
+        {
+          "name": "computeFairnessBalance",
+          "params": [
+            "completions",
+            "members",
+            "today"
+          ],
+          "returnType": "FairnessBalance",
+          "exported": true,
+          "lineCount": 26
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/task-stats",
+          "specifiers": [
+            "computeMembersComparison",
+            "MemberCompletionCount"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskCompletionRow"
+          ]
+        }
+      ],
+      "exports": [
+        "computeFairnessBalance"
+      ],
+      "totalLines": 99,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/google-calendar.ts": {
+      "filePath": "src/lib/google-calendar.ts",
+      "contentHash": "e821a6d06017e4c071127a3481509f228966a7a1e1dfe31e45c3fedcfd6ee6cb",
+      "functions": [
+        {
+          "name": "getClientId",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "getClientSecret",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "getRedirectUri",
+          "params": [],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "buildOAuthUrl",
+          "params": [
+            "state"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "exchangeCodeForTokens",
+          "params": [
+            "code"
+          ],
+          "returnType": "Promise<GoogleTokens>",
+          "exported": true,
+          "lineCount": 43
+        },
+        {
+          "name": "refreshAccessToken",
+          "params": [
+            "tokens"
+          ],
+          "returnType": "Promise<GoogleTokens>",
+          "exported": true,
+          "lineCount": 36
+        },
+        {
+          "name": "getValidAccessToken",
+          "params": [
+            "tokens"
+          ],
+          "returnType": "Promise<{\r\n  accessToken: string;\r\n  updatedTokens: GoogleTokens;\r\n}>",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "calendarFetch",
+          "params": [
+            "path",
+            "accessToken",
+            "options"
+          ],
+          "returnType": "Promise<Response>",
+          "exported": false,
+          "lineCount": 36
+        },
+        {
+          "name": "getPrimaryCalendarId",
+          "params": [
+            "accessToken"
+          ],
+          "returnType": "Promise<string>",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "listEvents",
+          "params": [
+            "accessToken",
+            "calendarId",
+            "timeMin",
+            "timeMax"
+          ],
+          "returnType": "Promise<CalendarEvent[]>",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "createEvent",
+          "params": [
+            "accessToken",
+            "calendarId",
+            "event"
+          ],
+          "returnType": "Promise<CalendarEvent & { id: string }>",
+          "exported": true,
+          "lineCount": 20
+        },
+        {
+          "name": "updateEvent",
+          "params": [
+            "accessToken",
+            "calendarId",
+            "eventId",
+            "event"
+          ],
+          "returnType": "Promise<CalendarEvent & { id: string }>",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "deleteEvent",
+          "params": [
+            "accessToken",
+            "calendarId",
+            "eventId"
+          ],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "taskToCalendarEvent",
+          "params": [
+            "task"
+          ],
+          "returnType": "CalendarEvent",
+          "exported": true,
+          "lineCount": 16
+        },
+        {
+          "name": "getJerusalemOffset",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 16
+        },
+        {
+          "name": "offsetDateTime",
+          "params": [
+            "localDatetime",
+            "minutes"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 15
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "getRedirectUri",
+        "buildOAuthUrl",
+        "exchangeCodeForTokens",
+        "refreshAccessToken",
+        "getValidAccessToken",
+        "getPrimaryCalendarId",
+        "listEvents",
+        "createEvent",
+        "updateEvent",
+        "deleteEvent",
+        "taskToCalendarEvent"
+      ],
+      "totalLines": 441,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/haptics.ts": {
+      "filePath": "src/lib/haptics.ts",
+      "contentHash": "e0e97a27030e1333294c253b15df9436faf9281176d3cc1ecbfb199bf72c1b12",
+      "functions": [
+        {
+          "name": "haptic",
+          "params": [
+            "pattern"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "haptic"
+      ],
+      "totalLines": 22,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/household-type.ts": {
+      "filePath": "src/lib/household-type.ts",
+      "contentHash": "fec390275d71b12eba07f388e6ebfb7dc406b767ed1f4ca0800c459c2898d2cd",
+      "functions": [
+        {
+          "name": "loadHousehold",
+          "params": [],
+          "returnType": "HouseholdConfig",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "saveHousehold",
+          "params": [
+            "cfg"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "DEFAULT_HOUSEHOLD",
+        "loadHousehold",
+        "saveHousehold",
+        "TYPE_LABELS"
+      ],
+      "totalLines": 73,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/kid-profiles.ts": {
+      "filePath": "src/lib/kid-profiles.ts",
+      "contentHash": "3dab55ff4b218fd3e5f87f004b0279309ee05714d36378daddb8d92c905719a3",
+      "functions": [
+        {
+          "name": "genId",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "loadKidProfiles",
+          "params": [],
+          "returnType": "readonly KidProfile[]",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "saveAll",
+          "params": [
+            "profiles"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "addKidProfile",
+          "params": [
+            "input"
+          ],
+          "returnType": "KidProfile | null",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "removeKidProfile",
+          "params": [
+            "id"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "verifyKidPin",
+          "params": [
+            "id",
+            "pin"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "loadKidProfiles",
+        "addKidProfile",
+        "removeKidProfile",
+        "verifyKidPin",
+        "KID_EMOJIS"
+      ],
+      "totalLines": 79,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/love-tokens.ts": {
+      "filePath": "src/lib/love-tokens.ts",
+      "contentHash": "5a74388061b62e82f07eab3face9d7f3df91af04d3bdb9b0ff80aba94dca2bcb",
+      "functions": [
+        {
+          "name": "validateInput",
+          "params": [
+            "input"
+          ],
+          "returnType": "{ ok: true } | { ok: false; reason: string }",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "sendLoveToken",
+          "params": [
+            "input"
+          ],
+          "returnType": "Promise<SendResult>",
+          "exported": true,
+          "lineCount": 62
+        },
+        {
+          "name": "getRemainingSendsToday",
+          "params": [
+            "recipientId"
+          ],
+          "returnType": "Promise<number>",
+          "exported": true,
+          "lineCount": 12
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        }
+      ],
+      "exports": [
+        "DAILY_SEND_LIMIT",
+        "PRESET_VALUES",
+        "MAX_VALUE",
+        "MAX_MESSAGE_LEN",
+        "sendLoveToken",
+        "getRemainingSendsToday"
+      ],
+      "totalLines": 131,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/notifications.ts": {
+      "filePath": "src/lib/notifications.ts",
+      "contentHash": "a3e8cd5169596c96c4fa285c6db72c7e76ab15a12be7b88ecf36257ca171052d",
+      "functions": [
+        {
+          "name": "isNotificationSupported",
+          "params": [],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "getNotificationPermission",
+          "params": [],
+          "returnType": "NotificationPermissionState",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "requestNotificationPermission",
+          "params": [],
+          "returnType": "Promise<NotificationPermissionState>",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "registerServiceWorker",
+          "params": [],
+          "returnType": "Promise<ServiceWorkerRegistration | null>",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "getScheduledReminders",
+          "params": [],
+          "returnType": "ScheduledReminder[]",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "saveScheduledReminders",
+          "params": [
+            "reminders"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "toggleReminder",
+          "params": [
+            "id"
+          ],
+          "returnType": "ScheduledReminder[]",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "getDefaultReminders",
+          "params": [],
+          "returnType": "ScheduledReminder[]",
+          "exported": false,
+          "lineCount": 38
+        },
+        {
+          "name": "createTime",
+          "params": [
+            "base",
+            "hours",
+            "minutes"
+          ],
+          "returnType": "Date",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "urlBase64ToUint8Array",
+          "params": [
+            "base64String"
+          ],
+          "returnType": "ArrayBuffer",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "subscribeToPush",
+          "params": [
+            "userId"
+          ],
+          "returnType": "Promise<PushSubscription | null>",
+          "exported": true,
+          "lineCount": 46
+        },
+        {
+          "name": "unsubscribeFromPush",
+          "params": [
+            "userId"
+          ],
+          "returnType": "Promise<boolean>",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "isPushSubscribed",
+          "params": [],
+          "returnType": "Promise<boolean>",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "showLocalNotification",
+          "params": [
+            "title",
+            "body",
+            "options"
+          ],
+          "returnType": "Promise<boolean>",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "getNotificationPrefs",
+          "params": [],
+          "returnType": "NotificationPrefs",
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "saveNotificationPrefs",
+          "params": [
+            "prefs"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "isNotificationSupported",
+        "getNotificationPermission",
+        "requestNotificationPermission",
+        "registerServiceWorker",
+        "getScheduledReminders",
+        "saveScheduledReminders",
+        "toggleReminder",
+        "subscribeToPush",
+        "unsubscribeFromPush",
+        "isPushSubscribed",
+        "showLocalNotification",
+        "getNotificationPrefs",
+        "saveNotificationPrefs"
+      ],
+      "totalLines": 359,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/pets.ts": {
+      "filePath": "src/lib/pets.ts",
+      "contentHash": "a3957fff5f1791e6784bb7709c71caf87ad053d5019581181ea14b48c44ecefc",
+      "functions": [
+        {
+          "name": "getActivePet",
+          "params": [],
+          "returnType": "Pet",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "setActivePet",
+          "params": [
+            "petId"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "getCollection",
+          "params": [],
+          "returnType": "ReadonlySet<string>",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "addToCollection",
+          "params": [
+            "petId"
+          ],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "syncCollectionWithStreak",
+          "params": [
+            "currentStreak"
+          ],
+          "returnType": "readonly Pet[]",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "petsAtRarity",
+          "params": [
+            "rarity"
+          ],
+          "returnType": "readonly Pet[]",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "PETS",
+        "getActivePet",
+        "setActivePet",
+        "getCollection",
+        "addToCollection",
+        "syncCollectionWithStreak",
+        "petsAtRarity"
+      ],
+      "totalLines": 109,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/playlists.ts": {
+      "filePath": "src/lib/playlists.ts",
+      "contentHash": "d7a8435d05c6a3422b1dab83ecee52ad7d5005478f2ae76d4c31dcae953c0c49",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "PLAYLISTS"
+      ],
+      "totalLines": 90,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/push.ts": {
+      "filePath": "src/lib/push.ts",
+      "contentHash": "471747c1b0a9cc6dc59c22d181f645dcbe5993399d2ca2627806d1302de8f6fb",
+      "functions": [
+        {
+          "name": "ensureVapidConfigured",
+          "params": [],
+          "returnType": "boolean",
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "sendPushNotification",
+          "params": [
+            "subscription",
+            "payload"
+          ],
+          "returnType": "Promise<{ success: boolean; expired?: boolean }>",
+          "exported": true,
+          "lineCount": 37
+        },
+        {
+          "name": "sendPushToAll",
+          "params": [
+            "subscriptions",
+            "payload"
+          ],
+          "returnType": "Promise<{\r\n  sent: number;\r\n  failed: number;\r\n  expired: string[];\r\n}>",
+          "exported": true,
+          "lineCount": 37
+        },
+        {
+          "name": "getVapidPublicKey",
+          "params": [],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "web-push",
+          "specifiers": [
+            "webpush"
+          ]
+        }
+      ],
+      "exports": [
+        "sendPushNotification",
+        "sendPushToAll",
+        "getVapidPublicKey"
+      ],
+      "totalLines": 139,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/rate-limit.ts": {
+      "filePath": "src/lib/rate-limit.ts",
+      "contentHash": "73f995500f6d6231b1f550ac6a15b83a8d4ad7b2d47ec1158ae0fead08f19d98",
+      "functions": [
+        {
+          "name": "getRedis",
+          "params": [],
+          "returnType": "Redis | null",
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "createUpstashLimiter",
+          "params": [
+            "redis",
+            "windowMs",
+            "max"
+          ],
+          "returnType": "UpstashLimiter",
+          "exported": false,
+          "lineCount": 47
+        },
+        {
+          "name": "createInMemoryLimiter",
+          "params": [
+            "windowMs",
+            "max"
+          ],
+          "returnType": "SyncLimiter",
+          "exported": false,
+          "lineCount": 53
+        },
+        {
+          "name": "rateLimit",
+          "params": [
+            "options"
+          ],
+          "returnType": "{\r\n  check: (token: string) => Promise<RateLimitResult>;\r\n}",
+          "exported": true,
+          "lineCount": 18
+        },
+        {
+          "name": "getClientIp",
+          "params": [
+            "request"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 7
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@upstash/ratelimit",
+          "specifiers": [
+            "Ratelimit"
+          ]
+        },
+        {
+          "source": "@upstash/redis",
+          "specifiers": [
+            "Redis"
+          ]
+        }
+      ],
+      "exports": [
+        "rateLimit",
+        "getClientIp"
+      ],
+      "totalLines": 231,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/rewards.ts": {
+      "filePath": "src/lib/rewards.ts",
+      "contentHash": "6332fef11c900c05adb6a3c81ed244071972757c7573a688c354303112edeefc",
+      "functions": [
+        {
+          "name": "getWeekStart",
+          "params": [
+            "dateStr"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "getMonthStart",
+          "params": [
+            "dateStr"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "addDays",
+          "params": [
+            "base",
+            "days"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "countCompletedByUser",
+          "params": [
+            "tasks",
+            "startDate",
+            "endDate"
+          ],
+          "returnType": "Map<string, number>",
+          "exported": false,
+          "lineCount": 15
+        },
+        {
+          "name": "countCompletedInRange",
+          "params": [
+            "tasks",
+            "startDate",
+            "endDate"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "countBothDailyStreak",
+          "params": [
+            "tasks",
+            "members",
+            "today"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 22
+        },
+        {
+          "name": "countCategoryStreak",
+          "params": [
+            "tasks",
+            "category",
+            "today"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 18
+        },
+        {
+          "name": "computeRewardsProgress",
+          "params": [
+            "taskInstances",
+            "streaks",
+            "goldenRuleHits",
+            "householdMembers",
+            "today"
+          ],
+          "returnType": "RewardProgress[]",
+          "exported": true,
+          "lineCount": 74
+        },
+        {
+          "name": "getNextReward",
+          "params": [
+            "progress"
+          ],
+          "returnType": "RewardProgress | null",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "getUnlockedCount",
+          "params": [
+            "progress"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 3
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskInstance",
+            "TaskTemplate"
+          ]
+        }
+      ],
+      "exports": [
+        "REWARDS",
+        "computeRewardsProgress",
+        "getNextReward",
+        "getUnlockedCount"
+      ],
+      "totalLines": 327,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/room-health.ts": {
+      "filePath": "src/lib/room-health.ts",
+      "contentHash": "1df2487991cebbfd4106e1df7c7a36c85868962408a43a990110f192c127a299",
+      "functions": [
+        {
+          "name": "computeRoomHealth",
+          "params": [
+            "lastCompletedAt",
+            "recurrenceType",
+            "now"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "getHealthColor",
+          "params": [
+            "score"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "getHealthLabel",
+          "params": [
+            "score"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "computeCategoryHealth",
+          "params": [
+            "completions",
+            "category",
+            "now"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 21
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "RecurrenceType"
+          ]
+        }
+      ],
+      "exports": [
+        "computeRoomHealth",
+        "getHealthColor",
+        "getHealthLabel",
+        "computeCategoryHealth"
+      ],
+      "totalLines": 75,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/room-task-templates.ts": {
+      "filePath": "src/lib/room-task-templates.ts",
+      "contentHash": "558ad96e3dde62d6bb0a1acc44857c10b362238a4bfced78b691991f3aee0f70",
+      "functions": [
+        {
+          "name": "getTasksForRoom",
+          "params": [
+            "roomId",
+            "level"
+          ],
+          "returnType": "RoomTaskTemplate[]",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "getTaskCountForRoom",
+          "params": [
+            "roomId",
+            "level"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "getDifficultyLabel",
+          "params": [
+            "difficulty"
+          ],
+          "returnType": "{ he: string; en: string }",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "getDifficultyColor",
+          "params": [
+            "difficulty"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "getDifficultyPoints",
+          "params": [
+            "difficulty"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "ROOM_DEFINITIONS",
+        "getTasksForRoom",
+        "getTaskCountForRoom",
+        "getDifficultyLabel",
+        "getDifficultyColor",
+        "getDifficultyPoints"
+      ],
+      "totalLines": 248,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/safe-confetti.ts": {
+      "filePath": "src/lib/safe-confetti.ts",
+      "contentHash": "89dcae02e25a747686c5f7d7f53d96fb46075307f4190a7d303e37c833c79cce",
+      "functions": [
+        {
+          "name": "fireConfetti",
+          "params": [
+            "options"
+          ],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 14
+        },
+        {
+          "name": "fireCelebration",
+          "params": [],
+          "returnType": "Promise<void>",
+          "exported": true,
+          "lineCount": 15
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "fireConfetti",
+        "fireCelebration"
+      ],
+      "totalLines": 42,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/seed-data.ts": {
+      "filePath": "src/lib/seed-data.ts",
+      "contentHash": "7b8ddeafb59e3a2060f575d7e8727de50abfd1116134fc98b437284504a544bb",
+      "functions": [
+        {
+          "name": "getRecurrenceLabel",
+          "params": [
+            "type"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "TASK_TEMPLATES_SEED",
+        "getCategoryColor",
+        "getCategoryLabel",
+        "getRecurrenceLabel"
+      ],
+      "totalLines": 850,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/shopping-autocomplete.ts": {
+      "filePath": "src/lib/shopping-autocomplete.ts",
+      "contentHash": "760b3de7e86db5385efc9bd316dd8f67852fd686124f6c1e2d110f2d6e97dd49",
+      "functions": [
+        {
+          "name": "searchSuggestions",
+          "params": [
+            "query",
+            "limit"
+          ],
+          "returnType": "ShoppingItemSuggestion[]",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "getEmojiForItem",
+          "params": [
+            "name"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 27
+        },
+        {
+          "name": "getSuggestionsForCategory",
+          "params": [
+            "category"
+          ],
+          "returnType": "ShoppingItemSuggestion[]",
+          "exported": true,
+          "lineCount": 5
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "SHOPPING_SUGGESTIONS",
+        "searchSuggestions",
+        "getEmojiForItem",
+        "getSuggestionsForCategory"
+      ],
+      "totalLines": 318,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/smart-scheduler.ts": {
+      "filePath": "src/lib/smart-scheduler.ts",
+      "contentHash": "3e46f687e50ff3cd29efebe4e56c5c802846dcbbdcbffe19c5cf62c39fc44286",
+      "functions": [
+        {
+          "name": "groupTasksByZone",
+          "params": [
+            "tasks"
+          ],
+          "returnType": "Map<string, TaskRow[]>",
+          "exported": true,
+          "lineCount": 26
+        },
+        {
+          "name": "analyzeDailyLoad",
+          "params": [
+            "tasks",
+            "startOfWeek"
+          ],
+          "returnType": "DayLoad[]",
+          "exported": true,
+          "lineCount": 35
+        },
+        {
+          "name": "estimateTaskMinutes",
+          "params": [
+            "task"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 28
+        },
+        {
+          "name": "generateSmartSuggestions",
+          "params": [
+            "weekTasks"
+          ],
+          "returnType": "Suggestion[]",
+          "exported": true,
+          "lineCount": 88
+        },
+        {
+          "name": "getWeekRange",
+          "params": [
+            "startOfWeek"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "calcEventMinutes",
+          "params": [
+            "event"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "analyzeDailyLoadWithCalendar",
+          "params": [
+            "tasks",
+            "calendarEvents",
+            "startOfWeek"
+          ],
+          "returnType": "DayLoadWithCalendar[]",
+          "exported": true,
+          "lineCount": 32
+        },
+        {
+          "name": "generateCalendarAwareSuggestions",
+          "params": [
+            "weekTasks",
+            "calendarEvents"
+          ],
+          "returnType": "Suggestion[]",
+          "exported": true,
+          "lineCount": 61
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./types/database",
+          "specifiers": [
+            "TaskRow"
+          ]
+        },
+        {
+          "source": "./types/calendar",
+          "specifiers": [
+            "ClientCalendarEvent"
+          ]
+        }
+      ],
+      "exports": [
+        "groupTasksByZone",
+        "analyzeDailyLoad",
+        "generateSmartSuggestions",
+        "getWeekRange",
+        "analyzeDailyLoadWithCalendar",
+        "generateCalendarAwareSuggestions"
+      ],
+      "totalLines": 370,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/sound-effects.ts": {
+      "filePath": "src/lib/sound-effects.ts",
+      "contentHash": "9537a8a482296572497a0582d04996d6d72b8e649d8f5d682ccce45f93626904",
+      "functions": [
+        {
+          "name": "getCtx",
+          "params": [],
+          "returnType": "AudioContext | null",
+          "exported": false,
+          "lineCount": 14
+        },
+        {
+          "name": "playSequence",
+          "params": [
+            "notes",
+            "gainPeak"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 21
+        },
+        {
+          "name": "playHeartPop",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "playSparkle",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "playSpinChime",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "playSuccessChord",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "playUnlockChime",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 9
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/ux-preferences",
+          "specifiers": [
+            "shouldPlaySound"
+          ]
+        }
+      ],
+      "exports": [
+        "playHeartPop",
+        "playSparkle",
+        "playSpinChime",
+        "playSuccessChord",
+        "playUnlockChime"
+      ],
+      "totalLines": 112,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/storage.ts": {
+      "filePath": "src/lib/storage.ts",
+      "contentHash": "184940c6bce7c978765fe390ed6c658fba19cc9105af9d0c0a7d9606d2b44474",
+      "functions": [
+        {
+          "name": "compressImage",
+          "params": [
+            "file"
+          ],
+          "returnType": "Promise<Blob>",
+          "exported": false,
+          "lineCount": 43
+        },
+        {
+          "name": "uploadAvatar",
+          "params": [
+            "userId",
+            "file"
+          ],
+          "returnType": "Promise<{ url: string } | { error: string }>",
+          "exported": true,
+          "lineCount": 49
+        },
+        {
+          "name": "uploadTaskPhoto",
+          "params": [
+            "userId",
+            "taskId",
+            "file"
+          ],
+          "returnType": "Promise<{ url: string } | { error: string }>",
+          "exported": true,
+          "lineCount": 40
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        }
+      ],
+      "exports": [
+        "uploadAvatar",
+        "uploadTaskPhoto"
+      ],
+      "totalLines": 151,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/sumit-client-inline.ts": {
+      "filePath": "src/lib/sumit-client-inline.ts",
+      "contentHash": "d0fc5740a980e1be5fea0249b4689faa570f4b6ae7b27c593022f158ee104838",
+      "functions": [
+        {
+          "name": "createSumitClient",
+          "params": [
+            "{\n  companyId,\n  apiKey,\n  fetchImpl,\n}"
+          ],
+          "returnType": "SumitClient",
+          "exported": true,
+          "lineCount": 86
+        }
+      ],
+      "classes": [
+        {
+          "name": "SumitError",
+          "methods": [
+            "constructor"
+          ],
+          "properties": [
+            "status",
+            "endpoint",
+            "response"
+          ],
+          "exported": true,
+          "lineCount": 16
+        }
+      ],
+      "imports": [],
+      "exports": [
+        "SumitError",
+        "createSumitClient"
+      ],
+      "totalLines": 169,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/supabase.ts": {
+      "filePath": "src/lib/supabase.ts",
+      "contentHash": "7e0b81923d0050196700f85de808d9333156e8b55bcdb3810aa503deb3f4d495",
+      "functions": [
+        {
+          "name": "isSupabaseConfigured",
+          "params": [],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "createClient",
+          "params": [],
+          "exported": true,
+          "lineCount": 10
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@supabase/ssr",
+          "specifiers": [
+            "createBrowserClient"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "Database"
+          ]
+        }
+      ],
+      "exports": [
+        "isSupabaseConfigured",
+        "createClient"
+      ],
+      "totalLines": 31,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/surprise-box.ts": {
+      "filePath": "src/lib/surprise-box.ts",
+      "contentHash": "e895f278f9209d556646d74598a1dd2d0f97287ab47a122220ff639237c97f96",
+      "functions": [
+        {
+          "name": "pick",
+          "params": [
+            "arr"
+          ],
+          "returnType": "T",
+          "exported": false,
+          "lineCount": 1
+        },
+        {
+          "name": "rollReward",
+          "params": [],
+          "returnType": "Reward",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "getTimeAwareGreeting",
+          "params": [],
+          "returnType": "{ greeting: string; ctaPrefix: string }",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "todayInIsrael",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 10
+        },
+        {
+          "name": "openTodayBox",
+          "params": [],
+          "returnType": "Promise<OpenBoxResult>",
+          "exported": true,
+          "lineCount": 53
+        },
+        {
+          "name": "isBoxAvailableToday",
+          "params": [],
+          "returnType": "Promise<boolean>",
+          "exported": true,
+          "lineCount": 13
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        }
+      ],
+      "exports": [
+        "rollReward",
+        "getTimeAwareGreeting",
+        "openTodayBox",
+        "isBoxAvailableToday"
+      ],
+      "totalLines": 197,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/task-stats.ts": {
+      "filePath": "src/lib/task-stats.ts",
+      "contentHash": "76902a4932cc31236568fe7fd18fbe7e39288ed76954bed8642bb6b0ae154e5f",
+      "functions": [
+        {
+          "name": "addDays",
+          "params": [
+            "baseDate",
+            "days"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "computeCategoryStats",
+          "params": [
+            "tasks",
+            "categoryIdToKey"
+          ],
+          "returnType": "CategoryStat[]",
+          "exported": true,
+          "lineCount": 30
+        },
+        {
+          "name": "computeMonthlyData",
+          "params": [
+            "completions",
+            "today"
+          ],
+          "returnType": "MonthlyCompletionPoint[]",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "countUpcomingTasks",
+          "params": [
+            "tasks",
+            "today"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "computeCompletionRate",
+          "params": [
+            "tasks"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "computeWeeklyTrend",
+          "params": [
+            "completions",
+            "tasks",
+            "today"
+          ],
+          "returnType": "WeeklyTrendPoint[]",
+          "exported": true,
+          "lineCount": 29
+        },
+        {
+          "name": "countCompletedThisWeek",
+          "params": [
+            "completions",
+            "today"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "countCompletedThisMonth",
+          "params": [
+            "completions",
+            "today"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "computePartnerComparison",
+          "params": [
+            "completions",
+            "myUserId",
+            "partnerUserId",
+            "today"
+          ],
+          "returnType": "PartnerComparison",
+          "exported": true,
+          "lineCount": 19
+        },
+        {
+          "name": "computeMembersComparison",
+          "params": [
+            "completions",
+            "members",
+            "today"
+          ],
+          "returnType": "MemberCompletionCount[]",
+          "exported": true,
+          "lineCount": 22
+        },
+        {
+          "name": "computeCategoryBreakdown",
+          "params": [
+            "completions",
+            "tasks",
+            "categoryIdToKey"
+          ],
+          "returnType": "CategoryBreakdownItem[]",
+          "exported": true,
+          "lineCount": 33
+        },
+        {
+          "name": "computeBestStreak",
+          "params": [
+            "completions"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 34
+        },
+        {
+          "name": "buildStreakHistory",
+          "params": [
+            "completions",
+            "today",
+            "days"
+          ],
+          "returnType": "StreakDay[]",
+          "exported": true,
+          "lineCount": 21
+        },
+        {
+          "name": "buildCalendarMonth",
+          "params": [
+            "year",
+            "month",
+            "tasks",
+            "completions",
+            "today"
+          ],
+          "returnType": "CalendarDay[]",
+          "exported": true,
+          "lineCount": 54
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/seed-data",
+          "specifiers": [
+            "getCategoryColor",
+            "getCategoryLabel"
+          ]
+        },
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskRow",
+            "TaskCompletionRow"
+          ]
+        }
+      ],
+      "exports": [
+        "addDays",
+        "computeCategoryStats",
+        "computeMonthlyData",
+        "countUpcomingTasks",
+        "computeCompletionRate",
+        "computeWeeklyTrend",
+        "countCompletedThisWeek",
+        "countCompletedThisMonth",
+        "computePartnerComparison",
+        "computeMembersComparison",
+        "computeCategoryBreakdown",
+        "computeBestStreak",
+        "buildStreakHistory",
+        "buildCalendarMonth"
+      ],
+      "totalLines": 471,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/task-templates.ts": {
+      "filePath": "src/lib/task-templates.ts",
+      "contentHash": "db5198216ca5f5e2f1a660a48c78b9f6d6fc15065503a07916a3b2e0b9280974",
+      "functions": [],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "TASK_TEMPLATES"
+      ],
+      "totalLines": 88,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/ux-preferences.ts": {
+      "filePath": "src/lib/ux-preferences.ts",
+      "contentHash": "c9d62d3de5ade9a74704fe06c894d727f314c9d51108f46e194d5f1d7c75f6cd",
+      "functions": [
+        {
+          "name": "applyFontToDom",
+          "params": [
+            "font"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "loadPreferences",
+          "params": [],
+          "returnType": "UxPreferences",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "savePreferences",
+          "params": [
+            "prefs"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "tryHaptic",
+          "params": [
+            "pattern"
+          ],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 12
+        },
+        {
+          "name": "shouldPlaySound",
+          "params": [],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 6
+        },
+        {
+          "name": "shouldReduceMotion",
+          "params": [],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 8
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "DEFAULT_PREFS",
+        "FONT_LABELS",
+        "applyFontToDom",
+        "loadPreferences",
+        "savePreferences",
+        "tryHaptic",
+        "shouldPlaySound",
+        "shouldReduceMotion"
+      ],
+      "totalLines": 98,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/weekly-generator.ts": {
+      "filePath": "src/lib/weekly-generator.ts",
+      "contentHash": "c86edf0d94e4aeac0f57ca779c3bd301a0fcec156364897df4d7e4d34dae5e2f",
+      "functions": [
+        {
+          "name": "estimateMinutesFromTitle",
+          "params": [
+            "title"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 22
+        },
+        {
+          "name": "findMatchingTemplate",
+          "params": [
+            "title"
+          ],
+          "returnType": "TaskTemplate | undefined",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "getDayCap",
+          "params": [
+            "dayIndex"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "memberLoad",
+          "params": [
+            "plan",
+            "memberId"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 11
+        },
+        {
+          "name": "generateWeekPlan",
+          "params": [
+            "options"
+          ],
+          "returnType": "WeekPlan",
+          "exported": true,
+          "lineCount": 182
+        },
+        {
+          "name": "getCategoryFromId",
+          "params": [
+            "categoryId"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "getRecurrenceDayForSeed",
+          "params": [
+            "tmpl"
+          ],
+          "returnType": "number | null",
+          "exported": false,
+          "lineCount": 20
+        },
+        {
+          "name": "pickAssignee",
+          "params": [
+            "plan",
+            "members"
+          ],
+          "returnType": "string | null",
+          "exported": false,
+          "lineCount": 8
+        },
+        {
+          "name": "findAlternativeDay",
+          "params": [
+            "plan",
+            "template",
+            "_originalDay"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 27
+        },
+        {
+          "name": "rebalanceAssignments",
+          "params": [
+            "plan",
+            "members"
+          ],
+          "returnType": "void",
+          "exported": false,
+          "lineCount": 30
+        },
+        {
+          "name": "moveTaskInPlan",
+          "params": [
+            "plan",
+            "fromDate",
+            "taskIndex",
+            "toDate"
+          ],
+          "returnType": "WeekPlan",
+          "exported": true,
+          "lineCount": 25
+        },
+        {
+          "name": "removeTaskFromPlan",
+          "params": [
+            "plan",
+            "date",
+            "taskIndex"
+          ],
+          "returnType": "WeekPlan",
+          "exported": true,
+          "lineCount": 13
+        },
+        {
+          "name": "addTaskToPlan",
+          "params": [
+            "plan",
+            "date",
+            "task"
+          ],
+          "returnType": "WeekPlan",
+          "exported": true,
+          "lineCount": 11
+        },
+        {
+          "name": "reassignTaskInPlan",
+          "params": [
+            "plan",
+            "date",
+            "taskIndex",
+            "newAssignee"
+          ],
+          "returnType": "WeekPlan",
+          "exported": true,
+          "lineCount": 14
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./seed-data",
+          "specifiers": [
+            "TASK_TEMPLATES_SEED",
+            "TaskTemplate"
+          ]
+        },
+        {
+          "source": "./auto-scheduler",
+          "specifiers": [
+            "isTemplateDueOnDate",
+            "formatDate",
+            "DIFFICULTY_WEIGHT"
+          ]
+        },
+        {
+          "source": "./types/database",
+          "specifiers": [
+            "TaskRow"
+          ]
+        },
+        {
+          "source": "./zones",
+          "specifiers": [
+            "ZoneDayMapping",
+            "DEFAULT_ZONE_MAPPINGS",
+            "getPreferredDay"
+          ]
+        },
+        {
+          "source": "./categories",
+          "specifiers": [
+            "CategoryKey"
+          ]
+        }
+      ],
+      "exports": [
+        "generateWeekPlan",
+        "moveTaskInPlan",
+        "removeTaskFromPlan",
+        "addTaskToPlan",
+        "reassignTaskInPlan"
+      ],
+      "totalLines": 510,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/weekly-mock-data.ts": {
+      "filePath": "src/lib/weekly-mock-data.ts",
+      "contentHash": "b68c41d5465ad3b8f305605a39f9bfed5a8f1dd9ef500909cb9389eeff0ce9df",
+      "functions": [
+        {
+          "name": "getCategoryFromId",
+          "params": [
+            "categoryId"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 5
+        },
+        {
+          "name": "generateMockWeeklyTasks",
+          "params": [],
+          "returnType": "TaskRow[]",
+          "exported": true,
+          "lineCount": 60
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/types/database",
+          "specifiers": [
+            "TaskRow"
+          ]
+        },
+        {
+          "source": "@/lib/categories",
+          "specifiers": [
+            "CATEGORY_LABELS"
+          ]
+        }
+      ],
+      "exports": [
+        "getCategoryFromId",
+        "generateMockWeeklyTasks"
+      ],
+      "totalLines": 70,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/weekly-wheel.ts": {
+      "filePath": "src/lib/weekly-wheel.ts",
+      "contentHash": "9db1c112690fbe33b4924a8f572370c30b6ab2925b9b8676c5f4e096dbc835cd",
+      "functions": [
+        {
+          "name": "spinSegment",
+          "params": [],
+          "returnType": "WheelSegment",
+          "exported": true,
+          "lineCount": 9
+        },
+        {
+          "name": "currentIsoWeek",
+          "params": [],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "isWheelAvailableTime",
+          "params": [],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 15
+        },
+        {
+          "name": "getOrSpin",
+          "params": [],
+          "returnType": "Promise<SpinResult>",
+          "exported": true,
+          "lineCount": 66
+        },
+        {
+          "name": "redeemSpin",
+          "params": [
+            "spinId"
+          ],
+          "returnType": "Promise<{ ok: true } | { ok: false; error: string }>",
+          "exported": true,
+          "lineCount": 18
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "@/lib/supabase",
+          "specifiers": [
+            "createClient"
+          ]
+        }
+      ],
+      "exports": [
+        "SEGMENTS",
+        "spinSegment",
+        "currentIsoWeek",
+        "isWheelAvailableTime",
+        "getOrSpin",
+        "redeemSpin"
+      ],
+      "totalLines": 168,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/welcome-gift.ts": {
+      "filePath": "src/lib/welcome-gift.ts",
+      "contentHash": "f6bd438a1bc957b82c484577047b4e7390f34e652b1de50dc14fab40566cddf0",
+      "functions": [
+        {
+          "name": "hasClaimedWelcomeGift",
+          "params": [],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "markWelcomeGiftClaimed",
+          "params": [],
+          "returnType": "void",
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "shouldShowWelcomeGift",
+          "params": [],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 6
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "WELCOME_GIFT",
+        "hasClaimedWelcomeGift",
+        "markWelcomeGiftClaimed",
+        "shouldShowWelcomeGift"
+      ],
+      "totalLines": 48,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/whatsapp-messages.ts": {
+      "filePath": "src/lib/whatsapp-messages.ts",
+      "contentHash": "319ed6edf12f7ba3017be3791dcc89d42fe7c3ece9c967c6a520a0d8be5c8d43",
+      "functions": [
+        {
+          "name": "randomPick",
+          "params": [
+            "arr"
+          ],
+          "returnType": "T",
+          "exported": false,
+          "lineCount": 3
+        },
+        {
+          "name": "getHebrewDay",
+          "params": [],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 4
+        },
+        {
+          "name": "estimateTotalMinutes",
+          "params": [
+            "tasks"
+          ],
+          "returnType": "number",
+          "exported": false,
+          "lineCount": 5
+        },
+        {
+          "name": "formatMinutes",
+          "params": [
+            "minutes"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 6
+        },
+        {
+          "name": "buildMorningBrief",
+          "params": [
+            "data"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 42
+        },
+        {
+          "name": "buildEveningSummary",
+          "params": [
+            "data"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 50
+        },
+        {
+          "name": "buildFridayCelebration",
+          "params": [
+            "weeklyCompleted",
+            "weeklyTotal",
+            "streak"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 11
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "buildMorningBrief",
+        "buildEveningSummary",
+        "buildFridayCelebration"
+      ],
+      "totalLines": 201,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/whatsapp.ts": {
+      "filePath": "src/lib/whatsapp.ts",
+      "contentHash": "c1f369fd5428431014a607346b4b06906106abc73b53c592c94bbf449be12d77",
+      "functions": [
+        {
+          "name": "getConfig",
+          "params": [],
+          "exported": false,
+          "lineCount": 9
+        },
+        {
+          "name": "formatPhone",
+          "params": [
+            "phone"
+          ],
+          "returnType": "string",
+          "exported": false,
+          "lineCount": 13
+        },
+        {
+          "name": "extractPhoneFromChatId",
+          "params": [
+            "chatId"
+          ],
+          "returnType": "string",
+          "exported": true,
+          "lineCount": 3
+        },
+        {
+          "name": "sendWhatsAppMessage",
+          "params": [
+            "phone",
+            "message"
+          ],
+          "returnType": "Promise<{ success: boolean; idMessage?: string; error?: string }>",
+          "exported": true,
+          "lineCount": 23
+        }
+      ],
+      "classes": [],
+      "imports": [],
+      "exports": [
+        "extractPhoneFromChatId",
+        "sendWhatsAppMessage"
+      ],
+      "totalLines": 59,
+      "hasStructuralAnalysis": true
+    },
+    "src/lib/zones.ts": {
+      "filePath": "src/lib/zones.ts",
+      "contentHash": "0839c9dafdd33a09a04dedd6717dc131eecdce32f80aef4e340e0a225667ec64",
+      "functions": [
+        {
+          "name": "getZoneInfo",
+          "params": [
+            "zone"
+          ],
+          "exported": true,
+          "lineCount": 8
+        },
+        {
+          "name": "buildZoneDaySummary",
+          "params": [
+            "mappings"
+          ],
+          "returnType": "Array<{ dayIndex: number; dayName: string; zones: Array<{ zone: CategoryKey; icon: string; label: string }> }>",
+          "exported": true,
+          "lineCount": 24
+        },
+        {
+          "name": "getPreferredDay",
+          "params": [
+            "zone",
+            "mappings"
+          ],
+          "returnType": "number",
+          "exported": true,
+          "lineCount": 7
+        },
+        {
+          "name": "loadZoneMappings",
+          "params": [],
+          "returnType": "ZoneDayMapping[]",
+          "exported": true,
+          "lineCount": 10
+        },
+        {
+          "name": "saveZoneMappings",
+          "params": [
+            "mappings"
+          ],
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "isZoneModeEnabled",
+          "params": [],
+          "returnType": "boolean",
+          "exported": true,
+          "lineCount": 4
+        },
+        {
+          "name": "setZoneModeEnabled",
+          "params": [
+            "enabled"
+          ],
+          "exported": true,
+          "lineCount": 4
+        }
+      ],
+      "classes": [],
+      "imports": [
+        {
+          "source": "./categories",
+          "specifiers": [
+            "CATEGORY_LABELS",
+            "CATEGORY_ICONS",
+            "CATEGORY_COLORS",
+            "CategoryKey"
+          ]
+        }
+      ],
+      "exports": [
+        "DEFAULT_ZONE_MAPPINGS",
+        "ZONE_DAY_LABELS",
+        "getZoneInfo",
+        "buildZoneDaySummary",
+        "getPreferredDay",
+        "loadZoneMappings",
+        "saveZoneMappings",
+        "isZoneModeEnabled",
+        "setZoneModeEnabled"
+      ],
+      "totalLines": 158,
+      "hasStructuralAnalysis": true
+    }
+  }
+}
