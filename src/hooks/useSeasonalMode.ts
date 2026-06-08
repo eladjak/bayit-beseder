@@ -142,13 +142,28 @@ export function useSeasonalMode(): SeasonalModeReturn {
       if (!activation || !activeTemplate) return { created: 0, errors: ["לא הופעל מצב עונתי"] };
 
       const supabase = createClient();
+
+      // Tasks are household-scoped (migration 014) — resolve the user's household.
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { created: 0, errors: ["לא מחובר"] };
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("household_id")
+        .eq("id", user.id)
+        .single();
+      if (!profile?.household_id) return { created: 0, errors: ["אין משק בית"] };
+      const householdId = profile.household_id;
+
       const catMap = await buildCategoryMap();
 
       const startDate = new Date(activation.startDate);
       const holidayDate = new Date(activation.holidayDate);
 
       const scheduled = schedulePesachTasks(activeTemplate, startDate, holidayDate, members);
-      const inserts = buildTaskInserts(scheduled, catMap, activeTemplate.id);
+      const inserts = buildTaskInserts(scheduled, catMap, activeTemplate.id).map((t) => ({
+        ...t,
+        household_id: householdId,
+      }));
 
       let created = 0;
       const errors: string[] = [];

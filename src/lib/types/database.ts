@@ -36,6 +36,7 @@ export type Database = {
       tasks: {
         Row: {
           id: string;
+          household_id: string;
           title: string;
           description: string | null;
           category_id: string | null;
@@ -49,6 +50,10 @@ export type Database = {
         };
         Insert: {
           id?: string;
+          // Required (NOT NULL after migration 014). Kept required here as a
+          // compile-time guard so every tasks insert must set it. useTasks.createTask
+          // injects it (its param omits household_id), so UI callers don't pass it.
+          household_id: string;
           title: string;
           description?: string | null;
           category_id?: string | null;
@@ -62,6 +67,7 @@ export type Database = {
         };
         Update: {
           id?: string;
+          household_id?: string;
           title?: string;
           description?: string | null;
           category_id?: string | null;
@@ -73,6 +79,13 @@ export type Database = {
           recurring?: boolean;
         };
         Relationships: [
+          {
+            foreignKeyName: "tasks_household_id_fkey";
+            columns: ["household_id"];
+            isOneToOne: false;
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "tasks_category_id_fkey";
             columns: ["category_id"];

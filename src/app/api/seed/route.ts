@@ -35,10 +35,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Check if tasks already exist
+  // Tasks are household-scoped (migration 014) — resolve the user's household.
+  const { data: seederProfile } = await supabase
+    .from("profiles")
+    .select("household_id")
+    .eq("id", user.id)
+    .single();
+
+  const householdId = seederProfile?.household_id;
+  if (!householdId) {
+    return NextResponse.json({ error: "No household" }, { status: 400 });
+  }
+
+  // Check if tasks already exist FOR THIS HOUSEHOLD (scoped so each household seeds once)
   const { count } = await supabase
     .from("tasks")
-    .select("*", { count: "exact", head: true });
+    .select("*", { count: "exact", head: true })
+    .eq("household_id", householdId);
 
   if (count && count > 0) {
     return NextResponse.json({ seeded: false, message: "Tasks already exist" });
@@ -74,6 +87,7 @@ export async function POST(request: NextRequest) {
   if (body.tasks && Array.isArray(body.tasks) && body.tasks.length > 0) {
     // Custom tasks from wizard
     tasks = body.tasks.map((t, i) => ({
+      household_id: householdId,
       title: t.title,
       category_id: catMap[catNameMap[t.category] ?? "כללי"] ?? catMap["כללי"],
       assigned_to: user.id,
@@ -84,14 +98,14 @@ export async function POST(request: NextRequest) {
   } else {
     // Default tasks (fallback when user skips wizard)
     tasks = [
-      { title: "שטיפת כלים / הפעלת מדיח", category_id: catMap["מטבח"], assigned_to: user.id, due_date: today, points: 10, recurring: true },
-      { title: "ניקוי משטחי עבודה במטבח", category_id: catMap["מטבח"], assigned_to: user.id, due_date: today, points: 5, recurring: true },
-      { title: "הוצאת אשפה", category_id: catMap["מטבח"], due_date: today, points: 5, recurring: true },
-      { title: "סידור מהיר של הסלון", category_id: catMap["סלון"], due_date: today, points: 5, recurring: true },
-      { title: "איוורור הבית (פתיחת חלונות)", category_id: catMap["כללי"], due_date: today, points: 2, recurring: true },
-      { title: "ניקוי כיור אמבטיה", category_id: catMap["אמבטיה"], due_date: today, points: 8, recurring: true },
-      { title: "כביסה - מכונה + תליה", category_id: catMap["כביסה"], due_date: tomorrow, points: 15, recurring: true },
-      { title: "שאיבת אבק", category_id: catMap["סלון"], due_date: tomorrow, points: 15, recurring: true },
+      { household_id: householdId, title: "שטיפת כלים / הפעלת מדיח", category_id: catMap["מטבח"], assigned_to: user.id, due_date: today, points: 10, recurring: true },
+      { household_id: householdId, title: "ניקוי משטחי עבודה במטבח", category_id: catMap["מטבח"], assigned_to: user.id, due_date: today, points: 5, recurring: true },
+      { household_id: householdId, title: "הוצאת אשפה", category_id: catMap["מטבח"], due_date: today, points: 5, recurring: true },
+      { household_id: householdId, title: "סידור מהיר של הסלון", category_id: catMap["סלון"], due_date: today, points: 5, recurring: true },
+      { household_id: householdId, title: "איוורור הבית (פתיחת חלונות)", category_id: catMap["כללי"], due_date: today, points: 2, recurring: true },
+      { household_id: householdId, title: "ניקוי כיור אמבטיה", category_id: catMap["אמבטיה"], due_date: today, points: 8, recurring: true },
+      { household_id: householdId, title: "כביסה - מכונה + תליה", category_id: catMap["כביסה"], due_date: tomorrow, points: 15, recurring: true },
+      { household_id: householdId, title: "שאיבת אבק", category_id: catMap["סלון"], due_date: tomorrow, points: 15, recurring: true },
     ];
   }
 

@@ -105,6 +105,23 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
 
       const supabase = createClient();
 
+      // Tasks are household-scoped (migration 014) — resolve the user's household.
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setState("done");
+        return { created: 0, errors: ["לא מחובר"] };
+      }
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("household_id")
+        .eq("id", user.id)
+        .single();
+      const householdId = profile?.household_id;
+      if (!householdId) {
+        setState("done");
+        return { created: 0, errors: ["אין משק בית"] };
+      }
+
       // Fetch category UUID map from Supabase
       const catMap = await buildCategoryMap();
 
@@ -140,6 +157,7 @@ export function useWeeklyGenerator(): UseWeeklyGeneratorReturn {
         const { error } = await supabase
           .from("tasks")
           .insert({
+            household_id: householdId,
             title: task.title,
             category_id: categoryUuid,
             due_date: date,

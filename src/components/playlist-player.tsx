@@ -22,14 +22,23 @@ async function recordPlaylistCompletion(playlistId: string, playlistName: string
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
+    // Tasks are household-scoped (migration 014) — need the user's household.
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("household_id")
+      .eq("id", user.id)
+      .single();
+    if (!profile?.household_id) return;
+
     // Use a deterministic synthetic task title so we can look it up
     const syntheticTitle = `[פלייליסט] ${playlistName}`;
 
-    // Try to find existing task for this playlist
+    // Try to find existing task for this playlist (within this household)
     const { data: existing } = await supabase
       .from("tasks")
       .select("id")
       .eq("title", syntheticTitle)
+      .eq("household_id", profile.household_id)
       .eq("assigned_to", user.id)
       .maybeSingle();
 
@@ -42,6 +51,7 @@ async function recordPlaylistCompletion(playlistId: string, playlistName: string
       const { data: created, error: createError } = await supabase
         .from("tasks")
         .insert({
+          household_id: profile.household_id,
           title: syntheticTitle,
           description: `פלייליסט ניקיון: ${playlistName}`,
           assigned_to: user.id,
@@ -55,13 +65,6 @@ async function recordPlaylistCompletion(playlistId: string, playlistName: string
       if (createError || !created) return;
       taskId = created.id;
     }
-
-    // Get user's household_id
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("household_id")
-      .eq("id", user.id)
-      .single();
 
     // Insert completion record
     await supabase.from("task_completions").insert({
