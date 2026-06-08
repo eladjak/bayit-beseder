@@ -54,6 +54,7 @@ export function InviteContent() {
     }
 
     async function init() {
+      try {
       // Validate the invite code
       const res = await fetch(`/api/invite?code=${encodeURIComponent(code)}`);
       if (!res.ok) {
@@ -123,6 +124,11 @@ export function InviteContent() {
       }
 
       setPageState("ready_to_join");
+      } catch {
+        // Network / unexpected failure during validation — don't hang on the
+        // loading spinner. Fall back to the graceful "invalid link" screen.
+        setPageState("invalid");
+      }
     }
 
     void init();

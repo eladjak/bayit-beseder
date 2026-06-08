@@ -374,8 +374,8 @@ export default function DashboardPage() {
   );
 
   const handleCompletionFeedback = useCallback(
-    async (feedback: { rating: number; notes: string; photoFile: File | null }) => {
-      if (!profile) return;
+    async (feedback: { rating: number; notes: string; photoFile: File | null }): Promise<boolean> => {
+      if (!profile) return false;
       try {
         const supabase = (await import("@/lib/supabase")).createClient();
         const updates: Record<string, unknown> = {};
@@ -383,14 +383,22 @@ export default function DashboardPage() {
         if (feedback.photoFile) {
           const { uploadTaskPhoto } = await import("@/lib/storage");
           const photoResult = await uploadTaskPhoto(profile.id, completionModal.taskId, feedback.photoFile);
-          if ("url" in photoResult) updates.photo_url = photoResult.url;
+          if ("error" in photoResult) {
+            toast.error(photoResult.error);
+            return false;
+          }
+          updates.photo_url = photoResult.url;
         }
         if (Object.keys(updates).length > 0) {
-          await supabase
+          const { error } = await supabase
             .from("task_completions")
             .update(updates)
             .eq("task_id", completionModal.taskId)
             .eq("user_id", profile.id);
+          if (error) {
+            toast.error("שגיאה בשמירת המשוב");
+            return false;
+          }
         }
         if (feedback.rating > 0) {
           const ratings = JSON.parse(localStorage.getItem("bayit-task-ratings") ?? "{}");
@@ -400,10 +408,12 @@ export default function DashboardPage() {
         if (feedback.rating > 0 || feedback.notes || feedback.photoFile) {
           toast.success("המשוב נשמר!");
         }
+        setCompletionModal({ isOpen: false, taskId: "", taskTitle: "" });
+        return true;
       } catch {
         toast.error("שגיאה בשמירת המשוב");
+        return false;
       }
-      setCompletionModal({ isOpen: false, taskId: "", taskTitle: "" });
     },
     [profile, completionModal.taskId]
   );

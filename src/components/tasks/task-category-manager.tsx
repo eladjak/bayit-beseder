@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Plus, Pencil, Trash2, ArrowUp, ArrowDown, Check } from "lucide-react";
 import { toast } from "sonner";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
-import type { TaskCategoryRow } from "@/hooks/useTaskCategories";
+import type { TaskCategoryAddResult, TaskCategoryRow } from "@/hooks/useTaskCategories";
 
 const COLOR_OPTIONS = [
   "#F59E0B", "#3B82F6", "#8B5CF6", "#EC4899",
@@ -21,7 +21,7 @@ const ICON_OPTIONS = [
 
 interface TaskCategoryManagerProps {
   categories: TaskCategoryRow[];
-  onAdd: (name: string, icon: string, color: string) => Promise<void>;
+  onAdd: (name: string, icon: string, color: string) => Promise<TaskCategoryAddResult>;
   onUpdate: (id: string, updates: { name?: string; icon?: string; color?: string }) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onReorder: (orderedIds: string[]) => Promise<void>;
@@ -62,7 +62,11 @@ export function TaskCategoryManager({
 
   const handleAdd = async () => {
     if (!newName.trim()) return;
-    await onAdd(newName.trim(), newIcon, newColor);
+    const result = await onAdd(newName.trim(), newIcon, newColor);
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
+    }
     setNewName("");
     setNewIcon("✨");
     setNewColor("#6366f1");

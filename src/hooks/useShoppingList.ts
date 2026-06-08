@@ -37,6 +37,14 @@ export interface ShoppingItem {
   created_at: string;
 }
 
+export type ShoppingAddItemResult =
+  | { ok: true }
+  | {
+      ok: false;
+      reason: "not_authenticated" | "no_household" | "insert_failed" | "unexpected";
+      error: string;
+    };
+
 // Fallback color/icon maps for categories that don't have dynamic data yet
 export const CATEGORY_COLORS: Record<string, string> = {
   "מזון": "#22C55E",
@@ -85,7 +93,12 @@ const STORAGE_KEY = "bayit-beseder-shopping-list";
 interface UseShoppingListReturn {
   items: ShoppingItem[];
   loading: boolean;
-  addItem: (title: string, category: ShoppingCategory, quantity?: number, unit?: string) => void;
+  addItem: (
+    title: string,
+    category: ShoppingCategory,
+    quantity?: number,
+    unit?: string
+  ) => Promise<ShoppingAddItemResult>;
   toggleItem: (id: string) => void;
   removeItem: (id: string) => void;
   editItem: (itemId: string, updates: { title?: string; quantity?: number; unit?: string; category?: string }) => Promise<void>;
@@ -246,7 +259,12 @@ export function useShoppingList(): UseShoppingListReturn {
   // ---- CRUD operations ----
 
   const addItem = useCallback(
-    async (title: string, category: ShoppingCategory, quantity?: number, unit?: string) => {
+    async (
+      title: string,
+      category: ShoppingCategory,
+      quantity?: number,
+      unit?: string
+    ): Promise<ShoppingAddItemResult> => {
       if (usingMockRef.current) {
         const newItem: ShoppingItem = {
           id: `s${Date.now()}`,
@@ -264,15 +282,21 @@ export function useShoppingList(): UseShoppingListReturn {
           return updated;
         });
         trackEvent("shopping_add");
-        return;
+        return { ok: true };
       }
 
       try {
         const supabase = createClient();
 
         // Get current user's household_id
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          return {
+            ok: false,
+            reason: "not_authenticated",
+            error: "צריך להתחבר כדי להוסיף פריטים לרשימה.",
+          };
+        }
 
         const { data: profile } = await supabase
           .from("profiles")
@@ -291,9 +315,15 @@ export function useShoppingList(): UseShoppingListReturn {
           }
         }
 
-        if (!householdId) return;
+        if (!householdId) {
+          return {
+            ok: false,
+            reason: "no_household",
+            error: "לא נמצא בית פעיל להוספת הפריט.",
+          };
+        }
 
-        await supabase.from("shopping_items").insert({
+        const { error } = await supabase.from("shopping_items").insert({
           household_id: householdId,
           title,
           category,
@@ -301,25 +331,22 @@ export function useShoppingList(): UseShoppingListReturn {
           unit: unit ?? null,
           added_by: user.id,
         });
+        if (error) {
+          return {
+            ok: false,
+            reason: "insert_failed",
+            error: "לא הצלחנו להוסיף את הפריט. נסו שוב.",
+          };
+        }
         trackEvent("shopping_add");
         // Realtime subscription will handle the state update
+        return { ok: true };
       } catch {
-        // If Supabase insert fails, add locally as fallback
-        const newItem: ShoppingItem = {
-          id: `s${Date.now()}`,
-          title,
-          quantity,
-          unit,
-          category,
-          checked: false,
-          added_by: "אני",
-          created_at: new Date().toISOString(),
+        return {
+          ok: false,
+          reason: "unexpected",
+          error: "לא הצלחנו להוסיף את הפריט. נסו שוב.",
         };
-        setItems((prev) => {
-          const updated = [newItem, ...prev];
-          saveToLocalStorage(updated);
-          return updated;
-        });
       }
     },
     [saveToLocalStorage]

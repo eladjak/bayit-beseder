@@ -14,6 +14,14 @@ export interface TaskCategoryRow {
   created_at: string;
 }
 
+export type TaskCategoryAddResult =
+  | { ok: true }
+  | {
+      ok: false;
+      reason: "feature_blocked" | "no_household" | "db_error" | "unexpected";
+      error: string;
+    };
+
 /** Default categories seeded from the hardcoded categories.ts definitions */
 const DEFAULT_TASK_CATEGORIES: Omit<TaskCategoryRow, "id" | "household_id" | "created_at">[] = [
   { name: "מטבח", icon: "🍳", color: "#F59E0B", sort_order: 0 },
@@ -30,7 +38,7 @@ interface UseTaskCategoriesReturn {
   taskCategories: TaskCategoryRow[];
   loading: boolean;
   canAddCustomCategories: boolean;
-  addTaskCategory: (name: string, icon: string, color: string) => Promise<void>;
+  addTaskCategory: (name: string, icon: string, color: string) => Promise<TaskCategoryAddResult>;
   updateTaskCategory: (id: string, updates: { name?: string; icon?: string; color?: string }) => Promise<void>;
   deleteTaskCategory: (id: string) => Promise<void>;
   reorderTaskCategories: (orderedIds: string[]) => Promise<void>;
@@ -180,28 +188,54 @@ export function useTaskCategories(): UseTaskCategoriesReturn {
   }, []);
 
   const addTaskCategory = useCallback(
-    async (name: string, icon: string, color: string) => {
+    async (name: string, icon: string, color: string): Promise<TaskCategoryAddResult> => {
       // Custom categories are a plus/family feature
       if (!canUse("custom_categories")) {
         // Callers should check canAddCustomCategories first and show UpgradePrompt.
         // This is a safety guard in case they don't.
-        return;
+        return {
+          ok: false,
+          reason: "feature_blocked",
+          error: "קטגוריות מותאמות זמינות רק בתוכנית שתומכת בפיצ'ר הזה.",
+        };
       }
-      const householdId = await getHouseholdId();
-      if (!householdId) return;
+      try {
+        const householdId = await getHouseholdId();
+        if (!householdId) {
+          return {
+            ok: false,
+            reason: "no_household",
+            error: "לא נמצא בית פעיל להוספת קטגוריה.",
+          };
+        }
 
-      const maxOrder = taskCategories.reduce(
-        (max, c) => Math.max(max, c.sort_order),
-        -1
-      );
-      await catTable().insert({
-        household_id: householdId,
-        name,
-        icon,
-        color,
-        sort_order: maxOrder + 1,
-      });
-      // Realtime will update state
+        const maxOrder = taskCategories.reduce(
+          (max, c) => Math.max(max, c.sort_order),
+          -1
+        );
+        const { error } = await catTable().insert({
+          household_id: householdId,
+          name,
+          icon,
+          color,
+          sort_order: maxOrder + 1,
+        });
+        if (error) {
+          return {
+            ok: false,
+            reason: "db_error",
+            error: "לא הצלחנו להוסיף את הקטגוריה. נסו שוב.",
+          };
+        }
+        // Realtime will update state
+        return { ok: true };
+      } catch {
+        return {
+          ok: false,
+          reason: "unexpected",
+          error: "לא הצלחנו להוסיף את הקטגוריה. נסו שוב.",
+        };
+      }
     },
     [taskCategories, getHouseholdId, canUse] // eslint-disable-line react-hooks/exhaustive-deps
   );

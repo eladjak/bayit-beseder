@@ -15,7 +15,7 @@ interface TaskCompletionModalProps {
     rating: number;
     notes: string;
     photoFile: File | null;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
 }
 
 export function TaskCompletionModal({
@@ -57,13 +57,18 @@ export function TaskCompletionModal({
 
   const handleSubmit = useCallback(async () => {
     setSubmitting(true);
-    haptic("success");
-    await onSubmit({ rating, notes, photoFile });
-    // Reset state
-    setRating(0);
-    setNotes("");
-    handleRemovePhoto();
-    setSubmitting(false);
+    try {
+      const saved = await onSubmit({ rating, notes, photoFile });
+      if (saved) {
+        haptic("success");
+        // Reset state
+        setRating(0);
+        setNotes("");
+        handleRemovePhoto();
+      }
+    } finally {
+      setSubmitting(false);
+    }
   }, [rating, notes, photoFile, onSubmit, handleRemovePhoto]);
 
   const handleSkip = useCallback(() => {

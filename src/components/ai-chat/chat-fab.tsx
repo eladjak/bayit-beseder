@@ -38,7 +38,7 @@ export function ChatFAB({ onClick }: ChatFABProps) {
   const { t } = useTranslation();
 
   return (
-    <div className="fixed bottom-24 right-4 z-20">
+    <div className="fixed bottom-40 end-4 z-20">
       {/* Attention pulse ring — rendered once on mount */}
       <motion.span
         className="absolute inset-0 rounded-full gradient-primary pointer-events-none"

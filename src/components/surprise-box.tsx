@@ -78,7 +78,7 @@ export function SurpriseBox({ trigger = 0 }: Props) {
           onClick={handleOpen}
           disabled={pending}
           aria-label="פתח את קופסת ההפתעה היומית"
-          className="alopik-brand-gradient alopik-shimmer fixed bottom-44 end-4 z-40 size-14 rounded-full text-white shadow-xl flex items-center justify-center hover:brightness-110 active:scale-95 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
+          className="alopik-brand-gradient alopik-shimmer fixed bottom-56 end-4 z-40 size-14 rounded-full text-white shadow-xl flex items-center justify-center hover:brightness-110 active:scale-95 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
         >
           <Gift className="size-7" aria-hidden="true" />
           <Sparkles

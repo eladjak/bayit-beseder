@@ -224,9 +224,13 @@ export default function ShoppingPage() {
     setShowForm(true);
   }
 
-  function handleAdd() {
+  async function handleAdd() {
     if (!newTitle.trim()) return;
-    addItem(newTitle.trim(), newCategory);
+    const result = await addItem(newTitle.trim(), newCategory);
+    if (!result.ok) {
+      toast.error(result.error);
+      return;
+    }
     haptic("success");
     toast.success(t("shopping.itemAdded"));
     setNewTitle("");
@@ -622,11 +626,15 @@ export default function ShoppingPage() {
                   {suggestions.map((s) => (
                     <button
                       key={`${s.name}-${s.category}`}
-                      onClick={() => {
+                      onClick={async () => {
                         const category = orderedCategoryNames.includes(s.category)
                           ? s.category
                           : newCategory;
-                        addItem(s.name, category);
+                        const result = await addItem(s.name, category);
+                        if (!result.ok) {
+                          toast.error(result.error);
+                          return;
+                        }
                         haptic("success");
                         toast.success(t("shopping.itemAdded"));
                         setNewTitle("");

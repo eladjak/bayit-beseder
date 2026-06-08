@@ -283,15 +283,17 @@ function PartnerComparisonSection({
             <div className="flex rounded-full h-2.5 overflow-hidden bg-border/30">
               <motion.div
                 className="bg-primary rounded-r-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${myPct}%` }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
+                style={{ width: `${myPct}%`, transformOrigin: "right" }}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
               />
               <motion.div
                 className="bg-primary-light rounded-l-full"
-                initial={{ width: 0 }}
-                animate={{ width: `${partnerPct}%` }}
-                transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+                style={{ width: `${partnerPct}%`, transformOrigin: "right" }}
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.2, ease: "easeOut", delay: 0.03 }}
               />
             </div>
             <div className="flex justify-between text-[10px] text-muted">
@@ -369,9 +371,10 @@ function MembersComparisonSection({
                 <motion.div
                   key={m.userId}
                   className={`${BAR_COLORS[i % BAR_COLORS.length]} ${i === 0 ? "rounded-r-full" : ""} ${i === members.length - 1 ? "rounded-l-full" : ""}`}
-                  initial={{ width: 0 }}
-                  animate={{ width: `${pct}%` }}
-                  transition={{ duration: 0.6, ease: "easeOut", delay: i * 0.08 }}
+                  style={{ width: `${pct}%`, transformOrigin: "right" }}
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.2, ease: "easeOut", delay: i * 0.03 }}
                 />
               );
             })}

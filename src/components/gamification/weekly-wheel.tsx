@@ -100,7 +100,7 @@ export function WeeklyWheel() {
             handleSpin();
           }}
           aria-label="פתח את גלגל המזל השבועי"
-          className="fixed bottom-64 end-4 z-40 size-14 rounded-full bg-gradient-to-br alopik-brand-gradient alopik-shimmer text-white shadow-xl flex items-center justify-center hover:brightness-110 active:scale-95 transition-transform duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
+          className="fixed bottom-72 end-4 z-40 size-14 rounded-full bg-gradient-to-br alopik-brand-gradient alopik-shimmer text-white shadow-xl flex items-center justify-center hover:brightness-110 active:scale-95 transition-transform duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
         >
           <span aria-hidden="true" className="text-2xl">🎡</span>
         </button>

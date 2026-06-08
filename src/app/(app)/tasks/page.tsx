@@ -649,7 +649,10 @@ export default function TasksPage() {
               <button
                 onClick={() => {
                   dismissTasksTip();
-                  if (hasDbTasks) {
+                  // Authenticated users (even with zero tasks yet) can always add
+                  // their first task. The demo "login to add" toast is only for
+                  // genuinely logged-out visitors browsing the mock list.
+                  if (hasDbTasks || profile) {
                     setShowAddForm((prev) => !prev);
                   } else {
                     toast(t("tasks.loginToAdd"));
