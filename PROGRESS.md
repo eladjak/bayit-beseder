@@ -583,3 +583,6 @@ Applied: 001, 001_initial_schema, 002, 003, 004, 005, 006, 007, 008, 009
 - Push notification reliability
 - Performance: lazy-load more heavy components
 - Landing page A/B test variations
+
+### 11.6.2026 — מעבר שיפורים רוחבי (Fable-5 sweep)
+- tsc ✓0 · branch `chore/next-16.2.9-security` — next ^16.2.0→16.2.9, build ירוק, ממתין ל-merge אחרי preview (עץ העבודה נשאר עם 16 קבצים מלוכלכים — לא עורבבו) · חוב lint: 118 בעיות (לא טופל — עץ מלוכלך).
