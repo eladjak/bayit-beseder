@@ -586,3 +586,11 @@ Applied: 001, 001_initial_schema, 002, 003, 004, 005, 006, 007, 008, 009
 
 ### 11.6.2026 — מעבר שיפורים רוחבי (Fable-5 sweep)
 - tsc ✓0 · branch `chore/next-16.2.9-security` — next ^16.2.0→16.2.9, build ירוק, ממתין ל-merge אחרי preview (עץ העבודה נשאר עם 16 קבצים מלוכלכים — לא עורבבו) · חוב lint: 118 בעיות (לא טופל — עץ מלוכלך).
+
+---
+
+## 2026-06-11 — apps-finish sweep (Fable-5 / Claude Opus 4.8)
+- **lint:** fixed 2 `react/no-unescaped-entities` errors in `print-tasks.tsx` (Hebrew gershayim → `{'"'}`, render identical). Commit `ac1546a` on master (build green). 
+- **audit:** clean (0 high/critical) — already handled by today's earlier next→16.2.9 bump (`4b76b30`/`6dfeda3`). tsc 0.
+- **NOT touched:** 45 remaining eslint errors = React-Compiler heuristics (set-state-in-effect ×23, refs ×7, memoization ×4) + 9 `no-explicit-any` + 1 `no-html-link-for-pages` (behavioral, live site) — out of scope for a safe types/lint sweep.
+- **Needs Elad (deploy/decision):** push auth-gating + invite-RLS fix `d3a4a57` to prod (Elad's tap) · run irreversible migration **014_tasks_household_scope** on a Supabase branch first then prod · set `SUMIT_WEBHOOK_SECRET` in Vercel before Sumit billing goes live · rotate Sumit API token · quarantine stale `001_initial_schema.sql` decoy.
