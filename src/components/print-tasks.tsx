@@ -276,9 +276,9 @@ export function PrintTasks({ tasks, categories, members, houseName }: PrintTasks
         {/* Footer */}
         <footer style={footerStyle}>
           <span>
-            {totalRooms} חדרים · {totalTasks} משימות סה"כ
+            {totalRooms} חדרים · {totalTasks} משימות סה{'"'}כ
           </span>
-          <span>נוצר ע"י בית בסדר | bayitbeseder.com</span>
+          <span>נוצר ע{'"'}י בית בסדר | bayitbeseder.com</span>
         </footer>
       </div>
     </>
