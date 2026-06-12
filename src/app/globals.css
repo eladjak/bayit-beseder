@@ -515,10 +515,29 @@ textarea:focus-visible {
 @keyframes bbBob { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-5px) rotate(1deg); } }
 .bb-bob { animation: bbBob 4s ease-in-out infinite; }
 
+/* Logo/mascot entrance — fade + gentle scale, plays once per full page load.
+   Pattern: ~/.claude/docs/logo-animation-pattern.md (image-mark variant).
+   fill-mode MUST be "backwards" (not both/forwards) so the finished animation
+   never blocks later transforms (hover/idle bob) at animation priority. */
+@keyframes bbLogoEnter {
+  /* "to" omits opacity on purpose — it interpolates to the element's own
+     base opacity (the mascot uses Tailwind opacity-95), avoiding an end jump. */
+  from { opacity: 0; transform: scale(0.92); }
+  to   { transform: scale(1); }
+}
+.bb-logo-enter { animation: bbLogoEnter 450ms ease-out backwards; }
+/* Combined with the idle bob: entrance plays first, bob takes over at 450ms
+   (bbBob has no backwards fill, so it stays inert during its delay). */
+.bb-bob.bb-logo-enter {
+  animation:
+    bbLogoEnter 450ms ease-out backwards,
+    bbBob 4s ease-in-out 450ms infinite;
+}
+
 /* Illustration helper — soft rounded frame so raster illustrations sit warmly */
 .bb-illus { border-radius: 18px; object-fit: cover; }
 
 /* Warm focus ring (keeps a11y, less clinical than pure indigo) */
 @media (prefers-reduced-motion: reduce) {
-  .bb-bob, .bb-pop { animation: none; transition: none; }
+  .bb-bob, .bb-pop, .bb-logo-enter { animation: none; transition: none; }
 }

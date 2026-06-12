@@ -36,13 +36,13 @@ export function DashboardHeader({
         width={72}
         height={72}
         sizes="72px"
-        className="bb-bob pointer-events-none absolute top-3 left-3 z-0 w-14 h-14 rounded-2xl object-cover border border-white/40 shadow-lg shadow-black/15 opacity-95"
+        className="bb-bob bb-logo-enter pointer-events-none absolute top-3 left-3 z-0 w-14 h-14 rounded-2xl object-cover border border-white/40 shadow-lg shadow-black/15 opacity-95"
       />
       <div className="text-center relative z-10">
         {/* User avatar in header */}
         <div className="flex justify-center mb-3">
           {avatarUrl ? (
-            <div className="relative">
+            <div className="bb-logo-enter relative">
               <Image
                 src={avatarUrl}
                 alt={displayName}
@@ -54,7 +54,7 @@ export function DashboardHeader({
               <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-success rounded-full border-2 border-white" />
             </div>
           ) : (
-            <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-lg shadow-black/10">
+            <div className="bb-logo-enter w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20 shadow-lg shadow-black/10">
               <span className="text-xl">
                 {displayName.charAt(0)}
               </span>
