@@ -594,3 +594,19 @@ Applied: 001, 001_initial_schema, 002, 003, 004, 005, 006, 007, 008, 009
 - **audit:** clean (0 high/critical) — already handled by today's earlier next→16.2.9 bump (`4b76b30`/`6dfeda3`). tsc 0.
 - **NOT touched:** 45 remaining eslint errors = React-Compiler heuristics (set-state-in-effect ×23, refs ×7, memoization ×4) + 9 `no-explicit-any` + 1 `no-html-link-for-pages` (behavioral, live site) — out of scope for a safe types/lint sweep.
 - **Needs Elad (deploy/decision):** push auth-gating + invite-RLS fix `d3a4a57` to prod (Elad's tap) · run irreversible migration **014_tasks_household_scope** on a Supabase branch first then prod · set `SUMIT_WEBHOOK_SECRET` in Vercel before Sumit billing goes live · rotate Sumit API token · quarantine stale `001_initial_schema.sql` decoy.
+
+## 2026-06-12 — GEO/AEO sweep (autonomous Shabbat task)
+- geo-scan (self-hosted scanner): score raised to >=95 (see commit "feat(seo)" of this date)
+- Zero-risk changes only: head/meta/JSON-LD/static files; app logic untouched
+
+## 2026-06-12 — Deep-iteration i18n+UX sweep (autonomous Shabbat loop, commit `9f820bb`, PUSHED)
+**Definition-of-done feature-completeness pass on non-payment/non-auth-deploy surfaces.** First mapped the Codex 2026-06-06 audit (18 findings) against current master: CRITICAL #1 (auth-gate `allowDemo={false}`), #2 (invite RLS), #3 (task scoping) all already shipped/verified per LAUNCH-2026-06-08.md; #10 FAB overlap resolved (ChatFAB `bottom-40` vs QuickLove `bottom-24`, stacked); #16 reduced-motion covered by `MotionConfig reducedMotion="user"` in `(app)/layout.tsx`; #18 stats progress bars already `scaleX`/0.2s. So the Codex table is closed.
+- **NEW gaps found + fixed (i18n — untranslated Hebrew rendered even in EN mode):**
+  - Fairness Meter, the flagship moat feature — hardcoded headers/labels in `stats/page.tsx` (×2 sections) + dashboard `fairness-balance-meter.tsx` → `t()` keys (he+en).
+  - Settings section headers (UX prefs / companion / backgrounds) + page `<h1>` → `t()`.
+  - Dashboard `playlist-card`, `partner-status` manage-members link, `monthly-calendar` legend → `t()`.
+- **Misleading-UI fix:** settings `languageSoon` note said "English coming soon, app stays Hebrew" — but EN interface is fully live (963-key en.json + working toggle). Rewritten to a truthful note (interface is in English; some AI-generated content may still be Hebrew).
+- **Animation polish:** `fairness-balance-meter` segmented bar dropped `transition-[width] duration-500` (layout-thrash; width is data-driven, no anim needed).
+- **Gates:** tsc 0 · `bun run build` green (all routes) · he/en parity 963=963, zero missing both ways · prod 200 on /, /settings, /stats, /dashboard, /login · GEO-scan **100/100** (unchanged) · all 13 new keys resolve in both locales.
+- **Left for a future session (documented, not forced):** `coaching-insight.tsx` still has hardcoded Hebrew tied to the `COACHING_STYLE_LABELS` shared lib constant — partial translation would produce a worse mixed-language result, so deferred to a dedicated coaching-i18n pass. Pervasive `animate={{ height: "auto" }}` accordions + `animate={{ width }}` progress bars across weekly/onboarding/emergency are framer-driven (so MotionConfig already disables them for reduced-motion); converting to transform-safe risks visual regressions across many screens — left as polish-not-broken.
+- **Still gated on Elad (unchanged from 6-11 entry):** push auth/invite `d3a4a57` · run migration 014 on Supabase branch then prod · set `SUMIT_WEBHOOK_SECRET` in Vercel · rotate Sumit token · quarantine `001_initial_schema.sql` decoy. NOT touched this session per mandate.
