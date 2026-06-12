@@ -539,5 +539,7 @@ textarea:focus-visible {
 
 /* Warm focus ring (keeps a11y, less clinical than pure indigo) */
 @media (prefers-reduced-motion: reduce) {
-  .bb-bob, .bb-pop, .bb-logo-enter { animation: none; transition: none; }
+  /* .bb-bob.bb-logo-enter repeated here: the compound selector (0-2-0) would
+     otherwise out-rank these single-class rules — media queries add no specificity */
+  .bb-bob, .bb-pop, .bb-logo-enter, .bb-bob.bb-logo-enter { animation: none; transition: none; }
 }
