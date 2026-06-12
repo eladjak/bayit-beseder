@@ -9,6 +9,9 @@
   },
   "settings": {
     "title": "הגדרות",
+    "uxPreferencesTitle": "העדפות חוויה",
+    "companionTitle": "החבר/ה לדרך 🐾",
+    "backgroundsTitle": "רקעים",
     "profile": "פרופיל",
     "household": "בית",
     "notifications": "התראות",
@@ -79,7 +82,7 @@
       "themeDark": "כהה",
       "themeSystem": "מערכת",
       "languageTitle": "שפה",
-      "languageSoon": "English translation is coming soon. The app will remain in Hebrew for now."
+      "languageSoon": "הממשק זמין באנגלית. חלק מהתוכן שנוצר על־ידי ה־AI עשוי עדיין להופיע בעברית."
     },
     "themeCustomizer": {
       "title": "ערכת צבעים",
@@ -211,6 +214,14 @@
     "refresh": "רענן"
   },
   "dashboard": {
+    "fairnessMeterTitle": "מאזן השבוע",
+    "fairnessMeterSubtitle": "איך התחלק העומס בבית — 7 ימים אחרונים",
+    "fairnessMeterAria": "מאזן ההוגנות של השבוע",
+    "fairnessMeterPercent": "אחוז",
+    "manageMembers": "ניהול חברי הבית",
+    "legendCompleted": "הושלם",
+    "legendPending": "ממתין",
+    "tasksWord": "משימות",
     "goodMorning": "בוקר טוב",
     "goodAfternoon": "צהריים טובים",
     "goodEvening": "ערב טוב",
@@ -514,6 +525,9 @@
     "completionsCount": "השלמות",
     "dayLabel": "יום",
     "tasksLabel": "משימות",
+    "fairnessTitle": "⚖️ השבוע — מי עשה מה?",
+    "fairnessThisWeek": "השבוע:",
+    "fairnessThisMonth": "החודש:",
     "advancedStats": "סטטיסטיקות מתקדמות",
     "weeklyTrendTitle": "מגמת השלמות — 4 שבועות",
     "myCompletions": "אני",
@@ -719,6 +733,7 @@
   },
   "playlists": {
     "title": "פלייליסטים 🎵",
+    "cardTitle": "פלייליסטים",
     "subtitle": "שגרות ניקיון מודרכות עם טיימר",
     "imageAlt": "פלייליסטים לניקיון",
     "tasks": "משימות",

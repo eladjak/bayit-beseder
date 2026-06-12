@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export function PlaylistCard() {
+  const { t } = useTranslation();
   return (
     <Link
       href="/playlists"
@@ -12,10 +14,10 @@ export function PlaylistCard() {
         <span className="text-lg">🎵</span>
       </div>
       <div className="flex-1 text-right">
-        <p className="font-semibold text-foreground text-sm">פלייליסטים</p>
-        <p className="text-[11px] text-muted">שגרות ניקיון מודרכות עם טיימר</p>
+        <p className="font-semibold text-foreground text-sm">{t("playlists.cardTitle")}</p>
+        <p className="text-[11px] text-muted">{t("playlists.subtitle")}</p>
       </div>
-      <span className="text-muted text-xs group-hover:text-primary transition-colors">←</span>
+      <span className="text-muted text-xs group-hover:text-primary transition-colors" aria-hidden="true">←</span>
     </Link>
   );
 }

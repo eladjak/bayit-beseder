@@ -412,7 +412,7 @@ export default function SettingsPage() {
     <div className="space-y-4 bg-background min-h-dvh" dir="rtl">
       {/* Header with gradient */}
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 text-center overflow-hidden">
-        <h1 className="text-xl font-bold text-white tracking-tight relative z-10">⚙️ הגדרות</h1>
+        <h1 className="text-xl font-bold text-white tracking-tight relative z-10">⚙️ {t("settings.title")}</h1>
       </div>
 
       <div className="px-4 space-y-4">
@@ -733,19 +733,19 @@ export default function SettingsPage() {
 
         {/* Alopik v2 Phase 2 #6 — 4-axis UX preferences (independent of theme): Haptics / Sounds / Notifications / Night-mode */}
         <div className="space-y-3">
-          <h2 className="text-base font-bold text-gray-900 px-2">העדפות חוויה</h2>
+          <h2 className="text-base font-bold text-gray-900 px-2">{t("settings.uxPreferencesTitle")}</h2>
           <UxPreferencesPanel />
         </div>
 
         {/* Alopik v2 Phase 3 #7 — Pet collection */}
         <div id="pets" className="space-y-3">
-          <h2 className="text-base font-bold text-gray-900 px-2">החבר/ה לדרך 🐾</h2>
+          <h2 className="text-base font-bold text-gray-900 px-2">{t("settings.companionTitle")}</h2>
           <PetSelector currentStreak={profile?.streak ?? 0} />
         </div>
 
         {/* Alopik v2 Phase 3 #8 — Background themes */}
         <div id="backgrounds" className="space-y-3">
-          <h2 className="text-base font-bold text-gray-900 px-2">רקעים</h2>
+          <h2 className="text-base font-bold text-gray-900 px-2">{t("settings.backgroundsTitle")}</h2>
           <BackgroundSelector currentStreak={profile?.streak ?? 0} />
         </div>
 

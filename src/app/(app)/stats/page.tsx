@@ -253,7 +253,7 @@ function PartnerComparisonSection({
     <div className="card-elevated p-4">
       <div className="flex items-center gap-2 mb-3">
         <Users className="w-4 h-4 text-primary" />
-        <h2 className="font-semibold text-sm">⚖️ השבוע — מי עשה מה?</h2>
+        <h2 className="font-semibold text-sm">{t("stats.fairnessTitle")}</h2>
       </div>
 
       {/* Bar comparison */}
@@ -308,13 +308,13 @@ function PartnerComparisonSection({
           <div className="flex items-center gap-1.5">
             <TrendingUp className="w-3 h-3 text-success" />
             <span className="text-[11px] text-muted">
-              השבוע: <span className="font-medium text-foreground">{weeklyCompletedTotal}</span>
+              {t("stats.fairnessThisWeek")} <span className="font-medium text-foreground">{weeklyCompletedTotal}</span>
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <TrendingUp className="w-3 h-3 text-primary" />
             <span className="text-[11px] text-muted">
-              החודש: <span className="font-medium text-foreground">{monthlyCompletedTotal}</span>
+              {t("stats.fairnessThisMonth")} <span className="font-medium text-foreground">{monthlyCompletedTotal}</span>
             </span>
           </div>
         </div>
@@ -347,7 +347,7 @@ function MembersComparisonSection({
     <div className="card-elevated p-4">
       <div className="flex items-center gap-2 mb-3">
         <Users className="w-4 h-4 text-primary" />
-        <h2 className="font-semibold text-sm">⚖️ השבוע — מי עשה מה?</h2>
+        <h2 className="font-semibold text-sm">{t("stats.fairnessTitle")}</h2>
       </div>
 
       {/* Per-member counts */}

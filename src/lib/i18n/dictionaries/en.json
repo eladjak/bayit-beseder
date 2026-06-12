@@ -9,6 +9,9 @@
   },
   "settings": {
     "title": "Settings",
+    "uxPreferencesTitle": "Experience Preferences",
+    "companionTitle": "Your Companion 🐾",
+    "backgroundsTitle": "Backgrounds",
     "profile": "Profile",
     "household": "Household",
     "notifications": "Notifications",
@@ -79,7 +82,7 @@
       "themeDark": "Dark",
       "themeSystem": "System",
       "languageTitle": "Language",
-      "languageSoon": "English translation is coming soon. The app will remain in Hebrew for now."
+      "languageSoon": "The interface is available in English. Some AI-generated content may still appear in Hebrew."
     },
     "themeCustomizer": {
       "title": "Color Theme",
@@ -211,6 +214,14 @@
     "refresh": "Refresh"
   },
   "dashboard": {
+    "fairnessMeterTitle": "This Week's Balance",
+    "fairnessMeterSubtitle": "How the household load split — last 7 days",
+    "fairnessMeterAria": "This week's fairness balance",
+    "fairnessMeterPercent": "percent",
+    "manageMembers": "Manage household members",
+    "legendCompleted": "Completed",
+    "legendPending": "Pending",
+    "tasksWord": "tasks",
     "goodMorning": "Good morning",
     "goodAfternoon": "Good afternoon",
     "goodEvening": "Good evening",
@@ -514,6 +525,9 @@
     "completionsCount": "completions",
     "dayLabel": "Day",
     "tasksLabel": "tasks",
+    "fairnessTitle": "⚖️ This Week — Who Did What?",
+    "fairnessThisWeek": "This week:",
+    "fairnessThisMonth": "This month:",
     "advancedStats": "Advanced Statistics",
     "weeklyTrendTitle": "Completion Trend — 4 Weeks",
     "myCompletions": "Me",
@@ -719,6 +733,7 @@
   },
   "playlists": {
     "title": "Playlists 🎵",
+    "cardTitle": "Playlists",
     "subtitle": "Guided cleaning routines with timer",
     "imageAlt": "Cleaning playlists",
     "tasks": "tasks",

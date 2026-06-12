@@ -9,6 +9,7 @@
 import { motion } from "framer-motion";
 import { Scale } from "lucide-react";
 import { computeFairnessBalance } from "@/lib/fairness-balance";
+import { useTranslation } from "@/hooks/useTranslation";
 import type { TaskCompletionRow } from "@/lib/types/database";
 
 const BAR_COLORS = ["bg-primary", "bg-violet-400", "bg-amber-400", "bg-emerald-400", "bg-rose-400", "bg-sky-400"];
@@ -21,6 +22,7 @@ interface FairnessBalanceMeterProps {
 }
 
 export function FairnessBalanceMeter({ completions, members, today }: FairnessBalanceMeterProps) {
+  const { t } = useTranslation();
   const balance = computeFairnessBalance(completions, members, today);
   if (!balance.show) return null;
 
@@ -30,26 +32,26 @@ export function FairnessBalanceMeter({ completions, members, today }: FairnessBa
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className="bb-card p-4"
-      aria-label="מאזן ההוגנות של השבוע"
+      aria-label={t("dashboard.fairnessMeterAria")}
     >
       <div className="flex items-center gap-2 mb-2.5">
         <span className="inline-flex items-center justify-center size-7 rounded-xl bg-primary/10 text-primary">
           <Scale className="size-4" aria-hidden="true" />
         </span>
         <div>
-          <h3 className="text-sm font-bold text-foreground">מאזן השבוע</h3>
-          <p className="text-[11px] text-muted">איך התחלק העומס בבית — 7 ימים אחרונים</p>
+          <h3 className="text-sm font-bold text-foreground">{t("dashboard.fairnessMeterTitle")}</h3>
+          <p className="text-[11px] text-muted">{t("dashboard.fairnessMeterSubtitle")}</p>
         </div>
       </div>
 
-      {/* Segmented balance bar */}
+      {/* Segmented balance bar — width is data-driven; no width transition (avoids layout thrash) */}
       <div className="flex h-3 w-full overflow-hidden rounded-full bg-surface-hover" role="img"
-        aria-label={balance.shares.map((s) => `${s.name} ${s.pct} אחוז`).join(", ")}>
+        aria-label={balance.shares.map((s) => `${s.name} ${s.pct} ${t("dashboard.fairnessMeterPercent")}`).join(", ")}>
         {balance.shares.map((s, i) =>
           s.pct > 0 ? (
             <div
               key={s.userId}
-              className={`${BAR_COLORS[i % BAR_COLORS.length]} h-full transition-[width] duration-500`}
+              className={`${BAR_COLORS[i % BAR_COLORS.length]} h-full`}
               style={{ width: `${s.pct}%` }}
             />
           ) : null

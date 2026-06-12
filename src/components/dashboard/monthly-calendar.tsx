@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 import { buildCalendarMonth } from "@/lib/task-stats";
 import type { CalendarDay } from "@/lib/task-stats";
 import type { TaskRow, TaskCompletionRow } from "@/lib/types/database";
@@ -77,6 +78,7 @@ export function MonthlyCalendar({
   completions,
   today,
 }: MonthlyCalendarProps) {
+  const { t } = useTranslation();
   const todayDate = new Date(today);
   const [year, setYear] = useState(todayDate.getFullYear());
   const [month, setMonth] = useState(todayDate.getMonth());
@@ -182,15 +184,15 @@ export function MonthlyCalendar({
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-success" />
-            <span className="text-[10px] text-muted">הושלם</span>
+            <span className="text-[10px] text-muted">{t("dashboard.legendCompleted")}</span>
           </div>
           <div className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-warning" />
-            <span className="text-[10px] text-muted">ממתין</span>
+            <span className="text-[10px] text-muted">{t("dashboard.legendPending")}</span>
           </div>
         </div>
         <div className="text-[10px] text-muted">
-          {monthStats.totalCompleted}/{monthStats.totalDue} משימות
+          {monthStats.totalCompleted}/{monthStats.totalDue} {t("dashboard.tasksWord")}
         </div>
       </div>
     </div>
