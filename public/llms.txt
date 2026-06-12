@@ -1,0 +1,30 @@
+# בית בסדר (Bayit Beseder)
+
+> אפליקציה חינמית בעברית לניהול משק הבית — לזוגות, משפחות ושותפים.
+> Free Hebrew-first home management app for couples, families, and roommates.
+
+## What it does
+
+- Smart chore rotation and task management with gamification (points, streaks, achievements)
+- Weekly planning algorithm that splits tasks by home zone, day, and load
+- Shared shopping list with 22 categories and realtime sync
+- WhatsApp daily summaries and Google Calendar integration
+- Passover (Pesach) mode with a 37-task, 4-stage checklist
+- PWA — works straight from the browser, installable on mobile
+
+## Key pages
+
+- https://www.bayitbeseder.com/ — landing page (Hebrew)
+- https://www.bayitbeseder.com/about — about the project
+- https://www.bayitbeseder.com/how-it-works — how it works
+- https://www.bayitbeseder.com/blog — home management tips (Hebrew)
+- https://www.bayitbeseder.com/contact — contact
+- https://www.bayitbeseder.com/privacy — privacy policy
+- https://www.bayitbeseder.com/terms — terms of service
+
+## Facts
+
+- Language: Hebrew (RTL), free to use, no premium tier
+- Open source: https://github.com/eladjak/bayit-beseder
+- Tech: Next.js, Supabase, Tailwind CSS, hosted on Vercel
+- Contact: contact@bayitbeseder.com

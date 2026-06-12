@@ -127,6 +127,40 @@ const faqStructuredData = {
   ],
 };
 
+const websiteLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "בית בסדר",
+  alternateName: "Bayit Beseder",
+  url: "https://www.bayitbeseder.com",
+  inLanguage: "he",
+  description: "אפליקציה חינמית בעברית לניהול משק הבית לזוגות, משפחות ושותפים",
+  publisher: {
+    "@type": "Organization",
+    name: "בית בסדר",
+    url: "https://www.bayitbeseder.com",
+  },
+};
+
+const webPageLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: "בית בסדר — ניהול הבית ביחד, בכיף",
+  url: "https://www.bayitbeseder.com",
+  inLanguage: "he",
+  datePublished: "2026-03-01",
+  dateModified: "2026-06-12",
+  isPartOf: {
+    "@type": "WebSite",
+    name: "בית בסדר",
+    url: "https://www.bayitbeseder.com",
+  },
+  primaryImageOfPage: {
+    "@type": "ImageObject",
+    url: "https://www.bayitbeseder.com/og-image.jpg",
+  },
+};
+
 const organizationLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
@@ -169,9 +203,17 @@ export default function LandingPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageLd) }}
+      />
 
       {/* Hero Section */}
-      <section id="hero-section" className="relative overflow-hidden">
+      <header id="hero-section" className="relative overflow-hidden">
         <div
           className="absolute inset-0"
           style={{
@@ -245,8 +287,9 @@ export default function LandingPage() {
             className="mt-6 mx-auto w-64 md:w-80 rounded-2xl shadow-2xl border-2 border-white/10"
           />
         </div>
-      </section>
+      </header>
 
+      <main>
       {/* Social Proof — animated stats counter */}
       <SocialProofSection />
 
@@ -352,14 +395,30 @@ export default function LandingPage() {
               💬 צור קשר
             </Link>
           </div>
+          <p className="text-[11px] text-muted/70 mt-6">
+            נבנה עם{" "}
+            <a href="https://nextjs.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Next.js</a>
+            {" · "}
+            <a href="https://supabase.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Supabase</a>
+            {" · "}
+            <a href="https://tailwindcss.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Tailwind CSS</a>
+            {" · "}
+            מתארח ב-
+            <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Vercel</a>
+            {" · "}
+            סכמות לפי{" "}
+            <a href="https://schema.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Schema.org</a>
+          </p>
         </div>
       </section>
+      </main>
 
       {/* Footer */}
       <footer className="border-t border-border py-10 text-center text-xs text-muted bg-surface">
         <div className="max-w-4xl mx-auto px-6">
           {/* Brand */}
-          <p className="font-bold text-base text-foreground mb-1">🏠 בית בסדר</p>
+          <h3 className="sr-only">בית בסדר — מידע וקישורים</h3>
+          <h4 className="font-bold text-base text-foreground mb-1">🏠 בית בסדר</h4>
           <p className="text-muted mb-2">ניהול הבית ביחד, בכיף — חינם לחלוטין</p>
           <div className="flex items-center justify-center gap-3 mb-4">
             <a href="https://github.com/eladjak/bayit-beseder" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-full bg-[#24292f]/10 dark:bg-white/10 text-foreground hover:bg-[#24292f]/20 transition-colors">
@@ -370,7 +429,7 @@ export default function LandingPage() {
           </div>
 
           {/* Links grid */}
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-6 text-xs">
+          <nav aria-label="קישורי אתר" className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-6 text-xs">
             <Link href="/dashboard" className="text-primary hover:underline">דשבורד</Link>
             <Link href="/login" className="text-primary hover:underline">התחברות</Link>
             <Link href="/tasks" className="text-primary hover:underline">משימות</Link>
@@ -378,9 +437,10 @@ export default function LandingPage() {
             <Link href="/weekly" className="text-primary hover:underline">שבועי</Link>
             <Link href="/stats" className="text-primary hover:underline">סטטיסטיקות</Link>
             <Link href="/blog" className="text-primary hover:underline">בלוג</Link>
-          </div>
+          </nav>
 
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-6 text-xs">
+            <Link href="/about" className="text-muted hover:text-foreground hover:underline">אודות</Link>
             <Link href="/privacy" className="text-muted hover:text-foreground hover:underline">מדיניות פרטיות</Link>
             <Link href="/terms" className="text-muted hover:text-foreground hover:underline">תנאי שימוש</Link>
             <Link href="/contact" className="text-muted hover:text-foreground hover:underline">צור קשר</Link>
