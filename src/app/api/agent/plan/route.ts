@@ -6,6 +6,7 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { generateWeekPlan } from "@/lib/weekly-generator";
 import type { TaskRow } from "@/lib/types/database";
 import { buildPlanSummary, buildPlanWhatsAppText } from "@/lib/agent/plan-format";
+import { maybeDeliverToOwner } from "@/lib/agent/deliver";
 
 /**
  * POST /api/agent/plan
@@ -30,6 +31,12 @@ const bodySchema = z.object({
     .optional(),
   zoneMode: z.boolean().optional(),
   members: z.array(z.string().uuid()).max(10).optional(),
+  /**
+   * Optional delivery. When "whatsapp", the generated whatsappText is sent to
+   * ELAD'S OWN number (from env BAYIT_AGENT_WHATSAPP_TO) — never a recipient
+   * from this body. Omit to just receive the text and forward it yourself.
+   */
+  deliver: z.literal("whatsapp").optional(),
 });
 
 /** Compute the Sunday of the week containing `from` (Israeli week starts Sunday). */
@@ -71,7 +78,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  const { householdId, weekStart, zoneMode, members } = parsed.data;
+  const { householdId, weekStart, zoneMode, members, deliver } = parsed.data;
 
   // 4. Resolve week start
   const weekStartDate = weekStart
@@ -135,10 +142,14 @@ export async function POST(request: NextRequest) {
   const summary = buildPlanSummary(plan, nameMap);
   const whatsappText = buildPlanWhatsAppText(summary);
 
+  // 8. Optional delivery to Elad's own WhatsApp (recipient is env-only).
+  const delivery = await maybeDeliverToOwner(deliver, whatsappText);
+
   return NextResponse.json(
     {
       plan: summary,
       whatsappText,
+      delivery,
       meta: {
         householdScoped: Boolean(householdId),
         weekStart: summary.weekStart,

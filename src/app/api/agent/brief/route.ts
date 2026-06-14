@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { verifyAgentRequest } from "@/lib/agent/auth";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { buildMorningBrief, type DailyBriefData } from "@/lib/whatsapp-messages";
+import { maybeDeliverToOwner } from "@/lib/agent/deliver";
 
 /**
  * GET /api/agent/brief?householdId=<uuid>
@@ -19,6 +20,11 @@ const limiter = rateLimit({ windowMs: 60_000, max: 20 });
 
 const querySchema = z.object({
   householdId: z.string().uuid().optional(),
+  /**
+   * Optional delivery. "whatsapp" sends the brief to ELAD'S OWN number
+   * (env BAYIT_AGENT_WHATSAPP_TO) — never a recipient from the request.
+   */
+  deliver: z.literal("whatsapp").optional(),
 });
 
 export async function GET(request: NextRequest) {
@@ -41,6 +47,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const parsed = querySchema.safeParse({
     householdId: searchParams.get("householdId") ?? undefined,
+    deliver: searchParams.get("deliver") ?? undefined,
   });
   if (!parsed.success) {
     return NextResponse.json(
@@ -48,7 +55,7 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   }
-  const { householdId } = parsed.data;
+  const { householdId, deliver } = parsed.data;
 
   // 4. Service-role Supabase
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -131,6 +138,9 @@ export async function GET(request: NextRequest) {
           overdueCount > 0 ? `\n⚠️ ${overdueCount} משימות באיחור.` : ""
         }\n\n--- בית בסדר ---`;
 
+  // Optional delivery to Elad's own WhatsApp (recipient is env-only).
+  const delivery = await maybeDeliverToOwner(deliver, whatsappText);
+
   return NextResponse.json(
     {
       date: today,
@@ -140,6 +150,7 @@ export async function GET(request: NextRequest) {
       overdueCount,
       streak,
       whatsappText,
+      delivery,
       meta: { householdScoped: Boolean(householdId), generatedAt: new Date().toISOString() },
     },
     { headers: { "Cache-Control": "no-store", "X-RateLimit-Remaining": String(rl.remaining) } }

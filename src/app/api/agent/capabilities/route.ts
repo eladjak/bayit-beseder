@@ -38,9 +38,10 @@ export async function GET(request: Request) {
           weekStart: "string YYYY-MM-DD (אופציונלי) — תאריך תחילת השבוע. ברירת מחדל: יום ראשון הקרוב.",
           zoneMode: "boolean (אופציונלי) — תזמון מבוסס-אזורים (קיבוץ משימות לפי חדרי הבית).",
           members: "string[] (אופציונלי) — מזהי בני הבית. נגזר מ-householdId אם לא סופק.",
+          deliver: "\"whatsapp\" (אופציונלי) — אם מצוין, התוכנית תישלח ב-WhatsApp לאלעד בלבד (הנמען מהשרת, לא מהבקשה).",
         },
         returns:
-          "{ plan: PlanSummary, whatsappText: string } — whatsappText מוכן להעברה ל-/api/whatsapp/send או לכל ערוץ הודעות.",
+          "{ plan: PlanSummary, whatsappText: string, delivery } — whatsappText מוכן להעברה. delivery מדווח אם נשלח בפועל.",
       },
       {
         id: "get_today_brief",
@@ -50,12 +51,13 @@ export async function GET(request: Request) {
           "סיכום היום: המשימות הפתוחות להיום, מי משויך, כמה משימות באיחור, ומצב הרצף (streak) — כ-JSON + טקסט מוכן.",
         params: {
           householdId: "string (אופציונלי) — query param. מצמצם לאותו משק בית.",
+          deliver: "\"whatsapp\" (אופציונלי) — query param. אם מצוין, הסיכום יישלח ב-WhatsApp לאלעד בלבד.",
         },
-        returns: "{ date, tasks[], overdueCount, streak, whatsappText }",
+        returns: "{ date, tasks[], overdueCount, streak, whatsappText, delivery }",
       },
     ],
     sendChannel: {
-      note: "האפליקציה כבר יודעת לשלוח ל-WhatsApp דרך POST /api/whatsapp/send (מאובטח ב-CRON_SECRET). הסוכן אמור לקחת את whatsappText ולהעבירו לערוץ ההודעות שלו. שליחת WhatsApp אמיתית דורשת אישור נפרד.",
+      note: "שליחה אופציונלית: הוסיפו deliver=\"whatsapp\" כדי שהשרת ישלח את הטקסט ל-WhatsApp של אלעד בלבד (הנמען נקבע ב-env BAYIT_AGENT_WHATSAPP_TO, לעולם לא מגוף הבקשה). ללא deliver — קחו את whatsappText והעבירו אותו בעצמכם.",
     },
   });
 }

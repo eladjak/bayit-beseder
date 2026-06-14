@@ -74,6 +74,7 @@ ready-to-send Hebrew WhatsApp text block** (`whatsappText`).
 | `weekStart` | `string YYYY-MM-DD` | Defaults to the Sunday of the current week (Israeli week starts Sunday). |
 | `zoneMode` | `boolean` | Zone-first scheduling (groups tasks by house zones). |
 | `members` | `string[] (uuid)` | Member ids to balance across. Derived from `householdId` when omitted. |
+| `deliver` | `"whatsapp"` | If set, the server sends `whatsappText` to **Elad's own WhatsApp only** (recipient from env `BAYIT_AGENT_WHATSAPP_TO`, never from this body). See [WhatsApp delivery](#whatsapp-delivery). |
 
 ```bash
 curl -s -X POST https://www.bayitbeseder.com/api/agent/plan \
@@ -111,12 +112,15 @@ curl -s -X POST https://www.bayitbeseder.com/api/agent/plan \
     ]
   },
   "whatsappText": "📅 תוכנית שבועית — בית בסדר\n…",
+  "delivery": { "attempted": false, "channel": null, "sent": false, "status": "לא התבקשה שליחה" },
   "meta": { "householdScoped": true, "weekStart": "2026-06-14", "generatedAt": "…" }
 }
 ```
 
 The plan generation is a **pure function** — it performs **no DB writes** and has
 no side effects. It only reads existing tasks when `householdId` is provided.
+The `delivery` field reports whether a WhatsApp send was requested/performed
+(see below).
 
 ---
 
@@ -126,56 +130,74 @@ Today's brief: open tasks for today, who's assigned, overdue count, and the
 daily streak — as JSON plus a ready-to-send WhatsApp text block.
 
 ```bash
-curl -s "https://www.bayitbeseder.com/api/agent/brief?householdId=$HID" \
+curl -s "https://www.bayitbeseder.com/api/agent/brief?householdId=$HID&deliver=whatsapp" \
   -H "Authorization: Bearer $BAYIT_AGENT_KEY"
 ```
 
-**Response:** `{ date, dayOfWeek, tasks[], taskCount, overdueCount, streak, whatsappText, meta }`.
+**Response:** `{ date, dayOfWeek, tasks[], taskCount, overdueCount, streak, whatsappText, delivery, meta }`.
+`deliver=whatsapp` is an optional query param (same semantics as the body flag below).
 
 ---
 
-## Example flow: external agent → generate plan → send to WhatsApp
+## WhatsApp delivery
 
-This is the concrete use-case Elad named. The agent never opens the UI; it
-generates the plan and forwards the prepared text to a messaging channel.
+> Status: **wired and live** (approved by Elad 2026-06-14). Opt-in per request.
 
-```bash
-# 1. Agent generates the weekly plan
-RESP=$(curl -s -X POST https://www.bayitbeseder.com/api/agent/plan \
-  -H "Authorization: Bearer $BAYIT_AGENT_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"householdId":"'"$HID"'"}')
+When a request to `/api/agent/plan` (body `"deliver":"whatsapp"`) or
+`/api/agent/brief` (query `?deliver=whatsapp`) sets the flag, the server sends
+the generated `whatsappText` over WhatsApp.
 
-# 2. Agent extracts the ready-to-send block
-TEXT=$(echo "$RESP" | jq -r '.whatsappText')
+**The safety line (non-negotiable):**
 
-# 3. Agent forwards it to the user's WhatsApp
-#    (BayitBeSeder already has POST /api/whatsapp/send, secured by CRON_SECRET.)
-curl -s -X POST https://www.bayitbeseder.com/api/whatsapp/send \
-  -H "Authorization: Bearer $CRON_SECRET" \
-  -H "Content-Type: application/json" \
-  -d '{"phone":"0501234567","message":'"$(echo "$TEXT" | jq -Rs .)"'}'
-```
+- The recipient is **always Elad's own number**, read **exclusively** from the
+  env var `BAYIT_AGENT_WHATSAPP_TO`. It is **never** taken from the request body.
+  An agent can ask us to *deliver*, but cannot *choose the recipient* — so the
+  endpoint can never be used to spam an arbitrary number.
+- If `BAYIT_AGENT_WHATSAPP_TO` is unset, delivery **fails closed**: nothing is
+  sent, and `delivery.status` reports it. The JSON + `whatsappText` are still
+  returned, so a caller can always fall back to forwarding the text itself.
+- Transport reuses the app's existing, already-live **Green API** client
+  (`src/lib/whatsapp.ts`) — the same path the daily-brief cron uses. No new
+  WhatsApp integration was introduced; no WAHA.
 
-### Or to a generic webhook (the agent's own channel)
-
-The Agent API deliberately **does not send WhatsApp itself** — sending is a
-separate, approved step. The shape an agent would POST to its own outbound
-webhook:
+**`delivery` object in the response:**
 
 ```jsonc
-POST https://my-agent.example.com/outbound
-{
-  "channel": "whatsapp",
-  "to": "+972501234567",
-  "text": "<plan.whatsappText verbatim>"
-}
+{ "attempted": true, "channel": "whatsapp", "sent": true, "status": "נשלח ל-WhatsApp של אלעד", "idMessage": "…" }
 ```
 
-> ⚠️ **Not wired here:** no real WhatsApp send is triggered by the Agent API.
-> `whatsappText` is produced for the calling agent to forward. Wiring an
-> automatic send from `/api/agent/plan` requires Elad's explicit approval
-> (it would message the household).
+`sent` is `true` only when the transport accepted the message. A failed send
+never breaks the primary response (you still get the plan + text).
+
+### Live flow (the use-case Elad named)
+
+```bash
+# One call: generate the weekly plan AND deliver it to Elad's WhatsApp.
+curl -s -X POST https://www.bayitbeseder.com/api/agent/plan \
+  -H "Authorization: Bearer $BAYIT_AGENT_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"householdId":"'"$HID"'","deliver":"whatsapp"}'
+# → { plan, whatsappText, delivery: { sent: true, ... }, meta }
+```
+
+So Kami can map *"תכין לי תוכנית לשבוע ושלח לי בוואטסאפ"* to a single authed
+POST with `deliver:"whatsapp"`.
+
+### Without delivery (forward it yourself)
+
+Omit `deliver` to just get `whatsappText` and forward it through your own
+channel — e.g. the app's pre-existing `POST /api/whatsapp/send`
+(secured by `CRON_SECRET`), or an agent's own outbound webhook.
+
+---
+
+## Required env vars
+
+| Var | Purpose |
+|-----|---------|
+| `BAYIT_AGENT_KEY` | Bearer token for all `/api/agent/*`. Fail-closed (503) if unset. |
+| `BAYIT_AGENT_WHATSAPP_TO` | Elad's WhatsApp recipient (Green API chatId, e.g. `972525427474@c.us`). Required only for `deliver:"whatsapp"`; fail-closed if unset. |
+| `GREEN_API_INSTANCE_ID`, `GREEN_API_TOKEN`, `GREEN_API_URL` | Existing Green API transport (already set; used by the daily-brief cron). |
 
 ---
 
@@ -186,4 +208,6 @@ POST https://my-agent.example.com/outbound
 - Zod input validation on every body/query.
 - `householdId` scoping; private household data is never returned without a
   valid token, and household reads use the service-role key server-side only.
-- Additive: no existing UI route or behavior is changed.
+- **WhatsApp delivery recipient is env-only** (`BAYIT_AGENT_WHATSAPP_TO`), never
+  from the request — an agent cannot choose who gets messaged. Fails closed.
+- Additive: no existing UI route or behavior is changed; `deliver` is opt-in.
