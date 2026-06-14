@@ -773,6 +773,23 @@
       "emergency": "In tough times, giving ourselves permission to do less is mental health, not laziness 💙",
       "low_motivation": "Research shows the hardest part is starting — after 2 minutes your body gets into action on its own ⚡",
       "partner_complete": "Teamwork at home reduces stress and strengthens the relationship — both sides win 🤝"
+    },
+    "insight": {
+      "smartTitle": "Smart coaching system",
+      "smartSubtitle": "Learns the style that works best for you",
+      "coldStartHint": "The system starts tailoring messages after a few days of use",
+      "systemLabel": "Coaching system",
+      "insightsLabel": "Coaching insights",
+      "styleHeader": "Coaching style",
+      "last30Days": "Last 30 days",
+      "effectivenessMessages": "{pct}% effectiveness · {sent} messages sent",
+      "chartLabel": "Effectiveness chart by style",
+      "styles": {
+        "encouraging": "Encouraging",
+        "factual": "Factual",
+        "playful": "Playful",
+        "urgent": "Urgent"
+      }
     }
   },
   "seasonal": {
