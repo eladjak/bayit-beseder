@@ -1,5 +1,11 @@
 # BayitBeSeder (בית בסדר) - Progress
 
+## 2026-06-14 — Launch-readiness pass (autonomous, team-build + safe-live-refactor)
+**Verdict: core (non-payment) product is LAUNCH-READY.** Full scorecard: `docs/LAUNCH-READINESS-2026-06-14.md`.
+- **Fixed + DEPLOYED:** `i18n(coaching)` coaching-insight dashboard widget — was hardcoded Hebrew even in EN mode + always `dir=rtl` (last deferred i18n gap). Wired 13 keys he/en + locale-aware dir. Commit `ac6710d` → merged master `741e9be` → pushed. tsc 0 · build green · parity **976=976** · prod **200** · GEO **100/100** held post-deploy.
+- **Confirmed launch-ready:** `useSubscription` hardcodes `free` tier → entire core couple experience (tasks/weekly/shopping/stats/gamification/coaching/multi-household/fairness) works with NO payment. RLS blocker was already resolved 2026-06-08. 0 dead buttons, 0 TODOs, all states present, register/onboarding complete.
+- **Before launch (Elad):** set `SUMIT_WEBHOOK_SECRET` in Vercel (the one true *payment* blocker — webhook 503-safe-fails until then; monetization only, not usage) · rotate Sumit token · push gated `d3a4a57` · run migration 014 on a Supabase branch first. NOTE: prior-agent favicon/logo WIP + the docs from 6/6–6/8 remain UNCOMMITTED in the working tree (left untouched, not mine to sweep).
+
 ## 2026-06-07 — Critical fixes #1+#2 (auth) DONE · #3 (migration) validated, staged
 - **#1 auth-gating + #2 invite service-role** APPLIED + committed `d3a4a57` (local, NOT pushed — deploy=Elad's tap). tsc + `bun run build` pass. Council 2 lenses CLEAR (security: invite codes 32-bit crypto-hex, rate-limited 5/min, auth-gated; behavior: no flash/loop, clean demo-button removal). Also fixed stale middleware comment.
 - **#3 tasks-household-scope migration (014):** VALIDATED schema-correct against the REAL schema (`001_initial.sql` ≡ `database.ts`: tasks has assigned_to/status/due_date/recurring; task_completions.user_id; profiles.household_id all exist). NOT applied — irreversible prod surgery requiring (a) coordinated migration+code deploy (useTasks/database.ts/createTask — column is NOT NULL, app breaks if mismatched), (b) Supabase branch validation for zero task-loss, (c) Elad's tap.
