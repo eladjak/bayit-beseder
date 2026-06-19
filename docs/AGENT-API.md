@@ -4,9 +4,9 @@ The **second front door** to BayitBeSeder. Lets an external agent (Kami / Box /
 Solis / any Claude / OpenClaw) command the app by voice or text — e.g. *"תכין לי
 תוכנית לשבוע ושלח לי בוואטסאפ"* — without anyone opening the UI.
 
-> Status: Phase 1 (read + plan-generate). Implemented 2026-06-14 on branch
-> `feat/agent-api-ui-qa-2026-06-14`. Builds on the design in
-> `docs/AGENT-INTERFACE.md`.
+> Status: Phase 1.1 (read + plan-generate + **task write**). 2026-06-14: initial
+> `/api/agent/{capabilities,plan,brief}`. 2026-06-19: added `/api/agent/task`
+> (list / add / complete). Builds on the design in `docs/AGENT-INTERFACE.md`.
 
 ---
 
@@ -40,7 +40,8 @@ Set it in Vercel project settings / `.env.local` as `BAYIT_AGENT_KEY`.
 | 401 | Missing `Authorization: Bearer` header |
 | 403 | Wrong token |
 | 503 | `BAYIT_AGENT_KEY` not configured on the server (API disabled) |
-| 429 | Rate limit exceeded (10/min for `plan`, 20/min for `brief`, per IP) |
+| 409 | Conflict — task already completed or skipped (complete action) |
+| 429 | Rate limit exceeded (10/min for `plan`, 20/min for `brief`, 30/min for `task`, per IP) |
 | 400 | Invalid params (Zod validation) |
 
 ---
@@ -139,6 +140,49 @@ curl -s "https://www.bayitbeseder.com/api/agent/brief?householdId=$HID&deliver=w
 
 ---
 
+### `POST /api/agent/task`
+
+**Agent-facing task read/write.** Lets Kami / Box say:
+- *"תוסיף משימה: להפשיר עוף לארבע"* → `action:"add"`
+- *"מה המשימות הפתוחות?"* → `action:"list"`
+- *"סמן משימה X כהושלמה"* → `action:"complete"`
+
+Rate-limited at **30/min per IP**.
+
+**action: `"list"` — get open tasks**
+
+```bash
+curl -s -X POST https://www.bayitbeseder.com/api/agent/task \
+  -H "Authorization: Bearer $BAYIT_AGENT_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"action":"list","householdId":"'"$HID"'"}'
+# → { action:"list", tasks:[{id, title, status, dueDate, assignedTo, points}], count }
+```
+
+**action: `"add"` — create a task**
+
+```bash
+curl -s -X POST https://www.bayitbeseder.com/api/agent/task \
+  -H "Authorization: Bearer $BAYIT_AGENT_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"action":"add","householdId":"'"$HID"'","title":"להפשיר עוף לארבע","assignee":"אלעד","due":"2026-06-20"}'
+# → 201 { action:"add", task:{...}, message:"✅ משימה נוספה: ..." }
+```
+
+**action: `"complete"` — mark a task done**
+
+```bash
+curl -s -X POST https://www.bayitbeseder.com/api/agent/task \
+  -H "Authorization: Bearer $BAYIT_AGENT_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"action":"complete","householdId":"'"$HID"'","taskId":"<task-uuid>"}'
+# → { action:"complete", taskId, title, pointsAwarded, message:"✅ משימה הושלמה: ..." }
+```
+
+Security: `householdId` is required for writes and scopes every Supabase query — an agent cannot touch another household's data. Status guard: only `pending`/`in_progress` tasks can be completed (409 if already done/skipped).
+
+---
+
 ## WhatsApp delivery
 
 > Status: **wired and live** (approved by Elad 2026-06-14). Opt-in per request.
@@ -196,7 +240,7 @@ channel — e.g. the app's pre-existing `POST /api/whatsapp/send`
 | Var | Purpose |
 |-----|---------|
 | `BAYIT_AGENT_KEY` | Bearer token for all `/api/agent/*`. Fail-closed (503) if unset. |
-| `BAYIT_AGENT_WHATSAPP_TO` | Elad's WhatsApp recipient (Green API chatId, e.g. `972525427474@c.us`). Required only for `deliver:"whatsapp"`; fail-closed if unset. |
+| `BAYIT_AGENT_WHATSAPP_TO` | Elad's WhatsApp recipient — **bare number** (e.g. `972525427474`). `formatPhone()` in `src/lib/whatsapp.ts` appends `@c.us`; do NOT include it here or Green API gets a double-suffix → 400. |
 | `GREEN_API_INSTANCE_ID`, `GREEN_API_TOKEN`, `GREEN_API_URL` | Existing Green API transport (already set; used by the daily-brief cron). |
 
 ---
