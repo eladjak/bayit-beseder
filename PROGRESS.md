@@ -1,5 +1,32 @@
 # BayitBeSeder (בית בסדר) - Progress
 
+## 2026-06-19 — Agent-operability: /api/agent/task + live WhatsApp verified (Shabbat run B)
+
+**Status: AGENT-OPERABLE — Kami/Box can now read AND write the household state.**
+
+### What was done
+- **`POST /api/agent/task`** implemented and deployed (commit `0707041` → master → Vercel):
+  - `action:"list"` — returns open tasks scoped to householdId (20 by default, max 50)
+  - `action:"add"` — creates a task (title, optional assignee/due/category/difficulty); resolves assignee display name → user_id; category key → category_id; awards points by difficulty
+  - `action:"complete"` — marks task completed; writes `task_completions` row; awards points to assignee profile; guards against double-completion (409)
+  - Auth: Bearer `BAYIT_AGENT_KEY`. Rate: 30/min. householdId required for writes. tsc 0 · 325/325 tests · deployed.
+- **Capabilities manifest** updated to v1.1.0 (3 actions: plan, brief, task).
+- **`BAYIT_AGENT_WHATSAPP_TO`** wired in `.env.local` = `972525427474` (bare number — `formatPhone()` adds `@c.us`; this was the 2026-06-14 gotcha).
+- **WHATSAPP_PHONES** wired in `.env.local` = `0525427474` (for daily-brief cron).
+- **docs/AGENT-API.md** updated: task endpoint curl examples + gotcha note on bare number format.
+
+### Live verifications (real calls, not faked)
+1. `GET /api/agent/capabilities` → v1.1.0, 3 actions — ✅
+2. `GET /api/agent/brief?deliver=whatsapp` → `delivery.sent: true`, `idMessage: 3EB038B465BB764BD326A0` — **real WhatsApp delivered to Elad's number** ✅
+3. `POST /api/agent/task {action:"list"}` → `count: 20`, open tasks from DB — ✅
+
+### Remaining (not this session)
+- **Phase 2 meal-prep planner** (the core pain-killer — defrost/prep cron) still blocked on Elad's 5-answer intake (see docs/AGENT-INTERFACE.md §Intake)
+- **household_id** for scoped queries — Kami needs Elad's household UUID to scope `brief`/`task` calls (run `GET /api/agent/brief` without householdId returns global, which is fine for now)
+- **`SUMIT_WEBHOOK_SECRET`** still needs to be set in Vercel (payment, safe-fail without it)
+- **Migration 014** (tasks household scope) still needs Supabase branch run → prod (Elad's tap)
+- **`d3a4a57`** (auth-gate + invite RLS) not pushed to prod yet (Elad's tap)
+
 ## 2026-06-14 — Launch-readiness pass (autonomous, team-build + safe-live-refactor)
 **Verdict: core (non-payment) product is LAUNCH-READY.** Full scorecard: `docs/LAUNCH-READINESS-2026-06-14.md`.
 - **Fixed + DEPLOYED:** `i18n(coaching)` coaching-insight dashboard widget — was hardcoded Hebrew even in EN mode + always `dir=rtl` (last deferred i18n gap). Wired 13 keys he/en + locale-aware dir. Commit `ac6710d` → merged master `741e9be` → pushed. tsc 0 · build green · parity **976=976** · prod **200** · GEO **100/100** held post-deploy.
