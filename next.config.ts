@@ -81,6 +81,30 @@ const nextConfig: NextConfig = {
         source: "/(.*)",
         headers: [
           {
+            // Content-Security-Policy in REPORT-ONLY mode (does NOT block — only
+            // reports violations to the browser console). Baseline tuned for what
+            // this app loads: Supabase (REST/Realtime/Storage over https + wss),
+            // Google Fonts (gstatic), Plausible analytics, Sentry error reporting,
+            // Sanity CMS images, Google avatar images, inline ThemeScript +
+            // JSON-LD. After a few days of clean Report-Only reports, flip the key
+            // below to "Content-Security-Policy" to enforce.
+            key: "Content-Security-Policy-Report-Only",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://plausible.io",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com https://lh3.googleusercontent.com https://cdn.sanity.io",
+              "font-src 'self' data: https://fonts.gstatic.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://plausible.io https://*.ingest.sentry.io https://*.sentry.io https://cdn.sanity.io https://*.sanity.io",
+              "frame-src 'self'",
+              "worker-src 'self' blob:",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-ancestors 'none'",
+            ].join("; "),
+          },
+          {
             key: "X-DNS-Prefetch-Control",
             value: "on",
           },
