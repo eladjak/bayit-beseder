@@ -1,5 +1,18 @@
 # BayitBeSeder (בית בסדר) - Progress
 
+## 2026-07-05 — Home-launch 48h horizon EXECUTED (MASTERPIECE-PLAN.md)
+
+**Status: Kami is now ACTUALLY wired to bayit (the missing side of "agent-operable") + compassionate brief + fresh-start ready.**
+
+- **Kami side (LIVE on Contabo prod):** new `src/integrations/bayit/bayit-client.ts` in `/opt/elad-personal-agent` + deterministic Hebrew intents in `message-router.ts` (personal chats only, groups gate untouched — diff verified additions-only) + injection in `index.ts`. Env: `BAYIT_AGENT_KEY` (copied from THIS repo's `.env.local` — canonical source, no new secrets) + `BAYIT_API_URL`; `BAYIT_HOUSEHOLD_ID` pre-existed. Built (`bun run build`), restarted `kami-agent`, verified: ActiveState=active, "Starting polling", `[bayit-client] enabled`. **Live test from Kami's box: 15/15 ✅** incl. full write round-trip (add→complete, +10 pts). Phrases: "מה יש היום בבית?" · "תוסיף משימה: X" · "סיימתי את X" (match-gated, falls through to AI) · "תוכנית שבועית לבית". Backups: `/opt/backups/*.pre-bayit-20260704-231117.bak`. Gotcha caught: Hebrew FINAL letters in regex (תוסיף = ף).
+- **This repo (branch `feat/home-launch-48h`, preview only — NOT merged to master):**
+  - `buildKindOverdueLine` in `whatsapp-messages.ts` + wired into `/api/agent/brief` empty-day text and `buildAdaptiveMorningBrief` (filters `{overdueCount}` templates when pile > 3). No more "⚠️ 43 משימות באיחור" shame wall. New tests `compassionate-brief.test.ts` (20/20 with adjacent file).
+  - `scripts/fresh-start.mjs` — dry-run by default, archives (skipped, never deletes). **Dry-run proof: 43 stale open tasks, all Feb-Mar 2026.** Apply = Elad's tap.
+  - Meal-planner prep: `supabase/migrations/015_meals.sql` (NOT applied), `GET /api/agent/prep` 501 stub with planned contract, `docs/MEAL-PLANNER-INTAKE.md` (5-question WhatsApp message ready for Kami — NOT sent until Elad approves).
+  - `docs/LAUNCH-HOME.md` — Inbal invitation drafts + 10-min home-launch ritual (DRAFT ONLY, Elad sends himself; recreates lost LAUNCH-2026-06-08.md).
+- **Verification:** tsc 0 · build green · 326/331 tests pass (5 `useTaskStreaks` failures are PRE-EXISTING — fail on clean tree too, env artifact).
+- **Elad's 3 taps:** approve fresh-start apply · tell Kami to send the meal intake · send Inbal the invite + do the ritual.
+
 ## 2026-06-19 — Agent-operability: /api/agent/task + live WhatsApp verified (Shabbat run B)
 
 **Status: AGENT-OPERABLE — Kami/Box can now read AND write the household state.**
