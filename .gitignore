@@ -74,3 +74,6 @@ strategy-2026.html
 # Sprint 7.31 temp
 .illus.log
 .illus-tmp/
+
+# archived local one-off artifacts (screenshots, debug htmls)
+docs/archive/local-artifacts/

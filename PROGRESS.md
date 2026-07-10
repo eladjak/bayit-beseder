@@ -1,5 +1,18 @@
 # BayitBeSeder (בית בסדר) - Progress
 
+## 2026-07-10 — Fleet-sweep deep audit: hygiene (§5-ו) done + branch merged to master
+
+**Status: launch-ready branch `feat/home-launch-48h` verified (tsc 0 · 331/331 tests — the 5 old `useTaskStreaks` failures are gone · Vercel preview Ready) and merged to master per MASTERPIECE-PLAN "ליורש" directive.**
+
+- **Hygiene (MASTERPIECE-PLAN §5-ו, was never executed):**
+  - `supabase/migrations/001_initial_schema.sql` (decoy schema that misled an audit) → `docs/archive/001_initial_schema.DECOY.sql` + `docs/archive/README.md` warning.
+  - One-off migration runners deleted: `run-migration.mjs` (tracked; ran the DECOY schema!), `try-migration.mjs`, `migrate-via-supabase-js.mjs`, `run-full-migration.mjs` (untracked).
+  - Stale `pnpm-lock.yaml` removed (bun.lock is canonical; vercel.json pins `bun install --frozen-lockfile`).
+  - Root clutter (old screenshots + debug/guide HTMLs + March reports) → `docs/archive/` / `docs/archive/local-artifacts/` (gitignored).
+- **Live verification (2026-07-10):** root 200 · robots/llms.txt/sitemap 200 · 10 JSON-LD blocks in initial HTML · exactly 1 h1 · canonical present · `/api/agent/capabilities` fails-closed 401 without Bearer.
+- **Still Elad's taps (unchanged):** fresh-start `--apply` · meal-intake via Kami · Inbal invite + ritual · `CRON_SECRET`/cron-run verification in Vercel · migrations 014+015 in Supabase SQL editor.
+- Full audit + ranked plan: `~/Documents/reports/fleet-sweep/bayit-beseder.md`.
+
 ## 2026-07-05 — Home-launch 48h horizon EXECUTED (MASTERPIECE-PLAN.md)
 
 **Status: Kami is now ACTUALLY wired to bayit (the missing side of "agent-operable") + compassionate brief + fresh-start ready.**
