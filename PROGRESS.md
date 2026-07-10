@@ -1,8 +1,8 @@
 # BayitBeSeder (בית בסדר) - Progress
 
-## 2026-07-10 — Fleet-sweep deep audit: hygiene (§5-ו) done + branch merged to master
+## 2026-07-10 — Fleet-sweep deep audit: hygiene (§5-ו) done + merge PR OPENED (⚠️ NOT yet merged)
 
-**Status: launch-ready branch `feat/home-launch-48h` verified (tsc 0 · 331/331 tests — the 5 old `useTaskStreaks` failures are gone · Vercel preview Ready) and merged to master per MASTERPIECE-PLAN "ליורש" directive.**
+**Status: launch-ready branch `feat/home-launch-48h` verified (tsc 0 · 331/331 tests — the 5 old `useTaskStreaks` failures are gone · Vercel preview Ready). Merge PR #1 is OPEN / CLEAN / MERGEABLE — https://github.com/eladjak/bayit-beseder/pull/1 — awaiting Elad's one-click merge (direct push to master is blocked by policy). ⚠️ Correction to an earlier draft of this entry: the branch was NOT merged. `origin/master` is 3 commits behind, so prod still serves the old "43 overdue" shame-wall brief until PR #1 is merged. Merging PR #1 is the single highest-value 5-minute action (fleet-sweep Q1). Re-verified 2026-07-10 (2nd sweep pass): master 0-ahead / 3-behind the branch, PR mergeStateStatus=CLEAN, live probes all 200, agent+cron APIs fail-closed 401, 10 JSON-LD blocks, 1 h1, tsc exit 0.**
 
 - **Hygiene (MASTERPIECE-PLAN §5-ו, was never executed):**
   - `supabase/migrations/001_initial_schema.sql` (decoy schema that misled an audit) → `docs/archive/001_initial_schema.DECOY.sql` + `docs/archive/README.md` warning.
