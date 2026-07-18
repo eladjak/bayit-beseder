@@ -225,7 +225,13 @@ export function useShoppingList(): UseShoppingListReturn {
                 added_by: string | null;
                 created_at: string;
               });
-              setItems((prev) => [newItem, ...prev]);
+              // Dedupe: the adder already inserted this item optimistically
+              // (see addItem). Only append if it isn't already present.
+              setItems((prev) =>
+                prev.some((item) => item.id === newItem.id)
+                  ? prev
+                  : [newItem, ...prev]
+              );
             } else if (payload.eventType === "UPDATE") {
               const updated = toShoppingItem(payload.new as {
                 id: string;
@@ -323,14 +329,18 @@ export function useShoppingList(): UseShoppingListReturn {
           };
         }
 
-        const { error } = await supabase.from("shopping_items").insert({
-          household_id: householdId,
-          title,
-          category,
-          quantity: quantity ?? 1,
-          unit: unit ?? null,
-          added_by: user.id,
-        });
+        const { data: inserted, error } = await supabase
+          .from("shopping_items")
+          .insert({
+            household_id: householdId,
+            title,
+            category,
+            quantity: quantity ?? 1,
+            unit: unit ?? null,
+            added_by: user.id,
+          })
+          .select()
+          .single();
         if (error) {
           return {
             ok: false,
@@ -339,7 +349,18 @@ export function useShoppingList(): UseShoppingListReturn {
           };
         }
         trackEvent("shopping_add");
-        // Realtime subscription will handle the state update
+        // Optimistically add the new row to local state immediately.
+        // Realtime INSERT events are not always delivered in time (or at all),
+        // so we do not rely on them for the adder's own item — the realtime
+        // handler dedupes by id to avoid a double when the event does arrive.
+        if (inserted) {
+          const newItem = toShoppingItem(inserted);
+          setItems((prev) =>
+            prev.some((item) => item.id === newItem.id)
+              ? prev
+              : [newItem, ...prev]
+          );
+        }
         return { ok: true };
       } catch {
         return {
