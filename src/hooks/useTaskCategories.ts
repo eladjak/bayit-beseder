@@ -159,11 +159,16 @@ export function useTaskCategories(): UseTaskCategoriesReturn {
           { event: "*", schema: "public", table: "task_categories" },
           (payload) => {
             if (payload.eventType === "INSERT") {
-              setTaskCategories((prev) =>
-                [...prev, payload.new as TaskCategoryRow].sort(
-                  (a, b) => a.sort_order - b.sort_order
-                )
-              );
+              setTaskCategories((prev) => {
+                const row = payload.new as TaskCategoryRow;
+                // Ignore rows we already hold. On a household's first visit the
+                // auto-seed inserts the 8 defaults AND sets them in state, then
+                // realtime delivers an INSERT for each of those same rows — a
+                // blind append rendered every category twice (16 chips) and
+                // produced React duplicate-key errors.
+                if (prev.some((c) => c.id === row.id)) return prev;
+                return [...prev, row].sort((a, b) => a.sort_order - b.sort_order);
+              });
             } else if (payload.eventType === "UPDATE") {
               const updated = payload.new as TaskCategoryRow;
               setTaskCategories((prev) =>
