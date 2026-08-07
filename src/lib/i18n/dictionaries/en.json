@@ -678,7 +678,10 @@
     "noResults": "No tasks found",
     "completedAt": "Completed on ",
     "errorTitle": "Error loading history",
-    "errorSubtitle": "Could not load data. Please try again later."
+    "errorSubtitle": "Could not load data. Please try again later.",
+    "emptyTitle": "No history yet",
+    "emptySubtitle": "Once you mark a task as done, it will show up here.",
+    "emptyCta": "Go to my tasks"
   },
   "notFound": {
     "title": "Page not found",
