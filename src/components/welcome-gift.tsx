@@ -12,7 +12,12 @@
 import { useEffect, useState } from "react";
 import { Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
-import { WELCOME_GIFT, markWelcomeGiftClaimed, shouldShowWelcomeGift } from "@/lib/welcome-gift";
+import {
+  WELCOME_GIFT,
+  markWelcomeGiftClaimed,
+  shouldShowWelcomeGift,
+  claimWelcomeGiftOnce,
+} from "@/lib/welcome-gift";
 import { playSparkle } from "@/lib/sound-effects";
 import { tryHaptic } from "@/lib/ux-preferences";
 
@@ -32,21 +37,32 @@ export function WelcomeGiftModal() {
     tryHaptic([10, 30, 10, 30, 50]);
     markWelcomeGiftClaimed();
     setOpen(false);
-    // Actually GRANT the bonus points (atomic RPC, migration 014). Non-blocking.
+    // Grant AT MOST ONCE PER USER, enforced server-side (see claimWelcomeGiftOnce).
+    // The localStorage flag above only stops the modal reappearing on THIS device;
+    // it is not, and never was, sufficient to gate the points.
     void (async () => {
       try {
         const { createClient } = await import("@/lib/supabase");
-        const supabase = createClient() as ReturnType<typeof createClient> & {
-          rpc: (n: string, a?: Record<string, unknown>) => Promise<unknown>;
-        };
-        await supabase.rpc("increment_user_points", { p_amount: WELCOME_GIFT.bonusPoints });
+        const supabase = createClient();
+        const { data } = await supabase.auth.getUser();
+        const userId = data.user?.id;
+        if (!userId) return;
+        const granted = await claimWelcomeGiftOnce(
+          supabase as unknown as Parameters<typeof claimWelcomeGiftOnce>[0],
+          userId,
+          WELCOME_GIFT.bonusPoints,
+        );
+        if (granted) {
+          toast.success(
+            `🎁 קיבלתם ${WELCOME_GIFT.bonusPoints} נקודות בונוס + ${WELCOME_GIFT.freeSurpriseBoxes} קופסת הפתעה חינם!`,
+          );
+        } else {
+          toast.success("ברוכים השבים! 🎁 את מתנת ההצטרפות כבר קיבלתם");
+        }
       } catch {
         /* non-blocking */
       }
     })();
-    toast.success(
-      `🎁 קיבלתם ${WELCOME_GIFT.bonusPoints} נקודות בונוס + ${WELCOME_GIFT.freeSurpriseBoxes} קופסת הפתעה חינם!`,
-    );
   };
 
   if (!open) return null;

@@ -842,6 +842,9 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
       role="dialog"
       aria-modal="true"
       aria-label={t("onboarding.dialogAriaLabel")}
+      // Marker the app layout polls so the 6-step welcome tour queues behind
+      // this wizard instead of opening underneath it with unclickable controls.
+      data-setup-wizard="1"
       className="fixed inset-0 z-[100] bg-background flex flex-col"
       dir="rtl"
     >
