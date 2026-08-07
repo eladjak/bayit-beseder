@@ -71,6 +71,26 @@ function randomPick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+/**
+ * Kind (non-shaming) overdue line — the compassionate-brief rule (2026-07-05).
+ *
+ * Why: a wall like "⚠️ 43 משימות באיחור" is a shame wall — it makes people
+ * close the app, not open it (and contradicts the non-shaming Fairness-Meter
+ * DNA of this product). Rules:
+ *  - 0 overdue  → empty string (say nothing).
+ *  - 1-3        → name the small number, with agency (complete / defer / skip).
+ *  - 4 or more  → NEVER print the number. Offer a fresh start instead.
+ *
+ * Returned string starts with "\n" when non-empty so callers can append as-is.
+ */
+export function buildKindOverdueLine(overdueCount: number): string {
+  if (overdueCount <= 0) return "";
+  if (overdueCount <= 3) {
+    return `\nיש ${overdueCount} משימות מהימים הקודמים — אפשר להשלים, לדחות או פשוט לדלג. הכל בסדר.`;
+  }
+  return "\nיש כמה משימות ותיקות שמחכות ברקע. רוצים לוח נקי? אפשר לבקש \"התחלה נקייה\" ונארכב אותן ביחד.";
+}
+
 function getHebrewDay(): string {
   const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
   return days[new Date().getDay()];

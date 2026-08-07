@@ -15,7 +15,9 @@ interface ToggleRowProps {
 
 function ToggleRow({ label, enabled, onToggle }: ToggleRowProps) {
   return (
-    <div className="flex items-center justify-between">
+    // pe-14 (mobile-only left gutter in RTL) keeps the switch clear of the
+    // floating action buttons that hug the physical-left edge at ~390px.
+    <div className="flex items-center justify-between pe-14 lg:pe-0">
       <span className="text-sm text-foreground">{label}</span>
       <button
         onClick={onToggle}
@@ -208,7 +210,7 @@ export function WhatsAppSettings({
       <p className="text-xs text-muted">
         {t("settings.whatsappSection.description")}
       </p>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pe-14 lg:pe-0">
         <span className="text-sm text-foreground">
           {t("settings.whatsappSection.toggle")}
         </span>

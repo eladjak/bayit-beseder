@@ -7,6 +7,7 @@
  */
 
 import type { CoachingStyle } from "./coaching-tracker";
+import { buildKindOverdueLine } from "./whatsapp-messages";
 
 // ============================================================
 // Template variable types
@@ -122,13 +123,26 @@ export function buildAdaptiveMorningBrief(
   taskList: string,   // already formatted numbered list
   dayOfWeek: string
 ): string {
-  const template = randomPick(MORNING_STYLES[style]);
+  // Compassionate brief (2026-07-05): when the overdue pile is big (>3),
+  // never open the morning with the raw number ("43 באיחור" = shame wall).
+  // Filter out templates that interpolate {overdueCount} and append a kind
+  // fresh-start line instead. Small counts (1-3) keep the honest number.
+  const bigOverduePile = vars.overdueCount > 3;
+  const templatePool = bigOverduePile
+    ? MORNING_STYLES[style].filter((t) => !t.includes("{overdueCount}"))
+    : MORNING_STYLES[style];
+  const template = randomPick(
+    templatePool.length > 0 ? templatePool : MORNING_STYLES[style]
+  );
   const header = interpolate(template, {
     count: vars.count,
     firstTask: vars.firstTask,
     streak: vars.streak,
     overdueCount: vars.overdueCount,
   });
+  const kindOverdueLine = bigOverduePile
+    ? buildKindOverdueLine(vars.overdueCount)
+    : "";
 
   const streakLine =
     vars.streak > 0 && style !== "factual" && style !== "urgent"
@@ -142,7 +156,7 @@ export function buildAdaptiveMorningBrief(
 
   const replyHint = "\n\n💡 השיבו עם מספר המשימה כדי לסמן אותה כבוצעה";
 
-  return `${header}\n\nיום ${dayOfWeek} - ${vars.count} משימות:\n${taskList}${streakLine}${fridayBonus}${replyHint}\n\n--- בית בסדר ---`;
+  return `${header}\n\nיום ${dayOfWeek} - ${vars.count} משימות:\n${taskList}${kindOverdueLine}${streakLine}${fridayBonus}${replyHint}\n\n--- בית בסדר ---`;
 }
 
 /**

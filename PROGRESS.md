@@ -1,5 +1,31 @@
 # BayitBeSeder (בית בסדר) - Progress
 
+## 2026-07-10 — Fleet-sweep deep audit: hygiene (§5-ו) done + merge PR OPENED (⚠️ NOT yet merged)
+
+**Status: launch-ready branch `feat/home-launch-48h` verified (tsc 0 · 331/331 tests — the 5 old `useTaskStreaks` failures are gone · Vercel preview Ready). Merge PR #1 is OPEN / CLEAN / MERGEABLE — https://github.com/eladjak/bayit-beseder/pull/1 — awaiting Elad's one-click merge (direct push to master is blocked by policy). ⚠️ Correction to an earlier draft of this entry: the branch was NOT merged. `origin/master` is 3 commits behind, so prod still serves the old "43 overdue" shame-wall brief until PR #1 is merged. Merging PR #1 is the single highest-value 5-minute action (fleet-sweep Q1). Re-verified 2026-07-10 (2nd sweep pass): master 0-ahead / 3-behind the branch, PR mergeStateStatus=CLEAN, live probes all 200, agent+cron APIs fail-closed 401, 10 JSON-LD blocks, 1 h1, tsc exit 0.**
+
+- **Hygiene (MASTERPIECE-PLAN §5-ו, was never executed):**
+  - `supabase/migrations/001_initial_schema.sql` (decoy schema that misled an audit) → `docs/archive/001_initial_schema.DECOY.sql` + `docs/archive/README.md` warning.
+  - One-off migration runners deleted: `run-migration.mjs` (tracked; ran the DECOY schema!), `try-migration.mjs`, `migrate-via-supabase-js.mjs`, `run-full-migration.mjs` (untracked).
+  - Stale `pnpm-lock.yaml` removed (bun.lock is canonical; vercel.json pins `bun install --frozen-lockfile`).
+  - Root clutter (old screenshots + debug/guide HTMLs + March reports) → `docs/archive/` / `docs/archive/local-artifacts/` (gitignored).
+- **Live verification (2026-07-10):** root 200 · robots/llms.txt/sitemap 200 · 10 JSON-LD blocks in initial HTML · exactly 1 h1 · canonical present · `/api/agent/capabilities` fails-closed 401 without Bearer.
+- **Still Elad's taps (unchanged):** fresh-start `--apply` · meal-intake via Kami · Inbal invite + ritual · `CRON_SECRET`/cron-run verification in Vercel · migrations 014+015 in Supabase SQL editor.
+- Full audit + ranked plan: `~/Documents/reports/fleet-sweep/bayit-beseder.md`.
+
+## 2026-07-05 — Home-launch 48h horizon EXECUTED (MASTERPIECE-PLAN.md)
+
+**Status: Kami is now ACTUALLY wired to bayit (the missing side of "agent-operable") + compassionate brief + fresh-start ready.**
+
+- **Kami side (LIVE on Contabo prod):** new `src/integrations/bayit/bayit-client.ts` in `/opt/elad-personal-agent` + deterministic Hebrew intents in `message-router.ts` (personal chats only, groups gate untouched — diff verified additions-only) + injection in `index.ts`. Env: `BAYIT_AGENT_KEY` (copied from THIS repo's `.env.local` — canonical source, no new secrets) + `BAYIT_API_URL`; `BAYIT_HOUSEHOLD_ID` pre-existed. Built (`bun run build`), restarted `kami-agent`, verified: ActiveState=active, "Starting polling", `[bayit-client] enabled`. **Live test from Kami's box: 15/15 ✅** incl. full write round-trip (add→complete, +10 pts). Phrases: "מה יש היום בבית?" · "תוסיף משימה: X" · "סיימתי את X" (match-gated, falls through to AI) · "תוכנית שבועית לבית". Backups: `/opt/backups/*.pre-bayit-20260704-231117.bak`. Gotcha caught: Hebrew FINAL letters in regex (תוסיף = ף).
+- **This repo (branch `feat/home-launch-48h`, preview only — NOT merged to master):**
+  - `buildKindOverdueLine` in `whatsapp-messages.ts` + wired into `/api/agent/brief` empty-day text and `buildAdaptiveMorningBrief` (filters `{overdueCount}` templates when pile > 3). No more "⚠️ 43 משימות באיחור" shame wall. New tests `compassionate-brief.test.ts` (20/20 with adjacent file).
+  - `scripts/fresh-start.mjs` — dry-run by default, archives (skipped, never deletes). **Dry-run proof: 43 stale open tasks, all Feb-Mar 2026.** Apply = Elad's tap.
+  - Meal-planner prep: `supabase/migrations/015_meals.sql` (NOT applied), `GET /api/agent/prep` 501 stub with planned contract, `docs/MEAL-PLANNER-INTAKE.md` (5-question WhatsApp message ready for Kami — NOT sent until Elad approves).
+  - `docs/LAUNCH-HOME.md` — Inbal invitation drafts + 10-min home-launch ritual (DRAFT ONLY, Elad sends himself; recreates lost LAUNCH-2026-06-08.md).
+- **Verification:** tsc 0 · build green · 326/331 tests pass (5 `useTaskStreaks` failures are PRE-EXISTING — fail on clean tree too, env artifact).
+- **Elad's 3 taps:** approve fresh-start apply · tell Kami to send the meal intake · send Inbal the invite + do the ritual.
+
 ## 2026-06-19 — Agent-operability: /api/agent/task + live WhatsApp verified (Shabbat run B)
 
 **Status: AGENT-OPERABLE — Kami/Box can now read AND write the household state.**

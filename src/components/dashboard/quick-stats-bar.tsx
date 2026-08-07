@@ -15,6 +15,15 @@ function useCountUp(target: number, duration = 600): number {
   useEffect(() => {
     const from = prevRef.current;
     if (from === target) return;
+    // Respect reduced motion: jump straight to the value, no rAF count-up.
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ) {
+      prevRef.current = target;
+      setDisplay(target);
+      return;
+    }
     const startTime = performance.now();
     const animate = (now: number) => {
       const elapsed = now - startTime;

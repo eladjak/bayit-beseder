@@ -3,7 +3,11 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { verifyAgentRequest } from "@/lib/agent/auth";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { buildMorningBrief, type DailyBriefData } from "@/lib/whatsapp-messages";
+import {
+  buildMorningBrief,
+  buildKindOverdueLine,
+  type DailyBriefData,
+} from "@/lib/whatsapp-messages";
 import { maybeDeliverToOwner } from "@/lib/agent/deliver";
 
 /**
@@ -131,12 +135,14 @@ export async function GET(request: NextRequest) {
     dayOfWeek,
   };
 
+  // Compassionate brief (2026-07-05): never print a shame-wall overdue count.
+  // buildKindOverdueLine caps the number at 3 and offers a "fresh start" beyond.
   const whatsappText =
     shapedTasks.length > 0
       ? buildMorningBrief(briefData)
-      : `בוקר טוב! ☀️ אין משימות פתוחות להיום (יום ${dayOfWeek}).${
-          overdueCount > 0 ? `\n⚠️ ${overdueCount} משימות באיחור.` : ""
-        }\n\n--- בית בסדר ---`;
+      : `בוקר טוב! ☀️ אין משימות פתוחות להיום (יום ${dayOfWeek}).${buildKindOverdueLine(
+          overdueCount
+        )}\n\n--- בית בסדר ---`;
 
   // Optional delivery to Elad's own WhatsApp (recipient is env-only).
   const delivery = await maybeDeliverToOwner(deliver, whatsappText);

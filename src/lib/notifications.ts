@@ -49,6 +49,22 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
     return null;
   }
 
+  // Do NOT run the service worker in development. The SW's
+  // stale-while-revalidate page caching plus dev/HMR rebuilds cause it to
+  // continuously re-install and background-revalidate cached pages, which
+  // floods the dev server with navigation requests and makes the app hard to
+  // profile locally. In dev we also proactively unregister any SW left over
+  // from a previous production visit on the same origin (e.g. localhost).
+  if (process.env.NODE_ENV !== "production") {
+    try {
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map((r) => r.unregister()));
+    } catch {
+      // ignore — nothing to clean up
+    }
+    return null;
+  }
+
   try {
     const registration = await navigator.serviceWorker.register("/sw.js", {
       scope: "/",
