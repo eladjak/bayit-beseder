@@ -180,9 +180,9 @@ export function SetupWizard({
               className="flex-1 h-1.5 rounded-full bg-border/50 overflow-hidden"
             >
               <motion.div
-                className="h-full rounded-full bg-primary"
-                initial={{ width: 0 }}
-                animate={{ width: i <= stepIndex ? "100%" : "0%" }}
+                className="h-full w-full rounded-full bg-primary bb-bar"
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: i <= stepIndex ? 1 : 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
               />
             </div>

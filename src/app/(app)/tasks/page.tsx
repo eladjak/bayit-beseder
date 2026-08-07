@@ -43,7 +43,8 @@ import { CategoryCard } from "@/components/category-card";
 import { TaskCategoryManager } from "@/components/tasks/task-category-manager";
 import { TaskListSkeleton } from "@/components/skeleton";
 import { useTasks } from "@/hooks/useTasks";
-import { isRecurring } from "@/lib/task-flags";
+import { isRecurring, isTaskOverdue } from "@/lib/task-flags";
+import { TaskCompleteMark } from "@/components/tasks/task-complete-mark";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useProfile } from "@/hooks/useProfile";
 import { useCategories } from "@/hooks/useCategories";
@@ -90,6 +91,7 @@ export default function TasksPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [titleError, setTitleError] = useState<string | null>(null);
+  const [celebratingId, setCelebratingId] = useState<string | null>(null);
   const [newTaskCategory, setNewTaskCategory] = useState("general");
   const [editingTask, setEditingTask] = useState<DbTaskView | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
@@ -214,12 +216,9 @@ export default function TasksPage() {
           ? (dynamicCategoryNameToKey[categoryName] ?? CATEGORY_KEY_TO_NAME[categoryName] ?? "general")
           : "general";
 
-        // Check if task is overdue (due date is in the past and not completed)
-        const today = new Date().toISOString().slice(0, 10);
-        const isOverdue =
-          dbTask.due_date &&
-          dbTask.due_date < today &&
-          dbTask.status !== "completed";
+        // Overdue is a one-off concept — a recurring chore is simply due again.
+        // See isTaskOverdue: this is what produced the 43-item shame wall.
+        const isOverdue = isTaskOverdue(dbTask);
 
         // For recurring tasks, use today's completions instead of permanent status.
         const dbCompleted = isRecurring(dbTask.recurring)
@@ -281,13 +280,17 @@ export default function TasksPage() {
     [dbTaskViews]
   );
 
+  // A task being celebrated stays in the pending list for the length of the
+  // mark, so the check can actually be seen drawing before the row leaves.
+  // Without this the row is filtered out on the same tick as the click and the
+  // completion moment is invisible — which is how it shipped.
   const pendingDbTasks = useMemo(
-    () => filteredDbTasks.filter((t) => !t.isCompleted),
-    [filteredDbTasks]
+    () => filteredDbTasks.filter((t) => !t.isCompleted || t.id === celebratingId),
+    [filteredDbTasks, celebratingId]
   );
   const completedDbTasks = useMemo(
-    () => filteredDbTasks.filter((t) => t.isCompleted),
-    [filteredDbTasks]
+    () => filteredDbTasks.filter((t) => t.isCompleted && t.id !== celebratingId),
+    [filteredDbTasks, celebratingId]
   );
   const [showCompleted, setShowCompleted] = useState(true);
 
@@ -384,6 +387,13 @@ export default function TasksPage() {
         }
       } else {
         haptic("success");
+        // Let the completion mark actually land before the row leaves the list.
+        // 180ms == the draw duration, inside the 200ms feedback ceiling — long
+        // enough to see, short enough that it never feels like waiting.
+        setCelebratingId(taskId);
+        window.setTimeout(() => {
+          setCelebratingId((cur) => (cur === taskId ? null : cur));
+        }, 700);
         setOptimisticCompleted((prev) => new Set(prev).add(taskId));
         setOptimisticUncompleted((prev) => {
           const next = new Set(prev);
@@ -973,12 +983,16 @@ export default function TasksPage() {
                           aria-pressed={false}
                           whileTap={{ scale: 1.3 }}
                           transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
-                          className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                            task.isOverdue
-                              ? "border-red-400 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
-                              : "border-border hover:border-primary hover:bg-primary/5"
+                          className={`relative mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                            celebratingId === task.id
+                              ? "bg-success border-success"
+                              : task.isOverdue
+                                ? "border-red-400 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                                : "border-border hover:border-primary hover:bg-primary/5"
                           }`}
-                        />
+                        >
+                          <TaskCompleteMark active={celebratingId === task.id} />
+                        </motion.button>
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm font-medium leading-snug ${
                             task.isOverdue ? "text-red-700 dark:text-red-400" : "text-foreground"
@@ -1088,12 +1102,16 @@ export default function TasksPage() {
                       aria-pressed={false}
                       whileTap={{ scale: 1.3 }}
                       transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
-                      className={`mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
-                        task.isOverdue
-                          ? "border-red-400 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
-                          : "border-border hover:border-primary hover:bg-primary/5"
+                      className={`relative mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                        celebratingId === task.id
+                          ? "bg-success border-success"
+                          : task.isOverdue
+                            ? "border-red-400 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-950/20"
+                            : "border-border hover:border-primary hover:bg-primary/5"
                       }`}
-                    />
+                    >
+                      <TaskCompleteMark active={celebratingId === task.id} />
+                    </motion.button>
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm font-medium leading-snug ${
                         task.isOverdue ? "text-red-700 dark:text-red-400" : "text-foreground"

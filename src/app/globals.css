@@ -543,3 +543,84 @@ textarea:focus-visible {
      otherwise out-rank these single-class rules — media queries add no specificity */
   .bb-bob, .bb-pop, .bb-logo-enter, .bb-bob.bb-logo-enter { animation: none; transition: none; }
 }
+
+/* ============================================================
+   Task-completion mark — the moment a chore is marked done
+   (wow-ui-standard, principle 6 "nothing dead" + motion diet)
+
+   Animates ONLY stroke-dashoffset / transform / opacity.
+   The check draw is 180ms — inside the 200ms feedback ceiling.
+   People tick several chores in a row here, so this is one precise
+   mark, not a confetti cannon: restraint is the luxury.
+   ============================================================ */
+.bb-mark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  color: #fff;
+}
+
+.bb-mark__check {
+  width: 100%;
+  height: 100%;
+  /* The donut lesson: without fill-box the origin is the whole viewBox. */
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.bb-mark__check path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0; /* base state = final visible state (belt 3) */
+  animation: bb-mark-draw 180ms ease-out both;
+}
+
+/* Single soft ring pulse — transform + opacity only. */
+.bb-mark__ring {
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  box-shadow: 0 0 0 2px var(--color-success);
+  opacity: 0;
+  transform: scale(0.8);
+  animation: bb-mark-ring 320ms ease-out both;
+}
+
+@keyframes bb-mark-draw {
+  from { stroke-dashoffset: 1; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes bb-mark-ring {
+  0%   { opacity: .55; transform: scale(.8); }
+  100% { opacity: 0;   transform: scale(1.6); }
+}
+
+/* Belt 1 — CSS. Belt 3 already guarantees the drawn check is the base state,
+   so cancelling the animation leaves a finished check, never an empty box. */
+@media (prefers-reduced-motion: reduce) {
+  .bb-mark__check path { animation: none; stroke-dashoffset: 0; }
+  .bb-mark__ring { animation: none; display: none; }
+}
+
+/* ============================================================
+   Progress bars on the motion diet (wow-ui-standard §א)
+
+   Animating `width` is off-diet: it drives layout on every frame.
+   `scaleX` runs on the compositor instead.
+
+   RTL: a progress bar must grow FROM the start edge, so the origin is
+   the right in Hebrew and the left in English. There is no widely
+   supported logical value for transform-origin, so it is flipped on
+   [dir] explicitly. The wrapper keeps overflow hidden so the scaled
+   child cannot escape the rounded corners.
+   ============================================================ */
+.bb-bar {
+  transform-origin: right center;
+  will-change: transform;
+}
+
+[dir="ltr"] .bb-bar {
+  transform-origin: left center;
+}

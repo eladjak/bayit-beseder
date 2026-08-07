@@ -743,10 +743,10 @@ function SlimProgressBar({ current, total }: { current: number; total: number })
   return (
     <div className="w-full h-1 bg-border overflow-hidden rounded-full">
       <motion.div
-        className="h-full rounded-full"
+        className="h-full w-full rounded-full bb-bar"
         style={{ background: "linear-gradient(90deg, #6366F1, #8B5CF6, #D946EF)" }}
-        animate={{ width: `${pct}%` }}
-        initial={{ width: "0%" }}
+        animate={{ scaleX: pct / 100 }}
+        initial={{ scaleX: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
       />
     </div>

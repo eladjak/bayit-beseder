@@ -8,6 +8,7 @@ import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
 import { createClient } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
+import { isTaskOverdue } from "@/lib/task-flags";
 
 interface EmergencyTask {
   id: string;
@@ -15,6 +16,9 @@ interface EmergencyTask {
   category: string;
   estimated_minutes: number;
   due_date: string | null;
+  status: string | null;
+  /** Live column is `text` ("true"/"false") — read via isRecurring, never `!!`. */
+  recurring: unknown;
 }
 
 // Emergency mode state is stored in localStorage since the households table
@@ -57,7 +61,7 @@ export default function EmergencyPage() {
       const today = new Date().toISOString().slice(0, 10);
       const { data: pendingTasks } = await supabase
         .from("tasks")
-        .select("id, title, category_id, due_date, status, points")
+        .select("id, title, category_id, due_date, status, points, recurring")
         .lte("due_date", today)
         .eq("status", "pending")
         .order("due_date", { ascending: true });
@@ -70,6 +74,8 @@ export default function EmergencyPage() {
           category: task.category_id ?? "general",
           estimated_minutes: (task.points ?? 10) <= 5 ? 5 : (task.points ?? 10) <= 15 ? 15 : 30,
           due_date: task.due_date,
+          status: task.status,
+          recurring: (task as { recurring?: unknown }).recurring,
         }));
         setTasks(emergencyTasks);
       }
@@ -212,8 +218,9 @@ export default function EmergencyPage() {
             <p className="text-sm text-muted">{t("emergency.completedFromList")}</p>
             <div className="h-2 bg-blue-100 dark:bg-blue-900/40 rounded-full mt-3 overflow-hidden">
               <motion.div
-                className="h-full bg-blue-500 rounded-full"
-                animate={{ width: `${percentage}%` }}
+                className="h-full w-full bg-blue-500 rounded-full bb-bar"
+                animate={{ scaleX: percentage / 100 }}
+                initial={{ scaleX: 0 }}
                 transition={{ duration: 0.3 }}
               />
             </div>
@@ -278,7 +285,7 @@ export default function EmergencyPage() {
                         <Clock className="w-3 h-3" />
                         {task.estimated_minutes} {t("common.minutes")}
                       </span>
-                      {task.due_date && task.due_date < new Date().toISOString().slice(0, 10) && (
+                      {isTaskOverdue(task) && (
                         <span className="text-[10px] text-red-500 font-medium">{t("common.overdue")}</span>
                       )}
                     </div>

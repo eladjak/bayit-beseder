@@ -9,6 +9,7 @@ import {
   type DailyBriefData,
 } from "@/lib/whatsapp-messages";
 import { maybeDeliverToOwner } from "@/lib/agent/deliver";
+import { isTaskOverdue } from "@/lib/task-flags";
 
 /**
  * GET /api/agent/brief?householdId=<uuid>
@@ -84,14 +85,20 @@ export async function GET(request: NextRequest) {
   const todayTasks = tasks ?? [];
 
   // 6. Overdue count
+  //
+  // Filtered in JS rather than SQL because `recurring` is a `text` column in the
+  // live database, so a `.eq("recurring", false)` boolean filter does not match.
+  // isTaskOverdue is the single source of truth for what "overdue" means, and it
+  // excludes recurring chores — they are due again, not late. Without that, this
+  // count reported 43 for the real household when the true number was 0.
   let overdueQuery = supabase
     .from("tasks")
-    .select("id")
+    .select("id, due_date, status, recurring")
     .lt("due_date", today)
     .neq("status", "completed");
   if (householdId) overdueQuery = overdueQuery.eq("household_id", householdId);
   const { data: overdue } = await overdueQuery;
-  const overdueCount = overdue?.length ?? 0;
+  const overdueCount = (overdue ?? []).filter((t) => isTaskOverdue(t, today)).length;
 
   // 7. Resolve assignee names
   const assignedIds = [

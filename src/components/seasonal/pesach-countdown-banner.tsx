@@ -87,9 +87,9 @@ export function PesachCountdownBanner({
       {progress.total > 0 && (
         <div className="mt-3 h-1.5 bg-white/20 rounded-full overflow-hidden relative z-10">
           <motion.div
-            className="h-full bg-white/80 rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${progressPct}%` }}
+            className="h-full w-full bg-white/80 rounded-full bb-bar"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: progressPct / 100 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           />
         </div>
