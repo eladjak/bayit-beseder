@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
+import { isRecurring } from "@/lib/task-flags";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -147,7 +148,7 @@ export default function SettingsPage() {
         id: task.id,
         title: task.title,
         category: null,
-        recurring: task.recurring,
+        recurring: isRecurring(task.recurring),
         status: task.status,
         due_date: task.due_date,
         created_at: task.created_at,

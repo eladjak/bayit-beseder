@@ -83,11 +83,35 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
 
-  // Alopik v2 #3: Show onboarding wizard once per user (localStorage flag)
+  // Alopik v2 #3: Show onboarding wizard once per user (localStorage flag).
+  //
+  // It must QUEUE BEHIND the conversational household-setup wizard on the
+  // dashboard. Both used to open at once, and because the setup wizard renders
+  // above it, the tour's own "דלג"/"סגור" controls were physically unclickable —
+  // a first-run user was stuck looking at a dialog they could not dismiss.
+  // Poll the setup flag so the tour opens the moment setup is done or skipped.
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const done = localStorage.getItem("bayit-onboarding-done-v1");
-    if (!done) setOnboardingOpen(true);
+    if (localStorage.getItem("bayit-onboarding-done-v1")) return;
+
+    setOnboardingOpen(true);
+  }, []);
+
+  // Whether the dashboard's household-setup wizard is currently on screen.
+  //
+  // This is a CONTINUOUS condition, not a one-shot check with a grace period.
+  // The setup wizard is dynamically imported and gated on tasks loading, so it
+  // can appear AFTER the tour has already opened — a timed guess loses that race
+  // (verified: a 1500ms grace still produced two stacked dialogs). Suppressing
+  // the tour for as long as the wizard is present cannot race.
+  const [setupWizardVisible, setSetupWizardVisible] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const check = () => setSetupWizardVisible(!!document.querySelector("[data-setup-wizard]"));
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
   }, []);
 
   // Alopik v2 Phase 3: auto-unlock pets + backgrounds when streak advances
@@ -176,7 +200,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 
       {/* Alopik v2 #3: Adult-toned onboarding wizard (once per user, re-trigger from settings) */}
       <OnboardingWizard
-        open={onboardingOpen}
+        open={onboardingOpen && !setupWizardVisible}
         onClose={() => {
           setOnboardingOpen(false);
           if (typeof window !== "undefined") {

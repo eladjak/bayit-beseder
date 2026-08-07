@@ -43,6 +43,7 @@ import { CategoryCard } from "@/components/category-card";
 import { TaskCategoryManager } from "@/components/tasks/task-category-manager";
 import { TaskListSkeleton } from "@/components/skeleton";
 import { useTasks } from "@/hooks/useTasks";
+import { isRecurring } from "@/lib/task-flags";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useProfile } from "@/hooks/useProfile";
 import { useCategories } from "@/hooks/useCategories";
@@ -88,6 +89,7 @@ export default function TasksPage() {
   const [showTemplatePicker, setShowTemplatePicker] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [titleError, setTitleError] = useState<string | null>(null);
   const [newTaskCategory, setNewTaskCategory] = useState("general");
   const [editingTask, setEditingTask] = useState<DbTaskView | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
@@ -178,7 +180,13 @@ export default function TasksPage() {
   if (!tasksLoading && dbTasks.length > 0) {
     sawDbTasks.current = true;
   }
-  const hasDbTasks = sawDbTasks.current || (!tasksLoading && dbTasks.length > 0);
+  // A member of a household is always in "real data" mode — even with zero tasks.
+  // WHY — this gates the add-task form (`showAddForm && hasDbTasks`). With the old
+  // `dbTasks.length > 0` test, a household with no tasks could never render the
+  // form, so "+ משימה" was a dead button for exactly the users who most needed it:
+  // the ones with an empty home trying to add their first chore.
+  const hasDbTasks =
+    sawDbTasks.current || !!profile?.household_id || (!tasksLoading && dbTasks.length > 0);
 
   // Optimistic state: track tasks completed in this session before DB confirms
   const [optimisticCompleted, setOptimisticCompleted] = useState<Set<string>>(new Set());
@@ -214,7 +222,7 @@ export default function TasksPage() {
           dbTask.status !== "completed";
 
         // For recurring tasks, use today's completions instead of permanent status.
-        const dbCompleted = dbTask.recurring
+        const dbCompleted = isRecurring(dbTask.recurring)
           ? isCompletedToday(dbTask.id)
           : dbTask.status === "completed";
         const isCompleted = optimisticCompleted.has(dbTask.id)
@@ -232,7 +240,7 @@ export default function TasksPage() {
           isCompleted,
           tips: [],
           isEmergency: false,
-          recurrenceLabel: dbTask.recurring ? t("common.recurring") : t("common.oneTime"),
+          recurrenceLabel: isRecurring(dbTask.recurring) ? t("common.recurring") : t("common.oneTime"),
           dueDate: dbTask.due_date ?? undefined,
           isOverdue: !!isOverdue,
           points: dbTask.points ?? 0,
@@ -320,7 +328,7 @@ export default function TasksPage() {
       const task = dbTasks.find((t) => t.id === taskId);
       if (!task) return;
 
-      const dbCompleted = task.recurring
+      const dbCompleted = isRecurring(task.recurring)
         ? isCompletedToday(task.id)
         : task.status === "completed";
       const isCurrentlyCompleted = optimisticCompleted.has(taskId)
@@ -338,7 +346,7 @@ export default function TasksPage() {
           return next;
         });
 
-        if (task.recurring) {
+        if (isRecurring(task.recurring)) {
           const supabase = (await import("@/lib/supabase")).createClient();
           const startOfDay = new Date();
           startOfDay.setHours(0, 0, 0, 0);
@@ -384,7 +392,7 @@ export default function TasksPage() {
         });
 
         const photoUrl = pendingPhotoUrl[taskId] ?? undefined;
-        const result = await markComplete({ taskId, userId: profile.id, recurring: !!task.recurring, photoUrl });
+        const result = await markComplete({ taskId, userId: profile.id, recurring: isRecurring(task.recurring), photoUrl });
         setOptimisticCompleted((prev) => {
           const next = new Set(prev);
           next.delete(taskId);
@@ -410,7 +418,15 @@ export default function TasksPage() {
 
   // Add new task to DB
   const handleAddTask = useCallback(async () => {
-    if (!newTaskTitle.trim()) return;
+    // Refuse an empty/whitespace-only title with a message a human can read.
+    // (Previously this was a silent `return` behind a disabled button, so the
+    // user got no explanation at all — a refusal you have to infer.)
+    if (!newTaskTitle.trim()) {
+      setTitleError(t("tasks.titleRequired"));
+      toast.error(t("tasks.titleRequired"));
+      return;
+    }
+    setTitleError(null);
 
     // Find category_id from categories table
     const categoryName = CATEGORY_KEY_TO_NAME[newTaskCategory] ?? newTaskCategory;
@@ -735,9 +751,18 @@ export default function TasksPage() {
             <input
               type="text"
               value={newTaskTitle}
-              onChange={(e) => setNewTaskTitle(e.target.value)}
+              onChange={(e) => {
+                setNewTaskTitle(e.target.value);
+                if (titleError) setTitleError(null);
+              }}
               placeholder={t("tasks.whatToDo")}
-              className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+              aria-invalid={titleError ? true : undefined}
+              aria-describedby={titleError ? "new-task-title-error" : undefined}
+              className={`flex-1 px-3 py-2 rounded-lg bg-background border text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 ${
+                titleError
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-border focus:ring-primary"
+              }`}
               dir="rtl"
             />
             <VoiceInputButton
@@ -746,6 +771,16 @@ export default function TasksPage() {
               className="flex-shrink-0 w-8 h-8"
             />
           </div>
+          {titleError && (
+            <p
+              id="new-task-title-error"
+              role="alert"
+              className="text-xs text-red-600 font-medium"
+              dir="rtl"
+            >
+              {titleError}
+            </p>
+          )}
           <div className="flex gap-2 flex-wrap">
             {taskCategories.map((tc) => (
               <button
@@ -769,8 +804,7 @@ export default function TasksPage() {
           <div className="flex gap-2">
             <button
               onClick={handleAddTask}
-              disabled={!newTaskTitle.trim()}
-              className="flex-1 py-2 rounded-2xl gradient-primary text-white text-sm font-semibold disabled:opacity-50 shadow-md shadow-primary/20 transition-transform duration-100 active:scale-[0.97]"
+              className="flex-1 py-2 rounded-2xl gradient-primary text-white text-sm font-semibold shadow-md shadow-primary/20 transition-transform duration-100 active:scale-[0.97]"
             >
               {t("tasks.letsDoIt")}
             </button>
@@ -1016,8 +1050,8 @@ export default function TasksPage() {
             <AnimatePresence mode="popLayout">
               {pendingDbTasks.map((task) => {
                 const display = resolveCategoryDisplay(task.categoryKey);
-                const isRecurring = task.recurrenceLabel === t("common.recurring");
-                const skipped = isRecurring && isSkippedToday(task.id);
+                const taskIsRecurring = task.recurrenceLabel === t("common.recurring");
+                const skipped = taskIsRecurring && isSkippedToday(task.id);
                 return (
                   <SortableTaskRow
                     key={task.id}
@@ -1087,7 +1121,7 @@ export default function TasksPage() {
                           </span>
                         )}
                         {/* Streak badge for recurring tasks */}
-                        {isRecurring && (() => {
+                        {taskIsRecurring && (() => {
                           const streak = getStreak(task.id);
                           return streak >= 2 ? (
                             <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-orange-50 dark:bg-orange-950/30 text-orange-600 dark:text-orange-400 font-semibold border border-orange-200/50 dark:border-orange-700/30">
@@ -1167,7 +1201,7 @@ export default function TasksPage() {
                         </motion.button>
                       )}
                       {/* Skip button (recurring only) */}
-                      {isRecurring && (
+                      {taskIsRecurring && (
                         <button
                           onClick={() => {
                             toggleSkip(task.id);

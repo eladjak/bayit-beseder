@@ -27,6 +27,7 @@ import { filterTasksByEnergy } from "@/lib/energy-filter";
 import type { EnergyLevel } from "@/lib/energy-filter";
 import { useProfile } from "@/hooks/useProfile";
 import { useTasks } from "@/hooks/useTasks";
+import { isRecurring } from "@/lib/task-flags";
 import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
 import { useAppSounds } from "@/hooks/useAppSound";
@@ -217,7 +218,14 @@ export default function DashboardPage() {
       .catch(() => {});
   }, [refetchTasks]);
 
-  const hasDbTasks = !tasksLoading && dbTasks.length > 0;
+  // An authenticated member of a household always sees their REAL list — even
+  // when that list is empty. MOCK_TASKS is now strictly the logged-out demo.
+  //
+  // WHY — previously this was `dbTasks.length > 0`, so a household with no tasks
+  // was shown 8 fabricated chores with working checkboxes that wrote to
+  // localStorage instead of the database. A brand-new home's first screen was
+  // therefore a list of chores nobody had ever added, and ticking them was theatre.
+  const hasDbTasks = !tasksLoading && (!!profile?.household_id || dbTasks.length > 0);
 
   const dbTaskItems: TaskItem[] = useMemo(
     () =>
@@ -228,7 +236,7 @@ export default function DashboardPage() {
           : "general";
         // Recurring tasks: check today's completions for daily reset.
         // One-time tasks: use permanent status.
-        const completed = t.recurring
+        const completed = isRecurring(t.recurring)
           ? isCompletedToday(t.id)
           : t.status === "completed";
         return {
@@ -317,11 +325,11 @@ export default function DashboardPage() {
       if (hasDbTasks && profile) {
         const task = dbTasks.find((t) => t.id === taskId);
         // For recurring tasks, check today's completions; for one-time, check status
-        const alreadyDone = task?.recurring
+        const alreadyDone = isRecurring(task?.recurring)
           ? isCompletedToday(taskId)
           : task?.status === "completed";
         if (task && !alreadyDone) {
-          const result = await markComplete({ taskId, userId: profile.id, recurring: !!task.recurring });
+          const result = await markComplete({ taskId, userId: profile.id, recurring: isRecurring(task.recurring) });
           if (result === null) {
             toast.error("לא ניתן לסמן את המשימה כהושלמה. נסה שוב.");
             return;

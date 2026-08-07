@@ -283,6 +283,7 @@
     "filterByCategory": "Filter by category",
     "whatToDo": "What needs to be done?",
     "addByVoice": "Add by voice",
+    "titleRequired": "Please write what the task is — one line is enough.",
     "letsDoIt": "Let's do it 🚀",
     "taskAdded": "Added! 🙌",
     "taskDeleted": "Gone 🗑️",
