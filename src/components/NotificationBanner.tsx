@@ -54,6 +54,23 @@ export function NotificationBanner() {
     return () => clearTimeout(timer);
   }, [pwaCanInstall]);
 
+  // Never surface while a modal dialog is open.
+  //
+  // Same rule as the service-worker update toast: onboarding is a full-screen
+  // takeover, and an interstitial appearing on top of it competes with the very
+  // controls the user needs to get out. This is a CONTINUOUS condition rather
+  // than a one-shot check — the 30s timer can easily fire while a wizard is
+  // still up, and a timed guess would lose that race.
+  const [modalOpen, setModalOpen] = useState(false);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const check = () => setModalOpen(!!document.querySelector('[aria-modal="true"]'));
+    check();
+    const observer = new MutationObserver(check);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
   const handleEnable = useCallback(async () => {
     setRequesting(true);
 
@@ -88,10 +105,24 @@ export function NotificationBanner() {
     localStorage.setItem("bayit-notification-banner-dismissed", "never");
   }, []);
 
-  if (!visible) return null;
+  if (!visible || modalOpen) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-40 p-3 pointer-events-none">
+    // Anchored ABOVE the bottom navigation, not over the page header.
+    //
+    // WHY — this used to be `fixed top-0 left-0 right-0`, a full-width overlay
+    // pinned across the top of the viewport. On a 390px phone that lands exactly
+    // on the page header, so the title row and its actions were unreachable
+    // underneath it: "+ משימה" on /tasks could not be clicked at all while the
+    // banner was up. Verified repeatedly — it cost a click on every test run.
+    //
+    // A low-priority ask to enable notifications must never obstruct a primary
+    // action. Bottom placement clears the bottom nav pill (fixed bottom-3, z-30)
+    // and leaves every control reachable; the page scrolls behind it.
+    <div
+      className="fixed inset-x-0 z-40 p-3 pointer-events-none"
+      style={{ bottom: "calc(5.5rem + env(safe-area-inset-bottom, 0px))" }}
+    >
       <div className="max-w-lg mx-auto bg-primary text-white rounded-2xl p-4 shadow-lg pointer-events-auto">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
