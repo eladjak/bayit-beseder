@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { Search, Filter } from "lucide-react";
 
 const VoiceInputButton = dynamic(
@@ -158,56 +159,13 @@ function HistoryItem({ task, completion, categoryKey }: HistoryItemProps) {
 }
 
 // ============================================
-// Mock data for demo mode
+// History entry shape
 // ============================================
 
-interface MockHistoryEntry {
+interface HistoryEntry {
   task: TaskRow;
   completion: TaskCompletionRow;
   categoryKey: string;
-}
-
-function buildMockHistory(): MockHistoryEntry[] {
-  const now = new Date();
-  const makeDate = (daysAgo: number, hour = 9): string => {
-    const d = new Date(now);
-    d.setDate(d.getDate() - daysAgo);
-    d.setHours(hour, 30, 0, 0);
-    return d.toISOString();
-  };
-
-  const mockTasks: TaskRow[] = [
-    { id: "m1", household_id: "mock-household", title: "שטיפת כלים", description: null, category_id: "cat-kitchen", assigned_to: null, status: "completed", due_date: null, points: 10, recurring: true, created_at: makeDate(10) },
-    { id: "m2", household_id: "mock-household", title: "ניקוי אמבטיה", description: null, category_id: "cat-bathroom", assigned_to: null, status: "completed", due_date: null, points: 15, recurring: false, created_at: makeDate(9) },
-    { id: "m3", household_id: "mock-household", title: "כביסה", description: null, category_id: "cat-laundry", assigned_to: null, status: "completed", due_date: null, points: 10, recurring: true, created_at: makeDate(7) },
-    { id: "m4", household_id: "mock-household", title: "האכלת חתולים", description: null, category_id: "cat-pets", assigned_to: null, status: "completed", due_date: null, points: 5, recurring: true, created_at: makeDate(5) },
-    { id: "m5", household_id: "mock-household", title: "ניקוי סלון", description: null, category_id: "cat-living", assigned_to: null, status: "completed", due_date: null, points: 20, recurring: false, created_at: makeDate(3) },
-    { id: "m6", household_id: "mock-household", title: "הוצאת אשפה", description: null, category_id: "cat-kitchen", assigned_to: null, status: "completed", due_date: null, points: 5, recurring: true, created_at: makeDate(2) },
-    { id: "m7", household_id: "mock-household", title: "ניקוי מקרר", description: null, category_id: "cat-kitchen", assigned_to: null, status: "completed", due_date: null, points: 25, recurring: false, created_at: makeDate(1) },
-    { id: "m8", household_id: "mock-household", title: "ניקוי חדר שינה", description: null, category_id: "cat-bedroom", assigned_to: null, status: "completed", due_date: null, points: 15, recurring: false, created_at: makeDate(0, 14) },
-  ];
-
-  const categoryMap: Record<string, string> = {
-    "cat-kitchen": "kitchen",
-    "cat-bathroom": "bathroom",
-    "cat-laundry": "laundry",
-    "cat-pets": "pets",
-    "cat-living": "living",
-    "cat-bedroom": "bedroom",
-  };
-
-  return mockTasks.map((task, i) => ({
-    task,
-    completion: {
-      id: `mc${i}`,
-      task_id: task.id,
-      user_id: "demo-user",
-      completed_at: makeDate(mockTasks.length - 1 - i, 9 + i),
-      photo_url: null,
-      notes: null,
-    },
-    categoryKey: categoryMap[task.category_id ?? ""] ?? "general",
-  }));
 }
 
 // ============================================
@@ -243,12 +201,13 @@ export default function HistoryPage() {
     return name ? (CATEGORY_NAME_TO_KEY[name] ?? "general") : "general";
   };
 
-  // Determine whether to use DB data or mock
-  const hasDbData = !loading && completions.length > 0;
-
-  // Build list of history entries
-  const dbEntries: MockHistoryEntry[] = useMemo(() => {
-    if (!hasDbData) return [];
+  // Build list of history entries.
+  //
+  // These are ALWAYS the user's real completions. There is deliberately no
+  // demo/mock fallback: this page is a personal record, so showing invented
+  // entries to someone with no history would misrepresent their own activity.
+  // A user with zero completions gets the empty state below instead.
+  const allEntries: HistoryEntry[] = useMemo(() => {
     return completions
       .map((c) => {
         const task = taskById[c.task_id];
@@ -259,13 +218,9 @@ export default function HistoryPage() {
           categoryKey: getCategoryKey(task.category_id),
         };
       })
-      .filter((e): e is MockHistoryEntry => e !== null);
+      .filter((e): e is HistoryEntry => e !== null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [completions, taskById, categoryMap]);
-
-  const mockEntries = useMemo(() => buildMockHistory(), []);
-
-  const allEntries = hasDbData ? dbEntries : mockEntries;
 
   // Filter by category
   const filteredByCategory = useMemo(() => {
@@ -357,22 +312,45 @@ export default function HistoryPage() {
         </div>
       )}
 
-      {/* Empty State */}
+      {/* Empty State — two distinct cases.
+          A filter that matched nothing is a different situation from having no
+          history at all, and a brand-new user needs a next action, not a
+          "no results" message about a search they never ran. */}
       {!loading && !tasksError && sortedEntries.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-4xl mb-3">📋</p>
-          <p className="text-sm font-medium text-foreground">{t("history.noResults")}</p>
-          <p className="text-xs text-muted mt-1">
-            {search || selectedCategory
-              ? t("tasks.tryOtherCategory")
-              : t("history.noResults")}
-          </p>
+          {search || selectedCategory ? (
+            <>
+              <p className="text-4xl mb-3">🔍</p>
+              <p className="text-sm font-medium text-foreground">
+                {t("history.noResults")}
+              </p>
+              <p className="text-xs text-muted mt-1">
+                {t("tasks.tryOtherCategory")}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-4xl mb-3">📋</p>
+              <p className="text-sm font-medium text-foreground">
+                {t("history.emptyTitle")}
+              </p>
+              <p className="text-xs text-muted mt-1">
+                {t("history.emptySubtitle")}
+              </p>
+              <Link
+                href="/tasks"
+                className="inline-block mt-4 px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium"
+              >
+                {t("history.emptyCta")}
+              </Link>
+            </>
+          )}
         </div>
       )}
 
       {/* History List */}
       {!loading && sortedEntries.length > 0 && (
-        <div className="space-y-2.5">
+        <div className="space-y-2.5" data-testid="history-list">
           {sortedEntries.map((entry) => (
             <HistoryItem
               key={entry.completion.id}
