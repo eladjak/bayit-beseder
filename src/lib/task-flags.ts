@@ -24,3 +24,36 @@ export function isRecurring(value: unknown): boolean {
   if (typeof value === "number") return value === 1;
   return false;
 }
+
+export function todayISO(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * Is this task genuinely overdue?
+ *
+ * A RECURRING task is never overdue. It is simply due again.
+ *
+ * WHY THIS EXISTS — the old test was `due_date < today && status !== 'completed'`.
+ * A recurring task never carries `status = 'completed'` (by design: its done-ness
+ * lives in `task_completions`, so it can reset daily). The two facts combined mean
+ * every recurring chore whose due_date had passed was marked overdue PERMANENTLY,
+ * no matter how many times it had actually been done.
+ *
+ * That is the whole "43 overdue tasks from February and March" shame-wall.
+ * Measured on the real household 2026-08-07: 43 flagged overdue, 43 of them
+ * recurring, and ZERO genuinely-overdue one-off tasks. It was never a data
+ * problem — archiving those 43 would have retired a working chore rotation to
+ * hide a display bug.
+ *
+ * A one-off task with a past due date is still overdue, and still says so.
+ */
+export function isTaskOverdue(
+  task: { due_date?: string | null; status?: string | null; recurring?: unknown },
+  today: string = todayISO()
+): boolean {
+  if (isRecurring(task.recurring)) return false;
+  if (!task.due_date) return false;
+  if (task.status === "completed" || task.status === "skipped") return false;
+  return task.due_date < today;
+}

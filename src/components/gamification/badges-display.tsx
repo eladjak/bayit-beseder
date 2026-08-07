@@ -80,9 +80,9 @@ function BadgeDetailModal({ code, onClose, isEarned, progress }: BadgeDetailModa
                 </div>
                 <div className="h-2 bg-border rounded-full overflow-hidden">
                   <motion.div
-                    className="h-full bg-primary rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${pct}%` }}
+                    className="h-full w-full bg-primary rounded-full bb-bar"
+                    initial={{ scaleX: 0 }}
+                    animate={{ scaleX: pct / 100 }}
                     transition={{ duration: 0.5 }}
                   />
                 </div>
