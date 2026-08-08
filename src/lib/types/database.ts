@@ -6,6 +6,23 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+/**
+ * The `tasks.recurring` column as it ACTUALLY comes back from PostgREST.
+ *
+ * Migration 001 declares this column `boolean`, but production stores `text`,
+ * so reads return the STRINGS "true" / "false" — and `!!"false"` is `true`.
+ * Typing the Row as `boolean` did not merely fail to catch that bug: it
+ * actively reassured the reader that `!!task.recurring` was safe.
+ *
+ * This type is deliberately NOT `boolean`, so that assigning a read value
+ * straight into a boolean is a compile error. Read it through `isRecurring()`
+ * in `src/lib/task-flags.ts`.
+ *
+ * NOTE: `Insert`/`Update` keep `boolean` on purpose — we always WRITE a real
+ * boolean; it is only the READ path that is untrustworthy.
+ */
+export type RecurringFlag = boolean | string;
+
 export type Database = {
   public: {
     Tables: {
@@ -45,7 +62,8 @@ export type Database = {
           due_date: string | null;
           points: number;
           position?: number | null;
-          recurring: boolean;
+          // NOT boolean — see RecurringFlag above. Read via isRecurring().
+          recurring: RecurringFlag;
           created_at: string;
         };
         Insert: {
