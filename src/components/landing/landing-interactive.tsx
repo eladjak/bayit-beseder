@@ -190,7 +190,7 @@ export function SocialProofSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-xs font-semibold tracking-widest text-primary uppercase mb-3"
+          className="text-xs font-semibold tracking-widest text-primary-ink uppercase mb-3"
         >
           בית בסדר במספרים
         </motion.p>

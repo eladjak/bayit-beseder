@@ -229,6 +229,22 @@ body {
    Gradient Utilities
    ============================================ */
 
+/* Indigo as READING TEXT, which is a different requirement from indigo as a
+   button fill and therefore needs its own token.
+   --color-primary cannot be themed for this: it is also the background under
+   white text in bg-primary buttons across the app, so lightening it for dark
+   mode would fix the links and break the buttons. Measured on the live site:
+   #6366F1 as text is 4.30 on the dark background and 3.89 on the dark surface.
+   Use text-primary-ink for text, keep text-primary/bg-primary for fills.
+   Measured: light 6.29 on white, 5.84 on cream, 5.41 over bg-primary/10;
+   dark 9.64 on background, 8.71 on surface, 7.85 over bg-primary/10. */
+.text-primary-ink { color: #4F46E5; }
+:root.dark .text-primary-ink,
+.dark .text-primary-ink { color: #A5B4FC; }
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) .text-primary-ink { color: #A5B4FC; }
+}
+
 /* Carries white text, so every stop has to clear 4.5:1 against white on its own.
    The old tail stop (--color-accent-light, #A78BFA) measured 2.6 and dragged the
    button down to 3.79. These three stops measure 6.29 / 5.70 / 5.38. */

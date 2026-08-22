@@ -127,7 +127,7 @@ function BotBubble({ message, onFollowUp, isLast }: BotBubbleProps) {
                 key={label}
                 type="button"
                 onClick={() => onFollowUp(label)}
-                className="text-xs px-3 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-primary font-medium hover:bg-primary/15 transition-colors active:scale-95"
+                className="text-xs px-3 py-1.5 rounded-full border border-primary/30 bg-primary/5 text-primary-ink font-medium hover:bg-primary/15 transition-colors active:scale-95"
               >
                 {label}
               </button>
