@@ -47,7 +47,7 @@ export function StickyCta() {
               className="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-white font-bold text-base shadow-lg active:scale-95 transition-transform"
               style={{
                 background:
-                  "linear-gradient(135deg, #6366F1 0%, #8B5CF6 60%, #D946EF 100%)",
+                  "linear-gradient(135deg, #4F46E5 0%, #7C3AED 60%, #9333EA 100%)",
               }}
             >
               🚀 התחילו בחינם

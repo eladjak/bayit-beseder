@@ -4,7 +4,11 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary: #6366F1;
+  /* Indigo-600 rather than indigo-500: as text on the cream background the old
+     #6366F1 measured 4.15-4.47, just under the 4.5 threshold, and as a button
+     background under white text it measured the same. Deepening it one step
+     fixes both directions at once and stays inside the brand's indigo. */
+  --color-primary: #4F46E5;
   --color-primary-light: #818CF8;
   --color-primary-dark: #4F46E5;
   /* Warm Joy layer (Sprint 7.31): cream-lavender background instead of cold white.
@@ -13,7 +17,9 @@
   --color-surface: #FFFFFF;
   --color-surface-hover: #F6F1EA;
   --color-foreground: #2A2440;
-  --color-muted: #7A7290;
+  /* #7A7290 measured 4.21 on the cream background — below 4.5 for body text.
+     Same hue, one step deeper. */
+  --color-muted: #5C5472;
   --color-border: #ECE6DC;
 
   --color-success: #10B981;
@@ -35,8 +41,8 @@
   --color-mint: #34D399;
   --color-cream: #FFF7EC;
 
-  --color-muted-foreground: #7A7290;
-  --color-ring: #6366F1;
+  --color-muted-foreground: #5C5472;
+  --color-ring: #4F46E5;
 
   --font-sans: var(--font-heebo);
 }
@@ -62,6 +68,11 @@ body {
     --color-muted-foreground: #9896B0 !important;
     --color-border: #2D2A45 !important;
     --color-ring: #818CF8 !important;
+    /* The light theme deepens --color-primary to #4F46E5 for contrast on cream.
+       On dark surfaces that same indigo drops to 3.06, so dark mode keeps the
+       lighter indigo it already shipped with. Do not delete: without this line
+       the light-mode contrast fix silently regresses dark mode. */
+    --color-primary: #6366F1 !important;
     color-scheme: dark;
   }
 }
@@ -77,6 +88,11 @@ body {
   --color-muted-foreground: #9896B0 !important;
   --color-border: #2D2A45 !important;
   --color-ring: #818CF8 !important;
+  /* The light theme deepens --color-primary to #4F46E5 for contrast on cream.
+     On dark surfaces that same indigo drops to 3.06, so dark mode keeps the
+     lighter indigo it already shipped with. Do not delete: without this line
+     the light-mode contrast fix silently regresses dark mode. */
+  --color-primary: #6366F1 !important;
   color-scheme: dark;
 }
 
@@ -213,8 +229,11 @@ body {
    Gradient Utilities
    ============================================ */
 
+/* Carries white text, so every stop has to clear 4.5:1 against white on its own.
+   The old tail stop (--color-accent-light, #A78BFA) measured 2.6 and dragged the
+   button down to 3.79. These three stops measure 6.29 / 5.70 / 5.38. */
 .gradient-primary {
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 50%, var(--color-accent-light) 100%);
+  background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #9333EA 100%);
 }
 
 .gradient-hero {

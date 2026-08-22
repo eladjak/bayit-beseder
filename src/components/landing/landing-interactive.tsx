@@ -190,7 +190,7 @@ export function SocialProofSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-xs font-semibold tracking-widest text-primary/70 uppercase mb-3"
+          className="text-xs font-semibold tracking-widest text-primary uppercase mb-3"
         >
           בית בסדר במספרים
         </motion.p>
@@ -473,7 +473,7 @@ export function FloatingCta() {
             className="flex items-center gap-2 px-7 py-3.5 rounded-full text-white font-bold text-base shadow-2xl hover:shadow-primary/40 transition-all hover:scale-105 active:scale-95"
             style={{
               background:
-                "linear-gradient(135deg, #6366F1 0%, #8B5CF6 60%, #D946EF 100%)",
+                "linear-gradient(135deg, #4F46E5 0%, #7C3AED 60%, #9333EA 100%)",
               boxShadow:
                 "0 8px 32px rgba(99,102,241,0.4), 0 2px 8px rgba(0,0,0,0.15)",
             }}

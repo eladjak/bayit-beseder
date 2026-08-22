@@ -478,6 +478,7 @@ export function FaqChat() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="שאלו כל שאלה על בית בסדר..."
+            aria-label="שאלו כל שאלה על בית בסדר"
             disabled={isBusy}
             dir="rtl"
             className="flex-1 text-sm bg-transparent outline-none text-foreground placeholder:text-muted disabled:opacity-50"
@@ -486,7 +487,7 @@ export function FaqChat() {
             type="submit"
             disabled={!inputValue.trim() || isBusy}
             className="w-8 h-8 rounded-full flex items-center justify-center text-white disabled:opacity-40 transition-opacity flex-shrink-0"
-            style={{ background: "linear-gradient(135deg, #6366F1, #8B5CF6)" }}
+            style={{ background: "linear-gradient(135deg, #4F46E5, #7C3AED)" }}
             aria-label="שלח שאלה"
           >
             {isStreaming ? (

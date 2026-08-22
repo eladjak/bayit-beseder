@@ -217,7 +217,11 @@ export default function LandingPage() {
         <div
           className="absolute inset-0"
           style={{
-            background: "linear-gradient(135deg, #6366F1 0%, #8B5CF6 40%, #D946EF 70%, #EC4899 100%)",
+            // Same indigo -> violet -> fuchsia -> pink run, deepened one step so
+            // white text clears 4.5:1 on every stop. The old fuchsia/pink end
+            // measured 3.46 / 3.53 against solid white and worse under the
+            // translucent text below it.
+            background: "linear-gradient(135deg, #3730A3 0%, #5B21B6 40%, #86198F 70%, #9F1239 100%)",
           }}
         />
         <div className="absolute inset-0 opacity-20" style={{
@@ -237,19 +241,19 @@ export default function LandingPage() {
 
           <div className="flex flex-wrap items-center justify-center gap-2 mb-5 text-sm text-white/85">
             <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15">👫 זוגות</span>
-            <span className="text-white/40">·</span>
+            <span className="text-white/85">·</span>
             <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15">👨‍👩‍👧 משפחות</span>
-            <span className="text-white/40">·</span>
+            <span className="text-white/85">·</span>
             <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15">🤝 שותפים</span>
-            <span className="text-white/40">·</span>
+            <span className="text-white/85">·</span>
             <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15">🙋 סינגלים</span>
           </div>
 
-          <p className="text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-8 leading-relaxed">
+          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8 leading-relaxed">
             משימות עם נקודות, תכנון שבועי חכם, רשימת קניות משותפת,
             פטים ורקעים שנפתחים עם הרצף שלכם, וגלגל מזל יום שישי.
             <br />
-            <span className="text-white/60 text-base">בלי ויכוחים. בלי שיפוט. רק אתם והבית. 💖</span>
+            <span className="text-white/90 text-base">בלי ויכוחים. בלי שיפוט. רק אתם והבית. 💖</span>
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
@@ -262,7 +266,7 @@ export default function LandingPage() {
             </a>
           </div>
 
-          <p className="text-xs text-white/50 mt-4">
+          <p className="text-xs text-white/85 mt-4">
             לא צריך להוריד מחנות. עובד ישר מהדפדפן.
           </p>
 
@@ -356,7 +360,7 @@ export default function LandingPage() {
           href="/login"
           className="inline-block px-10 py-4 rounded-2xl text-white font-bold text-lg shadow-xl hover:shadow-2xl transition-all hover:scale-105 active:scale-95"
           style={{
-            background: "linear-gradient(135deg, #6366F1, #8B5CF6, #D946EF)",
+            background: "linear-gradient(135deg, #4F46E5, #7C3AED, #9333EA)",
           }}
         >
           🏠 בואו נתחיל!
@@ -395,7 +399,7 @@ export default function LandingPage() {
               💬 צור קשר
             </Link>
           </div>
-          <p className="text-[11px] text-muted/70 mt-6">
+          <p className="text-[11px] text-muted mt-6">
             נבנה עם{" "}
             <a href="https://nextjs.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">Next.js</a>
             {" · "}
@@ -447,7 +451,7 @@ export default function LandingPage() {
             <Link href="/blog" className="text-muted hover:text-foreground hover:underline">טיפים לניהול הבית</Link>
           </div>
 
-          <p className="text-muted/60">בית בסדר © 2026 — נבנה באהבה בישראל 🇮🇱</p>
+          <p className="text-muted">בית בסדר © 2026 — נבנה באהבה בישראל 🇮🇱</p>
         </div>
       </footer>
 
