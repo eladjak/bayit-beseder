@@ -581,7 +581,19 @@
     "resetSent": "נשלח! בדקו את המייל",
     "loginButton": "התחברו",
     "registerButton": "הרשמו",
-    "orDivider": "או"
+    "orDivider": "או",
+    "errors": {
+      "emailRequired": "צריך למלא אימייל",
+      "emailInvalid": "האימייל לא נראה תקין. צריך להיראות כמו name@example.com",
+      "passwordRequired": "צריך למלא סיסמה",
+      "nameRequired": "צריך למלא שם מלא",
+      "passwordTooShort": "הסיסמה צריכה להיות באורך 6 תווים לפחות",
+      "passwordsDoNotMatch": "שתי הסיסמאות לא זהות",
+      "confirmPasswordRequired": "צריך לאמת את הסיסמה",
+      "summaryTitle": "לא הצלחנו לשלוח את הטופס"
+    },
+    "showPassword": "הצגת הסיסמה",
+    "hidePassword": "הסתרת הסיסמה"
   },
   "onboarding": {
     "welcomeTitle": "היי! אני העוזר שלכם",

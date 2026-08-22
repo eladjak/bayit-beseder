@@ -581,7 +581,19 @@
     "resetSent": "Sent! Check your email",
     "loginButton": "Login",
     "registerButton": "Register",
-    "orDivider": "or"
+    "orDivider": "or",
+    "errors": {
+      "emailRequired": "Please enter an email address",
+      "emailInvalid": "That email does not look right. It should look like name@example.com",
+      "passwordRequired": "Please enter a password",
+      "nameRequired": "Please enter your full name",
+      "passwordTooShort": "Password must be at least 6 characters",
+      "passwordsDoNotMatch": "The two passwords do not match",
+      "confirmPasswordRequired": "Please confirm your password",
+      "summaryTitle": "We could not submit the form"
+    },
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "onboarding": {
     "welcomeTitle": "Hi! I'm your home assistant",

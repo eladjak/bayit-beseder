@@ -195,10 +195,13 @@ export function NotificationSettings({
             </div>
             <div className="flex items-center gap-3">
               <div className="flex-1">
-                <label className="text-xs text-muted block mb-1">
+                {/* htmlFor/id: the label was a sibling with no association,
+                    so it read to the eye and to nothing else. */}
+                <label htmlFor="quiet-start" className="text-xs text-muted block mb-1">
                   {t("settings.notificationSection.quietStart")}
                 </label>
                 <input
+                  id="quiet-start"
                   type="time"
                   value={granularPrefs.quietStart}
                   onChange={(e) => updatePref("quietStart", e.target.value)}
@@ -207,10 +210,13 @@ export function NotificationSettings({
                 />
               </div>
               <div className="flex-1">
-                <label className="text-xs text-muted block mb-1">
+                {/* htmlFor/id: the label was a sibling with no association,
+                    so it read to the eye and to nothing else. */}
+                <label htmlFor="quiet-end" className="text-xs text-muted block mb-1">
                   {t("settings.notificationSection.quietEnd")}
                 </label>
                 <input
+                  id="quiet-end"
                   type="time"
                   value={granularPrefs.quietEnd}
                   onChange={(e) => updatePref("quietEnd", e.target.value)}

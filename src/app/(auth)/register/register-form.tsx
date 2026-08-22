@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -11,6 +11,7 @@ import {
   Eye,
   EyeOff,
   User,
+  AlertCircle,
 } from "lucide-react";
 import { signUp, signInWithGoogle } from "@/lib/auth";
 import { toast } from "sonner";
@@ -27,19 +28,35 @@ export function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const { t } = useTranslation();
 
+  // Every failure used to go to a toast only: no focus move, nothing tied to
+  // the field, and an empty submit hit a bare `return` that said nothing at all.
+  const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string; confirmPassword?: string }>({});
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const confirmRef = useRef<HTMLInputElement>(null);
+  const looksLikeEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
-    if (!name || !email || !password) return;
 
-    if (password !== confirmPassword) {
-      toast.error("הסיסמאות לא תואמות.");
+    const next: typeof errors = {};
+    if (!name.trim()) next.name = t("auth.errors.nameRequired");
+    if (!email.trim()) next.email = t("auth.errors.emailRequired");
+    else if (!looksLikeEmail(email)) next.email = t("auth.errors.emailInvalid");
+    if (!password) next.password = t("auth.errors.passwordRequired");
+    else if (password.length < 6) next.password = t("auth.errors.passwordTooShort");
+    if (!confirmPassword) next.confirmPassword = t("auth.errors.confirmPasswordRequired");
+    else if (password && password !== confirmPassword) next.confirmPassword = t("auth.errors.passwordsDoNotMatch");
+
+    if (next.name || next.email || next.password || next.confirmPassword) {
+      setErrors(next);
+      // Focus the FIRST invalid field, in DOM order.
+      const first = next.name ? nameRef : next.email ? emailRef : next.password ? passwordRef : confirmRef;
+      first.current?.focus();
       return;
     }
-
-    if (password.length < 6) {
-      toast.error("הסיסמה חייבת להכיל לפחות 6 תווים.");
-      return;
-    }
+    setErrors({});
 
     setLoading(true);
     const result = await signUp(email, password, name);
@@ -86,73 +103,122 @@ export function RegisterForm() {
         </div>
 
         {/* Registration Form */}
-        <form onSubmit={handleRegister} className="w-full space-y-3">
-          <div className="relative">
-            <User className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-            <input
-              type="text"
-              placeholder={t("auth.fullName")}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-surface border border-border rounded-xl pe-10 ps-4 py-3 text-sm focus:outline-none focus:border-primary"
-              autoComplete="name"
-            />
+        <form onSubmit={handleRegister} className="w-full space-y-3" noValidate>
+          <div>
+            <label htmlFor="reg-name" className="sr-only">{t("auth.fullName")}</label>
+            <div className="relative">
+              <User className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" aria-hidden="true" />
+              <input
+                id="reg-name"
+                ref={nameRef}
+                type={"text"}
+                placeholder={t("auth.fullName")}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                aria-invalid={errors.name ? true : undefined}
+                aria-describedby={errors.name ? "reg-name-error" : undefined}
+                className={`w-full bg-surface border rounded-xl pe-10 ps-4 py-3 text-sm focus:outline-none ${errors.name ? "border-danger focus:border-danger" : "border-border focus:border-primary"}`}
+                autoComplete="name"
+              />
+            </div>
+            {errors.name && (
+              <p id="reg-name-error" role="alert" className="flex items-start gap-1.5 mt-1.5 text-xs text-danger">
+                <AlertCircle className="w-3.5 h-3.5 mt-px shrink-0" aria-hidden="true" />
+                <span>{errors.name}</span>
+              </p>
+            )}
           </div>
 
-          <div className="relative">
-            <Mail className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-            <input
-              type="email"
-              placeholder={t("auth.email")}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-surface border border-border rounded-xl pe-10 ps-4 py-3 text-sm focus:outline-none focus:border-primary"
-              dir="ltr"
-              autoComplete="email"
-            />
+          <div>
+            <label htmlFor="reg-email" className="sr-only">{t("auth.email")}</label>
+            <div className="relative">
+              <Mail className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" aria-hidden="true" />
+              <input
+                id="reg-email"
+                ref={emailRef}
+                type={"email"}
+                placeholder={t("auth.email")}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                aria-invalid={errors.email ? true : undefined}
+                aria-describedby={errors.email ? "reg-email-error" : undefined}
+                className={`w-full bg-surface border rounded-xl pe-10 ps-4 py-3 text-sm focus:outline-none ${errors.email ? "border-danger focus:border-danger" : "border-border focus:border-primary"}`}
+                dir="ltr"
+                autoComplete="email"
+              />
+            </div>
+            {errors.email && (
+              <p id="reg-email-error" role="alert" className="flex items-start gap-1.5 mt-1.5 text-xs text-danger">
+                <AlertCircle className="w-3.5 h-3.5 mt-px shrink-0" aria-hidden="true" />
+                <span>{errors.email}</span>
+              </p>
+            )}
           </div>
 
-          <div className="relative">
-            <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder={t("auth.password")}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-surface border border-border rounded-xl pe-10 ps-10 py-3 text-sm focus:outline-none focus:border-primary"
-              dir="ltr"
-              autoComplete="new-password"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((p) => !p)}
-              className="absolute start-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground"
-              tabIndex={-1}
-            >
-              {showPassword ? (
-                <EyeOff className="w-4 h-4" />
-              ) : (
-                <Eye className="w-4 h-4" />
-              )}
-            </button>
+          <div>
+            <label htmlFor="reg-password" className="sr-only">{t("auth.password")}</label>
+            <div className="relative">
+              <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" aria-hidden="true" />
+              <input
+                id="reg-password"
+                ref={passwordRef}
+                type={showPassword ? "text" : "password"}
+                placeholder={t("auth.password")}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                aria-invalid={errors.password ? true : undefined}
+                aria-describedby={errors.password ? "reg-password-error" : undefined}
+                className={`w-full bg-surface border rounded-xl pe-10 ps-10 py-3 text-sm focus:outline-none ${errors.password ? "border-danger focus:border-danger" : "border-border focus:border-primary"}`}
+                dir="ltr"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((p) => !p)}
+                aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+                aria-pressed={showPassword}
+                className="absolute start-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
+              </button>
+            </div>
+            {errors.password && (
+              <p id="reg-password-error" role="alert" className="flex items-start gap-1.5 mt-1.5 text-xs text-danger">
+                <AlertCircle className="w-3.5 h-3.5 mt-px shrink-0" aria-hidden="true" />
+                <span>{errors.password}</span>
+              </p>
+            )}
           </div>
 
-          <div className="relative">
-            <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-            <input
-              type={showPassword ? "text" : "password"}
-              placeholder={t("auth.confirmPassword")}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full bg-surface border border-border rounded-xl pe-10 ps-4 py-3 text-sm focus:outline-none focus:border-primary"
-              dir="ltr"
-              autoComplete="new-password"
-            />
+          <div>
+            <label htmlFor="reg-confirm" className="sr-only">{t("auth.confirmPassword")}</label>
+            <div className="relative">
+              <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" aria-hidden="true" />
+              <input
+                id="reg-confirm"
+                ref={confirmRef}
+                type={showPassword ? "text" : "password"}
+                placeholder={t("auth.confirmPassword")}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                aria-invalid={errors.confirmPassword ? true : undefined}
+                aria-describedby={errors.confirmPassword ? "reg-confirm-error" : undefined}
+                className={`w-full bg-surface border rounded-xl pe-10 ps-4 py-3 text-sm focus:outline-none ${errors.confirmPassword ? "border-danger focus:border-danger" : "border-border focus:border-primary"}`}
+                dir="ltr"
+                autoComplete="new-password"
+              />
+            </div>
+            {errors.confirmPassword && (
+              <p id="reg-confirm-error" role="alert" className="flex items-start gap-1.5 mt-1.5 text-xs text-danger">
+                <AlertCircle className="w-3.5 h-3.5 mt-px shrink-0" aria-hidden="true" />
+                <span>{errors.confirmPassword}</span>
+              </p>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={loading || !name || !email || !password || !confirmPassword}
+            disabled={loading}
             className="w-full py-3 bg-primary text-white rounded-xl font-medium text-sm hover:bg-primary-dark transition-colors disabled:opacity-50"
           >
             {loading ? (

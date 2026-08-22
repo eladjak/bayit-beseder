@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useRef, Suspense } from "react";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles } from "lucide-react";
+import { Loader2, Mail, Lock, Eye, EyeOff, Sparkles, AlertCircle } from "lucide-react";
 import { signIn, signInWithGoogle, resetPassword } from "@/lib/auth";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -36,6 +36,18 @@ function LoginContent() {
   const [resetEmail, setResetEmail] = useState("");
   const { t } = useTranslation();
 
+  // Submission errors, per field plus a form-level one. Previously every failure
+  // went to a toast and nothing else: no focus move, nothing tied to the field,
+  // and the submit button sat disabled while the form was empty, so a keyboard
+  // user pressing it got silence and no reason.
+  const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const resetEmailRef = useRef<HTMLInputElement>(null);
+  const [resetError, setResetError] = useState("");
+
+  const looksLikeEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
   const errorParam = searchParams.get("error");
   const resetDone = searchParams.get("reset") === "true";
 
@@ -51,14 +63,29 @@ function LoginContent() {
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (!email || !password) return;
+
+    // Validate first, name the field, and put the caret in it. A message the
+    // user has to go looking for is a message a screen-reader user never finds.
+    const next: { email?: string; password?: string } = {};
+    if (!email.trim()) next.email = t("auth.errors.emailRequired");
+    else if (!looksLikeEmail(email)) next.email = t("auth.errors.emailInvalid");
+    if (!password) next.password = t("auth.errors.passwordRequired");
+
+    if (next.email || next.password) {
+      setErrors(next);
+      (next.email ? emailRef : passwordRef).current?.focus();
+      return;
+    }
+    setErrors({});
 
     setLoading(true);
     const result = await signIn(email, password);
     setLoading(false);
 
     if (result.error) {
+      setErrors({ form: result.error });
       toast.error(result.error);
+      emailRef.current?.focus();
       return;
     }
 
@@ -85,14 +112,24 @@ function LoginContent() {
 
   async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault();
-    if (!resetEmail) return;
+
+    if (!resetEmail.trim() || !looksLikeEmail(resetEmail)) {
+      setResetError(
+        !resetEmail.trim() ? t("auth.errors.emailRequired") : t("auth.errors.emailInvalid"),
+      );
+      resetEmailRef.current?.focus();
+      return;
+    }
+    setResetError("");
 
     setLoading(true);
     const result = await resetPassword(resetEmail);
     setLoading(false);
 
     if (result.error) {
+      setResetError(result.error);
       toast.error(result.error);
+      resetEmailRef.current?.focus();
       return;
     }
 
@@ -124,7 +161,7 @@ function LoginContent() {
             className="w-24 h-24 rounded-2xl object-cover shadow-lg shadow-black/20 border-2 border-white/30"
           />
           <h1 className="text-3xl font-bold text-white">בית בסדר</h1>
-          <p className="text-white/80 text-center text-sm">
+          <p className="text-white/90 text-center text-sm">
             ניהול תחזוקת הבית המשותף
             <br />
             <span className="flex items-center justify-center gap-1 mt-1">
@@ -138,40 +175,61 @@ function LoginContent() {
         {/* Glass Card */}
         <div className="w-full rounded-2xl bg-white/90 dark:bg-surface/95 backdrop-blur-xl p-6 shadow-xl shadow-black/10 dark:shadow-black/40 border border-white/50 dark:border-border space-y-4">
           {/* Error / Success Messages */}
+          {/* These land after an OAuth redirect, so the user arrives with the
+              message already on screen and never hears it announced otherwise. */}
           {errorParam === "auth" && (
-            <div className="w-full bg-danger/10 border border-danger/20 text-danger text-sm rounded-xl px-4 py-3 text-center">
+            <div role="alert" className="w-full bg-danger/10 border border-danger/20 text-danger text-sm rounded-xl px-4 py-3 text-center">
               {t("common.error")}. {t("common.retry")}.
             </div>
           )}
           {resetDone && (
-            <div className="w-full bg-success/10 border border-success/20 text-success text-sm rounded-xl px-4 py-3 text-center">
+            <div role="status" className="w-full bg-success/10 border border-success/20 text-success text-sm rounded-xl px-4 py-3 text-center">
               {t("common.success")}!
             </div>
           )}
 
           {/* Password Reset Modal */}
           {showReset ? (
-            <form onSubmit={handleResetPassword} className="space-y-3">
+            <form onSubmit={handleResetPassword} className="space-y-3" noValidate>
               <h2 className="text-lg font-semibold text-foreground text-center">
                 {t("auth.resetPassword")}
               </h2>
               <p className="text-sm text-muted text-center">
                 {t("auth.resetPassword")}
               </p>
-              <div className="relative">
-                <Mail className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-                <input
-                  type="email"
-                  placeholder={t("auth.email")}
-                  value={resetEmail}
-                  onChange={(e) => setResetEmail(e.target.value)}
-                  className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pe-10 ps-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  dir="ltr"
-                />
+              <div>
+                <label htmlFor="reset-email" className="sr-only">
+                  {t("auth.email")}
+                </label>
+                <div className="relative">
+                  <Mail className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" aria-hidden="true" />
+                  <input
+                    id="reset-email"
+                    ref={resetEmailRef}
+                    type="email"
+                    placeholder={t("auth.email")}
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    aria-invalid={resetError ? true : undefined}
+                    aria-describedby={resetError ? "reset-email-error" : undefined}
+                    className={`w-full bg-background/60 dark:bg-background/80 border rounded-xl pe-10 ps-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 transition-all ${
+                      resetError
+                        ? "border-danger focus:border-danger focus:ring-danger/20"
+                        : "border-border focus:border-primary focus:ring-primary/20"
+                    }`}
+                    dir="ltr"
+                  />
+                </div>
+                {resetError && (
+                  <p id="reset-email-error" role="alert" className="flex items-start gap-1.5 mt-1.5 text-xs text-danger">
+                    <AlertCircle className="w-3.5 h-3.5 mt-px shrink-0" aria-hidden="true" />
+                    <span>{resetError}</span>
+                  </p>
+                )}
               </div>
               <button
                 type="submit"
-                disabled={loading || !resetEmail}
+                disabled={loading}
                 className="w-full py-3 gradient-primary text-white rounded-2xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 shadow-md shadow-primary/20"
               >
                 {loading ? (
@@ -191,47 +249,110 @@ function LoginContent() {
           ) : (
             <>
               {/* Email/Password Form */}
-              <form onSubmit={handleEmailLogin} className="space-y-3">
-                <div className="relative">
-                  <Mail className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-                  <input
-                    type="email"
-                    placeholder={t("auth.email")}
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pe-10 ps-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                    dir="ltr"
-                    autoComplete="email"
-                  />
-                </div>
-                <div className="relative">
-                  <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder={t("auth.password")}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-background/60 dark:bg-background/80 border border-border rounded-xl pe-10 ps-10 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                    dir="ltr"
-                    autoComplete="current-password"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((p) => !p)}
-                    className="absolute start-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground"
-                    tabIndex={-1}
+              <form onSubmit={handleEmailLogin} className="space-y-3" noValidate>
+                {errors.form && (
+                  <p
+                    role="alert"
+                    className="flex items-start gap-1.5 bg-danger/10 border border-danger/30 text-danger text-sm rounded-xl px-3 py-2"
                   >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
-                  </button>
+                    <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" />
+                    <span>{errors.form}</span>
+                  </p>
+                )}
+                <div>
+                  {/* Visually hidden: the design carries the name in the icon and
+                      placeholder, but a placeholder disappears the moment you
+                      type and is not a reliable accessible name. */}
+                  <label htmlFor="login-email" className="sr-only">
+                    {t("auth.email")}
+                  </label>
+                  <div className="relative">
+                    <Mail className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" aria-hidden="true" />
+                    <input
+                      id="login-email"
+                      ref={emailRef}
+                      type="email"
+                      placeholder={t("auth.email")}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      aria-invalid={errors.email ? true : undefined}
+                      aria-describedby={errors.email ? "login-email-error" : undefined}
+                      className={`w-full bg-background/60 dark:bg-background/80 border rounded-xl pe-10 ps-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 transition-all ${
+                        errors.email
+                          ? "border-danger focus:border-danger focus:ring-danger/20"
+                          : "border-border focus:border-primary focus:ring-primary/20"
+                      }`}
+                      dir="ltr"
+                      autoComplete="email"
+                    />
+                  </div>
+                  {errors.email && (
+                    <p
+                      id="login-email-error"
+                      role="alert"
+                      className="flex items-start gap-1.5 mt-1.5 text-xs text-danger"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 mt-px shrink-0" aria-hidden="true" />
+                      <span>{errors.email}</span>
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <label htmlFor="login-password" className="sr-only">
+                    {t("auth.password")}
+                  </label>
+                  <div className="relative">
+                    <Lock className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" aria-hidden="true" />
+                    <input
+                      id="login-password"
+                      ref={passwordRef}
+                      type={showPassword ? "text" : "password"}
+                      placeholder={t("auth.password")}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      aria-invalid={errors.password ? true : undefined}
+                      aria-describedby={errors.password ? "login-password-error" : undefined}
+                      className={`w-full bg-background/60 dark:bg-background/80 border rounded-xl pe-10 ps-10 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 transition-all ${
+                        errors.password
+                          ? "border-danger focus:border-danger focus:ring-danger/20"
+                          : "border-border focus:border-primary focus:ring-primary/20"
+                      }`}
+                      dir="ltr"
+                      autoComplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((p) => !p)}
+                      aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+                      aria-pressed={showPassword}
+                      className="absolute start-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-4 h-4" aria-hidden="true" />
+                      ) : (
+                        <Eye className="w-4 h-4" aria-hidden="true" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p
+                      id="login-password-error"
+                      role="alert"
+                      className="flex items-start gap-1.5 mt-1.5 text-xs text-danger"
+                    >
+                      <AlertCircle className="w-3.5 h-3.5 mt-px shrink-0" aria-hidden="true" />
+                      <span>{errors.password}</span>
+                    </p>
+                  )}
                 </div>
 
+                {/* Deliberately NOT disabled on empty fields. A disabled submit
+                    button is the silence this whole change is about: it tells a
+                    keyboard user nothing about what is missing or why. Submit,
+                    then say what is wrong. */}
                 <button
                   type="submit"
-                  disabled={loading || !email || !password}
+                  disabled={loading}
                   className="w-full py-3 gradient-primary text-white rounded-2xl font-semibold text-sm hover:opacity-90 transition-opacity disabled:opacity-50 shadow-md shadow-primary/20"
                 >
                   {loading ? (
@@ -302,7 +423,7 @@ function LoginContent() {
           )}
         </div>
 
-        <p className="text-xs text-white/60 text-center">
+        <p className="text-xs text-white/90 text-center">
           בהתחברות אתם מסכימים לתנאי השימוש ולמדיניות הפרטיות
         </p>
       </div>

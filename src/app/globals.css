@@ -252,8 +252,13 @@ body {
   background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #9333EA 100%);
 }
 
+/* This is the backdrop of the sign-in screen and it carries white text, so its
+   pale tail was unreadable: measured on /login, white on the old #A78BFA and
+   #C4B5FD stops came out 2.46 and 1.74 at full opacity, before any fading.
+   Rebuilt so white clears 4.5 on every stop even through the opacity-90 layer
+   (measured 5.95 at the lightest stop). */
 .gradient-hero {
-  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 30%, var(--color-accent) 55%, var(--color-accent-light) 80%, #C4B5FD 100%);
+  background: linear-gradient(135deg, #312E81 0%, #3730A3 30%, #5B21B6 55%, #6D28D9 80%, #86198F 100%);
   background-size: 200% 200%;
   animation: gradient-shift 12s ease infinite;
 }
