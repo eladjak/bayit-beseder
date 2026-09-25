@@ -1,12 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createHmac, timingSafeEqual } from "crypto";
+import * as Sentry from "@sentry/nextjs";
 import { sendWhatsAppMessage, extractPhoneFromChatId } from "@/lib/whatsapp";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 // 30 requests per minute — allows burst traffic from Green API retries
 // while blocking abusive callers.
 const limiter = rateLimit({ windowMs: 60_000, max: 30 });
+
+/**
+ * Has this instance already reported the missing-secret condition?
+ *
+ * The report fires ONCE per cold start, not once per request: the alert is
+ * about a configuration state, not about traffic, so a per-request report
+ * would produce hundreds of duplicates for a single underlying cause and
+ * train the reader to ignore it.
+ */
+let missingSecretReported = false;
+
+/**
+ * Make the fail-open VISIBLE.
+ *
+ * This endpoint currently skips signature verification entirely when
+ * WHATSAPP_WEBHOOK_SECRET is unset — and as of 2026-08-08 it IS unset in
+ * production, so every caller on the internet is trusted. Its sibling,
+ * `api/sumit/webhook`, refuses to run in production without its secret.
+ *
+ * This function does NOT close that hole (closing it without a secret in
+ * place would take the live reply-to-complete flow down). It only ensures
+ * the condition is reported somewhere a human actually looks, instead of a
+ * console.warn nobody reads. See `docs/whatsapp-webhook-secret.md` for the
+ * prepared one-line change that closes it once Elad creates the secret.
+ */
+function reportMissingWebhookSecret() {
+  if (missingSecretReported) return;
+  missingSecretReported = true;
+
+  const msg =
+    "[whatsapp/webhook] WHATSAPP_WEBHOOK_SECRET is not set — signature " +
+    "verification is SKIPPED and this endpoint accepts unsigned requests " +
+    "from anyone.";
+
+  console.error(msg);
+
+  if (process.env.NODE_ENV === "production") {
+    Sentry.captureMessage(msg, {
+      level: "error",
+      tags: { area: "webhook-auth", endpoint: "whatsapp" },
+    });
+  }
+}
 
 /**
  * POST /api/whatsapp/webhook
@@ -58,10 +102,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
   } else {
-    console.warn(
-      "[webhook] WHATSAPP_WEBHOOK_SECRET is not set — skipping signature verification. " +
-        "Set this env var in production!"
-    );
+    // NOTE: this branch is the fail-open path, and it is the LIVE path in
+    // production today. It deliberately still continues — see
+    // reportMissingWebhookSecret() above for why this only reports.
+    reportMissingWebhookSecret();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
