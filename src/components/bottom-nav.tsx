@@ -11,15 +11,17 @@ import {
   Calendar,
   BarChart3,
   Settings,
+  UtensilsCrossed,
 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { haptic } from "@/lib/haptics";
 
-const NAV_KEYS = ["home", "tasks", "shopping", "weekly", "stats", "settings"] as const;
+const NAV_KEYS = ["home", "tasks", "meals", "shopping", "weekly", "stats", "settings"] as const;
 
 const NAV_ITEMS = [
   { href: "/dashboard", key: "home" as const, fallback: "ראשי", icon: Home },
   { href: "/tasks", key: "tasks" as const, fallback: "משימות", icon: CheckSquare },
+  { href: "/meals", key: "meals" as const, fallback: "ארוחות", icon: UtensilsCrossed },
   { href: "/shopping", key: "shopping" as const, fallback: "קניות", icon: ShoppingCart },
   { href: "/weekly", key: "weekly" as const, fallback: "שבועי", icon: Calendar },
   { href: "/stats", key: "stats" as const, fallback: "סטטיסטיקה", icon: BarChart3 },
