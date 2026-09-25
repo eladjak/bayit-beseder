@@ -1,3 +1,14 @@
+/** Hebrew day names, index 0 = Sunday (Israeli week start). Single source of truth. */
+export const HEBREW_DAY_NAMES = [
+  "יום ראשון",
+  "יום שני",
+  "יום שלישי",
+  "יום רביעי",
+  "יום חמישי",
+  "יום שישי",
+  "שבת",
+];
+
 function formatDate(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");

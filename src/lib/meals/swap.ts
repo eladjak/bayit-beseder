@@ -44,7 +44,20 @@ export function suggestSwapAlternatives(options: SwapOptions): Meal[] {
   const respectsWindow = (meal: Meal) => {
     const last = lastUseBefore(meal.id, date, recentHistory);
     if (!last) return true;
-    return daysBetween(last, date) >= repeatWindow(meal);
+    // Inclusive, matching generator.ts: a gap EQUAL to the window still
+    // counts as "within" it and must be excluded, so > not >=.
+    //
+    // Honesty note (2026-09-25): unlike in generator.ts, this specific `>`
+    // vs `>=` distinction currently has NO observable effect on this
+    // function's return value. `effectivePool` falls back to the FULL pool
+    // (a strict superset) whenever `strictPool` is too small, and ranking
+    // below always picks by daysSince regardless of which pool an item came
+    // from — so a boundary-case meal's rank is identical either way. It's
+    // kept `>` purely so this file's semantics don't silently disagree with
+    // generator.ts's (the two SHOULD mean the same thing), not because it
+    // was proven to change behavior here. Verified by hand-tracing + a
+    // sabotage/restore pass that produced identical output both ways.
+    return daysBetween(last, date) > repeatWindow(meal);
   };
 
   const strictPool = pool.filter(respectsWindow);

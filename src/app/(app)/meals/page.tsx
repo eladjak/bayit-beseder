@@ -6,6 +6,7 @@ import { RefreshCw, ChevronDown, ChevronUp, Plus, Snowflake, ShoppingCart } from
 import { toast } from "sonner";
 import { useMealPlanner, type SwapAlternative } from "@/hooks/useMealPlanner";
 import { ilDateString } from "@/lib/meals/timezone";
+import { toHebrewShortDate, forHebrewDayLabel } from "@/lib/meals/format";
 import { haptic } from "@/lib/haptics";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -16,7 +17,11 @@ const STATUS_LABEL: Record<string, string> = {
   leftovers: "שאריות",
 };
 
-function DefrostBanner({ items }: { items: { mealName: string; startNow: boolean; hoursUntilStart: number; prepNote: string | null }[] }) {
+function DefrostBanner({
+  items,
+}: {
+  items: { date: string; mealName: string; startNow: boolean; hoursUntilStart: number; prepNote: string | null }[];
+}) {
   if (items.length === 0) return null;
   return (
     <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 space-y-2" role="status">
@@ -27,7 +32,7 @@ function DefrostBanner({ items }: { items: { mealName: string; startNow: boolean
       {items.map((item, i) => (
         <div key={i} className="text-sm text-amber-900">
           {item.startNow ? "🔴 עכשיו: " : `🕐 עוד כ-${Math.max(0, Math.round(item.hoursUntilStart))} שעות: `}
-          {item.prepNote ?? `${item.mealName} מהמקפיא`}
+          {item.prepNote ?? `${item.mealName} מהמקפיא`} — הארוחה מתוכננת {forHebrewDayLabel(item.date)} ({item.mealName})
         </div>
       ))}
     </div>
@@ -63,8 +68,15 @@ function DayCard({
       dir="rtl"
     >
       <div className="flex items-center justify-between">
-        <div className="font-bold">{dayName}</div>
-        <div className="text-xs text-muted">{date}</div>
+        <div className="flex items-center gap-2">
+          <div className="font-bold">{dayName}</div>
+          {isToday && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary text-white">
+              היום
+            </span>
+          )}
+        </div>
+        <div className="text-xs text-muted">{toHebrewShortDate(date)}</div>
       </div>
       <div className="text-base">{mealName ?? "אין ארוחה מתוכננת"}</div>
       <div className="text-xs text-muted">{STATUS_LABEL[status] ?? status}</div>

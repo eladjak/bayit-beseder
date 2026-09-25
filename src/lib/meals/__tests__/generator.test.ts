@@ -29,6 +29,46 @@ describe("generateWeekMealPlan", () => {
     }
   });
 
+  it("a meal used exactly 5 days ago is excluded from the STRICT pool — reported bug: it used to pass silently", () => {
+    // Reproduces the reported screenshot scenario (27.9 and 2.10 — exactly 5
+    // days apart, index 0 and index 5 — with "a" showing up on both and no
+    // indication anything was relaxed). Root cause, confirmed by hand-tracing
+    // the OLD comparison (`daysBetween(...) < repeatWindow(meal)`): a gap of
+    // EXACTLY 5 days makes `5 < 5` false, so the meal is NOT excluded and can
+    // win the strict pool outright — with an EMPTY ruleNotes, i.e. it looks
+    // like a completely clean pick, not a relaxed one.
+    //
+    // Set up day0..day4 explicitly (existingByDate) so day5 is the only day
+    // actually generated here, with meal "a" last used exactly on day0 (5
+    // days before day5) and no other meal available within its own window —
+    // i.e. a is the ONLY candidate that could satisfy the old buggy check.
+    const meals = [
+      makeMeal({ id: "a", name: "עוף בתנור עם ירקות", min_repeat_days: 0 }),
+      makeMeal({ id: "b", name: "פסטה", min_repeat_days: 0 }),
+      makeMeal({ id: "c", name: "שקשוקה", min_repeat_days: 0 }),
+    ];
+    const days = generateWeekMealPlan({
+      meals,
+      weekStartDate: WEEK_START, // day0 = 2026-09-27
+      existingByDate: {
+        "2026-09-27": { mealId: "a", status: "planned" }, // day0
+        "2026-09-28": { mealId: "b", status: "planned" }, // day1
+        "2026-09-29": { mealId: "c", status: "planned" }, // day2
+        "2026-09-30": { mealId: "b", status: "planned" }, // day3 (2 days before day5)
+        "2026-10-01": { mealId: "c", status: "planned" }, // day4 (1 day before day5)
+      },
+    });
+
+    const day5 = days[5]; // 2026-10-02, exactly 5 days after day0
+    expect(day5.date).toBe("2026-10-02");
+    // "a" is still the honest pick here (it's the only meal that's had ANY
+    // real rest — b and c are still inside their own window) — the fix is
+    // not that it disappears, it's that reusing it at exactly 5 days is now
+    // NEVER free: it must always come through the relaxed path and be marked.
+    expect(day5.mealId).toBe("a");
+    expect(day5.ruleNotes.join(" ")).toContain("הוקל");
+  });
+
   it("is deterministic: identical inputs produce identical output", () => {
     const meals = [
       makeMeal({ id: "a" }),

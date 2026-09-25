@@ -1,12 +1,18 @@
 import type { Meal, MealPlanStatus } from "./types";
+import { HEBREW_DAY_NAMES } from "./week";
 
 /**
  * Weekly meal-plan generator — pure function, no DB writes, no AI calls
  * (rules-based, per PLAN-PRODUCT-2026-09-25.md §"מתכנן הארוחות מתוכנן לכשלים").
  *
  * Rules (v1):
- *  1. No same meal within max(5, meal.min_repeat_days) days — checked against
- *     `recentHistory` (meal_plan rows from before this week) AND the plan
+ *  1. No same meal within max(5, meal.min_repeat_days) days — "within 5 days"
+ *     is INCLUSIVE (a gap of exactly 5 days still counts as "within" and is
+ *     rejected), so two uses of the same meal must be at least 6 days apart.
+ *     Fixed 2026-09-25: the original `<` comparison allowed an exact 5-day
+ *     gap through, which read as "no repeat within 5 days" but actually
+ *     permitted one. Checked against `recentHistory` (meal_plan rows from
+ *     before this week) AND the plan
  *     being built, so a meal never repeats across the week boundary either.
  *  2. Optional: at most 2 meat-tagged meals in a row (default ON).
  *  3. Friday ("ערב שבת") prefers a meal tagged `shabbat` (a bigger meal).
@@ -56,7 +62,7 @@ export interface GeneratedMealDay {
   ruleNotes: string[];
 }
 
-const HEBREW_DAYS = ["יום ראשון", "יום שני", "יום שלישי", "יום רביעי", "יום חמישי", "יום שישי", "שבת"];
+const HEBREW_DAYS = HEBREW_DAY_NAMES;
 
 function formatDate(d: Date): string {
   const y = d.getFullYear();
@@ -71,6 +77,7 @@ function daysBetween(a: string, b: string): number {
   return Math.round(Math.abs(db - da) / 86_400_000);
 }
 
+/** The minimum number of days between two uses of `meal` (inclusive floor of 5). */
 function repeatWindow(meal: Meal): number {
   return Math.max(5, meal.min_repeat_days);
 }
@@ -140,7 +147,9 @@ function pickMealForDay(
   function passable(meal: Meal, strict: boolean): boolean {
     if (strict) {
       const last = lastUseBefore(meal.id, date, recentHistory, soFar);
-      if (last && daysBetween(last, date) < repeatWindow(meal)) return false;
+      // Inclusive: a gap EQUAL to the window (e.g. exactly 5 days) still
+      // counts as "within" the window and is rejected — so <= not <.
+      if (last && daysBetween(last, date) <= repeatWindow(meal)) return false;
     }
     if (meatStreak >= 2 && isMeat(meal)) return false;
     return true;
