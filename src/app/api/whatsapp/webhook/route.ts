@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { createHmac, timingSafeEqual } from "crypto";
+import { timingSafeEqual } from "crypto";
 import * as Sentry from "@sentry/nextjs";
 import { sendWhatsAppMessage, extractPhoneFromChatId } from "@/lib/whatsapp";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
@@ -10,37 +10,39 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 const limiter = rateLimit({ windowMs: 60_000, max: 30 });
 
 /**
- * Has this instance already reported the missing-secret condition?
+ * Has this instance already reported the missing-token condition?
  *
  * The report fires ONCE per cold start, not once per request: the alert is
  * about a configuration state, not about traffic, so a per-request report
  * would produce hundreds of duplicates for a single underlying cause and
  * train the reader to ignore it.
  */
-let missingSecretReported = false;
+let missingTokenReported = false;
 
 /**
- * Make the fail-open VISIBLE.
+ * Make the fail-open VISIBLE, and say exactly what closes it.
  *
- * This endpoint currently skips signature verification entirely when
- * WHATSAPP_WEBHOOK_SECRET is unset — and as of 2026-08-08 it IS unset in
- * production, so every caller on the internet is trusted. Its sibling,
- * `api/sumit/webhook`, refuses to run in production without its secret.
+ * This endpoint accepts unauthenticated requests from anyone on the
+ * internet when WHATSAPP_WEBHOOK_TOKEN is unset. This function does NOT
+ * close that hole (closing it before the token exists would take the live
+ * reply-to-complete flow down). It only ensures the condition is reported
+ * somewhere a human actually looks, instead of a console.warn nobody reads.
  *
- * This function does NOT close that hole (closing it without a secret in
- * place would take the live reply-to-complete flow down). It only ensures
- * the condition is reported somewhere a human actually looks, instead of a
- * console.warn nobody reads. See `docs/whatsapp-webhook-secret.md` for the
- * prepared one-line change that closes it once Elad creates the secret.
+ * Closing it needs no code change: the moment WHATSAPP_WEBHOOK_TOKEN is set
+ * in Vercel AND the same value is set as `webhookUrlToken` in the Green API
+ * instance settings (SetSettings / console), the very next request enforces
+ * it — see the `if (webhookToken)` branch below.
  */
-function reportMissingWebhookSecret() {
-  if (missingSecretReported) return;
-  missingSecretReported = true;
+function reportMissingWebhookToken() {
+  if (missingTokenReported) return;
+  missingTokenReported = true;
 
   const msg =
-    "[whatsapp/webhook] WHATSAPP_WEBHOOK_SECRET is not set — signature " +
-    "verification is SKIPPED and this endpoint accepts unsigned requests " +
-    "from anyone.";
+    "[whatsapp/webhook] WHATSAPP_WEBHOOK_TOKEN is not set — this endpoint " +
+    "accepts unauthenticated requests from anyone on the internet. Set " +
+    "WHATSAPP_WEBHOOK_TOKEN in Vercel AND the same value as webhookUrlToken " +
+    "in the Green API instance settings to close this (no redeploy needed " +
+    "once both are set).";
 
   console.error(msg);
 
@@ -50,6 +52,19 @@ function reportMissingWebhookSecret() {
       tags: { area: "webhook-auth", endpoint: "whatsapp" },
     });
   }
+}
+
+/** Constant-time string compare that never throws on length mismatch. */
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    // Still run a comparison against a fixed-length buffer so the timing
+    // does not leak the token length, then return false.
+    timingSafeEqual(bufA, Buffer.alloc(bufA.length));
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
 }
 
 /**
@@ -76,36 +91,38 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // A2: Webhook signature verification — HMAC-SHA256.
-  // When WHATSAPP_WEBHOOK_SECRET is set, the caller must send a matching
-  // signature in the X-Webhook-Signature header (hex-encoded HMAC-SHA256 of
-  // the raw request body).  In development (no secret configured) we log a
-  // warning and continue so the endpoint remains functional.
+  // A2: Webhook authentication.
+  //
+  // Green API's ONLY supported webhook-authentication mechanism is a static
+  // token: it sends `Authorization: Bearer <webhookUrlToken>` on every
+  // webhook request, where `webhookUrlToken` is a field you set once via
+  // the SetSettings API / instance console. Green API does NOT support
+  // HMAC body-signing — there is no `x-webhook-signature` header it can
+  // send. (Verified against Green API's own docs, 2026-09-25.) This route
+  // previously implemented an HMAC-SHA256 check that real Green API traffic
+  // could never satisfy — see docs/whatsapp-webhook-secret.md for the
+  // history and the token-based replacement.
+  //
+  // When WHATSAPP_WEBHOOK_TOKEN is set, the caller must send a matching
+  // bearer token. When it is unset, we log/report and continue unsigned —
+  // see reportMissingWebhookToken() above.
   const rawBody = await request.text();
-  const webhookSecret = process.env.WHATSAPP_WEBHOOK_SECRET;
+  const webhookToken = process.env.WHATSAPP_WEBHOOK_TOKEN;
 
-  if (webhookSecret) {
-    const signatureHeader = request.headers.get("x-webhook-signature") ?? "";
-    const expectedSig = createHmac("sha256", webhookSecret)
-      .update(rawBody)
-      .digest("hex");
+  if (webhookToken) {
+    const authHeader = request.headers.get("authorization") ?? "";
+    const match = authHeader.match(/^Bearer\s+(.+)$/i);
+    const presented = match?.[1]?.trim();
 
-    // Constant-time comparison to prevent timing attacks.
-    const sigBuffer = Buffer.from(signatureHeader, "hex");
-    const expectedBuffer = Buffer.from(expectedSig, "hex");
-
-    if (
-      sigBuffer.length !== expectedBuffer.length ||
-      !timingSafeEqual(sigBuffer, expectedBuffer)
-    ) {
-      console.warn("[webhook] Invalid signature — request rejected");
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    if (!presented || !safeEqual(presented, webhookToken)) {
+      console.warn("[webhook] Missing or invalid webhook token — request rejected");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
   } else {
     // NOTE: this branch is the fail-open path, and it is the LIVE path in
-    // production today. It deliberately still continues — see
-    // reportMissingWebhookSecret() above for why this only reports.
-    reportMissingWebhookSecret();
+    // production today (as of 2026-09-25). It deliberately still continues
+    // — see reportMissingWebhookToken() above for why this only reports.
+    reportMissingWebhookToken();
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -159,6 +176,49 @@ export async function POST(request: NextRequest) {
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+  // Idempotency: Green API redelivers a webhook on timeout/non-2xx, and can
+  // in principle deliver the same message twice for other reasons too. Each
+  // delivery carries a stable `idMessage` (verified against Green API's own
+  // docs, 2026-09-25 — it is a top-level field, e.g.
+  // "F7AEC1B7086ECDC7E6E45923F5EDB825"). We use it to make sure a redelivery
+  // of an already-completed reply does not complete the same task twice.
+  //
+  // This check is check-then-act, not atomic (same pattern already used by
+  // this repo's sibling route, api/sumit/webhook, for billing_events): two
+  // truly concurrent deliveries of the same idMessage could both pass the
+  // check before either records it. Green API retries are sequential
+  // (deliver → wait for response → retry only on failure), so this window
+  // is narrow in practice, and is documented here rather than hidden.
+  //
+  // If whatsapp_webhook_events does not exist yet (migration
+  // supabase/migrations/016_whatsapp_webhook_dedupe.sql not applied), this
+  // is a idempotency nicety, not a security control — degrade to
+  // "cannot verify, proceed" rather than failing the whole webhook.
+  const idMessage: string | undefined =
+    typeof body.idMessage === "string" && body.idMessage ? body.idMessage : undefined;
+
+  if (idMessage) {
+    const { data: existingEvent, error: dedupeCheckErr } = await supabase
+      .from("whatsapp_webhook_events")
+      .select("id_message")
+      .eq("id_message", idMessage)
+      .maybeSingle();
+
+    if (dedupeCheckErr) {
+      console.error(
+        "[webhook] dedupe check failed (table may be missing — see " +
+          "supabase/migrations/016_whatsapp_webhook_dedupe.sql), proceeding without it:",
+        dedupeCheckErr.message
+      );
+    } else if (existingEvent) {
+      return NextResponse.json({ ok: true, duplicate: true });
+    }
+  } else {
+    console.warn(
+      "[webhook] incoming message has no idMessage — cannot dedupe this delivery"
+    );
+  }
+
   // C3: Identify the sender by their WhatsApp phone number.
   // Green API sender format: "972501234567@c.us" → strip suffix to get E.164 number.
   const senderPhone = (body.senderData?.sender as string | undefined)
@@ -208,15 +268,37 @@ export async function POST(request: NextRequest) {
   const task = tasks[taskNumber - 1];
 
   // C3: Mark task as completed and attribute it to the identified user.
+  // household_id filter is a second safety line even though `task` was
+  // already selected scoped to `profile.household_id` above: it means this
+  // UPDATE can never touch a row outside the sender's household even if the
+  // in-memory `tasks` array above were ever built incorrectly.
   const { error } = await supabase
     .from("tasks")
     .update({ status: "completed", assigned_to: profile.id })
-    .eq("id", task.id);
+    .eq("id", task.id)
+    .eq("household_id", profile.household_id);
 
   if (error) {
     await sendReply(chatId, "שגיאה בעדכון המשימה, נסו שוב");
     console.error("[webhook] Task update failed:", error.message);
     return NextResponse.json({ error: "Failed to update task" }, { status: 500 });
+  }
+
+  // Record this delivery as processed. Best-effort: if this insert fails we
+  // still confirm the completion to the user (it already happened), but log
+  // loudly — a retry of this exact idMessage could now double-complete.
+  if (idMessage) {
+    const { error: dedupeInsertErr } = await supabase
+      .from("whatsapp_webhook_events")
+      .insert({ id_message: idMessage, chat_id: chatId, task_id: task.id });
+
+    if (dedupeInsertErr) {
+      console.error(
+        "[webhook] failed to record dedupe marker — a retry of this delivery " +
+          "could double-complete the task:",
+        dedupeInsertErr.message
+      );
+    }
   }
 
   // Count remaining tasks
