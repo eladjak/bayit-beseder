@@ -1,8 +1,19 @@
 -- -----------------------------------------------------------------------------
 -- BayitBeSeder -- PRODUCTION APPLY, 2026-09-26
 -- -----------------------------------------------------------------------------
--- Paste this whole file into the Supabase SQL Editor and run it top to bottom,
--- OR run it section by section (see instructions in the PR / handoff note).
+-- DO NOT paste this whole file into the Supabase SQL Editor and run it all at
+-- once. Postgres does not guarantee that text appearing before a `BEGIN` in
+-- the same submitted batch is already committed when that `BEGIN` starts --
+-- so "paste it all" cannot be trusted to keep Section 1's backup safely
+-- committed before Section 2 begins touching anything. Run it as FOUR
+-- SEPARATE PASTES, each its own "Run" in the SQL Editor, IN THIS ORDER:
+--   1. Copy Section 0 alone. Run it. Read every result before continuing.
+--   2. Copy Section 1 alone. Run it. Confirm it reports success (it prints
+--      its own BEGIN/COMMIT) before moving on -- if it errors, STOP, do not
+--      run Section 2.
+--   3. Copy Section 2 alone. Run it.
+--   4. Copy Section 3 alone. Run it. Compare against what Section 0.5 showed.
+-- Section 4 (rollback) is not part of this sequence -- see its own header.
 --
 -- Ports migrations 015 (meals v1, final version from PR #8), 016 (WhatsApp
 -- webhook dedupe table), 017 (shopping_items cross-household INSERT hole) and
@@ -20,14 +31,39 @@
 --   Section 0 -- READ-ONLY preflight. Run this FIRST, on its own. It only
 --               SELECTs; it changes nothing. Read its output before deciding
 --               to proceed to Section 1/2.
---   Section 1 -- Backup: snapshots current policy definitions into a table,
---               so Section 4 (rollback) has something to restore from.
+--   Section 1 -- Backup: snapshots current policy definitions into a table
+--               that is itself locked down (no anon/authenticated access,
+--               RLS enabled with zero policies) so it cannot become an
+--               attacker-writable source of "trusted" rollback SQL. Runs in
+--               its own explicit transaction, committed before Section 2
+--               starts, so Section 4 (rollback) always has something real to
+--               restore from even if Section 2 later fails outright.
 --   Section 2 -- The actual migration, in ONE transaction (BEGIN...COMMIT).
 --               If anything inside fails, Postgres rolls back the whole
 --               transaction automatically -- nothing is half-applied.
 --   Section 3 -- Read-only verification queries to run AFTER Section 2.
 --   Section 4 -- ROLLBACK script, commented out. Only uncomment and run this
 --               if Section 2 needs to be undone. Read it before running it.
+--
+-- CORRECTED after an adversarial review (2026-09-26) caught a critical bug:
+-- the original draft of Section 2.4's household-reassignment guard used
+-- `SECURITY DEFINER` on the trigger function together with a `current_user`
+-- check. Under SECURITY DEFINER, `current_user` inside the function body is
+-- the FUNCTION OWNER (whoever ran CREATE FUNCTION), not the role of the
+-- actual request -- so that check could never distinguish a client request
+-- from a legitimate service-role request, and could have permanently locked
+-- Elad and Inbal out of the invite/join flow (or, depending on the owner,
+-- silently done nothing at all). Fixed below to `SECURITY INVOKER`, where
+-- `current_user` correctly reflects the role PostgREST switched to for that
+-- request (`service_role` for service-role-key requests, `authenticated`
+-- otherwise). Two more real (if lower-probability, given only 2 real users
+-- and no client code today that would trigger them) holes the same review
+-- found were also closed: a client could INSERT a new profile row with a
+-- foreign household_id already set (the original trigger only fired on
+-- UPDATE), and a client could UPDATE their own existing task_completions row
+-- to repoint task_id at a different household's task (018's fix only
+-- covered INSERT). Both are closed below in the same spirit as 018's
+-- existing 7 fixes.
 -- -----------------------------------------------------------------------------
 
 
@@ -89,7 +125,7 @@ select
           where schemaname='public' and tablename='profiles' and policyname='Anyone can view profiles')
     as m018_hole3_still_open,
   exists (select 1 from pg_trigger
-          where tgname='trg_prevent_self_household_reassignment')
+          where tgname='trg_prevent_client_household_tampering')
     as m018_hole4_trigger_exists,
   exists (select 1 from information_schema.tables
           where table_schema='public' and table_name='whatsapp_webhook_events')
@@ -107,13 +143,27 @@ select
 
 
 -- -----------------------------------------------------------------------------
--- SECTION 1 -- BACKUP (run once, before Section 2)
+-- SECTION 1 -- BACKUP (run once, in its own paste, before Section 2)
 -- -----------------------------------------------------------------------------
 -- Snapshot of every current policy definition in the public schema. This is
 -- what Section 4's rollback reads from. IF NOT EXISTS is deliberate: if you
 -- ever have to re-run this whole script after a failed/partial attempt, this
 -- keeps the ORIGINAL pre-migration snapshot instead of overwriting it with an
 -- already-half-migrated state.
+--
+-- Locked down deliberately: a new table in the `public` schema of an
+-- existing Supabase project can inherit default grants that make it
+-- reachable by `anon`/`authenticated` through PostgREST. If that happened
+-- here, this table's contents (which get fed into raw SQL by Section 4's
+-- rollback via EXECUTE) would be attacker-writable. REVOKE + enabling RLS
+-- with zero policies makes it default-deny for anon/authenticated; only the
+-- Postgres superuser/owner (i.e. you, running this in the SQL Editor, and
+-- the service_role which bypasses RLS) can read or write it.
+--
+-- Runs in its OWN transaction, separate from Section 2, and this paste ends
+-- with COMMIT -- confirm it succeeded before moving on to Section 2.
+
+BEGIN;
 
 create table if not exists public._policy_backup_20260926 as
 select *, now() as _backed_up_at
@@ -121,7 +171,14 @@ from pg_policies
 where schemaname = 'public';
 
 comment on table public._policy_backup_20260926 is
-  'One-time snapshot of pg_policies taken 2026-09-26 before PRODUCTION-APPLY-2026-09-26.sql ran. Used by that script''s Section 4 rollback. Safe to drop once the migration is confirmed good and stable.';
+  'One-time snapshot of pg_policies taken 2026-09-26 before PRODUCTION-APPLY-2026-09-26.sql ran. Used by that script''s Section 4 rollback. Locked down (RLS enabled, no policies, all grants revoked from anon/authenticated) -- see the comment above this table''s CREATE statement. Safe to drop once the migration is confirmed good and stable.';
+
+revoke all on public._policy_backup_20260926 from public, anon, authenticated;
+alter table public._policy_backup_20260926 enable row level security;
+-- No policies are added on purpose: default-deny for anon/authenticated.
+-- The table owner and service_role (which bypasses RLS) can still read it.
+
+COMMIT;
 
 
 -- -----------------------------------------------------------------------------
@@ -196,6 +253,23 @@ BEGIN
       AND is_nullable = 'NO'
   ) THEN
     RAISE EXCEPTION 'PRODUCTION-APPLY-2026-09-26 aborted: public.tasks.household_id is missing or nullable. Migration 014_tasks_household_scope.sql must run first and complete (it backfills household_id and sets it NOT NULL). Run 014 on its own, verify it, then re-run this script.';
+  END IF;
+
+  -- Creating a CREATE POLICY does NOT by itself enable row-level security on
+  -- a table -- ENABLE ROW LEVEL SECURITY is a separate statement. If any of
+  -- these tables somehow has RLS disabled, every policy this script
+  -- creates/tightens on it is dead weight and the table stays wide open
+  -- regardless of what Section 2 does. Refuse rather than give a false sense
+  -- of having closed anything.
+  IF EXISTS (
+    SELECT 1 FROM pg_class c
+    JOIN pg_namespace n ON n.oid = c.relnamespace
+    WHERE n.nspname = 'public'
+      AND c.relname IN ('households', 'household_members', 'profiles',
+                         'task_completions', 'streaks', 'shopping_items')
+      AND NOT c.relrowsecurity
+  ) THEN
+    RAISE EXCEPTION 'PRODUCTION-APPLY-2026-09-26 aborted: at least one of households/household_members/profiles/task_completions/streaks/shopping_items has Row Level Security DISABLED. This script only adds/replaces POLICIES; it does not enable RLS on tables it assumes already have it on. Investigate before proceeding -- run: select relname, relrowsecurity from pg_class join pg_namespace on pg_namespace.oid=relnamespace where nspname=''public'' and relname in (''households'',''household_members'',''profiles'',''task_completions'',''streaks'',''shopping_items'');';
   END IF;
 END
 $guard$;
@@ -362,28 +436,56 @@ CREATE POLICY "Users can view own or household member profiles"
   );
 
 -- 4. profiles.household_id: block direct client reassignment via trigger
--- (RLS's WITH CHECK cannot compare NEW to OLD).
-CREATE OR REPLACE FUNCTION public.prevent_self_household_reassignment()
+-- (RLS's WITH CHECK cannot compare NEW to OLD). Also blocks a client from
+-- setting household_id at INSERT time (018's original draft only guarded
+-- UPDATE; a client-issued INSERT with a pre-set household_id would have
+-- slipped through, and 015's meal/meal_plan RLS keys directly off
+-- profiles.household_id, so a forged value here has real reach).
+--
+-- SECURITY INVOKER, not SECURITY DEFINER: under SECURITY DEFINER,
+-- `current_user` inside a plpgsql function body is the FUNCTION OWNER (i.e.
+-- whoever ran this CREATE FUNCTION -- typically the migration-runner's own
+-- role), not the role of the request that fired the trigger. That would make
+-- `current_user <> 'service_role'` either always-true (blocking legitimate
+-- service-role writes from invite/join too) or always-false (letting a
+-- client through), depending on who happens to own the function -- and
+-- either way it would NOT do what the function's own name says. Under
+-- SECURITY INVOKER, `current_user` correctly reflects the Postgres role
+-- PostgREST switched to for that specific request (`service_role` for
+-- service-role-key requests, `authenticated` for normal ones), which is
+-- what this check actually needs. The function does no privileged reads or
+-- writes of its own, so INVOKER costs it nothing.
+CREATE OR REPLACE FUNCTION public.prevent_client_household_tampering()
 RETURNS trigger
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 SET search_path = public
 AS $func$
 BEGIN
-  IF NEW.household_id IS DISTINCT FROM OLD.household_id
-     AND current_user <> 'service_role' THEN
+  IF current_user = 'service_role' THEN
+    RETURN NEW;
+  END IF;
+
+  IF TG_OP = 'INSERT' AND NEW.household_id IS NOT NULL THEN
+    RAISE EXCEPTION
+      'profiles.household_id cannot be set on insert by a client; use the invite/join API';
+  END IF;
+
+  IF TG_OP = 'UPDATE' AND NEW.household_id IS DISTINCT FROM OLD.household_id THEN
     RAISE EXCEPTION
       'profiles.household_id cannot be changed directly; use the invite/join or leave-household API';
   END IF;
+
   RETURN NEW;
 END;
 $func$;
 
 DROP TRIGGER IF EXISTS trg_prevent_self_household_reassignment ON public.profiles;
-CREATE TRIGGER trg_prevent_self_household_reassignment
-  BEFORE UPDATE ON public.profiles
+DROP TRIGGER IF EXISTS trg_prevent_client_household_tampering ON public.profiles;
+CREATE TRIGGER trg_prevent_client_household_tampering
+  BEFORE INSERT OR UPDATE ON public.profiles
   FOR EACH ROW
-  EXECUTE FUNCTION public.prevent_self_household_reassignment();
+  EXECUTE FUNCTION public.prevent_client_household_tampering();
 
 -- 5. task_completions INSERT: require the referenced task to belong to a
 -- household the caller is a member of.
@@ -391,6 +493,31 @@ DROP POLICY IF EXISTS "Users can insert own completions" ON public.task_completi
 
 CREATE POLICY "Users can insert own completions"
   ON public.task_completions FOR INSERT
+  WITH CHECK (
+    auth.uid() = user_id
+    AND EXISTS (
+      SELECT 1 FROM public.tasks t
+      WHERE t.id = task_id
+        AND public.is_household_member(t.household_id)
+    )
+  );
+
+-- 5b. task_completions UPDATE: the pre-existing "Users can update own
+-- completions" policy (from 001_initial.sql, still live -- 018's original
+-- draft never touched it) only checks `auth.uid() = user_id`. Since a plain
+-- FOR UPDATE policy with no WITH CHECK reuses USING as the check, a client
+-- could not change WHO owns the row, but could freely repoint `task_id` at
+-- ANY task, including one belonging to a different household -- forging
+-- completion history against a foreign household's task via UPDATE even
+-- with the INSERT hole above closed. The dashboard's own use of this policy
+-- (src/app/(app)/dashboard/page.tsx) only ever updates `notes`/`photo_url`
+-- and never touches `task_id`, so this tightening does not change its
+-- behavior.
+DROP POLICY IF EXISTS "Users can update own completions" ON public.task_completions;
+
+CREATE POLICY "Users can update own completions"
+  ON public.task_completions FOR UPDATE
+  USING (auth.uid() = user_id)
   WITH CHECK (
     auth.uid() = user_id
     AND EXISTS (
@@ -447,7 +574,7 @@ select
   (select count(*) from pg_policies
      where schemaname='public' and tablename='profiles' and policyname='Anyone can view profiles') as hole3_still_open_should_be_0,
   (select count(*) from pg_trigger
-     where tgname='trg_prevent_self_household_reassignment') as hole4_trigger_should_be_1,
+     where tgname='trg_prevent_client_household_tampering') as hole4_trigger_should_be_1,
   (select count(*) from pg_policies
      where schemaname='public' and tablename='shopping_items'
        and policyname='Authenticated users can insert items') as m017_hole_still_open_should_be_0,
@@ -466,17 +593,34 @@ select
 -- -----------------------------------------------------------------------------
 -- SECTION 4 -- ROLLBACK (commented out -- read fully before uncommenting)
 -- -----------------------------------------------------------------------------
--- Restores the policies that Section 1 backed up, on every table 017/018
--- touched, and reverts the 018 trigger. Then optionally drops the new meal
--- tables (015) -- ONLY if they are still empty, so this never discards real
--- user data. whatsapp_webhook_events (016) is left in place with RLS
--- disabled again (back to its original unprotected-but-functional shape);
--- it is not dropped because 016's own comment documents it as safe to have
--- existed all along, dedupe rows are legitimate operational data.
+-- Restores the policies that Section 1 backed up on every table 017/018
+-- touched, and reverts the 018 trigger. This is 4a -- the ONLY part meant to
+-- run as routine "undo Section 2" if something looks wrong. It never touches
+-- table existence or table data.
 --
--- This does NOT run automatically. Uncomment the whole block (remove the
--- /* and */ ) and run it manually if you need to undo Section 2.
+-- Dropping the new meal tables (015) is a SEPARATE, SEPARATELY-GUARDED step
+-- (4b, further down) that is NOT run as part of 4a -- a failed table-existence
+-- check there must never be able to roll back the policy restoration above it
+-- (an earlier draft of this rollback had exactly that bug: `RAISE EXCEPTION`
+-- inside the same transaction as the policy restore would have undone the
+-- restore too, while its own error message falsely claimed the restore had
+-- already been committed). whatsapp_webhook_events (016) is NOT touched by
+-- either 4a or 4b: whether it should end up with RLS enabled or disabled
+-- depends on whether it already existed (with or without RLS) before this
+-- run, which this rollback cannot know from the backup alone (the backup
+-- only captured POLICIES, and this table had none either way) -- decide that
+-- by hand after checking `select relrowsecurity from pg_class ... where
+-- relname='whatsapp_webhook_events'`, if you decide RLS should come off at
+-- all. Do not disable it automatically: doing so is capable of re-opening a
+-- table that was ALREADY correctly protected before this run, not just
+-- reverting what THIS run changed.
+--
+-- This does NOT run automatically. Uncomment the whole 4a block (remove the
+-- /* and */ ) and run it manually if you need to undo Section 2's policy
+-- changes. Do not run 4b unless you have specifically decided the new meal
+-- tables should be dropped too.
 
+-- ============================== 4a: POLICY ROLLBACK ==============================
 /*
 BEGIN;
 
@@ -487,11 +631,16 @@ DECLARE
   t text;
   cur_pol record;
   bak_pol record;
+  roles_sql text;
   stmt text;
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.tables
                  WHERE table_schema = 'public' AND table_name = '_policy_backup_20260926') THEN
     RAISE EXCEPTION 'Rollback aborted: public._policy_backup_20260926 does not exist -- nothing to restore from. Section 1 was never run, or the backup table was already dropped.';
+  END IF;
+
+  IF NOT EXISTS (SELECT 1 FROM public._policy_backup_20260926) THEN
+    RAISE EXCEPTION 'Rollback aborted: public._policy_backup_20260926 exists but is empty -- refusing to proceed with an empty source of truth (this would drop current policies and restore nothing).';
   END IF;
 
   FOREACH t IN ARRAY affected_tables LOOP
@@ -508,9 +657,22 @@ BEGIN
       FROM public._policy_backup_20260926
       WHERE tablename = t
     LOOP
+      -- Quote each role individually (pg_policies represents "no explicit
+      -- TO clause" / all-roles as the literal name 'public' inside the
+      -- roles array, which is also the PostgreSQL keyword PUBLIC -- valid
+      -- unquoted on its own, but role names in general can contain
+      -- characters that need %I quoting; do it per-element rather than a
+      -- bare array_to_string, which does not quote anything).
+      SELECT string_agg(
+               CASE WHEN r = 'public' THEN 'public' ELSE format('%I', r) END,
+               ', ' ORDER BY ord
+             )
+      INTO roles_sql
+      FROM unnest(bak_pol.roles) WITH ORDINALITY AS u(r, ord);
+
       stmt := format('CREATE POLICY %I ON public.%I AS %s FOR %s TO %s',
                       bak_pol.policyname, t, bak_pol.permissive, bak_pol.cmd,
-                      array_to_string(bak_pol.roles, ', '));
+                      roles_sql);
       IF bak_pol.qual IS NOT NULL THEN
         stmt := stmt || format(' USING (%s)', bak_pol.qual);
       END IF;
@@ -523,21 +685,45 @@ BEGIN
 END
 $rollback$;
 
--- Revert 018's profiles.household_id reassignment guard.
+-- Revert 018's/this script's profiles.household_id tampering guard.
 DROP TRIGGER IF EXISTS trg_prevent_self_household_reassignment ON public.profiles;
+DROP TRIGGER IF EXISTS trg_prevent_client_household_tampering ON public.profiles;
 DROP FUNCTION IF EXISTS public.prevent_self_household_reassignment();
+DROP FUNCTION IF EXISTS public.prevent_client_household_tampering();
 
--- Revert 018's RLS-enable on whatsapp_webhook_events (016 itself is not undone).
-ALTER TABLE IF EXISTS public.whatsapp_webhook_events DISABLE ROW LEVEL SECURITY;
+COMMIT;
+*/
 
--- Drop the new meal tables (015) -- ONLY if both are still empty. If either
--- has real rows, this refuses and leaves them in place; delete manually
--- after confirming with Elad that losing that data is intended.
+-- ============================== 4b: DROP MEAL TABLES (separate, optional) ========
+-- Only run this if you have specifically decided 015's meals/meal_plan
+-- tables themselves should be removed, not just their policies. Deliberately
+-- its own transaction, run AFTER 4a (if at all) and never combined with it.
+-- Locks both tables before counting rows, closing the gap where a
+-- concurrent write between the count and the DROP could otherwise let real
+-- data through undetected.
+/*
+BEGIN;
+
 DO $drop_meals$
 BEGIN
-  IF (SELECT count(*) FROM public.meal_plan) > 0 OR (SELECT count(*) FROM public.meals) > 0 THEN
-    RAISE EXCEPTION 'Refusing to drop meals/meal_plan: they contain data. Rollback of the policy changes above already ran; the meal tables were left in place untouched.';
+  IF NOT EXISTS (SELECT 1 FROM information_schema.tables
+                 WHERE table_schema='public' AND table_name='meal_plan')
+     AND NOT EXISTS (SELECT 1 FROM information_schema.tables
+                     WHERE table_schema='public' AND table_name='meals') THEN
+    RAISE NOTICE 'Neither meals nor meal_plan exist -- nothing to drop.';
+    RETURN;
   END IF;
+
+  LOCK TABLE public.meal_plan IN ACCESS EXCLUSIVE MODE;
+  LOCK TABLE public.meals IN ACCESS EXCLUSIVE MODE;
+
+  IF (SELECT count(*) FROM public.meal_plan) > 0 OR (SELECT count(*) FROM public.meals) > 0 THEN
+    RAISE EXCEPTION 'Refusing to drop meals/meal_plan: they contain data. Nothing was dropped.';
+  END IF;
+
+  -- CASCADE here only affects objects that depend on meals/meal_plan
+  -- specifically (e.g. the meal_plan_meal_id_fkey constraint back onto
+  -- meals) -- there is nothing else in this schema that references them.
   DROP TABLE IF EXISTS public.meal_plan CASCADE;
   DROP TABLE IF EXISTS public.meals CASCADE;
 END
