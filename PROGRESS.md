@@ -669,3 +669,50 @@ Applied: 001, 001_initial_schema, 002, 003, 004, 005, 006, 007, 008, 009
 - **Gates:** tsc 0 · `bun run build` green (all routes) · he/en parity 963=963, zero missing both ways · prod 200 on /, /settings, /stats, /dashboard, /login · GEO-scan **100/100** (unchanged) · all 13 new keys resolve in both locales.
 - **Left for a future session (documented, not forced):** `coaching-insight.tsx` still has hardcoded Hebrew tied to the `COACHING_STYLE_LABELS` shared lib constant — partial translation would produce a worse mixed-language result, so deferred to a dedicated coaching-i18n pass. Pervasive `animate={{ height: "auto" }}` accordions + `animate={{ width }}` progress bars across weekly/onboarding/emergency are framer-driven (so MotionConfig already disables them for reduced-motion); converting to transform-safe risks visual regressions across many screens — left as polish-not-broken.
 - **Still gated on Elad (unchanged from 6-11 entry):** push auth/invite `d3a4a57` · run migration 014 on Supabase branch then prod · set `SUMIT_WEBHOOK_SECRET` in Vercel · rotate Sumit token · quarantine `001_initial_schema.sql` decoy. NOT touched this session per mandate.
+
+## 2026-09-25 — Security prep-stage sweep (Claude Sonnet 5, worktree `.claude/worktrees/agent-ac6c85a423aca2907`, branch `worktree-agent-ac6c85a423aca2907`)
+
+**Merged in first:** `fix/make-the-fail-open-visible` (f26182b — tasks.recurring type fix, the fail-open visibility work). Already reachable from an earlier `origin/master` audit; merged explicitly anyway per task instructions.
+
+**Baseline (before any change):** `bun install --frozen-lockfile` clean (746 packages) · `bunx tsc --noEmit` **0 errors** (verified with a deliberate-break canary: exit 2, 1 error, before reverting) · `bunx vitest run` **342/342 passed, 31 test files**.
+
+**After this session's changes:** `bunx tsc --noEmit` still **0 errors**. New test files add **12 passing tests** on top of the 342 baseline (10 in the WhatsApp webhook suite, 2 in the agent multi-tenant-gap suite) — see the task report for the combined final run.
+
+### 1. WhatsApp webhook auth — replaced an unimplementable scheme with the one Green API actually supports
+`src/app/api/whatsapp/webhook/route.ts` previously verified an HMAC-SHA256 `x-webhook-signature` header. **Verified against Green API's own docs (2026-09-25): Green API cannot send that header at all** — its only webhook-auth mechanism is a static token, sent as `Authorization: Bearer <webhookUrlToken>` (configured once via `SetSettings`/console). The HMAC branch could never have been satisfied by real traffic.
+
+Replaced with token verification against a **new** env var `WHATSAPP_WEBHOOK_TOKEN` (kept separate from the old `WHATSAPP_WEBHOOK_SECRET` — different scheme, different name, so a stale value can't silently look "configured"). Unset → same fail-open behavior as before (logged + Sentry-reported once per cold start); set → 401 on missing/wrong token, no redeploy needed to flip it. Also added:
+- **Idempotency** by Green API's `idMessage` (new table `whatsapp_webhook_events`, migration `supabase/migrations/016_whatsapp_webhook_dedupe.sql`, **not applied**) — a redelivered webhook can no longer double-complete a task. Degrades gracefully (logs, proceeds) if the migration hasn't been applied yet.
+- A second `household_id` filter on the completing `UPDATE`, on top of the existing scoped `SELECT` (defense in depth).
+
+10 new tests in `src/app/api/whatsapp/webhook/__tests__/route.test.ts` (token auth ×4, idempotency ×3, unknown sender ×1, household boundary ×2). **All three security-relevant behaviors (auth, household boundary, idempotency) were verified red→green**: each was broken on purpose in `route.ts`, the matching test went red for exactly the predicted reason, then the code was reverted and re-verified green (diff showed a clean revert each time).
+
+Docs updated: `.env.example` (new var + a flagged contradiction — see below) · `docs/whatsapp-webhook-secret.md` (rewritten to describe the real mechanism and what Elad needs to do, in order).
+
+**🔴 Surfaced, not resolved:** `.env.example` says this Green API instance is "shared instance with Kami"; `src/lib/whatsapp.ts`'s own header comment says it's "a DEDICATED Green API instance (not shared with Kami)". These contradict each other. Flagged in both files. **Do not touch any Green API instance setting (including `webhookUrlToken`) until this is resolved** — on a shared instance it could affect Kami's bot too.
+
+### 2. `/api/agent/*` multi-tenant gap — documented, not fixed (per task scope)
+`BAYIT_AGENT_KEY` authenticates "a caller is an authorized agent", not "this caller may act on household X" — `householdId` is a plain body field, not something the token restricts. Two consequences, demonstrated with red→green-verified tests in `src/app/api/agent/task/__tests__/multi-tenant-gap.test.ts`:
+- `list` with no `householdId` returns **every** household's tasks to any key-holder.
+- `complete` with a valid key + any household's id + a task id in it (obtainable from the point above) really completes that task.
+
+Full write-up, including why this needs a per-household-token redesign rather than a query tweak, and why that redesign is out of scope for a prep task: `docs/AGENT-API-MULTI-TENANT-GAP.md`.
+
+### 3. Household isolation — what could and couldn't be tested here
+- **`/api/whatsapp/webhook`** and **`/api/agent/task`**: covered above, mock-based (no local Supabase/Docker available in this worktree — `docker info` failed, no `supabase` CLI on PATH).
+- **The web app's own task/shopping/meal CRUD does not go through service-role API routes at all** — it's client-side Supabase calls protected by Postgres RLS (confirmed: none of the non-agent/non-webhook/non-cron routes touch `SUPABASE_SERVICE_ROLE_KEY`). That means household isolation for the normal UI flow lives entirely in RLS policy SQL, which cannot be meaningfully tested by mocking a JS Supabase client — there is no application code to mock. Reviewed statically instead (not run against real Postgres):
+  - `tasks` (migration 014) and `meals`/`meal_plan` (migration 015, **not yet applied**) RLS looks correctly scoped — every policy ties back to `household_members`/`profiles.household_id` via `auth.uid()`.
+  - 🔴 **`shopping_items` (migration 003) has two EXTRA permissive policies** beyond the household-scoped ones: `"Authenticated users can insert items" WITH CHECK (auth.role() = 'authenticated')` (no household check on INSERT at all) and `"Authenticated users can manage own items" USING (added_by = auth.uid())` (FOR ALL, no household check). Postgres RLS policies for the same command are OR'd, so these are **additive holes**, not narrower alternatives. The 003 file itself calls this "simple mode" support in a comment, so **it may be intentional** — flagging for Elad to confirm rather than asserting it's a bug. Not fixed here: RLS policy changes need to run against a real Postgres to verify they don't break the "simple mode" the comment describes, which this worktree cannot do. Also unresolved: whether `supabase/migration.sql` (which has ONLY the two scoped policies, not the two permissive ones) or `003_shopping_items.sql` (which has all four) is what was actually applied to production — the two files define same-named policies, which is only consistent if just one of them was ever run.
+- **Realtime subscriptions**: not tested — this needs a live browser subscribing to a Postgres changes channel, which isn't feasible headlessly in this worktree without Docker/local Supabase. Not faked, because faking Realtime would not test anything about the real subscription/RLS interaction.
+
+### 4. Gemini tier/model audit (report-only, no keys touched)
+Env var: `GEMINI_API_KEY` (used by `src/app/api/ai/chat/route.ts` and `.../coaching-tip/route.ts`; **missing from `.env.example`** — separate small onboarding gap, not fixed here). Endpoint: `generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash` — this is the **Gemini Developer API (AI Studio)**, not Vertex AI. **Tier (free vs. paid) cannot be determined from the code** — the same endpoint/key format is used for both; it depends on whether billing is enabled on the Google Cloud project behind that specific key, which is an account-level setting this worktree has no access to and did not check. Per Google's own terms (`ai.google.dev/gemini-api/terms`, fetched 2026-09-25): **on the free tier, Google uses submitted content to improve its products and human reviewers may read/annotate API input and output** (de-identified first); **on paid tier, Google does not use prompts/responses to improve products**, and only logs them briefly for abuse detection. Worth Elad checking directly, since the chat feature carries real household/task conversations.
+
+### What's still open (nothing here was decided or applied)
+- `WHATSAPP_WEBHOOK_TOKEN` not set anywhere (Elad's step — see `docs/whatsapp-webhook-secret.md` for the exact order).
+- `supabase/migrations/016_whatsapp_webhook_dedupe.sql` not applied.
+- The shared-vs-dedicated Green API instance contradiction not resolved.
+- The `/api/agent/*` multi-tenant gap not fixed (needs a bigger design — see the doc).
+- `shopping_items`'s extra permissive RLS policies not confirmed intentional or fixed.
+- Gemini API key tier not checked against Google's billing console.
+- A PR was opened against `master` (not merged, not deployed) — see the task report / PR link for the URL.
