@@ -915,6 +915,106 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Meal-prep planner (migration 015_meals.sql, extended 2026-09-25).
+      // NOT YET APPLIED to production — see the migration file header.
+      meals: {
+        Row: {
+          id: string;
+          household_id: string;
+          name: string;
+          who_eats: string[];
+          prep_lead_hours: number;
+          prep_note: string | null;
+          min_repeat_days: number;
+          tags: string[];
+          ingredients: Json;
+          last_served_at: string | null;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          name: string;
+          who_eats?: string[];
+          prep_lead_hours?: number;
+          prep_note?: string | null;
+          min_repeat_days?: number;
+          tags?: string[];
+          ingredients?: Json;
+          last_served_at?: string | null;
+          active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          household_id?: string;
+          name?: string;
+          who_eats?: string[];
+          prep_lead_hours?: number;
+          prep_note?: string | null;
+          min_repeat_days?: number;
+          tags?: string[];
+          ingredients?: Json;
+          last_served_at?: string | null;
+          active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "meals_household_id_fkey";
+            columns: ["household_id"];
+            isOneToOne: false;
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      meal_plan: {
+        Row: {
+          id: string;
+          household_id: string;
+          meal_id: string | null;
+          plan_date: string;
+          status: "planned" | "prepped" | "cooked" | "skipped" | "leftovers";
+          note: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          meal_id?: string | null;
+          plan_date: string;
+          status?: "planned" | "prepped" | "cooked" | "skipped" | "leftovers";
+          note?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          household_id?: string;
+          meal_id?: string | null;
+          plan_date?: string;
+          status?: "planned" | "prepped" | "cooked" | "skipped" | "leftovers";
+          note?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "meal_plan_household_id_fkey";
+            columns: ["household_id"];
+            isOneToOne: false;
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "meal_plan_meal_id_fkey";
+            columns: ["meal_id"];
+            isOneToOne: false;
+            referencedRelation: "meals";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
