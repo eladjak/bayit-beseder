@@ -36,7 +36,8 @@ const MIGRATION_PATH = join(__dirname, "..", "019_close_live_rls_holes.sql");
 let sql: string;
 
 beforeAll(() => {
-  sql = readFileSync(MIGRATION_PATH, "utf-8");
+  // Windows checkouts (core.autocrlf) turn LF into CRLF; the sabotage patterns below are LF-only.
+  sql = readFileSync(MIGRATION_PATH, "utf-8").replace(/\r\n/g, "\n");
 });
 
 // ---------------------------------------------------------------------------
