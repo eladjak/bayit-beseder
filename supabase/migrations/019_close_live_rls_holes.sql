@@ -5,9 +5,17 @@
 --
 -- 018_close_effective_rls_holes.sql targets policy names that do not exist
 -- on production (it was written against an older/local schema and was
--- never applied live). This migration (019) is self-contained and
--- idempotent (every DROP is IF EXISTS, every CREATE/REPLACE re-runnable)
--- so it can be applied INSTEAD OF 018.
+-- never applied live). This migration (019) is self-contained and fully
+-- idempotent (every DROP is IF EXISTS, every CREATE POLICY is preceded by
+-- a DROP POLICY IF EXISTS of its own name, CREATE OR REPLACE FUNCTION, and
+-- DROP TRIGGER IF EXISTS) so it can be applied INSTEAD OF 018 and re-run
+-- safely.
+--
+-- Revision 2 (27.9.2026, adversarial review by Codex): fixed a
+-- SECURITY DEFINER bug in the profiles trigger, tightened
+-- household_members UPDATE to owner-only + column-scoped, merged
+-- task_completions SELECT into one policy, and removed a streaks write
+-- policy that had zero real client usage. See the per-section notes below.
 --
 -- The live hole, same shape on 7 tables: three blanket policies per table —
 -- "Auth read <table>" SELECT, "Auth update <table>" UPDATE, "Auth write
@@ -26,53 +34,92 @@
 
 BEGIN;
 
--- 1. household_members. Verified: only client write is UPDATE (role change,
--- members-section.tsx handleChangeRole) within caller's own household.
--- INSERT is service-role only (invite/join route). DELETE has no policy
--- live either, left untouched (out of scope: not a new hole).
+-- 0. Helper: is_household_owner. Same SECURITY DEFINER pattern as
+-- is_household_member (014_tasks_household_scope.sql) so an owner-only
+-- policy can check role without a self-referencing subquery on
+-- household_members inside its own policy.
+CREATE OR REPLACE FUNCTION public.is_household_owner(target_household_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.household_members hm
+    WHERE hm.household_id = target_household_id
+      AND hm.user_id = auth.uid()
+      AND hm.role = 'owner'
+  );
+$$;
+
+REVOKE ALL ON FUNCTION public.is_household_owner(uuid) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.is_household_owner(uuid) TO authenticated;
+
+-- 1. household_members. Verified: the only client write is
+-- members-section.tsx handleChangeRole, which sends ONLY `{ role: newRole }`
+-- (no user_id/household_id in the payload) — confirmed by reading the call
+-- site. Its UI trigger (the kebab menu) is rendered only when
+-- `isOwner && !isCurrentUser` (members-section.tsx MemberRow), so the app
+-- already restricts role changes to owners; the policy now enforces that
+-- server-side via is_household_owner instead of trusting the UI gate.
+-- Column-level REVOKE/GRANT closes the identity-swap hole a household-scoped
+-- (but column-unrestricted) UPDATE policy would still leave open — without
+-- it, an owner could UPDATE user_id or household_id on a row even though
+-- the app never asks them to. INSERT stays service-role only (invite/join
+-- route). DELETE has no live policy either and is left untouched.
 DROP POLICY IF EXISTS "Auth read household_members" ON public.household_members;
 DROP POLICY IF EXISTS "Auth update household_members" ON public.household_members;
 DROP POLICY IF EXISTS "Auth write household_members" ON public.household_members;
 
+DROP POLICY IF EXISTS "Household members can view household_members" ON public.household_members;
 CREATE POLICY "Household members can view household_members"
   ON public.household_members FOR SELECT
   USING (public.is_household_member(household_id));
 
-CREATE POLICY "Household members can update household_members"
+DROP POLICY IF EXISTS "Household members can update household_members" ON public.household_members;
+DROP POLICY IF EXISTS "Household owners can update member roles" ON public.household_members;
+CREATE POLICY "Household owners can update member roles"
   ON public.household_members FOR UPDATE
-  USING (public.is_household_member(household_id))
-  WITH CHECK (public.is_household_member(household_id));
+  USING (public.is_household_owner(household_id))
+  WITH CHECK (public.is_household_owner(household_id));
+
+REVOKE UPDATE ON public.household_members FROM authenticated, anon;
+GRANT UPDATE (role) ON public.household_members TO authenticated;
 
 -- 2. households. Verified: INSERT is service-role only (invite route).
 -- UPDATE (name/golden_rule_target) is a real client flow, not owner-gated
--- in the app, so scoped to membership not role.
+-- in the app (useHousehold.ts / settings/page.tsx have no isOwner check on
+-- this path), so scoped to membership, not role.
 DROP POLICY IF EXISTS "Auth read households" ON public.households;
 DROP POLICY IF EXISTS "Auth update households" ON public.households;
 DROP POLICY IF EXISTS "Auth write households" ON public.households;
 
+DROP POLICY IF EXISTS "Household members can view households" ON public.households;
 CREATE POLICY "Household members can view households"
   ON public.households FOR SELECT
   USING (public.is_household_member(id));
 
+DROP POLICY IF EXISTS "Household members can update households" ON public.households;
 CREATE POLICY "Household members can update households"
   ON public.households FOR UPDATE
   USING (public.is_household_member(id))
   WITH CHECK (public.is_household_member(id));
 
--- 3. streaks. Verified: only client reads are own-row (useNotifications.ts,
--- eq user_id=self). No client insert/update anywhere; only service-role
--- cron/agent routes write. Scoped to own row within own household.
+-- 3. streaks. Verified: every client read (useNotifications.ts) is
+-- `.eq("user_id", user.id)` — own row only. Grepped src/ for INSERT/UPDATE
+-- on "streaks" and found NONE — only service-role cron/agent routes write
+-- (they bypass RLS entirely). A write policy here would be dead code that
+-- widens the attack surface for no real feature, so SELECT only.
 DROP POLICY IF EXISTS "Auth read streaks" ON public.streaks;
 DROP POLICY IF EXISTS "Auth update streaks" ON public.streaks;
 DROP POLICY IF EXISTS "Auth write streaks" ON public.streaks;
+DROP POLICY IF EXISTS "Household members can manage streaks" ON public.streaks;
 
-CREATE POLICY "Household members can manage streaks"
-  ON public.streaks FOR ALL
-  USING (public.is_household_member(household_id))
-  WITH CHECK (
-    public.is_household_member(household_id)
-    AND user_id = auth.uid()
-  );
+DROP POLICY IF EXISTS "Household members can view streaks" ON public.streaks;
+CREATE POLICY "Household members can view streaks"
+  ON public.streaks FOR SELECT
+  USING (public.is_household_member(household_id));
 
 -- 4. task_instances. Verified: zero client call sites anywhere in src/;
 -- only reader/writer is auto-scheduler.ts via the service-role cron route.
@@ -95,6 +142,7 @@ DROP POLICY IF EXISTS "Auth read user_achievements" ON public.user_achievements;
 DROP POLICY IF EXISTS "Auth update user_achievements" ON public.user_achievements;
 DROP POLICY IF EXISTS "Auth write user_achievements" ON public.user_achievements;
 
+DROP POLICY IF EXISTS "Users can view own achievements" ON public.user_achievements;
 CREATE POLICY "Users can view own achievements"
   ON public.user_achievements FOR SELECT
   USING (user_id = auth.uid());
@@ -105,16 +153,34 @@ DROP POLICY IF EXISTS "Auth read weekly_syncs" ON public.weekly_syncs;
 DROP POLICY IF EXISTS "Auth update weekly_syncs" ON public.weekly_syncs;
 DROP POLICY IF EXISTS "Auth write weekly_syncs" ON public.weekly_syncs;
 
--- 8. task_completions. Drop the open SELECT (the two correct
--- household-scoped SELECT policies stay untouched) and the two INSERT
--- policies that never check the task's household. Verified: the two real
--- client INSERT sites (playlist-player.tsx, tasks/page.tsx) always insert
--- for a task in the caller's own household, so the tightened check does
--- not change their behavior.
+-- 8. task_completions. SELECT: merge the two live household-adjacent
+-- policies ("Users can view own completions", "Household can view
+-- completions") into ONE policy keyed off the task's household via
+-- is_household_member, rather than two separately-maintained OR'd
+-- policies. Verified: every read site (dashboard partner completions,
+-- activity feed, stats, notifications) only ever needs completions whose
+-- task belongs to the caller's own household — own-row is a strict subset
+-- of that, so merging does not remove any visibility the app relies on.
+-- The live open SELECT ("Users read completions" USING (true)) and the two
+-- unscoped INSERT policies are dropped as before.
 DROP POLICY IF EXISTS "Users read completions" ON public.task_completions;
 DROP POLICY IF EXISTS "Users can insert completions" ON public.task_completions;
 DROP POLICY IF EXISTS "Users insert completions" ON public.task_completions;
+DROP POLICY IF EXISTS "Users can view own completions" ON public.task_completions;
+DROP POLICY IF EXISTS "Household can view completions" ON public.task_completions;
 
+DROP POLICY IF EXISTS "Household members can view completions" ON public.task_completions;
+CREATE POLICY "Household members can view completions"
+  ON public.task_completions FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.tasks t
+      WHERE t.id = task_id
+        AND public.is_household_member(t.household_id)
+    )
+  );
+
+DROP POLICY IF EXISTS "Users can insert own household completions" ON public.task_completions;
 CREATE POLICY "Users can insert own household completions"
   ON public.task_completions FOR INSERT
   WITH CHECK (
@@ -126,45 +192,37 @@ CREATE POLICY "Users can insert own household completions"
     )
   );
 
--- 9. profiles — shared with kidushishi. Additive only, no policy dropped or
--- altered. Adds the missing fellow-household SELECT (there is currently no
--- cross-household read policy live at all) and a trigger blocking direct
--- client reassignment of household_id. Verified: both real assignments
--- (invite/join, invite create) use the service role, exempted below. The
--- one client-side attempt to touch another user's household_id
--- (members-section.tsx executeRemove) already fails today under the
--- existing own-row-only UPDATE policies, so this trigger only closes the
--- self-service path, changing no currently-working behavior.
--- No DROP POLICY here on purpose (additive-only, shared table). Idempotency
--- for re-running this migration is handled with an existence check instead
--- of DROP POLICY IF EXISTS, so nothing in this section can ever remove an
--- existing profiles policy, including one this same migration created.
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_policies
-    WHERE schemaname = 'public'
-      AND tablename = 'profiles'
-      AND policyname = 'Users can view household member profiles'
-  ) THEN
-    CREATE POLICY "Users can view household member profiles"
-      ON public.profiles FOR SELECT
-      USING (
-        household_id IS NOT NULL
-        AND public.is_household_member(household_id)
-      );
-  END IF;
-END $$;
+-- 9. profiles — shared with kidushishi. Every policy this migration touches
+-- is dropped by ITS OWN exact name only (never an existing kidushishi
+-- policy name) before being re-created, so this section is idempotent
+-- without ever removing a policy this migration did not itself add.
+DROP POLICY IF EXISTS "Users can view household member profiles" ON public.profiles;
+CREATE POLICY "Users can view household member profiles"
+  ON public.profiles FOR SELECT
+  USING (
+    household_id IS NOT NULL
+    AND public.is_household_member(household_id)
+  );
 
+-- profiles.household_id: block direct client reassignment. Fixed from
+-- revision 1: the function must be SECURITY INVOKER, not SECURITY DEFINER —
+-- under SECURITY DEFINER, current_user inside the function body is the
+-- FUNCTION OWNER (whoever ran this migration), never the calling role, so
+-- the service_role exemption could never match and every UPDATE — including
+-- the legitimate invite/join and invite-create service-role writes — would
+-- have been rejected. Under SECURITY INVOKER, current_user is the role
+-- PostgREST is actually running as for this request: 'service_role' for the
+-- service-role key, 'authenticated' for a normal signed-in user, or
+-- 'postgres'/'supabase_admin' for direct dashboard/psql access.
 CREATE OR REPLACE FUNCTION public.prevent_self_household_reassignment()
 RETURNS trigger
 LANGUAGE plpgsql
-SECURITY DEFINER
+SECURITY INVOKER
 SET search_path = public
 AS $$
 BEGIN
   IF NEW.household_id IS DISTINCT FROM OLD.household_id
-     AND current_user <> 'service_role' THEN
+     AND current_user NOT IN ('service_role', 'postgres', 'supabase_admin') THEN
     RAISE EXCEPTION
       'profiles.household_id cannot be changed directly; use the invite/join or leave-household API';
   END IF;
