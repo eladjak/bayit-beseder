@@ -13,15 +13,26 @@
  * household from `AgentAuthResult.householdId` instead. See
  * docs/AGENT-API-MULTI-TENANT-GAP.md for the gap this closes.
  *
- * Two credential shapes are accepted, in this order:
+ * Two credential shapes are accepted. `verifyAgentRequest` checks the legacy
+ * key FIRST — chronologically, before ever touching the database — precisely
+ * so that path does not depend on the per-household token table existing or
+ * being reachable at all. It still gives the per-household lookup PRIORITY
+ * when that lookup actually succeeds, so the effective precedence is:
  *
- * 1. A per-household token (table `household_agent_tokens`, migration 020).
- *    Only its SHA-256 hash is stored; `resolveHouseholdForToken` looks up the
- *    presented token's hash and returns one of three outcomes: the household
- *    it authorizes ("ok"), "not_found" (unknown or revoked — falls through
- *    to the legacy key below), or "error" (the lookup itself failed, e.g. a
- *    DB/network problem) — which this function turns into an HTTP 503, NOT
- *    a 403, so an outage is never reported to the caller as "bad token".
+ * 1. A per-household token (table `household_agent_tokens`, migration 020),
+ *    IF the lookup for it actually finds an active row. Only its SHA-256
+ *    hash is stored; `resolveHouseholdForToken` looks up the presented
+ *    token's hash and returns one of three outcomes: the household it
+ *    authorizes ("ok" — wins even if the same presented value also happens
+ *    to equal the legacy key below), "not_found" (unknown or revoked — falls
+ *    through to the legacy key), or "error" (the lookup itself failed, e.g.
+ *    the table does not exist yet, or a DB/network problem). An "error" is
+ *    turned into an HTTP 503 ONLY when the legacy key does not also match
+ *    the presented value — see point 2. This is deliberate: during a
+ *    migration/rollout window where the code has been deployed but
+ *    `020_household_agent_tokens.sql` has not been applied yet (or the DB is
+ *    otherwise briefly unreachable), a pinned legacy key must keep working
+ *    rather than being taken down by a table that does not exist yet.
  * 2. The legacy global key (`BAYIT_AGENT_KEY` / `AGENT_API_TOKEN`), kept
  *    working ONLY as a documented transition path (design doc §3). It no
  *    longer grants access to "any household the caller names" — it grants
@@ -30,7 +41,9 @@
  *    key still authenticates (so it does not 401 outright) but authorizes
  *    ZERO households — every household-scoped handler then fails closed
  *    with 403, which is the safe default until an operator explicitly pins
- *    it or (better) switches the caller to a real per-household token.
+ *    it or (better) switches the caller to a real per-household token. A
+ *    genuine DB/network error (point 1) falls through to here — and, if the
+ *    legacy key does NOT also match, is answered with 503 instead of 403.
  *
  * Security notes:
  * - Secrets are read ONLY from the environment / database. Nothing is
@@ -149,19 +162,29 @@ export async function verifyAgentRequest(request: Request): Promise<AgentAuthRes
     };
   }
 
-  // 1. Per-household token (preferred path).
+  // 0. Legacy key comparison FIRST — chronologically before the DB call
+  // below, and computed unconditionally (it needs no database at all). This
+  // is what lets the transition-period legacy key keep working even if the
+  // household_agent_tokens table does not exist yet or the DB is briefly
+  // unreachable (see the module docstring). It is only a comparison here —
+  // acting on a legacy match is deferred to step 2, so a real per-household
+  // token can still take priority when the lookup actually succeeds.
+  const legacyMatches = Boolean(legacyKey) && safeEqual(presented, legacyKey ?? "");
+
+  // 1. Per-household token lookup (DB). Wins over a legacy match whenever it
+  // actually finds an active token.
   if (supabase) {
     const resolved = await resolveHouseholdForToken(supabase, presented);
     if (resolved.status === "ok") {
       return { ok: true, status: 200, householdId: resolved.householdId };
     }
-    if (resolved.status === "error") {
+    if (resolved.status === "error" && !legacyMatches) {
       // A DB/network failure is NOT the same thing as "this token is
       // invalid" — conflating the two would silently mask real outages as
-      // ordinary auth rejections (and, worse, would then fall through to
-      // the legacy-key check below on every transient DB hiccup). Answer
-      // 503 so a monitoring/retry layer treats it as an outage, not a
-      // rejected credential.
+      // ordinary auth rejections. Answer 503 so a monitoring/retry layer
+      // treats it as an outage, not a rejected credential. (When the
+      // presented value ALSO matches the legacy key, step 2 below handles
+      // it instead — the DB being broken/missing must not break that path.)
       return {
         ok: false,
         status: 503,
@@ -169,11 +192,12 @@ export async function verifyAgentRequest(request: Request): Promise<AgentAuthRes
         householdId: null,
       };
     }
-    // status === "not_found" — fall through to the legacy key check below.
+    // status === "not_found", or ("error" with legacyMatches === true) —
+    // fall through to the legacy key check below either way.
   }
 
   // 2. Legacy global key (transition path — see module docstring).
-  if (legacyKey && safeEqual(presented, legacyKey)) {
+  if (legacyMatches) {
     const pinnedHouseholdId = getLegacyKeyHouseholdId();
     if (!pinnedHouseholdId) {
       // Deliberate operator-facing warning: this is exactly the "shared key

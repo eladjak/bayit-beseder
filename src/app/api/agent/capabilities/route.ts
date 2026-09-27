@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { verifyAgentRequest } from "@/lib/agent/auth";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 /**
  * GET /api/agent/capabilities
@@ -12,8 +13,29 @@ import { verifyAgentRequest } from "@/lib/agent/auth";
  * See docs/DESIGN-per-household-agent-tokens.md — the token itself now
  * determines which household a caller may act on; `householdId` fields in
  * other endpoints are accepted for backward compatibility but ignored.
+ *
+ * Rate-limited per IP, same as every other /api/agent/* route, and — as of
+ * the round-2 adversarial review of PR #13 — checked BEFORE the auth call
+ * below, not after. This route was the one place that called
+ * verifyAgentRequest (which queries household_agent_tokens) with no rate
+ * limit at all, so a flood of requests with garbage bearer tokens could hit
+ * the database on every single one, unthrottled.
  */
+const limiter = rateLimit({ windowMs: 60_000, max: 20 });
+
 export async function GET(request: Request) {
+  // 1. Rate limit — BEFORE the token lookup (see task/route.ts for the
+  // fuller explanation: auth below queries household_agent_tokens per
+  // distinct token presented).
+  const rl = await limiter.check(getClientIp(request));
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "יותר מדי בקשות. נסו שוב עוד דקה." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(rl.reset / 1000)) } }
+    );
+  }
+
+  // 2. Auth — resolves WHICH household (if any) this bearer token authorizes.
   const auth = await verifyAgentRequest(request);
   if (!auth.ok) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });

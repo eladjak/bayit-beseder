@@ -182,16 +182,52 @@ describe("verifyAgentRequest", () => {
     expect(result.householdId).toBeNull();
   });
 
-  it("a DB lookup error does NOT fall through to the legacy key, even if the legacy key would have matched", async () => {
+  // RED-FIRST for the round-2 adversarial review (PR #13): the legacy key
+  // comparison must happen BEFORE the DB token lookup, chronologically, so
+  // that a pinned legacy key keeps working even if household_agent_tokens
+  // does not exist yet (e.g. this code deployed before migration 020 is
+  // applied) or the DB is briefly unreachable for any other reason. Against
+  // the round-1 fix (which returned 503 unconditionally on ANY DB lookup
+  // error, even when the presented value also matched the legacy key), this
+  // test fails: it got 503 with householdId null, not 200 with the pinned
+  // household.
+  it("a DB lookup error falls through to a MATCHING, PINNED legacy key instead of surfacing 503 — the DB being broken/missing must not break the transition-period legacy key", async () => {
     process.env.BAYIT_AGENT_KEY = TOKEN_A_RAW;
+    process.env.BAYIT_AGENT_KEY_HOUSEHOLD_ID = HOUSEHOLD_A;
+    vi.mocked(createClient).mockReturnValue(
+      fakeSupabase([], { errorOnLookup: "relation \"household_agent_tokens\" does not exist" })
+    );
+    const result = await verifyAgentRequest(requestWith(`Bearer ${TOKEN_A_RAW}`));
+    expect(result.ok).toBe(true);
+    expect(result.status).toBe(200);
+    expect(result.householdId).toBe(HOUSEHOLD_A);
+  });
+
+  it("a DB lookup error STILL surfaces as 503 when the presented value does NOT also match the legacy key", async () => {
+    process.env.BAYIT_AGENT_KEY = "some-other-legacy-key-entirely";
     process.env.BAYIT_AGENT_KEY_HOUSEHOLD_ID = HOUSEHOLD_A;
     vi.mocked(createClient).mockReturnValue(
       fakeSupabase([], { errorOnLookup: "connection reset by peer" })
     );
     const result = await verifyAgentRequest(requestWith(`Bearer ${TOKEN_A_RAW}`));
-    // A real outage must be visible as 503, not masked by a legacy key that
-    // happens to also match the same presented value.
+    // TOKEN_A_RAW does not match "some-other-legacy-key-entirely", so this
+    // really is an unrecoverable outage for this credential — 503, not a
+    // silent fallback to a key that was never presented.
     expect(result.status).toBe(503);
+    expect(result.householdId).toBeNull();
+  });
+
+  it("a real per-household token STILL takes priority over a matching legacy key, even though the legacy comparison now runs first", async () => {
+    process.env.BAYIT_AGENT_KEY = TOKEN_A_RAW;
+    process.env.BAYIT_AGENT_KEY_HOUSEHOLD_ID = HOUSEHOLD_B;
+    vi.mocked(createClient).mockReturnValue(
+      fakeSupabase([{ household_id: HOUSEHOLD_A, token_hash: hashToken(TOKEN_A_RAW), revoked_at: null }])
+    );
+    const result = await verifyAgentRequest(requestWith(`Bearer ${TOKEN_A_RAW}`));
+    // The DB lookup succeeds ("ok"), so it wins over the legacy pin (which
+    // would have said HOUSEHOLD_B) even though the legacy comparison is
+    // evaluated first in the code.
+    expect(result.householdId).toBe(HOUSEHOLD_A);
   });
 
   it("logs a warning when the legacy key is presented with no household pinned", async () => {
