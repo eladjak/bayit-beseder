@@ -1,9 +1,18 @@
 # The `/api/agent/*` multi-tenant gap
 
-**Status: DOCUMENTED, NOT FIXED.** Written 2026-09-25 as part of a prep-stage
-security task. This is a real gap, demonstrated with tests, and it is being
-left open on purpose rather than half-fixed — see "Why this is not fixed
-here" below.
+**Status: FIXED 2026-09-27.** Written 2026-09-25 as part of a prep-stage
+security task, documenting a real gap on purpose rather than half-fixing it —
+see "Why this is not fixed here" below for the reasoning at the time. The fix
+landed per `docs/DESIGN-per-household-agent-tokens.md`: every `/api/agent/*`
+route now resolves the acting household from the bearer token itself
+(`src/lib/agent/auth.ts` → `verifyAgentRequest`), never from a `householdId`
+field the caller writes into the request. The two exploits described below
+are covered by
+`src/app/api/agent/task/__tests__/household-token-isolation.test.ts`, which
+replaced the two tests that used to demonstrate them
+(`multi-tenant-gap.test.ts`, removed). The rest of this document is kept as
+the historical record of the gap and why it was deferred rather than
+half-fixed at the time.
 
 ## The gap, in one sentence
 

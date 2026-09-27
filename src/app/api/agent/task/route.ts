@@ -14,10 +14,14 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
  *  "סמן משימה X כהושלמה"           → marks a task completed
  *  "מה המשימות הפתוחות?"           → returns open tasks list
  *
- * Auth: Bearer BAYIT_AGENT_KEY. Rate-limited per IP (30/min).
+ * Auth: Bearer <per-household token> (or the legacy BAYIT_AGENT_KEY during the
+ * transition — see src/lib/agent/auth.ts). Rate-limited per IP (30/min).
  *
  * SAFETY LINES:
- * - householdId is REQUIRED for add/complete to scope all writes.
+ * - The household acted on is ALWAYS the one the bearer token authorizes
+ *   (`auth.householdId`) — never a `householdId` field from the request body.
+ *   A body may still include one for backward compatibility with older
+ *   callers, but it is parsed and discarded, not used for scoping.
  * - No RLS bypass without a verified householdId.
  * - task_completion user_id uses the household's first member (service-role
  *   writes on behalf of the household, not an unauthenticated caller).
@@ -30,8 +34,14 @@ const limiter = rateLimit({ windowMs: 60_000, max: 30 });
 
 const addSchema = z.object({
   action: z.literal("add"),
-  /** Household UUID (required for writes). */
-  householdId: z.string().uuid(),
+  /**
+   * DEPRECATED / IGNORED. The household is resolved from the bearer token
+   * (see src/lib/agent/auth.ts), never from the request body. This field is
+   * still accepted (and validated as a UUID when present) only so older
+   * callers that still send it do not fail schema validation; its value is
+   * never read for authorization or scoping.
+   */
+  householdId: z.string().uuid().optional(),
   /** Task title (Hebrew OK). */
   title: z.string().min(1).max(200),
   /** Optional ISO date string YYYY-MM-DD. Defaults to today. */
@@ -52,8 +62,8 @@ const addSchema = z.object({
 
 const completeSchema = z.object({
   action: z.literal("complete"),
-  /** Household UUID (required for writes). */
-  householdId: z.string().uuid(),
+  /** DEPRECATED / IGNORED — see addSchema.householdId above. */
+  householdId: z.string().uuid().optional(),
   /** UUID of the task to complete. */
   taskId: z.string().uuid(),
   /** Optional note written on completion. */
@@ -62,7 +72,8 @@ const completeSchema = z.object({
 
 const listSchema = z.object({
   action: z.literal("list"),
-  /** Household UUID (optional — returns all open tasks when omitted). */
+  /** DEPRECATED / IGNORED — the household is always the one the bearer token
+   * authorizes. See addSchema.householdId above. */
   householdId: z.string().uuid().optional(),
   /** Filter by status. Defaults to pending+in_progress. */
   status: z
@@ -86,13 +97,12 @@ const bodySchema = z.discriminatedUnion("action", [
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  // 1. Auth
-  const auth = verifyAgentRequest(request);
-  if (!auth.ok) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
-
-  // 2. Rate limit
+  // 1. Rate limit — BEFORE the token lookup. Auth (step 2) queries the
+  // household_agent_tokens table on every distinct token presented; checking
+  // the rate limiter first means a flood of requests with random/garbage
+  // bearer tokens gets 429'd per-IP without ever reaching the database,
+  // instead of exhausting DB connections on lookups that were always going
+  // to fail anyway.
   const rl = await limiter.check(getClientIp(request));
   if (!rl.success) {
     return NextResponse.json(
@@ -103,6 +113,19 @@ export async function POST(request: NextRequest) {
       }
     );
   }
+
+  // 2. Auth — resolves WHICH household (if any) this bearer token authorizes.
+  const auth = await verifyAgentRequest(request);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+  if (!auth.householdId) {
+    return NextResponse.json(
+      { error: "הטוקן אינו מורשה לפעול על אף משק בית." },
+      { status: 403 }
+    );
+  }
+  const householdId = auth.householdId;
 
   // 3. Parse body
   let raw: unknown;
@@ -136,11 +159,11 @@ export async function POST(request: NextRequest) {
 
   switch (body.action) {
     case "list":
-      return handleList(supabase, body, rl.remaining);
+      return handleList(supabase, householdId, body, rl.remaining);
     case "add":
-      return handleAdd(supabase, body, rl.remaining);
+      return handleAdd(supabase, householdId, body, rl.remaining);
     case "complete":
-      return handleComplete(supabase, body, rl.remaining);
+      return handleComplete(supabase, householdId, body, rl.remaining);
   }
 }
 
@@ -148,6 +171,7 @@ export async function POST(request: NextRequest) {
 
 async function handleList(
   supabase: ReturnType<typeof createClient<Database>>,
+  householdId: string,
   body: z.infer<typeof listSchema>,
   rlRemaining: number
 ) {
@@ -157,12 +181,9 @@ async function handleList(
   let q = supabase
     .from("tasks")
     .select("id, title, status, due_date, assigned_to, points, category_id")
+    .eq("household_id", householdId)
     .order("due_date", { ascending: true })
     .limit(limit);
-
-  if (body.householdId) {
-    q = q.eq("household_id", body.householdId);
-  }
 
   if (statusFilter === "open") {
     q = q.in("status", ["pending", "in_progress"]);
@@ -205,7 +226,10 @@ async function handleList(
       action: "list",
       tasks: shaped,
       count: shaped.length,
-      meta: { householdScoped: Boolean(body.householdId), generatedAt: new Date().toISOString() },
+      // householdScoped is always true now — the household comes from the
+      // bearer token, never from the request. Kept in the response shape for
+      // backward compatibility with existing callers that read this field.
+      meta: { householdScoped: true, generatedAt: new Date().toISOString() },
     },
     { headers: { "Cache-Control": "no-store", "X-RateLimit-Remaining": String(rlRemaining) } }
   );
@@ -215,6 +239,7 @@ async function handleList(
 
 async function handleAdd(
   supabase: ReturnType<typeof createClient<Database>>,
+  householdId: string,
   body: z.infer<typeof addSchema>,
   rlRemaining: number
 ) {
@@ -227,7 +252,7 @@ async function handleAdd(
     const { data: profiles } = await supabase
       .from("profiles")
       .select("id, display_name")
-      .eq("household_id", body.householdId);
+      .eq("household_id", householdId);
 
     // Case-insensitive partial match on display_name
     const match = (profiles ?? []).find((p) =>
@@ -259,7 +284,7 @@ async function handleAdd(
   const { data: task, error } = await supabase
     .from("tasks")
     .insert({
-      household_id: body.householdId,
+      household_id: householdId,
       title: body.title,
       status: "pending" as const,
       due_date: dueDate,
@@ -313,15 +338,16 @@ async function handleAdd(
 
 async function handleComplete(
   supabase: ReturnType<typeof createClient<Database>>,
+  householdId: string,
   body: z.infer<typeof completeSchema>,
   rlRemaining: number
 ) {
-  // 1. Fetch the task (scoped to the supplied householdId — safety check)
+  // 1. Fetch the task (scoped to the token's household — safety check)
   const { data: task, error: fetchErr } = await supabase
     .from("tasks")
     .select("id, title, status, household_id, assigned_to, points")
     .eq("id", body.taskId)
-    .eq("household_id", body.householdId)
+    .eq("household_id", householdId)
     .single();
 
   if (fetchErr || !task) {
@@ -364,7 +390,7 @@ async function handleComplete(
     const { data: member } = await supabase
       .from("household_members")
       .select("user_id")
-      .eq("household_id", body.householdId)
+      .eq("household_id", householdId)
       .limit(1)
       .single();
     completorId = member?.user_id ?? null;

@@ -12,18 +12,38 @@ Solis / any Claude / OpenClaw) command the app by voice or text — e.g. *"תכ�
 
 ## Authentication
 
+> **2026-09-27: per-household tokens.** See
+> `docs/DESIGN-per-household-agent-tokens.md` and
+> `docs/AGENT-API-MULTI-TENANT-GAP.md` (now marked FIXED). The household a
+> caller acts on is resolved **from the bearer token itself**
+> (`src/lib/agent/auth.ts` → `verifyAgentRequest`) — a `householdId` field in
+> the request body/query below is accepted for backward compatibility but is
+> **ignored** for authorization. Issue a token with
+> `node scripts/issue-agent-token.mjs issue <householdId> [label]`.
+
 Every `/api/agent/*` request requires a bearer token:
 
 ```
-Authorization: Bearer <BAYIT_AGENT_KEY>
+Authorization: Bearer <household agent token>
 ```
 
-- The key is read **only** from the environment (`BAYIT_AGENT_KEY`). There is no
-  hardcoded default, and the API **fails closed** (HTTP 503) when the key is unset.
-- `AGENT_API_TOKEN` is accepted as a documented alias; `BAYIT_AGENT_KEY` wins.
-- Comparison is constant-time (`crypto.timingSafeEqual`).
-- This token is **separate** from `CRON_SECRET` so it can be rotated/scoped
-  independently of the Vercel cron jobs.
+- **Preferred:** a per-household token from the `household_agent_tokens`
+  table (migration `020_household_agent_tokens.sql`), issued via
+  `scripts/issue-agent-token.mjs`. Only its SHA-256 hash is stored; the raw
+  value is shown once at issuance and cannot be recovered.
+- **Legacy / transition:** the old shared `BAYIT_AGENT_KEY` (or its
+  `AGENT_API_TOKEN` alias) still authenticates, but it now authorizes **zero
+  households** unless the server operator pins it to exactly one via
+  `BAYIT_AGENT_KEY_HOUSEHOLD_ID` — it can never again act on "whatever
+  household the caller names". Move any caller still using it to a real
+  per-household token, then unset it.
+- The API **fails closed** (HTTP 503) when neither a per-household token
+  store nor a legacy key is reachable at all; it returns 403 for an
+  unrecognized/revoked token or a legacy key with no household authorized.
+- Comparison of the legacy key is constant-time (`crypto.timingSafeEqual`);
+  the per-household token is looked up by an exact hash match in Postgres.
+- This credential is **separate** from `CRON_SECRET` so it can be
+  rotated/scoped independently of the Vercel cron jobs.
 
 Generate a key:
 

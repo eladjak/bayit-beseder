@@ -54,6 +54,10 @@ export function makeSupabaseMock(
         calls.push({ table, op: "eq", args });
         return chain;
       },
+      is: (...args: unknown[]) => {
+        calls.push({ table, op: "is", args });
+        return chain;
+      },
       neq: (...args: unknown[]) => {
         calls.push({ table, op: "neq", args });
         return chain;

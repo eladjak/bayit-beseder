@@ -1033,6 +1033,41 @@ export type Database = {
           },
         ];
       };
+      household_agent_tokens: {
+        Row: {
+          id: string;
+          household_id: string;
+          token_hash: string;
+          label: string | null;
+          created_at: string;
+          revoked_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          token_hash: string;
+          label?: string | null;
+          created_at?: string;
+          revoked_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          household_id?: string;
+          token_hash?: string;
+          label?: string | null;
+          created_at?: string;
+          revoked_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "household_agent_tokens_household_id_fkey";
+            columns: ["household_id"];
+            isOneToOne: false;
+            referencedRelation: "households";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

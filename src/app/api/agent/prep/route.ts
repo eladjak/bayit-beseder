@@ -20,27 +20,42 @@ import { maybeDeliverToOwner } from "@/lib/agent/deliver";
  * No intake was required — Elad said "תתחיל מברירת מחדל": households are
  * seeded with a default ~25-meal rotation on first use.
  *
- * Auth: Bearer BAYIT_AGENT_KEY. Rate-limited per IP.
+ * Auth: Bearer <per-household token> (or the legacy BAYIT_AGENT_KEY during the
+ * transition). Rate-limited per IP. The household is always the one the
+ * bearer token authorizes — a `householdId` query param is accepted for
+ * backward compatibility but ignored for scoping (see src/lib/agent/auth.ts).
  */
 
 const limiter = rateLimit({ windowMs: 60_000, max: 20 });
 
 const querySchema = z.object({
-  householdId: z.string().uuid(),
+  /** DEPRECATED / IGNORED — see module docstring above. Kept optional (was
+   * previously required) since the real household now always comes from the
+   * bearer token. */
+  householdId: z.string().uuid().optional(),
   deliver: z.literal("whatsapp").optional(),
 });
 
 export async function GET(request: NextRequest) {
-  const auth = verifyAgentRequest(request);
-  if (!auth.ok) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
-
+  // 1. Rate limit — BEFORE the token lookup (see task/route.ts for why: auth
+  // below queries household_agent_tokens per distinct token presented).
   const rl = await limiter.check(getClientIp(request));
   if (!rl.success) {
     return NextResponse.json(
       { error: "יותר מדי בקשות. נסו שוב עוד דקה." },
       { status: 429, headers: { "Retry-After": String(Math.ceil(rl.reset / 1000)) } }
+    );
+  }
+
+  // 2. Auth — resolves WHICH household (if any) this bearer token authorizes.
+  const auth = await verifyAgentRequest(request);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+  if (!auth.householdId) {
+    return NextResponse.json(
+      { error: "הטוקן אינו מורשה לפעול על אף משק בית." },
+      { status: 403 }
     );
   }
 
@@ -55,7 +70,10 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   }
-  const { householdId, deliver } = parsed.data;
+  const { deliver } = parsed.data;
+  // Household is ALWAYS the one the bearer token authorizes, never the query
+  // param above (which is parsed only for backward-compat, then discarded).
+  const householdId = auth.householdId;
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

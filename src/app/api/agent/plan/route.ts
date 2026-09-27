@@ -18,12 +18,19 @@ import { maybeDeliverToOwner } from "@/lib/agent/deliver";
  * it calls this endpoint, gets `whatsappText`, and forwards it to the user's
  * WhatsApp / push channel. (Actual WhatsApp send is a separate, approved step.)
  *
- * Auth: Bearer BAYIT_AGENT_KEY. Rate-limited per IP.
+ * Auth: Bearer <per-household token> (or the legacy BAYIT_AGENT_KEY during the
+ * transition). Rate-limited per IP. The household used to enrich the plan
+ * with existing tasks/members is always the one the bearer token authorizes
+ * — a `householdId` body field is accepted for backward compatibility but
+ * ignored for that purpose (see src/lib/agent/auth.ts). A token authorized
+ * for NO household (e.g. an unpinned legacy key) gets 403 — generating and
+ * possibly delivering a plan is a real action, not a household-optional read.
  */
 
 const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 
 const bodySchema = z.object({
+  /** DEPRECATED / IGNORED — see module docstring above. */
   householdId: z.string().uuid().optional(),
   weekStart: z
     .string()
@@ -49,13 +56,8 @@ function comingSunday(from: Date): Date {
 }
 
 export async function POST(request: NextRequest) {
-  // 1. Auth
-  const auth = verifyAgentRequest(request);
-  if (!auth.ok) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
-
-  // 2. Rate limit
+  // 1. Rate limit — BEFORE the token lookup (see task/route.ts for why: auth
+  // below queries household_agent_tokens per distinct token presented).
   const rl = await limiter.check(getClientIp(request));
   if (!rl.success) {
     return NextResponse.json(
@@ -63,6 +65,26 @@ export async function POST(request: NextRequest) {
       { status: 429, headers: { "Retry-After": String(Math.ceil(rl.reset / 1000)) } }
     );
   }
+
+  // 2. Auth — resolves WHICH household (if any) this bearer token authorizes.
+  const auth = await verifyAgentRequest(request);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+  // Unlike a truly household-optional read, generating (and possibly
+  // delivering, via `deliver: "whatsapp"`) a plan is a real action taken on
+  // someone's behalf — a legacy key with no household pinned must not be
+  // able to trigger it. Every other agent route already fails closed here;
+  // this route previously did not (it allowed a "no household context"
+  // plan through), which was the one inconsistency an adversarial review
+  // caught.
+  if (!auth.householdId) {
+    return NextResponse.json(
+      { error: "הטוקן אינו מורשה לפעול על אף משק בית." },
+      { status: 403 }
+    );
+  }
+  const householdId = auth.householdId;
 
   // 3. Parse + validate body
   let raw: unknown;
@@ -78,7 +100,7 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  const { householdId, weekStart, zoneMode, members, deliver } = parsed.data;
+  const { weekStart, zoneMode, members, deliver } = parsed.data;
 
   // 4. Resolve week start
   const weekStartDate = weekStart
