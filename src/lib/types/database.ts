@@ -250,6 +250,7 @@ export type Database = {
           invite_code: string;
           golden_rule_target: number;
           emergency_mode: boolean;
+          city: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -259,6 +260,7 @@ export type Database = {
           invite_code: string;
           golden_rule_target?: number;
           emergency_mode?: boolean;
+          city?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -268,6 +270,7 @@ export type Database = {
           invite_code?: string;
           golden_rule_target?: number;
           emergency_mode?: boolean;
+          city?: string | null;
           created_at?: string;
           updated_at?: string;
         };

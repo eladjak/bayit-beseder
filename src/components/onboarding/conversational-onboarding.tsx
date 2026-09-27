@@ -24,6 +24,8 @@ interface ConversationalOnboardingProps {
 
 export interface OnboardingResult {
   homeName: string;
+  /** Optional city/town (יישוב) the household is in. Empty string if skipped. */
+  homeCity: string;
   roomCount: RoomCount;
   residents: Set<ResidentType>;
   kidCount: number;
@@ -319,10 +321,14 @@ function StepWelcome({ onNext, t }: { onNext: () => void; t: TFn }) {
 function StepHomeName({
   value,
   onChange,
+  city,
+  onCityChange,
   t,
 }: {
   value: string;
   onChange: (v: string) => void;
+  city: string;
+  onCityChange: (v: string) => void;
   t: TFn;
 }) {
   const suggestions = [
@@ -372,6 +378,22 @@ function StepHomeName({
             {s}
           </button>
         ))}
+      </div>
+
+      <div className="mt-6">
+        <label htmlFor="onboarding-city" className="text-sm font-medium text-foreground block mb-2">
+          {t("onboarding.cityLabel")}
+        </label>
+        <input
+          id="onboarding-city"
+          type="text"
+          value={city}
+          onChange={(e) => onCityChange(e.target.value)}
+          placeholder={t("onboarding.cityPlaceholder")}
+          maxLength={100}
+          className="w-full px-4 py-3 rounded-2xl border-2 border-border bg-surface text-foreground placeholder:text-muted/50 focus:border-primary focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition-colors text-right text-sm"
+          dir="rtl"
+        />
       </div>
     </div>
   );
@@ -764,6 +786,7 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
   const focusTrapRef = useFocusTrap<HTMLDivElement>(open, onSkip);
   const [step, setStep] = useState(0); // 0 = welcome
   const [homeName, setHomeName] = useState("");
+  const [homeCity, setHomeCity] = useState("");
   const [roomCount, setRoomCount] = useState<RoomCount>("3");
   const [residents, setResidents] = useState<Set<ResidentType>>(new Set(["couple"]));
   const [kidCount] = useState(0);
@@ -810,6 +833,7 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
     setTimeout(() => {
       onComplete({
         homeName,
+        homeCity,
         roomCount,
         residents,
         kidCount,
@@ -818,7 +842,7 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
         tasks: generatedTasks,
       });
     }, 2200);
-  }, [generatedTasks, homeName, roomCount, residents, kidCount, style, dailyMinutes, onComplete]);
+  }, [generatedTasks, homeName, homeCity, roomCount, residents, kidCount, style, dailyMinutes, onComplete]);
 
   const canProceed = useMemo(() => {
     if (step === 0) return true;
@@ -888,7 +912,15 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
             className={step === 0 || (step === 5 && isGenerating) || step === 6 ? "h-full flex items-center justify-center" : ""}
           >
             {step === 0 && <StepWelcome onNext={() => setStep(1)} t={t} />}
-            {step === 1 && <StepHomeName value={homeName} onChange={setHomeName} t={t} />}
+            {step === 1 && (
+              <StepHomeName
+                value={homeName}
+                onChange={setHomeName}
+                city={homeCity}
+                onCityChange={setHomeCity}
+                t={t}
+              />
+            )}
             {step === 2 && <StepRoomCount value={roomCount} onChange={setRoomCount} t={t} />}
             {step === 3 && <StepResidents value={residents} onChange={setResidents} t={t} />}
             {step === 4 && (

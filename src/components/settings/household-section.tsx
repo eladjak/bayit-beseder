@@ -5,11 +5,14 @@ import { useTranslation } from "@/hooks/useTranslation";
 
 interface HouseholdSectionProps {
   householdName: string;
+  city: string;
+  cityError: string | null;
   goldenTarget: number;
   inviteCode: string;
   copied: boolean;
   householdSaving: boolean;
   onNameChange: (name: string) => void;
+  onCityChange: (city: string) => void;
   onTargetChange: (target: number) => void;
   onCopyInviteCode: () => void;
   onSave: () => void;
@@ -17,11 +20,14 @@ interface HouseholdSectionProps {
 
 export function HouseholdSection({
   householdName,
+  city,
+  cityError,
   goldenTarget,
   inviteCode,
   copied,
   householdSaving,
   onNameChange,
+  onCityChange,
   onTargetChange,
   onCopyInviteCode,
   onSave,
@@ -44,6 +50,27 @@ export function HouseholdSection({
           onChange={(e) => onNameChange(e.target.value)}
           className="w-full bg-background dark:bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
         />
+      </div>
+      <div>
+        <label htmlFor="household-city" className="text-xs text-muted block mb-1">
+          {t("settings.householdSection.cityLabel")}
+        </label>
+        <input
+          id="household-city"
+          type="text"
+          value={city}
+          onChange={(e) => onCityChange(e.target.value)}
+          placeholder={t("settings.householdSection.cityPlaceholder")}
+          maxLength={100}
+          aria-invalid={cityError ? true : undefined}
+          aria-describedby={cityError ? "household-city-error" : undefined}
+          className="w-full bg-background dark:bg-background border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary"
+        />
+        {cityError ? (
+          <p id="household-city-error" className="text-[11px] text-danger mt-1">
+            {cityError}
+          </p>
+        ) : null}
       </div>
       <div>
         <label className="text-xs text-muted block mb-1">

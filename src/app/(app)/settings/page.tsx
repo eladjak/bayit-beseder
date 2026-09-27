@@ -7,7 +7,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile } from "@/hooks/useProfile";
-import { useHousehold } from "@/hooks/useHousehold";
+import { useHousehold, normalizeHouseholdCity } from "@/hooks/useHousehold";
 import { signOut } from "@/lib/auth";
 import {
   getNotificationPrefs,
@@ -113,6 +113,8 @@ export default function SettingsPage() {
   const [copied, setCopied] = useState(false);
   const [goldenTarget, setGoldenTarget] = useState(80);
   const [householdName, setHouseholdName] = useState("הבית שלנו");
+  const [householdCity, setHouseholdCity] = useState("");
+  const [householdCityError, setHouseholdCityError] = useState<string | null>(null);
   const [householdSaving, setHouseholdSaving] = useState(false);
 
   // Sound state
@@ -234,6 +236,7 @@ export default function SettingsPage() {
     if (household) {
       setHouseholdName(household.name);
       setGoldenTarget(household.goldenRuleTarget);
+      setHouseholdCity(household.city ?? "");
       localStorage.setItem("bayit-household-name", household.name);
       localStorage.setItem("bayit-golden-target", String(household.goldenRuleTarget));
     }
@@ -303,6 +306,13 @@ export default function SettingsPage() {
   }
 
   const handleSaveHousehold = useCallback(async () => {
+    const normalizedCity = normalizeHouseholdCity(householdCity);
+    if (normalizedCity === undefined) {
+      setHouseholdCityError(t("settings.householdSection.cityTooLong"));
+      return;
+    }
+    setHouseholdCityError(null);
+
     localStorage.setItem("bayit-household-name", householdName);
     localStorage.setItem("bayit-golden-target", String(goldenTarget));
     if (!profile?.household_id) {
@@ -310,14 +320,18 @@ export default function SettingsPage() {
       return;
     }
     setHouseholdSaving(true);
-    const success = await updateHousehold({ name: householdName, goldenRuleTarget: goldenTarget });
+    const success = await updateHousehold({
+      name: householdName,
+      goldenRuleTarget: goldenTarget,
+      city: normalizedCity,
+    });
     setHouseholdSaving(false);
     if (success) {
       toast.success("הגדרות הבית עודכנו 🏠");
     } else {
       toast.error("לא הצלחנו לשמור — נסו שוב");
     }
-  }, [householdName, goldenTarget, profile?.household_id, updateHousehold]);
+  }, [householdName, householdCity, goldenTarget, profile?.household_id, updateHousehold, t]);
 
   const supabaseNotifKeys = new Set<string>(["morning", "midday", "evening", "partnerActivity"]);
 
@@ -457,11 +471,17 @@ export default function SettingsPage() {
 
         <HouseholdSection
           householdName={householdName}
+          city={householdCity}
+          cityError={householdCityError}
           goldenTarget={goldenTarget}
           inviteCode={household.inviteCode}
           copied={copied}
           householdSaving={householdSaving}
           onNameChange={setHouseholdName}
+          onCityChange={(value) => {
+            setHouseholdCity(value);
+            if (householdCityError) setHouseholdCityError(null);
+          }}
           onTargetChange={setGoldenTarget}
           onCopyInviteCode={copyInviteCode}
           onSave={handleSaveHousehold}
