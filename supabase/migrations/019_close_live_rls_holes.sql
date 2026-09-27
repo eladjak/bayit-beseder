@@ -75,12 +75,14 @@ DROP POLICY IF EXISTS "Auth write household_members" ON public.household_members
 DROP POLICY IF EXISTS "Household members can view household_members" ON public.household_members;
 CREATE POLICY "Household members can view household_members"
   ON public.household_members FOR SELECT
+  TO authenticated
   USING (public.is_household_member(household_id));
 
 DROP POLICY IF EXISTS "Household members can update household_members" ON public.household_members;
 DROP POLICY IF EXISTS "Household owners can update member roles" ON public.household_members;
 CREATE POLICY "Household owners can update member roles"
   ON public.household_members FOR UPDATE
+  TO authenticated
   USING (public.is_household_owner(household_id))
   WITH CHECK (public.is_household_owner(household_id));
 
@@ -98,11 +100,13 @@ DROP POLICY IF EXISTS "Auth write households" ON public.households;
 DROP POLICY IF EXISTS "Household members can view households" ON public.households;
 CREATE POLICY "Household members can view households"
   ON public.households FOR SELECT
+  TO authenticated
   USING (public.is_household_member(id));
 
 DROP POLICY IF EXISTS "Household members can update households" ON public.households;
 CREATE POLICY "Household members can update households"
   ON public.households FOR UPDATE
+  TO authenticated
   USING (public.is_household_member(id))
   WITH CHECK (public.is_household_member(id));
 
@@ -119,6 +123,7 @@ DROP POLICY IF EXISTS "Household members can manage streaks" ON public.streaks;
 DROP POLICY IF EXISTS "Household members can view streaks" ON public.streaks;
 CREATE POLICY "Household members can view streaks"
   ON public.streaks FOR SELECT
+  TO authenticated
   USING (public.is_household_member(household_id));
 
 -- 4. task_instances. Verified: zero client call sites anywhere in src/;
@@ -145,6 +150,7 @@ DROP POLICY IF EXISTS "Auth write user_achievements" ON public.user_achievements
 DROP POLICY IF EXISTS "Users can view own achievements" ON public.user_achievements;
 CREATE POLICY "Users can view own achievements"
   ON public.user_achievements FOR SELECT
+  TO authenticated
   USING (user_id = auth.uid());
 
 -- 7. weekly_syncs. Verified: zero call sites anywhere in src/ except the
@@ -172,6 +178,7 @@ DROP POLICY IF EXISTS "Household can view completions" ON public.task_completion
 DROP POLICY IF EXISTS "Household members can view completions" ON public.task_completions;
 CREATE POLICY "Household members can view completions"
   ON public.task_completions FOR SELECT
+  TO authenticated
   USING (
     EXISTS (
       SELECT 1 FROM public.tasks t
@@ -183,6 +190,7 @@ CREATE POLICY "Household members can view completions"
 DROP POLICY IF EXISTS "Users can insert own household completions" ON public.task_completions;
 CREATE POLICY "Users can insert own household completions"
   ON public.task_completions FOR INSERT
+  TO authenticated
   WITH CHECK (
     auth.uid() = user_id
     AND EXISTS (
@@ -199,6 +207,7 @@ CREATE POLICY "Users can insert own household completions"
 DROP POLICY IF EXISTS "Users can view household member profiles" ON public.profiles;
 CREATE POLICY "Users can view household member profiles"
   ON public.profiles FOR SELECT
+  TO authenticated
   USING (
     household_id IS NOT NULL
     AND public.is_household_member(household_id)

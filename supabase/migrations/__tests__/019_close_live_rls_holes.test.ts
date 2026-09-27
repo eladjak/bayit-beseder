@@ -290,8 +290,8 @@ describe("019 fix #2 — household_members UPDATE is owner-only and column-scope
 
   it("RED: a sabotaged copy using is_household_member (any member, not just owner) for the UPDATE policy is caught", () => {
     const sabotaged = sql.replace(
-      'CREATE POLICY "Household owners can update member roles"\n  ON public.household_members FOR UPDATE\n  USING (public.is_household_owner(household_id))\n  WITH CHECK (public.is_household_owner(household_id));',
-      'CREATE POLICY "Household owners can update member roles"\n  ON public.household_members FOR UPDATE\n  USING (public.is_household_member(household_id))\n  WITH CHECK (public.is_household_member(household_id));'
+      'CREATE POLICY "Household owners can update member roles"\n  ON public.household_members FOR UPDATE\n  TO authenticated\n  USING (public.is_household_owner(household_id))\n  WITH CHECK (public.is_household_owner(household_id));',
+      'CREATE POLICY "Household owners can update member roles"\n  ON public.household_members FOR UPDATE\n  TO authenticated\n  USING (public.is_household_member(household_id))\n  WITH CHECK (public.is_household_member(household_id));'
     );
     expect(sabotaged).not.toBe(sql);
     const blocks = extractPolicyBlocks(sabotaged);
@@ -313,8 +313,8 @@ describe("019 fix #4 — streaks has no write policy (zero verified client write
 
   it("RED: a sabotaged copy re-adding a FOR ALL streaks policy is caught", () => {
     const sabotaged = sql.replace(
-      'DROP POLICY IF EXISTS "Household members can view streaks" ON public.streaks;\nCREATE POLICY "Household members can view streaks"\n  ON public.streaks FOR SELECT\n  USING (public.is_household_member(household_id));',
-      'DROP POLICY IF EXISTS "Household members can view streaks" ON public.streaks;\nCREATE POLICY "Household members can view streaks"\n  ON public.streaks FOR SELECT\n  USING (public.is_household_member(household_id));\n\nCREATE POLICY "Household members can manage streaks"\n  ON public.streaks FOR ALL\n  USING (public.is_household_member(household_id));'
+      'DROP POLICY IF EXISTS "Household members can view streaks" ON public.streaks;\nCREATE POLICY "Household members can view streaks"\n  ON public.streaks FOR SELECT\n  TO authenticated\n  USING (public.is_household_member(household_id));',
+      'DROP POLICY IF EXISTS "Household members can view streaks" ON public.streaks;\nCREATE POLICY "Household members can view streaks"\n  ON public.streaks FOR SELECT\n  TO authenticated\n  USING (public.is_household_member(household_id));\n\nCREATE POLICY "Household members can manage streaks"\n  ON public.streaks FOR ALL\n  USING (public.is_household_member(household_id));'
     );
     expect(sabotaged).not.toBe(sql);
     const streaksPolicyRe = /CREATE POLICY "[^"]+"\s*\n\s*ON public\.streaks FOR (\w+)/g;
@@ -395,5 +395,34 @@ describe("019 fix #3 — task_completions has one merged SELECT policy", () => {
     const selectPolicyRe = /CREATE POLICY "([^"]+)"\s*\n\s*ON public\.task_completions FOR SELECT/g;
     const names = [...sabotaged.matchAll(selectPolicyRe)].map((m) => m[1]);
     expect(names.length).toBeGreaterThan(1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Revision 3 (Codex round 2): every new policy is scoped TO authenticated,
+// so an anon read of a shared table (profiles) never reaches
+// is_household_member(), which anon has no EXECUTE on.
+// ---------------------------------------------------------------------------
+
+function policiesMissingAuthenticated(text: string): string[] {
+  const missing: string[] = [];
+  const re = /CREATE POLICY\s+"([^"]+)"\s+ON\s+public\.\w+\s+FOR\s+\w+\s+(TO\s+authenticated)?/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    if (!m[2]) missing.push(m[1]);
+  }
+  return missing;
+}
+
+describe("019 revision 3: policies are TO authenticated", () => {
+  it("every CREATE POLICY is scoped TO authenticated", () => {
+    const count = (sql.match(/CREATE POLICY/g) || []).length;
+    expect(count).toBeGreaterThan(0);
+    expect(policiesMissingAuthenticated(sql)).toEqual([]);
+  });
+
+  it("RED: a policy without TO authenticated is caught", () => {
+    const sabotaged = sql.replace(/\n  TO authenticated/, "");
+    expect(policiesMissingAuthenticated(sabotaged).length).toBe(1);
   });
 });
