@@ -18,12 +18,17 @@ import { maybeDeliverToOwner } from "@/lib/agent/deliver";
  * it calls this endpoint, gets `whatsappText`, and forwards it to the user's
  * WhatsApp / push channel. (Actual WhatsApp send is a separate, approved step.)
  *
- * Auth: Bearer BAYIT_AGENT_KEY. Rate-limited per IP.
+ * Auth: Bearer <per-household token> (or the legacy BAYIT_AGENT_KEY during the
+ * transition). Rate-limited per IP. The household used to enrich the plan
+ * with existing tasks/members is always the one the bearer token authorizes
+ * — a `householdId` body field is accepted for backward compatibility but
+ * ignored for that purpose (see src/lib/agent/auth.ts).
  */
 
 const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 
 const bodySchema = z.object({
+  /** DEPRECATED / IGNORED — see module docstring above. */
   householdId: z.string().uuid().optional(),
   weekStart: z
     .string()
@@ -49,8 +54,8 @@ function comingSunday(from: Date): Date {
 }
 
 export async function POST(request: NextRequest) {
-  // 1. Auth
-  const auth = verifyAgentRequest(request);
+  // 1. Auth — resolves WHICH household (if any) this bearer token authorizes.
+  const auth = await verifyAgentRequest(request);
   if (!auth.ok) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
@@ -78,7 +83,11 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  const { householdId, weekStart, zoneMode, members, deliver } = parsed.data;
+  const { weekStart, zoneMode, members, deliver } = parsed.data;
+  // Household context is ALWAYS the one the bearer token authorizes (may be
+  // null — a plan can still be generated with no household context, exactly
+  // as when the (now-ignored) body field was previously omitted).
+  const householdId = auth.householdId;
 
   // 4. Resolve week start
   const weekStartDate = weekStart

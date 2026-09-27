@@ -8,10 +8,13 @@ import { verifyAgentRequest } from "@/lib/agent/auth";
  * An agent (Kami / Box / any Claude / OpenClaw) reads this once to learn the
  * available actions, their params, and the auth scheme — then drives the app.
  *
- * Auth: Bearer BAYIT_AGENT_KEY (same as all /api/agent/* endpoints).
+ * Auth: Bearer <per-household token> (same as all /api/agent/* endpoints).
+ * See docs/DESIGN-per-household-agent-tokens.md — the token itself now
+ * determines which household a caller may act on; `householdId` fields in
+ * other endpoints are accepted for backward compatibility but ignored.
  */
 export async function GET(request: Request) {
-  const auth = verifyAgentRequest(request);
+  const auth = await verifyAgentRequest(request);
   if (!auth.ok) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
@@ -23,8 +26,11 @@ export async function GET(request: Request) {
     version: "1.1.0",
     auth: {
       scheme: "Bearer",
-      header: "Authorization: Bearer <BAYIT_AGENT_KEY>",
-      note: "המפתח מוגדר בסביבת השרת בלבד (BAYIT_AGENT_KEY). אין מפתח ברירת מחדל.",
+      header: "Authorization: Bearer <household agent token>",
+      note:
+        "כל משק בית מקבל טוקן משלו (ראו docs/DESIGN-per-household-agent-tokens.md). " +
+        "הטוקן קובע לבדו לאיזה משק בית מותר לפעול — שדה householdId בבקשה, אם קיים, מתעלמים ממנו. " +
+        "המפתח הגלובלי הישן (BAYIT_AGENT_KEY) עדיין עובד רק כתקופת-מעבר, ורק אם נעוץ מראש למשק בית בודד.",
     },
     actions: [
       {
@@ -34,7 +40,7 @@ export async function GET(request: Request) {
         summary:
           "ייצור תוכנית שבועית מאוזנת (חלוקת משימות לימים ולבני הבית) והחזרתה כ-JSON + בלוק טקסט מוכן לשליחה ב-WhatsApp.",
         params: {
-          householdId: "string (אופציונלי) — מזהה משק בית. אם סופק, נשלבות גם המשימות הקיימות של אותו משק בית.",
+          householdId: "מיושן / מתעלמים ממנו — משק הבית נקבע לפי הטוקן עצמו, לא לפי שדה זה.",
           weekStart: "string YYYY-MM-DD (אופציונלי) — תאריך תחילת השבוע. ברירת מחדל: יום ראשון הקרוב.",
           zoneMode: "boolean (אופציונלי) — תזמון מבוסס-אזורים (קיבוץ משימות לפי חדרי הבית).",
           members: "string[] (אופציונלי) — מזהי בני הבית. נגזר מ-householdId אם לא סופק.",
@@ -50,7 +56,7 @@ export async function GET(request: Request) {
         summary:
           "סיכום היום: המשימות הפתוחות להיום, מי משויך, כמה משימות באיחור, ומצב הרצף (streak) — כ-JSON + טקסט מוכן.",
         params: {
-          householdId: "string (אופציונלי) — query param. מצמצם לאותו משק בית.",
+          householdId: "מיושן / מתעלמים ממנו — משק הבית נקבע לפי הטוקן עצמו.",
           deliver: "\"whatsapp\" (אופציונלי) — query param. אם מצוין, הסיכום יישלח ב-WhatsApp לאלעד בלבד.",
         },
         returns: "{ date, tasks[], overdueCount, streak, whatsappText, delivery }",
@@ -64,7 +70,7 @@ export async function GET(request: Request) {
         params: {
           action: "\"list\" | \"add\" | \"complete\" — (חובה)",
           householdId:
-            "string UUID — חובה ל-add/complete, אופציונלי ל-list.",
+            "מיושן / מתעלמים ממנו — משק הבית נקבע לפי הטוקן עצמו, לא לפי שדה זה.",
           title: "string — כותרת המשימה (חובה ל-add). דוגמה: \"להפשיר עוף לארבע\".",
           due: "string YYYY-MM-DD (אופציונלי, ל-add) — תאריך יעד. ברירת מחדל: היום.",
           assignee:

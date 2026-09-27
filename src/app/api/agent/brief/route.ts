@@ -18,12 +18,16 @@ import { isTaskOverdue } from "@/lib/task-flags";
  * overdue count, and the daily streak — as JSON plus a ready-to-send Hebrew
  * WhatsApp text block. Lets an agent answer "מה יש לנו היום?".
  *
- * Auth: Bearer BAYIT_AGENT_KEY. Rate-limited per IP.
+ * Auth: Bearer <per-household token> (or the legacy BAYIT_AGENT_KEY during the
+ * transition). Rate-limited per IP. The household is always the one the
+ * bearer token authorizes — a `householdId` query param is accepted for
+ * backward compatibility but ignored for scoping (see src/lib/agent/auth.ts).
  */
 
 const limiter = rateLimit({ windowMs: 60_000, max: 20 });
 
 const querySchema = z.object({
+  /** DEPRECATED / IGNORED — see module docstring above. */
   householdId: z.string().uuid().optional(),
   /**
    * Optional delivery. "whatsapp" sends the brief to ELAD'S OWN number
@@ -33,10 +37,16 @@ const querySchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
-  // 1. Auth
-  const auth = verifyAgentRequest(request);
+  // 1. Auth — resolves WHICH household (if any) this bearer token authorizes.
+  const auth = await verifyAgentRequest(request);
   if (!auth.ok) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+  if (!auth.householdId) {
+    return NextResponse.json(
+      { error: "הטוקן אינו מורשה לפעול על אף משק בית." },
+      { status: 403 }
+    );
   }
 
   // 2. Rate limit
@@ -60,7 +70,10 @@ export async function GET(request: NextRequest) {
       { status: 400 }
     );
   }
-  const { householdId, deliver } = parsed.data;
+  const { deliver } = parsed.data;
+  // Household is ALWAYS the one the bearer token authorizes, never the query
+  // param above (which is parsed only for backward-compat, then discarded).
+  const householdId = auth.householdId;
 
   // 4. Service-role Supabase
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
