@@ -716,3 +716,4 @@ Env var: `GEMINI_API_KEY` (used by `src/app/api/ai/chat/route.ts` and `.../coach
 - `shopping_items`'s extra permissive RLS policies not confirmed intentional or fixed.
 - Gemini API key tier not checked against Google's billing console.
 - A PR was opened against `master` (not merged, not deployed) — see the task report / PR link for the URL.
+- **27.9.2026**: `019_close_live_rls_holes.sql` closes the 24 broad "Auth read/update/write" policies confirmed live on production (household_members, households, streaks, task_instances, task_templates, user_achievements, weekly_syncs) plus the task_completions open-read/unscoped-insert holes, and adds the missing profiles cross-household SELECT + household_id-reassignment trigger (additive-only). Not applied to the database — PR only, see task report for the URL.
