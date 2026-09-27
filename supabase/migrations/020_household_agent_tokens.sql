@@ -61,12 +61,23 @@ ALTER TABLE public.household_agent_tokens ENABLE ROW LEVEL SECURITY;
 
 -- No policies for `anon` or `authenticated` are created on purpose. With RLS
 -- enabled and zero policies, both roles are denied by default for every
--- operation (select/insert/update/delete). Only the service-role key (which
--- bypasses RLS entirely, by Postgres/PostgREST design) can read or write this
--- table — exactly what src/lib/agent/tokens.ts and src/lib/agent/auth.ts use.
--- This mirrors the task_instances/task_templates/weekly_syncs sections of
--- 019_close_live_rls_holes.sql, which use the same "RLS on, no client
--- policy" pattern for service-role-only tables.
+-- DML operation (select/insert/update/delete). Only the service-role key
+-- (which bypasses RLS entirely, by Postgres/PostgREST design) can read or
+-- write this table — exactly what src/lib/agent/tokens.ts and
+-- src/lib/agent/auth.ts use. This mirrors the task_instances/task_templates/
+-- weekly_syncs sections of 019_close_live_rls_holes.sql, which use the same
+-- "RLS on, no client policy" pattern for service-role-only tables.
+--
+-- RLS alone is NOT enough, though: TRUNCATE is not governed by row-level
+-- policies at all (it is a table-level DDL-adjacent operation), and Supabase
+-- grants PostgREST's `anon`/`authenticated` roles default table privileges
+-- (SELECT/INSERT/UPDATE/DELETE — and, on some setups, TRUNCATE) on every new
+-- table in `public` unless explicitly revoked. Revoking those privileges
+-- outright closes that gap at the grant level, independent of RLS, and is a
+-- second, independent reason `anon`/`authenticated` cannot touch this table
+-- even if a future migration ever adds a client policy here by mistake.
+REVOKE ALL ON TABLE public.household_agent_tokens FROM PUBLIC, anon, authenticated;
+GRANT ALL ON TABLE public.household_agent_tokens TO service_role;
 
 COMMENT ON TABLE public.household_agent_tokens IS
   'Per-household bearer tokens for /api/agent/* (see docs/DESIGN-per-household-agent-tokens.md). Service-role only — no client policies.';

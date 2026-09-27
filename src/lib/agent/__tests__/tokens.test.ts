@@ -3,13 +3,15 @@ import { createHash } from "node:crypto";
 import {
   generateRawToken,
   hashToken,
-  safeEqualHex,
   issueHouseholdToken,
   revokeHouseholdToken,
   resolveHouseholdForToken,
 } from "../tokens";
 
-function fakeSupabase(rows: Array<{ id: string; household_id: string; token_hash: string; revoked_at: string | null }>) {
+function fakeSupabase(
+  rows: Array<{ id: string; household_id: string; token_hash: string; revoked_at: string | null }>,
+  options: { errorOnLookup?: string } = {}
+) {
   const insertedRows: Array<Record<string, unknown>> = [];
   const updatedIds: string[] = [];
 
@@ -49,6 +51,9 @@ function fakeSupabase(rows: Array<{ id: string; household_id: string; token_hash
           error: null,
         }),
       maybeSingle: () => {
+        if (options.errorOnLookup) {
+          return Promise.resolve({ data: null, error: { message: options.errorOnLookup } });
+        }
         const hashEq = state.eqs.find(([c]) => c === "token_hash")?.[1];
         const match = rows.find((r) => r.token_hash === hashEq && r.revoked_at === null);
         return Promise.resolve({
@@ -87,19 +92,6 @@ describe("generateRawToken / hashToken", () => {
   });
 });
 
-describe("safeEqualHex", () => {
-  it("returns true for equal strings", () => {
-    expect(safeEqualHex("abc123", "abc123")).toBe(true);
-  });
-  it("returns false for different strings of the same length", () => {
-    expect(safeEqualHex("abc123", "abc124")).toBe(false);
-  });
-  it("returns false (never throws) for different-length strings", () => {
-    expect(() => safeEqualHex("short", "much-longer-string")).not.toThrow();
-    expect(safeEqualHex("short", "much-longer-string")).toBe(false);
-  });
-});
-
 describe("issueHouseholdToken", () => {
   it("stores only the hash, never the raw token, and returns the raw token exactly once", async () => {
     const fake = fakeSupabase([]);
@@ -121,15 +113,20 @@ describe("resolveHouseholdForToken", () => {
     const fake = fakeSupabase([
       { id: "t1", household_id: "household-a", token_hash: hashToken(raw), revoked_at: null },
     ]);
-    await expect(resolveHouseholdForToken(fake.client, raw)).resolves.toBe("household-a");
+    await expect(resolveHouseholdForToken(fake.client, raw)).resolves.toEqual({
+      status: "ok",
+      householdId: "household-a",
+    });
   });
 
-  it("returns null for an unknown token", async () => {
+  it("returns status 'not_found' for an unknown token", async () => {
     const fake = fakeSupabase([]);
-    await expect(resolveHouseholdForToken(fake.client, "bbs_agent_unknown")).resolves.toBeNull();
+    await expect(resolveHouseholdForToken(fake.client, "bbs_agent_unknown")).resolves.toEqual({
+      status: "not_found",
+    });
   });
 
-  it("returns null for a REVOKED token, even though its hash exists in the table", async () => {
+  it("returns status 'not_found' for a REVOKED token, even though its hash exists in the table", async () => {
     const raw = "bbs_agent_revoked";
     const fake = fakeSupabase([
       {
@@ -139,7 +136,9 @@ describe("resolveHouseholdForToken", () => {
         revoked_at: "2026-09-01T00:00:00.000Z",
       },
     ]);
-    await expect(resolveHouseholdForToken(fake.client, raw)).resolves.toBeNull();
+    await expect(resolveHouseholdForToken(fake.client, raw)).resolves.toEqual({
+      status: "not_found",
+    });
   });
 
   it("never confuses two different households' tokens", async () => {
@@ -149,8 +148,30 @@ describe("resolveHouseholdForToken", () => {
       { id: "t1", household_id: "household-a", token_hash: hashToken(rawA), revoked_at: null },
       { id: "t2", household_id: "household-b", token_hash: hashToken(rawB), revoked_at: null },
     ]);
-    await expect(resolveHouseholdForToken(fake.client, rawA)).resolves.toBe("household-a");
-    await expect(resolveHouseholdForToken(fake.client, rawB)).resolves.toBe("household-b");
+    await expect(resolveHouseholdForToken(fake.client, rawA)).resolves.toEqual({
+      status: "ok",
+      householdId: "household-a",
+    });
+    await expect(resolveHouseholdForToken(fake.client, rawB)).resolves.toEqual({
+      status: "ok",
+      householdId: "household-b",
+    });
+  });
+
+  // RED-FIRST for fix #5 (adversarial review, PR #13): a DB/network failure
+  // during the lookup must NOT be reported the same way as "token unknown".
+  // Against the pre-fix implementation (`if (error || !data) return null`)
+  // this test fails, because a lookup error collapsed into the exact same
+  // `null` as a genuinely unknown token — see auth.test.ts for the
+  // higher-level assertion that this becomes an HTTP 503, not a 403.
+  it("returns status 'error' (never 'not_found') when the lookup itself fails", async () => {
+    const fake = fakeSupabase([], { errorOnLookup: "connection reset" });
+    const result = await resolveHouseholdForToken(fake.client, "bbs_agent_whatever");
+    expect(result.status).toBe("error");
+    expect(result).not.toEqual({ status: "not_found" });
+    if (result.status === "error") {
+      expect(result.message).toBe("connection reset");
+    }
   });
 });
 

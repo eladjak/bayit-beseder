@@ -17,8 +17,11 @@
  *
  * 1. A per-household token (table `household_agent_tokens`, migration 020).
  *    Only its SHA-256 hash is stored; `resolveHouseholdForToken` looks up the
- *    presented token's hash and returns the single household it authorizes,
- *    or `null` if it is unknown/revoked.
+ *    presented token's hash and returns one of three outcomes: the household
+ *    it authorizes ("ok"), "not_found" (unknown or revoked — falls through
+ *    to the legacy key below), or "error" (the lookup itself failed, e.g. a
+ *    DB/network problem) — which this function turns into an HTTP 503, NOT
+ *    a 403, so an outage is never reported to the caller as "bad token".
  * 2. The legacy global key (`BAYIT_AGENT_KEY` / `AGENT_API_TOKEN`), kept
  *    working ONLY as a documented transition path (design doc §3). It no
  *    longer grants access to "any household the caller names" — it grants
@@ -40,7 +43,7 @@
  *   independently from the Vercel cron jobs.
  */
 
-import { timingSafeEqual } from "node:crypto";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
 import { resolveHouseholdForToken } from "@/lib/agent/tokens";
@@ -76,17 +79,25 @@ function getLegacyKeyHouseholdId(): string | null {
   return process.env.BAYIT_AGENT_KEY_HOUSEHOLD_ID?.trim() || null;
 }
 
-/** Constant-time string compare that never throws on length mismatch. */
+/**
+ * Constant-time string compare with NO length-dependent branch.
+ *
+ * The earlier version compared raw buffers and took an early `if (bufA.length
+ * !== bufB.length)` branch before calling `timingSafeEqual` — that branch
+ * itself leaks the presented token's length relative to the secret's length
+ * (a fast rejection path an attacker can time, independent of
+ * `timingSafeEqual`'s own constant-time guarantee, which only covers the
+ * comparison it is given, not the code deciding whether to call it).
+ *
+ * Hashing both inputs to a fixed-size SHA-256 digest FIRST removes the
+ * length-dependent branch entirely: every input, of any length (including
+ * empty), always produces exactly 32 bytes, so `timingSafeEqual` never sees
+ * a length mismatch and this function never has a fast path to take.
+ */
 function safeEqual(a: string, b: string): boolean {
-  const bufA = Buffer.from(a);
-  const bufB = Buffer.from(b);
-  if (bufA.length !== bufB.length) {
-    // Still run a comparison against a fixed-length buffer so the timing does
-    // not leak the secret length, then return false.
-    timingSafeEqual(bufA, Buffer.alloc(bufA.length));
-    return false;
-  }
-  return timingSafeEqual(bufA, bufB);
+  const digestA = createHash("sha256").update(a, "utf8").digest();
+  const digestB = createHash("sha256").update(b, "utf8").digest();
+  return timingSafeEqual(digestA, digestB);
 }
 
 /** Service-role Supabase client for the token lookup, or `null` if the
@@ -140,15 +151,46 @@ export async function verifyAgentRequest(request: Request): Promise<AgentAuthRes
 
   // 1. Per-household token (preferred path).
   if (supabase) {
-    const householdId = await resolveHouseholdForToken(supabase, presented);
-    if (householdId) {
-      return { ok: true, status: 200, householdId };
+    const resolved = await resolveHouseholdForToken(supabase, presented);
+    if (resolved.status === "ok") {
+      return { ok: true, status: 200, householdId: resolved.householdId };
     }
+    if (resolved.status === "error") {
+      // A DB/network failure is NOT the same thing as "this token is
+      // invalid" — conflating the two would silently mask real outages as
+      // ordinary auth rejections (and, worse, would then fall through to
+      // the legacy-key check below on every transient DB hiccup). Answer
+      // 503 so a monitoring/retry layer treats it as an outage, not a
+      // rejected credential.
+      return {
+        ok: false,
+        status: 503,
+        error: "שגיאה בבדיקת הטוקן מול מסד הנתונים. נסו שוב בעוד רגע.",
+        householdId: null,
+      };
+    }
+    // status === "not_found" — fall through to the legacy key check below.
   }
 
   // 2. Legacy global key (transition path — see module docstring).
   if (legacyKey && safeEqual(presented, legacyKey)) {
-    return { ok: true, status: 200, householdId: getLegacyKeyHouseholdId() };
+    const pinnedHouseholdId = getLegacyKeyHouseholdId();
+    if (!pinnedHouseholdId) {
+      // Deliberate operator-facing warning: this is exactly the "shared key
+      // with no pin" state that silently authorizes zero households, and an
+      // operator watching server logs during the Kami migration needs to
+      // see this, not infer it from a wave of 403s on every household-scoped
+      // request.
+      console.warn(
+        "[bayit-agent-auth] BAYIT_AGENT_KEY was presented and matched, but " +
+          "BAYIT_AGENT_KEY_HOUSEHOLD_ID is not set — this credential authorizes " +
+          "ZERO households (fail-closed default). Set BAYIT_AGENT_KEY_HOUSEHOLD_ID " +
+          "to the one household this legacy key should act on during the " +
+          "transition, or (preferred) issue a real per-household token via " +
+          "scripts/issue-agent-token.mjs and retire this key."
+      );
+    }
+    return { ok: true, status: 200, householdId: pinnedHouseholdId };
   }
 
   return { ok: false, status: 403, error: "אסימון הרשאה שגוי.", householdId: null };

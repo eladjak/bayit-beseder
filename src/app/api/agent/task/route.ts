@@ -97,7 +97,24 @@ const bodySchema = z.discriminatedUnion("action", [
 // ── Route handler ─────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  // 1. Auth — resolves WHICH household (if any) this bearer token authorizes.
+  // 1. Rate limit — BEFORE the token lookup. Auth (step 2) queries the
+  // household_agent_tokens table on every distinct token presented; checking
+  // the rate limiter first means a flood of requests with random/garbage
+  // bearer tokens gets 429'd per-IP without ever reaching the database,
+  // instead of exhausting DB connections on lookups that were always going
+  // to fail anyway.
+  const rl = await limiter.check(getClientIp(request));
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "יותר מדי בקשות. נסו שוב עוד דקה." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(Math.ceil(rl.reset / 1000)) },
+      }
+    );
+  }
+
+  // 2. Auth — resolves WHICH household (if any) this bearer token authorizes.
   const auth = await verifyAgentRequest(request);
   if (!auth.ok) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
@@ -109,18 +126,6 @@ export async function POST(request: NextRequest) {
     );
   }
   const householdId = auth.householdId;
-
-  // 2. Rate limit
-  const rl = await limiter.check(getClientIp(request));
-  if (!rl.success) {
-    return NextResponse.json(
-      { error: "יותר מדי בקשות. נסו שוב עוד דקה." },
-      {
-        status: 429,
-        headers: { "Retry-After": String(Math.ceil(rl.reset / 1000)) },
-      }
-    );
-  }
 
   // 3. Parse body
   let raw: unknown;

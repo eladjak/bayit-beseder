@@ -17,7 +17,10 @@ function hashToken(raw: string): string {
   return createHash("sha256").update(raw, "utf8").digest("hex");
 }
 
-function fakeSupabase(rows: Array<{ household_id: string; token_hash: string; revoked_at: string | null }>) {
+function fakeSupabase(
+  rows: Array<{ household_id: string; token_hash: string; revoked_at: string | null }>,
+  options: { errorOnLookup?: string } = {}
+) {
   const from = (table: string) => {
     if (table !== "household_agent_tokens") {
       throw new Error(`unexpected table ${table}`);
@@ -35,6 +38,9 @@ function fakeSupabase(rows: Array<{ household_id: string; token_hash: string; re
         return builder;
       },
       maybeSingle: () => {
+        if (options.errorOnLookup) {
+          return Promise.resolve({ data: null, error: { message: options.errorOnLookup } });
+        }
         const hashEq = state.eqs.find(([c]) => c === "token_hash")?.[1];
         const match = rows.find((r) => r.token_hash === hashEq && r.revoked_at === null);
         return Promise.resolve({
@@ -156,5 +162,59 @@ describe("verifyAgentRequest", () => {
     const result = await verifyAgentRequest(requestWith(`Bearer ${TOKEN_A_RAW}`));
     expect(result.ok).toBe(false);
     expect(result.status).toBe(503);
+  });
+
+  // RED-FIRST for fix #5 (adversarial review, PR #13): a DB/network failure
+  // during the token lookup must surface as 503 (an outage), NOT 403 (a bad
+  // credential) — and it must NOT silently fall through to the legacy-key
+  // check either. Against the pre-fix auth.ts (which called the old
+  // `string | null`-returning resolveHouseholdForToken and treated any falsy
+  // result, including a DB error, as "not this token") this test fails: no
+  // legacy key is configured here, so the old code would return the generic
+  // 403 "אסימון הרשאה שגוי" instead of surfacing the DB failure.
+  it("returns 503 (never 403) when the per-household token lookup itself fails (DB/network error)", async () => {
+    vi.mocked(createClient).mockReturnValue(
+      fakeSupabase([], { errorOnLookup: "connection reset by peer" })
+    );
+    const result = await verifyAgentRequest(requestWith(`Bearer ${TOKEN_A_RAW}`));
+    expect(result.ok).toBe(false);
+    expect(result.status).toBe(503);
+    expect(result.householdId).toBeNull();
+  });
+
+  it("a DB lookup error does NOT fall through to the legacy key, even if the legacy key would have matched", async () => {
+    process.env.BAYIT_AGENT_KEY = TOKEN_A_RAW;
+    process.env.BAYIT_AGENT_KEY_HOUSEHOLD_ID = HOUSEHOLD_A;
+    vi.mocked(createClient).mockReturnValue(
+      fakeSupabase([], { errorOnLookup: "connection reset by peer" })
+    );
+    const result = await verifyAgentRequest(requestWith(`Bearer ${TOKEN_A_RAW}`));
+    // A real outage must be visible as 503, not masked by a legacy key that
+    // happens to also match the same presented value.
+    expect(result.status).toBe(503);
+  });
+
+  it("logs a warning when the legacy key is presented with no household pinned", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    process.env.BAYIT_AGENT_KEY = "legacy-shared-key";
+    vi.mocked(createClient).mockReturnValue(fakeSupabase([]));
+
+    await verifyAgentRequest(requestWith("Bearer legacy-shared-key"));
+
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy.mock.calls[0][0]).toMatch(/BAYIT_AGENT_KEY_HOUSEHOLD_ID/);
+    warnSpy.mockRestore();
+  });
+
+  it("does NOT log the warning when the legacy key is pinned to a household", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    process.env.BAYIT_AGENT_KEY = "legacy-shared-key";
+    process.env.BAYIT_AGENT_KEY_HOUSEHOLD_ID = HOUSEHOLD_A;
+    vi.mocked(createClient).mockReturnValue(fakeSupabase([]));
+
+    await verifyAgentRequest(requestWith("Bearer legacy-shared-key"));
+
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 });

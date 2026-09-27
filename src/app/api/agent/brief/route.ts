@@ -37,7 +37,17 @@ const querySchema = z.object({
 });
 
 export async function GET(request: NextRequest) {
-  // 1. Auth — resolves WHICH household (if any) this bearer token authorizes.
+  // 1. Rate limit — BEFORE the token lookup (see task/route.ts for why: auth
+  // below queries household_agent_tokens per distinct token presented).
+  const rl = await limiter.check(getClientIp(request));
+  if (!rl.success) {
+    return NextResponse.json(
+      { error: "יותר מדי בקשות. נסו שוב עוד דקה." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil(rl.reset / 1000)) } }
+    );
+  }
+
+  // 2. Auth — resolves WHICH household (if any) this bearer token authorizes.
   const auth = await verifyAgentRequest(request);
   if (!auth.ok) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
@@ -46,15 +56,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
       { error: "הטוקן אינו מורשה לפעול על אף משק בית." },
       { status: 403 }
-    );
-  }
-
-  // 2. Rate limit
-  const rl = await limiter.check(getClientIp(request));
-  if (!rl.success) {
-    return NextResponse.json(
-      { error: "יותר מדי בקשות. נסו שוב עוד דקה." },
-      { status: 429, headers: { "Retry-After": String(Math.ceil(rl.reset / 1000)) } }
     );
   }
 

@@ -22,7 +22,9 @@ import { maybeDeliverToOwner } from "@/lib/agent/deliver";
  * transition). Rate-limited per IP. The household used to enrich the plan
  * with existing tasks/members is always the one the bearer token authorizes
  * — a `householdId` body field is accepted for backward compatibility but
- * ignored for that purpose (see src/lib/agent/auth.ts).
+ * ignored for that purpose (see src/lib/agent/auth.ts). A token authorized
+ * for NO household (e.g. an unpinned legacy key) gets 403 — generating and
+ * possibly delivering a plan is a real action, not a household-optional read.
  */
 
 const limiter = rateLimit({ windowMs: 60_000, max: 10 });
@@ -54,13 +56,8 @@ function comingSunday(from: Date): Date {
 }
 
 export async function POST(request: NextRequest) {
-  // 1. Auth — resolves WHICH household (if any) this bearer token authorizes.
-  const auth = await verifyAgentRequest(request);
-  if (!auth.ok) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
-  }
-
-  // 2. Rate limit
+  // 1. Rate limit — BEFORE the token lookup (see task/route.ts for why: auth
+  // below queries household_agent_tokens per distinct token presented).
   const rl = await limiter.check(getClientIp(request));
   if (!rl.success) {
     return NextResponse.json(
@@ -68,6 +65,26 @@ export async function POST(request: NextRequest) {
       { status: 429, headers: { "Retry-After": String(Math.ceil(rl.reset / 1000)) } }
     );
   }
+
+  // 2. Auth — resolves WHICH household (if any) this bearer token authorizes.
+  const auth = await verifyAgentRequest(request);
+  if (!auth.ok) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+  // Unlike a truly household-optional read, generating (and possibly
+  // delivering, via `deliver: "whatsapp"`) a plan is a real action taken on
+  // someone's behalf — a legacy key with no household pinned must not be
+  // able to trigger it. Every other agent route already fails closed here;
+  // this route previously did not (it allowed a "no household context"
+  // plan through), which was the one inconsistency an adversarial review
+  // caught.
+  if (!auth.householdId) {
+    return NextResponse.json(
+      { error: "הטוקן אינו מורשה לפעול על אף משק בית." },
+      { status: 403 }
+    );
+  }
+  const householdId = auth.householdId;
 
   // 3. Parse + validate body
   let raw: unknown;
@@ -84,10 +101,6 @@ export async function POST(request: NextRequest) {
     );
   }
   const { weekStart, zoneMode, members, deliver } = parsed.data;
-  // Household context is ALWAYS the one the bearer token authorizes (may be
-  // null — a plan can still be generated with no household context, exactly
-  // as when the (now-ignored) body field was previously omitted).
-  const householdId = auth.householdId;
 
   // 4. Resolve week start
   const weekStartDate = weekStart

@@ -12,7 +12,7 @@
  * (src/lib/agent/auth.ts) look up which single household it authorizes.
  */
 
-import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
 
@@ -31,20 +31,6 @@ export function generateRawToken(): string {
  * or rainbow-table, unlike a human password. */
 export function hashToken(rawToken: string): string {
   return createHash("sha256").update(rawToken, "utf8").digest("hex");
-}
-
-/** Constant-time compare of two hex digests (defence in depth; the DB lookup
- * in verifyAgentRequest already does the real hash comparison via an exact
- * index match, but this is used by legacy-key comparison and is kept here so
- * both auth paths share one safe-compare implementation). */
-export function safeEqualHex(a: string, b: string): boolean {
-  const bufA = Buffer.from(a, "utf8");
-  const bufB = Buffer.from(b, "utf8");
-  if (bufA.length !== bufB.length) {
-    timingSafeEqual(bufA, Buffer.alloc(bufA.length));
-    return false;
-  }
-  return timingSafeEqual(bufA, bufB);
 }
 
 export interface IssuedToken {
@@ -105,15 +91,28 @@ export async function revokeHouseholdToken(
 }
 
 /**
+ * Result of looking a token up. Deliberately NOT collapsed into
+ * `string | null`: "the lookup itself failed" (a DB/network error) and "the
+ * lookup succeeded and found nothing" (an unknown or revoked token) are
+ * different failures that callers must handle differently — the former is
+ * an outage (verifyAgentRequest turns it into HTTP 503), the latter is a
+ * genuinely bad credential (403, or fall through to another auth path).
+ * Swallowing both into `null` would report an outage as "bad token".
+ */
+export type TokenLookupResult =
+  | { status: "ok"; householdId: string }
+  | { status: "not_found" }
+  | { status: "error"; message: string };
+
+/**
  * Look up which household (if any) a presented raw token is currently
- * authorized for. Returns `null` when the token is unknown, malformed, or
- * revoked — callers must treat `null` as "not authorized for any household",
- * never as "authorized for all households".
+ * authorized for. See `TokenLookupResult` for why this returns three
+ * distinct outcomes instead of `string | null`.
  */
 export async function resolveHouseholdForToken(
   supabase: AgentTokensClient,
   rawToken: string
-): Promise<string | null> {
+): Promise<TokenLookupResult> {
   const tokenHash = hashToken(rawToken);
 
   const { data, error } = await supabase
@@ -123,9 +122,12 @@ export async function resolveHouseholdForToken(
     .is("revoked_at", null)
     .maybeSingle();
 
-  if (error || !data) {
-    return null;
+  if (error) {
+    return { status: "error", message: error.message };
+  }
+  if (!data) {
+    return { status: "not_found" };
   }
 
-  return data.household_id as string;
+  return { status: "ok", householdId: data.household_id as string };
 }
