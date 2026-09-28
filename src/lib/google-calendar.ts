@@ -214,6 +214,88 @@ export async function getValidAccessToken(tokens: GoogleTokens): Promise<{
 // Calendar API helpers
 // ============================================================
 
+/**
+ * Why a Calendar API call failed, so callers can decide what to DO about it
+ * instead of pattern-matching an error message string.
+ *
+ * "auth_expired" (Google status 401) means the access token itself is
+ * invalid. A valid refresh token normally prevents this, so seeing it means
+ * Google rejected the token out of band.
+ *
+ * "permission_denied" (403) means the token is otherwise fine, but Google
+ * refused the specific operation: a missing or changed OAuth scope, the
+ * Calendar API not enabled, or a per-user block. This is a DIFFERENT root
+ * cause than auth_expired even though both need a reconnect to fix -- this
+ * is exactly what was observed in production for one household that still
+ * had a valid, present refresh token.
+ *
+ * "rate_limited" (429) is transient. Never clear tokens or force a reconnect
+ * for this -- retrying later resolves it on its own.
+ *
+ * "unknown" covers any other non-2xx status. Also transient / worth
+ * investigating, never an auto-reconnect trigger.
+ */
+export type GoogleCalendarErrorReason =
+  | "auth_expired"
+  | "permission_denied"
+  | "rate_limited"
+  | "unknown";
+
+export class GoogleCalendarApiError extends Error {
+  readonly status: number;
+  readonly reason: GoogleCalendarErrorReason;
+  /** Raw response body text from Google, for logs only -- never shown to users. */
+  readonly googleBody?: string;
+
+  constructor(
+    status: number,
+    reason: GoogleCalendarErrorReason,
+    message: string,
+    googleBody?: string
+  ) {
+    super(message);
+    this.name = "GoogleCalendarApiError";
+    this.status = status;
+    this.reason = reason;
+    this.googleBody = googleBody;
+  }
+
+  /** True when the right recovery is "clear tokens, ask the user to reconnect". */
+  get needsReconnect(): boolean {
+    return this.reason === "auth_expired" || this.reason === "permission_denied";
+  }
+}
+
+function reasonForStatus(status: number): GoogleCalendarErrorReason {
+  if (status === 401) return "auth_expired";
+  if (status === 403) return "permission_denied";
+  if (status === 429) return "rate_limited";
+  return "unknown";
+}
+
+const ERROR_MESSAGE_BY_REASON: Record<
+  Exclude<GoogleCalendarErrorReason, "unknown">,
+  string
+> = {
+  auth_expired:
+    "Google Calendar access token expired or was revoked. Please reconnect.",
+  permission_denied:
+    "Google Calendar permission denied. You may need to reconnect with the correct scopes.",
+  rate_limited:
+    "Google Calendar rate limit exceeded. Please wait a moment and try again.",
+};
+
+/** Throws a classified GoogleCalendarApiError for a non-ok response that calendarFetch let through (i.e. not 401/403/429). */
+async function throwForUnhandledStatus(res: Response, label: string): Promise<never> {
+  const googleBody = await res.clone().text().catch(() => undefined);
+  throw new GoogleCalendarApiError(
+    res.status,
+    "unknown",
+    `${label}: ${res.status}`,
+    googleBody
+  );
+}
+
 async function calendarFetch(
   path: string,
   accessToken: string,
@@ -228,22 +310,17 @@ async function calendarFetch(
     },
   });
 
-  // Surface specific Google API errors for better debugging
+  // Surface specific Google API errors for better debugging, classified by
+  // status rather than by a message string later.
   if (!res.ok) {
-    const status = res.status;
-    if (status === 401) {
-      throw new Error(
-        "Google Calendar access token expired or was revoked. Please reconnect."
-      );
-    }
-    if (status === 403) {
-      throw new Error(
-        "Google Calendar permission denied. You may need to reconnect with the correct scopes."
-      );
-    }
-    if (status === 429) {
-      throw new Error(
-        "Google Calendar rate limit exceeded. Please wait a moment and try again."
+    const reason = reasonForStatus(res.status);
+    if (reason !== "unknown") {
+      const bodyText = await res.clone().text().catch(() => undefined);
+      throw new GoogleCalendarApiError(
+        res.status,
+        reason,
+        ERROR_MESSAGE_BY_REASON[reason],
+        bodyText
       );
     }
   }
@@ -259,7 +336,7 @@ export async function getPrimaryCalendarId(
 ): Promise<string> {
   const res = await calendarFetch("/users/me/calendarList", accessToken);
   if (!res.ok) {
-    throw new Error(`Failed to list calendars: ${res.status}`);
+    await throwForUnhandledStatus(res, "Failed to list calendars");
   }
 
   const data = (await res.json()) as { items: CalendarListEntry[] };
@@ -290,7 +367,7 @@ export async function listEvents(
   );
 
   if (!res.ok) {
-    throw new Error(`Failed to list events: ${res.status}`);
+    await throwForUnhandledStatus(res, "Failed to list events");
   }
 
   const data = (await res.json()) as { items: CalendarEvent[] };
@@ -315,7 +392,7 @@ export async function createEvent(
   );
 
   if (!res.ok) {
-    throw new Error(`Failed to create event: ${res.status}`);
+    await throwForUnhandledStatus(res, "Failed to create event");
   }
 
   return (await res.json()) as CalendarEvent & { id: string };
@@ -340,7 +417,7 @@ export async function updateEvent(
   );
 
   if (!res.ok) {
-    throw new Error(`Failed to update event: ${res.status}`);
+    await throwForUnhandledStatus(res, "Failed to update event");
   }
 
   return (await res.json()) as CalendarEvent & { id: string };
@@ -361,7 +438,7 @@ export async function deleteEvent(
   );
 
   if (!res.ok && res.status !== 404) {
-    throw new Error(`Failed to delete event: ${res.status}`);
+    await throwForUnhandledStatus(res, "Failed to delete event");
   }
 }
 
@@ -399,15 +476,22 @@ export function taskToCalendarEvent(task: TaskLike): CalendarEvent {
 }
 
 /**
- * Returns the current UTC offset for the Asia/Jerusalem timezone as a string
- * like "+02:00" or "+03:00" (depends on whether DST is active).
+ * Returns the Asia/Jerusalem UTC offset — "+02:00" (winter) or "+03:00"
+ * (summer DST) — for the given reference instant.
+ *
+ * MUST be resolved from the date being computed, never from "now": Israel
+ * observes DST, so a task due in a different season than the moment this
+ * code happens to run needs the *other* offset. Resolving from "now" was a
+ * real bug — see src/lib/__tests__/google-calendar.dst.test.ts — that quietly
+ * shifted every calendar event's end time by exactly one hour whenever the
+ * sync ran on the opposite side of the DST boundary from the task's due date.
  */
-function getJerusalemOffset(): string {
+function getJerusalemOffset(reference: Date): string {
   // Extract the longOffset representation, e.g. "GMT+3", "GMT+03:00", or "GMT+2"
   const parts = new Intl.DateTimeFormat("en", {
     timeZone: TIMEZONE,
     timeZoneName: "longOffset",
-  }).formatToParts(new Date());
+  }).formatToParts(reference);
   const offsetPart = parts.find((p) => p.type === "timeZoneName")?.value ?? "GMT+2";
   // offsetPart may be "GMT+3", "GMT+03:00", or "GMT+02:00" depending on environment
   const fullMatch = offsetPart.match(/GMT([+-]\d{2}:\d{2})/);
@@ -424,7 +508,14 @@ function getJerusalemOffset(): string {
  * Returns the result as a local datetime string in Israel timezone.
  */
 function offsetDateTime(localDatetime: string, minutes: number): string {
-  const offset = getJerusalemOffset(); // dynamically resolve DST-aware offset
+  // Resolve the DST offset for THIS date, not for "now": use noon UTC on the
+  // same calendar date as a reference instant. Israel's UTC offset is only
+  // ever 2-3 hours, so noon UTC always lands on the correct side of the DST
+  // boundary for any date except the transition day itself (a known,
+  // acceptable narrowing — see the test file for the case this fixes).
+  const [datePart] = localDatetime.split("T");
+  const offsetReference = new Date(`${datePart}T12:00:00Z`);
+  const offset = getJerusalemOffset(offsetReference); // dynamically resolve DST-aware offset for this date
   const date = new Date(`${localDatetime}${offset}`);
   date.setMinutes(date.getMinutes() + minutes);
   // Convert back to Israel local time (not UTC) by formatting in Israel timezone

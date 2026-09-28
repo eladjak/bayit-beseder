@@ -1,14 +1,52 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
   getValidAccessToken,
   getPrimaryCalendarId,
   listEvents,
   createEvent,
   taskToCalendarEvent,
+  GoogleCalendarApiError,
   type GoogleTokens,
 } from "@/lib/google-calendar";
 import type { Json } from "@/lib/types/database";
+
+/** Distinguishes an auth/permission failure (needs reconnect) from a transient one. */
+function classify(err: unknown): { needsReconnect: boolean } {
+  return { needsReconnect: err instanceof GoogleCalendarApiError && err.needsReconnect };
+}
+
+/**
+ * Logs a Calendar API failure with its real Google status/reason (not just a
+ * generic message), and clears the stored tokens when the failure means the
+ * connection itself is bad (401 or 403) rather than a transient hiccup
+ * (429 / unknown). A 403 with a present, valid refresh_token is exactly the
+ * case observed in production for one household — it used to be logged
+ * identically to every other failure and the household stayed silently
+ * "connected" while sync failed every week.
+ */
+async function logAndMaybeDisconnect(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supabase: SupabaseClient<any, any, any>,
+  profileId: string,
+  err: unknown,
+  action: string
+): Promise<void> {
+  const detail =
+    err instanceof GoogleCalendarApiError
+      ? ` (google_status=${err.status}, reason=${err.reason}${
+          err.googleBody ? `, body=${err.googleBody.slice(0, 300)}` : ""
+        })`
+      : "";
+  console.error(`[cron/calendar-sync] ${action} failed for ${profileId}${detail}:`, err);
+
+  if (classify(err).needsReconnect) {
+    await supabase
+      .from("profiles")
+      .update({ google_calendar_tokens: null, google_calendar_id: null })
+      .eq("id", profileId);
+  }
+}
 
 /**
  * GET /api/cron/calendar-sync
@@ -124,8 +162,9 @@ export async function GET(request: NextRequest) {
           .update({ google_calendar_id: calendarId })
           .eq("id", profile.id);
       } catch (err) {
-        console.error(`[cron/calendar-sync] Failed to get calendar id for ${profile.id}:`, err);
-        results.push({ userId: profile.id, status: "error", reason: "calendar id resolution failed" });
+        await logAndMaybeDisconnect(supabase, profile.id, err, "calendar id resolution");
+        const reason = classify(err).needsReconnect ? "needs_reconnect" : "calendar id resolution failed";
+        results.push({ userId: profile.id, status: "error", reason });
         continue;
       }
     }
@@ -134,8 +173,15 @@ export async function GET(request: NextRequest) {
     let existingEvents: Array<{ id?: string; summary?: string; description?: string }> = [];
     try {
       existingEvents = await listEvents(accessToken, calendarId, timeMin, timeMax);
-    } catch {
-      // Non-fatal — we'll just risk a duplicate if listing fails
+    } catch (err) {
+      const { needsReconnect } = classify(err);
+      await logAndMaybeDisconnect(supabase, profile.id, err, "listing existing events");
+      if (needsReconnect) {
+        results.push({ userId: profile.id, status: "error", reason: "needs_reconnect" });
+        continue;
+      }
+      // Transient (rate limit / unknown) — proceed and risk a duplicate rather
+      // than skip the whole sync for this user.
     }
 
     const syncedTaskIds = new Set<string>();
@@ -187,7 +233,13 @@ export async function GET(request: NextRequest) {
         existingTitles.add(task.title);
         created++;
       } catch (err) {
-        console.warn(`[cron/calendar-sync] Could not create event for task "${task.title}":`, err);
+        const { needsReconnect } = classify(err);
+        await logAndMaybeDisconnect(supabase, profile.id, err, `creating event for task "${task.title}"`);
+        if (needsReconnect) {
+          // The token is bad for this profile — every remaining createEvent
+          // call this loop would fail the same way. Stop wasting calls.
+          break;
+        }
       }
     }
 
