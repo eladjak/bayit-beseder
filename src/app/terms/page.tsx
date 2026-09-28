@@ -217,7 +217,7 @@ export default function TermsPage() {
             </h2>
             <p className="text-muted-foreground leading-relaxed">
               תנאי שימוש אלו כפופים לדין הישראלי.
-              כל סכסוך שיתעורר ידון בבתי המשפט המוסמכים במחוז תל אביב.
+              כל סכסוך שיתעורר ידון בבתי המשפט המוסמכים במחוז הצפון.
             </p>
           </section>
 
