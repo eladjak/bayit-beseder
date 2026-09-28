@@ -37,6 +37,9 @@
     },
     "householdSection": {
       "householdNameLabel": "Household name",
+      "cityLabel": "City / town (optional)",
+      "cityPlaceholder": "e.g. Migdal HaEmek",
+      "cityTooLong": "City name is too long (max 100 characters)",
       "inviteCodeLabel": "Invite code",
       "copyInviteCode": "Copy invite code",
       "goldenTargetLabel": "Golden rule target",
@@ -605,6 +608,8 @@
     "homeNameSubtitle": "Give your home a name — it creates emotional connection",
     "homeNamePlaceholder": "Type a name...",
     "homeNameAriaLabel": "Home name",
+    "cityLabel": "Which city/town do you live in? (optional)",
+    "cityPlaceholder": "e.g. Migdal HaEmek",
     "homeNameSuggestion1": "Our Apartment",
     "homeNameSuggestion2": "Our Home",
     "homeNameSuggestion3": "The Nest",

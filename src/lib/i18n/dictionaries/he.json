@@ -37,6 +37,9 @@
     },
     "householdSection": {
       "householdNameLabel": "שם הבית",
+      "cityLabel": "יישוב (לא חובה)",
+      "cityPlaceholder": "למשל: מגדל העמק",
+      "cityTooLong": "שם היישוב ארוך מדי (עד 100 תווים)",
       "inviteCodeLabel": "קוד הזמנה",
       "copyInviteCode": "העתקת קוד הזמנה",
       "goldenTargetLabel": "יעד כלל הזהב",
@@ -605,6 +608,8 @@
     "homeNameSubtitle": "תנו לבית שם — זה יוצר חיבור רגשי",
     "homeNamePlaceholder": "הקלידו שם...",
     "homeNameAriaLabel": "שם הבית",
+    "cityLabel": "באיזה יישוב אתם גרים? (לא חובה)",
+    "cityPlaceholder": "למשל: מגדל העמק",
     "homeNameSuggestion1": "הדירה שלנו",
     "homeNameSuggestion2": "הבית שלנו",
     "homeNameSuggestion3": "הקן",

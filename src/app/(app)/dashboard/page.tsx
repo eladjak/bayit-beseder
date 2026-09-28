@@ -57,7 +57,7 @@ const CoachingBubble = dynamic(() => import("@/components/gamification/coaching-
 const TaskCompletionModal = dynamic(() => import("@/components/task-completion-modal").then(m => ({ default: m.TaskCompletionModal })), { ssr: false });
 const PesachActivationModal = dynamic(() => import("@/components/seasonal/pesach-activation-modal").then(m => ({ default: m.PesachActivationModal })), { ssr: false });
 const ConversationalOnboarding = dynamic(() => import("@/components/onboarding/conversational-onboarding").then(m => ({ default: m.ConversationalOnboarding })), { ssr: false });
-import { useHousehold } from "@/hooks/useHousehold";
+import { useHousehold, normalizeHouseholdCity } from "@/hooks/useHousehold";
 import { OfflineIndicator } from "@/components/offline-indicator";
 import { useFirstVisit } from "@/hooks/useFirstVisit";
 import { FeatureTooltip } from "@/components/feature-tooltip";
@@ -145,7 +145,7 @@ export default function DashboardPage() {
   const { playComplete, playAchievement, playStreak } = useAppSounds();
   const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const { partner } = usePartner(profile?.partner_id, todayStr);
-  const { household } = useHousehold(profile?.household_id ?? null);
+  const { household, updateHousehold } = useHousehold(profile?.household_id ?? null);
   // N-member support: prefer household_members table; falls back to partner_id
   const { members: householdMembers, loading: membersLoading } = useHouseholdMembers(
     profile?.household_id ?? null,
@@ -181,12 +181,21 @@ export default function DashboardPage() {
   }, [tasksLoading, dbTasks.length, profile]);
 
   const handleOnboardingComplete = useCallback(
-    async (result: { homeName: string; tasks: { title: string; category: string; estimatedMinutes: number; recurring: boolean; frequency: string }[] }) => {
+    async (result: { homeName: string; homeCity?: string; tasks: { title: string; category: string; estimatedMinutes: number; recurring: boolean; frequency: string }[] }) => {
       setShowTaskWizard(false);
       if (!profile) return;
       // Save home name to localStorage
       if (result.homeName) {
         localStorage.setItem("bayit-beseder-home-name", result.homeName);
+      }
+      // Persist the optional city to the household record (best-effort; the
+      // wizard flow does not block on this and never surfaces its own error —
+      // the household settings page remains the authoritative place to fix it).
+      if (result.homeCity && profile.household_id) {
+        const normalizedCity = normalizeHouseholdCity(result.homeCity);
+        if (normalizedCity) {
+          void updateHousehold({ city: normalizedCity });
+        }
       }
       // Mark conversational onboarding as done
       localStorage.setItem("bayit-beseder-onboarding-done", "true");
@@ -205,7 +214,7 @@ export default function DashboardPage() {
         toast.error("שגיאה ביצירת המשימות. נסו שוב.");
       }
     },
-    [profile, refetchTasks]
+    [profile, refetchTasks, updateHousehold]
   );
 
   const handleOnboardingSkip = useCallback(() => {
