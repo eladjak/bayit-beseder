@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, TaskTemplate, TaskInstance } from "@/lib/types/database";
+import type { Database, TaskTemplate } from "@/lib/types/database";
 
 // ============================================
 // Difficulty weight constants
@@ -118,250 +118,96 @@ export function getTemplatesDueOnDate(
   );
 }
 
-/**
- * Compute weighted load for a member based on assigned instances and their difficulty.
- * Each instance contributes its difficulty weight (defaults to 2 if missing).
- */
-export function computeWeightedLoad(
-  instances: Array<{ assigned_to: string | null; difficulty?: number }>,
-  memberId: string
-): number {
-  let load = 0;
-  for (const inst of instances) {
-    if (inst.assigned_to === memberId) {
-      const diff = inst.difficulty != null ? inst.difficulty : 2;
-      load += DIFFICULTY_WEIGHT[diff] ?? 2;
-    }
-  }
-  return load;
-}
+// --------------------------------------------
+// Nightly planner: roll overdue undone tasks forward to today
+// --------------------------------------------
+//
+// WHY THIS REPLACED THE OLD template->instance generator (Sept 2026):
+//
+// The auto-schedule cron used to write into `task_templates` /
+// `task_instances`. A production data check found those two tables EMPTY
+// (0 rows) in every household, while the app's real task list lives in the
+// `tasks` table (60 rows across 3 households at the time of the check). The
+// cron fired every night, found no templates, and created nothing -- it had
+// been doing nothing useful since it was wired up. Migration 019 had
+// already independently confirmed zero CLIENT call sites for those two
+// tables; this was the last server-side reader, so the path was fully dead.
+//
+// `tasks` has a `recurring` boolean flag but no cadence (no
+// recurrence_type/recurrence_day columns), so "generate the next
+// occurrence" cannot be reconstructed for it without inventing a schedule
+// that no data supports. What the data DID show, unambiguously, across all
+// three households: every single pending/in-progress task had a due_date in
+// the past -- the oldest from February, the newest three weeks ago, zero
+// due today or later. So the concrete, data-supported behavior this cron
+// now performs is: roll overdue, undone tasks forward to today's Israel
+// date.
 
-/**
- * Select who to assign a task to using rotation logic.
- *
- * 1. If template has default_assignee, use it
- * 2. If goldenRuleTarget is provided, use weighted load to balance toward target ratio
- * 3. Otherwise, fall back to count-based rotation (original behavior)
- */
-export function selectAssignee(
-  template: Pick<TaskTemplate, "default_assignee">,
-  recentInstances: Pick<TaskInstance, "assigned_to">[],
-  members: string[],
-  templateIndex: number,
-  goldenRuleTarget?: number
-): string {
-  if (members.length === 0) {
-    return "";
-  }
-
-  // If template has a default assignee and that person is a member, use them
-  if (template.default_assignee && members.includes(template.default_assignee)) {
-    return template.default_assignee;
-  }
-
-  // Golden rule path: use weighted loads
-  if (goldenRuleTarget != null && members.length === 2) {
-    const user1 = members[0];
-    const user2 = members[1];
-
-    const load1 = computeWeightedLoad(recentInstances as Array<{ assigned_to: string | null; difficulty?: number }>, user1);
-    const load2 = computeWeightedLoad(recentInstances as Array<{ assigned_to: string | null; difficulty?: number }>, user2);
-    const totalLoad = load1 + load2;
-
-    const targetRatio1 = goldenRuleTarget / 100;
-    const targetRatio2 = 1 - targetRatio1;
-
-    if (totalLoad === 0) {
-      // No history - alternate by index
-      return templateIndex % 2 === 0 ? user1 : user2;
-    }
-
-    const actualRatio1 = load1 / totalLoad;
-    const actualRatio2 = load2 / totalLoad;
-
-    // Assign to the member furthest below their target ratio
-    const gap1 = targetRatio1 - actualRatio1;
-    const gap2 = targetRatio2 - actualRatio2;
-
-    if (gap1 > gap2) return user1;
-    if (gap2 > gap1) return user2;
-    // If equal gaps, alternate by index
-    return templateIndex % 2 === 0 ? user1 : user2;
-  }
-
-  // Original count-based rotation (no golden rule)
-  const counts: Record<string, number> = {};
-  for (const m of members) {
-    counts[m] = 0;
-  }
-  for (const instance of recentInstances) {
-    if (instance.assigned_to && counts[instance.assigned_to] !== undefined) {
-      counts[instance.assigned_to]++;
-    }
-  }
-
-  // Find min count
-  let minCount = Infinity;
-  for (const m of members) {
-    if (counts[m] < minCount) {
-      minCount = counts[m];
-    }
-  }
-
-  // Get members with min count
-  const candidates = members.filter((m) => counts[m] === minCount);
-
-  // If multiple candidates (tied), use template index to alternate
-  if (candidates.length > 1) {
-    return candidates[templateIndex % candidates.length];
-  }
-
-  return candidates[0];
-}
-
-// ============================================
-// Main scheduling function
-// ============================================
-
-export interface ScheduleResult {
-  created: number;
-  skipped: number;
+export interface RolloverResult {
+  householdId: string;
+  rolledOver: number;
   errors: string[];
 }
 
 /**
- * Generate task instances for a household over a date range.
- * Checks for existing instances to avoid duplicates.
- * When goldenRuleTarget is provided, uses weighted difficulty for fair rotation.
+ * Roll overdue, undone tasks (status "pending" or "in_progress", due_date
+ * strictly before `today`) forward to `today` for one household.
+ *
+ * Idempotent by construction: it only touches rows where due_date < today.
+ * After the update those rows have due_date = today, so a second call with
+ * the same `today` finds nothing left to move and returns rolledOver: 0.
+ * Tasks with no due_date are left untouched (nothing to reschedule).
+ * Completed/skipped tasks are left untouched (nothing to unstick).
  */
-export async function generateTaskInstances(
+export async function rollOverdueTasksToToday(
   supabase: SupabaseClient<Database>,
   householdId: string,
-  startDate: Date,
-  endDate: Date,
-  goldenRuleTarget?: number
-): Promise<ScheduleResult> {
-  const result: ScheduleResult = { created: 0, skipped: 0, errors: [] };
+  today: Date
+): Promise<RolloverResult> {
+  const todayStr = formatDate(today);
+  const result: RolloverResult = { householdId, rolledOver: 0, errors: [] };
 
-  // Fetch active templates for this household
-  const { data: templates, error: templatesError } = await supabase
-    .from("task_templates")
-    .select("*")
+  const { data, error } = await supabase
+    .from("tasks")
+    .update({ due_date: todayStr })
     .eq("household_id", householdId)
-    .eq("active", true);
+    .lt("due_date", todayStr)
+    .in("status", ["pending", "in_progress"])
+    .select("id");
 
-  if (templatesError) {
-    result.errors.push(`Failed to fetch templates: ${templatesError.message}`);
+  if (error) {
+    result.errors.push(`Failed to roll over tasks: ${error.message}`);
     return result;
   }
 
-  if (!templates || templates.length === 0) {
-    return result;
-  }
-
-  // Fetch household members
-  const { data: members, error: membersError } = await supabase
-    .from("household_members")
-    .select("user_id")
-    .eq("household_id", householdId);
-
-  if (membersError) {
-    result.errors.push(`Failed to fetch members: ${membersError.message}`);
-    return result;
-  }
-
-  const memberIds = (members ?? []).map((m) => m.user_id);
-  if (memberIds.length === 0) {
-    result.errors.push("No members found in household");
-    return result;
-  }
-
-  // Build date range array
-  const dates: Date[] = [];
-  const current = new Date(startDate);
-  while (current <= endDate) {
-    dates.push(new Date(current));
-    current.setDate(current.getDate() + 1);
-  }
-
-  // Fetch existing instances in the date range to avoid duplicates
-  const startStr = formatDate(startDate);
-  const endStr = formatDate(endDate);
-
-  const { data: existingInstances, error: existingError } = await supabase
-    .from("task_instances")
-    .select("template_id, due_date")
-    .eq("household_id", householdId)
-    .gte("due_date", startStr)
-    .lte("due_date", endStr);
-
-  if (existingError) {
-    result.errors.push(`Failed to fetch existing instances: ${existingError.message}`);
-    return result;
-  }
-
-  // Build a set of "templateId|dueDate" for quick lookup
-  const existingSet = new Set(
-    (existingInstances ?? []).map((i) => `${i.template_id}|${i.due_date}`)
-  );
-
-  // For each template, fetch recent instances for assignment rotation
-  const recentInstancesMap = new Map<string, Pick<TaskInstance, "assigned_to">[]>();
-
-  for (const template of templates) {
-    const { data: recent } = await supabase
-      .from("task_instances")
-      .select("assigned_to")
-      .eq("template_id", template.id)
-      .eq("household_id", householdId)
-      .order("due_date", { ascending: false })
-      .limit(5);
-
-    recentInstancesMap.set(template.id, recent ?? []);
-  }
-
-  // Generate instances
-  const toInsert: Database["public"]["Tables"]["task_instances"]["Insert"][] = [];
-
-  for (const date of dates) {
-    const dateStr = formatDate(date);
-    const dueTemplates = getTemplatesDueOnDate(templates, date);
-
-    for (let i = 0; i < dueTemplates.length; i++) {
-      const template = dueTemplates[i] as TaskTemplate;
-      const key = `${template.id}|${dateStr}`;
-
-      if (existingSet.has(key)) {
-        result.skipped++;
-        continue;
-      }
-
-      const recentInstances = recentInstancesMap.get(template.id) ?? [];
-      const assignee = selectAssignee(template, recentInstances, memberIds, i, goldenRuleTarget);
-
-      toInsert.push({
-        template_id: template.id,
-        household_id: householdId,
-        assigned_to: assignee || null,
-        due_date: dateStr,
-        status: "pending",
-      });
-    }
-  }
-
-  // Batch insert
-  if (toInsert.length > 0) {
-    const { error: insertError } = await supabase
-      .from("task_instances")
-      .insert(toInsert);
-
-    if (insertError) {
-      result.errors.push(`Failed to insert instances: ${insertError.message}`);
-      return result;
-    }
-
-    result.created = toInsert.length;
-  }
-
+  result.rolledOver = data?.length ?? 0;
   return result;
+}
+
+export interface PlannerRunSummary {
+  householdsProcessed: number;
+  tasksRolledOver: number;
+  errors: string[];
+}
+
+/**
+ * Run the nightly rollover for a list of households (one per row from
+ * `households`). Returns per-household results plus a summary suitable for
+ * a one-line log (counts only -- never task titles or user ids).
+ */
+export async function runNightlyPlannerForHouseholds(
+  supabase: SupabaseClient<Database>,
+  householdIds: string[],
+  today: Date
+): Promise<{ results: RolloverResult[]; summary: PlannerRunSummary }> {
+  const results: RolloverResult[] = [];
+  for (const householdId of householdIds) {
+    results.push(await rollOverdueTasksToToday(supabase, householdId, today));
+  }
+  const summary: PlannerRunSummary = {
+    householdsProcessed: results.length,
+    tasksRolledOver: results.reduce((sum, r) => sum + r.rolledOver, 0),
+    errors: results.flatMap((r) => r.errors),
+  };
+  return { results, summary };
 }
