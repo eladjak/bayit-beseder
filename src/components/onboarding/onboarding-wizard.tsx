@@ -18,13 +18,14 @@ import {
   TYPE_LABELS,
   type HouseholdType,
 } from "@/lib/household-type";
+import { useTranslation } from "@/hooks/useTranslation";
 
 type Step = {
   readonly id: string;
   readonly emoji: string;
-  readonly title: string;
-  readonly body: string;
-  readonly cta?: string;
+  readonly titleKey: string;
+  readonly bodyKey: string;
+  readonly ctaKey: string;
   readonly customRender?: boolean;
 };
 
@@ -32,45 +33,45 @@ const STEPS: ReadonlyArray<Step> = [
   {
     id: "welcome",
     emoji: "🏡",
-    title: "ברוכים הבאים לבית בסדר",
-    body: "אפליקציה שבונה ביחד הרגלים יומיים, מחזירה את הקלילות לבית, וחוגגת את הניסיונות לא רק את ההצלחות.",
-    cta: "בואו נתחיל",
+    titleKey: "onboardingTour.welcome.title",
+    bodyKey: "onboardingTour.welcome.body",
+    ctaKey: "onboardingTour.welcome.cta",
   },
   {
     id: "household-type",
     emoji: "🏘️",
-    title: "מי גרים אצלכם?",
-    body: "בחרו את ההרכב — כל מסך יותאם לפי זה.",
-    cta: "הבא",
+    titleKey: "onboardingTour.householdType.title",
+    bodyKey: "onboardingTour.householdType.body",
+    ctaKey: "onboardingTour.householdType.cta",
     customRender: true,
   },
   {
     id: "couple",
     emoji: "👥",
-    title: "הצוות שלכם — הליבה",
-    body: "תוסיפו את כל מי שגר בבית. כל מה שתעשו יהיה ביניכם בלבד — אין שיפוט, אין השוואות חיצוניות. רק אתם.",
-    cta: "הבא",
+    titleKey: "onboardingTour.couple.title",
+    bodyKey: "onboardingTour.couple.body",
+    ctaKey: "onboardingTour.couple.cta",
   },
   {
     id: "first-tasks",
     emoji: "✅",
-    title: "3 משימות ראשונות",
-    body: "אל תכבידו על עצמכם. בחרו 3 משימות שאתם כבר עושים — וגם זה יספור. ההצלחה מתחילה במה שכבר קורה.",
-    cta: "הבא",
+    titleKey: "onboardingTour.firstTasks.title",
+    bodyKey: "onboardingTour.firstTasks.body",
+    ctaKey: "onboardingTour.firstTasks.cta",
   },
   {
     id: "first-reward",
     emoji: "🎁",
-    title: "פרס משותף ראשון",
-    body: "מה תעשו ביחד כשתשלימו שבוע? ערב סרט, ארוחה בחוץ, בוקר עצלן — אתם בוחרים. המוטיבציה חייבת להיות אמיתית, לא דמיונית.",
-    cta: "הבא",
+    titleKey: "onboardingTour.firstReward.title",
+    bodyKey: "onboardingTour.firstReward.body",
+    ctaKey: "onboardingTour.firstReward.cta",
   },
   {
     id: "ready",
     emoji: "🚀",
-    title: "מוכנים?",
-    body: "מהיום אתם משחקים. אין עונשים, אין דחיפות אגרסיביות. אם פספסתם — הinventory מתאפס בשקט. ההתייצבות היא הניצחון.",
-    cta: "יאללה לדרך",
+    titleKey: "onboardingTour.ready.title",
+    bodyKey: "onboardingTour.ready.body",
+    ctaKey: "onboardingTour.ready.cta",
   },
 ] as const;
 
@@ -81,6 +82,7 @@ type Props = {
 };
 
 export function OnboardingWizard({ open, onClose, onComplete }: Props) {
+  const { t } = useTranslation();
   const [stepIndex, setStepIndex] = useState(0);
   const [selectedType, setSelectedType] = useState<HouseholdType>(() =>
     typeof window !== "undefined" ? loadHousehold().type : "couple",
@@ -132,7 +134,9 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
             style={{
               transform: `scaleX(${(stepIndex + 1) / STEPS.length})`,
             }}
-            aria-label={`שלב ${stepIndex + 1} מתוך ${STEPS.length}`}
+            aria-label={t("onboardingTour.progressLabel")
+              .replace("{current}", String(stepIndex + 1))
+              .replace("{total}", String(STEPS.length))}
           />
         </div>
 
@@ -143,7 +147,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
             onClick={onClose}
             className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1"
           >
-            דלג
+            {t("onboardingTour.skip")}
           </button>
           <span className="text-xs text-gray-400 tabular-nums">
             {stepIndex + 1}/{STEPS.length}
@@ -151,7 +155,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
           <button
             type="button"
             onClick={onClose}
-            aria-label="סגור"
+            aria-label={t("onboardingTour.close")}
             className="size-7 rounded-full hover:bg-gray-100 flex items-center justify-center"
           >
             <X className="size-4" aria-hidden="true" />
@@ -169,10 +173,10 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
             {step.emoji}
           </div>
           <h2 id="ob-title" className="text-xl font-bold text-gray-900 mb-3 text-balance">
-            {step.title}
+            {t(step.titleKey)}
           </h2>
           <p className="text-sm text-gray-600 leading-relaxed text-pretty mb-4">
-            {step.body}
+            {t(step.bodyKey)}
           </p>
 
           {step.customRender && step.id === "household-type" && (
@@ -223,7 +227,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
                   onChange={(e) => setHasKids(e.target.checked)}
                   className="size-4 accent-indigo-600"
                 />
-                <span className="text-sm text-gray-700">יש לנו ילדים 👶</span>
+                <span className="text-sm text-gray-700">{t("onboardingTour.householdType.hasKids")}</span>
               </label>
             </div>
           )}
@@ -237,7 +241,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
                 className="flex-1 py-3 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-50 transition-colors duration-200 flex items-center justify-center gap-1"
               >
                 <ChevronRight className="size-4" aria-hidden="true" />
-                הקודם
+                {t("onboardingTour.prev")}
               </button>
             )}
             <button
@@ -246,7 +250,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
               className="flex-1 py-3 rounded-lg bg-indigo-600 text-white font-bold hover:bg-indigo-700 transition-colors duration-200 flex items-center justify-center gap-1"
             >
               {isLast && <Sparkles className="size-4" aria-hidden="true" />}
-              {step.cta ?? "הבא"}
+              {t(step.ctaKey)}
               {!isLast && <ChevronLeft className="size-4" aria-hidden="true" />}
             </button>
           </div>

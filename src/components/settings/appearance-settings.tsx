@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun, Globe, Monitor, Volume2, MessageCircle, Save, Loader2 } from "lucide-react";
+import { Moon, Sun, Globe, Monitor, Volume2, Save, Loader2 } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { ThemeCustomizer } from "@/components/settings/theme-customizer";
 
@@ -82,24 +82,24 @@ export function AppearanceSettings({
   const { t } = useTranslation();
 
   return (
-    <>
+    <div className="space-y-5">
       {/* Sounds */}
-      <section className="card-elevated p-4 space-y-3">
+      <div className="space-y-3">
         <div className="flex items-center gap-2">
           <Volume2 className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm">
+          <h3 className="font-semibold text-xs text-muted">
             {t("settings.appearanceSection.soundsTitle")}
-          </h2>
+          </h3>
         </div>
         <ToggleRow
           label={t("settings.appearanceSection.appSounds")}
           enabled={soundEnabled}
           onToggle={onSoundToggle}
         />
-      </section>
+      </div>
 
       {/* Theme */}
-      <section className="card-elevated p-4 space-y-3">
+      <div className="space-y-3 border-t border-border/50 pt-4">
         <div className="flex items-center gap-2">
           {theme === "dark" ? (
             <Moon className="w-4 h-4 text-muted" />
@@ -108,9 +108,9 @@ export function AppearanceSettings({
           ) : (
             <Sun className="w-4 h-4 text-muted" />
           )}
-          <h2 className="font-semibold text-sm">
+          <h3 className="font-semibold text-xs text-muted">
             {t("settings.appearanceSection.themeTitle")}
-          </h2>
+          </h3>
         </div>
         <div className="flex gap-2">
           <ThemeButton
@@ -135,18 +135,20 @@ export function AppearanceSettings({
             onSelect={onThemeChange}
           />
         </div>
-      </section>
+      </div>
 
       {/* Color Theme */}
-      <ThemeCustomizer />
+      <div className="border-t border-border/50 pt-4">
+        <ThemeCustomizer />
+      </div>
 
       {/* Language */}
-      <section className="card-elevated p-4 space-y-3">
+      <div className="space-y-3 border-t border-border/50 pt-4">
         <div className="flex items-center gap-2">
           <Globe className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm">
+          <h3 className="font-semibold text-xs text-muted">
             {t("settings.appearanceSection.languageTitle")}
-          </h2>
+          </h3>
         </div>
         <div className="flex gap-2">
           <button
@@ -175,8 +177,8 @@ export function AppearanceSettings({
             {t("settings.appearanceSection.languageSoon")}
           </p>
         )}
-      </section>
-    </>
+      </div>
+    </div>
   );
 }
 
@@ -202,11 +204,7 @@ export function WhatsAppSettings({
   const { t } = useTranslation();
 
   return (
-    <section className="card-elevated p-4 space-y-3">
-      <div className="flex items-center gap-2">
-        <MessageCircle className="w-4 h-4 text-muted" />
-        <h2 className="font-semibold text-sm">WhatsApp</h2>
-      </div>
+    <div className="space-y-3">
       <p className="text-xs text-muted">
         {t("settings.whatsappSection.description")}
       </p>
@@ -261,6 +259,6 @@ export function WhatsAppSettings({
           </button>
         </div>
       )}
-    </section>
+    </div>
   );
 }

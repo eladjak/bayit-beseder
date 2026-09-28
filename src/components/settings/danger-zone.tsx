@@ -1,41 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { AlertTriangle, LogOut, ExternalLink } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface DangerZoneProps {
-  isDemo: boolean;
-  onLogout: () => void;
   onClearLocalData: () => void;
 }
 
-export function DangerZone({ isDemo, onLogout, onClearLocalData }: DangerZoneProps) {
+// Note: this used to also render its own "activate emergency" card and its
+// own logout button. The emergency card was a straight duplicate of the
+// emergency-page link the settings page already shows near the top (same
+// destination, same copy) — removed. Logout moved out to settings/page.tsx
+// directly, since it now lives inside a collapsible section here and must
+// stay reachable without opening that section first.
+export function DangerZone({ onClearLocalData }: DangerZoneProps) {
   const { t } = useTranslation();
 
   return (
     <>
-      {/* Emergency */}
-      <section className="card-elevated p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <AlertTriangle className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm">
-            {t("settings.dangerSection.emergencyTitle")}
-          </h2>
-        </div>
-        <p className="text-xs text-muted mb-3">
-          {t("settings.dangerSection.emergencyDesc")}
-        </p>
-        <Link
-          href="/emergency"
-          className="block w-full py-2.5 rounded-xl border border-border bg-surface text-sm font-medium text-foreground hover:bg-surface-hover transition-all duration-100 active:scale-[0.98] text-center"
-        >
-          {t("settings.dangerSection.activateEmergency")}
-        </Link>
-      </section>
-
       {/* About & Data Management */}
-      <section className="card-elevated p-4 space-y-4">
+      <div className="space-y-4">
         <div>
           <h2 className="font-semibold text-sm mb-2">
             {t("settings.dangerSection.aboutTitle")}
@@ -115,18 +100,7 @@ export function DangerZone({ isDemo, onLogout, onClearLocalData }: DangerZonePro
             {t("settings.dangerSection.clearData")}
           </button>
         </div>
-      </section>
-
-      {/* Logout */}
-      <button
-        onClick={onLogout}
-        className="w-full flex items-center justify-center gap-2 py-3 text-danger text-sm font-medium transition-all duration-100 active:scale-[0.97] hover:opacity-80"
-      >
-        <LogOut className="w-4 h-4" />
-        {isDemo
-          ? t("settings.dangerSection.backToLogin")
-          : t("settings.dangerSection.logout")}
-      </button>
+      </div>
     </>
   );
 }

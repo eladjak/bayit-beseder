@@ -61,6 +61,7 @@ import { useHousehold, normalizeHouseholdCity } from "@/hooks/useHousehold";
 import { OfflineIndicator } from "@/components/offline-indicator";
 import { useFirstVisit } from "@/hooks/useFirstVisit";
 import { FeatureTooltip } from "@/components/feature-tooltip";
+import { pushAssistantReaction } from "@/lib/assistant-reactions";
 
 // ============================================
 // Mock data (fallback when Supabase not connected)
@@ -440,6 +441,11 @@ export default function DashboardPage() {
     const msg = getRandomMessage("task_complete");
     setCoaching({ visible: true, message: msg.message, emoji: msg.emoji });
     setTimeout(() => setCoaching((prev) => ({ ...prev, visible: false })), 5000);
+    // Also broadcast it app-wide through the assistant-reactions store (see
+    // src/lib/assistant-reactions.ts) so the floating assistant bubble in
+    // the app shell can react to it on any screen, not just here — this
+    // in-page coaching bubble above is unchanged and still shows locally.
+    pushAssistantReaction(msg.message, msg.emoji);
   }, []);
 
   const completionDates = useMemo(

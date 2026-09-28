@@ -22,6 +22,7 @@ import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useAssistantVisibility } from "@/hooks/useAssistantVisibility";
 
 // Lazy-load the AI chat components to keep the initial bundle lean
 const ChatFAB = dynamic(
@@ -82,6 +83,12 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const { notifications, unreadCount, markAsRead, markAllAsRead, dismiss } = useNotifications();
+  // Whether the floating AI-assistant bubble is shown at all — a persisted,
+  // explicit user choice (toggle lives in Settings). The keyboard shortcut
+  // (Ctrl+/) and the assistant's own drawer still work regardless; this only
+  // controls the always-on floating entry point, which some users want off
+  // their screen entirely, especially once they've learned the shortcut.
+  const { visible: assistantVisible } = useAssistantVisibility();
 
   // Alopik v2 #3: Show onboarding wizard once per user (localStorage flag).
   //
@@ -180,8 +187,11 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       </main>
       <BottomNav />
 
-      {/* AI Chat floating button */}
-      <ChatFAB onClick={() => setChatOpen(true)} />
+      {/* AI Chat floating button — hidden when the user turned it off in
+          Settings (persisted; see useAssistantVisibility). panelOpen tells
+          it whether the full drawer is open, so it knows not to show a
+          reaction peek for something the user is already looking at. */}
+      {assistantVisible && <ChatFAB onClick={() => setChatOpen(true)} panelOpen={chatOpen} />}
 
       {/* Alopik v2 #1: Quick Love floating button (bidirectional household member micro-recognition) */}
       <QuickLoveButton />

@@ -1,8 +1,7 @@
 "use client";
 
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, User } from "lucide-react";
 import { AvatarUpload } from "@/components/avatar-upload";
-import { User } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface ProfileSectionProps {

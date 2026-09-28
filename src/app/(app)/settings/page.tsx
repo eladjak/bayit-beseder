@@ -33,9 +33,26 @@ import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
 import { useTranslation } from "@/hooks/useTranslation";
 import { exportTasksToCSV, exportCompletionsToCSV, downloadCSV, type ExportTask, type ExportCompletion } from "@/lib/export";
-import { LayoutGrid, AlertTriangle, Keyboard, Download, FileDown } from "lucide-react";
+import {
+  LayoutGrid,
+  AlertTriangle,
+  Keyboard,
+  Download,
+  FileDown,
+  Home,
+  Bell,
+  Palette,
+  MessageCircle,
+  Sparkles,
+  Trophy,
+  Sliders,
+  LogOut,
+} from "lucide-react";
 import Link from "next/link";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
+import { CollapsibleSection } from "@/components/ui/collapsible-section";
+import { useAssistantVisibility } from "@/hooks/useAssistantVisibility";
+import { Bot } from "lucide-react";
 
 const SetupWizard = dynamic(() => import("@/components/setup-wizard/setup-wizard").then(m => ({ default: m.SetupWizard })), { ssr: false });
 const PrizeManager = dynamic(() => import("@/components/prizes/prize-manager").then(m => ({ default: m.PrizeManager })), { ssr: false });
@@ -131,6 +148,9 @@ export default function SettingsPage() {
 
   // PWA install
   const { canInstall, isInstalled, promptInstall } = usePWAInstall();
+
+  // AI assistant floating-button visibility
+  const { visible: assistantVisible, setVisible: setAssistantVisible } = useAssistantVisibility();
   const [deactivatingSeasonal, setDeactivatingSeasonal] = useState(false);
 
   // Setup wizard state
@@ -469,86 +489,163 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <HouseholdSection
-          householdName={householdName}
-          city={householdCity}
-          cityError={householdCityError}
-          goldenTarget={goldenTarget}
-          inviteCode={household.inviteCode}
-          copied={copied}
-          householdSaving={householdSaving}
-          onNameChange={setHouseholdName}
-          onCityChange={(value) => {
-            setHouseholdCity(value);
-            if (householdCityError) setHouseholdCityError(null);
-          }}
-          onTargetChange={setGoldenTarget}
-          onCopyInviteCode={copyInviteCode}
-          onSave={handleSaveHousehold}
-        />
+        {/* Household, members, invite & calendar — grouped because they're
+            all "who's in this home and how it's wired up", and together they
+            used to be 4 separate always-open cards before you even reached
+            notifications. Open by default: this is the group people actually
+            come here to change. */}
+        <CollapsibleSection
+          id="household"
+          icon={<Home className="w-4 h-4" />}
+          title={t("settings.groups.household.title")}
+          subtitle={t("settings.groups.household.subtitle")}
+          defaultOpen
+        >
+          <HouseholdSection
+            householdName={householdName}
+            city={householdCity}
+            cityError={householdCityError}
+            goldenTarget={goldenTarget}
+            inviteCode={household.inviteCode}
+            copied={copied}
+            householdSaving={householdSaving}
+            onNameChange={setHouseholdName}
+            onCityChange={(value) => {
+              setHouseholdCity(value);
+              if (householdCityError) setHouseholdCityError(null);
+            }}
+            onTargetChange={setGoldenTarget}
+            onCopyInviteCode={copyInviteCode}
+            onSave={handleSaveHousehold}
+          />
 
-        <MembersSection onInviteClick={() => {
-          // Scroll to invite partner section
-          document.getElementById("invite-partner-section")?.scrollIntoView({ behavior: "smooth" });
-        }} />
+          <MembersSection onInviteClick={() => {
+            document.getElementById("invite-partner-section")?.scrollIntoView({ behavior: "smooth" });
+          }} />
 
-        <div id="invite-partner-section">
-          <InvitePartner />
-        </div>
+          <div id="invite-partner-section" className="border-t border-border/50 pt-4">
+            <InvitePartner />
+          </div>
 
-        <Suspense fallback={null}>
-          <CalendarSettings />
-        </Suspense>
+          <Suspense fallback={null}>
+            <div className="border-t border-border/50 pt-4">
+              <CalendarSettings />
+            </div>
+          </Suspense>
+        </CollapsibleSection>
 
-        <NotificationSettings
-          notifPrefs={notifPrefs}
-          notifPermission={notifPermission}
-          pushSubscribed={pushSubscribed}
-          onTogglePref={toggleNotifPref}
-          onEnableNotifications={enableNotifications}
-          onTogglePushSubscription={togglePushSubscription}
-        />
+        {/* Emergency Page Link — kept as its own always-visible card, not
+            folded away: it's a safety feature, not a preference. */}
+        <Link href="/emergency" className="card-elevated p-4 flex items-center gap-3 hover:bg-surface-hover transition-colors">
+          <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+            <AlertTriangle className="w-5 h-5 text-red-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">{t("settings.emergencyPageTitle")}</p>
+            <p className="text-xs text-muted mt-0.5">{t("settings.emergencyPageDesc")}</p>
+          </div>
+          <span className="text-muted text-lg leading-none">‹</span>
+        </Link>
 
-        <AppearanceSettings
-          theme={theme}
-          language={language}
-          soundEnabled={soundEnabled}
-          onThemeChange={handleThemeChange}
-          onLanguageChange={handleLanguageChange}
-          onSoundToggle={() => {
-            const next = !soundEnabled;
-            setSoundEnabledState(next);
-            setSoundEnabled(next);
-          }}
-        />
+        <CollapsibleSection
+          id="assistant"
+          icon={<Bot className="w-4 h-4" />}
+          title={t("settings.groups.assistant.title")}
+          subtitle={t("settings.groups.assistant.subtitle")}
+        >
+          <div className="flex items-center justify-between pe-14 lg:pe-0">
+            <span className="text-sm text-foreground">{t("settings.assistantSection.toggleLabel")}</span>
+            <button
+              onClick={() => setAssistantVisible(!assistantVisible)}
+              role="switch"
+              aria-checked={assistantVisible}
+              className={`w-10 h-6 rounded-full transition-all duration-150 active:scale-90 relative ${
+                assistantVisible ? "bg-primary" : "bg-border"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform duration-150 ${
+                  assistantVisible ? "translate-x-0.5" : "translate-x-[18px]"
+                }`}
+              />
+            </button>
+          </div>
+          <p className="text-[11px] text-muted">{t("settings.assistantSection.hint")}</p>
+        </CollapsibleSection>
 
-        <WhatsAppSettings
-          whatsappEnabled={whatsappEnabled}
-          whatsappPhone={whatsappPhone}
-          whatsappPhoneSaving={whatsappPhoneSaving}
-          isDemo={isDemo}
-          onToggle={() => {
-            const next = !whatsappEnabled;
-            setWhatsappEnabled(next);
-            localStorage.setItem("bayit-whatsapp-enabled", next ? "true" : "false");
-            if (next && !whatsappPhone) {
-              toast.info("הזינו מספר טלפון כדי להתחיל לקבל הודעות");
-            }
-          }}
-          onPhoneChange={setWhatsappPhone}
-          onSavePhone={handleSaveWhatsappPhone}
-        />
+        <CollapsibleSection
+          id="notifications"
+          icon={<Bell className="w-4 h-4" />}
+          title={t("settings.groups.notifications.title")}
+          subtitle={t("settings.groups.notifications.subtitle")}
+        >
+          <NotificationSettings
+            notifPrefs={notifPrefs}
+            notifPermission={notifPermission}
+            pushSubscribed={pushSubscribed}
+            onTogglePref={toggleNotifPref}
+            onEnableNotifications={enableNotifications}
+            onTogglePushSubscription={togglePushSubscription}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          id="appearance"
+          icon={<Palette className="w-4 h-4" />}
+          title={t("settings.groups.appearance.title")}
+          subtitle={t("settings.groups.appearance.subtitle")}
+        >
+          <AppearanceSettings
+            theme={theme}
+            language={language}
+            soundEnabled={soundEnabled}
+            onThemeChange={handleThemeChange}
+            onLanguageChange={handleLanguageChange}
+            onSoundToggle={() => {
+              const next = !soundEnabled;
+              setSoundEnabledState(next);
+              setSoundEnabled(next);
+            }}
+          />
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          id="whatsapp"
+          icon={<MessageCircle className="w-4 h-4" />}
+          title={t("settings.groups.whatsapp.title")}
+          subtitle={t("settings.groups.whatsapp.subtitle")}
+        >
+          <WhatsAppSettings
+            whatsappEnabled={whatsappEnabled}
+            whatsappPhone={whatsappPhone}
+            whatsappPhoneSaving={whatsappPhoneSaving}
+            isDemo={isDemo}
+            onToggle={() => {
+              const next = !whatsappEnabled;
+              setWhatsappEnabled(next);
+              localStorage.setItem("bayit-whatsapp-enabled", next ? "true" : "false");
+              if (next && !whatsappPhone) {
+                toast.info("הזינו מספר טלפון כדי להתחיל לקבל הודעות");
+              }
+            }}
+            onPhoneChange={setWhatsappPhone}
+            onSavePhone={handleSaveWhatsappPhone}
+          />
+        </CollapsibleSection>
 
         {/* Zone-Based Scheduling */}
-        <div className="card-elevated p-4 space-y-3">
-          <h2 className="font-semibold text-foreground text-sm flex items-center gap-2">
-            <LayoutGrid className="w-4 h-4" />
-            {t("settings.zones")}
-          </h2>
-          <p className="text-xs text-muted">
-            {t("settings.zonesSection.description")}
-          </p>
-          <div className="flex items-center justify-between">
+        <CollapsibleSection
+          id="zones"
+          icon={<LayoutGrid className="w-4 h-4" />}
+          title={t("settings.groups.zones.title")}
+          subtitle={t("settings.zonesSection.description")}
+        >
+          {/* pe-14 (mobile-only left gutter in RTL) keeps the switch clear of
+              the floating action buttons that hug the physical-left edge —
+              same fix already applied to the other toggle rows in this file
+              (see notification-settings.tsx / appearance-settings.tsx for
+              the original comment); this one was missed. */}
+          <div className="flex items-center justify-between pe-14 lg:pe-0">
             <span className="text-sm text-foreground">{t("settings.zonesSection.zoneMode")}</span>
             <button
               onClick={zoneConfig.toggleZoneMode}
@@ -594,26 +691,15 @@ export default function SettingsPage() {
               </button>
             </div>
           )}
-        </div>
-
-        {/* Emergency Page Link */}
-        <Link href="/emergency" className="card-elevated p-4 flex items-center gap-3 hover:bg-surface-hover transition-colors">
-          <div className="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
-            <AlertTriangle className="w-5 h-5 text-red-500" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-foreground">{t("settings.emergencyPageTitle")}</p>
-            <p className="text-xs text-muted mt-0.5">{t("settings.emergencyPageDesc")}</p>
-          </div>
-          <span className="text-muted text-lg leading-none">‹</span>
-        </Link>
+        </CollapsibleSection>
 
         {/* Seasonal Mode Section */}
         {seasonalMode.activeTemplate && (
-          <div className="card-elevated p-4 space-y-3">
-            <h2 className="font-semibold text-foreground text-sm flex items-center gap-2">
-              {seasonalMode.activeTemplate.emoji} {t("settings.seasonal")}
-            </h2>
+          <CollapsibleSection
+            id="seasonal"
+            icon={<span aria-hidden="true">{seasonalMode.activeTemplate.emoji}</span>}
+            title={t("settings.groups.seasonal.title")}
+          >
             {seasonalMode.activation ? (
               <>
                 <div className="flex items-center justify-between text-sm">
@@ -649,10 +735,11 @@ export default function SettingsPage() {
                 {seasonalMode.activeTemplate.nameHe} {t("settings.seasonalSection.availableHint")}
               </p>
             )}
-          </div>
+          </CollapsibleSection>
         )}
 
-        {/* PWA Install */}
+        {/* PWA Install — kept as its own small always-visible banner; it's a
+            one-time, time-sensitive prompt, not a preference to fold away. */}
         {!isInstalled && canInstall && (
           <div className="card-elevated p-4 space-y-3">
             <h2 className="font-semibold text-foreground text-sm flex items-center gap-2">
@@ -671,12 +758,12 @@ export default function SettingsPage() {
         )}
 
         {/* Data Export */}
-        <div className="card-elevated p-4 space-y-3">
-          <h2 className="font-semibold text-foreground text-sm flex items-center gap-2">
-            <FileDown className="w-4 h-4" />
-            {t("export.title")}
-          </h2>
-          <p className="text-xs text-muted">{t("export.description")}</p>
+        <CollapsibleSection
+          id="export"
+          icon={<FileDown className="w-4 h-4" />}
+          title={t("settings.groups.export.title")}
+          subtitle={t("settings.groups.export.subtitle")}
+        >
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => { void handleExportTasks(); }}
@@ -703,13 +790,16 @@ export default function SettingsPage() {
               {t("export.completions")}
             </button>
           </div>
-        </div>
+        </CollapsibleSection>
 
         {/* Prize Manager */}
-        <div id="prizes" className="space-y-2 scroll-mt-20">
-          <h3 className="text-sm font-semibold text-foreground px-1">🏆 {t("prizes.title")}</h3>
+        <CollapsibleSection
+          id="prizes"
+          icon={<Trophy className="w-4 h-4" />}
+          title={t("settings.groups.prizes.title")}
+        >
           <PrizeManager />
-        </div>
+        </CollapsibleSection>
 
         {/* Print Tasks */}
         <Link href="/tasks/print" className="card-elevated p-4 block hover:scale-[0.99] active:scale-[0.97] transition-transform">
@@ -725,17 +815,17 @@ export default function SettingsPage() {
         </Link>
 
         {/* Keyboard Shortcuts */}
-        <div className="card-elevated p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Keyboard className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">{t("shortcuts.settingsLink")}</span>
-            </div>
-            <span className="text-[10px] text-muted bg-surface-hover px-2 py-0.5 rounded-md">
+        <CollapsibleSection
+          id="shortcuts"
+          icon={<Keyboard className="w-4 h-4" />}
+          title={t("settings.groups.shortcuts.title")}
+          badge={
+            <span className="text-[10px] text-muted bg-surface-hover px-2 py-0.5 rounded-md shrink-0">
               {t("shortcuts.desktopOnly")}
             </span>
-          </div>
-          <div className="mt-3 grid grid-cols-2 gap-1.5">
+          }
+        >
+          <div className="grid grid-cols-2 gap-1.5">
             {[
               { keys: "Ctrl+N", desc: t("shortcuts.newTask") },
               { keys: "Ctrl+/", desc: t("shortcuts.openAIChat") },
@@ -750,31 +840,57 @@ export default function SettingsPage() {
               </div>
             ))}
           </div>
-        </div>
+        </CollapsibleSection>
 
         {/* Alopik v2 Phase 2 #6 — 4-axis UX preferences (independent of theme): Haptics / Sounds / Notifications / Night-mode */}
-        <div className="space-y-3">
-          <h2 className="text-base font-bold text-gray-900 px-2">{t("settings.uxPreferencesTitle")}</h2>
+        <CollapsibleSection
+          id="ux-preferences"
+          icon={<Sliders className="w-4 h-4" />}
+          title={t("settings.uxPreferencesTitle")}
+          subtitle={t("settings.groups.uxPreferences.subtitle")}
+        >
           <UxPreferencesPanel />
-        </div>
+        </CollapsibleSection>
 
         {/* Alopik v2 Phase 3 #7 — Pet collection */}
-        <div id="pets" className="space-y-3">
-          <h2 className="text-base font-bold text-gray-900 px-2">{t("settings.companionTitle")}</h2>
+        <CollapsibleSection
+          id="pets"
+          icon={<span aria-hidden="true">🐾</span>}
+          title={t("settings.companionTitle")}
+          subtitle={t("settings.groups.companion.subtitle")}
+        >
           <PetSelector currentStreak={profile?.streak ?? 0} />
-        </div>
+        </CollapsibleSection>
 
         {/* Alopik v2 Phase 3 #8 — Background themes */}
-        <div id="backgrounds" className="space-y-3">
-          <h2 className="text-base font-bold text-gray-900 px-2">{t("settings.backgroundsTitle")}</h2>
+        <CollapsibleSection
+          id="backgrounds"
+          icon={<Sparkles className="w-4 h-4" />}
+          title={t("settings.backgroundsTitle")}
+          subtitle={t("settings.groups.backgrounds.subtitle")}
+        >
           <BackgroundSelector currentStreak={profile?.streak ?? 0} />
-        </div>
+        </CollapsibleSection>
 
-        <DangerZone
-          isDemo={isDemo}
-          onLogout={handleLogout}
-          onClearLocalData={handleClearLocalData}
-        />
+        <CollapsibleSection
+          id="danger-zone"
+          icon={<AlertTriangle className="w-4 h-4" />}
+          title={t("settings.groups.danger.title")}
+        >
+          <DangerZone onClearLocalData={handleClearLocalData} />
+        </CollapsibleSection>
+
+        {/* Logout — outside every collapsible section on purpose: it must
+            stay reachable in one tap without opening anything first. */}
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 py-3 text-danger text-sm font-medium transition-all duration-100 active:scale-[0.97] hover:opacity-80"
+        >
+          <LogOut className="w-4 h-4" />
+          {isDemo
+            ? t("settings.dangerSection.backToLogin")
+            : t("settings.dangerSection.logout")}
+        </button>
 
         {/* About & Feedback Section */}
         <div className="card-elevated overflow-hidden">

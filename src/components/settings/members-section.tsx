@@ -467,13 +467,13 @@ export function MembersSection({ onInviteClick }: MembersSectionProps) {
 
   return (
     <>
-      <section className="card-elevated p-4 space-y-3">
+      <div className="space-y-3 border-t border-border/50 pt-4 first:border-t-0 first:pt-0">
         {/* Header */}
         <div className="flex items-center gap-2">
           <Users className="w-4 h-4 text-muted" />
-          <h2 className="font-semibold text-sm flex-1">
+          <h3 className="font-semibold text-xs text-muted flex-1">
             {t("settings.members.title")}
-          </h2>
+          </h3>
           {!loading && members.length > 0 && (
             <span className="text-[11px] font-medium text-muted bg-surface-hover px-2 py-0.5 rounded-full">
               {members.length}
@@ -533,7 +533,7 @@ export function MembersSection({ onInviteClick }: MembersSectionProps) {
             {t("settings.members.inviteMore")}
           </button>
         </div>
-      </section>
+      </div>
 
       {/* Confirm removal dialog */}
       <AnimatePresence>
