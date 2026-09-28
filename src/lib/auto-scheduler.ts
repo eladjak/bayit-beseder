@@ -119,7 +119,7 @@ export function getTemplatesDueOnDate(
 }
 
 // --------------------------------------------
-// Nightly planner: roll overdue undone tasks forward to today
+// Nightly planner: gentle rollover + flag-for-review
 // --------------------------------------------
 //
 // WHY THIS REPLACED THE OLD template->instance generator (Sept 2026):
@@ -139,59 +139,280 @@ export function getTemplatesDueOnDate(
 // that no data supports. What the data DID show, unambiguously, across all
 // three households: every single pending/in-progress task had a due_date in
 // the past -- the oldest from February, the newest three weeks ago, zero
-// due today or later. So the concrete, data-supported behavior this cron
-// now performs is: roll overdue, undone tasks forward to today's Israel
-// date.
+// due today or later.
+//
+// FIRST VERSION (moved every overdue task straight to today) was replaced
+// by "gentle rollover" per Elad's decision: silently bumping a task that's
+// been sitting for a month+ to "due today" hides how stale it really is,
+// and dumping everything on today at once just recreates the pile-up one
+// day later. So:
+//   - overdue MORE than REVIEW_THRESHOLD_DAYS (14) days: never moved. Left
+//     exactly where it is and flagged (flagged_for_review_at) so a person
+//     decides what to do with it. See migration 022 for the column this
+//     needs -- NOT yet applied to production; see that file.
+//   - overdue 1-14 days: rolled forward, but capped at DAILY_CAP_PER_GROUP
+//     (5) new due-dates per day per assignee (unassigned tasks share one
+//     household-wide cap of 5/day, the same cap, just scoped to the whole
+//     household instead of one person). Whatever doesn't fit today spills
+//     to tomorrow, then the day after, etc. -- oldest due_date first, so
+//     the tasks that have been waiting longest get first claim on today.
+// Recurrence generation for `recurring` is still out of scope -- no
+// schedule exists in the data to generate one from.
 
-export interface RolloverResult {
+/** Tasks overdue by more than this many days are flagged, never moved. */
+export const REVIEW_THRESHOLD_DAYS = 14;
+
+/** Max new due-dates per day, per assignee (or per household for unassigned). */
+export const DAILY_CAP_PER_GROUP = 5;
+
+/** Rotation-group key for tasks with no assignee -- capped per household. */
+export const UNASSIGNED_GROUP_KEY = "__unassigned__";
+
+/** Whole calendar days between two YYYY-MM-DD strings (to - from). */
+function daysBetween(fromStr: string, toStr: string): number {
+  const from = Date.parse(`${fromStr}T00:00:00.000Z`);
+  const to = Date.parse(`${toStr}T00:00:00.000Z`);
+  return Math.round((to - from) / 86400000);
+}
+
+/** Add N whole days to a YYYY-MM-DD string, returning YYYY-MM-DD. */
+function addDaysStr(dateStr: string, days: number): string {
+  const d = new Date(`${dateStr}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return formatDate(d);
+}
+
+export interface OverdueTaskInput {
+  id: string;
+  /** YYYY-MM-DD. Caller guarantees this is strictly before `todayStr`. */
+  due_date: string;
+  assigned_to: string | null;
+}
+
+export interface ScheduledTaskInput {
+  /** YYYY-MM-DD, today or later. */
+  due_date: string;
+  assigned_to: string | null;
+}
+
+export interface RolloverMove {
+  id: string;
+  due_date: string;
+}
+
+export interface RolloverPlan {
+  /** Tasks to move, 1-14 days overdue, capped and spread. */
+  moves: RolloverMove[];
+  /** Task ids to flag for review instead of moving, >14 days overdue. */
+  flagIds: string[];
+}
+
+/**
+ * Pure planning function -- no I/O, fully unit-testable without a database.
+ *
+ * `overdueTasks` must already be filtered to undone (pending/in_progress),
+ * not-yet-flagged, due_date < today. `alreadyScheduled` is every OTHER
+ * undone task already due today or later (from a previous run, or a real
+ * future due_date), so the cap accounts for what's already sitting on a
+ * given day and a second run of the same day doesn't overshoot it.
+ *
+ * Deterministic: given the same inputs it always produces the same plan,
+ * which is what makes the DB-facing function around it idempotent -- a
+ * second call the same day finds no candidates left (moved tasks now have
+ * due_date >= today; flagged tasks now have flagged_for_review_at set) and
+ * returns an empty plan.
+ */
+export function planGentleRollover(
+  overdueTasks: OverdueTaskInput[],
+  todayStr: string,
+  alreadyScheduled: ScheduledTaskInput[] = []
+): RolloverPlan {
+  const flagIds: string[] = [];
+  const candidates: OverdueTaskInput[] = [];
+
+  for (const task of overdueTasks) {
+    const overdueDays = daysBetween(task.due_date, todayStr);
+    if (overdueDays > REVIEW_THRESHOLD_DAYS) {
+      flagIds.push(task.id);
+    } else if (overdueDays >= 1) {
+      candidates.push(task);
+    }
+    // overdueDays <= 0 is not possible given the caller's contract
+    // (due_date < today), but if it ever happened, doing nothing is safe.
+  }
+
+  // occupancy[group] = Map<dayOffsetFromToday, countAlreadyThere>
+  const occupancy = new Map<string, Map<number, number>>();
+  const bump = (group: string, offset: number) => {
+    let dayMap = occupancy.get(group);
+    if (!dayMap) {
+      dayMap = new Map();
+      occupancy.set(group, dayMap);
+    }
+    dayMap.set(offset, (dayMap.get(offset) ?? 0) + 1);
+  };
+
+  for (const scheduled of alreadyScheduled) {
+    const offset = daysBetween(todayStr, scheduled.due_date);
+    if (offset < 0) continue; // defensive; caller contract says today or later
+    bump(scheduled.assigned_to ?? UNASSIGNED_GROUP_KEY, offset);
+  }
+
+  // Oldest due_date first, globally -- ties broken by id for determinism.
+  const sorted = [...candidates].sort(
+    (a, b) => a.due_date.localeCompare(b.due_date) || a.id.localeCompare(b.id)
+  );
+
+  const moves: RolloverMove[] = [];
+  for (const task of sorted) {
+    const group = task.assigned_to ?? UNASSIGNED_GROUP_KEY;
+    let offset = 0;
+    let dayMap = occupancy.get(group);
+    while ((dayMap?.get(offset) ?? 0) >= DAILY_CAP_PER_GROUP) {
+      offset++;
+    }
+    if (!dayMap) {
+      dayMap = new Map();
+      occupancy.set(group, dayMap);
+    }
+    dayMap.set(offset, (dayMap.get(offset) ?? 0) + 1);
+    moves.push({ id: task.id, due_date: addDaysStr(todayStr, offset) });
+  }
+
+  return { moves, flagIds };
+}
+
+export interface PlannerHouseholdResult {
   householdId: string;
-  rolledOver: number;
+  /** Rolled forward to due today (dayOffset 0). */
+  movedToday: number;
+  /** Rolled forward to a later day because today was at the cap. */
+  movedLater: number;
+  /** How many days out the furthest spread task landed (0 = none spread). */
+  spreadDays: number;
+  /** Overdue more than 14 days -- left in place, flagged instead. */
+  flaggedForReview: number;
   errors: string[];
 }
 
 /**
- * Roll overdue, undone tasks (status "pending" or "in_progress", due_date
- * strictly before `today`) forward to `today` for one household.
+ * Run the gentle-rollover planner for one household and apply it.
  *
- * Idempotent by construction: it only touches rows where due_date < today.
- * After the update those rows have due_date = today, so a second call with
- * the same `today` finds nothing left to move and returns rolledOver: 0.
- * Tasks with no due_date are left untouched (nothing to reschedule).
- * Completed/skipped tasks are left untouched (nothing to unstick).
+ * Never touches completed/skipped tasks, never touches a task that's
+ * already flagged, never changes any field other than due_date (for
+ * rollovers) or flagged_for_review_at (for the >14-day bucket).
  */
-export async function rollOverdueTasksToToday(
+export async function runNightlyPlannerForHousehold(
   supabase: SupabaseClient<Database>,
   householdId: string,
   today: Date
-): Promise<RolloverResult> {
+): Promise<PlannerHouseholdResult> {
   const todayStr = formatDate(today);
-  const result: RolloverResult = { householdId, rolledOver: 0, errors: [] };
+  const result: PlannerHouseholdResult = {
+    householdId,
+    movedToday: 0,
+    movedLater: 0,
+    spreadDays: 0,
+    flaggedForReview: 0,
+    errors: [],
+  };
 
-  const { data, error } = await supabase
+  const { data: overdue, error: overdueError } = await supabase
     .from("tasks")
-    .update({ due_date: todayStr })
+    .select("id, due_date, assigned_to")
     .eq("household_id", householdId)
     .lt("due_date", todayStr)
     .in("status", ["pending", "in_progress"])
-    .select("id");
+    .is("flagged_for_review_at", null);
 
-  if (error) {
-    result.errors.push(`Failed to roll over tasks: ${error.message}`);
+  if (overdueError) {
+    result.errors.push(`Failed to fetch overdue tasks: ${overdueError.message}`);
+    return result;
+  }
+  if (!overdue || overdue.length === 0) {
     return result;
   }
 
-  result.rolledOver = data?.length ?? 0;
+  const { data: upcoming, error: upcomingError } = await supabase
+    .from("tasks")
+    .select("due_date, assigned_to")
+    .eq("household_id", householdId)
+    .gte("due_date", todayStr)
+    .in("status", ["pending", "in_progress"]);
+
+  if (upcomingError) {
+    result.errors.push(`Failed to fetch upcoming tasks: ${upcomingError.message}`);
+    return result;
+  }
+
+  const plan = planGentleRollover(
+    overdue.map((t) => ({ id: t.id, due_date: t.due_date as string, assigned_to: t.assigned_to })),
+    todayStr,
+    (upcoming ?? [])
+      .filter((t): t is { due_date: string; assigned_to: string | null } => t.due_date != null)
+      .map((t) => ({ due_date: t.due_date, assigned_to: t.assigned_to }))
+  );
+
+  // Apply moves grouped by target due_date -- one round trip per distinct
+  // date instead of one per task.
+  const idsByDate = new Map<string, string[]>();
+  for (const move of plan.moves) {
+    const ids = idsByDate.get(move.due_date) ?? [];
+    ids.push(move.id);
+    idsByDate.set(move.due_date, ids);
+  }
+
+  for (const [dueDate, ids] of idsByDate) {
+    const { data: moved, error: moveError } = await supabase
+      .from("tasks")
+      .update({ due_date: dueDate })
+      .in("id", ids)
+      .select("id");
+
+    if (moveError) {
+      result.errors.push(`Failed to move tasks to ${dueDate}: ${moveError.message}`);
+      continue;
+    }
+
+    const count = moved?.length ?? 0;
+    const offset = daysBetween(todayStr, dueDate);
+    if (offset === 0) {
+      result.movedToday += count;
+    } else {
+      result.movedLater += count;
+    }
+    if (count > 0) {
+      result.spreadDays = Math.max(result.spreadDays, offset);
+    }
+  }
+
+  if (plan.flagIds.length > 0) {
+    const { data: flagged, error: flagError } = await supabase
+      .from("tasks")
+      .update({ flagged_for_review_at: new Date().toISOString() })
+      .in("id", plan.flagIds)
+      .select("id");
+
+    if (flagError) {
+      result.errors.push(`Failed to flag tasks for review: ${flagError.message}`);
+    } else {
+      result.flaggedForReview = flagged?.length ?? 0;
+    }
+  }
+
   return result;
 }
 
 export interface PlannerRunSummary {
   householdsProcessed: number;
-  tasksRolledOver: number;
+  tasksMovedToday: number;
+  tasksMovedLater: number;
+  tasksFlaggedForReview: number;
   errors: string[];
 }
 
 /**
- * Run the nightly rollover for a list of households (one per row from
+ * Run the nightly planner for a list of households (one per row from
  * `households`). Returns per-household results plus a summary suitable for
  * a one-line log (counts only -- never task titles or user ids).
  */
@@ -199,14 +420,16 @@ export async function runNightlyPlannerForHouseholds(
   supabase: SupabaseClient<Database>,
   householdIds: string[],
   today: Date
-): Promise<{ results: RolloverResult[]; summary: PlannerRunSummary }> {
-  const results: RolloverResult[] = [];
+): Promise<{ results: PlannerHouseholdResult[]; summary: PlannerRunSummary }> {
+  const results: PlannerHouseholdResult[] = [];
   for (const householdId of householdIds) {
-    results.push(await rollOverdueTasksToToday(supabase, householdId, today));
+    results.push(await runNightlyPlannerForHousehold(supabase, householdId, today));
   }
   const summary: PlannerRunSummary = {
     householdsProcessed: results.length,
-    tasksRolledOver: results.reduce((sum, r) => sum + r.rolledOver, 0),
+    tasksMovedToday: results.reduce((sum, r) => sum + r.movedToday, 0),
+    tasksMovedLater: results.reduce((sum, r) => sum + r.movedLater, 0),
+    tasksFlaggedForReview: results.reduce((sum, r) => sum + r.flaggedForReview, 0),
     errors: results.flatMap((r) => r.errors),
   };
   return { results, summary };

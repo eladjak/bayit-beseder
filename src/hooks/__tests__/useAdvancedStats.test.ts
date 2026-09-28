@@ -37,6 +37,7 @@ function makeTask(overrides: Partial<TaskRow> & { id: string }): TaskRow {
     points: overrides.points ?? 10,
     recurring: overrides.recurring ?? false,
     created_at: overrides.created_at ?? "2026-01-01T00:00:00Z",
+    flagged_for_review_at: overrides.flagged_for_review_at ?? null,
   };
 }
 

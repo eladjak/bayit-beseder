@@ -65,6 +65,10 @@ export type Database = {
           // NOT boolean — see RecurringFlag above. Read via isRecurring().
           recurring: RecurringFlag;
           created_at: string;
+          // Set by the nightly planner (migration 022, NOT yet applied to
+          // production as of this PR — see that migration file) when a task
+          // has been overdue more than 14 days. NULL = not flagged.
+          flagged_for_review_at: string | null;
         };
         Insert: {
           id?: string;
@@ -82,6 +86,7 @@ export type Database = {
           position?: number | null;
           recurring?: boolean;
           created_at?: string;
+          flagged_for_review_at?: string | null;
         };
         Update: {
           id?: string;
@@ -95,6 +100,7 @@ export type Database = {
           points?: number;
           position?: number | null;
           recurring?: boolean;
+          flagged_for_review_at?: string | null;
         };
         Relationships: [
           {

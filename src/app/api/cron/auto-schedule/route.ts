@@ -7,11 +7,22 @@ import type { Database } from "@/lib/types/database";
  * GET /api/cron/auto-schedule
  * Vercel Cron: Runs at 01:00 Israel time (22:00 UTC).
  *
- * For each household, rolls overdue undone tasks (status "pending" or
- * "in_progress", due_date before today) forward to today's Israel date.
- * See src/lib/auto-scheduler.ts for why this replaced the old
- * template->instance generator and why this is the behavior the production
- * data actually supports.
+ * "Gentle rollover" (Elad's decision, Sept 2026): for each household,
+ * undone tasks (status "pending"/"in_progress") overdue 1-14 days are
+ * rolled forward, capped at 5 new due-dates per day per assignee
+ * (unassigned tasks share one household-wide cap of 5/day) -- the rest
+ * spread over the following days, oldest due_date first. Tasks overdue
+ * MORE than 14 days are never moved; they're flagged for review instead
+ * (flagged_for_review_at) so a person decides what to do with them.
+ *
+ * NOTE: the review-flag path needs migration 022
+ * (supabase/migrations/022_task_review_flag.sql), which is NOT applied to
+ * production yet -- see that file. Until it is, this route's flagging step
+ * will fail for any household that actually has a >14-day-overdue task
+ * (the rollover step for 1-14-day tasks is unaffected, since it never
+ * touches that column).
+ *
+ * See src/lib/auto-scheduler.ts for the full history and reasoning.
  */
 export async function GET(request: NextRequest) {
   // Verify Vercel Cron authorization
@@ -42,7 +53,9 @@ export async function GET(request: NextRequest) {
   }
 
   if (!households || households.length === 0) {
-    console.log("[auto-schedule] households=0 tasksRolledOver=0 errors=0");
+    console.log(
+      "[auto-schedule] households=0 movedToday=0 movedLater=0 flaggedForReview=0 errors=0"
+    );
     return NextResponse.json({ message: "No households found" });
   }
 
@@ -61,14 +74,16 @@ export async function GET(request: NextRequest) {
   // user ids -- see rules/how-elad-gets-told + the agent brief for this
   // task ("log a one-line summary ... without personal data").
   console.log(
-    `[auto-schedule] households=${summary.householdsProcessed} tasksRolledOver=${summary.tasksRolledOver} errors=${summary.errors.length}`
+    `[auto-schedule] households=${summary.householdsProcessed} movedToday=${summary.tasksMovedToday} movedLater=${summary.tasksMovedLater} flaggedForReview=${summary.tasksFlaggedForReview} errors=${summary.errors.length}`
   );
 
   return NextResponse.json({
     success: summary.errors.length === 0,
     date: formatDate(today),
     householdsProcessed: summary.householdsProcessed,
-    tasksRolledOver: summary.tasksRolledOver,
+    tasksMovedToday: summary.tasksMovedToday,
+    tasksMovedLater: summary.tasksMovedLater,
+    tasksFlaggedForReview: summary.tasksFlaggedForReview,
     errors: summary.errors,
     results,
   });

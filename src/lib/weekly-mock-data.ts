@@ -61,6 +61,7 @@ export function generateMockWeeklyTasks(): TaskRow[] {
         points: 10,
         recurring: true,
         created_at: new Date().toISOString(),
+        flagged_for_review_at: null,
       });
     }
   }
