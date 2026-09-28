@@ -115,8 +115,14 @@ body {
   border-radius: 3px;
 }
 
+/* 96px only cleared the bottom nav (72px). The AI assistant's floating
+   button sits higher, at bottom-40 (160px) + its own 56px height, so its
+   top edge reaches ~216px from the screen bottom on every in-app page —
+   with only 96px of padding, the last ~120px of scrollable content on any
+   settings/list screen sat behind it and was untappable. Raised to clear
+   that button with headroom; see AGENTS ownership note on ChatFAB. */
 .pb-safe {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 232px);
 }
 
 .safe-top {
