@@ -17,6 +17,35 @@ export function formatDate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
+/**
+ * Returns "today" as a Date at UTC midnight of Israel's CURRENT calendar
+ * day -- not the server's current UTC calendar day.
+ *
+ * This matters because the auto-schedule cron fires at 22:00 UTC (see
+ * vercel.json), which is already 00:00 or 01:00 the NEXT day in Israel
+ * (Asia/Jerusalem is UTC+2 in winter, UTC+3 in summer). Plain `new Date()`
+ * represents that same instant, and formatDate()/toISOString() read its UTC
+ * calendar date -- which is still YESTERDAY relative to Israel. Every night
+ * the 7-day scheduling window was silently built as
+ * [Israel's yesterday .. yesterday+6] instead of [today .. today+6]: real
+ * "today" was never scheduled, and a day that had already passed was
+ * re-processed instead.
+ *
+ * The returned Date is anchored at UTC midnight of the correct Israel
+ * calendar day so every downstream UTC-based helper in this file
+ * (formatDate, getDate()/setDate() day-stepping) stays internally
+ * consistent while representing the right real-world day.
+ */
+export function getTodayInIsrael(): Date {
+  const isoDate = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jerusalem",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date()); // "YYYY-MM-DD"
+  return new Date(`${isoDate}T00:00:00.000Z`);
+}
+
 /** Get ISO week number for a date (1-based, Monday start) */
 export function getISOWeekNumber(date: Date): number {
   const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));

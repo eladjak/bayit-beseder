@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { generateTaskInstances, formatDate } from "@/lib/auto-scheduler";
+import { generateTaskInstances, formatDate, getTodayInIsrael } from "@/lib/auto-scheduler";
 import type { Database } from "@/lib/types/database";
 
 /**
@@ -40,8 +40,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ message: "No households found" });
   }
 
-  // Date range: today + next 6 days = rolling 7-day window
-  const today = new Date();
+  // Date range: today + next 6 days = rolling 7-day window.
+  // Must be Israel's calendar day, not the server's UTC day: this cron fires
+  // at 22:00 UTC, which is already past midnight in Israel — see
+  // getTodayInIsrael()'s doc comment for the bug this avoids.
+  const today = getTodayInIsrael();
   const endDate = new Date(today);
   endDate.setDate(endDate.getDate() + 6);
 
