@@ -15,8 +15,8 @@ import type { Database } from "@/lib/types/database";
  * MORE than 14 days are never moved; they're flagged for review instead
  * (flagged_for_review_at) so a person decides what to do with them.
  *
- * NOTE: the review-flag path needs migration 022
- * (supabase/migrations/022_task_review_flag.sql), which is NOT applied to
+ * NOTE: the review-flag path needs migration 023
+ * (supabase/migrations/023_task_review_flag.sql), which is NOT applied to
  * production yet -- see that file. Until it is, this route's flagging step
  * will fail for any household that actually has a >14-day-overdue task
  * (the rollover step for 1-14-day tasks is unaffected, since it never

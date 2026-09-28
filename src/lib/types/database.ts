@@ -65,7 +65,7 @@ export type Database = {
           // NOT boolean — see RecurringFlag above. Read via isRecurring().
           recurring: RecurringFlag;
           created_at: string;
-          // Set by the nightly planner (migration 022, NOT yet applied to
+          // Set by the nightly planner (migration 023, NOT yet applied to
           // production as of this PR — see that migration file) when a task
           // has been overdue more than 14 days. NULL = not flagged.
           flagged_for_review_at: string | null;

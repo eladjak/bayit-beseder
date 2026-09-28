@@ -148,7 +148,7 @@ export function getTemplatesDueOnDate(
 // day later. So:
 //   - overdue MORE than REVIEW_THRESHOLD_DAYS (14) days: never moved. Left
 //     exactly where it is and flagged (flagged_for_review_at) so a person
-//     decides what to do with it. See migration 022 for the column this
+//     decides what to do with it. See migration 023 for the column this
 //     needs -- NOT yet applied to production; see that file.
 //   - overdue 1-14 days: rolled forward, but capped at DAILY_CAP_PER_GROUP
 //     (5) new due-dates per day per assignee (unassigned tasks share one

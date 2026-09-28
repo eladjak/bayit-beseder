@@ -83,7 +83,7 @@ interface DbTaskView {
   // Set by the nightly planner cron when a task has been overdue more than
   // 14 days: it's left in place (due_date untouched) instead of being
   // silently moved, so a person decides what to do with it. See
-  // src/lib/auto-scheduler.ts and migration 022.
+  // src/lib/auto-scheduler.ts and migration 023.
   needsReview: boolean;
 }
 
