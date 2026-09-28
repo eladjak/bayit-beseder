@@ -1,7 +1,8 @@
 "use client";
 
-import { Save, Loader2, Copy, Check, Home } from "lucide-react";
+import { Save, Loader2, Copy, Check } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { InlineHelp } from "@/components/ui/inline-help";
 
 interface HouseholdSectionProps {
   householdName: string;
@@ -35,11 +36,7 @@ export function HouseholdSection({
   const { t } = useTranslation();
 
   return (
-    <section className="card-elevated p-4 space-y-4">
-      <div className="flex items-center gap-2">
-        <Home className="w-4 h-4 text-muted" />
-        <h2 className="font-semibold text-sm">{t("settings.household")}</h2>
-      </div>
+    <div className="space-y-4">
       <div>
         <label className="text-xs text-muted block mb-1">
           {t("settings.householdSection.householdNameLabel")}
@@ -94,8 +91,12 @@ export function HouseholdSection({
         </div>
       </div>
       <div>
-        <label className="text-xs text-muted block mb-2">
+        <label className="text-xs text-muted mb-2 flex items-center gap-1">
           {t("settings.householdSection.goldenTargetLabel")}: {goldenTarget}%
+          <InlineHelp
+            text={t("settings.householdSection.goldenTargetHelp")}
+            label={t("settings.householdSection.goldenTargetHelpLabel")}
+          />
         </label>
         <input
           type="range"
@@ -132,6 +133,6 @@ export function HouseholdSection({
           ? t("settings.householdSection.saving")
           : t("settings.householdSection.saveHousehold")}
       </button>
-    </section>
+    </div>
   );
 }

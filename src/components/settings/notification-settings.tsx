@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, CheckCircle2, XCircle, AlertCircle, Moon } from "lucide-react";
+import { CheckCircle2, XCircle, AlertCircle, Moon } from "lucide-react";
 import { isNotificationSupported } from "@/lib/notifications";
 import type { NotificationPrefs } from "@/lib/notifications";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -78,12 +78,7 @@ export function NotificationSettings({
   const { prefs: granularPrefs, updatePref, isQuietHours } = useNotificationPrefs();
 
   return (
-    <section className="card-elevated p-4 space-y-3">
-      <div className="flex items-center gap-2">
-        <Bell className="w-4 h-4 text-muted" />
-        <h2 className="font-semibold text-sm">{t("settings.notifications")}</h2>
-      </div>
-
+    <div className="space-y-3">
       {/* Permission status */}
       {isNotificationSupported() && notifPermission !== "granted" && (
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl p-3">
@@ -263,6 +258,6 @@ export function NotificationSettings({
           />
         </div>
       </div>
-    </section>
+    </div>
   );
 }
