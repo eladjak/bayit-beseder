@@ -29,6 +29,7 @@ const PLANS: ReadonlyArray<Plan> = [
     emoji: "🌱",
     features: [
       "עד 50 משימות חוזרות",
+      "רשימת קניות משותפת ללא הגבלה",
       "סטטיסטיקה בסיסית",
       "Quick Love · Surprise Box · גלגל המזל",
       "חברים לדרך + רקעים (פתיחה לפי streak)",
@@ -38,34 +39,19 @@ const PLANS: ReadonlyArray<Plan> = [
   },
   {
     id: "plus",
-    name: "Plus",
-    priceMonthly: "₪19/חודש",
+    name: "Plus (AI)",
+    priceMonthly: "₪19/חודש למשק בית",
     priceYearly: "₪149/שנה (חיסכון ₪89)",
     emoji: "🌟",
     highlight: true,
     features: [
-      "אשף תכנון שבועי חכם (Wizard) — לפי אזורים בבית",
+      "אשף תכנון שבועי חכם עם AI — לפי אזורים בבית",
       "סטטיסטיקה מלאה — מגמות, השוואות, יעדים",
       "מצב פסח — 37 משימות + 25 פריטי קניות",
       "קטגוריות מותאמות אישית בלי הגבלה",
       "ייצוא CSV של משימות והשלמות",
-      "עד 4 בני משפחה כולל פרופילי ילדים",
-    ],
-    ctaLabel: "התחל 30 יום חינם",
-  },
-  {
-    id: "family",
-    name: "Family",
-    priceMonthly: "₪29/חודש",
-    priceYearly: "₪239/שנה (חיסכון ₪109)",
-    emoji: "👨‍👩‍👧",
-    features: [
-      "כל מה ש-Plus כולל",
-      "אישורי משימות הורה→ילד",
-      "פרופילי ילדים נפרדים עם קודי כניסה",
-      "WhatsApp daily briefs לכל המשפחה",
-      "תזמון Google Calendar דו-כיווני",
-      "תמיכה עדיפות בזמן יומיים",
+      "עד 4 בני משפחה, כולל פרופילי ילדים ואישורי הורה→ילד",
+      "WhatsApp daily briefs ותזמון Google Calendar דו-כיווני",
     ],
     ctaLabel: "התחל 30 יום חינם",
   },
@@ -84,11 +70,11 @@ export default function UpgradePage() {
             בחרו את המסלול שמתאים לכם
           </h1>
           <p className="text-base text-gray-600 dark:text-gray-300 max-w-xl mx-auto text-pretty">
-            הבית שלכם — בקצב שלכם. שדרגו רק כשמרגישים שזה שווה. בלי לחץ, בלי הפתעות.
+            משימות ורשימת קניות — תמיד בחינם. מסלול Plus מוסיף יכולות AI כשתרגישו שזה שווה.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
+        <div className="grid md:grid-cols-2 gap-4 mb-8 max-w-2xl mx-auto">
           {PLANS.map((plan) => (
             <div
               key={plan.id}
