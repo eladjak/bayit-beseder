@@ -4,6 +4,7 @@ import {
   getValidAccessToken,
   getPrimaryCalendarId,
   listEvents,
+  GoogleCalendarApiError,
   type GoogleTokens,
   type CalendarEvent,
 } from "@/lib/google-calendar";
@@ -149,11 +150,8 @@ export async function GET(request: NextRequest) {
         .from("profiles")
         .update({ google_calendar_id: calendarId })
         .eq("id", user.id);
-    } catch {
-      return NextResponse.json(
-        { connected: true, events: [], error: "Failed to access Google Calendar" },
-        { status: 200 }
-      );
+    } catch (err) {
+      return await handleCalendarError(supabase, user.id, err, "Failed to access Google Calendar");
     }
   }
 
@@ -166,10 +164,53 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ connected: true, events });
   } catch (err) {
-    console.error("[calendar/events] Failed to fetch events:", err);
+    return await handleCalendarError(supabase, user.id, err, "Failed to fetch calendar events");
+  }
+}
+
+/**
+ * Classifies a Google Calendar API failure and responds accordingly.
+ *
+ * A permission_denied (403) failure is a DIFFERENT fact than the token
+ * simply being expired (401) — it can happen with a perfectly present,
+ * valid refresh_token, as observed in production for one household. Both
+ * still mean "the user needs to reconnect", so both clear the stored tokens
+ * and tell the UI to show the disconnected/reconnect state. A rate-limit or
+ * unclassified error is treated as transient: tokens are left in place and
+ * the caller is told to try again, instead of being forced through a
+ * needless reconnect for a hiccup.
+ */
+async function handleCalendarError(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  err: unknown,
+  transientMessage: string
+): Promise<NextResponse> {
+  const isReconnectable = err instanceof GoogleCalendarApiError && err.needsReconnect;
+
+  console.error(
+    `[calendar/events] ${transientMessage}${
+      err instanceof GoogleCalendarApiError
+        ? ` (status=${err.status}, reason=${err.reason})`
+        : ""
+    }:`,
+    err
+  );
+
+  if (isReconnectable) {
+    await supabase
+      .from("profiles")
+      .update({ google_calendar_tokens: null, google_calendar_id: null })
+      .eq("id", userId);
+
     return NextResponse.json(
-      { connected: true, events: [], error: "Failed to fetch calendar events" },
-      { status: 200 }
+      { connected: false, events: [], error: "הרשאות Google Calendar פגו. יש להתחבר מחדש." },
+      { status: 200 } // Not 401 - graceful degradation
     );
   }
+
+  return NextResponse.json(
+    { connected: true, events: [], error: transientMessage },
+    { status: 200 }
+  );
 }

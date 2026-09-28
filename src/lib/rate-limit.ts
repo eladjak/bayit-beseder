@@ -17,6 +17,7 @@
 
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import * as Sentry from "@sentry/nextjs";
 
 // ---------------------------------------------------------------------------
 // Public types (unchanged from the original in-memory implementation)
@@ -65,6 +66,54 @@ function getRedis(): Redis | null {
 // Upstash-backed limiter
 // ---------------------------------------------------------------------------
 
+/**
+ * Has this process already reported that Upstash is unreachable?
+ *
+ * Fires ONCE per cold start across every route that uses rateLimit(), not
+ * once per request and not once per route: with Upstash down, every rate-
+ * limited request on every one of the ~14 routes that import this module
+ * would otherwise hit the catch branch below and log/report identically,
+ * producing a flood that trains the reader to ignore it — exactly the
+ * failure mode this file's own Sentry pattern (see
+ * src/app/api/whatsapp/webhook/route.ts) exists to avoid.
+ */
+let upstashUnreachableReported = false;
+
+/**
+ * Make a fully-down Upstash instance VISIBLE, not just a console.error that
+ * scrolls off Vercel's log retention window.
+ *
+ * A prior version of this module correctly added a circuit-breaker and an
+ * in-memory fallback so requests never 500 when Upstash is unreachable — but
+ * "degrades gracefully" also means "degrades silently forever" if nobody is
+ * watching the logs. Distributed rate limiting silently becomes per-instance
+ * (each serverless cold start gets its own counters, so the real limit is
+ * effectively much weaker than configured) and nothing tells a human that
+ * happened. This reports it once, with the real cause, so it gets fixed
+ * instead of just tolerated.
+ */
+function reportUpstashUnreachable(err: unknown): void {
+  const message = err instanceof Error ? err.message : String(err);
+  console.error("[rate-limit] Upstash unreachable, using in-memory fallback:", message);
+
+  if (upstashUnreachableReported) return;
+  upstashUnreachableReported = true;
+
+  if (process.env.NODE_ENV === "production") {
+    Sentry.captureMessage(
+      "[rate-limit] Upstash Redis is unreachable — rate limiting has silently " +
+        "degraded to per-instance in-memory counters (much weaker than the " +
+        "configured distributed limit). Check UPSTASH_REDIS_REST_URL/TOKEN and " +
+        "whether the Upstash database still exists.",
+      {
+        level: "error",
+        tags: { area: "rate-limit" },
+        extra: { cause: message },
+      }
+    );
+  }
+}
+
 interface UpstashLimiter extends RateLimiter {
   check(token: string): Promise<RateLimitResult>;
 }
@@ -110,7 +159,7 @@ function createUpstashLimiter(
       } catch (err) {
         upstreamHealthy = false;
         lastFailureTs = Date.now();
-        console.error("[rate-limit] Upstash unreachable, using in-memory fallback:", err instanceof Error ? err.message : err);
+        reportUpstashUnreachable(err);
         return memoryFallback.check(token);
       }
     },
