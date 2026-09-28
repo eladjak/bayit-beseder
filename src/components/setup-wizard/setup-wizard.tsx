@@ -119,18 +119,13 @@ export function SetupWizard({
     }
   }, [currentRoomIndex]);
 
-  const handleBack = useCallback(() => {
-    const idx = STEPS.indexOf(currentStep);
-    if (currentStep === "tasks") {
-      handlePrevRoom();
-      return;
-    }
-    if (idx > 0) {
-      setCurrentStep(STEPS[idx - 1]);
-    } else {
-      onClose?.();
-    }
-  }, [currentStep, handlePrevRoom, onClose]);
+  // Note: back navigation is handled per-step (StepRoomPicker/StepRoomTasks/
+  // StepReview each get an onBack below, wired to the right previous step —
+  // "tasks" needs handlePrevRoom, not a flat STEPS lookup, since it can step
+  // backward through rooms before leaving the step). The first step has no
+  // back control by design: going back from step 1 is "close", which the
+  // header's own X already does — a second control for the same action
+  // would be the opposite of decluttering this wizard.
 
   const handleFinish = useCallback(async () => {
     setIsCreating(true);
