@@ -80,6 +80,11 @@ interface DbTaskView {
   position: number | null;
   created_at: string;
   assigned_to: string | null;
+  // Set by the nightly planner cron when a task has been overdue more than
+  // 14 days: it's left in place (due_date untouched) instead of being
+  // silently moved, so a person decides what to do with it. See
+  // src/lib/auto-scheduler.ts and migration 023.
+  needsReview: boolean;
 }
 
 export default function TasksPage() {
@@ -132,6 +137,24 @@ export default function TasksPage() {
 
   function isSkippedToday(taskId: string): boolean {
     return skippedTaskIds.has(`${taskId}-${todayDateStr}`);
+  }
+
+  // Un-flags a task the nightly planner marked "needs review" (overdue more
+  // than 14 days, so it was left in place instead of moved — see
+  // src/lib/auto-scheduler.ts) and brings it back into today's pending
+  // list. This is the only thing that clears flagged_for_review_at — the
+  // cron only ever sets it, never clears it (a person decides, not the
+  // planner).
+  async function bringBackToToday(taskId: string) {
+    const success = await updateTask(taskId, {
+      due_date: todayDateStr,
+      flagged_for_review_at: null,
+    });
+    if (!success) {
+      toast.error(t("tasks.bringBackToTodayFailed"));
+      return;
+    }
+    refetchTasks();
   }
 
   function toggleSkip(taskId: string) {
@@ -246,6 +269,7 @@ export default function TasksPage() {
           position: dbTask.position ?? null,
           created_at: dbTask.created_at,
           assigned_to: dbTask.assigned_to ?? null,
+          needsReview: dbTask.flagged_for_review_at != null,
         };
       }).sort((a, b) => {
         const aPosition = a.position ?? Number.MAX_SAFE_INTEGER;
@@ -276,7 +300,7 @@ export default function TasksPage() {
   );
 
   const allPendingDbTasks = useMemo(
-    () => dbTaskViews.filter((t) => !t.isCompleted),
+    () => dbTaskViews.filter((t) => !t.isCompleted && !t.needsReview),
     [dbTaskViews]
   );
 
@@ -284,14 +308,27 @@ export default function TasksPage() {
   // mark, so the check can actually be seen drawing before the row leaves.
   // Without this the row is filtered out on the same tick as the click and the
   // completion moment is invisible — which is how it shipped.
+  //
+  // Flagged-for-review tasks (needsReview) are deliberately excluded from
+  // the normal pending list — that's the point of flagging instead of
+  // silently rescheduling them (see auto-scheduler.ts). They're shown in
+  // their own collapsible section below instead (needsReviewDbTasks).
   const pendingDbTasks = useMemo(
-    () => filteredDbTasks.filter((t) => !t.isCompleted || t.id === celebratingId),
+    () =>
+      filteredDbTasks.filter(
+        (t) => (!t.isCompleted || t.id === celebratingId) && !t.needsReview
+      ),
     [filteredDbTasks, celebratingId]
   );
   const completedDbTasks = useMemo(
     () => filteredDbTasks.filter((t) => t.isCompleted && t.id !== celebratingId),
     [filteredDbTasks, celebratingId]
   );
+  const needsReviewDbTasks = useMemo(
+    () => dbTaskViews.filter((t) => t.needsReview),
+    [dbTaskViews]
+  );
+  const [showNeedsReview, setShowNeedsReview] = useState(false);
   const [showCompleted, setShowCompleted] = useState(true);
 
   // Virtualizer parent refs
@@ -1494,6 +1531,68 @@ export default function TasksPage() {
                   })}
                 </div>
               )
+            )}
+          </div>
+        )}
+
+        {/* ---- Needs-Review Section ----
+            Tasks the nightly planner found overdue by more than 14 days.
+            It never moves these on its own (see src/lib/auto-scheduler.ts)
+            -- they stay right where they are, with their real due_date, so
+            it's obvious how long they've actually been waiting. This is
+            the "משימות ישנות לבדיקה" visibility Elad asked for. */}
+        {hasDbTasks && needsReviewDbTasks.length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={() => setShowNeedsReview((prev) => !prev)}
+              className="flex items-center gap-2 text-sm text-muted hover:text-foreground transition-all duration-100 active:scale-[0.97] w-full"
+              aria-expanded={showNeedsReview}
+            >
+              <div className="h-px flex-1 bg-border" />
+              <span className="font-medium px-2">
+                {showNeedsReview ? "▾" : "▸"} 🗂️ {t("tasks.needsReviewTitle")} ({needsReviewDbTasks.length})
+              </span>
+              <div className="h-px flex-1 bg-border" />
+            </button>
+            {showNeedsReview && (
+              <div className="space-y-2 mt-2">
+                <p className="text-xs text-muted px-1">{t("tasks.needsReviewExplain")}</p>
+                {needsReviewDbTasks.map((task) => {
+                  const display = resolveCategoryDisplay(task.categoryKey);
+                  return (
+                    <motion.div
+                      key={task.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="card-elevated p-3 flex items-start gap-3"
+                      style={{ borderInlineStart: "3px solid var(--color-warning, #F59E0B)" }}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium">{task.title}</p>
+                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                          <span
+                            className="text-[10px] px-2 py-0.5 rounded-md text-white/80 font-medium"
+                            style={{ backgroundColor: display.color }}
+                          >
+                            {display.icon ? `${display.icon} ` : ""}{display.label}
+                          </span>
+                          {task.dueDate && (
+                            <span className="text-[10px] text-muted px-2 py-0.5 rounded-md bg-background border border-border/50">
+                              {task.dueDate}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => bringBackToToday(task.id)}
+                        className="text-xs px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors flex-shrink-0"
+                      >
+                        {t("tasks.bringBackToToday")}
+                      </button>
+                    </motion.div>
+                  );
+                })}
+              </div>
             )}
           </div>
         )}

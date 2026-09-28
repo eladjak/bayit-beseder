@@ -195,6 +195,7 @@ describe("generateWeekPlan", () => {
           points: 10,
           created_at: "2026-03-01T00:00:00Z",
           description: null,
+          flagged_for_review_at: null,
         },
       ],
       members: MEMBERS,

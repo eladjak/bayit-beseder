@@ -1,11 +1,20 @@
 /**
- * Unit tests for auto-scheduler.
+ * Unit tests for the date/recurrence pure functions still exported from
+ * src/lib/auto-scheduler.ts (formatDate, getISOWeekNumber, getDayOfYear,
+ * isTemplateDueOnDate, getTemplatesDueOnDate). These are shared with
+ * src/lib/weekly-generator.ts, which is why they're still live code.
  * Uses Node.js built-in test runner (Node 18+). Run with:
  *   node --test src/__tests__/auto-scheduler.test.mjs
  *
  * NOTE: These tests use inline implementations of the pure functions
  * to avoid the TypeScript/path-alias setup overhead in a test environment.
  * The implementations must match src/lib/auto-scheduler.ts exactly.
+ *
+ * The DB-writing part of the old auto-scheduler (generateTaskInstances,
+ * selectAssignee, computeWeightedLoad) was removed in Sept 2026 -- see the
+ * note further down in this file and src/lib/auto-scheduler.ts's "Nightly
+ * planner" comment block for why. Its replacement is tested in
+ * src/lib/__tests__/auto-scheduler.rollover.test.ts.
  */
 
 import { test, describe } from "node:test";
@@ -70,47 +79,9 @@ function getTemplatesDueOnDate(templates, date) {
   return templates.filter((t) => t.active && isTemplateDueOnDate(t, date));
 }
 
-function selectAssignee(template, recentInstances, members, templateIndex) {
-  if (members.length === 0) {
-    return "";
-  }
-
-  if (
-    template.default_assignee &&
-    members.includes(template.default_assignee)
-  ) {
-    return template.default_assignee;
-  }
-
-  const counts = {};
-  for (const m of members) {
-    counts[m] = 0;
-  }
-  for (const instance of recentInstances) {
-    if (instance.assigned_to && counts[instance.assigned_to] !== undefined) {
-      counts[instance.assigned_to]++;
-    }
-  }
-
-  let minCount = Infinity;
-  for (const m of members) {
-    if (counts[m] < minCount) {
-      minCount = counts[m];
-    }
-  }
-
-  const candidates = members.filter((m) => counts[m] === minCount);
-
-  if (candidates.length > 1) {
-    return candidates[templateIndex % candidates.length];
-  }
-
-  return candidates[0];
-}
-
-// ============================================
+// --------------------------------------------
 // Helpers
-// ============================================
+// --------------------------------------------
 
 function makeTemplate(overrides = {}) {
   return {
@@ -336,66 +307,18 @@ describe("getTemplatesDueOnDate", () => {
   });
 });
 
-// ============================================
-// Tests: selectAssignee
-// ============================================
+// NOTE (Sept 2026): the old selectAssignee/computeWeightedLoad tests that
+// used to live here tested the template->instance assignment-rotation
+// logic. That logic was removed from src/lib/auto-scheduler.ts along with
+// generateTaskInstances -- production data showed task_templates /
+// task_instances were EMPTY in every household, so that whole path had
+// never created a single row. See the "Nightly planner" comment block at
+// the top of auto-scheduler.ts for what replaced it (rolling overdue tasks
+// forward), and src/lib/__tests__/auto-scheduler.rollover.test.ts for its
+// tests. Generic weighted-rotation math (independent of that dead path)
+// is still covered by src/__tests__/golden-rule-rotation.test.mjs.
 
-describe("selectAssignee", () => {
-  const members = ["user-a", "user-b"];
-
-  test("returns default_assignee when set and member exists", () => {
-    const template = makeTemplate({ default_assignee: "user-a" });
-    const result = selectAssignee(template, [], members, 0);
-    assert.equal(result, "user-a");
-  });
-
-  test("ignores default_assignee when not in members list", () => {
-    const template = makeTemplate({ default_assignee: "user-c" });
-    const result = selectAssignee(template, [], members, 0);
-    // Should fall through to rotation logic
-    assert.ok(members.includes(result));
-  });
-
-  test("assigns to member with fewer recent instances", () => {
-    const template = makeTemplate({ default_assignee: null });
-    const recentInstances = [
-      { assigned_to: "user-a" },
-      { assigned_to: "user-a" },
-      { assigned_to: "user-b" },
-    ];
-    const result = selectAssignee(template, recentInstances, members, 0);
-    assert.equal(result, "user-b"); // user-b has 1 vs user-a has 2
-  });
-
-  test("alternates by templateIndex when tied", () => {
-    const template = makeTemplate({ default_assignee: null });
-    const recentInstances = [
-      { assigned_to: "user-a" },
-      { assigned_to: "user-b" },
-    ];
-    // Tied at 1 each, templateIndex=0 -> first candidate
-    const result0 = selectAssignee(template, recentInstances, members, 0);
-    assert.equal(result0, "user-a");
-
-    // templateIndex=1 -> second candidate
-    const result1 = selectAssignee(template, recentInstances, members, 1);
-    assert.equal(result1, "user-b");
-  });
-
-  test("assigns first member when no history and templateIndex=0", () => {
-    const template = makeTemplate({ default_assignee: null });
-    const result = selectAssignee(template, [], members, 0);
-    assert.equal(result, "user-a");
-  });
-
-  test("returns empty string when no members", () => {
-    const template = makeTemplate();
-    const result = selectAssignee(template, [], [], 0);
-    assert.equal(result, "");
-  });
-});
-
-// ============================================
+// --------------------------------------------
 // Tests: formatDate
 // ============================================
 

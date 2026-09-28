@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, TaskTemplate, TaskInstance } from "@/lib/types/database";
+import type { Database, TaskTemplate } from "@/lib/types/database";
 
 // ============================================
 // Difficulty weight constants
@@ -118,250 +118,319 @@ export function getTemplatesDueOnDate(
   );
 }
 
-/**
- * Compute weighted load for a member based on assigned instances and their difficulty.
- * Each instance contributes its difficulty weight (defaults to 2 if missing).
- */
-export function computeWeightedLoad(
-  instances: Array<{ assigned_to: string | null; difficulty?: number }>,
-  memberId: string
-): number {
-  let load = 0;
-  for (const inst of instances) {
-    if (inst.assigned_to === memberId) {
-      const diff = inst.difficulty != null ? inst.difficulty : 2;
-      load += DIFFICULTY_WEIGHT[diff] ?? 2;
-    }
-  }
-  return load;
+// --------------------------------------------
+// Nightly planner: gentle rollover + flag-for-review
+// --------------------------------------------
+//
+// WHY THIS REPLACED THE OLD template->instance generator (Sept 2026):
+//
+// The auto-schedule cron used to write into `task_templates` /
+// `task_instances`. A production data check found those two tables EMPTY
+// (0 rows) in every household, while the app's real task list lives in the
+// `tasks` table (60 rows across 3 households at the time of the check). The
+// cron fired every night, found no templates, and created nothing -- it had
+// been doing nothing useful since it was wired up. Migration 019 had
+// already independently confirmed zero CLIENT call sites for those two
+// tables; this was the last server-side reader, so the path was fully dead.
+//
+// `tasks` has a `recurring` boolean flag but no cadence (no
+// recurrence_type/recurrence_day columns), so "generate the next
+// occurrence" cannot be reconstructed for it without inventing a schedule
+// that no data supports. What the data DID show, unambiguously, across all
+// three households: every single pending/in-progress task had a due_date in
+// the past -- the oldest from February, the newest three weeks ago, zero
+// due today or later.
+//
+// FIRST VERSION (moved every overdue task straight to today) was replaced
+// by "gentle rollover" per Elad's decision: silently bumping a task that's
+// been sitting for a month+ to "due today" hides how stale it really is,
+// and dumping everything on today at once just recreates the pile-up one
+// day later. So:
+//   - overdue MORE than REVIEW_THRESHOLD_DAYS (14) days: never moved. Left
+//     exactly where it is and flagged (flagged_for_review_at) so a person
+//     decides what to do with it. See migration 023 for the column this
+//     needs -- NOT yet applied to production; see that file.
+//   - overdue 1-14 days: rolled forward, but capped at DAILY_CAP_PER_GROUP
+//     (5) new due-dates per day per assignee (unassigned tasks share one
+//     household-wide cap of 5/day, the same cap, just scoped to the whole
+//     household instead of one person). Whatever doesn't fit today spills
+//     to tomorrow, then the day after, etc. -- oldest due_date first, so
+//     the tasks that have been waiting longest get first claim on today.
+// Recurrence generation for `recurring` is still out of scope -- no
+// schedule exists in the data to generate one from.
+
+/** Tasks overdue by more than this many days are flagged, never moved. */
+export const REVIEW_THRESHOLD_DAYS = 14;
+
+/** Max new due-dates per day, per assignee (or per household for unassigned). */
+export const DAILY_CAP_PER_GROUP = 5;
+
+/** Rotation-group key for tasks with no assignee -- capped per household. */
+export const UNASSIGNED_GROUP_KEY = "__unassigned__";
+
+/** Whole calendar days between two YYYY-MM-DD strings (to - from). */
+function daysBetween(fromStr: string, toStr: string): number {
+  const from = Date.parse(`${fromStr}T00:00:00.000Z`);
+  const to = Date.parse(`${toStr}T00:00:00.000Z`);
+  return Math.round((to - from) / 86400000);
+}
+
+/** Add N whole days to a YYYY-MM-DD string, returning YYYY-MM-DD. */
+function addDaysStr(dateStr: string, days: number): string {
+  const d = new Date(`${dateStr}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return formatDate(d);
+}
+
+export interface OverdueTaskInput {
+  id: string;
+  /** YYYY-MM-DD. Caller guarantees this is strictly before `todayStr`. */
+  due_date: string;
+  assigned_to: string | null;
+}
+
+export interface ScheduledTaskInput {
+  /** YYYY-MM-DD, today or later. */
+  due_date: string;
+  assigned_to: string | null;
+}
+
+export interface RolloverMove {
+  id: string;
+  due_date: string;
+}
+
+export interface RolloverPlan {
+  /** Tasks to move, 1-14 days overdue, capped and spread. */
+  moves: RolloverMove[];
+  /** Task ids to flag for review instead of moving, >14 days overdue. */
+  flagIds: string[];
 }
 
 /**
- * Select who to assign a task to using rotation logic.
+ * Pure planning function -- no I/O, fully unit-testable without a database.
  *
- * 1. If template has default_assignee, use it
- * 2. If goldenRuleTarget is provided, use weighted load to balance toward target ratio
- * 3. Otherwise, fall back to count-based rotation (original behavior)
+ * `overdueTasks` must already be filtered to undone (pending/in_progress),
+ * not-yet-flagged, due_date < today. `alreadyScheduled` is every OTHER
+ * undone task already due today or later (from a previous run, or a real
+ * future due_date), so the cap accounts for what's already sitting on a
+ * given day and a second run of the same day doesn't overshoot it.
+ *
+ * Deterministic: given the same inputs it always produces the same plan,
+ * which is what makes the DB-facing function around it idempotent -- a
+ * second call the same day finds no candidates left (moved tasks now have
+ * due_date >= today; flagged tasks now have flagged_for_review_at set) and
+ * returns an empty plan.
  */
-export function selectAssignee(
-  template: Pick<TaskTemplate, "default_assignee">,
-  recentInstances: Pick<TaskInstance, "assigned_to">[],
-  members: string[],
-  templateIndex: number,
-  goldenRuleTarget?: number
-): string {
-  if (members.length === 0) {
-    return "";
-  }
+export function planGentleRollover(
+  overdueTasks: OverdueTaskInput[],
+  todayStr: string,
+  alreadyScheduled: ScheduledTaskInput[] = []
+): RolloverPlan {
+  const flagIds: string[] = [];
+  const candidates: OverdueTaskInput[] = [];
 
-  // If template has a default assignee and that person is a member, use them
-  if (template.default_assignee && members.includes(template.default_assignee)) {
-    return template.default_assignee;
-  }
-
-  // Golden rule path: use weighted loads
-  if (goldenRuleTarget != null && members.length === 2) {
-    const user1 = members[0];
-    const user2 = members[1];
-
-    const load1 = computeWeightedLoad(recentInstances as Array<{ assigned_to: string | null; difficulty?: number }>, user1);
-    const load2 = computeWeightedLoad(recentInstances as Array<{ assigned_to: string | null; difficulty?: number }>, user2);
-    const totalLoad = load1 + load2;
-
-    const targetRatio1 = goldenRuleTarget / 100;
-    const targetRatio2 = 1 - targetRatio1;
-
-    if (totalLoad === 0) {
-      // No history - alternate by index
-      return templateIndex % 2 === 0 ? user1 : user2;
+  for (const task of overdueTasks) {
+    const overdueDays = daysBetween(task.due_date, todayStr);
+    if (overdueDays > REVIEW_THRESHOLD_DAYS) {
+      flagIds.push(task.id);
+    } else if (overdueDays >= 1) {
+      candidates.push(task);
     }
-
-    const actualRatio1 = load1 / totalLoad;
-    const actualRatio2 = load2 / totalLoad;
-
-    // Assign to the member furthest below their target ratio
-    const gap1 = targetRatio1 - actualRatio1;
-    const gap2 = targetRatio2 - actualRatio2;
-
-    if (gap1 > gap2) return user1;
-    if (gap2 > gap1) return user2;
-    // If equal gaps, alternate by index
-    return templateIndex % 2 === 0 ? user1 : user2;
+    // overdueDays <= 0 is not possible given the caller's contract
+    // (due_date < today), but if it ever happened, doing nothing is safe.
   }
 
-  // Original count-based rotation (no golden rule)
-  const counts: Record<string, number> = {};
-  for (const m of members) {
-    counts[m] = 0;
-  }
-  for (const instance of recentInstances) {
-    if (instance.assigned_to && counts[instance.assigned_to] !== undefined) {
-      counts[instance.assigned_to]++;
+  // occupancy[group] = Map<dayOffsetFromToday, countAlreadyThere>
+  const occupancy = new Map<string, Map<number, number>>();
+  const bump = (group: string, offset: number) => {
+    let dayMap = occupancy.get(group);
+    if (!dayMap) {
+      dayMap = new Map();
+      occupancy.set(group, dayMap);
     }
+    dayMap.set(offset, (dayMap.get(offset) ?? 0) + 1);
+  };
+
+  for (const scheduled of alreadyScheduled) {
+    const offset = daysBetween(todayStr, scheduled.due_date);
+    if (offset < 0) continue; // defensive; caller contract says today or later
+    bump(scheduled.assigned_to ?? UNASSIGNED_GROUP_KEY, offset);
   }
 
-  // Find min count
-  let minCount = Infinity;
-  for (const m of members) {
-    if (counts[m] < minCount) {
-      minCount = counts[m];
+  // Oldest due_date first, globally -- ties broken by id for determinism.
+  const sorted = [...candidates].sort(
+    (a, b) => a.due_date.localeCompare(b.due_date) || a.id.localeCompare(b.id)
+  );
+
+  const moves: RolloverMove[] = [];
+  for (const task of sorted) {
+    const group = task.assigned_to ?? UNASSIGNED_GROUP_KEY;
+    let offset = 0;
+    let dayMap = occupancy.get(group);
+    while ((dayMap?.get(offset) ?? 0) >= DAILY_CAP_PER_GROUP) {
+      offset++;
     }
+    if (!dayMap) {
+      dayMap = new Map();
+      occupancy.set(group, dayMap);
+    }
+    dayMap.set(offset, (dayMap.get(offset) ?? 0) + 1);
+    moves.push({ id: task.id, due_date: addDaysStr(todayStr, offset) });
   }
 
-  // Get members with min count
-  const candidates = members.filter((m) => counts[m] === minCount);
-
-  // If multiple candidates (tied), use template index to alternate
-  if (candidates.length > 1) {
-    return candidates[templateIndex % candidates.length];
-  }
-
-  return candidates[0];
+  return { moves, flagIds };
 }
 
-// ============================================
-// Main scheduling function
-// ============================================
-
-export interface ScheduleResult {
-  created: number;
-  skipped: number;
+export interface PlannerHouseholdResult {
+  householdId: string;
+  /** Rolled forward to due today (dayOffset 0). */
+  movedToday: number;
+  /** Rolled forward to a later day because today was at the cap. */
+  movedLater: number;
+  /** How many days out the furthest spread task landed (0 = none spread). */
+  spreadDays: number;
+  /** Overdue more than 14 days -- left in place, flagged instead. */
+  flaggedForReview: number;
   errors: string[];
 }
 
 /**
- * Generate task instances for a household over a date range.
- * Checks for existing instances to avoid duplicates.
- * When goldenRuleTarget is provided, uses weighted difficulty for fair rotation.
+ * Run the gentle-rollover planner for one household and apply it.
+ *
+ * Never touches completed/skipped tasks, never touches a task that's
+ * already flagged, never changes any field other than due_date (for
+ * rollovers) or flagged_for_review_at (for the >14-day bucket).
  */
-export async function generateTaskInstances(
+export async function runNightlyPlannerForHousehold(
   supabase: SupabaseClient<Database>,
   householdId: string,
-  startDate: Date,
-  endDate: Date,
-  goldenRuleTarget?: number
-): Promise<ScheduleResult> {
-  const result: ScheduleResult = { created: 0, skipped: 0, errors: [] };
+  today: Date
+): Promise<PlannerHouseholdResult> {
+  const todayStr = formatDate(today);
+  const result: PlannerHouseholdResult = {
+    householdId,
+    movedToday: 0,
+    movedLater: 0,
+    spreadDays: 0,
+    flaggedForReview: 0,
+    errors: [],
+  };
 
-  // Fetch active templates for this household
-  const { data: templates, error: templatesError } = await supabase
-    .from("task_templates")
-    .select("*")
+  const { data: overdue, error: overdueError } = await supabase
+    .from("tasks")
+    .select("id, due_date, assigned_to")
     .eq("household_id", householdId)
-    .eq("active", true);
+    .lt("due_date", todayStr)
+    .in("status", ["pending", "in_progress"])
+    .is("flagged_for_review_at", null);
 
-  if (templatesError) {
-    result.errors.push(`Failed to fetch templates: ${templatesError.message}`);
+  if (overdueError) {
+    result.errors.push(`Failed to fetch overdue tasks: ${overdueError.message}`);
+    return result;
+  }
+  if (!overdue || overdue.length === 0) {
     return result;
   }
 
-  if (!templates || templates.length === 0) {
-    return result;
-  }
-
-  // Fetch household members
-  const { data: members, error: membersError } = await supabase
-    .from("household_members")
-    .select("user_id")
-    .eq("household_id", householdId);
-
-  if (membersError) {
-    result.errors.push(`Failed to fetch members: ${membersError.message}`);
-    return result;
-  }
-
-  const memberIds = (members ?? []).map((m) => m.user_id);
-  if (memberIds.length === 0) {
-    result.errors.push("No members found in household");
-    return result;
-  }
-
-  // Build date range array
-  const dates: Date[] = [];
-  const current = new Date(startDate);
-  while (current <= endDate) {
-    dates.push(new Date(current));
-    current.setDate(current.getDate() + 1);
-  }
-
-  // Fetch existing instances in the date range to avoid duplicates
-  const startStr = formatDate(startDate);
-  const endStr = formatDate(endDate);
-
-  const { data: existingInstances, error: existingError } = await supabase
-    .from("task_instances")
-    .select("template_id, due_date")
+  const { data: upcoming, error: upcomingError } = await supabase
+    .from("tasks")
+    .select("due_date, assigned_to")
     .eq("household_id", householdId)
-    .gte("due_date", startStr)
-    .lte("due_date", endStr);
+    .gte("due_date", todayStr)
+    .in("status", ["pending", "in_progress"]);
 
-  if (existingError) {
-    result.errors.push(`Failed to fetch existing instances: ${existingError.message}`);
+  if (upcomingError) {
+    result.errors.push(`Failed to fetch upcoming tasks: ${upcomingError.message}`);
     return result;
   }
 
-  // Build a set of "templateId|dueDate" for quick lookup
-  const existingSet = new Set(
-    (existingInstances ?? []).map((i) => `${i.template_id}|${i.due_date}`)
+  const plan = planGentleRollover(
+    overdue.map((t) => ({ id: t.id, due_date: t.due_date as string, assigned_to: t.assigned_to })),
+    todayStr,
+    (upcoming ?? [])
+      .filter((t): t is { due_date: string; assigned_to: string | null } => t.due_date != null)
+      .map((t) => ({ due_date: t.due_date, assigned_to: t.assigned_to }))
   );
 
-  // For each template, fetch recent instances for assignment rotation
-  const recentInstancesMap = new Map<string, Pick<TaskInstance, "assigned_to">[]>();
-
-  for (const template of templates) {
-    const { data: recent } = await supabase
-      .from("task_instances")
-      .select("assigned_to")
-      .eq("template_id", template.id)
-      .eq("household_id", householdId)
-      .order("due_date", { ascending: false })
-      .limit(5);
-
-    recentInstancesMap.set(template.id, recent ?? []);
+  // Apply moves grouped by target due_date -- one round trip per distinct
+  // date instead of one per task.
+  const idsByDate = new Map<string, string[]>();
+  for (const move of plan.moves) {
+    const ids = idsByDate.get(move.due_date) ?? [];
+    ids.push(move.id);
+    idsByDate.set(move.due_date, ids);
   }
 
-  // Generate instances
-  const toInsert: Database["public"]["Tables"]["task_instances"]["Insert"][] = [];
+  for (const [dueDate, ids] of idsByDate) {
+    const { data: moved, error: moveError } = await supabase
+      .from("tasks")
+      .update({ due_date: dueDate })
+      .in("id", ids)
+      .select("id");
 
-  for (const date of dates) {
-    const dateStr = formatDate(date);
-    const dueTemplates = getTemplatesDueOnDate(templates, date);
+    if (moveError) {
+      result.errors.push(`Failed to move tasks to ${dueDate}: ${moveError.message}`);
+      continue;
+    }
 
-    for (let i = 0; i < dueTemplates.length; i++) {
-      const template = dueTemplates[i] as TaskTemplate;
-      const key = `${template.id}|${dateStr}`;
-
-      if (existingSet.has(key)) {
-        result.skipped++;
-        continue;
-      }
-
-      const recentInstances = recentInstancesMap.get(template.id) ?? [];
-      const assignee = selectAssignee(template, recentInstances, memberIds, i, goldenRuleTarget);
-
-      toInsert.push({
-        template_id: template.id,
-        household_id: householdId,
-        assigned_to: assignee || null,
-        due_date: dateStr,
-        status: "pending",
-      });
+    const count = moved?.length ?? 0;
+    const offset = daysBetween(todayStr, dueDate);
+    if (offset === 0) {
+      result.movedToday += count;
+    } else {
+      result.movedLater += count;
+    }
+    if (count > 0) {
+      result.spreadDays = Math.max(result.spreadDays, offset);
     }
   }
 
-  // Batch insert
-  if (toInsert.length > 0) {
-    const { error: insertError } = await supabase
-      .from("task_instances")
-      .insert(toInsert);
+  if (plan.flagIds.length > 0) {
+    const { data: flagged, error: flagError } = await supabase
+      .from("tasks")
+      .update({ flagged_for_review_at: new Date().toISOString() })
+      .in("id", plan.flagIds)
+      .select("id");
 
-    if (insertError) {
-      result.errors.push(`Failed to insert instances: ${insertError.message}`);
-      return result;
+    if (flagError) {
+      result.errors.push(`Failed to flag tasks for review: ${flagError.message}`);
+    } else {
+      result.flaggedForReview = flagged?.length ?? 0;
     }
-
-    result.created = toInsert.length;
   }
 
   return result;
+}
+
+export interface PlannerRunSummary {
+  householdsProcessed: number;
+  tasksMovedToday: number;
+  tasksMovedLater: number;
+  tasksFlaggedForReview: number;
+  errors: string[];
+}
+
+/**
+ * Run the nightly planner for a list of households (one per row from
+ * `households`). Returns per-household results plus a summary suitable for
+ * a one-line log (counts only -- never task titles or user ids).
+ */
+export async function runNightlyPlannerForHouseholds(
+  supabase: SupabaseClient<Database>,
+  householdIds: string[],
+  today: Date
+): Promise<{ results: PlannerHouseholdResult[]; summary: PlannerRunSummary }> {
+  const results: PlannerHouseholdResult[] = [];
+  for (const householdId of householdIds) {
+    results.push(await runNightlyPlannerForHousehold(supabase, householdId, today));
+  }
+  const summary: PlannerRunSummary = {
+    householdsProcessed: results.length,
+    tasksMovedToday: results.reduce((sum, r) => sum + r.movedToday, 0),
+    tasksMovedLater: results.reduce((sum, r) => sum + r.movedLater, 0),
+    tasksFlaggedForReview: results.reduce((sum, r) => sum + r.flaggedForReview, 0),
+    errors: results.flatMap((r) => r.errors),
+  };
+  return { results, summary };
 }

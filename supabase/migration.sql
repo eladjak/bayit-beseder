@@ -14,9 +14,18 @@
 --   achievements   - achievement definitions (stats page)
 --   user_achievements - per-user unlocked achievements (stats page)
 --
--- ACTIVE (auto-scheduler cron only, not directly shown in UI):
---   task_templates  - template definitions used by /api/cron/auto-schedule
---   task_instances  - generated instances written by auto-schedule cron
+-- ORPHANED (Sept 2026 -- confirmed empty in production, zero readers left):
+--   task_templates  - was going to be used by /api/cron/auto-schedule, but
+--                     the cron never had any rows to read: 0 templates in
+--                     every household. Migration 019 already removed the
+--                     client-side RLS policies after confirming zero UI
+--                     call sites. The cron itself was rewritten (Sept 2026)
+--                     to operate on `tasks` directly instead -- see
+--                     src/lib/auto-scheduler.ts. Nothing in the app reads
+--                     or writes this table anymore. Left in place (not
+--                     dropped) since dropping a live table is a decision
+--                     for Elad, not something a script does unasked.
+--   task_instances  - same story, same table pairing, same status.
 --
 -- RESERVED (schema ready, not yet wired to UI):
 --   household_members  - profiles.household_id is used instead for

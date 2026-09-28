@@ -365,6 +365,12 @@
   "addFirstTask": "הוסיפו משימה ראשונה",
   "completedSection": "בוצע",
   "weDid": "עשינו 💪",
+  "needsReviewTitle": "משימות ישנות לבדיקה",
+  "needsReviewToggleShow": "הצג משימות ישנות לבדיקה",
+  "needsReviewToggleHide": "הסתר משימות ישנות לבדיקה",
+  "needsReviewExplain": "המשימות האלה עברו את התאריך שלהן לפני יותר מ-14 יום, אז לא הזזנו אותן לבד - צריך שתחליטו מה עושים איתן.",
+  "bringBackToToday": "החזר למעקב היום",
+  "bringBackToTodayFailed": "לא הצלחנו להחזיר את המשימה - נסו שוב",
   "photo": {
    "addPhoto": "הוסף תמונה",
    "preview": "תצוגה מקדימה",

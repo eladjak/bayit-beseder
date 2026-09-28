@@ -1,12 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { generateTaskInstances, formatDate, getTodayInIsrael } from "@/lib/auto-scheduler";
+import { runNightlyPlannerForHouseholds, formatDate, getTodayInIsrael } from "@/lib/auto-scheduler";
 import type { Database } from "@/lib/types/database";
 
 /**
  * GET /api/cron/auto-schedule
  * Vercel Cron: Runs at 01:00 Israel time (22:00 UTC).
- * For each household, generates task instances for the next 7 days (rolling week).
+ *
+ * "Gentle rollover" (Elad's decision, Sept 2026): for each household,
+ * undone tasks (status "pending"/"in_progress") overdue 1-14 days are
+ * rolled forward, capped at 5 new due-dates per day per assignee
+ * (unassigned tasks share one household-wide cap of 5/day) -- the rest
+ * spread over the following days, oldest due_date first. Tasks overdue
+ * MORE than 14 days are never moved; they're flagged for review instead
+ * (flagged_for_review_at) so a person decides what to do with them.
+ *
+ * NOTE: the review-flag path needs migration 023
+ * (supabase/migrations/023_task_review_flag.sql), which is NOT applied to
+ * production yet -- see that file. Until it is, this route's flagging step
+ * will fail for any household that actually has a >14-day-overdue task
+ * (the rollover step for 1-14-day tasks is unaffected, since it never
+ * touches that column).
+ *
+ * See src/lib/auto-scheduler.ts for the full history and reasoning.
  */
 export async function GET(request: NextRequest) {
   // Verify Vercel Cron authorization
@@ -24,10 +40,10 @@ export async function GET(request: NextRequest) {
 
   const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey);
 
-  // Fetch all households (including golden_rule_target for weighted rotation)
+  // Fetch all households
   const { data: households, error: householdsError } = await supabase
     .from("households")
-    .select("id, name, golden_rule_target");
+    .select("id");
 
   if (householdsError) {
     return NextResponse.json(
@@ -37,54 +53,38 @@ export async function GET(request: NextRequest) {
   }
 
   if (!households || households.length === 0) {
+    console.log(
+      "[auto-schedule] households=0 movedToday=0 movedLater=0 flaggedForReview=0 errors=0"
+    );
     return NextResponse.json({ message: "No households found" });
   }
 
-  // Date range: today + next 6 days = rolling 7-day window.
-  // Must be Israel's calendar day, not the server's UTC day: this cron fires
-  // at 22:00 UTC, which is already past midnight in Israel — see
-  // getTodayInIsrael()'s doc comment for the bug this avoids.
+  // Israel's calendar day, not the server's UTC day -- see
+  // getTodayInIsrael()'s doc comment for the bug this avoids (the cron
+  // fires at 22:00 UTC, already past midnight in Israel).
   const today = getTodayInIsrael();
-  const endDate = new Date(today);
-  endDate.setDate(endDate.getDate() + 6);
 
-  const results: {
-    household: string;
-    created: number;
-    skipped: number;
-    errors: string[];
-  }[] = [];
+  const { results, summary } = await runNightlyPlannerForHouseholds(
+    supabase,
+    households.map((h) => h.id),
+    today
+  );
 
-  for (const household of households) {
-    const scheduleResult = await generateTaskInstances(
-      supabase,
-      household.id,
-      today,
-      endDate,
-      household.golden_rule_target ?? undefined
-    );
-
-    results.push({
-      household: household.name,
-      created: scheduleResult.created,
-      skipped: scheduleResult.skipped,
-      errors: scheduleResult.errors,
-    });
-  }
-
-  const totalCreated = results.reduce((sum, r) => sum + r.created, 0);
-  const totalSkipped = results.reduce((sum, r) => sum + r.skipped, 0);
-  const totalErrors = results.reduce((sum, r) => sum + r.errors.length, 0);
+  // One-line summary: counts only, never household names, task titles, or
+  // user ids -- see rules/how-elad-gets-told + the agent brief for this
+  // task ("log a one-line summary ... without personal data").
+  console.log(
+    `[auto-schedule] households=${summary.householdsProcessed} movedToday=${summary.tasksMovedToday} movedLater=${summary.tasksMovedLater} flaggedForReview=${summary.tasksFlaggedForReview} errors=${summary.errors.length}`
+  );
 
   return NextResponse.json({
-    success: totalErrors === 0,
-    dateRange: {
-      start: formatDate(today),
-      end: formatDate(endDate),
-    },
-    totalCreated,
-    totalSkipped,
-    totalErrors,
-    households: results,
+    success: summary.errors.length === 0,
+    date: formatDate(today),
+    householdsProcessed: summary.householdsProcessed,
+    tasksMovedToday: summary.tasksMovedToday,
+    tasksMovedLater: summary.tasksMovedLater,
+    tasksFlaggedForReview: summary.tasksFlaggedForReview,
+    errors: summary.errors,
+    results,
   });
 }

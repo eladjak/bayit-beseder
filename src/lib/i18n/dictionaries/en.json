@@ -365,6 +365,12 @@
   "addFirstTask": "Add your first task",
   "completedSection": "Done",
   "weDid": "Done 💪",
+  "needsReviewTitle": "Old tasks to review",
+  "needsReviewToggleShow": "Show old tasks to review",
+  "needsReviewToggleHide": "Hide old tasks to review",
+  "needsReviewExplain": "These tasks passed their due date more than 14 days ago, so we didn't move them on our own - you need to decide what to do with them.",
+  "bringBackToToday": "Bring back to today",
+  "bringBackToTodayFailed": "Couldn't bring the task back - try again",
   "photo": {
    "addPhoto": "Add photo",
    "preview": "Preview",
