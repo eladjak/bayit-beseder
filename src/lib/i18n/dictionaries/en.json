@@ -734,7 +734,10 @@
   "voiceLabel": "Voice input",
   "inputLabel": "Message to assistant",
   "sendLabel": "Send message",
-  "typingLabel": "Typing..."
+  "typingLabel": "Typing...",
+  "openLabelUnread": "Open smart assistant — new message",
+  "dismissPeek": "Dismiss message",
+  "reactionsTitle": "I noticed..."
  },
  "pwa": {
   "installTitle": "Install Bayit BeSeder",

@@ -734,7 +734,10 @@
   "voiceLabel": "הקלטה קולית",
   "inputLabel": "הודעה לעוזר",
   "sendLabel": "שלח הודעה",
-  "typingLabel": "מקליד..."
+  "typingLabel": "מקליד...",
+  "openLabelUnread": "פתח עוזר חכם — יש הודעה חדשה",
+  "dismissPeek": "סגירת ההודעה",
+  "reactionsTitle": "שמתי לב ל..."
  },
  "pwa": {
   "installTitle": "התקינו את בית בסדר",

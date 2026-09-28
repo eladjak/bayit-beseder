@@ -8,6 +8,7 @@ import { VoiceInputButton } from "@/components/voice-input-button";
 import { ChatMessage } from "./chat-message";
 import { useAIChat } from "@/hooks/useAIChat";
 import { useFocusTrap } from "@/hooks/useFocusTrap";
+import { useAssistantReactions } from "@/hooks/useAssistantReactions";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -25,10 +26,24 @@ interface ChatDrawerProps {
 export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
   const { t } = useTranslation();
   const { messages, sendMessage, isTyping, quickActions } = useAIChat();
+  const { reactions, markAllRead } = useAssistantReactions();
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const focusTrapRef = useFocusTrap<HTMLDivElement>(open, onClose);
+
+  // Opening the full panel is what "reads" a reaction — the peek/unread dot
+  // on the floating bubble (chat-fab.tsx) are the only other place this
+  // state is visible, so as soon as the user actually looks at the panel
+  // there is nothing left unread.
+  useEffect(() => {
+    if (open) markAllRead();
+  }, [open, markAllRead]);
+
+  // Recent reactions to show, oldest-of-the-shown-set first so they read
+  // top-to-bottom in the same chronological direction as the chat itself
+  // (newest content at the bottom). The store itself is newest-first.
+  const recentReactions = [...reactions].slice(0, 3).reverse();
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -137,6 +152,28 @@ export function ChatDrawer({ open, onClose }: ChatDrawerProps) {
               aria-live="polite"
               aria-label={t("aiChat.historyLabel")}
             >
+              {/* Recent assistant reactions (e.g. task-completion coaching
+                  messages, see src/lib/assistant-reactions.ts) surfaced at
+                  the top — separate from the chat log itself, since these
+                  come from elsewhere in the app and aren't part of this
+                  conversation's own history. */}
+              {recentReactions.length > 0 && (
+                <div className="space-y-2 pb-2 mb-1 border-b border-border/60">
+                  <p className="text-[11px] font-medium text-muted">{t("aiChat.reactionsTitle")}</p>
+                  {recentReactions.map((reaction) => (
+                    <div
+                      key={reaction.id}
+                      className="flex items-start gap-2 bg-surface-hover rounded-xl px-3 py-2"
+                    >
+                      <span className="text-base leading-none shrink-0" aria-hidden="true">
+                        {reaction.emoji ?? "💬"}
+                      </span>
+                      <p className="text-xs text-foreground leading-snug">{reaction.message}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {messages.map((msg) => (
                 <ChatMessage
                   key={msg.id}

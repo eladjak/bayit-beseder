@@ -188,8 +188,10 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       <BottomNav />
 
       {/* AI Chat floating button — hidden when the user turned it off in
-          Settings (persisted; see useAssistantVisibility). */}
-      {assistantVisible && <ChatFAB onClick={() => setChatOpen(true)} />}
+          Settings (persisted; see useAssistantVisibility). panelOpen tells
+          it whether the full drawer is open, so it knows not to show a
+          reaction peek for something the user is already looking at. */}
+      {assistantVisible && <ChatFAB onClick={() => setChatOpen(true)} panelOpen={chatOpen} />}
 
       {/* Alopik v2 #1: Quick Love floating button (bidirectional household member micro-recognition) */}
       <QuickLoveButton />
