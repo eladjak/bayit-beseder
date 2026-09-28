@@ -814,21 +814,18 @@ export type Database = {
           },
         ];
       };
+      // Sumit-only billing (migration 022_billing.sql, 2026-09-28). No Stripe
+      // columns — Stripe was never used, and 010/011_subscriptions*.sql were
+      // never applied to production, so there is no live Stripe data to
+      // preserve. One paid tier: "plus". "family" was removed — it was never
+      // a real purchasable SKU.
       subscriptions: {
         Row: {
           id: string;
           household_id: string;
           user_id: string;
-          tier: "free" | "plus" | "family";
-          status:
-            | "active"
-            | "past_due"
-            | "canceled"
-            | "trialing"
-            | "incomplete";
-          stripe_customer_id: string | null;
-          stripe_subscription_id: string | null;
-          stripe_price_id: string | null;
+          tier: "free" | "plus";
+          status: "active" | "past_due" | "canceled";
           sumit_customer_id: string | null;
           sumit_subscription_id: string | null;
           sumit_payment_method_id: string | null;
@@ -837,7 +834,6 @@ export type Database = {
           current_period_end: string | null;
           cancel_at: string | null;
           canceled_at: string | null;
-          trial_end: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -845,16 +841,8 @@ export type Database = {
           id?: string;
           household_id: string;
           user_id: string;
-          tier: "free" | "plus" | "family";
-          status:
-            | "active"
-            | "past_due"
-            | "canceled"
-            | "trialing"
-            | "incomplete";
-          stripe_customer_id?: string | null;
-          stripe_subscription_id?: string | null;
-          stripe_price_id?: string | null;
+          tier: "free" | "plus";
+          status: "active" | "past_due" | "canceled";
           sumit_customer_id?: string | null;
           sumit_subscription_id?: string | null;
           sumit_payment_method_id?: string | null;
@@ -863,7 +851,6 @@ export type Database = {
           current_period_end?: string | null;
           cancel_at?: string | null;
           canceled_at?: string | null;
-          trial_end?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -871,16 +858,8 @@ export type Database = {
           id?: string;
           household_id?: string;
           user_id?: string;
-          tier?: "free" | "plus" | "family";
-          status?:
-            | "active"
-            | "past_due"
-            | "canceled"
-            | "trialing"
-            | "incomplete";
-          stripe_customer_id?: string | null;
-          stripe_subscription_id?: string | null;
-          stripe_price_id?: string | null;
+          tier?: "free" | "plus";
+          status?: "active" | "past_due" | "canceled";
           sumit_customer_id?: string | null;
           sumit_subscription_id?: string | null;
           sumit_payment_method_id?: string | null;
@@ -889,7 +868,6 @@ export type Database = {
           current_period_end?: string | null;
           cancel_at?: string | null;
           canceled_at?: string | null;
-          trial_end?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -906,7 +884,6 @@ export type Database = {
       billing_events: {
         Row: {
           id: string;
-          stripe_event_id: string | null;
           sumit_payment_id: string | null;
           sumit_document_id: string | null;
           event_type: string;
@@ -916,7 +893,6 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          stripe_event_id?: string | null;
           sumit_payment_id?: string | null;
           sumit_document_id?: string | null;
           event_type: string;
@@ -926,7 +902,6 @@ export type Database = {
         };
         Update: {
           id?: string;
-          stripe_event_id?: string | null;
           sumit_payment_id?: string | null;
           sumit_document_id?: string | null;
           event_type?: string;

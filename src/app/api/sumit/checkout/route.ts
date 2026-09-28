@@ -1,16 +1,17 @@
 /**
- * Sumit checkout — creates a hosted payment redirect URL for a tier upgrade.
+ * Sumit checkout — creates a hosted payment redirect URL for the Plus upgrade.
  *
  * Flow:
- *   1. Client POSTs { householdId, tier, billing: 'monthly'|'yearly' }
+ *   1. Client POSTs { householdId }
  *   2. We call Sumit /billing/payments/beginredirect/
  *   3. Sumit returns a hosted URL
  *   4. User completes payment on Sumit
  *   5. Sumit fires webhook → /api/sumit/webhook → subscription row created
  *
- * Pricing per docs/pricing-model.md §6:
- *   Plus:   19 NIS monthly / 190 NIS yearly
- *   Family: 39 NIS monthly / 390 NIS yearly
+ * Business decision (Elad, 2026-09-28): ONE paid tier — Plus, 19 NIS/month
+ * per household. No yearly pricing, no free trial, no Family tier/SKU.
+ * The `family` SKU and yearly billing that used to live here were removed —
+ * they were never wired into a real feature set and were never approved.
  */
 import { NextRequest, NextResponse } from 'next/server';
 import { createSumitClient } from '@/lib/sumit-client-inline';
@@ -22,16 +23,11 @@ export const dynamic = 'force-dynamic';
 // 10 checkout starts per minute per IP — leaves room for retries but blocks abuse
 const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 
-const PRICING: Record<string, Record<string, { amount: number; sku: string; description: string }>> = {
-  plus: {
-    monthly: { amount: 19, sku: 'plus-monthly', description: 'בית בסדר Plus — חודשי' },
-    yearly: { amount: 190, sku: 'plus-yearly', description: 'בית בסדר Plus — שנתי' },
-  },
-  family: {
-    monthly: { amount: 39, sku: 'family-monthly', description: 'בית בסדר Family — חודשי' },
-    yearly: { amount: 390, sku: 'family-yearly', description: 'בית בסדר Family — שנתי' },
-  },
-};
+const PLUS_PLAN = {
+  amount: 19,
+  sku: 'plus-monthly',
+  description: 'בית בסדר Plus — חודשי',
+} as const;
 
 export async function POST(req: NextRequest) {
   // 1. Rate limit
@@ -50,10 +46,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // 3. Parse + validate body
-  const { householdId, tier, billing = 'monthly' } = await req.json();
-  if (!householdId || !PRICING[tier]?.[billing]) {
-    return NextResponse.json({ error: 'Invalid tier/billing' }, { status: 400 });
+  // 3. Parse + validate body — only the household id is meaningful input now;
+  // there is exactly one purchasable product (Plus, monthly), so tier/billing
+  // are no longer accepted from the client.
+  const { householdId } = await req.json();
+  if (!householdId || typeof householdId !== 'string') {
+    return NextResponse.json({ error: 'Invalid householdId' }, { status: 400 });
   }
 
   // 4. Authorize — caller must belong to the household they're upgrading
@@ -75,7 +73,7 @@ export async function POST(req: NextRequest) {
   }
 
   const sumit = createSumitClient({ companyId, apiKey });
-  const plan = PRICING[tier][billing];
+  const plan = PLUS_PLAN;
 
   try {
     // 6. Use server-side authenticated identity — never trust client-supplied email/name
@@ -98,6 +96,11 @@ export async function POST(req: NextRequest) {
         ],
       },
       RedirectURL: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://bayit-beseder.vercel.app'}/settings?upgrade=success`,
+      // IssueInvoice:true asks Sumit to issue a document for this charge.
+      // Elad is an עוסק פטור (VAT-exempt sole trader) — the document TYPE
+      // (receipt, not "tax invoice"/"+VAT") is controlled by the default
+      // document type configured on the Sumit account itself, not by this
+      // API call. Confirm that account setting before going live.
       IssueInvoice: true,
       ExternalIdentifier: householdId,
     }) as { RedirectURL?: string; PaymentURL?: string; PaymentID?: string };
@@ -106,8 +109,9 @@ export async function POST(req: NextRequest) {
       checkoutUrl: result?.RedirectURL || result?.PaymentURL,
       paymentId: result?.PaymentID,
     });
-  } catch (e: any) {
-    console.error('[sumit/checkout] error:', e.message);
-    return NextResponse.json({ error: e.message || 'Checkout failed' }, { status: 500 });
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Checkout failed';
+    console.error('[sumit/checkout] error:', message);
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

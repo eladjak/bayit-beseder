@@ -233,7 +233,26 @@
    "assistant": {
     "title": "העוזר החכם",
     "subtitle": "כפתור הצ׳אט הצף שרואים בכל מסך"
+   },
+   "subscription": {
+    "title": "המנוי שלי",
+    "subtitle": "בית בסדר Plus — סטטוס, חידוש וביטול"
    }
+  },
+  "subscriptionSection": {
+   "freeStatus": "אתם על המסלול החינמי",
+   "plusStatus": "בית בסדר Plus פעיל",
+   "pastDueStatus": "התשלום האחרון נכשל — בדקו את אמצעי התשלום ב-Sumit",
+   "canceledStatus": "המנוי בוטל",
+   "renewsOn": "מתחדש בתאריך",
+   "canceledOn": "בוטל בתאריך",
+   "upgradeButton": "שדרגו ל-Plus",
+   "upgradeError": "לא הצלחנו לפתוח את דף התשלום — נסו שוב",
+   "cancelButton": "בטלו את המנוי",
+   "cancelConfirm": "לבטל את בית בסדר Plus? היכולות המתקדמות ייעלמו בסוף התקופה הנוכחית.",
+   "cancelSuccess": "המנוי בוטל",
+   "cancelError": "לא הצלחנו לבטל — נסו שוב או פנו אלינו",
+   "cancelNote": "הביטול נרשם אצלנו. אם עדיין רואים חיוב עתידי אצל Sumit, יש לוודא ביטול גם שם."
   },
   "assistantSection": {
    "toggleLabel": "הצגת כפתור העוזר",
@@ -1173,7 +1192,7 @@
   "title": "שדרגו לבית בסדר+",
   "cta": "שדרגו עכשיו",
   "comingSoon": "בקרוב!",
-  "fromPrice": "מ-₪19 בלבד לחודש",
+  "fromPrice": "19₪ לחודש למשק בית",
   "statsBlurTitle": "סטטיסטיקות מלאות",
   "statsBlurDesc": "גלו מי עושה מה, מגמות לאורך זמן, ונתונים מפורטים על הבית שלכם",
   "wizardBlurTitle": "תכנון שבועי אוטומטי",
@@ -1190,10 +1209,7 @@
    "achievements_full": "כל 24 ההישגים",
    "weekly_challenges": "אתגרי שבוע",
    "leaderboard": "לוח מובילים",
-   "export": "ייצוא CSV / PDF",
-   "family_members": "עד 6 בני משק בית",
-   "child_profiles": "פרופילי ילדים",
-   "parent_approval": "אישורי הורה"
+   "export": "ייצוא CSV / PDF"
   }
  },
  "onboardingTour": {

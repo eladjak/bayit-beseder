@@ -1,16 +1,17 @@
 "use client";
 
-// Sumit integration deferred (2026-05-17).
-// Migrations 010+011 reference `public.households` / `public.household_members` tables
-// that do not exist in this database. Hardcoded "free" tier for every user until a
-// proper subscription schema is decided.
+// Real Sumit-backed subscription lookup (2026-09-28). Previously hardcoded to
+// "free" because migrations 010/011 referenced a schema that didn't exist in
+// this database — that gap is closed by supabase/migrations/022_billing.sql.
 //
-// If/when subscription DB is ready: re-enable the supabase lookup below by uncommenting
-// the useEffect block. Hook signature stays the same — call sites unchanged.
+// ONE paid tier: Plus, 19₪/month per household (Elad, 28.9.2026). The
+// `family` tier and its 3 family-only gated features were removed entirely —
+// they were never a real, purchasable thing.
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase";
 
-export type SubscriptionTier = "free" | "plus" | "family";
+export type SubscriptionTier = "free" | "plus";
 
 // Feature keys that can be gated
 export type GatedFeature =
@@ -25,13 +26,11 @@ export type GatedFeature =
   | "achievements_full"// All 24 achievements (free gets 5)
   | "weekly_challenges"// Weekly challenge quests
   | "leaderboard"      // Household leaderboard
-  | "export"           // CSV/PDF export
-  | "family_members"   // More than 2 household members (family tier)
-  | "child_profiles"   // Child profiles with pocket-money points (family tier)
-  | "parent_approval"; // Parent task approval (family tier)
+  | "export";          // CSV/PDF export
 
-// Feature access matrix per tier
-const FEATURE_MATRIX: Record<SubscriptionTier, Set<GatedFeature>> = {
+// Feature access matrix per tier — exported so /upgrade can render the real
+// gated-feature list instead of a hand-maintained duplicate that can drift.
+export const FEATURE_MATRIX: Record<SubscriptionTier, Set<GatedFeature>> = {
   free: new Set([
     // Free tier gets nothing from the gated list — base features are ungated
   ]),
@@ -49,38 +48,87 @@ const FEATURE_MATRIX: Record<SubscriptionTier, Set<GatedFeature>> = {
     "leaderboard",
     "export",
   ]),
-  family: new Set([
-    "wizard",
-    "stats_full",
-    "coaching",
-    "seasonal",
-    "zone_scheduling",
-    "custom_categories",
-    "whatsapp",
-    "unlimited_tasks",
-    "achievements_full",
-    "weekly_challenges",
-    "leaderboard",
-    "export",
-    "family_members",
-    "child_profiles",
-    "parent_approval",
-  ]),
 };
+
+export interface SubscriptionInfo {
+  tier: SubscriptionTier;
+  status: "active" | "past_due" | "canceled" | null;
+  currentPeriodEnd: string | null;
+  canceledAt: string | null;
+}
 
 export interface UseSubscriptionReturn {
   tier: SubscriptionTier;
+  status: SubscriptionInfo["status"];
+  currentPeriodEnd: string | null;
+  canceledAt: string | null;
+  /** True until the real subscription has resolved from Supabase — never
+   * grant Plus access based on a guess, so callers should treat this the
+   * same as `isFree` while it's true. */
+  loading: boolean;
   canUse: (feature: GatedFeature) => boolean;
   isPlus: boolean;
-  isFamily: boolean;
   isFree: boolean;
   maxTasks: number;
   maxMembers: number;
+  refresh: () => void;
 }
 
-export function useSubscription(_householdId?: string | null): UseSubscriptionReturn {
-  // Hardcoded "free" until subscription schema is decided. See banner comment above.
-  const [tier] = useState<SubscriptionTier>("free");
+export function useSubscription(householdId?: string | null): UseSubscriptionReturn {
+  // Default to "free" and never flash Plus access before the real row is
+  // confirmed — the loading state stays "free" the whole time it's loading.
+  // Kept as ONE state object (instead of 4 separate useState calls) so every
+  // branch below only ever needs a single setState call — calling setState
+  // synchronously and repeatedly within an effect body triggers cascading
+  // renders (react-hooks/set-state-in-effect).
+  const FREE_INFO: SubscriptionInfo = { tier: "free", status: null, currentPeriodEnd: null, canceledAt: null };
+  const [info, setInfo] = useState<SubscriptionInfo>(FREE_INFO);
+  const [loading, setLoading] = useState(true);
+  const [refreshTick, setRefreshTick] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!householdId) {
+      setInfo(FREE_INFO);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    const supabase = createClient();
+
+    supabase
+      .from("subscriptions")
+      .select("tier, status, current_period_end, canceled_at")
+      .eq("household_id", householdId)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error || !data) {
+          // No active row (or a lookup failure) — free tier, never guess Plus.
+          setInfo(FREE_INFO);
+        } else {
+          setInfo({
+            tier: data.tier === "plus" ? "plus" : "free",
+            status: data.status as SubscriptionInfo["status"],
+            currentPeriodEnd: data.current_period_end ?? null,
+            canceledAt: data.canceled_at ?? null,
+          });
+        }
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- FREE_INFO is a fresh object literal every render on purpose (it's a constant value, not state)
+  }, [householdId, refreshTick]);
+
+  const { tier, status, currentPeriodEnd, canceledAt } = info;
 
   const canUse = (feature: GatedFeature): boolean => {
     return FEATURE_MATRIX[tier].has(feature);
@@ -88,11 +136,15 @@ export function useSubscription(_householdId?: string | null): UseSubscriptionRe
 
   return {
     tier,
+    status,
+    currentPeriodEnd,
+    canceledAt,
+    loading,
     canUse,
-    isPlus: tier === "plus" || tier === "family",
-    isFamily: tier === "family",
+    isPlus: tier === "plus",
     isFree: tier === "free",
     maxTasks: tier === "free" ? 25 : Infinity,
-    maxMembers: tier === "family" ? 6 : 2,
+    maxMembers: 2,
+    refresh: () => setRefreshTick((t) => t + 1),
   };
 }

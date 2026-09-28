@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { requirePlus } from "@/lib/require-plus";
 
 const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 
@@ -31,6 +32,14 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ tip: getRandomFallbackTip() });
+  }
+
+  // "coaching" is a Plus-gated feature (see useSubscription's FEATURE_MATRIX).
+  // The client-side gate (useSubscription/canUse) is UI-only — enforce it
+  // here too, or anyone can call this endpoint directly and skip Plus.
+  const { allowed } = await requirePlus(supabase, user.id);
+  if (!allowed) {
+    return NextResponse.json({ error: "plus_required" }, { status: 403 });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;

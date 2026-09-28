@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useProfile } from "@/hooks/useProfile";
 
 export interface TaskCategoryRow {
   id: string;
@@ -49,7 +50,8 @@ export function useTaskCategories(): UseTaskCategoriesReturn {
   const [taskCategories, setTaskCategories] = useState<TaskCategoryRow[]>([]);
   const [loading, setLoading] = useState(true);
   const seedingRef = useRef(false);
-  const { canUse } = useSubscription();
+  const { profile } = useProfile();
+  const { canUse } = useSubscription(profile?.household_id ?? null);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const catTable = () => createClient().from("task_categories" as any);
