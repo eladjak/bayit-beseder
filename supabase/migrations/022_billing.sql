@@ -146,7 +146,7 @@ DROP POLICY IF EXISTS "billing_events_service_only" ON public.billing_events;
 
 -- ─── updated_at trigger ─────────────────────────────────────────────────────
 
-CREATE OR REPLACE FUNCTION public.touch_updated_at()
+CREATE OR REPLACE FUNCTION public.bayit_subscriptions_touch_updated_at()
     RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
     NEW.updated_at = now();
@@ -157,7 +157,7 @@ $$;
 DROP TRIGGER IF EXISTS subscriptions_touch ON public.subscriptions;
 CREATE TRIGGER subscriptions_touch
     BEFORE UPDATE ON public.subscriptions
-    FOR EACH ROW EXECUTE FUNCTION public.touch_updated_at();
+    FOR EACH ROW EXECUTE FUNCTION public.bayit_subscriptions_touch_updated_at();
 
 -- ─── seed: every existing household gets a 'free' row ──────────────────────
 -- (so useSubscription's "active row for this household" lookup always has
