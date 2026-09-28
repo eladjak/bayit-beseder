@@ -42,17 +42,6 @@ const contacts = [
     border: "border-indigo-100 dark:border-indigo-900/40",
   },
   {
-    icon: "💬",
-    title: "וואטסאפ",
-    description: "לשיחה מהירה",
-    href: "https://wa.me/972",
-    label: "פתחו שיחה",
-    cta: "כתבו לנו",
-    gradient: "from-emerald-500 to-teal-500",
-    bg: "bg-emerald-50 dark:bg-emerald-950/30",
-    border: "border-emerald-100 dark:border-emerald-900/40",
-  },
-  {
     icon: "🐛",
     title: "GitHub",
     description: "לבאגים ובקשות פיצ'רים",
