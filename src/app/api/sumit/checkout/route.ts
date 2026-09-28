@@ -65,6 +65,32 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
+  // 4b. Server-side guard against a real duplicate charge — never trust the
+  // client to only show the "Upgrade" button when it's actually relevant.
+  // A stale tab, a double click before the UI re-renders, or a direct POST
+  // to this route could otherwise start a SECOND real Sumit checkout for a
+  // household that already has an active Plus subscription; if the user
+  // completes it, that's a genuine double charge (the webhook would just
+  // find the existing active row and extend current_period_end again — the
+  // household is not billed correctly for it, but Sumit still took the
+  // money twice).
+  const { data: activeSub, error: subErr } = await supabase
+    .from('subscriptions')
+    .select('tier')
+    .eq('household_id', householdId)
+    .eq('status', 'active')
+    .maybeSingle();
+  if (subErr) {
+    console.error('[sumit/checkout] active-subscription lookup failed:', subErr.message);
+    return NextResponse.json({ error: 'Failed to check subscription status' }, { status: 500 });
+  }
+  if (activeSub?.tier === 'plus') {
+    return NextResponse.json(
+      { error: 'already_plus', message: 'household is already on Plus' },
+      { status: 409 },
+    );
+  }
+
   // 5. Sumit credentials — accept both legacy SUMIT_API_TOKEN and current SUMIT_API_KEY
   const companyId = process.env.SUMIT_COMPANY_ID;
   const apiKey = process.env.SUMIT_API_KEY || process.env.SUMIT_API_TOKEN;
