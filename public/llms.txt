@@ -24,7 +24,8 @@
 
 ## Facts
 
-- Language: Hebrew (RTL), free to use, no premium tier
+- Language: Hebrew (RTL)
+- Pricing: task management and shared shopping list are free with no time limit; a Plus plan (19 ILS/month per household, free trial available) unlocks AI features such as smart weekly planning and full statistics
 - Open source: https://github.com/eladjak/bayit-beseder
 - Tech: Next.js, Supabase, Tailwind CSS, hosted on Vercel
 - Contact: contact@bayitbeseder.com

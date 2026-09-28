@@ -6,7 +6,6 @@ import type { Metadata } from "next";
 // ssr:false is only valid inside Client Components in the App Router.
 import {
   SocialProofSection,
-  TestimonialsSection,
   FloatingCta,
   AnimatedFeatureCard,
   AnimatedHowItWorksSection,
@@ -50,9 +49,11 @@ const jsonLd = {
   isAccessibleForFree: true,
   keywords: "ניהול בית, ניהול משק בית, חלוקת תורנויות, חלוקת משימות בית, תכנון שבועי, ניקיון הבית, ארגון הבית, זוגות, משפחה, אפליקציה עברית",
   offers: {
-    "@type": "Offer",
-    price: "0",
+    "@type": "AggregateOffer",
+    lowPrice: "0",
+    highPrice: "19",
     priceCurrency: "ILS",
+    offerCount: "2",
     availability: "https://schema.org/InStock",
   },
   featureList: [
@@ -86,10 +87,10 @@ const faqStructuredData = {
   mainEntity: [
     {
       "@type": "Question",
-      name: "האם האפליקציה בחינם לגמרי?",
+      name: "האם האפליקציה בחינם?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "כן, בית בסדר חינמית לחלוטין. אין תשלום, אין מנוי, אין תכונות פרימיום נסתרות. פשוט נרשמים ומתחילים.",
+        text: "כן — ניהול המשימות ורשימת הקניות המשותפת חינמיים לגמרי, בלי הגבלת זמן. יכולות AI מתקדמות (תכנון שבועי חכם, סטטיסטיקה מלאה ועוד) זמינות במסלול Plus ב-19₪ לחודש למשק בית, עם 30 יום ניסיון חינם.",
       },
     },
     {
@@ -330,8 +331,9 @@ export default function LandingPage() {
       {/* How it works — animated */}
       <AnimatedHowItWorksSection />
 
-      {/* Testimonials hidden until we have real, attributed reviews (Wave-12 compliance) */}
-      {/* <TestimonialsSection /> */}
+      {/* Testimonials section removed (Wave-12 compliance): no real, attributed
+          reviews exist yet. The fabricated-quote component was deleted outright
+          (not just commented out) so it can't be silently re-enabled later. */}
 
       {/* Visual break */}
       <section className="max-w-4xl mx-auto px-6 py-8">
@@ -423,7 +425,7 @@ export default function LandingPage() {
           {/* Brand */}
           <h3 className="sr-only">בית בסדר — מידע וקישורים</h3>
           <h4 className="font-bold text-base text-foreground mb-1">🏠 בית בסדר</h4>
-          <p className="text-muted mb-2">ניהול הבית ביחד, בכיף — חינם לחלוטין</p>
+          <p className="text-muted mb-2">ניהול הבית ביחד, בכיף — משימות וקניות בחינם</p>
           <div className="flex items-center justify-center gap-3 mb-4">
             <a href="https://github.com/eladjak/bayit-beseder" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] font-medium px-2.5 py-1 rounded-full bg-[#24292f]/10 dark:bg-white/10 text-foreground hover:bg-[#24292f]/20 transition-colors">
               <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
