@@ -22,14 +22,6 @@ export const SocialProofSection = dynamic(
   { ssr: false }
 );
 
-export const TestimonialsSection = dynamic(
-  () =>
-    import("@/components/landing/landing-interactive").then((m) => ({
-      default: m.TestimonialsSection,
-    })),
-  { ssr: false }
-);
-
 export const FloatingCta = dynamic(
   () =>
     import("@/components/landing/landing-interactive").then((m) => ({
