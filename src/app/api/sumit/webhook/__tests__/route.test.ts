@@ -165,6 +165,14 @@ function makeRequest(body: unknown, headers: Record<string, string> = {}) {
   });
 }
 
+function queryRequest(body: unknown, query: string) {
+  return new NextRequest("https://example.com/api/sumit/webhook" + query, {
+    method: "POST",
+    body: JSON.stringify(body),
+    headers: { "content-type": "application/json" },
+  });
+}
+
 // ── setup ────────────────────────────────────────────────────────────────
 
 const ORIGINAL_ENV = { ...process.env };
@@ -186,7 +194,7 @@ afterEach(() => {
 
 describe("POST /api/sumit/webhook — signature auth", () => {
   it("accepts a request whose signature header equals the shared secret verbatim (the realistic Sumit UI-configured-header case)", async () => {
-    process.env.SUMIT_WEBHOOK_SECRET = "shared-secret-123";
+    process.env.SUMIT_WEBHOOK_SECRET = "dummy-shared-secret-123";
     useFakeSupabase({});
 
     const body = JSON.stringify(makeEvent());
@@ -194,7 +202,7 @@ describe("POST /api/sumit/webhook — signature auth", () => {
       new NextRequest("https://example.com/api/sumit/webhook", {
         method: "POST",
         body,
-        headers: { "content-type": "application/json", "x-sumit-signature": "shared-secret-123" },
+        headers: { "content-type": "application/json", "x-sumit-signature": "dummy-shared-secret-123" },
       })
     );
 
@@ -202,12 +210,12 @@ describe("POST /api/sumit/webhook — signature auth", () => {
   });
 
   it("accepts a request whose signature header is a valid HMAC-SHA256 hex digest of the raw body (forward-compat path)", async () => {
-    process.env.SUMIT_WEBHOOK_SECRET = "shared-secret-123";
+    process.env.SUMIT_WEBHOOK_SECRET = "dummy-shared-secret-123";
     useFakeSupabase({});
 
     const event = makeEvent();
     const body = JSON.stringify(event);
-    const signature = sign(body, "shared-secret-123");
+    const signature = sign(body, "dummy-shared-secret-123");
 
     const res = await POST(
       new NextRequest("https://example.com/api/sumit/webhook", {
@@ -221,7 +229,7 @@ describe("POST /api/sumit/webhook — signature auth", () => {
   });
 
   it("rejects with 401 when the signature header is wrong", async () => {
-    process.env.SUMIT_WEBHOOK_SECRET = "shared-secret-123";
+    process.env.SUMIT_WEBHOOK_SECRET = "dummy-shared-secret-123";
     useFakeSupabase({});
 
     const res = await POST(
@@ -229,6 +237,48 @@ describe("POST /api/sumit/webhook — signature auth", () => {
     );
 
     expect(res.status).toBe(401);
+  });
+
+  it("accepts a valid ?key= query secret (no header), for Sumit UIs that cannot send headers", async () => {
+    process.env.SUMIT_WEBHOOK_SECRET = "dummy-shared-secret-123";
+    useFakeSupabase({});
+    const res = await POST(queryRequest(makeEvent(), "?key=dummy-shared-secret-123"));
+    expect(res.status).toBe(200);
+  });
+
+  it("accepts a valid ?token= query secret too", async () => {
+    process.env.SUMIT_WEBHOOK_SECRET = "dummy-shared-secret-123";
+    useFakeSupabase({});
+    const res = await POST(queryRequest(makeEvent(), "?token=dummy-shared-secret-123"));
+    expect(res.status).toBe(200);
+  });
+
+  it("rejects with 401 on a wrong ?key= query secret", async () => {
+    process.env.SUMIT_WEBHOOK_SECRET = "dummy-shared-secret-123";
+    useFakeSupabase({});
+    const res = await POST(queryRequest(makeEvent(), "?key=wrong-secret"));
+    expect(res.status).toBe(401);
+  });
+
+  it("rejects with 401 when neither header nor query secret is present", async () => {
+    process.env.SUMIT_WEBHOOK_SECRET = "dummy-shared-secret-123";
+    useFakeSupabase({});
+    const res = await POST(queryRequest(makeEvent(), ""));
+    expect(res.status).toBe(401);
+  });
+
+  it("rejects with 401 on an empty ?key= value", async () => {
+    process.env.SUMIT_WEBHOOK_SECRET = "dummy-shared-secret-123";
+    useFakeSupabase({});
+    const res = await POST(queryRequest(makeEvent(), "?key="));
+    expect(res.status).toBe(401);
+  });
+
+  it("still returns 503 in production when the secret is unset, even if a ?key= is supplied", async () => {
+    (process.env as Record<string, string>).NODE_ENV = "production";
+    useFakeSupabase({});
+    const res = await POST(queryRequest(makeEvent(), "?key=anything"));
+    expect(res.status).toBe(503);
   });
 
   it("rejects with 503 when SUMIT_WEBHOOK_SECRET is unset in production — never fail-open on money", async () => {

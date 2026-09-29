@@ -9,8 +9,10 @@
  * Idempotency: drop duplicate events by sumit_payment_id in billing_events.
  *
  * NOT YET CONFIGURED. Set webhook URL in Sumit UI to:
- *   https://<your-domain>/api/sumit/webhook
- * And set SUMIT_WEBHOOK_SECRET in env.
+ *   https://<your-domain>/api/sumit/webhook?key=<SUMIT_WEBHOOK_SECRET>
+ * (the header x-sumit-signature / x-signature also works, if Sumit's UI can
+ * send custom headers). Set SUMIT_WEBHOOK_SECRET in env. Never log the URL's
+ * query string.
  *
  * ── What is verified vs assumed about Sumit's webhook shape ────────────────
  * Sumit's own documentation (help.sumit.co.il, "שליחת Webhook ממערכת סאמיט")
@@ -18,7 +20,9 @@
  * some record type (a card — e.g. a charge, a document, a customer) inside
  * Sumit's UI, attach a trigger (create/update/delete/archive on that view),
  * and Sumit POSTs whatever fields that view exposes to a URL you configure —
- * including any custom HTTP headers you add in that same UI. There is no
+ * (2026-09-29: the help articles on webhooks and triggers do NOT mention
+ * custom headers at all — that part is unverified, hence the ?key= option
+ * below). There is no
  * documented HMAC-signature scheme; Sumit does not publish a fixed
  * `payment.succeeded`/`recurring.charged` event-type vocabulary either — the
  * field names in the POST body are whatever the person who built the view
@@ -99,6 +103,22 @@ interface SumitWebhookEvent {
   UserID?: string;
 }
 
+/**
+ * Secret passed in the URL (?key=<secret> or ?token=<secret>), for setups
+ * where Sumit's UI cannot send custom headers. Plain timing-safe match only.
+ * The query string is never logged (it carries the secret).
+ */
+function verifyQueryKey(req: NextRequest, secret: string): boolean {
+  if (!secret) return false;
+  const params = req.nextUrl.searchParams;
+  const candidates = [params.get('key'), params.get('token')];
+  let ok = false;
+  for (const c of candidates) {
+    if (c && timingSafeStringEqual(c, secret)) ok = true;
+  }
+  return ok;
+}
+
 export async function POST(req: NextRequest) {
   const secret = process.env.SUMIT_WEBHOOK_SECRET || '';
   const signature = req.headers.get('x-sumit-signature') || req.headers.get('x-signature');
@@ -114,7 +134,7 @@ export async function POST(req: NextRequest) {
     }
     // dev/test only: log a loud warning so devs don't ship without the secret
     console.warn('[sumit/webhook] SUMIT_WEBHOOK_SECRET unset — accepting unsigned event (dev only)');
-  } else if (!verifySignature(rawBody, signature, secret)) {
+  } else if (!verifySignature(rawBody, signature, secret) && !verifyQueryKey(req, secret)) {
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
   }
 
