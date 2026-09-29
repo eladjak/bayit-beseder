@@ -166,7 +166,7 @@ CREATE TRIGGER subscriptions_touch
 -- but keeps the query shape identical whether a household has ever paid or
 -- not, and gives a stable row to look at in the Supabase dashboard.)
 INSERT INTO public.subscriptions (household_id, user_id, tier, status)
-SELECT h.id, h.created_by, 'free', 'active'
+SELECT h.id, (SELECT m.user_id FROM public.household_members m WHERE m.household_id = h.id ORDER BY m.joined_at LIMIT 1), 'free', 'active'
 FROM public.households h
 WHERE NOT EXISTS (
     SELECT 1 FROM public.subscriptions s
