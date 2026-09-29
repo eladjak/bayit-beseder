@@ -29,6 +29,7 @@ import { NotificationSettings } from "@/components/settings/notification-setting
 import { AppearanceSettings, WhatsAppSettings } from "@/components/settings/appearance-settings";
 import { DangerZone } from "@/components/settings/danger-zone";
 import { MembersSection } from "@/components/settings/members-section";
+import { SubscriptionSection } from "@/components/settings/subscription-section";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -532,6 +533,19 @@ export default function SettingsPage() {
               <CalendarSettings />
             </div>
           </Suspense>
+        </CollapsibleSection>
+
+        {/* My subscription — open by default, right after household: this is
+            what someone lands on right after checkout (?upgrade=success) and
+            what a paying user checks most. */}
+        <CollapsibleSection
+          id="subscription"
+          icon={<Sparkles className="w-4 h-4" />}
+          title={t("settings.groups.subscription.title")}
+          subtitle={t("settings.groups.subscription.subtitle")}
+          defaultOpen
+        >
+          <SubscriptionSection />
         </CollapsibleSection>
 
         {/* Emergency Page Link — kept as its own always-visible card, not

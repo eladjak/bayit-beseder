@@ -5,6 +5,7 @@ import {
   getStyleSummary,
   getBestCoachingStyle,
 } from "@/lib/coaching-tracker";
+import { requirePlus } from "@/lib/require-plus";
 
 /**
  * GET /api/coaching/insights
@@ -43,15 +44,9 @@ export async function GET(_request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Get household_id for this user
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("household_id")
-    .eq("id", user.id)
-    .single();
-
-  const householdId = profile?.household_id;
-
+  // "coaching" is a Plus-gated feature (see useSubscription's FEATURE_MATRIX).
+  // The client-side gate is UI-only — enforce it here too.
+  const { allowed, householdId } = await requirePlus(supabase, user.id);
   if (!householdId) {
     return NextResponse.json({
       hasData: false,
@@ -59,6 +54,9 @@ export async function GET(_request: NextRequest) {
       summary: [],
       totalSent: 0,
     });
+  }
+  if (!allowed) {
+    return NextResponse.json({ error: "plus_required" }, { status: 403 });
   }
 
   // Get effectiveness data

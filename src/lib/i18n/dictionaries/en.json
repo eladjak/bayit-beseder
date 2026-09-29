@@ -233,7 +233,26 @@
    "assistant": {
     "title": "Smart Assistant",
     "subtitle": "The floating chat button shown on every screen"
+   },
+   "subscription": {
+    "title": "My subscription",
+    "subtitle": "BayitBeSeder Plus — status, renewal and cancellation"
    }
+  },
+  "subscriptionSection": {
+   "freeStatus": "You're on the free plan",
+   "plusStatus": "BayitBeSeder Plus is active",
+   "pastDueStatus": "Your last payment failed — check your payment method in Sumit",
+   "canceledStatus": "Subscription canceled",
+   "renewsOn": "Renews on",
+   "canceledOn": "Canceled on",
+   "upgradeButton": "Upgrade to Plus",
+   "upgradeError": "Couldn't open the payment page — please try again",
+   "cancelButton": "Cancel subscription",
+   "cancelConfirm": "Cancel BayitBeSeder Plus? Advanced features will end at the end of the current period.",
+   "cancelSuccess": "Subscription canceled",
+   "cancelError": "Couldn't cancel — please try again or contact us",
+   "cancelNote": "The cancellation is recorded on our side. If you still see an upcoming charge in Sumit, make sure it's canceled there too."
   },
   "assistantSection": {
    "toggleLabel": "Show assistant button",
@@ -1179,7 +1198,7 @@
   "title": "Upgrade to BayitBeSeder+",
   "cta": "Upgrade now",
   "comingSoon": "Coming soon!",
-  "fromPrice": "From ₪19/month",
+  "fromPrice": "₪19/month per household",
   "statsBlurTitle": "Full statistics",
   "statsBlurDesc": "See who does what, trends over time, and detailed household data",
   "wizardBlurTitle": "Automatic weekly planning",
@@ -1196,10 +1215,7 @@
    "achievements_full": "All 24 achievements",
    "weekly_challenges": "Weekly challenges",
    "leaderboard": "Household leaderboard",
-   "export": "CSV / PDF export",
-   "family_members": "Up to 6 household members",
-   "child_profiles": "Child profiles",
-   "parent_approval": "Parent approval"
+   "export": "CSV / PDF export"
   }
  },
  "onboardingTour": {

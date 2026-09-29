@@ -30,9 +30,6 @@ const FEATURE_I18N_KEYS: Record<GatedFeature, string> = {
   weekly_challenges: "upgrade.features.weekly_challenges",
   leaderboard: "upgrade.features.leaderboard",
   export: "upgrade.features.export",
-  family_members: "upgrade.features.family_members",
-  child_profiles: "upgrade.features.child_profiles",
-  parent_approval: "upgrade.features.parent_approval",
 };
 
 export function UpgradePrompt({
@@ -94,7 +91,7 @@ export function UpgradePrompt({
             <Sparkles className="w-3.5 h-3.5" />
             <span className="text-xs font-medium">{t("upgrade.fromPrice")}</span>
           </div>
-          <span className="text-[11px] text-gray-500 mt-0.5">בחינם ל-30 יום · ביטול בכל רגע</span>
+          <span className="text-[11px] text-gray-500 mt-0.5">19₪ לחודש למשק בית</span>
         </div>
         <a
           href="/upgrade"

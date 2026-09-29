@@ -421,7 +421,7 @@ export default function StatsPage() {
   const { members: householdMembers } = useHouseholdMembers(profile?.household_id ?? null, today);
   const { dbUnlockedCodes, hasDbData: hasAchievementsDbData } = useUserAchievements();
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const { canUse } = useSubscription();
+  const { canUse } = useSubscription(profile?.household_id ?? null);
 
   // Build category_id -> key mapping
   const categoryIdToKey = useMemo(() => {

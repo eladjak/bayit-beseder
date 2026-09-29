@@ -101,7 +101,7 @@ export default function WeeklyPage() {
 
   const { tasks, loading, createTask, updateTask, refetch } = useTasks({});
 
-  const { canUse } = useSubscription();
+  const { canUse } = useSubscription(profile?.household_id ?? null);
   const zoneConfig = useZoneConfig();
   const wizard = useWeeklyGenerator();
   const [showWizard, setShowWizard] = useState(false);
