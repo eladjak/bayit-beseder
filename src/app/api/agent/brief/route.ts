@@ -8,7 +8,7 @@ import {
   buildKindOverdueLine,
   type DailyBriefData,
 } from "@/lib/whatsapp-messages";
-import { maybeDeliverToOwner } from "@/lib/agent/deliver";
+import { deliverWhatsApp, gateDelivery } from "@/lib/agent/deliver";
 import { isTaskOverdue } from "@/lib/task-flags";
 
 /**
@@ -30,8 +30,9 @@ const querySchema = z.object({
   /** DEPRECATED / IGNORED — see module docstring above. */
   householdId: z.string().uuid().optional(),
   /**
-   * Optional delivery. "whatsapp" sends the brief to ELAD'S OWN number
-   * (env BAYIT_AGENT_WHATSAPP_TO) — never a recipient from the request.
+   * Optional delivery. "whatsapp" sends the brief to the phone of the member who
+   * created this token (opt-in `deliver_to_me` scope, two-step confirm via
+   * `confirm_token`) — never a recipient from the request.
    */
   deliver: z.literal("whatsapp").optional(),
 });
@@ -72,6 +73,9 @@ export async function GET(request: NextRequest) {
     );
   }
   const { deliver } = parsed.data;
+  const confirmToken = searchParams.get("confirm_token")?.slice(0, 200) || undefined;
+  const gate = await gateDelivery(auth, deliver, [...searchParams.keys()]);
+  if (!gate.ok) return gate.response;
   // Household is ALWAYS the one the bearer token authorizes, never the query
   // param above (which is parsed only for backward-compat, then discarded).
   const householdId = auth.householdId;
@@ -165,8 +169,14 @@ export async function GET(request: NextRequest) {
           overdueCount
         )}\n\n--- בית בסדר ---`;
 
-  // Optional delivery to Elad's own WhatsApp (recipient is env-only).
-  const delivery = await maybeDeliverToOwner(deliver, whatsappText);
+  // Optional delivery: only to the token creator's own phone, behind scope + confirm.
+  const delivery = await deliverWhatsApp({
+    auth,
+    kind: "brief",
+    text: whatsappText,
+    deliver,
+    confirmToken,
+  });
 
   return NextResponse.json(
     {
@@ -180,6 +190,9 @@ export async function GET(request: NextRequest) {
       delivery,
       meta: { householdScoped: Boolean(householdId), generatedAt: new Date().toISOString() },
     },
-    { headers: { "Cache-Control": "no-store", "X-RateLimit-Remaining": String(rl.remaining) } }
+    {
+      status: delivery.rejected ? 409 : 200,
+      headers: { "Cache-Control": "no-store", "X-RateLimit-Remaining": String(rl.remaining) },
+    }
   );
 }

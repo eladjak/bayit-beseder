@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
     origin: new URL(request.url).origin,
     authorization: request.headers.get("authorization") ?? "",
     forwardedFor: request.headers.get("x-forwarded-for"),
+    scopes: auth.scopes,
   });
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,

@@ -25,9 +25,13 @@ Claude Code:
 claude mcp add --transport http bayit https://www.bayitbeseder.com/api/mcp   --header "Authorization: Bearer <token>"
 ```
 
-MCP tools never accept a `householdId` (the token decides) and never expose the
-`deliver: "whatsapp"` option. Every tool is a thin adapter over the HTTP routes
+MCP tools never accept a `householdId` (the token decides) and never accept a
+recipient. Every tool is a thin adapter over the HTTP routes
 below (`src/lib/agent/mcp-server.ts`), so scoping and validation live in one place.
+
+Two extra tools appear **only** for tokens created with the matching opt-in scope:
+`send_to_me` (`deliver_to_me`) and `delete_task` (`delete_tasks`). See
+[Token scopes](#token-scopes-and-two-step-confirmation).
 
 Token management routes (cookie-session, household members only, used by the
 settings page): `GET/POST /api/agent-tokens`, `DELETE /api/agent-tokens/<id>`.
@@ -227,23 +231,75 @@ Security: `householdId` is required for writes and scopes every Supabase query �
 
 ---
 
+## Token scopes and two-step confirmation
+
+Every per-household token has **scopes**, chosen when the token is created in
+Settings → חיבור לסוכנים. **Scopes cannot be widened afterwards**: to change them,
+create a new token.
+
+| Scope | Default | Lets the token |
+| --- | --- | --- |
+| `read`, `write` | always | list tasks, add tasks, complete tasks, get a plan / brief / prep (nothing is sent, nothing is deleted) |
+| `deliver_to_me` | **off** | send the plan / brief / prep by WhatsApp **only to the phone of the member who created the token** |
+| `delete_tasks` | **off** | delete tasks of the token's own household |
+
+Existing tokens keep the default scopes. A request that needs a scope the token
+lacks gets **403**.
+
+**Two-step confirm** (both opt-in actions):
+
+1. Call without `confirm_token`. Nothing happens. You get a preview
+   (`preview` for delete; `whatsappText` + `delivery.requiresConfirmation` for
+   deliver) and a single-use `confirm_token` (`delivery.confirmToken` for deliver).
+2. **Show the preview to your human and ask.** Only if they say yes, repeat the
+   same call with `confirm_token`. Never confirm on your own.
+
+A confirm token is valid for **5 minutes**, works **once**, and is bound to the
+token, the action and the target (the task id, or the message kind + the
+recipient). Reusing it, letting it expire, or presenting it for a different
+target is rejected (**409**).
+
+```bash
+# 1. preview
+curl -s -X POST https://www.bayitbeseder.com/api/agent/task \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"action":"delete","taskId":"<task-uuid>"}'
+# → { requiresConfirmation:true, deleted:false, preview:{...}, confirm_token:"bbs_confirm_…" }
+# 2. only after the human said yes
+curl -s -X POST https://www.bayitbeseder.com/api/agent/task \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"action":"delete","taskId":"<task-uuid>","confirm_token":"bbs_confirm_…"}'
+# → { deleted:true, taskId, title }
+```
+
+Every preview, execution, refusal and failed attempt of these two actions is
+written to an audit log; the most recent ones are shown in the settings section.
+
+Rollout note: scopes, creator tracking, confirmations and the audit log live in
+migration `supabase/migrations/024_agent_token_scopes.sql`. Until it is applied
+every token behaves as default-scopes and both opt-in actions are unavailable.
+
 ## WhatsApp delivery
 
-> Status: **wired and live** (approved by Elad 2026-06-14). Opt-in per request.
+> Requires the opt-in `deliver_to_me` scope and a two-step confirm (above).
 
-When a request to `/api/agent/plan` (body `"deliver":"whatsapp"`) or
-`/api/agent/brief` (query `?deliver=whatsapp`) sets the flag, the server sends
-the generated `whatsappText` over WhatsApp.
+When a request to `/api/agent/plan` (body `"deliver":"whatsapp"`),
+`/api/agent/brief` or `/api/agent/prep` (query `?deliver=whatsapp`) sets the
+flag, the server sends the generated `whatsappText` over WhatsApp.
 
 **The safety line (non-negotiable):**
 
-- The recipient is **always Elad's own number**, read **exclusively** from the
-  env var `BAYIT_AGENT_WHATSAPP_TO`. It is **never** taken from the request body.
-  An agent can ask us to *deliver*, but cannot *choose the recipient* — so the
-  endpoint can never be used to spam an arbitrary number.
-- If `BAYIT_AGENT_WHATSAPP_TO` is unset, delivery **fails closed**: nothing is
-  sent, and `delivery.status` reports it. The JSON + `whatsappText` are still
-  returned, so a caller can always fall back to forwarding the text itself.
+- The recipient is **always the phone in the profile of the member who created
+  the token** (and only while that member is still in the household). It is
+  **never** taken from the request. There is no recipient parameter; a request
+  that carries a field such as `to`, `phone`, `recipient`, `member` or `userId`
+  is refused with 400. An agent can ask us to *deliver*, but cannot *choose the
+  recipient*.
+- No scope, no creator, no phone in the profile, or an unavailable confirmation
+  store: delivery **fails closed** and nothing is sent. The JSON + `whatsappText`
+  are still returned, so a caller can always forward the text itself.
+- The legacy shared `BAYIT_AGENT_KEY` (owner's key, transition period) still
+  delivers to `BAYIT_AGENT_WHATSAPP_TO` as before.
 - Transport reuses the app's existing, already-live **Green API** client
   (`src/lib/whatsapp.ts`) — the same path the daily-brief cron uses. No new
   WhatsApp integration was introduced; no WAHA.
@@ -296,6 +352,8 @@ channel — e.g. the app's pre-existing `POST /api/whatsapp/send`
 - Zod input validation on every body/query.
 - `householdId` scoping; private household data is never returned without a
   valid token, and household reads use the service-role key server-side only.
-- **WhatsApp delivery recipient is env-only** (`BAYIT_AGENT_WHATSAPP_TO`), never
-  from the request — an agent cannot choose who gets messaged. Fails closed.
-- Additive: no existing UI route or behavior is changed; `deliver` is opt-in.
+- **WhatsApp delivery** needs the `deliver_to_me` scope, goes only to the token
+  creator's own phone (never from the request), is two-step, and fails closed.
+- **Task deletion** needs the `delete_tasks` scope, is two-step, household-scoped
+  and logged.
+- Additive: `deliver` and `delete` are opt-in per token.

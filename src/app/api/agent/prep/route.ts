@@ -8,7 +8,7 @@ import { loadOrGenerateWeek } from "@/lib/meals/plan-service";
 import { rowToMeal } from "@/lib/meals/db";
 import { computeTonightPrep } from "@/lib/meals/defrost";
 import { comingSunday } from "@/lib/meals/week";
-import { maybeDeliverToOwner } from "@/lib/agent/deliver";
+import { deliverWhatsApp, gateDelivery } from "@/lib/agent/deliver";
 
 /**
  * GET /api/agent/prep?householdId=<uuid> — "מה להפשיר הערב?"
@@ -71,6 +71,9 @@ export async function GET(request: NextRequest) {
     );
   }
   const { deliver } = parsed.data;
+  const confirmToken = searchParams.get("confirm_token")?.slice(0, 200) || undefined;
+  const gate = await gateDelivery(auth, deliver, [...searchParams.keys()]);
+  if (!gate.ok) return gate.response;
   // Household is ALWAYS the one the bearer token authorizes, never the query
   // param above (which is parsed only for backward-compat, then discarded).
   const householdId = auth.householdId;
@@ -130,7 +133,13 @@ export async function GET(request: NextRequest) {
       ? (meals.find((m) => m.id === tomorrowMeal.meal_id)?.name ?? null)
       : null;
 
-    const delivery = await maybeDeliverToOwner(deliver, whatsappText);
+    const delivery = await deliverWhatsApp({
+      auth,
+      kind: "prep",
+      text: whatsappText,
+      deliver,
+      confirmToken,
+    });
 
     return NextResponse.json(
       {
@@ -140,7 +149,10 @@ export async function GET(request: NextRequest) {
         delivery,
         meta: { householdId, generatedAt: now.toISOString() },
       },
-      { headers: { "Cache-Control": "no-store", "X-RateLimit-Remaining": String(rl.remaining) } }
+      {
+        status: delivery.rejected ? 409 : 200,
+        headers: { "Cache-Control": "no-store", "X-RateLimit-Remaining": String(rl.remaining) },
+      }
     );
   } catch (e) {
     return NextResponse.json(

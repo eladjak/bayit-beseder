@@ -1289,6 +1289,25 @@
    "httpTitle": "Plain HTTP request",
    "httpHint": "Any agent that can send HTTP requests can use the token like this:",
    "docsHint": "Full interface description:",
-   "tokenPlaceholder": "<your token>"
+   "tokenPlaceholder": "<your token>",
+   "scopesTitle": "Special permissions (off by default)",
+   "scopesDefault": "By default the agent reads tasks, adds tasks, marks tasks done and asks for a plan or brief. Nothing is sent and nothing is deleted.",
+   "scopeDeliver": "Let the agent send me the plan and brief on WhatsApp",
+   "scopeDeliverWarn": "Warning: the agent can only message your own WhatsApp number (nobody else), and only after it shows you the message and you approve. Needs a WhatsApp number in your profile.",
+   "scopeDelete": "Let the agent delete tasks",
+   "scopeDeleteWarn": "Warning: deleting cannot be undone. The agent will show the task and ask for approval before every delete, and can only delete tasks of your own household.",
+   "scopesFixed": "Permissions are set when the connection is created and cannot be widened later. To change them, create a new connection.",
+   "scopeBadgeDefault": "Standard",
+   "scopeBadgeDeliver": "Send to me",
+   "scopeBadgeDelete": "Delete tasks",
+   "auditTitle": "Recent sensitive actions",
+   "auditEmpty": "No sensitive actions yet.",
+   "auditDelete": "Task delete",
+   "auditDeliver": "WhatsApp to me",
+   "auditPreview": "Preview only, not done",
+   "auditExecuted": "Done",
+   "auditDenied": "Refused, no permission",
+   "auditRejected": "Refused",
+   "auditFailed": "Failed"
   }
 }

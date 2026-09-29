@@ -174,3 +174,91 @@ describe("agent-tokens: non-member and anonymous", () => {
     expect((await del("55555555-5555-4555-8555-555555555555", HH_A)).status).toBe(401);
   });
 });
+
+describe("agent-tokens: scopes chosen at creation", () => {
+  const seedProfile = (phone: string | null) => {
+    db.tables["profiles"] = [
+      { id: USER, household_id: HH_A, display_name: "אלעד", whatsapp_phone: phone },
+    ];
+  };
+
+  it("default creation: default scopes, creator recorded, sensitive scopes OFF", async () => {
+    const res = await POST(post({ householdId: HH_A, label: "רגיל" }));
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.token.scopes).toEqual(["read", "write"]);
+    const stored = db.tables["household_agent_tokens"][0];
+    expect(stored.scopes).toEqual(["read", "write"]);
+    expect(stored.created_by).toBe(USER);
+  });
+
+  it("opt-in scopes are stored exactly as ticked, and the list shows them", async () => {
+    seedProfile("0501234567");
+    const res = await POST(
+      post({ householdId: HH_A, label: "מלא", scopes: ["deliver_to_me", "delete_tasks"] })
+    );
+    expect(res.status).toBe(201);
+    expect((await res.json()).token.scopes).toEqual(["read", "write", "deliver_to_me", "delete_tasks"]);
+    const listed = await (await GET(list(HH_A))).json();
+    expect(listed.tokens[0].scopes).toEqual(["read", "write", "deliver_to_me", "delete_tasks"]);
+  });
+
+  it("only ONE opt-in ticked => only that one", async () => {
+    const res = await POST(post({ householdId: HH_A, label: "מחיקה", scopes: ["delete_tasks"] }));
+    expect((await res.json()).token.scopes).toEqual(["read", "write", "delete_tasks"]);
+  });
+
+  it("an unknown or default-widening scope is rejected, not ignored", async () => {
+    const r1 = await POST(post({ householdId: HH_A, label: "x", scopes: ["admin"] }));
+    expect(r1.status).toBe(400);
+    const r2 = await POST(post({ householdId: HH_A, label: "x", scopes: ["*"] }));
+    expect(r2.status).toBe(400);
+    expect(db.tables["household_agent_tokens"] ?? []).toHaveLength(0);
+  });
+
+  it("deliver_to_me needs a WhatsApp number in the creator's profile", async () => {
+    seedProfile(null);
+    const res = await POST(post({ householdId: HH_A, label: "x", scopes: ["deliver_to_me"] }));
+    expect(res.status).toBe(400);
+    expect(db.tables["household_agent_tokens"] ?? []).toHaveLength(0);
+  });
+
+  it("scopes cannot be widened in place: a second POST is a NEW token, the first keeps its scopes", async () => {
+    const created = await (await POST(post({ householdId: HH_A, label: "x" }))).json();
+    const res = await POST(post({ householdId: HH_A, label: "x", scopes: ["delete_tasks"], id: created.token.id }));
+    expect(res.status).toBe(201);
+    const first = db.tables["household_agent_tokens"].find((t) => t.id === created.token.id)!;
+    expect(first.scopes).toEqual(["read", "write"]);
+  });
+
+  it("GET returns the recent sensitive-action audit for THIS household only", async () => {
+    db.tables["agent_audit_log"] = [
+      { id: "1", household_id: HH_A, action: "delete_task", outcome: "executed", token_label: "קלוד", target: "t", detail: "נמחקה: משימה", created_at: "2026-09-29T10:00:00Z" },
+      { id: "2", household_id: HH_B, action: "delete_task", outcome: "executed", token_label: "זר", target: "t", detail: "של אחר", created_at: "2026-09-29T11:00:00Z" },
+    ];
+    const body = await (await GET(list(HH_A))).json();
+    expect(body.audit).toHaveLength(1);
+    expect(body.audit[0]).toMatchObject({ action: "delete_task", outcome: "executed", tokenLabel: "קלוד" });
+    expect(JSON.stringify(body)).not.toContain("של אחר");
+  });
+
+  it("before migration 024: default creation still works, opt-in scopes answer 503, list degrades", async () => {
+    db.missingColumns = { household_agent_tokens: ["scopes", "created_by"] };
+    db.missingTables = ["agent_audit_log", "agent_confirmations"];
+    seedProfile("0501234567");
+
+    const ok = await POST(post({ householdId: HH_A, label: "ישן" }));
+    expect(ok.status).toBe(201);
+    expect((await ok.json()).token.scopes).toEqual(["read", "write"]);
+
+    const blocked = await POST(post({ householdId: HH_A, label: "חדש", scopes: ["delete_tasks"] }));
+    expect(blocked.status).toBe(503);
+    expect(db.tables["household_agent_tokens"]).toHaveLength(1);
+
+    const listed = await GET(list(HH_A));
+    expect(listed.status).toBe(200);
+    const body = await listed.json();
+    expect(body.audit).toEqual([]);
+    expect(body.tokens[0].scopes).toEqual(["read", "write"]);
+  });
+});

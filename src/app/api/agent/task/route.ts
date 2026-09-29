@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
-import { verifyAgentRequest } from "@/lib/agent/auth";
+import { verifyAgentRequest, type AgentAuthResult } from "@/lib/agent/auth";
+import { hasScope } from "@/lib/agent/scopes";
+import { CONSUME_MESSAGES, consumeConfirmation, createConfirmation } from "@/lib/agent/confirm";
+import { logAgentAudit } from "@/lib/agent/audit";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 /**
@@ -13,6 +16,8 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
  *  "תוסיף משימה: להפשיר עוף לארבע" → creates a task in BayitBeSeder
  *  "סמן משימה X כהושלמה"           → marks a task completed
  *  "מה המשימות הפתוחות?"           → returns open tasks list
+ *  "מחק את המשימה X"               → deletes a task (opt-in scope `delete_tasks`,
+ *                                     two-step: preview + confirm_token)
  *
  * Auth: Bearer <per-household token> (or the legacy BAYIT_AGENT_KEY during the
  * transition — see src/lib/agent/auth.ts). Rate-limited per IP (30/min).
@@ -88,10 +93,26 @@ const listSchema = z.object({
   limit: z.number().int().min(1).max(50).optional(),
 });
 
+const deleteSchema = z.object({
+  action: z.literal("delete"),
+  /** DEPRECATED / IGNORED — see addSchema.householdId above. */
+  householdId: z.string().uuid().optional(),
+  /** UUID of the task to delete. Must belong to the token's own household. */
+  taskId: z.string().uuid(),
+  /**
+   * Second step. Omit it to get a PREVIEW of what would be deleted plus a
+   * single-use `confirm_token` (valid 5 minutes, bound to this task and this
+   * agent token). Nothing is deleted until you call again WITH the token, and
+   * you must only do that after the user has said yes.
+   */
+  confirm_token: z.string().min(10).max(200).optional(),
+});
+
 const bodySchema = z.discriminatedUnion("action", [
   addSchema,
   completeSchema,
   listSchema,
+  deleteSchema,
 ]);
 
 // ── Route handler ─────────────────────────────────────────────────────────────
@@ -164,7 +185,126 @@ export async function POST(request: NextRequest) {
       return handleAdd(supabase, householdId, body, rl.remaining);
     case "complete":
       return handleComplete(supabase, householdId, body, rl.remaining);
+    case "delete":
+      return handleDelete(supabase, auth, householdId, body, rl.remaining);
   }
+}
+
+// ── delete (opt-in scope, two-step) ───────────────────────────────────────────
+
+async function handleDelete(
+  supabase: ReturnType<typeof createClient<Database>>,
+  auth: AgentAuthResult,
+  householdId: string,
+  body: z.infer<typeof deleteSchema>,
+  rlRemaining: number
+) {
+  const headers = { "Cache-Control": "no-store", "X-RateLimit-Remaining": String(rlRemaining) };
+  const audit = (
+    outcome: "preview" | "executed" | "denied" | "rejected" | "failed",
+    detail?: string
+  ) =>
+    logAgentAudit(supabase, {
+      householdId,
+      tokenId: auth.tokenId ?? null,
+      tokenLabel: auth.tokenLabel ?? null,
+      actorUserId: auth.createdBy ?? null,
+      action: "delete_task",
+      target: body.taskId,
+      outcome,
+      detail,
+    });
+
+  // Scope check FIRST: a token without `delete_tasks` (and the legacy key, which
+  // never has it) learns nothing about whether the task exists.
+  if (auth.via !== "token" || !auth.tokenId || !hasScope(auth.scopes, "delete_tasks")) {
+    await audit("denied", "אין לחיבור הרשאת delete_tasks");
+    return NextResponse.json(
+      {
+        error:
+          "לחיבור הזה אין הרשאת מחיקת משימות (delete_tasks). כדי לאפשר זאת צרו חיבור חדש בהגדרות וסמנו את ההרשאה.",
+      },
+      { status: 403, headers }
+    );
+  }
+
+  const { data: task } = await supabase
+    .from("tasks")
+    .select("id, title, status, due_date")
+    .eq("id", body.taskId)
+    .eq("household_id", householdId)
+    .maybeSingle();
+  if (!task) {
+    return NextResponse.json(
+      { error: "המשימה לא נמצאה בתוך משק הבית המבוקש." },
+      { status: 404, headers }
+    );
+  }
+
+  const binding = {
+    tokenId: auth.tokenId,
+    householdId,
+    action: "delete_task" as const,
+    target: task.id as string,
+  };
+
+  // Step 1: preview only.
+  if (!body.confirm_token) {
+    const created = await createConfirmation(supabase, binding);
+    if (!created.ok) {
+      return NextResponse.json({ error: CONSUME_MESSAGES.unavailable }, { status: 503, headers });
+    }
+    await audit("preview", `תצוגה מקדימה: ${task.title}`);
+    return NextResponse.json(
+      {
+        action: "delete",
+        requiresConfirmation: true,
+        deleted: false,
+        preview: {
+          id: task.id,
+          title: task.title,
+          status: task.status,
+          dueDate: task.due_date,
+        },
+        confirm_token: created.confirmToken,
+        expiresInSeconds: created.expiresInSeconds,
+        message: `לא נמחק. הציגו לאדם את המשימה "${task.title}" ושאלו אם למחוק אותה. רק אם אישר, קראו שוב עם אותו taskId ועם confirm_token.`,
+      },
+      { headers }
+    );
+  }
+
+  // Step 2: execute, but only with a valid, unused, unexpired, matching token.
+  const consumed = await consumeConfirmation(supabase, binding, body.confirm_token);
+  if (!consumed.ok) {
+    await audit("rejected", `אישור נדחה: ${consumed.reason}`);
+    return NextResponse.json(
+      { error: CONSUME_MESSAGES[consumed.reason], reason: consumed.reason },
+      { status: consumed.reason === "unavailable" ? 503 : 409, headers }
+    );
+  }
+
+  const { error } = await supabase
+    .from("tasks")
+    .delete()
+    .eq("id", task.id)
+    .eq("household_id", householdId);
+  if (error) {
+    await audit("failed", `מחיקה נכשלה: ${task.title}`);
+    return NextResponse.json({ error: "שגיאה במחיקת המשימה" }, { status: 500, headers });
+  }
+
+  await audit("executed", `נמחקה: ${task.title}`);
+  return NextResponse.json(
+    {
+      action: "delete",
+      deleted: true,
+      taskId: task.id,
+      title: task.title,
+      message: `🗑️ המשימה נמחקה: "${task.title}"`,
+    },
+    { headers }
+  );
 }
 
 // ── list ──────────────────────────────────────────────────────────────────────

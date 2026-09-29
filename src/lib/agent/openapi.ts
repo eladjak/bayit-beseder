@@ -18,7 +18,9 @@ const errorResponse = (description: string) => ({
 
 const commonErrors = {
   "401": errorResponse("Missing bearer token / חסר אסימון"),
-  "403": errorResponse("Bad token, or token authorizes no household / אסימון שגוי או ללא משק בית"),
+  "403": errorResponse(
+    "Bad token, token authorizes no household, or the token lacks the scope this action needs (deliver_to_me / delete_tasks) / אסימון שגוי, ללא משק בית, או ללא ההרשאה הנדרשת"
+  ),
   "429": errorResponse("Rate limited / יותר מדי בקשות"),
   "503": errorResponse("Auth backend temporarily unavailable / שירות האימות אינו זמין"),
 };
@@ -34,14 +36,19 @@ export function buildAgentOpenApi(origin: string = AGENT_API_ORIGIN) {
         "Every request needs a per-household bearer token created by a household member in the app (Settings → חיבור לסוכנים). " +
         "The token alone decides which household is acted on; any `householdId` in a request is ignored. " +
         "The same capabilities are also available as an MCP server at " +
-        `${origin}/api/mcp (Streamable HTTP, same bearer token).`,
-      version: "1.1.0",
+        `${origin}/api/mcp (Streamable HTTP, same bearer token). ` +
+        "Tokens carry scopes chosen at creation. Default: read + add/complete tasks. Opt-in (unchecked by default): " +
+        "`deliver_to_me` (send the plan/brief/prep by WhatsApp ONLY to the phone of the member who created the token) and " +
+        "`delete_tasks`. Both are two-step: the first call returns a preview and a single-use `confirm_token` (5 minutes, bound to the token, action and target); " +
+        "the action happens only on a second call carrying it, and an agent must ask its human before making that call. " +
+        "A call without the needed scope returns 403.",
+      version: "1.2.0",
       license: { name: "MIT", identifier: "MIT" },
     },
     servers: [{ url: origin }],
     security: [{ householdToken: [] }],
     tags: [
-      { name: "tasks", description: "Read, add and complete tasks" },
+      { name: "tasks", description: "Read, add and complete tasks (delete with the opt-in delete_tasks scope)" },
       { name: "planning", description: "Weekly plan, daily brief, meal prep" },
       { name: "meta", description: "Self-description" },
     ],
@@ -66,7 +73,7 @@ export function buildAgentOpenApi(origin: string = AGENT_API_ORIGIN) {
           tags: ["tasks"],
           summary: "List, add or complete a task",
           description:
-            "`action` selects the operation: `list` returns tasks (default open ones), `add` creates a task (201), `complete` marks a pending/in-progress task completed.",
+            "`action` selects the operation: `list` returns tasks (default open ones), `add` creates a task (201), `complete` marks a pending/in-progress task completed, `delete` deletes a task (needs the delete_tasks scope; two-step: without confirm_token you only get a preview and a confirm_token, nothing is deleted).",
           requestBody: {
             required: true,
             content: {
@@ -84,7 +91,7 @@ export function buildAgentOpenApi(origin: string = AGENT_API_ORIGIN) {
             },
             "400": errorResponse("Invalid parameters / פרמטרים לא תקינים"),
             "404": errorResponse("Task not found in this household"),
-            "409": errorResponse("Task already completed or skipped"),
+            "409": errorResponse("Task already completed or skipped, or (action=delete) the confirm_token was used, expired or does not match"),
             ...commonErrors,
           },
         },
@@ -102,10 +109,12 @@ export function buildAgentOpenApi(origin: string = AGENT_API_ORIGIN) {
           },
           responses: {
             "200": {
-              description: "{ plan, whatsappText, delivery }",
+              description:
+                "{ plan, whatsappText, delivery }. With deliver=whatsapp and no confirm_token, delivery.requiresConfirmation is true and delivery.confirmToken is set: nothing was sent.",
               content: { "application/json": { schema: { type: "object" } } },
             },
-            "400": errorResponse("Invalid parameters"),
+            "400": errorResponse("Invalid parameters, or the request names a recipient (not allowed)"),
+            "409": errorResponse("deliver=whatsapp: confirm_token used, expired or mismatched, or no phone in the creator's profile"),
             ...commonErrors,
           },
         },
@@ -121,8 +130,16 @@ export function buildAgentOpenApi(origin: string = AGENT_API_ORIGIN) {
               in: "query",
               required: false,
               description:
-                "Reserved. `whatsapp` sends the text to the OWNER's number only (server-configured), never to a caller-chosen recipient.",
+                "`whatsapp` sends the text to the phone of the member who created the token, never to a caller-chosen recipient. Needs the deliver_to_me scope (else 403). Two-step: without confirm_token you get a preview and a confirm_token, nothing is sent.",
               schema: { type: "string", enum: ["whatsapp"] },
+            },
+            {
+              name: "confirm_token",
+              in: "query",
+              required: false,
+              description:
+                "Second step of deliver=whatsapp: the single-use token from the preview. Only send it after your human approved the message.",
+              schema: { type: "string" },
             },
           ],
           responses: {
@@ -196,6 +213,17 @@ export function buildAgentOpenApi(origin: string = AGENT_API_ORIGIN) {
                 note: { type: "string", maxLength: 500 },
               },
             },
+            {
+              type: "object",
+              required: ["action", "taskId"],
+              description:
+                "Needs the delete_tasks scope. Call once without confirm_token to get a preview and a confirm_token; call again WITH it (only after your human said yes) to delete.",
+              properties: {
+                action: { const: "delete" },
+                taskId: { type: "string", format: "uuid" },
+                confirm_token: { type: "string" },
+              },
+            },
           ],
         },
         PlanRequest: {
@@ -204,6 +232,13 @@ export function buildAgentOpenApi(origin: string = AGENT_API_ORIGIN) {
             weekStart: { type: "string", pattern: "^\\d{4}-\\d{2}-\\d{2}$" },
             zoneMode: { type: "boolean" },
             members: { type: "array", maxItems: 10, items: { type: "string", format: "uuid" } },
+            deliver: {
+              type: "string",
+              enum: ["whatsapp"],
+              description:
+                "Needs the deliver_to_me scope. Sends only to the token creator's own phone. Two-step with confirm_token. Any field naming a recipient is rejected with 400.",
+            },
+            confirm_token: { type: "string" },
           },
         },
       },

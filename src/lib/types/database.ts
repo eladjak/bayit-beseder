@@ -1025,6 +1025,9 @@ export type Database = {
           label: string | null;
           created_at: string;
           revoked_at: string | null;
+          /** Migration 024. Absent (treated as default scopes) until applied. */
+          scopes?: string[];
+          created_by?: string | null;
         };
         Insert: {
           id?: string;
@@ -1033,6 +1036,8 @@ export type Database = {
           label?: string | null;
           created_at?: string;
           revoked_at?: string | null;
+          scopes?: string[];
+          created_by?: string | null;
         };
         Update: {
           id?: string;
@@ -1041,6 +1046,8 @@ export type Database = {
           label?: string | null;
           created_at?: string;
           revoked_at?: string | null;
+          scopes?: string[];
+          created_by?: string | null;
         };
         Relationships: [
           {
@@ -1051,6 +1058,80 @@ export type Database = {
             referencedColumns: ["id"];
           },
         ];
+      };
+      // Migration 024: single-use confirm tokens for sensitive agent actions.
+      agent_confirmations: {
+        Row: {
+          confirm_hash: string;
+          token_id: string;
+          household_id: string;
+          action: string;
+          target: string;
+          created_at: string;
+          expires_at: string;
+          used_at: string | null;
+        };
+        Insert: {
+          confirm_hash: string;
+          token_id: string;
+          household_id: string;
+          action: string;
+          target: string;
+          created_at?: string;
+          expires_at: string;
+          used_at?: string | null;
+        };
+        Update: {
+          confirm_hash?: string;
+          token_id?: string;
+          household_id?: string;
+          action?: string;
+          target?: string;
+          created_at?: string;
+          expires_at?: string;
+          used_at?: string | null;
+        };
+        Relationships: [];
+      };
+      // Migration 024: audit trail of sensitive agent actions.
+      agent_audit_log: {
+        Row: {
+          id: string;
+          household_id: string;
+          token_id: string | null;
+          token_label: string | null;
+          actor_user_id: string | null;
+          action: string;
+          target: string | null;
+          outcome: string;
+          detail: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          token_id?: string | null;
+          token_label?: string | null;
+          actor_user_id?: string | null;
+          action: string;
+          target?: string | null;
+          outcome: string;
+          detail?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          household_id?: string;
+          token_id?: string | null;
+          token_label?: string | null;
+          actor_user_id?: string | null;
+          action?: string;
+          target?: string | null;
+          outcome?: string;
+          detail?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
       };
     };
     Views: {

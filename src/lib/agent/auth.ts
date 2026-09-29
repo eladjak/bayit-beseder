@@ -60,6 +60,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
 import { resolveHouseholdForToken } from "@/lib/agent/tokens";
+import { DEFAULT_SCOPES, type AgentScope } from "@/lib/agent/scopes";
 
 export interface AgentAuthResult {
   ok: boolean;
@@ -75,6 +76,22 @@ export interface AgentAuthResult {
    * any household-scoped operation", never as "all households".
    */
   householdId: string | null;
+  /**
+   * How the caller authenticated. `legacy` is the shared BAYIT_AGENT_KEY
+   * (Elad's own key): it never gets opt-in scopes and has no creator.
+   */
+  via?: "token" | "legacy";
+  /** Row id of the per-household token, when `via === "token"`. */
+  tokenId?: string | null;
+  tokenLabel?: string | null;
+  /**
+   * What this credential may do. Per-household tokens carry the scopes chosen
+   * at creation (DEFAULT when the column is absent). The legacy key always has
+   * exactly the default scopes.
+   */
+  scopes?: readonly AgentScope[];
+  /** Member who created the token: "me" for `deliver_to_me`. Null if unknown. */
+  createdBy?: string | null;
 }
 
 /** Read the configured legacy agent key (BAYIT_AGENT_KEY preferred, AGENT_API_TOKEN alias). */
@@ -117,7 +134,7 @@ function safeEqual(a: string, b: string): boolean {
  * server is not configured to reach the database (e.g. missing env in a
  * misconfigured deploy). Callers fall back to legacy-key-only auth in that
  * case rather than crashing. */
-function getServiceClient() {
+export function getServiceClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceKey) return null;
@@ -176,7 +193,16 @@ export async function verifyAgentRequest(request: Request): Promise<AgentAuthRes
   if (supabase) {
     const resolved = await resolveHouseholdForToken(supabase, presented);
     if (resolved.status === "ok") {
-      return { ok: true, status: 200, householdId: resolved.householdId };
+      return {
+        ok: true,
+        status: 200,
+        householdId: resolved.householdId,
+        via: "token",
+        tokenId: resolved.tokenId,
+        tokenLabel: resolved.label,
+        scopes: resolved.scopes,
+        createdBy: resolved.createdBy,
+      };
     }
     if (resolved.status === "error" && !legacyMatches) {
       // A DB/network failure is NOT the same thing as "this token is
@@ -214,7 +240,15 @@ export async function verifyAgentRequest(request: Request): Promise<AgentAuthRes
           "scripts/issue-agent-token.mjs and retire this key."
       );
     }
-    return { ok: true, status: 200, householdId: pinnedHouseholdId };
+    return {
+      ok: true,
+      status: 200,
+      householdId: pinnedHouseholdId,
+      via: "legacy",
+      tokenId: null,
+      scopes: DEFAULT_SCOPES,
+      createdBy: null,
+    };
   }
 
   return { ok: false, status: 403, error: "אסימון הרשאה שגוי.", householdId: null };
