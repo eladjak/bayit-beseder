@@ -22,6 +22,14 @@
 - https://www.bayitbeseder.com/privacy — privacy policy
 - https://www.bayitbeseder.com/terms — terms of service
 
+## For AI agents
+
+- Connect an agent to a household: a household member creates a token in the app (Settings → חיבור לסוכנים; shown once, revocable).
+- MCP server (Streamable HTTP, Bearer token): https://www.bayitbeseder.com/api/mcp
+- OpenAPI 3.1 description: https://www.bayitbeseder.com/api/agent/openapi.json
+- Docs: https://github.com/eladjak/bayit-beseder/blob/master/docs/AGENT-API.md
+- Tools: list_tasks, add_task, complete_task, weekly_plan, daily_brief, tonight_prep. A token only ever acts on its own household.
+
 ## Facts
 
 - Language: Hebrew (RTL)

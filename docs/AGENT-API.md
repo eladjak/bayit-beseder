@@ -10,6 +10,30 @@ Solis / any Claude / OpenClaw) command the app by voice or text — e.g. *"תכ�
 
 ---
 
+## Connect an agent (start here)
+
+| What | Where |
+|------|-------|
+| **Get a token** | In the app: **Settings → חיבור לסוכנים**. A household member creates a token with a label (e.g. "קלוד"); the raw token is shown **once**. Tokens can be listed (masked) and revoked in the same place. Max 10 active tokens per household. |
+| **MCP server** (Claude & other MCP clients) | `https://www.bayitbeseder.com/api/mcp` — Streamable HTTP, stateless, same bearer token. Tools: `list_tasks`, `add_task`, `complete_task`, `weekly_plan`, `daily_brief`, `tonight_prep`. |
+| **OpenAPI 3.1** | `https://www.bayitbeseder.com/api/agent/openapi.json` (public, no token). |
+| **Agent summary** | `https://www.bayitbeseder.com/llms.txt` |
+
+Claude Code:
+
+```bash
+claude mcp add --transport http bayit https://www.bayitbeseder.com/api/mcp   --header "Authorization: Bearer <token>"
+```
+
+MCP tools never accept a `householdId` (the token decides) and never expose the
+`deliver: "whatsapp"` option. Every tool is a thin adapter over the HTTP routes
+below (`src/lib/agent/mcp-server.ts`), so scoping and validation live in one place.
+
+Token management routes (cookie-session, household members only, used by the
+settings page): `GET/POST /api/agent-tokens`, `DELETE /api/agent-tokens/<id>`.
+
+---
+
 ## Authentication
 
 > **2026-09-27: per-household tokens.** See

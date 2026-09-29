@@ -131,3 +131,77 @@ export async function resolveHouseholdForToken(
 
   return { status: "ok", householdId: data.household_id as string };
 }
+
+// ── Self-serve management (settings page → "חיבור לסוכנים") ─────────────────
+//
+// These helpers back the logged-in-member UI. They take a service-role client
+// and a householdId that the CALLER has already proven the user belongs to
+// (see src/lib/agent/token-access.ts). Hashing/issuing/revoking stay in the
+// functions above; nothing here reimplements them.
+
+/** Max ACTIVE (non-revoked) tokens per household. */
+export const MAX_ACTIVE_TOKENS_PER_HOUSEHOLD = 10;
+
+/** Label length cap (also enforced by the API's zod schema). */
+export const MAX_TOKEN_LABEL_LENGTH = 60;
+
+/** What the UI is allowed to see about a token. Never the hash, never the raw value. */
+export interface TokenSummary {
+  id: string;
+  label: string | null;
+  createdAt: string;
+  /** Constant prefix + bullets: the raw token is not recoverable from the hash. */
+  maskedPrefix: string;
+}
+
+export const MASKED_TOKEN_PREFIX = `${TOKEN_PREFIX}••••••••`;
+
+/** List a household's ACTIVE tokens, newest first. */
+export async function listActiveHouseholdTokens(
+  supabase: AgentTokensClient,
+  householdId: string
+): Promise<TokenSummary[]> {
+  const { data, error } = await supabase
+    .from("household_agent_tokens")
+    .select("id, label, created_at")
+    .eq("household_id", householdId)
+    .is("revoked_at", null)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to list agent tokens: ${error.message}`);
+  }
+  return (data ?? []).map((row) => ({
+    id: row.id as string,
+    label: (row.label as string | null) ?? null,
+    createdAt: row.created_at as string,
+    maskedPrefix: MASKED_TOKEN_PREFIX,
+  }));
+}
+
+/**
+ * Revoke a token, but ONLY if it is an active token of `householdId`. Returns
+ * false when there is no such token (unknown id, another household's id, or
+ * already revoked) so the API can answer 404 without revealing which.
+ */
+export async function revokeTokenInHousehold(
+  supabase: AgentTokensClient,
+  householdId: string,
+  tokenId: string
+): Promise<boolean> {
+  const { data, error } = await supabase
+    .from("household_agent_tokens")
+    .select("id")
+    .eq("id", tokenId)
+    .eq("household_id", householdId)
+    .is("revoked_at", null)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to look up agent token: ${error.message}`);
+  }
+  if (!data) return false;
+
+  await revokeHouseholdToken(supabase, tokenId);
+  return true;
+}

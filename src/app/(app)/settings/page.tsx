@@ -30,6 +30,7 @@ import { AppearanceSettings, WhatsAppSettings } from "@/components/settings/appe
 import { DangerZone } from "@/components/settings/danger-zone";
 import { MembersSection } from "@/components/settings/members-section";
 import { SubscriptionSection } from "@/components/settings/subscription-section";
+import { AgentConnectSection } from "@/components/settings/agent-connect-section";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -546,6 +547,16 @@ export default function SettingsPage() {
           defaultOpen
         >
           <SubscriptionSection />
+        </CollapsibleSection>
+
+        {/* Agent connections: per-household tokens for Claude / other agents. Closed by default. */}
+        <CollapsibleSection
+          id="agents"
+          icon={<Bot className="w-4 h-4" />}
+          title={t("settings.groups.agents.title")}
+          subtitle={t("settings.groups.agents.subtitle")}
+        >
+          <AgentConnectSection />
         </CollapsibleSection>
 
         {/* Emergency Page Link — kept as its own always-visible card, not
