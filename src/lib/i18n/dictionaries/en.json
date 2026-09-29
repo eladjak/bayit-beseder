@@ -237,6 +237,10 @@
    "subscription": {
     "title": "My subscription",
     "subtitle": "BayitBeSeder Plus — status, renewal and cancellation"
+   },
+   "agents": {
+    "title": "Agent connections",
+    "subtitle": "Let Claude or another agent help you at home"
    }
   },
   "subscriptionSection": {
@@ -1255,5 +1259,36 @@
   "prev": "Back",
   "next": "Next",
   "progressLabel": "Step {current} of {total}"
- }
+ },
+  "agentSection": {
+   "intro": "An agent connection lets a digital assistant (for example Claude) see your household's tasks, add tasks, mark them done, and ask for a weekly plan or a daily brief. It cannot see any other household, and you can revoke it at any moment.",
+   "labelField": "Connection name",
+   "labelPlaceholder": "e.g. Claude, Kami",
+   "createButton": "Create connection",
+   "creating": "Creating…",
+   "loading": "Loading connections…",
+   "empty": "No connections yet. Create the first one to connect an agent.",
+   "loadError": "We could not load the connections.",
+   "retry": "Try again",
+   "createError": "We could not create the connection. Please try again.",
+   "limitReached": "You reached the maximum of active connections. Revoke an old one to create a new one.",
+   "activeCount": "active connections",
+   "createdAt": "Created",
+   "revoke": "Revoke",
+   "revokeConfirm": "Revoke this connection? The agent using it loses access immediately.",
+   "revokeSuccess": "Connection revoked.",
+   "revokeError": "We could not revoke the connection.",
+   "newTitle": "Connection created",
+   "newWarning": "Copy the token now. It is shown only once and is not stored on our side, so we cannot show it again. Anyone holding it can act for your household.",
+   "copy": "Copy",
+   "copied": "Copied",
+   "dismiss": "I copied and saved it, close",
+   "howToTitle": "How to connect",
+   "claudeTitle": "Claude (Claude Code)",
+   "claudeHint": "Run in a terminal, replacing the token with the value you copied:",
+   "httpTitle": "Plain HTTP request",
+   "httpHint": "Any agent that can send HTTP requests can use the token like this:",
+   "docsHint": "Full interface description:",
+   "tokenPlaceholder": "<your token>"
+  }
 }
