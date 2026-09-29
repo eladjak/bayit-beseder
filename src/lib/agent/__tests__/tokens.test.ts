@@ -113,9 +113,11 @@ describe("resolveHouseholdForToken", () => {
     const fake = fakeSupabase([
       { id: "t1", household_id: "household-a", token_hash: hashToken(raw), revoked_at: null },
     ]);
-    await expect(resolveHouseholdForToken(fake.client, raw)).resolves.toEqual({
+    await expect(resolveHouseholdForToken(fake.client, raw)).resolves.toMatchObject({
       status: "ok",
       householdId: "household-a",
+      scopes: ["read", "write"],
+      createdBy: null,
     });
   });
 
@@ -148,11 +150,11 @@ describe("resolveHouseholdForToken", () => {
       { id: "t1", household_id: "household-a", token_hash: hashToken(rawA), revoked_at: null },
       { id: "t2", household_id: "household-b", token_hash: hashToken(rawB), revoked_at: null },
     ]);
-    await expect(resolveHouseholdForToken(fake.client, rawA)).resolves.toEqual({
+    await expect(resolveHouseholdForToken(fake.client, rawA)).resolves.toMatchObject({
       status: "ok",
       householdId: "household-a",
     });
-    await expect(resolveHouseholdForToken(fake.client, rawB)).resolves.toEqual({
+    await expect(resolveHouseholdForToken(fake.client, rawB)).resolves.toMatchObject({
       status: "ok",
       householdId: "household-b",
     });

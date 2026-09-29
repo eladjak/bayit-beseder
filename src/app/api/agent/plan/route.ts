@@ -6,7 +6,7 @@ import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { generateWeekPlan } from "@/lib/weekly-generator";
 import type { TaskRow } from "@/lib/types/database";
 import { buildPlanSummary, buildPlanWhatsAppText } from "@/lib/agent/plan-format";
-import { maybeDeliverToOwner } from "@/lib/agent/deliver";
+import { deliverWhatsApp, gateDelivery } from "@/lib/agent/deliver";
 
 /**
  * POST /api/agent/plan
@@ -39,11 +39,14 @@ const bodySchema = z.object({
   zoneMode: z.boolean().optional(),
   members: z.array(z.string().uuid()).max(10).optional(),
   /**
-   * Optional delivery. When "whatsapp", the generated whatsappText is sent to
-   * ELAD'S OWN number (from env BAYIT_AGENT_WHATSAPP_TO) — never a recipient
-   * from this body. Omit to just receive the text and forward it yourself.
+   * Optional delivery. "whatsapp" sends the text to the phone of the member who
+   * created this token, and only with the opt-in `deliver_to_me` scope and a
+   * two-step confirm (first call = preview + confirm_token). The recipient is
+   * never taken from this body; a body naming one is rejected.
    */
   deliver: z.literal("whatsapp").optional(),
+  /** Second step of deliver: the single-use token returned by the preview. */
+  confirm_token: z.string().min(10).max(200).optional(),
 });
 
 /** Compute the Sunday of the week containing `from` (Israeli week starts Sunday). */
@@ -100,7 +103,14 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
-  const { weekStart, zoneMode, members, deliver } = parsed.data;
+  const { weekStart, zoneMode, members, deliver, confirm_token } = parsed.data;
+
+  const gate = await gateDelivery(
+    auth,
+    deliver,
+    raw && typeof raw === "object" ? Object.keys(raw as object) : []
+  );
+  if (!gate.ok) return gate.response;
 
   // 4. Resolve week start
   const weekStartDate = weekStart
@@ -164,8 +174,14 @@ export async function POST(request: NextRequest) {
   const summary = buildPlanSummary(plan, nameMap);
   const whatsappText = buildPlanWhatsAppText(summary);
 
-  // 8. Optional delivery to Elad's own WhatsApp (recipient is env-only).
-  const delivery = await maybeDeliverToOwner(deliver, whatsappText);
+  // 8. Optional delivery: only to the token creator's own phone, behind scope + confirm.
+  const delivery = await deliverWhatsApp({
+    auth,
+    kind: "plan",
+    text: whatsappText,
+    deliver,
+    confirmToken: confirm_token,
+  });
 
   return NextResponse.json(
     {
@@ -179,6 +195,7 @@ export async function POST(request: NextRequest) {
       },
     },
     {
+      status: delivery.rejected ? 409 : 200,
       headers: {
         "Cache-Control": "no-store",
         "X-RateLimit-Remaining": String(rl.remaining),

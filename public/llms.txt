@@ -29,6 +29,7 @@
 - OpenAPI 3.1 description: https://www.bayitbeseder.com/api/agent/openapi.json
 - Docs: https://github.com/eladjak/bayit-beseder/blob/master/docs/AGENT-API.md
 - Tools: list_tasks, add_task, complete_task, weekly_plan, daily_brief, tonight_prep. A token only ever acts on its own household.
+- Opt-in scopes, unchecked by default and fixed when the token is created: `deliver_to_me` (tool send_to_me: WhatsApp the plan/brief/prep ONLY to the phone of the member who created the token) and `delete_tasks` (tool delete_task). Both are two-step: the first call returns a preview and a single-use confirm_token (5 minutes); the agent must ask its human before making the second call. Every sensitive action is logged and shown in the app.
 
 ## Facts
 

@@ -66,7 +66,8 @@ export async function GET(request: Request) {
           weekStart: "string YYYY-MM-DD (אופציונלי) — תאריך תחילת השבוע. ברירת מחדל: יום ראשון הקרוב.",
           zoneMode: "boolean (אופציונלי) — תזמון מבוסס-אזורים (קיבוץ משימות לפי חדרי הבית).",
           members: "string[] (אופציונלי) — מזהי בני הבית. נגזר מ-householdId אם לא סופק.",
-          deliver: "\"whatsapp\" (אופציונלי) — אם מצוין, התוכנית תישלח ב-WhatsApp לאלעד בלבד (הנמען מהשרת, לא מהבקשה).",
+          deliver: "\"whatsapp\" (אופציונלי, דורש הרשאת deliver_to_me) — שולח ב-WhatsApp רק למספר של מי שיצר את החיבור, בשני שלבים: קריאה ראשונה מחזירה תצוגה מקדימה ו-confirm_token, קריאה שנייה עם confirm_token שולחת. הנמען אף פעם לא מהבקשה.",
+          confirm_token: "string (אופציונלי) — קוד האישור מהתצוגה המקדימה של deliver, חד-פעמי, 5 דקות.",
         },
         returns:
           "{ plan: PlanSummary, whatsappText: string, delivery } — whatsappText מוכן להעברה. delivery מדווח אם נשלח בפועל.",
@@ -79,7 +80,7 @@ export async function GET(request: Request) {
           "סיכום היום: המשימות הפתוחות להיום, מי משויך, כמה משימות באיחור, ומצב הרצף (streak) — כ-JSON + טקסט מוכן.",
         params: {
           householdId: "מיושן / מתעלמים ממנו — משק הבית נקבע לפי הטוקן עצמו.",
-          deliver: "\"whatsapp\" (אופציונלי) — query param. אם מצוין, הסיכום יישלח ב-WhatsApp לאלעד בלבד.",
+          deliver: "\"whatsapp\" (אופציונלי, דורש הרשאת deliver_to_me) — query param. שליחה למספר של מי שיצר את החיבור בלבד, בשני שלבים עם confirm_token (query param).",
         },
         returns: "{ date, tasks[], overdueCount, streak, whatsappText, delivery }",
       },
@@ -90,7 +91,7 @@ export async function GET(request: Request) {
         summary:
           "קריאה, הוספה, או השלמה של משימה. action='list' מחזיר משימות פתוחות; action='add' מוסיף משימה חדשה; action='complete' מסמן משימה כהושלמת.",
         params: {
-          action: "\"list\" | \"add\" | \"complete\" — (חובה)",
+          action: "\"list\" | \"add\" | \"complete\" | \"delete\" — (חובה). delete דורש הרשאת delete_tasks ופועל בשני שלבים (תצוגה מקדימה, ואז קריאה עם confirm_token).",
           householdId:
             "מיושן / מתעלמים ממנו — משק הבית נקבע לפי הטוקן עצמו, לא לפי שדה זה.",
           title: "string — כותרת המשימה (חובה ל-add). דוגמה: \"להפשיר עוף לארבע\".",
@@ -121,7 +122,7 @@ export async function GET(request: Request) {
       },
     ],
     sendChannel: {
-      note: "שליחה אופציונלית: הוסיפו deliver=\"whatsapp\" כדי שהשרת ישלח את הטקסט ל-WhatsApp של אלעד בלבד (הנמען נקבע ב-env BAYIT_AGENT_WHATSAPP_TO, לעולם לא מגוף הבקשה). ללא deliver — קחו את whatsappText והעבירו אותו בעצמכם.",
+      note: "שליחה אופציונלית: רק לחיבור שנוצר עם הרשאת deliver_to_me, ורק למספר הוואטסאפ של מי שיצר אותו (אי אפשר לבחור נמען; בקשה שמציינת נמען נדחית). השליחה דו-שלבית: הוסיפו deliver=\"whatsapp\" וקבלו תצוגה מקדימה ו-confirm_token, הציגו לאדם, ורק אם אישר קראו שוב עם confirm_token. ללא deliver — קחו את whatsappText והעבירו אותו בעצמכם.",
     },
   });
 }

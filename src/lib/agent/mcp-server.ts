@@ -8,9 +8,13 @@
  * The household is always resolved from the bearer token by the route;
  * no tool accepts a `householdId`, and none forwards one.
  *
- * Deliberately NOT exposed: the `deliver: "whatsapp"` option. That sends a
- * message to a person (the owner's number) and must never be triggerable by a
- * household's agent via MCP.
+ * Sensitive tools (`delete_task`, `send_to_me`) exist only for tokens whose
+ * creator ticked the matching opt-in scope, and each is two-step: the first call
+ * returns a preview and a single-use `confirm_token`; nothing happens until the
+ * agent calls again WITH it, after asking its human. `send_to_me` can only ever
+ * message the phone of the member who created the token: there is no recipient
+ * argument. The scope and confirm are enforced by the route handlers, not here,
+ * so a caller that bypasses MCP gets exactly the same answer.
  */
 import { NextRequest } from "next/server";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -19,6 +23,7 @@ import { POST as taskRoute } from "@/app/api/agent/task/route";
 import { POST as planRoute } from "@/app/api/agent/plan/route";
 import { GET as briefRoute } from "@/app/api/agent/brief/route";
 import { GET as prepRoute } from "@/app/api/agent/prep/route";
+import { hasScope, type AgentScope } from "@/lib/agent/scopes";
 
 export const MCP_SERVER_INFO = { name: "bayit-beseder", version: "1.0.0" } as const;
 
@@ -29,6 +34,8 @@ export interface McpCallContext {
   authorization: string;
   /** Caller IP (x-forwarded-for) so per-IP rate limits stay per-caller. */
   forwardedFor: string | null;
+  /** The token's scopes; decides which sensitive tools are offered. Default scopes if omitted. */
+  scopes?: readonly AgentScope[];
 }
 
 type RouteHandler = (req: NextRequest) => Promise<Response>;
@@ -187,6 +194,76 @@ export function createBayitMcpServer(ctx: McpCallContext): McpServer {
     },
     async () => invoke(prepRoute, buildRequest(ctx, "GET", "/api/agent/prep"))
   );
+
+  if (hasScope(ctx.scopes, "delete_tasks")) {
+    server.registerTool(
+      "delete_task",
+      {
+        title: "מחיקת משימה / Delete a task",
+        description:
+          "מוחק משימה של משק הבית (בלתי הפיך). דו-שלבי: קריאה ראשונה בלי confirm_token מחזירה רק תצוגה מקדימה וקוד אישור; לא נמחק דבר. חובה להציג את המשימה לאדם ולשאול אם למחוק, ורק אם אישר לקרוא שוב עם confirm_token. לעולם אל תאשרו בעצמכם. / Deletes a household task (irreversible). Two-step: the first call without confirm_token only returns a preview and a confirm_token; nothing is deleted. You MUST show the task to your human and ask before calling again with the confirm_token. Never confirm on your own.",
+        inputSchema: {
+          taskId: z.string().uuid().describe("מזהה המשימה (מ-list_tasks) / Task id from list_tasks"),
+          confirm_token: z
+            .string()
+            .min(10)
+            .max(200)
+            .optional()
+            .describe("קוד האישור מהקריאה הראשונה, רק אחרי שהאדם אישר / From the preview call, only after the human said yes"),
+        },
+        annotations: { destructiveHint: true },
+      },
+      async ({ taskId, confirm_token }) =>
+        invoke(
+          taskRoute,
+          buildRequest(ctx, "POST", "/api/agent/task", {
+            action: "delete",
+            taskId,
+            confirm_token,
+          })
+        )
+    );
+  }
+
+  if (hasScope(ctx.scopes, "deliver_to_me")) {
+    server.registerTool(
+      "send_to_me",
+      {
+        title: "שליחה אליי בוואטסאפ / Send to me on WhatsApp",
+        description:
+          "שולח את התוכנית השבועית / סיכום היום / הכנת הערב בוואטסאפ, אך ורק למספר של מי שיצר את החיבור (אין אפשרות לבחור נמען). דו-שלבי: קריאה ראשונה בלי confirm_token מחזירה תצוגה מקדימה (whatsappText) וקוד אישור; לא נשלח דבר. חובה להציג את ההודעה לאדם ולשאול אם לשלוח, ורק אם אישר לקרוא שוב עם אותם פרמטרים ועם confirm_token. לעולם אל תאשרו בעצמכם. / Sends the weekly plan, daily brief or tonight's prep by WhatsApp, ONLY to the phone of the member who created this connection (you cannot choose a recipient). Two-step: the first call without confirm_token returns a preview (whatsappText) and a confirm_token; nothing is sent. You MUST show the message to your human and ask before calling again with the same arguments plus confirm_token. Never confirm on your own.",
+        inputSchema: {
+          what: z.enum(["plan", "brief", "prep"]).describe("מה לשלוח: plan / brief / prep / What to send"),
+          weekStart: isoDate.optional().describe("רק ל-plan: תחילת השבוע YYYY-MM-DD / plan only: week start"),
+          confirm_token: z
+            .string()
+            .min(10)
+            .max(200)
+            .optional()
+            .describe("קוד האישור מהקריאה הראשונה, רק אחרי שהאדם אישר / From the preview call, only after the human said yes"),
+        },
+        annotations: { openWorldHint: true },
+      },
+      async ({ what, weekStart, confirm_token }) => {
+        if (what === "plan") {
+          return invoke(
+            planRoute,
+            buildRequest(ctx, "POST", "/api/agent/plan", {
+              weekStart,
+              deliver: "whatsapp",
+              confirm_token,
+            })
+          );
+        }
+        const qs = new URLSearchParams({ deliver: "whatsapp" });
+        if (confirm_token) qs.set("confirm_token", confirm_token);
+        return invoke(
+          what === "brief" ? briefRoute : prepRoute,
+          buildRequest(ctx, "GET", `/api/agent/${what}?${qs.toString()}`)
+        );
+      }
+    );
+  }
 
   return server;
 }

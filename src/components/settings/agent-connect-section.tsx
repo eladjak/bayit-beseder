@@ -22,6 +22,17 @@ interface TokenRow {
   label: string | null;
   createdAt: string;
   maskedPrefix: string;
+  /** Absent on older responses: treated as the default scopes. */
+  scopes?: string[];
+}
+
+interface AuditRow {
+  id: string;
+  action: "delete_task" | "deliver_to_me";
+  outcome: "preview" | "executed" | "denied" | "rejected" | "failed";
+  tokenLabel: string | null;
+  detail: string | null;
+  createdAt: string;
 }
 
 interface CreatedToken {
@@ -81,6 +92,10 @@ export function AgentConnectSection() {
   const householdId = profile?.household_id ?? null;
 
   const [tokens, setTokens] = useState<TokenRow[] | null>(null);
+  const [audit, setAudit] = useState<AuditRow[]>([]);
+  // Opt-in scopes: unchecked unless the member deliberately ticks them.
+  const [scopeDeliver, setScopeDeliver] = useState(false);
+  const [scopeDelete, setScopeDelete] = useState(false);
   const [max, setMax] = useState(10);
   const [loadError, setLoadError] = useState(false);
   const [label, setLabel] = useState("");
@@ -105,6 +120,7 @@ export function AgentConnectSection() {
       if (!res.ok) throw new Error(String(res.status));
       const data = await res.json();
       setTokens(data.tokens as TokenRow[]);
+      setAudit(Array.isArray(data.audit) ? (data.audit as AuditRow[]) : []);
       if (typeof data.max === "number") setMax(data.max);
     } catch {
       setLoadError(true);
@@ -127,7 +143,14 @@ export function AgentConnectSection() {
       const res = await fetch("/api/agent-tokens", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ householdId, label: trimmed }),
+        body: JSON.stringify({
+          householdId,
+          label: trimmed,
+          scopes: [
+            ...(scopeDeliver ? ["deliver_to_me"] : []),
+            ...(scopeDelete ? ["delete_tasks"] : []),
+          ],
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.status === 409) {
@@ -140,6 +163,8 @@ export function AgentConnectSection() {
       }
       setCreated({ id: data.token.id, label: data.token.label, rawToken: data.token.rawToken });
       setLabel("");
+      setScopeDeliver(false);
+      setScopeDelete(false);
       await load();
     } catch {
       setFormError(t("agentSection.createError"));
@@ -245,6 +270,41 @@ export function AgentConnectSection() {
             )}
           </button>
         </div>
+        <fieldset className="space-y-2 rounded-xl border border-border/60 p-3">
+          <legend className="px-1 text-xs font-semibold text-foreground">
+            {t("agentSection.scopesTitle")}
+          </legend>
+          <p className="text-xs text-muted">{t("agentSection.scopesDefault")}</p>
+          <label className="flex items-start gap-2 min-h-[44px] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={scopeDeliver}
+              onChange={(e) => setScopeDeliver(e.target.checked)}
+              className="mt-1 h-4 w-4 shrink-0"
+            />
+            <span className="text-xs text-foreground leading-relaxed">
+              <span className="font-medium">{t("agentSection.scopeDeliver")}</span>
+              <span className="block text-amber-800 dark:text-amber-300">
+                {t("agentSection.scopeDeliverWarn")}
+              </span>
+            </span>
+          </label>
+          <label className="flex items-start gap-2 min-h-[44px] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={scopeDelete}
+              onChange={(e) => setScopeDelete(e.target.checked)}
+              className="mt-1 h-4 w-4 shrink-0"
+            />
+            <span className="text-xs text-foreground leading-relaxed">
+              <span className="font-medium">{t("agentSection.scopeDelete")}</span>
+              <span className="block text-amber-800 dark:text-amber-300">
+                {t("agentSection.scopeDeleteWarn")}
+              </span>
+            </span>
+          </label>
+          <p className="text-xs text-muted">{t("agentSection.scopesFixed")}</p>
+        </fieldset>
         {atLimit && !formError && (
           <p className="text-xs text-muted">{t("agentSection.limitReached")}</p>
         )}
@@ -311,6 +371,21 @@ export function AgentConnectSection() {
                     {t("agentSection.createdAt")}{" "}
                     {new Date(tok.createdAt).toLocaleDateString("he-IL")}
                   </p>
+                  <p className="mt-1 flex flex-wrap gap-1">
+                    <span className="rounded-full border border-border/60 px-2 py-0.5 text-[11px] text-muted">
+                      {t("agentSection.scopeBadgeDefault")}
+                    </span>
+                    {tok.scopes?.includes("deliver_to_me") && (
+                      <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-900 dark:border-amber-700/60 dark:bg-amber-950/30 dark:text-amber-200">
+                        {t("agentSection.scopeBadgeDeliver")}
+                      </span>
+                    )}
+                    {tok.scopes?.includes("delete_tasks") && (
+                      <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] text-amber-900 dark:border-amber-700/60 dark:bg-amber-950/30 dark:text-amber-200">
+                        {t("agentSection.scopeBadgeDelete")}
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -326,6 +401,37 @@ export function AgentConnectSection() {
                   )}
                   {t("agentSection.revoke")}
                 </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-foreground mb-2">
+          {t("agentSection.auditTitle")}
+        </h3>
+        {audit.length === 0 ? (
+          <p className="text-sm text-muted">{t("agentSection.auditEmpty")}</p>
+        ) : (
+          <ul className="space-y-1.5">
+            {audit.map((a) => (
+              <li
+                key={a.id}
+                className="rounded-xl border border-border/60 px-3 py-2 text-xs text-foreground"
+              >
+                <span className="font-medium">
+                  {a.action === "delete_task"
+                    ? t("agentSection.auditDelete")
+                    : t("agentSection.auditDeliver")}
+                </span>
+                {" · "}
+                {t(`agentSection.audit${a.outcome.charAt(0).toUpperCase()}${a.outcome.slice(1)}`)}
+                {a.detail ? ` · ${a.detail}` : ""}
+                <span className="block text-muted">
+                  {a.tokenLabel ? `${a.tokenLabel} · ` : ""}
+                  {new Date(a.createdAt).toLocaleString("he-IL")}
+                </span>
               </li>
             ))}
           </ul>
