@@ -10,7 +10,8 @@ export type SessionResult =
  * Used by every /api/meals/* route (session-scoped, RLS-enforced).
  */
 export async function resolveHousehold(
-  supabase: SupabaseClient<Database>
+  supabase: SupabaseClient<Database>,
+  featureLabel: string = "במתכנן הארוחות"
 ): Promise<SessionResult> {
   const {
     data: { user },
@@ -18,7 +19,7 @@ export async function resolveHousehold(
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
-    return { ok: false, status: 401, error: "יש להתחבר כדי להשתמש במתכנן הארוחות." };
+    return { ok: false, status: 401, error: `יש להתחבר כדי להשתמש ${featureLabel}.` };
   }
 
   const { data: profile, error: profileError } = await supabase

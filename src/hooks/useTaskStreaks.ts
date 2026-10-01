@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { TaskCompletionRow } from "@/lib/types/database";
+import { ilDateString } from "@/lib/meals/timezone";
 
 /**
  * Given a list of task completions (sorted descending by completed_at),
@@ -19,15 +20,19 @@ function calculateStreak(completions: TaskCompletionRow[], taskId: string): numb
   const days: string[] = [];
   const seen = new Set<string>();
   for (const c of taskCompletions) {
-    const day = c.completed_at.slice(0, 10); // "YYYY-MM-DD"
+    // Calendar day in Asia/Jerusalem, never a UTC slice: a completion at
+    // 01:30 Israel time is still the previous day in UTC.
+    const day = ilDateString(new Date(c.completed_at)); // "YYYY-MM-DD"
     if (!seen.has(day)) {
       seen.add(day);
       days.push(day);
     }
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  const today = ilDateString(new Date());
+  // Pure calendar arithmetic on the Israeli date string (no 24h-of-milliseconds
+  // guess, so DST days cannot shift it).
+  const yesterday = new Date(new Date(today).getTime() - 86_400_000).toISOString().slice(0, 10);
 
   // Streak only counts if completed today or yesterday
   if (days[0] !== today && days[0] !== yesterday) return 0;
