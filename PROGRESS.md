@@ -1,5 +1,15 @@
 # BayitBeSeder (בית בסדר) - Progress
 
+## 2026-10-02 — Price comparison: Rami Levy, Osher Ad, Yochananof, Tiv Taam (PR #31)
+
+Elad approved the chains' public portal logins (1.10.2026, 23:32). Fetched from url.publishedprices.co.il with each chain's public username and an empty password; usernames in `/opt/bayit-prices/config/portal_users.json` (600, outside git), a non-empty password is refused.
+
+- **First run (1-2.10 night):** Rami Levy 99/99 price files, 99 stores · Osher Ad 24/24, 24 · Yochananof 47/47, 51 · Tiv Taam 54/54, 54. 0 failed files; every file header's chain ID matched the registry (now checked for all 7 chains).
+- **Elad's list (12 recognised of 14), common basket of 8 items, near Migdal HaEmek:** Osher Ad Afula 55.46 ₪ · Rami Levy Afula 61.78 · Yochananof Afula 66.39 · Carrefour Afula 71.45 · Shufersal Deal Migdal HaEmek 75.54 · Tiv Taam Mizra 85.05.
+- **Wrong matches the new catalogs exposed, fixed with tests:** spice/deli peppers (60-159 ₪/kg), fruit spreads/pet food as dairy dessert (now needs a dairy marker), mint jam, Maggi tomato.
+- **Checks:** 32/32 comparison prices + 12/12 random rows equal the raw files (independent reader; planted 1 ₪ error caught). Service tests 55/55, sabotage 20/20 red as predicted.
+- **Known gaps:** 9 of 51 Yochananof stores and 2 Rami Levy stores have no city (Yochananof publishes City=0; inferred from the store name where possible). Chocolate desserts were widened in the rules and appear only after the next full ingest.
+
 ## 2026-10-01 — Supermarket price comparison (flagged, Elad's household only)
 
 **Plan + adversarial review:** `~/.claude/workroom/bayit-price-compare-plan-2026-10-01.md` (Codex: FIX_FIRST, 27 points, each folded in or answered in §12).
