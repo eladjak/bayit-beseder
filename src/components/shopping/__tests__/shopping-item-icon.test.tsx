@@ -25,3 +25,12 @@ describe("ShoppingItemCard icon", () => {
     expect(iconOf("זזזזז", "קטגוריה-לא-מוכרת")).toBe("🛒");
   });
 });
+
+describe("ShoppingItemCard icon with a cart-icon category (real data: household category מזון = 🛒)", () => {
+  it("unknown food item does not render the generic cart", () => {
+    expect(iconOf("זזזזז", "מזון", { categoryIcon: "🛒" })).not.toBe("🛒");
+  });
+  it("known product still wins over the cart category icon", () => {
+    expect(iconOf("עגבניות", "מזון", { categoryIcon: "🛒", itemEmoji: "🛒" })).toBe("🍅");
+  });
+});
