@@ -70,6 +70,10 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(parse.pack_size(None, "", "פסטה פנה 500 גרם"), ("g", 500.0))
         self.assertEqual(parse.pack_size(None, "", "שמן קנולה 1 ליטר"), ("ml", 1000.0))
 
+    def test_bidi_controls_do_not_break_word_start(self):
+        r = Rule(id="e", label="ביצים", aliases=[], include=[["=ביצים"]])
+        self.assertTrue(r.matches("קרטון ‫ביצים רגילות", False))
+
     def test_norm_and_prefix_matching(self):
         r = Rule(id="milk", label="חלב", aliases=[], include=[["=חלב"]], exclude=["שוקו"])
         self.assertTrue(r.matches("החלב של טרה", False))

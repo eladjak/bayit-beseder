@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-_NIQQUD = re.compile(r"[֑-ׇ]")
+_NIQQUD = re.compile(r"[֑-ׇ‎‏‪-‮⁦-⁩﻿]")  # + bidi controls (wolt)
 _PUNCT = re.compile(r"[\"'`´׳״“”‘’\-_/\\.,()\[\]{}+*%!?:;|]")
 _FINALS = str.maketrans({"ך": "כ", "ם": "מ", "ן": "נ", "ף": "פ", "ץ": "צ"})
 

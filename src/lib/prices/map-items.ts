@@ -32,7 +32,7 @@ const ITEMS: CanonicalItem[] = (catalog as { items: CanonicalItem[] }).items;
 const FINALS: Record<string, string> = { ך: "כ", ם: "מ", ן: "נ", ף: "פ", ץ: "צ" };
 export function norm(text: string): string {
   return (text ?? "")
-    .replace(/[֑-ׇ]/g, "")
+    .replace(/[֑-ׇ‎‏‪-‮⁦-⁩﻿]/g, "")
     .toLowerCase()
     .replace(/["'`´׳״“”‘’\-_/\\.,()[\]{}+*%!?:;|]/g, " ")
     .replace(/[ךםןףץ]/g, (c) => FINALS[c])
