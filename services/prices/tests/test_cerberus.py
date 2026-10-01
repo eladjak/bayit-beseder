@@ -317,3 +317,44 @@ class FileNameTests(unittest.TestCase):
                              session_factory=lambda u, **kw: session(portal, u))
         self.assertEqual(sorted(r.name for r in refs), [f"PriceFull{y}-000-001-20261001-010000.gz",
                                                         f"PriceFull{y}-000-002-20260929-010000.gz"])
+
+
+class RulesOnNewCatalogsTests(unittest.TestCase):
+    """Wrong matches found on Elad's list once the new chains came in (2.10.2026)."""
+
+    @classmethod
+    def setUpClass(cls):
+        from bp.match import load_rules
+        rules = load_rules(Path(__file__).resolve().parents[3] / "src" / "lib" / "prices" / "canonical-items.json")
+        cls.by_id = {r.id: r for r in rules}
+
+    def test_ground_paprika_is_not_a_pepper(self):
+        pepper = self.by_id["pepper"]
+        self.assertFalse(pepper.matches("פלפל גרוס מתוק", True))  # Rami Levy, 60 ₪/kg spice
+        self.assertTrue(pepper.matches("פלפל כתום", True))
+
+    def test_eggplant_spread_and_fruit_puree_are_not_dairy_desserts(self):
+        d = self.by_id["dessert-dairy"]
+        self.assertFalse(d.matches("מעדן חצילים 200 גר ש", False))  # Rami Levy
+        self.assertFalse(d.matches("מעדן פרי תפוז 320 גר", False))  # Rami Levy
+        self.assertTrue(d.matches("מילקי אקסטרה קצפת 17", False))
+
+    def test_more_wrong_matches_from_the_new_catalogs(self):
+        self.assertFalse(self.by_id["pepper"].matches("פלפל סודני שלם", True))  # Rami Levy, spice 75 ₪/kg
+        self.assertFalse(self.by_id["pepper"].matches("פלפל מתוק שלם", True))  # Rami Levy, spice 80 ₪/kg
+        self.assertFalse(self.by_id["pepper"].matches("טאפס פלפל חלפניו", True))  # Rami Levy, deli 159 ₪/kg
+        self.assertFalse(self.by_id["dessert-dairy"].matches("מעדן משמש 300 גר", False))  # Rami Levy, fruit
+        self.assertFalse(self.by_id["mint"].matches("ריבת אוכמניות עם נענע 300 גרם SAVA", False))  # Tiv Taam
+        self.assertFalse(self.by_id["tomato"].matches("עגבניה מגי", True))  # Tiv Taam
+        self.assertTrue(self.by_id["mint"].matches("נענע", False))
+        self.assertTrue(self.by_id["tomato"].matches("עגבניה", True))
+
+    def test_dairy_dessert_needs_a_dairy_marker(self):
+        # the rule used to accept any "מעדן": jams, pet food, borekas (measured on 7 chains)
+        d = self.by_id["dessert-dairy"]
+        for bad in ("מעדן דובדבן 300 גר", "אולטרא פט מעדן ברווז לכלב 100 גרם", "מעדן -קונפיטורה תות שדה 1.25 ק\"ג",
+                    "מזון לחתול מעדן טונה", "מעדן אוכמניות 280 גרם"):
+            self.assertFalse(d.matches(bad, False), bad)
+        for good in ("מילקי אקסטרה קצפת 17", "מעדן חלב דל קלוריות", "מילקי פסק זמן 133 גרם", "מעדן הגולן וניל",
+                     "דני שוקולד 115 גרם", "מעדן שוקולד 125 גרם"):
+            self.assertTrue(d.matches(good, False), good)

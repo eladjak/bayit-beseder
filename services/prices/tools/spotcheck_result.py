@@ -1,7 +1,7 @@
 """Check every price in a saved comparison result against the raw source files.
 
 Independent of bp.parse (uses the regex reader in spotcheck.py).
-Usage: python3 tools/spotcheck_result.py /tmp/bp-res.json [max_per_store]
+Usage: python3 tools/spotcheck_result.py /tmp/bp-res.json [max_per_store] [chain,chain]
 """
 import json
 import re
@@ -14,13 +14,16 @@ from spotcheck import file_price  # noqa: E402
 RAW = Path("/opt/bayit-prices/raw")
 
 
-def main(path: str, per_store: int) -> int:
+def main(path: str, per_store: int, chains: set[str] | None = None) -> int:
     r = json.load(open(path, encoding="utf-8"))
-    day = sorted(p for p in RAW.iterdir() if p.is_dir())[-1]
+    # newest day first: a run that crosses midnight leaves chains in two day folders
+    days = sorted((p for p in RAW.iterdir() if p.is_dir()), reverse=True)
     n = bad = 0
     for s in r["ranked"]:
+        if chains and s["chain"] not in chains:
+            continue
         store = s["storeId"]
-        files = [f for f in (day / s["chain"]).glob("PriceFull*") if re.search(rf"-0*{re.escape(store)}-20\d{{6}}", f.name)]
+        files = [f for day in days for f in (day / s["chain"]).glob("PriceFull*") if re.search(rf"-0*{re.escape(store)}-20\d{{6}}", f.name)]
         for k in r["commonKeys"][:per_store]:
             v = s["lines"][k]
             got = file_price(files[0].read_bytes(), v["code"]) if files else None
@@ -33,4 +36,5 @@ def main(path: str, per_store: int) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 5))
+    raise SystemExit(main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 5,
+                          set(sys.argv[3].split(",")) if len(sys.argv) > 3 else None))
