@@ -75,9 +75,12 @@ def _packs_and_cost(rule: Rule, qty: float, price: float, dim: Optional[str], si
         return grams / 1000.0, round(price * grams / 1000.0, 2), unit_norm
     need = rule.ref * qty
     if rule.dim == "u":
-        per_pack = size if (dim == "u" and size and size > 0) else 1.0
-    else:
-        per_pack = size
+        # Counted items (eggs, rolls, diapers) come in packs of 10/12/18/30/32.
+        # Whole packs here would compare 18 eggs with 12 eggs (measured 1.10.2026:
+        # regulated eggs, identical per egg, looked 6.56 ₪ apart). Price the
+        # requested count at this product's per-unit price and mark it an estimate.
+        return None if unit_norm is None else (1, round(unit_norm * qty, 2), unit_norm)
+    per_pack = size
     packs = max(1, math.ceil(need / per_pack - 1e-9))
     return packs, round(packs * price, 2), unit_norm
 
@@ -144,7 +147,10 @@ def price_item_in_store(con: sqlite3.Connection, chain: str, store_id: str, rule
     ).fetchone()
     return {
         "code": code, "name": name, "price": price, "packs": packs, "cost": cost,
-        "weighted": weighted, "estimate": weighted, "promo": promo[0] if promo else None,
+        "weighted": weighted, "estimate": weighted or rule.dim == "u",
+        "basis": "kg" if weighted else ("unit" if rule.dim == "u" else "pack"),
+        "refAmount": rule.ref * req.qty if rule.dim == "u" else None,
+        "promo": promo[0] if promo else None,
     }
 
 

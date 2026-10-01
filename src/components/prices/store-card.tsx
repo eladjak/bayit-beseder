@@ -20,7 +20,7 @@ export function StoreCard({ store, data, stale, showCommon = true, onPick, onUnp
   const [open, setOpen] = useState(false);
   const published = formatPublished(store.published);
   const missing = store.missing ?? [];
-  const total = data.items.length;
+  const total = data.items.filter((i) => i.canonicalId).length;
   return (
     <li className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-surface overflow-hidden">
       <button
@@ -34,10 +34,10 @@ export function StoreCard({ store, data, stale, showCommon = true, onPick, onUnp
             {store.chainName} {store.name}
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            {store.city} · בערך {store.distanceKm.toFixed(1)} ק&quot;מ (מרכז העיר)
+            {store.city} · בערך {store.distanceKm.toFixed(1)}&nbsp;ק&quot;מ (מרכז העיר)
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400">
-            נמצאו {store.foundCount} מתוך {total}
+            נמצאו {store.foundCount} מתוך {total} שזוהו
           </p>
           {published && <p className="text-xs text-gray-500 dark:text-gray-400">{published}</p>}
           {stale && (
@@ -75,11 +75,19 @@ export function StoreCard({ store, data, stale, showCommon = true, onPick, onUnp
                 {line ? (
                   <div className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 space-y-0.5">
                     <p className="break-words">{line.name}</p>
-                    <p>
-                      {line.packs} × {formatMoney(line.price)} ={" "}
-                      <span className="font-semibold">{formatMoney(line.cost)}</span>
-                    </p>
-                    {line.estimate && <p>הערכה לפי ק&quot;ג</p>}
+                    {line.basis === "pack" || !line.basis ? (
+                      <p>
+                        {line.packs} × {formatMoney(line.price)} ={" "}
+                        <span className="font-semibold">{formatMoney(line.cost)}</span>
+                      </p>
+                    ) : (
+                      <p>
+                        <span className="font-semibold">{formatMoney(line.cost)}</span>
+                        {line.basis === "kg"
+                          ? ` (הערכה: ${formatMoney(line.price)} לק"ג)`
+                          : ` (הערכה לפי מחיר ליחידה, ל-${line.refAmount ?? ""} יח'. האריזה בסניף: ${formatMoney(line.price)})`}
+                      </p>
+                    )}
                     {line.promo && (
                       <p>
                         <span className="inline-block rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 px-2 py-0.5">
@@ -89,7 +97,9 @@ export function StoreCard({ store, data, stale, showCommon = true, onPick, onUnp
                     )}
                   </div>
                 ) : (
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">לא נמצא בסניף הזה</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {cid ? "לא נמצא בסניף הזה" : "לא זוהה כמוצר מכולת, לא נכנס להשוואה"}
+                  </p>
                 )}
                 {cid && (
                   <div className="mt-1.5 flex items-center gap-2 flex-wrap">

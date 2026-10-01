@@ -12,6 +12,9 @@ export interface PriceLine {
   cost: number;
   weighted: boolean;
   estimate: boolean;
+  /** pack = whole packs × shelf price; kg = per-kg estimate; unit = per-unit price × requested count */
+  basis?: "pack" | "kg" | "unit";
+  refAmount?: number | null;
   promo: string | null;
 }
 

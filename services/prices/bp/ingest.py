@@ -180,6 +180,7 @@ def ingest_chain(con: sqlite3.Connection, chain: Chain, matcher: Matcher, f: Fet
             con.executemany("INSERT OR IGNORE INTO cand VALUES(?,?,?)", [(k, cid, code) for cid, code in cand])
             con.executemany("INSERT OR REPLACE INTO prices VALUES(?,?,?,?,?)", [(k, *p) for p in prices])
             con.executemany("INSERT INTO promos VALUES(?,?,?,?,?,?,?,?,?,?)", [(k, *p) for p in promos])
+            compute_stats(con, k)
             con.execute(
                 "UPDATE chains SET last_ok_at=?, last_error=NULL, files_ok=?, files_failed=?, stores=?, products=?, prices=? WHERE key=?",
                 (_now(), ok, failed, len(stores), len(products), len(prices), k),
@@ -190,6 +191,16 @@ def ingest_chain(con: sqlite3.Connection, chain: Chain, matcher: Matcher, f: Fet
         con.execute("UPDATE chains SET last_error=? WHERE key=?", (f"{_now()} {e}"[:500], chain.key))
         con.commit()
         return {"chain": chain.key, "error": str(e)}
+
+
+def compute_stats(con: sqlite3.Connection, chain: str) -> int:
+    """Average price and store count per product, for the 'choose my product' list
+    (grouping 1.8M price rows on every request took 16 s)."""
+    con.execute("DELETE FROM product_stats WHERE chain=?", (chain,))
+    con.execute(
+        "INSERT INTO product_stats SELECT chain, item_code, ROUND(AVG(price),2), COUNT(*) FROM prices "
+        "WHERE chain=? GROUP BY chain, item_code", (chain,))
+    return con.execute("SELECT COUNT(*) FROM product_stats WHERE chain=?", (chain,)).fetchone()[0]
 
 
 def rematch(con: sqlite3.Connection, matcher: Matcher) -> dict:
@@ -216,6 +227,10 @@ def main(argv: list[str]) -> int:
     con = connect(root / "data" / "prices.db")
     if argv[:1] == ["--rematch"]:
         print(json.dumps(rematch(con, matcher), ensure_ascii=False))
+        return 0
+    if argv[:1] == ["--stats"]:
+        with con:
+            print(json.dumps({k: compute_stats(con, k) for k in CHAINS}, ensure_ascii=False))
         return 0
     keys = argv or list(CHAINS)
     f = Fetcher()

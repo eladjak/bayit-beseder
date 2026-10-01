@@ -37,7 +37,7 @@ export function SplitCard({ data }: { data: CompareResponse }) {
 
 export function OnlineSection({ data }: { data: CompareResponse }) {
   if (data.online.length === 0) return null;
-  const total = data.items.length;
+  const total = data.items.filter((i) => i.canonicalId).length;
   return (
     <section aria-label="משלוח" className={CARD}>
       <h2 className="font-bold text-gray-900 dark:text-gray-100">משלוח</h2>
@@ -52,7 +52,7 @@ export function OnlineSection({ data }: { data: CompareResponse }) {
               <div className="min-w-0">
                 <p className="font-medium text-gray-900 dark:text-gray-100 break-words">{s.chainName}</p>
                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                  נמצאו {s.foundCount} מתוך {total}
+                  נמצאו {s.foundCount} מתוך {total} שזוהו
                 </p>
                 {pub && <p className="text-xs text-gray-500">{pub}</p>}
               </div>

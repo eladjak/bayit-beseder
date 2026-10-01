@@ -9,8 +9,8 @@ export interface Candidate {
   code: string;
   name: string;
   manufacturer: string;
-  size: string;
-  dim: string;
+  size: number | null;
+  dim: string | null;
   weighted: boolean;
   avgPrice: number;
   stores: number;
@@ -78,7 +78,7 @@ export function CandidatesSheet({ title, canonicalId, onChoose, onClose }: Props
                 <button type="button" onClick={() => onChoose(c)} className={`w-full text-start py-2.5 ${FOCUS}`}>
                   <p className="text-sm font-medium text-gray-900 dark:text-gray-100 break-words">{c.name}</p>
                   <p className="text-xs text-gray-600 dark:text-gray-400">
-                    {[c.manufacturer, c.size].filter(Boolean).join(" · ")}
+                    {[cleanMaker(c.manufacturer), sizeLabel(c)].filter(Boolean).join(" · ")}
                     {c.avgPrice ? ` · בממוצע ${formatMoney(c.avgPrice)}` : ""} · ב-{c.stores} סניפים
                   </p>
                 </button>
@@ -89,4 +89,19 @@ export function CandidatesSheet({ title, canonicalId, onChoose, onClose }: Props
       </div>
     </div>
   );
+}
+
+/** Chains sometimes publish "," or "לא ידוע" as the manufacturer. */
+function cleanMaker(m: string | null | undefined): string {
+  const t = (m ?? "").trim();
+  return /[\p{L}\p{N}]/u.test(t) && t !== "לא ידוע" ? t : "";
+}
+
+function sizeLabel(c: Pick<Candidate, "size" | "dim" | "weighted">): string {
+  if (c.weighted) return "לפי משקל";
+  if (!c.size) return "";
+  if (c.dim === "ml") return c.size >= 1000 ? `${c.size / 1000} ל'` : `${c.size} מ"ל`;
+  if (c.dim === "g") return c.size >= 1000 ? `${c.size / 1000} ק"ג` : `${c.size} גרם`;
+  if (c.dim === "u") return `${c.size} יח'`;
+  return "";
 }
