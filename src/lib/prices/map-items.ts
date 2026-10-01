@@ -68,6 +68,12 @@ function cleanTitle(title: string): string {
   return title.replace(/[^\p{L}\p{N}%\s'"׳״-]/gu, " ");
 }
 
+/** Drop a Hebrew plural/feminine ending (after norm, so final letters are already regular). */
+function stem(w: string): string {
+  const s = w.replace(/(יות|ות|ימ|יה|ה)$/, "");
+  return s.length >= 2 ? s : w;
+}
+
 function strictWords(title: string, item: CanonicalItem): string[] {
   const covered = new Set<string>();
   for (const s of [item.label, ...item.aliases]) for (const w of norm(s).split(" ")) covered.add(w);
@@ -81,8 +87,12 @@ function strictWords(title: string, item: CanonicalItem): string[] {
       continue;
     }
     if (w.length < 2 || covered.has(w) || STOP.has(w) || /^\d+$/.test(w)) continue;
-    // plural / suffix of a covered word ("פלפלים" vs "פלפל") is not a new constraint
-    if ([...covered].some((c) => c.length >= 2 && (w.startsWith(c) || c.startsWith(w)))) continue;
+    // plural / suffix of a covered word ("פלפלים" vs "פלפל", "עגבניות" vs "עגבניה") is not a new constraint
+    const sw = stem(w);
+    if ([...covered].some((c) => {
+      const sc = stem(c);
+      return sc.length >= 2 && (sw.startsWith(sc) || sc.startsWith(sw));
+    })) continue;
     out.push(w);
   }
   return out.slice(0, 6);

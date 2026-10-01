@@ -18,6 +18,12 @@ describe("mapTitle", () => {
     }
   });
 
+  it("does not turn the plural of the item itself into a constraint", () => {
+    for (const t of ["עגבניות", "פלפלים", "קישואים", "לימונים", "ביצים"]) {
+      expect(mapTitle(t).strict, t).toEqual([]);
+    }
+  });
+
   it("keeps the family's extra words as constraints", () => {
     const plain = mapTitle("חלב");
     const lf = mapTitle("חלב ללא לקטוז");
