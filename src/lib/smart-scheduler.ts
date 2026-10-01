@@ -1,5 +1,6 @@
 import type { TaskRow } from "./types/database";
 import type { ClientCalendarEvent } from "./types/calendar";
+import { ilDay } from "@/lib/il-date";
 
 export interface DayLoad {
   date: string; // ISO date string (YYYY-MM-DD)
@@ -88,7 +89,7 @@ export function analyzeDailyLoad(
   for (let i = 0; i < 7; i++) {
     const date = new Date(startOfWeek);
     date.setDate(date.getDate() + i);
-    const dateStr = date.toISOString().split("T")[0];
+    const dateStr = ilDay(date);
     const dayName = HEBREW_DAYS[i];
 
     const dayTasks = tasks.filter((t) => t.due_date === dateStr);

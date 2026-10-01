@@ -7,6 +7,7 @@ import { hasScope } from "@/lib/agent/scopes";
 import { CONSUME_MESSAGES, consumeConfirmation, createConfirmation } from "@/lib/agent/confirm";
 import { logAgentAudit } from "@/lib/agent/audit";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { ilToday } from "@/lib/il-date";
 
 /**
  * POST /api/agent/task
@@ -383,7 +384,7 @@ async function handleAdd(
   body: z.infer<typeof addSchema>,
   rlRemaining: number
 ) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = ilToday();
   const dueDate = body.due ?? today;
 
   // Resolve assignee display name → user_id (best-effort; unassigned if not found)

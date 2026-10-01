@@ -40,6 +40,7 @@ import { StatCardSkeleton, RingSkeleton } from "@/components/skeleton";
 import { useAdvancedStats } from "@/hooks/useAdvancedStats";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradePrompt } from "@/components/upgrade-prompt";
+import { ilToday } from "@/lib/il-date";
 
 // Badges + Calendar — lazy-load
 const BadgesDisplay = dynamic(
@@ -412,7 +413,7 @@ function MembersComparisonSection({
 
 export default function StatsPage() {
   const { t } = useTranslation();
-  const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const today = useMemo(() => ilToday(), []);
   const { tasks, loading: tasksLoading } = useTasks({});
   const { completions, loading: completionsLoading } = useCompletions({ limit: 500 });
   const { categoryMap } = useCategories();

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase";
 import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
+import { addDaysStr, ilDay, ilToday, ymd } from "@/lib/il-date";
 
 export interface CalendarDayData {
   date: string; // YYYY-MM-DD
@@ -29,7 +30,7 @@ interface UseCalendarDataReturn {
 function buildMockCalendar(month: Date): CalendarDayData[] {
   const year = month.getFullYear();
   const mon = month.getMonth();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = ilToday();
   const firstDay = new Date(year, mon, 1);
   const lastDay = new Date(year, mon + 1, 0);
 
@@ -41,7 +42,7 @@ function buildMockCalendar(month: Date): CalendarDayData[] {
   for (let i = startPad - 1; i >= 0; i--) {
     const d = new Date(year, mon, -i);
     days.push({
-      date: d.toISOString().slice(0, 10),
+      date: ymd(year, mon, -i),
       dayOfMonth: d.getDate(),
       isCurrentMonth: false,
       isToday: false,
@@ -54,7 +55,7 @@ function buildMockCalendar(month: Date): CalendarDayData[] {
   // Current month
   for (let d = 1; d <= lastDay.getDate(); d++) {
     const dt = new Date(year, mon, d);
-    const dateStr = dt.toISOString().slice(0, 10);
+    const dateStr = ymd(year, mon, d);
     // Mock: random completions for past days
     const isPast = dateStr <= today;
     const mockCount = isPast ? Math.floor(Math.random() * 4) : 0;
@@ -82,7 +83,7 @@ function buildMockCalendar(month: Date): CalendarDayData[] {
   for (let d = 1; d <= remaining; d++) {
     const dt = new Date(year, mon + 1, d);
     days.push({
-      date: dt.toISOString().slice(0, 10),
+      date: ymd(year, mon + 1, d),
       dayOfMonth: dt.getDate(),
       isCurrentMonth: false,
       isToday: false,
@@ -102,7 +103,7 @@ function buildCalendarGrid(
 ): CalendarDayData[] {
   const year = month.getFullYear();
   const mon = month.getMonth();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = ilToday();
   const firstDay = new Date(year, mon, 1);
   const lastDay = new Date(year, mon + 1, 0);
 
@@ -111,7 +112,7 @@ function buildCalendarGrid(
   // Group completions by date
   const byDate = new Map<string, { title: string; completedAt: string }[]>();
   for (const c of completions) {
-    const dateStr = c.completed_at.slice(0, 10);
+    const dateStr = ilDay(c.completed_at);
     if (!byDate.has(dateStr)) byDate.set(dateStr, []);
     const task = taskById.get(c.task_id);
     byDate.get(dateStr)!.push({
@@ -126,7 +127,7 @@ function buildCalendarGrid(
   for (let i = startPad - 1; i >= 0; i--) {
     const d = new Date(year, mon, -i);
     days.push({
-      date: d.toISOString().slice(0, 10),
+      date: ymd(year, mon, -i),
       dayOfMonth: d.getDate(),
       isCurrentMonth: false,
       isToday: false,
@@ -138,7 +139,7 @@ function buildCalendarGrid(
 
   for (let d = 1; d <= lastDay.getDate(); d++) {
     const dt = new Date(year, mon, d);
-    const dateStr = dt.toISOString().slice(0, 10);
+    const dateStr = ymd(year, mon, d);
     const dayTasks = byDate.get(dateStr) ?? [];
     const count = dayTasks.length;
     const status: CalendarDayData["status"] =
@@ -158,7 +159,7 @@ function buildCalendarGrid(
   for (let d = 1; d <= remaining; d++) {
     const dt = new Date(year, mon + 1, d);
     days.push({
-      date: dt.toISOString().slice(0, 10),
+      date: ymd(year, mon + 1, d),
       dayOfMonth: dt.getDate(),
       isCurrentMonth: false,
       isToday: false,
@@ -198,15 +199,16 @@ export function useCalendarData(): UseCalendarDataReturn {
 
       const year = currentMonth.getFullYear();
       const mon = currentMonth.getMonth();
-      const startDate = new Date(year, mon, 1).toISOString().slice(0, 10);
-      const endDate = new Date(year, mon + 1, 0).toISOString().slice(0, 10);
+      const startDate = ymd(year, mon, 1);
+      const endDate = ymd(year, mon + 1, 0);
 
       const [{ data: compData }, { data: taskData }] = await Promise.all([
         supabase
           .from("task_completions")
           .select("*")
-          .gte("completed_at", `${startDate}T00:00:00`)
-          .lte("completed_at", `${endDate}T23:59:59`)
+          // Timestamps are UTC; widen by a day each side, days are grouped by Israeli date afterwards.
+          .gte("completed_at", `${addDaysStr(startDate, -1)}T00:00:00`)
+          .lte("completed_at", `${addDaysStr(endDate, 1)}T23:59:59`)
           .order("completed_at", { ascending: true }),
         supabase.from("tasks").select("id, title, category_id"),
       ]);

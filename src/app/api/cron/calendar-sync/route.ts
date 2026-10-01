@@ -10,6 +10,7 @@ import {
   type GoogleTokens,
 } from "@/lib/google-calendar";
 import type { Json } from "@/lib/types/database";
+import { ilDay } from "@/lib/il-date";
 
 /** Distinguishes an auth/permission failure (needs reconnect) from a transient one. */
 function classify(err: unknown): { needsReconnect: boolean } {
@@ -104,8 +105,8 @@ export async function GET(request: NextRequest) {
 
   const timeMin = now.toISOString();
   const timeMax = weekFromNow.toISOString();
-  const todayStr = now.toISOString().split("T")[0];
-  const weekStr = weekFromNow.toISOString().split("T")[0];
+  const todayStr = ilDay(now);
+  const weekStr = ilDay(weekFromNow);
 
   const results: Array<{
     userId: string;

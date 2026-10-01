@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
 import { isTaskOverdue } from "@/lib/task-flags";
+import { ilToday } from "@/lib/il-date";
 
 interface EmergencyTask {
   id: string;
@@ -58,7 +59,7 @@ export default function EmergencyPage() {
       }
 
       // Fetch today's and overdue pending tasks from the tasks table
-      const today = new Date().toISOString().slice(0, 10);
+      const today = ilToday();
       const { data: pendingTasks } = await supabase
         .from("tasks")
         .select("id, title, category_id, due_date, status, points, recurring")

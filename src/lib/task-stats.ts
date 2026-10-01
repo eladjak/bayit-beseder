@@ -1,4 +1,5 @@
 import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
+import { addDaysStr, ilDay } from "@/lib/il-date";
 import type { TaskRow, TaskCompletionRow } from "@/lib/types/database";
 
 // ============================================
@@ -28,9 +29,7 @@ export interface MonthlyCompletionPoint {
  * Positive `days` = future, negative = past.
  */
 export function addDays(baseDate: string, days: number): string {
-  const d = new Date(baseDate);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return addDaysStr(baseDate, days);
 }
 
 /**
@@ -80,14 +79,14 @@ export function computeMonthlyData(
   const countsByDay: Record<string, number> = {};
 
   for (const c of completions) {
-    const day = c.completed_at.slice(0, 10);
+    const day = ilDay(c.completed_at);
     countsByDay[day] = (countsByDay[day] ?? 0) + 1;
   }
 
   for (let i = 29; i >= 0; i--) {
     const dateStr = addDays(today, -i);
     days.push({
-      day: String(new Date(dateStr).getDate()),
+      day: String(new Date(dateStr).getUTCDate()),
       count: countsByDay[dateStr] ?? 0,
     });
   }
@@ -142,7 +141,7 @@ export function computeWeeklyTrend(
   today: string
 ): WeeklyTrendPoint[] {
   const todayDate = new Date(today);
-  const dayOfWeek = todayDate.getDay(); // 0=Sun, 6=Sat
+  const dayOfWeek = todayDate.getUTCDay(); // 0=Sun, 6=Sat
 
   // Find Sunday of this week
   const sunday = addDays(today, -dayOfWeek);
@@ -152,7 +151,7 @@ export function computeWeeklyTrend(
   for (let i = 0; i < 7; i++) {
     const dateStr = addDays(sunday, i);
     const completedCount = completions.filter(
-      (c) => c.completed_at.slice(0, 10) === dateStr
+      (c) => ilDay(c.completed_at) === dateStr
     ).length;
     const totalCount = tasks.filter((t) => t.due_date === dateStr).length;
 
@@ -175,7 +174,7 @@ export function countCompletedThisWeek(
 ): number {
   const weekAgo = addDays(today, -6);
   return completions.filter((c) => {
-    const d = c.completed_at.slice(0, 10);
+    const d = ilDay(c.completed_at);
     return d >= weekAgo && d <= today;
   }).length;
 }
@@ -189,7 +188,7 @@ export function countCompletedThisMonth(
 ): number {
   const monthAgo = addDays(today, -29);
   return completions.filter((c) => {
-    const d = c.completed_at.slice(0, 10);
+    const d = ilDay(c.completed_at);
     return d >= monthAgo && d <= today;
   }).length;
 }
@@ -219,7 +218,7 @@ export function computePartnerComparison(
   let partnerCount = 0;
 
   for (const c of completions) {
-    const d = c.completed_at.slice(0, 10);
+    const d = ilDay(c.completed_at);
     if (d < weekAgo || d > today) continue;
     if (c.user_id === myUserId) myCount += 1;
     else if (c.user_id === partnerUserId) partnerCount += 1;
@@ -251,7 +250,7 @@ export function computeMembersComparison(
   const countMap: Record<string, number> = {};
 
   for (const c of completions) {
-    const d = c.completed_at.slice(0, 10);
+    const d = ilDay(c.completed_at);
     if (d < weekAgo || d > today) continue;
     if (c.user_id in countMap) {
       countMap[c.user_id] += 1;
@@ -327,7 +326,7 @@ export function computeBestStreak(completions: TaskCompletionRow[]): number {
   // Collect unique dates with completions
   const datesWithActivity = new Set<string>();
   for (const c of completions) {
-    datesWithActivity.add(c.completed_at.slice(0, 10));
+    datesWithActivity.add(ilDay(c.completed_at));
   }
 
   // Sort dates ascending
@@ -376,7 +375,7 @@ export function buildStreakHistory(
 ): StreakDay[] {
   const completionDates = new Set<string>();
   for (const c of completions) {
-    completionDates.add(c.completed_at.slice(0, 10));
+    completionDates.add(ilDay(c.completed_at));
   }
 
   const result: StreakDay[] = [];
@@ -421,13 +420,13 @@ export function buildCalendarMonth(
   completions: TaskCompletionRow[],
   today: string
 ): CalendarDay[] {
-  const firstOfMonth = new Date(year, month, 1);
-  const startDay = firstOfMonth.getDay(); // 0=Sun
+  // Pure calendar arithmetic in UTC: no local-midnight-to-UTC drift.
+  const startDay = new Date(Date.UTC(year, month, 1)).getUTCDay(); // 0=Sun
 
   // Build completion counts by date
   const completionsByDate: Record<string, number> = {};
   for (const c of completions) {
-    const d = c.completed_at.slice(0, 10);
+    const d = ilDay(c.completed_at);
     completionsByDate[d] = (completionsByDate[d] ?? 0) + 1;
   }
 
@@ -449,17 +448,14 @@ export function buildCalendarMonth(
   const days: CalendarDay[] = [];
 
   // Start from the Sunday before (or on) the 1st of the month
-  const calendarStart = new Date(year, month, 1 - startDay);
-
   for (let i = 0; i < 42; i++) {
-    const current = new Date(calendarStart);
-    current.setDate(calendarStart.getDate() + i);
+    const current = new Date(Date.UTC(year, month, 1 - startDay + i));
     const dateStr = current.toISOString().slice(0, 10);
 
     days.push({
       date: dateStr,
-      dayOfMonth: current.getDate(),
-      isCurrentMonth: current.getMonth() === month,
+      dayOfMonth: current.getUTCDate(),
+      isCurrentMonth: current.getUTCMonth() === month,
       isToday: dateStr === today,
       dueCount: dueByDate[dateStr] ?? 0,
       completedCount: completionsByDate[dateStr] ?? 0,

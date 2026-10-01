@@ -15,6 +15,7 @@ import {
   recordCoachingSent,
 } from "@/lib/coaching-tracker";
 import { sendPushToAll, type PushSubscriptionData } from "@/lib/push";
+import { addDaysStr, ilToday } from "@/lib/il-date";
 
 /**
  * GET /api/cron/daily-summary
@@ -36,8 +37,8 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  const today = new Date().toISOString().slice(0, 10);
-  const isFriday = new Date().getDay() === 5;
+  const today = ilToday();
+  const isFriday = new Date(today).getUTCDay() === 5; // today = Israeli date
 
   const phones = (process.env.WHATSAPP_PHONES ?? "").split(",").filter(Boolean);
   if (phones.length === 0) {
@@ -58,9 +59,7 @@ export async function GET(request: NextRequest) {
   const remaining = allTasks.filter((t) => t.status !== "completed");
 
   // Tomorrow's task count for preview in evening summary
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().slice(0, 10);
+  const tomorrowStr = addDaysStr(today, 1);
   const { data: tomorrowTasks } = await supabase
     .from("tasks")
     .select("id")
@@ -166,9 +165,7 @@ export async function GET(request: NextRequest) {
 
   // On Fridays, also send weekly celebration
   if (isFriday) {
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    const weekStartStr = weekStart.toISOString().slice(0, 10);
+    const weekStartStr = addDaysStr(today, -new Date(today).getUTCDay());
 
     const { data: weekTasks } = await supabase
       .from("tasks")

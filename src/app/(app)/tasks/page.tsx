@@ -58,6 +58,7 @@ import { TaskTemplatePicker } from "@/components/task-template-picker";
 import type { TaskTemplate } from "@/lib/task-templates";
 import { useFirstVisit } from "@/hooks/useFirstVisit";
 import { FeatureTooltip } from "@/components/feature-tooltip";
+import { ilToday } from "@/lib/il-date";
 
 const VoiceInputButton = dynamic(
   () => import("@/components/voice-input-button").then((m) => m.VoiceInputButton),
@@ -121,7 +122,7 @@ export default function TasksPage() {
   const [pendingPhotoUrl, setPendingPhotoUrl] = useState<Record<string, string>>({});
 
   // Skipped recurring tasks: key = `{taskId}-{YYYY-MM-DD}`, stored in localStorage
-  const todayDateStr = new Date().toISOString().slice(0, 10);
+  const todayDateStr = ilToday();
   const [skippedTaskIds, setSkippedTaskIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
     const stored = localStorage.getItem("bayit-skipped");
@@ -129,7 +130,7 @@ export default function TasksPage() {
     try {
       const arr: string[] = JSON.parse(stored);
       // Keep only today's entries
-      return new Set(arr.filter((k) => k.endsWith(`-${new Date().toISOString().slice(0, 10)}`)));
+      return new Set(arr.filter((k) => k.endsWith(`-${ilToday()}`)));
     } catch {
       return new Set();
     }
@@ -479,7 +480,7 @@ export default function TasksPage() {
     const categoryName = CATEGORY_KEY_TO_NAME[newTaskCategory] ?? newTaskCategory;
     const category = categories.find((c) => c.name === categoryName);
 
-    const todayStr = new Date().toISOString().slice(0, 10);
+    const todayStr = ilToday();
 
     const result = await createTask({
       title: newTaskTitle.trim(),
@@ -583,7 +584,7 @@ export default function TasksPage() {
   const handleAddFromTemplate = useCallback(
     async (template: TaskTemplate) => {
       if (!profile) throw new Error("not logged in");
-      const todayStr = new Date().toISOString().slice(0, 10);
+      const todayStr = ilToday();
 
       for (const templateTask of template.tasks) {
         const categoryName = CATEGORY_KEY_TO_NAME[templateTask.category] ?? templateTask.category;

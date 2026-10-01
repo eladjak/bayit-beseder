@@ -9,6 +9,7 @@ import { useHouseholdMembers } from "@/hooks/useHouseholdMembers";
 import { useHousehold } from "@/hooks/useHousehold";
 import { useProfile } from "@/hooks/useProfile";
 import { PrintTasks, type PrintMember } from "@/components/print-tasks";
+import { ilToday } from "@/lib/il-date";
 
 function PrintPageSkeleton() {
   return (
@@ -92,7 +93,7 @@ function PrintPageSkeleton() {
 }
 
 export default function PrintPage() {
-  const today = new Date().toISOString().split("T")[0];
+  const today = ilToday();
 
   const { profile, loading: profileLoading } = useProfile();
   const householdId = profile?.household_id ?? null;

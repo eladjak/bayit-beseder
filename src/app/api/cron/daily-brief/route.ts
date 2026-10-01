@@ -11,6 +11,7 @@ import {
   recordCoachingSent,
 } from "@/lib/coaching-tracker";
 import { sendPushToAll, type PushSubscriptionData } from "@/lib/push";
+import { ilToday } from "@/lib/il-date";
 
 /**
  * GET /api/cron/daily-brief
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
   }
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = ilToday();
 
   // Get WhatsApp phone numbers from env (comma-separated)
   const phones = (process.env.WHATSAPP_PHONES ?? "").split(",").filter(Boolean);
@@ -89,7 +90,7 @@ export async function GET(request: NextRequest) {
   const streak = streaks?.[0]?.current_count ?? 0;
 
   const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
-  const dayOfWeek = days[new Date().getDay()];
+  const dayOfWeek = days[new Date(ilToday()).getUTCDay()];
 
   // Determine household_id for coaching style lookup
   // Use the first available profile's household_id, or null if unavailable

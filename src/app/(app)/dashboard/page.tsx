@@ -62,6 +62,7 @@ import { OfflineIndicator } from "@/components/offline-indicator";
 import { useFirstVisit } from "@/hooks/useFirstVisit";
 import { FeatureTooltip } from "@/components/feature-tooltip";
 import { pushAssistantReaction } from "@/lib/assistant-reactions";
+import { ilToday } from "@/lib/il-date";
 
 // ============================================
 // Mock data (fallback when Supabase not connected)
@@ -144,7 +145,7 @@ export default function DashboardPage() {
   const { completions: allCompletions, markComplete, isCompletedToday } = useCompletions({ limit: 500 });
   const { categoryMap } = useCategories();
   const { playComplete, playAchievement, playStreak } = useAppSounds();
-  const todayStr = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const todayStr = useMemo(() => ilToday(), []);
   const { partner } = usePartner(profile?.partner_id, todayStr);
   const { household, updateHousehold } = useHousehold(profile?.household_id ?? null);
   // N-member support: prefer household_members table; falls back to partner_id

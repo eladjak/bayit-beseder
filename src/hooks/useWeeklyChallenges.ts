@@ -8,6 +8,7 @@ import {
   type WeeklyChallenge,
 } from "@/lib/challenges";
 import type { TaskCompletionRow } from "@/lib/types/database";
+import { addDaysStr, ilDay, ilToday } from "@/lib/il-date";
 
 export interface ChallengeProgress {
   challenge: WeeklyChallenge;
@@ -37,21 +38,18 @@ interface UseWeeklyChallengesReturn {
 
 /** Monday of the current week as YYYY-MM-DD */
 function getWeekStart(): string {
-  const d = new Date();
-  const day = d.getDay(); // 0=Sun
+  const today = ilToday();
+  const day = new Date(today).getUTCDay(); // 0=Sun
   const diff = day === 0 ? -6 : 1 - day; // shift to Monday
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().slice(0, 10);
+  return addDaysStr(today, diff);
 }
 
 /** Sunday of the current week as YYYY-MM-DD (or end-of-week Sunday) */
 function getWeekEnd(): string {
-  const d = new Date();
-  const day = d.getDay();
+  const today = ilToday();
+  const day = new Date(today).getUTCDay();
   const diff = day === 0 ? 0 : 7 - day; // shift to Sunday
-  d.setDate(d.getDate() + diff);
-  d.setHours(23, 59, 59, 999);
-  return d.toISOString().slice(0, 10);
+  return addDaysStr(today, diff);
 }
 
 /** Filter completions to those that occurred within this week (Mon–Sun) */
@@ -59,7 +57,7 @@ function thisWeeksCompletions(completions: TaskCompletionRow[]): TaskCompletionR
   const start = getWeekStart();
   const end = getWeekEnd();
   return completions.filter((c) => {
-    const d = c.completed_at.slice(0, 10);
+    const d = ilDay(c.completed_at);
     return d >= start && d <= end;
   });
 }
@@ -101,7 +99,7 @@ function computeProgress(
     }
     case "perfect_week": {
       // Days where the user completed ≥1 task
-      const days = new Set(myCompletions.map((c) => c.completed_at.slice(0, 10)));
+      const days = new Set(myCompletions.map((c) => ilDay(c.completed_at)));
       return days.size;
     }
     case "power_couple": {
@@ -128,21 +126,19 @@ function computeProgress(
       // Max completions in any single day
       const byDay: Record<string, number> = {};
       for (const c of myCompletions) {
-        const day = c.completed_at.slice(0, 10);
+        const day = ilDay(c.completed_at);
         byDay[day] = (byDay[day] ?? 0) + 1;
       }
       return Math.max(0, ...Object.values(byDay));
     }
     case "streak_five": {
       // Consecutive days with completions ending today
-      const daySet = new Set(myCompletions.map((c) => c.completed_at.slice(0, 10)));
+      const daySet = new Set(myCompletions.map((c) => ilDay(c.completed_at)));
       let streak = 0;
-      const d = new Date();
-      while (true) {
-        const key = d.toISOString().slice(0, 10);
-        if (!daySet.has(key)) break;
+      let key = ilToday();
+      while (daySet.has(key)) {
         streak++;
-        d.setDate(d.getDate() - 1);
+        key = addDaysStr(key, -1);
       }
       return streak;
     }
@@ -180,7 +176,7 @@ function computeProgress(
       // Check if 10 household completions in any 3 consecutive days
       const byDay: Record<string, number> = {};
       for (const c of householdWeekCompletions) {
-        const day = c.completed_at.slice(0, 10);
+        const day = ilDay(c.completed_at);
         byDay[day] = (byDay[day] ?? 0) + 1;
       }
       const days = Object.keys(byDay).sort();

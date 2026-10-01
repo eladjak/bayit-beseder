@@ -11,6 +11,8 @@
  * Calendar event id linked to each task so we never duplicate events.
  */
 
+import { ilToday } from "@/lib/il-date";
+
 // ============================================================
 // Types
 // ============================================================
@@ -459,7 +461,7 @@ export interface TaskLike {
  * If the task has no due_date, defaults to today.
  */
 export function taskToCalendarEvent(task: TaskLike): CalendarEvent {
-  const dueDate = task.due_date ?? new Date().toISOString().split("T")[0];
+  const dueDate = task.due_date ?? ilToday();
 
   // Default: 1-hour block starting at 09:00 Israel time
   const durationMinutes = task.estimated_minutes ?? 60;

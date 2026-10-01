@@ -8,6 +8,7 @@ import type { SeasonalTemplate } from "@/lib/seasonal/types";
 import type { SeasonalActivation } from "@/lib/seasonal/types";
 import { getDaysUntilHoliday } from "@/lib/seasonal/registry";
 import { useTranslation } from "@/hooks/useTranslation";
+import { ilToday } from "@/lib/il-date";
 
 type ModalStep = "overview" | "creating" | "shopping" | "done";
 
@@ -40,8 +41,7 @@ export function PesachActivationModal({
 }: PesachActivationModalProps) {
   const [step, setStep] = useState<ModalStep>(activation?.tasksCreated ? "done" : "overview");
   const [startDate, setStartDate] = useState(() => {
-    const d = new Date();
-    return d.toISOString().slice(0, 10);
+    return ilToday();
   });
   const [createResult, setCreateResult] = useState<{ created: number; errors: string[] } | null>(null);
   const [shoppingResult, setShoppingResult] = useState<{ added: number; errors: string[] } | null>(null);

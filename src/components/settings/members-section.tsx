@@ -21,6 +21,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useHouseholdMembers, type HouseholdMember } from "@/hooks/useHouseholdMembers";
 import { useTranslation } from "@/hooks/useTranslation";
 import { createClient } from "@/lib/supabase";
+import { ilToday } from "@/lib/il-date";
 
 // ── Avatar ──────────────────────────────────────────────────────────────────
 
@@ -374,7 +375,7 @@ export function MembersSection({ onInviteClick }: MembersSectionProps) {
   const { profile } = useProfile();
   const { t } = useTranslation();
 
-  const todayStr = new Date().toISOString().slice(0, 10);
+  const todayStr = ilToday();
   const { members, loading, refetch } = useHouseholdMembers(
     profile?.household_id ?? null,
     todayStr

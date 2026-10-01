@@ -4,6 +4,7 @@ import { timingSafeEqual } from "crypto";
 import * as Sentry from "@sentry/nextjs";
 import { sendWhatsAppMessage, extractPhoneFromChatId } from "@/lib/whatsapp";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { ilToday } from "@/lib/il-date";
 
 // 30 requests per minute — allows burst traffic from Green API retries
 // while blocking abusive callers.
@@ -241,7 +242,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true, message: "no household" });
   }
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = ilToday();
 
   // C3: Find today's incomplete tasks scoped to this user's household only.
   const { data: tasks } = await supabase
