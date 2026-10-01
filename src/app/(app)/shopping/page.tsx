@@ -15,7 +15,7 @@ import { CategoryManager } from "@/components/shopping/category-manager";
 import { ShoppingShareSheet } from "@/components/shopping/shopping-share-sheet";
 import { PurchasedSection } from "@/components/shopping/purchased-section";
 import { searchSuggestions, getEmojiForItem } from "@/lib/shopping-autocomplete";
-import { buildCategoryModel, classifyItem } from "@/lib/shopping-taxonomy";
+import { buildCategoryModel, classifyItem, toStoredCategory } from "@/lib/shopping-taxonomy";
 import { haptic } from "@/lib/haptics";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useProfile } from "@/hooks/useProfile";
@@ -251,7 +251,7 @@ export default function ShoppingPage() {
   async function handleAdd() {
     if (!newTitle.trim()) return;
     const title = newTitle.trim();
-    const category = categoryTouched ? newCategory : categoryModel.resolveCategory(title, newCategory);
+    const category = categoryTouched ? toStoredCategory(newCategory) : categoryModel.resolveCategory(title, newCategory);
     const result = await addItem(title, category);
     if (!result.ok) {
       toast.error(result.error);
@@ -583,7 +583,7 @@ export default function ShoppingPage() {
                       )}
                       <button
                         onClick={() => {
-                          moveItemToCategory(movingItemId, catName);
+                          moveItemToCategory(movingItemId, toStoredCategory(catName));
                           toast.success(t("shopping.itemMoved"));
                           setMovingItemId(null);
                         }}
@@ -732,7 +732,7 @@ export default function ShoppingPage() {
 
       {/* Floating add button */}
       {!showForm && (
-        <div className="fixed bottom-24 left-4 z-20">
+        <div className="fixed bottom-24 start-4 z-20">
           <motion.button
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}

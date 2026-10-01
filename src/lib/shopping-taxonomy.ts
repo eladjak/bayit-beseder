@@ -51,6 +51,18 @@ export const TAXONOMY: TaxonomyCategory[] = [
 const BY_ID = new Map(TAXONOMY.map((c) => [c.id, c]));
 
 /** Generic / legacy names that mean "not really sorted yet" */
+/**
+ * "שונות" stored by older versions means "nobody sorted this" and is re-filed by name.
+ * When a person deliberately chooses "שונות" we store this marker instead, so it is
+ * never re-filed. resolveCategory() maps it back to the "שונות" group.
+ */
+export const MANUAL_MISC = "שונות (ידני)";
+
+/** Category string to persist for a deliberate user choice. */
+export function toStoredCategory(name: string): string {
+  return name === "שונות" ? MANUAL_MISC : name;
+}
+
 export const UNSORTED_CATEGORY_NAMES = new Set(["שונות", "אחר", "מזון", "בית", "כללי"]);
 
 // ---------------------------------------------------------------------------
@@ -218,6 +230,13 @@ const DICT: Record<string, string> = {
   `,
 };
 
+/** Whole-word overrides, checked before stemming ("חלבה" must not stem into "חלב"). */
+const EXACT: Record<string, string> = {
+  חלבה: "spreads:🍬",
+  חלווה: "spreads:🍬",
+  סביח: "bakery:🥙",
+};
+
 /** Weak signals: only used if nothing else matched. */
 const BRANDS: Record<string, string> = {
   תנובה: "dairy", טרה: "dairy", שטראוס: "dairy", יטבתה: "dairy", גד: "dairy",
@@ -263,6 +282,16 @@ export function tokenize(text: string): string[] {
     .replace(/["'`´׳״“”‘’]/g, "")
     .replace(/[^א-תa-z\s]/g, " ");
   return cleaned.split(/\s+/).filter(Boolean).map(stemToken);
+}
+
+function rawWords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[֑-ׇ]/g, "")
+    .replace(/["'`´׳״“”‘’]/g, "")
+    .replace(/[^א-תa-z\s]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
 }
 
 function stripPrefix(tok: string): string {
@@ -359,6 +388,15 @@ export function classifyItem(title: string): Classification | null {
   if (!title || !title.trim()) return null;
   const tokens = tokenize(title);
   if (tokens.length === 0) return null;
+
+  for (const raw of rawWords(title)) {
+    const hit = EXACT[raw];
+    if (hit) {
+      const [id, emoji] = hit.split(":");
+      const cat = BY_ID.get(id)!;
+      return { categoryId: cat.id, categoryName: cat.name, emoji, matched: raw, via: "token" };
+    }
+  }
   const stripped = tokens.map(stripPrefix);
 
   for (const toks of [tokens, stripped]) {
@@ -499,6 +537,7 @@ export function buildCategoryModel(dbCategories: HouseholdCategoryLike[]): Categ
   const knownNames = new Set(orderedNames);
   const resolveCategory = (title: string, stored: string | null | undefined): string => {
     const s = (stored ?? "").trim();
+    if (s === MANUAL_MISC) return displayNameFor("misc");
     // Respect a deliberate, known, specific choice (including the user's own categories)
     if (s && knownNames.has(s) && !UNSORTED_CATEGORY_NAMES.has(s)) return s;
     const hit = classifyItem(title);
