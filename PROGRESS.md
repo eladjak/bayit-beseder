@@ -1,5 +1,17 @@
 # BayitBeSeder (בית בסדר) - Progress
 
+## 2026-10-01 — Supermarket price comparison (flagged, Elad's household only)
+
+**Plan + adversarial review:** `~/.claude/workroom/bayit-price-compare-plan-2026-10-01.md` (Codex: FIX_FIRST, 27 points, each folded in or answered in §12).
+
+- **Data:** Price Transparency Law files, no login, no paid API. Working from the server: Shufersal (424 store files), Carrefour (146), Wolt Market online (34). Victory and Hatzi Hinam answer only from an Israeli IP (the server got no answer); Rami Levy / Osher Ad / Yochananof / Tiv Taam sit behind the Cerberus login portal and are out of scope until Elad decides.
+- **Where it runs:** `services/prices/` (Python, stdlib only) deployed to `/opt/bayit-prices` on the VPS as system user `bayitprices`. Separate SQLite store (`data/prices.db`), NOT the shared Supabase. Daily timer 06:40 Asia/Jerusalem. API on 127.0.0.1:3995, reachable as `hub.eladjak.com/bayit-prices/` (anchored tunnel rule; every path but `/v1/health` needs `X-Bayit-Prices-Key`).
+- **Matching:** 412 canonical items in `src/lib/prices/canonical-items.json` (rules: include / exclude words, pack-size window, weighted produce). Title → item uses the existing shopping taxonomy; extra words become must-contain, "לא X" becomes must-not-contain.
+- **Honesty rules (tested, each with a sabotage that must turn it red: `services/prices/tools/sabotage.py`):** rank only on items found in every compared store; whole packs that cover the quantity; a pinned product is never swapped; stale (>48h) stores shown but not ranked; promotions shown as text only; online never ranked against stores.
+- **App:** `/api/prices/{status,cities,compare,candidates,pin}`, screen `/shopping/prices`, entry link on the shopping list, assistant gets a ready verdict block for price questions. Flag: `PRICE_COMPARE_HOUSEHOLDS` (Vercel prod = Elad's household).
+- **Not done:** MCP tool for external agents; delivery fees (unknown, shown as unknown); Victory/Hatzi Hinam; legal review of commercial use of the data.
+
+
 ## 2026-09-27 — Household city field + legal drafts finalized + honest state-of-the-project since June
 
 **What this entry is:** an honest summary of everything that happened between the last real narrative update (11.6.2026, "apps-finish sweep") and today, because PROGRESS.md fell behind the actual work — the last ~15 entries above this one are terse commit-log style notes, not a picture of where the product stands. Read bottom-to-top for the full history; this entry is the current state.

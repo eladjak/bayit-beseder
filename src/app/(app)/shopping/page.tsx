@@ -23,6 +23,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { Loader2, Printer } from "lucide-react";
 import { useFirstVisit } from "@/hooks/useFirstVisit";
 import { FeatureTooltip } from "@/components/feature-tooltip";
+import { PricesEntryLink } from "@/components/prices/prices-entry-link";
 
 const VIRTUALIZE_THRESHOLD = 10;
 const ITEM_HEIGHT = 52; // px — estimated height of each ShoppingItemCard + gap
@@ -314,6 +315,7 @@ export default function ShoppingPage() {
                 </span>
               </div>
             )}
+            <PricesEntryLink />
           </div>
           <div className="flex items-center gap-2">
             {/* Clear checked */}

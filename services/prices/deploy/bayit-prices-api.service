@@ -1,0 +1,24 @@
+[Unit]
+Description=Bayit BeSeder price comparison API (127.0.0.1:3995, via hub tunnel /bayit-prices/)
+After=network-online.target
+
+[Service]
+User=bayitprices
+Group=bayitprices
+EnvironmentFile=/etc/bayit-prices.env
+Environment=BP_HOME=/opt/bayit-prices
+Environment=PYTHONUNBUFFERED=1
+WorkingDirectory=/opt/bayit-prices/app
+ExecStart=/usr/bin/python3 -m bp.api
+Restart=on-failure
+RestartSec=5
+MemoryMax=512M
+CPUQuota=50%
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/bayit-prices/data
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily price ingestion at 06:40 Israel time (full files are published ~02:00-05:30)
+
+[Timer]
+OnCalendar=*-*-* 06:40:00 Asia/Jerusalem
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
