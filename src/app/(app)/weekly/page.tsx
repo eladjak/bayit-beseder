@@ -56,11 +56,12 @@ import {
   generateMockWeeklyTasks,
   getCategoryFromId,
 } from "@/lib/weekly-mock-data";
+import { addDaysStr, ilDay, ilToday } from "@/lib/il-date";
 
 export default function WeeklyPage() {
   const { t } = useTranslation();
   const { profile } = useProfile();
-  const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const todayStr = useMemo(() => ilToday(), []);
   const { partner } = usePartner(profile?.partner_id, todayStr);
   const { members: householdMembers } = useHouseholdMembers(
     profile?.household_id ?? null,
@@ -74,12 +75,11 @@ export default function WeeklyPage() {
   }
 
   const startOfWeek = useMemo(() => {
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const start = new Date(now);
-    start.setDate(now.getDate() - dayOfWeek);
-    start.setHours(0, 0, 0, 0);
-    return start;
+    // Sunday of the current week in Israel, as a local-midnight Date.
+    const todayIl = ilToday();
+    const sunday = addDaysStr(todayIl, -new Date(todayIl).getUTCDay());
+    const [y, m, d] = sunday.split("-").map(Number);
+    return new Date(y, m - 1, d);
   }, []);
 
   const endOfWeek = useMemo(() => {
@@ -124,8 +124,8 @@ export default function WeeklyPage() {
         ? householdMembers.map((m) => m.id)
         : [profile.id, ...(profile.partner_id ? [profile.partner_id] : [])];
 
-    const startStr = startOfWeek.toISOString().split("T")[0];
-    const endStr = endOfWeek.toISOString().split("T")[0];
+    const startStr = ilDay(startOfWeek);
+    const endStr = ilDay(endOfWeek);
     const weekTasksForWizard = tasks.filter(
       (t) => t.due_date && t.due_date >= startStr && t.due_date <= endStr
     );
@@ -143,8 +143,8 @@ export default function WeeklyPage() {
         ? householdMembers.map((m) => m.id)
         : [profile.id, ...(profile.partner_id ? [profile.partner_id] : [])];
 
-    const startStr = startOfWeek.toISOString().split("T")[0];
-    const endStr = endOfWeek.toISOString().split("T")[0];
+    const startStr = ilDay(startOfWeek);
+    const endStr = ilDay(endOfWeek);
     const weekTasksForWizard = tasks.filter(
       (t) => t.due_date && t.due_date >= startStr && t.due_date <= endStr
     );
@@ -199,8 +199,8 @@ export default function WeeklyPage() {
   const weekTasks = useMemo(() => {
     if (loading) return [];
     if (tasks.length === 0) return mockTasksRef.current ?? [];
-    const startStr = startOfWeek.toISOString().split("T")[0];
-    const endStr = endOfWeek.toISOString().split("T")[0];
+    const startStr = ilDay(startOfWeek);
+    const endStr = ilDay(endOfWeek);
     return tasks.filter((t) => {
       if (!t.due_date) return false;
       return t.due_date >= startStr && t.due_date <= endStr;

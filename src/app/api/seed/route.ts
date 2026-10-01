@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { ilDayOffset, ilToday } from "@/lib/il-date";
 
 // 3 requests per minute — seeding is a one-time action; very strict limit.
 const limiter = rateLimit({ windowMs: 60_000, max: 3 });
@@ -72,8 +73,8 @@ export async function POST(request: NextRequest) {
     catMap[c.name] = c.id;
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+  const today = ilToday();
+  const tomorrow = ilDayOffset(1);
 
   // Check if custom tasks were sent from the wizard
   let body: { tasks?: { title: string; category: string; estimatedMinutes: number; recurring: boolean; frequency: string }[] } = {};

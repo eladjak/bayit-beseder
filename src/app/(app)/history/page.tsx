@@ -16,6 +16,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
 import type { TaskRow, TaskCompletionRow } from "@/lib/types/database";
 import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
+import { getRelativeDate } from "@/lib/relative-date";
 
 // ============================================
 // Category Filter Bar
@@ -76,34 +77,6 @@ interface HistoryItemProps {
   task: TaskRow;
   completion: TaskCompletionRow;
   categoryKey: string;
-}
-
-function getRelativeDate(completedAt: string): string {
-  const now = new Date();
-  const completed = new Date(completedAt);
-  const todayStr = now.toISOString().slice(0, 10);
-  const completedDateStr = completed.toISOString().slice(0, 10);
-
-  if (completedDateStr === todayStr) return "היום";
-
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  if (completedDateStr === yesterday.toISOString().slice(0, 10)) return "אתמול";
-
-  const diffMs = now.getTime() - completed.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays < 7) return `לפני ${diffDays} ימים`;
-  if (diffDays < 30) {
-    const weeks = Math.floor(diffDays / 7);
-    return weeks === 1 ? "לפני שבוע" : `לפני ${weeks} שבועות`;
-  }
-
-  return completed.toLocaleDateString("he-IL", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 }
 
 function HistoryItem({ task, completion, categoryKey }: HistoryItemProps) {

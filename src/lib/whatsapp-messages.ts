@@ -1,3 +1,4 @@
+import { ilToday } from "@/lib/il-date";
 /**
  * WhatsApp message templates for BayitBeSeder.
  * Hebrew, warm, household-friendly tone — works for couples, families,
@@ -93,7 +94,7 @@ export function buildKindOverdueLine(overdueCount: number): string {
 
 function getHebrewDay(): string {
   const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
-  return days[new Date().getDay()];
+  return days[new Date(ilToday()).getUTCDay()];
 }
 
 /**

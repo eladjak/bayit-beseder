@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
 import { CATEGORY_LABELS, CATEGORY_COLORS, CATEGORY_ICONS } from "@/lib/categories";
+import { addDaysStr, ilDay } from "@/lib/il-date";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -47,22 +48,19 @@ export interface PersonalRecords {
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 function isoWeekStart(date: Date): string {
-  const d = new Date(date);
-  const day = d.getDay(); // 0 = Sun
-  d.setDate(d.getDate() - day);
-  return d.toISOString().slice(0, 10);
+  // `date` is a date-only value (UTC midnight): pure calendar arithmetic.
+  const day = date.getUTCDay(); // 0 = Sun
+  return addDaysStr(date.toISOString().slice(0, 10), -day);
 }
 
 function addDays(base: string, days: number): string {
-  const d = new Date(base);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return addDaysStr(base, days);
 }
 
 function hebrewWeekLabel(weekStart: string, weekIndex: number): string {
   const date = new Date(weekStart);
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
+  const day = date.getUTCDate();
+  const month = date.getUTCMonth() + 1;
   if (weekIndex === 0) return `${day}/${month}`;
   return `שבוע ${weekIndex}`;
 }
@@ -97,7 +95,7 @@ export function useAdvancedStats({
       const weekEnd = addDays(weekStart, 6);
 
       const weekCompletions = completions.filter((c) => {
-        const d = c.completed_at.slice(0, 10);
+        const d = ilDay(c.completed_at);
         return d >= weekStart && d <= weekEnd;
       });
 
@@ -156,7 +154,7 @@ export function useAdvancedStats({
   const heatmapData = useMemo((): HeatmapDay[] => {
     const countsByDay: Record<string, number> = {};
     for (const c of completions) {
-      const day = c.completed_at.slice(0, 10);
+      const day = ilDay(c.completed_at);
       countsByDay[day] = (countsByDay[day] ?? 0) + 1;
     }
 
@@ -192,7 +190,7 @@ export function useAdvancedStats({
     const countsByDay: Record<string, number> = {};
     const myCounts: Record<string, number> = {};
     for (const c of completions) {
-      const day = c.completed_at.slice(0, 10);
+      const day = ilDay(c.completed_at);
       countsByDay[day] = (countsByDay[day] ?? 0) + 1;
       if (!userId || c.user_id === userId) {
         myCounts[day] = (myCounts[day] ?? 0) + 1;
@@ -213,7 +211,7 @@ export function useAdvancedStats({
     const daysWithActivity = new Set<string>();
     for (const c of completions) {
       if (!userId || c.user_id === userId) {
-        daysWithActivity.add(c.completed_at.slice(0, 10));
+        daysWithActivity.add(ilDay(c.completed_at));
       }
     }
 

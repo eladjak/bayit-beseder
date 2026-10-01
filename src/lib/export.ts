@@ -1,3 +1,4 @@
+import { ilDay } from "@/lib/il-date";
 /**
  * Data export utilities for BayitBeSeder
  * Supports CSV export with UTF-8 BOM for Hebrew Excel compatibility
@@ -62,7 +63,7 @@ export function exportTasksToCSV(tasks: ExportTask[]): string {
     escapeCSV(getFrequencyLabel(task.recurring)),
     escapeCSV(getStatusLabel(task.status)),
     escapeCSV(task.due_date ?? ""),
-    escapeCSV(task.created_at?.slice(0, 10) ?? ""),
+    escapeCSV(task.created_at ? ilDay(task.created_at) : ""),
   ]);
 
   const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");

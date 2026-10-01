@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { ACHIEVEMENTS } from "@/lib/achievements";
 import { computeBestStreak } from "@/lib/task-stats";
 import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
+import { ilDay } from "@/lib/il-date";
 
 const DEMO_EARNED = ["first_task", "streak_3", "week_warrior", "team_player"];
 
@@ -43,7 +44,7 @@ export function useEarnedBadges({
 
     // Count unique days with completions
     const completionDays = new Set(
-      completions.map((c) => c.completed_at.slice(0, 10))
+      completions.map((c) => ilDay(c.completed_at))
     );
 
     // first_task
@@ -80,7 +81,7 @@ export function useEarnedBadges({
     const total = completions.length;
     const streak = computeBestStreak(completions);
     const completionDays = new Set(
-      completions.map((c) => c.completed_at.slice(0, 10))
+      completions.map((c) => ilDay(c.completed_at))
     );
 
     const result: Record<string, number> = {};

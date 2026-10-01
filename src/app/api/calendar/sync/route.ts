@@ -8,6 +8,7 @@ import {
   type GoogleTokens,
 } from "@/lib/google-calendar";
 import type { Json } from "@/lib/types/database";
+import { ilDay } from "@/lib/il-date";
 
 /**
  * POST /api/calendar/sync
@@ -90,8 +91,8 @@ export async function POST() {
 
   const timeMin = now.toISOString();
   const timeMax = weekFromNow.toISOString();
-  const todayStr = now.toISOString().split("T")[0];
-  const weekStr = weekFromNow.toISOString().split("T")[0];
+  const todayStr = ilDay(now);
+  const weekStr = ilDay(weekFromNow);
 
   // Fetch existing calendar events so we can avoid duplicates.
   // We match by a [bayit:TASK_ID] tag embedded in the event description.

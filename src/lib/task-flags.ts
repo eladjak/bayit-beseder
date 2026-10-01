@@ -15,6 +15,8 @@
  * boolean and the text representation resolve identically. This is deliberately
  * a READ-side fix: it does not touch how the data is stored.
  */
+
+import { ilToday } from "@/lib/il-date";
 export function isRecurring(value: unknown): boolean {
   if (typeof value === "boolean") return value;
   if (typeof value === "string") {
@@ -26,7 +28,7 @@ export function isRecurring(value: unknown): boolean {
 }
 
 export function todayISO(): string {
-  return new Date().toISOString().slice(0, 10);
+  return ilToday();
 }
 
 /**

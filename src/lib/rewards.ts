@@ -1,4 +1,5 @@
 import type { TaskInstance, TaskTemplate } from "@/lib/types/database";
+import { addDaysStr, ilDay, ilToday } from "@/lib/il-date";
 
 // ============================================
 // Types
@@ -121,10 +122,8 @@ export const REWARDS: Reward[] = [
 // ============================================
 
 function getWeekStart(dateStr: string): string {
-  const d = new Date(dateStr);
-  const day = d.getDay(); // 0=Sun
-  d.setDate(d.getDate() - day);
-  return d.toISOString().slice(0, 10);
+  const day = new Date(dateStr).getUTCDay(); // 0=Sun (date-only string, UTC arithmetic)
+  return addDaysStr(dateStr, -day);
 }
 
 function getMonthStart(dateStr: string): string {
@@ -132,9 +131,7 @@ function getMonthStart(dateStr: string): string {
 }
 
 function addDays(base: string, days: number): string {
-  const d = new Date(base);
-  d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  return addDaysStr(base, days);
 }
 
 /**
@@ -149,7 +146,7 @@ function countCompletedByUser(
   const counts = new Map<string, number>();
   for (const t of tasks) {
     if (t.status !== "completed" || !t.completed_by || !t.completed_at) continue;
-    const d = t.completed_at.slice(0, 10);
+    const d = ilDay(t.completed_at);
     if (d >= startDate && d <= endDate) {
       counts.set(t.completed_by, (counts.get(t.completed_by) ?? 0) + 1);
     }
@@ -168,7 +165,7 @@ function countCompletedInRange(
   let count = 0;
   for (const t of tasks) {
     if (t.status !== "completed" || !t.completed_at) continue;
-    const d = t.completed_at.slice(0, 10);
+    const d = ilDay(t.completed_at);
     if (d >= startDate && d <= endDate) count++;
   }
   return count;
@@ -190,7 +187,7 @@ function countBothDailyStreak(
     const usersOnDay = new Set<string>();
     for (const t of tasks) {
       if (t.status !== "completed" || !t.completed_by || !t.completed_at) continue;
-      if (t.completed_at.slice(0, 10) === dateStr) {
+      if (ilDay(t.completed_at) === dateStr) {
         usersOnDay.add(t.completed_by);
       }
     }
@@ -235,7 +232,7 @@ export function computeRewardsProgress(
   streaks: { user1Streak: number; user2Streak: number },
   goldenRuleHits: number,
   householdMembers: string[],
-  today: string = new Date().toISOString().slice(0, 10)
+  today: string = ilToday()
 ): RewardProgress[] {
   const weekStart = getWeekStart(today);
   const monthStart = getMonthStart(today);

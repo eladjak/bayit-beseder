@@ -10,6 +10,7 @@ import {
 } from "@/lib/whatsapp-messages";
 import { deliverWhatsApp, gateDelivery } from "@/lib/agent/deliver";
 import { isTaskOverdue } from "@/lib/task-flags";
+import { ilToday } from "@/lib/il-date";
 
 /**
  * GET /api/agent/brief?householdId=<uuid>
@@ -90,7 +91,7 @@ export async function GET(request: NextRequest) {
     );
   }
   const supabase = createClient(supabaseUrl, serviceKey);
-  const today = new Date().toISOString().slice(0, 10);
+  const today = ilToday();
 
   // 5. Today's open tasks
   let todayQuery = supabase
@@ -141,7 +142,7 @@ export async function GET(request: NextRequest) {
   const streak = streaks?.[0]?.current_count ?? 0;
 
   const days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי", "שבת"];
-  const dayOfWeek = days[new Date().getDay()];
+  const dayOfWeek = days[new Date(ilToday()).getUTCDay()];
 
   // 9. Shape JSON + WhatsApp text
   const shapedTasks = todayTasks.map((t) => ({

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Flame, Trophy } from "lucide-react";
 import { computeConsecutiveStreak } from "@/hooks/useNotifications";
 import { AnimatedNumber } from "@/components/animated-number";
+import { addDaysStr, ilDay } from "@/lib/il-date";
 
 interface StreakTrackerProps {
   /** Array of ISO date strings when tasks were completed */
@@ -130,11 +131,9 @@ export const StreakTracker = memo(function StreakTracker({
       <div className="flex items-center gap-1 justify-center pt-1">
         {Array.from({ length: 7 }).map((_, i) => {
           const dayOffset = 6 - i;
-          const d = new Date(today);
-          d.setDate(d.getDate() - dayOffset);
-          const dateStr = d.toISOString().slice(0, 10);
+          const dateStr = addDaysStr(today, -dayOffset); // Israeli calendar day
           const hasActivity = completionDates.some(
-            (cd) => cd.slice(0, 10) === dateStr
+            (cd) => ilDay(cd) === dateStr
           );
 
           return (
@@ -154,7 +153,7 @@ export const StreakTracker = memo(function StreakTracker({
                 {hasActivity ? (
                   <Flame className="w-3 h-3" />
                 ) : (
-                  <span>{d.getDate()}</span>
+                  <span>{Number(dateStr.slice(8, 10))}</span>
                 )}
               </motion.div>
             </div>

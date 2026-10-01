@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase";
+import { addDaysStr, ilDay } from "@/lib/il-date";
 
 // ============================================
 // Types
@@ -179,7 +180,7 @@ async function fetchNotificationsFromSupabase(): Promise<SupabaseNotificationDat
 
     const now = new Date();
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-    const todayStr = now.toISOString().slice(0, 10);
+    const todayStr = ilDay(now);
 
     // Fetch all data sources in parallel using the actual production tables
     const [completionsResult, streaksResult, achievementsResult, tasksResult, profileResult] =
@@ -539,15 +540,13 @@ export function computeConsecutiveStreak(
   completionDates: string[],
   today: string
 ): number {
-  const dateSet = new Set(completionDates.map((d) => d.slice(0, 10)));
+  const dateSet = new Set(completionDates.map((d) => ilDay(d)));
   let streak = 0;
   let currentDate = today;
 
   while (dateSet.has(currentDate)) {
     streak += 1;
-    const d = new Date(currentDate);
-    d.setDate(d.getDate() - 1);
-    currentDate = d.toISOString().slice(0, 10);
+    currentDate = addDaysStr(currentDate, -1);
   }
 
   return streak;
@@ -562,14 +561,11 @@ export function computeWeeklyChallengeProgress(
   today: string,
   target: number
 ): { completed: number; target: number; percentage: number } {
-  const todayDate = new Date(today);
-  const dayOfWeek = todayDate.getDay(); // 0=Sun
-  const sundayDate = new Date(todayDate);
-  sundayDate.setDate(sundayDate.getDate() - dayOfWeek);
-  const sundayStr = sundayDate.toISOString().slice(0, 10);
+  const dayOfWeek = new Date(today).getUTCDay(); // 0=Sun (date-only string)
+  const sundayStr = addDaysStr(today, -dayOfWeek);
 
   const completed = completionDates.filter((d) => {
-    const dateStr = d.slice(0, 10);
+    const dateStr = ilDay(d);
     return dateStr >= sundayStr && dateStr <= today;
   }).length;
 

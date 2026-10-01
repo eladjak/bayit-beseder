@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { TaskCompletionRow } from "@/lib/types/database";
 import type { HouseholdMember } from "@/hooks/useHouseholdMembers";
+import { addDaysStr, ilDay, ilToday } from "@/lib/il-date";
 
 export type LeaderboardPeriod = "day" | "week" | "alltime";
 
@@ -36,17 +37,15 @@ interface UseLeaderboardReturn {
 
 /** Today as ISO date string */
 function todayStr(): string {
-  return new Date().toISOString().slice(0, 10);
+  return ilToday();
 }
 
 /** Monday of the current ISO week */
 function weekStart(): string {
-  const d = new Date();
-  const day = d.getDay();
+  const today = ilToday();
+  const day = new Date(today).getUTCDay();
   const diff = day === 0 ? -6 : 1 - day;
-  d.setDate(d.getDate() + diff);
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString().slice(0, 10);
+  return addDaysStr(today, diff);
 }
 
 /** Simple points model: 10 pts per completion */
@@ -72,7 +71,7 @@ function computeRankings(
     period === "day" ? todayStr() : period === "week" ? weekStart() : null;
 
   const filtered = start
-    ? completions.filter((c) => c.completed_at.slice(0, 10) >= start)
+    ? completions.filter((c) => ilDay(c.completed_at) >= start)
     : completions;
 
   // Count per user
