@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { ReactNode } from "react";
+
+/*
+ * Terms of use - rewritten 1.10.2026 after Elad's five legal decisions
+ * (see docs/TERMS-OF-USE-DRAFT.md, decision log).
+ * NOT reviewed by a lawyer. Every price / billing claim here must match
+ * src/app/api/sumit/* and src/app/upgrade/page.tsx.
+ */
 
 export const metadata: Metadata = {
   title: "תנאי שימוש",
@@ -23,6 +31,18 @@ export const metadata: Metadata = {
   },
 };
 
+const CONTACT_EMAIL = "hello@bayitbeseder.com";
+const PRIVACY_EMAIL = "privacy@bayitbeseder.com";
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <section>
+      <h2 className="text-xl font-semibold text-foreground mb-4">{title}</h2>
+      <div className="space-y-3 text-muted-foreground leading-relaxed">{children}</div>
+    </section>
+  );
+}
+
 export default function TermsPage() {
   return (
     <div className="min-h-dvh bg-background" dir="rtl" lang="he">
@@ -41,7 +61,7 @@ export default function TermsPage() {
             תנאי שימוש
           </h1>
           <p className="text-sm text-muted-foreground">
-            עודכן לאחרונה: מרץ 2026
+            עודכן לאחרונה: אוקטובר 2026
           </p>
         </header>
 
@@ -51,200 +71,162 @@ export default function TermsPage() {
             <p className="text-base leading-relaxed text-muted-foreground">
               ברוכים הבאים ל-<strong className="text-foreground">בית בסדר</strong> 🏠
               <br />
-              השימוש באפליקציה מהווה הסכמה לתנאים הבאים. כתבנו אותם בשפה אנושית
-              ולא ב-legalese מפחיד — אבל הם עדיין מחייבים. קחו רגע לקרוא.
+              השימוש באפליקציה מהווה הסכמה לתנאים הבאים. כתבנו אותם בשפה אנושית — אבל הם עדיין מחייבים.
+              הם נקראים יחד עם{" "}
+              <Link href="/privacy" className="text-primary underline underline-offset-2">מדיניות הפרטיות</Link>.
             </p>
           </section>
 
-          {/* 1 — About the service */}
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              1. מהי האפליקציה
-            </h2>
-            <p className="text-muted-foreground leading-relaxed">
-              בית בסדר היא אפליקציית ניהול בית שנועדה לעזור לזוגות, למשפחות ולשותפים לחלק משימות,
-              לנהל רשימות קניות, לתכנן את השבוע ולהנות מהדרך.
-              האפליקציה ניתנת לשימוש חינמי, ואנחנו שומרים לעצמנו את הזכות להוסיף בעתיד
-              תכונות בתשלום — אבל תמיד נודיע מראש ובבירור.
-            </p>
-          </section>
-
-          {/* 2 — Account */}
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              2. חשבון ורישום
-            </h2>
-            <div className="space-y-3 text-muted-foreground leading-relaxed">
-              <p>
-                כדי להשתמש באפליקציה צריך ליצור חשבון עם אימייל אמיתי.
-                אתם אחראים לשמור על פרטי ההתחברות שלכם בסוד.
-              </p>
-              <p>
-                חשבון אחד = משק בית אחד.
-                ניתן להזמין שותפ/ת בית לאותו חשבון — כך הנתונים משותפים ביניכם.
-              </p>
-              <p>
-                אתם חייבים להיות בני 13 לפחות כדי להשתמש בשירות.
-              </p>
-            </div>
-          </section>
-
-          {/* 3 — User responsibilities */}
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              3. אחריות המשתמש
-            </h2>
-            <p className="text-muted-foreground leading-relaxed mb-3">
-              אתם מתחייבים:
-            </p>
-            <ul className="space-y-2 text-muted-foreground leading-relaxed list-none">
-              <li className="flex gap-2">
-                <span className="text-green-500">✓</span>
-                <span>להזין מידע אמיתי ועדכני</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-green-500">✓</span>
-                <span>להשתמש באפליקציה למטרתה — ניהול בית</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-green-500">✓</span>
-                <span>לא להעביר פרטי התחברות לאנשים שאינם חלק מהבית שלכם</span>
-              </li>
-            </ul>
-            <p className="mt-4 text-muted-foreground leading-relaxed mb-3">
-              ואתם מתחייבים שלא:
-            </p>
-            <ul className="space-y-2 text-muted-foreground leading-relaxed list-none">
-              <li className="flex gap-2">
-                <span className="text-red-500">✗</span>
-                <span>לנסות לפרוץ, לשבש, או לפגוע בשירות</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-red-500">✗</span>
-                <span>להשתמש בבוטים, scrapers, או אמצעים אוטומטיים ללא אישורנו</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-red-500">✗</span>
-                <span>לנצל את הכלים שלנו לפעילות בלתי חוקית</span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-red-500">✗</span>
-                <span>ליצור חשבונות מזויפים או מרובים לאותו בית</span>
-              </li>
-            </ul>
-          </section>
-
-          {/* 4 — IP */}
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              4. קניין רוחני
-            </h2>
-            <p className="text-muted-foreground leading-relaxed">
-              הקוד, העיצוב, הלוגו והתוכן של האפליקציה (מלבד הנתונים שלכם) הם קניינו של בית בסדר.
-              אסור להעתיק, לשכפל, או לשנות אותם ללא אישור בכתב.
-            </p>
-            <p className="mt-3 text-muted-foreground leading-relaxed">
-              הנתונים שאתם מזינים — המשימות, הרשימות, ועוד — הם שלכם לחלוטין.
-              אנחנו לא טוענים לבעלות עליהם.
-            </p>
-          </section>
-
-          {/* 5 — Service availability */}
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              5. זמינות השירות
-            </h2>
-            <p className="text-muted-foreground leading-relaxed">
-              אנחנו שואפים להחזיק את האפליקציה זמינה 24/7, אבל החיים קורים —
-              עלולים להיות גיבויים, עדכונים, ולפעמים ירידת שרתים.
-              נעשה כמיטב יכולתנו להודיע מראש על תחזוקות מתוכננות.
-            </p>
-            <p className="mt-3 text-muted-foreground leading-relaxed">
-              <strong className="text-foreground">השירות ניתן &quot;כפי שהוא&quot; (as-is)</strong> ללא אחריות לזמינות רציפה מוחלטת.
-              אנחנו לא נושאים באחריות לנזק שנגרם כתוצאה מהפסקת שירות.
-            </p>
-          </section>
-
-          {/* 6 — Limitation of liability */}
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              6. הגבלת אחריות
-            </h2>
-            <p className="text-muted-foreground leading-relaxed">
-              בית בסדר לא תהיה אחראית לנזקים עקיפים, מקריים, או תוצאתיים הנובעים
-              מהשימוש (או הפסקת השימוש) באפליקציה.
-              האחריות המקסימלית שלנו כלפיכם לא תעלה על הסכום ששילמתם לנו ב-12 החודשים האחרונים
-              (שכנראה הוא אפס, כי זה חינמי).
-            </p>
-          </section>
-
-          {/* 7 — Account termination */}
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              7. סיום חשבון
-            </h2>
-            <div className="space-y-3 text-muted-foreground leading-relaxed">
-              <p>
-                <strong className="text-foreground">מצדכם:</strong>{" "}
-                ניתן למחוק את החשבון בכל עת מהגדרות ← &quot;אזור מסוכן&quot;. ללא שאלות מיותרות.
-              </p>
-              <p>
-                <strong className="text-foreground">מצדנו:</strong>{" "}
-                שמורה לנו הזכות להשעות או לסגור חשבון שמפר את תנאי השימוש.
-                במקרים חמורים — ללא הודעה מוקדמת.
-                במקרים פחות חמורים — נשלח אזהרה תחילה.
-              </p>
-            </div>
-          </section>
-
-          {/* 8 — Changes to terms */}
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              8. שינויים בתנאים
-            </h2>
-            <p className="text-muted-foreground leading-relaxed">
-              מדי פעם נצטרך לעדכן את התנאים. כשנעשה זאת —
-              נודיע לכם באימייל ונעדכן את התאריך בראש הדף.
-              המשך השימוש לאחר ההודעה נחשב כהסכמה לתנאים המעודכנים.
-              אם לא מסכימים — אפשר למחוק את החשבון (וזה בסדר גמור).
-            </p>
-          </section>
-
-          {/* 9 — Governing law */}
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              9. הדין החל וסמכות שיפוט
-            </h2>
-            <p className="text-muted-foreground leading-relaxed">
-              תנאי שימוש אלו כפופים לדין הישראלי.
-              כל סכסוך שיתעורר ידון בבתי המשפט המוסמכים במחוז הצפון.
-            </p>
-          </section>
-
-          {/* 10 — Contact */}
-          <section>
-            <h2 className="text-xl font-semibold text-foreground mb-4">
-              10. יצירת קשר
-            </h2>
-            <p className="text-muted-foreground leading-relaxed">
-              שאלות, הצעות, או פשוט רצון להגיד שלום — אנחנו כאן:
-              <br />
-              <a
-                href="mailto:hello@bayitbeseder.com"
-                className="text-primary underline underline-offset-2"
-              >
-                hello@bayitbeseder.com
+          <Section title="1. מהי האפליקציה ומי מפעיל אותה">
+            <p>
+              בית בסדר היא אפליקציה לניהול משק בית: משימות, רשימות קניות, תכנון ארוחות ותזכורות, לזוגות,
+              למשפחות ולשותפים. היא מופעלת על ידי אלעד יעקובוביץ&apos;, עוסק פטור (&quot;אנחנו&quot;).
+              יצירת קשר:{" "}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-2">
+                {CONTACT_EMAIL}
               </a>
+              .
             </p>
-          </section>
+          </Section>
+
+          <Section title="2. מי יכול להשתמש">
+            <p>מי שפותח בית באפליקציה או משלם על Plus חייב להיות בן 18 לפחות.</p>
+            <p>
+              חבר בית מתחת לגיל 18 מצטרף רק בהזמנה של הורה או אפוטרופוס שהוא חבר באותו בית, והאחריות על
+              השימוש שלו היא של ההורה. ילדים צעירים אינם פותחים חשבון; ההורה מוסיף אותם לבית ומנהל את
+              הפרטים שלהם.
+            </p>
+          </Section>
+
+          <Section title="3. חשבון ומשק בית">
+            <p>
+              כדי להשתמש צריך חשבון עם אימייל אמיתי. אתם אחראים לשמור על פרטי ההתחברות בסוד.
+              כל מי שהוזמן לבית רואה ועורך את המידע המשותף של אותו בית.
+            </p>
+            <p>
+              <strong className="text-foreground">הוצאת חבר מהבית:</strong>{" "}
+              הוא מאבד גישה למידע של הבית. מה שהזין לרשומות המשותפות (למשל משימות) עשוי להישאר בבית, אלא אם ביקש
+              למחוק את המידע האישי שלו.
+            </p>
+            <p>
+              <strong className="text-foreground">פרידה:</strong>{" "}
+              כל אחד מבני הזוג יכול לפנות אלינו באימייל ולבקש להפריד את החשבונות. נעזור לכל צד לקבל עותק של המידע
+              שלו. כרגע זה נעשה ידנית, לא אוטומטית.
+            </p>
+          </Section>
+
+          <Section title="4. חינם ו-Plus — מחיר, תשלום וביטול">
+            <p>
+              <strong className="text-foreground">הגרסה החינמית</strong> נשארת חינמית, בלי הגבלת זמן.
+            </p>
+            <p>
+              <strong className="text-foreground">Plus</strong> עולה 19 ₪ לחודש למשק בית. זה המחיר הסופי:
+              אנחנו עוסק פטור, ולכן אין תוספת מע&quot;מ. התכולה המדויקת של כל מסלול מוצגת ב
+              <Link href="/upgrade" className="text-primary underline underline-offset-2">עמוד השדרוג</Link>{" "}
+              לפני התשלום.
+            </p>
+            <p>
+              התשלום מתבצע בעמוד מאובטח של חברת הסליקה סאמיט (Sumit), ובסופו נשלחת קבלה לאימייל.
+              כל תשלום מעניק Plus לכל חברי הבית ל-31 יום. אם התשלום הוגדר כחיוב חודשי, הוא מתחדש כל חודש
+              עד שתבטלו, ולפני כל שינוי מחיר נודיע לכם לפחות 30 יום מראש.
+            </p>
+            <p>
+              <strong className="text-foreground">ביטול:</strong>{" "}
+              אפשר לבטל בכל עת, מדף ההגדרות או באימייל אלינו. החיוב הבא ייעצר תוך 3 ימי עסקים לכל המאוחר,
+              ו-Plus יישאר פעיל עד סוף התקופה ששולמה.
+            </p>
+            <p>
+              <strong className="text-foreground">החזר כספי:</strong>{" "}
+              ביקשתם לבטל תוך 14 יום מהתשלום הראשון — תקבלו החזר מלא. ביטול מאוחר יותר — לבקשתכם נחזיר את החלק
+              היחסי של החודש שעוד לא נוצל. ההחזר יינתן לאותו אמצעי תשלום.
+            </p>
+            <p>אם נפסיק את Plus או נסגור את השירות, נודיע מראש ונחזיר את החלק היחסי שלא נוצל.</p>
+          </Section>
+
+          <Section title="5. שימוש מקובל">
+            <p>אתם מתחייבים:</p>
+            <ul className="space-y-2 list-none">
+              <li className="flex gap-2"><span className="text-green-500">✓</span><span>להשתמש באפליקציה לניהול הבית שלכם</span></li>
+              <li className="flex gap-2"><span className="text-green-500">✓</span><span>להזין מידע על אחרים (למשל בן משפחה שאינו בבית) רק בהסכמתם</span></li>
+              <li className="flex gap-2"><span className="text-green-500">✓</span><span>לא להעביר פרטי התחברות או קוד גישה של עוזר דיגיטלי לאנשים מחוץ לבית</span></li>
+            </ul>
+            <p>ואתם מתחייבים שלא:</p>
+            <ul className="space-y-2 list-none">
+              <li className="flex gap-2"><span className="text-red-500">✗</span><span>לנסות לגשת למידע של בית אחר, לפרוץ או לעקוף הגנות</span></li>
+              <li className="flex gap-2"><span className="text-red-500">✗</span><span>להשתמש בממשק לסוכנים מעבר להרשאה שניתנה, או להעמיס על השירות</span></li>
+              <li className="flex gap-2"><span className="text-red-500">✗</span><span>להשתמש בשירות לפעילות בלתי חוקית, להטרדה או לתוכן פוגעני</span></li>
+            </ul>
+          </Section>
+
+          <Section title="6. קניין רוחני">
+            <p>
+              הקוד, העיצוב והתוכן של האפליקציה שייכים לנו. הנתונים שאתם מזינים שייכים לכם, ואנחנו לא טוענים
+              לבעלות עליהם.
+            </p>
+          </Section>
+
+          <Section title="7. העוזר החכם">
+            <p>
+              הצעות העוזר החכם (למשל תפריט שבועי) הן הצעות בלבד. בנושא אלרגיות ורגישויות מזון — בדקו בעצמכם
+              שהמידע שהזנתם נכון ושהמנה מתאימה. ההחלטה מה מגישים נשארת שלכם.
+            </p>
+          </Section>
+
+          <Section title="8. זמינות והגבלת אחריות">
+            <p>אנחנו שואפים שהאפליקציה תהיה זמינה תמיד, אבל ייתכנו תקלות ועבודות תחזוקה. השירות ניתן כפי שהוא.</p>
+            <p>
+              בכפוף לחוק, איננו אחראים לנזק עקיף, והאחריות שלנו מוגבלת לסכום ששילמתם לנו ב-12 החודשים האחרונים.
+              ההגבלה הזו אינה חלה על נזק שנגרם בזדון או ברשלנות חמורה שלנו, ואינה גורעת מזכויות שהחוק נותן לכם
+              כצרכנים.
+            </p>
+          </Section>
+
+          <Section title="9. סיום שימוש">
+            <p>
+              <strong className="text-foreground">מצדכם:</strong>{" "}
+              אפשר להפסיק בכל עת ולבקש למחוק את החשבון באימייל ל-
+              <a href={`mailto:${PRIVACY_EMAIL}`} className="text-primary underline underline-offset-2">
+                {PRIVACY_EMAIL}
+              </a>
+              . המחיקה מתבצעת כמתואר במדיניות הפרטיות.
+            </p>
+            <p>
+              <strong className="text-foreground">מצדנו:</strong>{" "}
+              נוכל להשעות חשבון שמפר את התנאים. ברוב המקרים נזהיר קודם; רק במקרה חמור (למשל ניסיון לגשת למידע
+              של בית אחר) נשעה מיד, ונודיע לכם למה.
+            </p>
+          </Section>
+
+          <Section title="10. שינויים בתנאים">
+            <p>
+              שינוי מהותי יגיע אליכם באימייל או בתוך האפליקציה לפחות 30 יום לפני שייכנס לתוקף, והתאריך בראש
+              הדף יתעדכן. לא מסכימים? אפשר לבטל ולמחוק את החשבון, ומי ששילם יקבל החזר יחסי.
+            </p>
+          </Section>
+
+          <Section title="11. הדין וסמכות השיפוט">
+            <p>
+              על התנאים חל הדין הישראלי. סכסוך יידון בבית המשפט המוסמך בישראל לפי החוק — כך שאפשר לתבוע
+              גם בבית המשפט הקרוב למקום מגוריכם.
+            </p>
+          </Section>
+
+          <Section title="12. יצירת קשר">
+            <p>
+              שאלות, משוב, או סתם להגיד שלום:{" "}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="text-primary underline underline-offset-2">
+                {CONTACT_EMAIL}
+              </a>
+              .
+            </p>
+          </Section>
 
           {/* Divider */}
           <hr className="border-border" />
 
           {/* Footer note */}
           <p className="text-sm text-muted-foreground">
-            תנאי שימוש אלו כתובים בעברית ומחייבים בגרסתם העברית בלבד.
-            שימוש באפליקציה מהווה הסכמה מלאה לכל הסעיפים לעיל.
+            תנאי שימוש אלו כתובים בעברית ומחייבים בגרסתם העברית.
           </p>
         </div>
 
