@@ -17,7 +17,7 @@ from pathlib import Path
 from . import parse
 from .db import connect
 from .match import Matcher, load_rules
-from .sources import CHAINS, IL, Chain, Fetcher, FileRef
+from .sources import CHAINS, IL, SHUFERSAL_KIND_ORDER, Chain, Fetcher, FileRef, list_shufersal
 
 MIN_OK_RATIO = 0.8  # a chain run with fewer parsed price files than this is rejected
 
@@ -75,8 +75,15 @@ def ingest_chain(con: sqlite3.Connection, chain: Chain, matcher: Matcher, f: Fet
     )
     con.commit()
     try:
-        refs = refs if refs is not None else chain.lister(f)
         raw_dir = raw_root / datetime.now(IL).strftime("%Y%m%d") / chain.key
+        if refs is None and chain.key == "shufersal":
+            # signed links expire an hour after listing: list and fetch one kind at a time
+            refs, payloads = [], {}
+            for kind in SHUFERSAL_KIND_ORDER:
+                rk = list_shufersal(f, kinds=(kind,))
+                refs.extend(rk)
+                payloads.update(_download(f, rk, raw_dir))
+        refs = refs if refs is not None else chain.lister(f)
         payloads = payloads if payloads is not None else _download(f, refs, raw_dir)
 
         stores, products, cand, prices, promos = [], {}, set(), [], []

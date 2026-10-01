@@ -113,9 +113,16 @@ def list_shufersal(f: Fetcher, kinds=("stores", "pricefull", "promofull")) -> li
             name = u.split("?")[0].rsplit("/", 1)[-1]
             if _kind(name) == kind:
                 out.append(FileRef(kind, u, name))
-    if not any(r.kind == "pricefull" for r in out):
+    if "pricefull" in kinds and not any(r.kind == "pricefull" for r in out):
         raise RuntimeError("shufersal: no PriceFull files listed")
     return latest_per_store(out)
+
+
+# Shufersal download links are signed and expire one hour after listing
+# (measured 1.10.2026: a link listed at 09:40Z carried se=10:40Z and returned 403
+# later). Listing all three kinds before downloading took longer than that, so
+# the ingest lists and downloads one kind at a time.
+SHUFERSAL_KIND_ORDER = ("stores", "pricefull", "promofull")
 
 
 # --- Carrefour (ex Yeinot Bitan / Mega) ----------------------------------------

@@ -28,6 +28,8 @@ CREATE TABLE IF NOT EXISTS prices(
   chain TEXT, store_id TEXT, item_code TEXT, price REAL, updated TEXT,
   PRIMARY KEY(chain, store_id, item_code)
 ) WITHOUT ROWID;
+-- by product: the candidates list and audits group prices per product (a full scan took >30 min)
+CREATE INDEX IF NOT EXISTS prices_by_item ON prices(chain, item_code);
 CREATE TABLE IF NOT EXISTS promos(
   chain TEXT, store_id TEXT, item_code TEXT, promotion_id TEXT, description TEXT,
   start TEXT, end TEXT, club_all INTEGER, min_qty REAL, discounted_price REAL
