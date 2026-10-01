@@ -185,11 +185,31 @@ def ingest_chain(con: sqlite3.Connection, chain: Chain, matcher: Matcher, f: Fet
         return {"chain": chain.key, "error": str(e)}
 
 
+def rematch(con: sqlite3.Connection, matcher: Matcher) -> dict:
+    """Re-check stored candidates against the current rules and drop the ones
+    that no longer match. Only removes: a widened rule needs a full ingest,
+    because products that never matched were never stored."""
+    rows = con.execute(
+        "SELECT c.chain, c.canonical_id, c.item_code, d.name, d.weighted FROM cand c "
+        "JOIN products d ON d.chain=c.chain AND d.item_code=c.item_code").fetchall()
+    drop = []
+    for chain, cid, code, name, weighted in rows:
+        r = matcher.by_id.get(cid)
+        if r is None or not r.matches(name, bool(weighted)):
+            drop.append((chain, cid, code))
+    with con:
+        con.executemany("DELETE FROM cand WHERE chain=? AND canonical_id=? AND item_code=?", drop)
+    return {"rematch_checked": len(rows), "dropped": len(drop)}
+
+
 def main(argv: list[str]) -> int:
     root = Path(os.environ.get("BP_HOME", "/opt/bayit-prices"))
     rules = load_rules(os.environ.get("BP_RULES", root / "canonical-items.json"))
     matcher = Matcher(rules)
     con = connect(root / "data" / "prices.db")
+    if argv[:1] == ["--rematch"]:
+        print(json.dumps(rematch(con, matcher), ensure_ascii=False))
+        return 0
     keys = argv or list(CHAINS)
     f = Fetcher()
     results = []

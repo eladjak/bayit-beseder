@@ -135,6 +135,15 @@ class IngestTests(unittest.TestCase):
         self.assertEqual(self.con.execute("SELECT COUNT(*) FROM prices").fetchone()[0], 1)  # only the milk is a candidate
         self.assertEqual(self.con.execute("SELECT price_published FROM stores").fetchone()[0], "2026-10-01T05:10")
 
+    def test_rematch_drops_candidates_a_tightened_rule_rejects(self):
+        from bp.ingest import rematch
+        refs, payloads = self._refs(5, 5)
+        ingest_chain(self.con, self.chain, self.matcher, None, self.tmp, refs=refs, payloads=payloads)
+        self.assertEqual(self.con.execute("SELECT COUNT(*) FROM cand").fetchone()[0], 1)
+        tight = Matcher([Rule(id="milk", label="חלב", aliases=[], include=[["חלב"]], exclude=["טרי"])])
+        self.assertEqual(rematch(self.con, tight)["dropped"], 1)
+        self.assertEqual(self.con.execute("SELECT COUNT(*) FROM cand").fetchone()[0], 0)
+
     def test_partial_download_keeps_previous_snapshot(self):
         refs, payloads = self._refs(5, 5)
         ingest_chain(self.con, self.chain, self.matcher, None, self.tmp, refs=refs, payloads=payloads)
