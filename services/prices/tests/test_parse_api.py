@@ -135,6 +135,12 @@ class IngestTests(unittest.TestCase):
         self.assertEqual(self.con.execute("SELECT COUNT(*) FROM prices").fetchone()[0], 1)  # only the milk is a candidate
         self.assertEqual(self.con.execute("SELECT price_published FROM stores").fetchone()[0], "2026-10-01T05:10")
 
+    def test_ingest_fills_product_stats(self):
+        refs, payloads = self._refs(5, 5)
+        ingest_chain(self.con, self.chain, self.matcher, None, self.tmp, refs=refs, payloads=payloads)
+        row = self.con.execute("SELECT avg_price, stores FROM product_stats").fetchone()
+        self.assertEqual((row[0], row[1]), (7.4, 1))
+
     def test_rematch_drops_candidates_a_tightened_rule_rejects(self):
         from bp.ingest import rematch
         refs, payloads = self._refs(5, 5)

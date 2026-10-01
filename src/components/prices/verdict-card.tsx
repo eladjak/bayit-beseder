@@ -8,7 +8,7 @@ interface Props {
 }
 
 /** Wording is driven only by `verdict`; never claims more than the data shows. */
-export function VerdictCard({ verdict, winner, totalItems }: Props) {
+export function VerdictCard({ verdict, winner }: Props) {
   if (!verdict || !winner) {
     return (
       <section
@@ -33,7 +33,7 @@ export function VerdictCard({ verdict, winner, totalItems }: Props) {
       <p className="text-xs text-emerald-800 dark:text-emerald-300">
         {full
           ? "הסל הזול ביותר מבין הסניפים שנבדקו"
-          : `הזול ביותר מבין הסניפים שנבדקו, על ${verdict.commonCount} פריטים שנמצאו בכל הסניפים (מתוך ${totalItems})`}
+          : `הזול ביותר מבין הסניפים שנבדקו, על ${verdict.commonCount} פריטים שנמצאו בכל הסניפים (מתוך ${verdict.itemsMatched} שזוהו ברשימה)`}
       </p>
       <p className="mt-1 text-lg font-bold text-gray-900 dark:text-gray-100">
         {winner.chainName} {winner.name}

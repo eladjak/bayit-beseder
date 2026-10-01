@@ -18,7 +18,7 @@ STALE = "2026-09-25T02:00"
 
 MILK = Rule(id="milk", label="חלב", aliases=["חלב"], include=[["חלב"]], exclude=["שוקו"],
             dim="ml", ref=1000, min=700, max=2100)
-EGGS = Rule(id="eggs", label="ביצים", aliases=["ביצים"], include=[["ביצים"]], dim="u", ref=12, min=12, max=12)
+EGGS = Rule(id="eggs", label="ביצים", aliases=["ביצים"], include=[["ביצים"]], dim="u", ref=12, min=10, max=30)
 TOM = Rule(id="tomato", label="עגבניות", aliases=["עגבניות"], include=[["עגבני"]], dim="g", ref=1000,
            weighted=True, packaged=False)
 MATCHER = Matcher([MILK, EGGS, TOM])
@@ -84,6 +84,23 @@ class CompareTests(unittest.TestCase):
         res = compare(con, MATCHER, [ItemReq("milk", "milk", strict=r)], ORIGIN, now=NOW)
         store = (res["ranked"] or res["otherStores"])[0]
         self.assertEqual(store["lines"]["milk"]["code"], "lf")
+
+    def test_milk_published_in_grams_still_counts(self):
+        con = db([("A", "1", 32.0, FRESH)], [("A", "g", "חלב הומוגני 3%", "g", 1000, 0)], [("A", "1", "g", 7.33)])
+        res = compare(con, MATCHER, [ItemReq("milk", "milk")], ORIGIN, now=NOW)
+        self.assertEqual((res["ranked"] or res["otherStores"])[0]["lines"]["milk"]["cost"], 7.33)
+
+    def test_counted_items_compare_per_unit_not_per_pack(self):
+        # measured 1.10.2026: regulated eggs, 12 at 13.13 vs 18 at 19.69 = same per egg
+        con = db(
+            [("A", "1", 32.0, FRESH), ("B", "1", 32.0, FRESH)],
+            [("A", "e12", "12 ביצים M", "u", 12, 0), ("B", "e18", "ביצים ארוזות 18יח M", "u", 18, 0)],
+            [("A", "1", "e12", 13.13), ("B", "1", "e18", 19.69)],
+        )
+        res = compare(con, MATCHER, [ItemReq("eggs", "eggs")], ORIGIN, now=NOW)
+        costs = {s["chain"]: s["lines"]["eggs"]["cost"] for s in res["ranked"]}
+        self.assertAlmostEqual(costs["A"], costs["B"], delta=0.02)
+        self.assertTrue(all(s["lines"]["eggs"]["estimate"] for s in res["ranked"]))
 
     def test_negated_word_excludes_products(self):
         con = db(

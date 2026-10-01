@@ -88,6 +88,8 @@ class Rule:
             if self.max is not None and count > self.max:
                 return None
             return round(price / count * self.ref, 4)
+        if dim in ("g", "ml") and self.dim in ("g", "ml"):
+            dim = self.dim  # chains publish 1 L milk as 1000 גרם (measured); close enough for groceries
         if dim != self.dim or not size or size <= 0:
             return None
         if self.min is not None and size < self.min:

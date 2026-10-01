@@ -26,7 +26,7 @@ describe("VerdictCard", () => {
         verdict={{ storeKey: "shufersal:1", basis: "common", commonCount: 3, itemsMatched: 6, savingVsDearest: 4 }} />
     );
     const t = container.textContent ?? "";
-    expect(t).toContain("על 3 פריטים שנמצאו בכל הסניפים (מתוך 8)");
+    expect(t).toContain("על 3 פריטים שנמצאו בכל הסניפים (מתוך 6 שזוהו ברשימה)");
     expect(t).toContain("לא השוואה של כל הסל");
   });
   it("null verdict: no winner, no 'cheapest' claim", () => {

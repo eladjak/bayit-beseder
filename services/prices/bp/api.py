@@ -110,12 +110,15 @@ def make_handler(state: State):
             if r == "/v1/candidates":
                 cid = (q.get("canonicalId") or [""])[0][:80]
                 with state.con() as c:
+                    # up to 12 per chain, most widely sold first, so every chain is represented
                     rows = c.execute(
-                        "SELECT d.chain, d.item_code, d.name, d.manufacturer, d.size, d.dim, d.weighted, "
-                        "ROUND(AVG(p.price),2), COUNT(p.store_id) FROM cand x "
-                        "JOIN products d ON d.chain=x.chain AND d.item_code=x.item_code "
-                        "JOIN prices p ON p.chain=x.chain AND p.item_code=x.item_code "
-                        "WHERE x.canonical_id=? GROUP BY d.chain, d.item_code ORDER BY COUNT(p.store_id) DESC LIMIT 40",
+                        "SELECT chain, item_code, name, manufacturer, size, dim, weighted, avg_price, stores FROM ("
+                        " SELECT d.chain, d.item_code, d.name, d.manufacturer, d.size, d.dim, d.weighted,"
+                        " s.avg_price, s.stores,"
+                        " ROW_NUMBER() OVER (PARTITION BY d.chain ORDER BY s.stores DESC, s.avg_price) AS rn"
+                        " FROM cand x JOIN products d ON d.chain=x.chain AND d.item_code=x.item_code"
+                        " JOIN product_stats s ON s.chain=x.chain AND s.item_code=x.item_code"
+                        " WHERE x.canonical_id=?) WHERE rn <= 12 ORDER BY chain, rn",
                         (cid,)).fetchall()
                 return self._send(200, {"candidates": [
                     {"chain": ch, "code": code, "name": nm, "manufacturer": mf, "size": sz, "dim": dm,

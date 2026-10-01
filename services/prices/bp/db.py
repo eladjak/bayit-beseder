@@ -35,6 +35,9 @@ CREATE TABLE IF NOT EXISTS promos(
   start TEXT, end TEXT, club_all INTEGER, min_qty REAL, discounted_price REAL
 );
 CREATE INDEX IF NOT EXISTS promos_by_store ON promos(chain, store_id, item_code);
+CREATE TABLE IF NOT EXISTS product_stats(
+  chain TEXT, item_code TEXT, avg_price REAL, stores INTEGER, PRIMARY KEY(chain, item_code)
+);
 CREATE TABLE IF NOT EXISTS pins(
   household_id TEXT, canonical_id TEXT, item_code TEXT, name TEXT, created_at TEXT,
   PRIMARY KEY(household_id, canonical_id)
