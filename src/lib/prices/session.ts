@@ -10,6 +10,9 @@ export type PriceSession =
   | { ok: true; supabase: Supabase; householdId: string; userId: string }
   | { ok: false; response: NextResponse };
 
+/** Used in the logged-out 401 message: "...להשתמש בהשוואת המחירים." */
+export const PRICES_FEATURE_LABEL = "בהשוואת המחירים";
+
 export const NO_STORE = { "Cache-Control": "private, no-store" } as const;
 
 /**
@@ -19,7 +22,7 @@ export const NO_STORE = { "Cache-Control": "private, no-store" } as const;
  */
 export async function requirePriceSession(): Promise<PriceSession> {
   const supabase = await createClient();
-  const session = await resolveHousehold(supabase);
+  const session = await resolveHousehold(supabase, PRICES_FEATURE_LABEL);
   if (!session.ok) {
     return { ok: false, response: NextResponse.json({ error: session.error }, { status: session.status, headers: NO_STORE }) };
   }
