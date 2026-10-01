@@ -26,6 +26,16 @@ def _now() -> str:
     return datetime.now(IL).isoformat(timespec="seconds")
 
 
+_STORE_WIDE = __import__("re").compile(r"קופון|מתנה|סיבוס|סודקסו|תו קנייה|תווי|שובר|כרטיס|נקודות|ע\. ")
+
+
+def is_item_promo(description: str, items_in_promo: int) -> bool:
+    """Keep promotions about specific products. Store-wide offers ('Cibus coupon
+    50 ₪ gift', 'buy for 99 ₪ get a cooler') list thousands of items and say
+    nothing about this product's price: measured 1.10.2026 on Shufersal milk."""
+    return items_in_promo <= 40 and not _STORE_WIDE.search(description or "")
+
+
 def published_stamp(name: str) -> str:
     """'PriceFull7290027600007-001-001-20261001-020000.gz' -> '2026-10-01T02:00'."""
     import re
@@ -131,8 +141,12 @@ def ingest_chain(con: sqlite3.Connection, chain: Chain, matcher: Matcher, f: Fet
                 continue
             store_id = r.name.split("-")[-3].lstrip("0") or "0" if r.name.count("-") >= 4 else ""
             try:
-                for pi in parse.iter_promos(parse.open_payload(data)):
-                    if pi.item_code in wanted:
+                rows = list(parse.iter_promos(parse.open_payload(data)))
+                size: dict[str, int] = {}
+                for pi in rows:
+                    size[pi.promotion_id] = size.get(pi.promotion_id, 0) + 1
+                for pi in rows:
+                    if pi.item_code in wanted and is_item_promo(pi.description, size[pi.promotion_id]):
                         promos.append((store_id, pi.item_code, pi.promotion_id, pi.description[:200], pi.start,
                                        pi.end, int(pi.club_all), pi.min_qty, pi.discounted_price))
             except Exception as e:

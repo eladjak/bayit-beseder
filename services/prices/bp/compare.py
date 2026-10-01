@@ -116,7 +116,14 @@ def price_item_in_store(con: sqlite3.Connection, chain: str, store_id: str, rule
             continue
         if req.strict and not req.pin_code:
             n = norm(name)
-            if not all(re.search(rf"(?:^| )[הובלמשכ]?{re.escape(w)}", n) for w in req.strict):
+            ok = True
+            for w in req.strict:
+                neg = w.startswith("!")
+                hit = re.search(rf"(?:^| )[הובלמשכ]?{re.escape(w.lstrip('!'))}", n) is not None
+                if hit == neg:  # required word missing, or forbidden word present
+                    ok = False
+                    break
+            if not ok:
                 continue
         pc = _packs_and_cost(rule, req.qty, price, dim, size, bool(weighted))
         if pc is None and req.pin_code:

@@ -81,8 +81,10 @@ function strictWords(title: string, item: CanonicalItem): string[] {
   const out: string[] = [];
   for (let i = 0; i < words.length; i++) {
     const w = words[i];
-    // "לא פרווה": a negation, not a word the product name will contain
+    // "לא פרווה": the product name must NOT contain the next word ("!פרווה")
     if (w === "לא") {
+      const next = words[i + 1];
+      if (next && next.length >= 2 && !STOP.has(next)) out.push(`!${next}`);
       i++;
       continue;
     }

@@ -85,6 +85,21 @@ class CompareTests(unittest.TestCase):
         store = (res["ranked"] or res["otherStores"])[0]
         self.assertEqual(store["lines"]["milk"]["code"], "lf")
 
+    def test_negated_word_excludes_products(self):
+        con = db(
+            [("A", "1", 32.0, FRESH)],
+            [("A", "p", "חלב פרווה 1 ליטר", "ml", 1000, 0), ("A", "d", "חלב 3% 1 ליטר", "ml", 1000, 0)],
+            [("A", "1", "p", 4.0), ("A", "1", "d", 7.0)],
+        )
+        res = compare(con, MATCHER, [ItemReq("milk", "milk", strict=["!פרווה"])], ORIGIN, now=NOW)
+        self.assertEqual((res["ranked"] or res["otherStores"])[0]["lines"]["milk"]["code"], "d")
+
+    def test_store_wide_coupon_promotions_are_not_item_promos(self):
+        from bp.ingest import is_item_promo
+        self.assertFalse(is_item_promo('ע. סיבוס קופון 50ש"ח מתנה', 3))
+        self.assertFalse(is_item_promo("קנה גלידות ב 99 שח", 500))
+        self.assertTrue(is_item_promo("3 ב-19", 4))
+
     def test_pinned_product_missing_means_missing_not_substituted(self):
         con = db(
             [("A", "1", 32.0, FRESH), ("B", "1", 32.0, FRESH)],

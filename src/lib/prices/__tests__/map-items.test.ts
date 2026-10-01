@@ -35,7 +35,8 @@ describe("mapTitle", () => {
     const p = mapTitle("פלפלים מכל צבע 🔴🟢 🟠 🟡 🫑");
     expect(p.canonicalId).not.toBeNull();
     expect(p.strict).toEqual([]);
-    expect(mapTitle("מעדני חלב (לא פרווה)").strict).not.toContain("פרווה");
+    // "לא פרווה" is a must-NOT-contain constraint, never a must-contain one
+    expect(mapTitle("מעדני חלב (לא פרווה)").strict).toEqual(["!פרווה"]);
   });
 
   it("leaves non-grocery items unmatched rather than guessing", () => {
