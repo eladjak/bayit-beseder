@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { buildPriceContext } from "@/lib/prices/assistant-context";
 
 // ---------------------------------------------------------------------------
 // Rate limiter: 10 requests per minute per IP
@@ -99,6 +100,8 @@ export async function POST(request: NextRequest) {
 
   // 2. Optional auth check (allow demo mode)
   let isAuthenticated = false;
+  let authedClient: ReturnType<typeof createServerClient> | null = null;
+  let authedUserId: string | null = null;
   try {
     const cookieStore = await cookies();
     const supabase = createServerClient(
@@ -125,6 +128,10 @@ export async function POST(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
     isAuthenticated = !!user;
+    if (user) {
+      authedClient = supabase;
+      authedUserId = user.id;
+    }
   } catch {
     // Auth failure is non-fatal — continue in demo mode
   }
@@ -161,6 +168,13 @@ export async function POST(request: NextRequest) {
   // 5. Build Gemini request — last 10 history items + current message
   const recentHistory = history.slice(-10);
 
+  // Price comparison facts (flagged households only, price questions only).
+  // The engine decides; the model only phrases. See src/lib/prices/assistant.ts.
+  const priceContext =
+    authedClient && authedUserId
+      ? await buildPriceContext(authedClient, authedUserId, message).catch(() => null)
+      : null;
+
   const contents = [
     // Inject system prompt as first user/model exchange
     {
@@ -175,6 +189,12 @@ export async function POST(request: NextRequest) {
         },
       ],
     },
+    ...(priceContext
+      ? [
+          { role: "user", parts: [{ text: priceContext }] },
+          { role: "model", parts: [{ text: "קיבלתי. אשתמש רק בנתונים האלה, ואציין תאריך, כיסוי ומה לא נבדק." }] },
+        ]
+      : []),
     // Conversation history
     ...recentHistory.map((msg) => ({
       role: msg.role,

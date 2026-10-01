@@ -1,0 +1,23 @@
+[Unit]
+Description=Bayit BeSeder price ingestion (daily Price Transparency files)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=bayitprices
+Group=bayitprices
+Environment=BP_HOME=/opt/bayit-prices
+Environment=PYTHONUNBUFFERED=1
+WorkingDirectory=/opt/bayit-prices/app
+# flock: never two runs at once; -n = give up rather than queue
+ExecStart=/usr/bin/flock -n /opt/bayit-prices/data/ingest.lock /usr/bin/python3 -m bp.ingest
+Nice=10
+IOSchedulingClass=idle
+CPUQuota=60%
+MemoryMax=3G
+TimeoutStartSec=3h
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/bayit-prices/data /opt/bayit-prices/raw
+ProtectHome=true
+PrivateTmp=true
