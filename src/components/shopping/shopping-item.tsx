@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, Trash2, Pencil, Minus, Plus, ArrowRightLeft } from "lucide-react";
 import type { ShoppingItem as ShoppingItemType } from "@/hooks/useShoppingList";
 import { CATEGORY_COLORS, SHOPPING_CATEGORY_ICONS } from "@/hooks/useShoppingList";
+import { resolveItemIcon } from "@/lib/shopping-taxonomy";
 
 interface ShoppingItemProps {
   item: ShoppingItemType;
@@ -38,7 +39,12 @@ export const ShoppingItemCard = memo(function ShoppingItemCard({
     ? "var(--color-success)"
     : (categoryColor ?? CATEGORY_COLORS[item.category] ?? "#6B7280");
 
-  const icon = itemEmoji ?? categoryIcon ?? SHOPPING_CATEGORY_ICONS[item.category] ?? "📦";
+  // Product icon comes from the item's own name. The old generic "🛒" is never used as a
+  // product icon: unknown names fall back to the category icon, cart only as a last resort.
+  const icon =
+    itemEmoji && itemEmoji !== "🛒"
+      ? itemEmoji
+      : resolveItemIcon(item.title, categoryIcon ?? SHOPPING_CATEGORY_ICONS[item.category]);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
