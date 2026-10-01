@@ -81,6 +81,8 @@ function strictWords(title: string, item: CanonicalItem): string[] {
       continue;
     }
     if (w.length < 2 || covered.has(w) || STOP.has(w) || /^\d+$/.test(w)) continue;
+    // plural / suffix of a covered word ("פלפלים" vs "פלפל") is not a new constraint
+    if ([...covered].some((c) => c.length >= 2 && (w.startsWith(c) || c.startsWith(w)))) continue;
     out.push(w);
   }
   return out.slice(0, 6);
