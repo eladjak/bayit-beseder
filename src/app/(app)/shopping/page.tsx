@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { Fragment, useState, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, X, ChevronDown, ChevronUp, Trash2, Settings, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useShoppingList, CATEGORY_COLORS, SHOPPING_CATEGORY_ICONS } from "@/hooks/useShoppingList";
+import { useShoppingList } from "@/hooks/useShoppingList";
 import type { ShoppingCategory, ShoppingItem } from "@/hooks/useShoppingList";
 import { useShoppingCategories } from "@/hooks/useShoppingCategories";
 import { ShoppingItemCard } from "@/components/shopping/shopping-item";
@@ -15,6 +15,7 @@ import { CategoryManager } from "@/components/shopping/category-manager";
 import { ShoppingShareSheet } from "@/components/shopping/shopping-share-sheet";
 import { PurchasedSection } from "@/components/shopping/purchased-section";
 import { searchSuggestions, getEmojiForItem } from "@/lib/shopping-autocomplete";
+import { buildCategoryModel, classifyItem } from "@/lib/shopping-taxonomy";
 import { haptic } from "@/lib/haptics";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useProfile } from "@/hooks/useProfile";
@@ -32,6 +33,8 @@ interface VirtualizedItemsProps {
   items: ShoppingItem[];
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
+  onEdit?: (id: string, updates: { title?: string; quantity?: number; category?: string }) => void;
+  onMoveCategory?: (id: string) => void;
   categoryColor: string;
   categoryIcon: string;
 }
@@ -40,6 +43,8 @@ function VirtualizedCategoryItems({
   items,
   onToggle,
   onRemove,
+  onEdit,
+  onMoveCategory,
   categoryColor,
   categoryIcon,
 }: VirtualizedItemsProps) {
@@ -82,6 +87,8 @@ function VirtualizedCategoryItems({
                 item={item}
                 onToggle={onToggle}
                 onRemove={onRemove}
+                onEdit={onEdit}
+                onMoveCategory={onMoveCategory}
                 categoryColor={categoryColor}
                 categoryIcon={categoryIcon}
               />
@@ -120,6 +127,8 @@ export default function ShoppingPage() {
   const [newCategory, setNewCategory] = useState<ShoppingCategory>("שונות");
   // Which category section triggered the add form (pre-selects category)
   const [formPresetCategory, setFormPresetCategory] = useState<string | null>(null);
+  // True once the user picked a category chip themselves (otherwise we auto-classify by name)
+  const [categoryTouched, setCategoryTouched] = useState(false);
 
   // Collapsed state per category name (persisted in localStorage)
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(() => {
@@ -133,30 +142,23 @@ export default function ShoppingPage() {
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
 
-  // Build icon/color maps from dynamic categories (with fallback to static maps)
+  // Category model: the household's own rows + the finer built-in categories,
+  // in store-walk order. Items are filed under it at render time (no data rewrite).
+  const categoryModel = useMemo(() => buildCategoryModel(dynamicCategories), [dynamicCategories]);
+
   const categoryIconMap = useMemo(() => {
-    const map: Record<string, string> = { ...SHOPPING_CATEGORY_ICONS };
-    for (const c of dynamicCategories) {
-      map[c.name] = c.icon;
-    }
+    const map: Record<string, string> = {};
+    for (const name of categoryModel.orderedNames) map[name] = categoryModel.iconOf(name);
     return map;
-  }, [dynamicCategories]);
+  }, [categoryModel]);
 
   const categoryColorMap = useMemo(() => {
-    const map: Record<string, string> = { ...CATEGORY_COLORS };
-    for (const c of dynamicCategories) {
-      map[c.name] = c.color;
-    }
+    const map: Record<string, string> = {};
+    for (const name of categoryModel.orderedNames) map[name] = categoryModel.colorOf(name);
     return map;
-  }, [dynamicCategories]);
+  }, [categoryModel]);
 
-  // Ordered category names from dynamic categories
-  const orderedCategoryNames = useMemo(() => {
-    if (dynamicCategories.length > 0) {
-      return dynamicCategories.map((c) => c.name);
-    }
-    return Object.keys(SHOPPING_CATEGORY_ICONS);
-  }, [dynamicCategories]);
+  const orderedCategoryNames = categoryModel.orderedNames;
 
   // Separate purchased items from active items
   const purchasedItems = useMemo(
@@ -169,33 +171,54 @@ export default function ShoppingPage() {
     [items]
   );
 
-  // Group ACTIVE items by category (purchased go to separate section)
+  // Group ACTIVE items by category (purchased go to separate section).
+  // An item stored under a generic category ("שונות" etc.) is filed by its name.
   const groupedItems = useMemo(() => {
-    const groups: { categoryName: string; items: typeof items }[] = [];
-    const categoriesWithItems = new Set(activeItems.map((i) => i.category));
+    const byCategory = new Map<string, ShoppingItem[]>();
+    for (const item of activeItems) {
+      const name = categoryModel.resolveCategory(item.title, item.category);
+      const list = byCategory.get(name);
+      if (list) list.push(item);
+      else byCategory.set(name, [item]);
+    }
 
+    const groups: { categoryName: string; items: ShoppingItem[] }[] = [];
+    const placed = new Set<string>();
     for (const catName of orderedCategoryNames) {
-      if (!categoriesWithItems.has(catName)) continue;
-      const catItems = activeItems
-        .filter((i) => i.category === catName)
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      groups.push({ categoryName: catName, items: catItems });
+      const catItems = byCategory.get(catName);
+      if (!catItems) continue;
+      placed.add(catName);
+      groups.push({
+        categoryName: catName,
+        items: [...catItems].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()),
+      });
     }
-
-    const knownCatNames = new Set(orderedCategoryNames);
-    const unknownItems = activeItems.filter((i) => !knownCatNames.has(i.category));
-    if (unknownItems.length > 0) {
-      groups.push({ categoryName: "שונות", items: unknownItems });
+    // Anything under a category name we do not know about goes to "שונות"
+    const leftovers = [...byCategory.entries()].filter(([n]) => !placed.has(n)).flatMap(([, list]) => list);
+    if (leftovers.length > 0) {
+      const existing = groups.find((g) => g.categoryName === "שונות");
+      if (existing) existing.items.push(...leftovers);
+      else groups.push({ categoryName: "שונות", items: leftovers });
     }
-
     return groups;
-  }, [activeItems, orderedCategoryNames]);
+  }, [activeItems, orderedCategoryNames, categoryModel]);
 
   // Autocomplete suggestions
   const suggestions = useMemo(
     () => newTitle.length >= 2 ? searchSuggestions(newTitle, 6) : [],
     [newTitle]
   );
+
+  // What we would file the typed title under (shown as a hint, overridable by tapping a chip)
+  const autoGuess = useMemo(
+    () => (newTitle.trim().length >= 2 ? classifyItem(newTitle) : null),
+    [newTitle]
+  );
+  const effectiveFormCategory = categoryTouched
+    ? newCategory
+    : autoGuess
+      ? categoryModel.displayNameFor(autoGuess.categoryId)
+      : newCategory;
 
   // Move category modal state
   const [movingItemId, setMovingItemId] = useState<string | null>(null);
@@ -220,13 +243,16 @@ export default function ShoppingPage() {
     haptic("tap");
     const cat = presetCategory ?? orderedCategoryNames[orderedCategoryNames.length - 1] ?? "שונות";
     setNewCategory(cat);
+    setCategoryTouched(Boolean(presetCategory));
     setFormPresetCategory(presetCategory ?? null);
     setShowForm(true);
   }
 
   async function handleAdd() {
     if (!newTitle.trim()) return;
-    const result = await addItem(newTitle.trim(), newCategory);
+    const title = newTitle.trim();
+    const category = categoryTouched ? newCategory : categoryModel.resolveCategory(title, newCategory);
+    const result = await addItem(title, category);
     if (!result.ok) {
       toast.error(result.error);
       return;
@@ -468,6 +494,8 @@ export default function ShoppingPage() {
                           items={catItems}
                           onToggle={handleToggle}
                           onRemove={handleRemove}
+                          onEdit={(id, updates) => { editItem(id, updates); toast.success(t("shopping.itemUpdated")); }}
+                          onMoveCategory={(id) => setMovingItemId(id)}
                           categoryColor={color}
                           categoryIcon={icon}
                         />
@@ -485,7 +513,7 @@ export default function ShoppingPage() {
                                 onMoveCategory={(id) => setMovingItemId(id)}
                                 categoryColor={color}
                                 categoryIcon={icon}
-                                itemEmoji={getEmojiForItem(item.title)}
+                                itemEmoji={getEmojiForItem(item.title, icon)}
                               />
                             ))}
                           </AnimatePresence>
@@ -502,7 +530,11 @@ export default function ShoppingPage() {
         {/* Purchased items section (at bottom) */}
         {purchasedItems.length > 0 && (
           <PurchasedSection
-            items={purchasedItems.map((i) => ({ ...i, emoji: getEmojiForItem(i.title) }))}
+            items={purchasedItems.map((i) => ({
+              ...i,
+              emoji: getEmojiForItem(i.title, categoryIconMap[categoryModel.resolveCategory(i.title, i.category)]),
+              category: categoryModel.resolveCategory(i.title, i.category),
+            }))}
             onUncheck={(id) => toggleItem(id)}
             onClearAll={clearChecked}
             categoryIcons={categoryIconMap}
@@ -541,20 +573,28 @@ export default function ShoppingPage() {
             >
               <h3 className="font-semibold text-foreground text-sm mb-3">{t("shopping.selectCategory")}</h3>
               <div className="grid grid-cols-3 gap-2 max-h-[50vh] overflow-y-auto">
-                {orderedCategoryNames.map((catName) => (
-                  <button
-                    key={catName}
-                    onClick={() => {
-                      moveItemToCategory(movingItemId, catName);
-                      toast.success(t("shopping.itemMoved"));
-                      setMovingItemId(null);
-                    }}
-                    className="flex flex-col items-center gap-1 p-3 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all active:scale-95"
-                  >
-                    <span className="text-xl">{categoryIconMap[catName] ?? "📦"}</span>
-                    <span className="text-[11px] text-foreground font-medium truncate w-full text-center">{catName}</span>
-                  </button>
-                ))}
+                {orderedCategoryNames.map((catName, idx) => {
+                  const section = categoryModel.sectionOf(catName);
+                  const showHeading = idx === 0 || categoryModel.sectionOf(orderedCategoryNames[idx - 1]) !== section;
+                  return (
+                    <Fragment key={catName}>
+                      {showHeading && (
+                        <div className="col-span-3 text-[11px] font-semibold text-muted pt-1">{section}</div>
+                      )}
+                      <button
+                        onClick={() => {
+                          moveItemToCategory(movingItemId, catName);
+                          toast.success(t("shopping.itemMoved"));
+                          setMovingItemId(null);
+                        }}
+                        className="flex flex-col items-center gap-1 p-3 rounded-xl border border-border hover:border-primary hover:bg-primary/5 transition-all active:scale-95"
+                      >
+                        <span className="text-xl">{categoryIconMap[catName] ?? "📦"}</span>
+                        <span className="text-[11px] text-foreground font-medium truncate w-full text-center">{catName}</span>
+                      </button>
+                    </Fragment>
+                  );
+                })}
               </div>
               <button
                 onClick={() => setMovingItemId(null)}
@@ -620,6 +660,12 @@ export default function ShoppingPage() {
                 />
               </div>
 
+              {autoGuess && !categoryTouched && (
+                <p className="mb-2 text-xs text-muted" aria-live="polite">
+                  {autoGuess.emoji} זוהה אוטומטית: {effectiveFormCategory} (אפשר לבחור קטגוריה אחרת למטה)
+                </p>
+              )}
+
               {/* Autocomplete suggestions */}
               {suggestions.length > 0 && (
                 <div className="mb-3 flex flex-wrap gap-1.5">
@@ -627,9 +673,9 @@ export default function ShoppingPage() {
                     <button
                       key={`${s.name}-${s.category}`}
                       onClick={async () => {
-                        const category = orderedCategoryNames.includes(s.category)
-                          ? s.category
-                          : newCategory;
+                        const category = categoryTouched
+                          ? newCategory
+                          : categoryModel.resolveCategory(s.name, newCategory);
                         const result = await addItem(s.name, category);
                         if (!result.ok) {
                           toast.error(result.error);
@@ -655,11 +701,11 @@ export default function ShoppingPage() {
                 {orderedCategoryNames.map((cat) => {
                   const catColor = categoryColorMap[cat] ?? "#6B7280";
                   const catIcon = categoryIconMap[cat] ?? "📦";
-                  const isSelected = newCategory === cat;
+                  const isSelected = effectiveFormCategory === cat;
                   return (
                     <button
                       key={cat}
-                      onClick={() => setNewCategory(cat)}
+                      onClick={() => { setNewCategory(cat); setCategoryTouched(true); }}
                       className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                         isSelected ? "text-white" : "bg-surface-hover text-muted"
                       }`}

@@ -1,3 +1,5 @@
+import { resolveItemIcon, listDictionaryLabels, getTaxonomyCategory } from "@/lib/shopping-taxonomy";
+
 export interface ShoppingItemSuggestion {
   name: string;
   nameEn: string;
@@ -276,38 +278,37 @@ export function searchSuggestions(
 
   const normalizedQuery = query.trim().toLowerCase();
 
-  return SHOPPING_SUGGESTIONS.filter((item) =>
+  const curated = SHOPPING_SUGGESTIONS.filter((item) =>
     item.name.toLowerCase().includes(normalizedQuery) ||
     item.nameEn.toLowerCase().includes(normalizedQuery)
-  ).slice(0, limit);
+  );
+
+  const seen = new Set(curated.map((c) => c.name));
+  const fromDictionary: ShoppingItemSuggestion[] = [];
+  for (const d of listDictionaryLabels()) {
+    if (seen.has(d.label)) continue;
+    if (!d.label.toLowerCase().includes(normalizedQuery)) continue;
+    seen.add(d.label);
+    fromDictionary.push({
+      name: d.label,
+      nameEn: "",
+      emoji: d.emoji,
+      category: getTaxonomyCategory(d.categoryId)?.name ?? "שונות",
+    });
+  }
+  // Prefix matches first, then the rest
+  fromDictionary.sort((a, b) => Number(b.name.startsWith(normalizedQuery)) - Number(a.name.startsWith(normalizedQuery)));
+
+  return [...curated, ...fromDictionary].slice(0, limit);
 }
 
-export function getEmojiForItem(name: string): string {
-  if (!name || name.trim() === "") {
-    return "🛒";
-  }
-
-  const normalizedName = name.trim().toLowerCase();
-
-  // Exact match first
-  const exactMatch = SHOPPING_SUGGESTIONS.find(
-    (item) => item.name.toLowerCase() === normalizedName
-  );
-  if (exactMatch) {
-    return exactMatch.emoji;
-  }
-
-  // Fuzzy: name contains a suggestion name or suggestion name contains name
-  const fuzzyMatch = SHOPPING_SUGGESTIONS.find(
-    (item) =>
-      normalizedName.includes(item.name.toLowerCase()) ||
-      item.name.toLowerCase().includes(normalizedName)
-  );
-  if (fuzzyMatch) {
-    return fuzzyMatch.emoji;
-  }
-
-  return "🛒";
+/**
+ * Product icon for a shopping item, derived from its name.
+ * The generic cart is the true last resort (only when a caller has no
+ * category icon either) - it is no longer returned for unknown names.
+ */
+export function getEmojiForItem(name: string, fallbackIcon?: string | null): string {
+  return resolveItemIcon(name ?? "", fallbackIcon);
 }
 
 export function getSuggestionsForCategory(
