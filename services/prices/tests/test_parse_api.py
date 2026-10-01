@@ -70,6 +70,12 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(parse.pack_size(None, "", "פסטה פנה 500 גרם"), ("g", 500.0))
         self.assertEqual(parse.pack_size(None, "", "שמן קנולה 1 ליטר"), ("ml", 1000.0))
 
+    def test_pack_size_corrects_published_mistakes(self):
+        self.assertEqual(parse.pack_size(452, "ליטר", "תלמה ברנפלקס"), ("ml", 452.0))  # Carrefour, measured
+        self.assertEqual(parse.pack_size(2000, "גרם", "קרטון ביצים M יח׳ 12"), ("u", 12.0))  # Wolt, measured
+        self.assertEqual(parse.pack_size(1, "ליטר", "חלב 3%"), ("ml", 1000.0))
+        self.assertEqual(parse.pack_size(1.5, "קילוגרם", "אורז"), ("g", 1500.0))
+
     def test_bidi_controls_do_not_break_word_start(self):
         r = Rule(id="e", label="ביצים", aliases=[], include=[["=ביצים"]])
         self.assertTrue(r.matches("קרטון ‫ביצים רגילות", False))

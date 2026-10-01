@@ -203,10 +203,22 @@ _UNIT_MAP = [
 def pack_size(qty: Optional[float], unit_qty: str, name: str = "") -> tuple[Optional[str], Optional[float]]:
     """Normalise a pack to (dimension, amount) with dimension in g / ml / u.
 
-    Falls back to a size written in the product name ("1 ליטר", "500 גרם")."""
+    Falls back to a size written in the product name ("1 ליטר", "500 גרם").
+    Two corrections for what chains actually publish (measured 1.10.2026):
+      * an explicit count in the name ("12 יח׳", "18 יחידות") wins: Wolt lists
+        an egg carton as 2000 גרם;
+      * a litre/kilo amount above 20 is really ml/grams: Carrefour lists a
+        452 g cornflakes box as 452 ליטר."""
+    m = re.search(r"(\d+)\s*(?:יח|יחידות|גלילים|גלי|ביצים)\b|(?:יח|יחידות)['׳]?\s*(\d+)", name or "")
+    if m:
+        n = int(m.group(1) or m.group(2))
+        if n > 1:
+            return "u", float(n)
     if qty and qty > 0 and unit_qty:
         for rx, (dim, mult) in _UNIT_MAP:
             if rx.search(unit_qty):
+                if mult == 1000.0 and qty > 20:
+                    mult = 1.0  # "452 ליטר" = 452 ml/g
                 return dim, qty * mult
     m = re.search(r"(\d+(?:\.\d+)?)\s*(ק\"ג|קג|קילו|גרם|גר|מ\"ל|מל|ליטר|ל'|ל\b)", name)
     if m:
