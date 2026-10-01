@@ -450,8 +450,10 @@ export function classifyItem(title: string): Classification | null {
 export function resolveItemIcon(title: string, fallbackIcon?: string | null): string {
   const hit = classifyItem(title);
   if (hit) return hit.emoji;
-  if (fallbackIcon) return fallbackIcon;
-  return "🛒";
+  // A category whose own icon is the generic cart (e.g. the default "מזון") must not
+  // turn every unrecognised item into a cart - that is the symptom we are removing.
+  if (fallbackIcon && fallbackIcon !== "🛒") return fallbackIcon;
+  return fallbackIcon ? "📦" : "🛒";
 }
 
 export function getTaxonomyCategory(id: string): TaxonomyCategory | undefined {

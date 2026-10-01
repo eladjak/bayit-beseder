@@ -1,6 +1,6 @@
 /// <reference lib="webworker" />
 
-const CACHE_VERSION = "v6";
+const CACHE_VERSION = "v7";
 const CACHE_NAME = `bayit-beseder-${CACHE_VERSION}`;
 
 // These JS/CSS chunks change on every deploy — cache them aggressively
@@ -106,7 +106,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // --- Stale-while-revalidate for pages ---
+  // --- Pages and RSC payloads: NETWORK-FIRST ---
+  // Serving the cached HTML first (stale-while-revalidate) meant the installed
+  // app showed the PREVIOUS deploy on every open, and a fixed bug stayed
+  // visible until the app was opened twice. The cache is now only the offline
+  // fallback; online users always get the current deploy.
+  if (isPageRequest(event.request, url)) {
+    event.respondWith(networkFirstPage(event.request));
+    return;
+  }
+
+  // --- Stale-while-revalidate for everything else ---
   event.respondWith(staleWhileRevalidate(event.request));
 });
 
@@ -140,11 +150,51 @@ async function networkFirst(request) {
     if (response.ok) {
       const cache = await caches.open(CACHE_NAME);
       cache.put(request, response.clone()).catch(() => {});
+      return response;
     }
-    return response;
+    // A chunk that 404s after a deploy: prefer a cached copy over a hard failure.
+    const cached = await caches.match(request);
+    return cached ?? response;
   } catch {
     const cached = await caches.match(request);
     if (cached) return cached;
+    return new Response("Offline", { status: 503 });
+  }
+}
+
+// ============================================
+// Pages: network-first with a short timeout, cache only as offline fallback
+// ============================================
+const PAGE_NETWORK_TIMEOUT_MS = 4000;
+
+function isPageRequest(request, url) {
+  if (request.mode === "navigate") return true;
+  if (request.headers.get("accept")?.includes("text/html")) return true;
+  // Next.js client-side navigation fetches the RSC payload of a page
+  if (request.headers.get("RSC") || url.searchParams.has("_rsc")) return true;
+  return false;
+}
+
+async function networkFirstPage(request) {
+  const cache = await caches.open(CACHE_NAME);
+  try {
+    const response = await Promise.race([
+      fetch(request),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("timeout")), PAGE_NETWORK_TIMEOUT_MS)
+      ),
+    ]);
+    if (response.ok) {
+      cache.put(request, response.clone()).catch(() => {});
+    }
+    return response;
+  } catch {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    if (request.mode === "navigate") {
+      const offlinePage = await cache.match(OFFLINE_URL);
+      if (offlinePage) return offlinePage;
+    }
     return new Response("Offline", { status: 503 });
   }
 }
