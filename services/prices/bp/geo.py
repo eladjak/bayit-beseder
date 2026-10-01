@@ -27,6 +27,51 @@ def clean_city(name: str) -> str:
     return n
 
 
+# Names a store file uses for a city whose official (CBS) name differs.
+_CITY_ALIASES = {
+    "תל אביב": "תל אביב-יפו",
+    'ת"א': "תל אביב-יפו",
+    "ראשלצ": "ראשון לציון",
+    "מודיעין": "מודיעין-מכבים-רעות",
+    "מישור אדומים": "מעלה אדומים",
+}
+
+
+def _fold(s: str) -> str:
+    s = clean_city(s).replace("-", " ").replace("״", '"')
+    s = s.replace("יי", "י").replace("וו", "ו")
+    s = re.sub(r'[^\w" ]', " ", s)
+    return " " + re.sub(r"\s+", " ", s).strip() + " "
+
+
+def infer_city(texts: list[str], known: list[str]) -> str:
+    """A city from free text, for chains whose Stores file has no city code
+    (Yochananof writes City=0). The store name is tried before the address; the
+    longest known name wins; a name shorter than 4 letters counts only when it
+    is the whole text (so the address "נופי חמד" is not the village Hemed)."""
+    table: dict[str, str] = {}
+    for k in known:
+        table.setdefault(_fold(k), k)
+    by_fold = dict(table)
+    for alias, target in _CITY_ALIASES.items():
+        real = by_fold.get(_fold(target))
+        if real:
+            table[_fold(alias)] = real
+    for text in texts:
+        ft = _fold(text or "")
+        if not ft.strip():
+            continue
+        best, best_len = "", 0
+        for fk, name in table.items():
+            core = fk.strip()
+            if ft == fk or (len(core.replace(" ", "")) >= 4 and fk in ft):
+                if len(core) > best_len:
+                    best, best_len = name, len(core)
+        if best:
+            return best
+    return ""
+
+
 def haversine_km(a: tuple[float, float], b: tuple[float, float]) -> float:
     lat1, lon1 = map(math.radians, a)
     lat2, lon2 = map(math.radians, b)
@@ -72,11 +117,16 @@ def refresh_store_locations(con: sqlite3.Connection, f: Fetcher) -> dict:
     if numeric:
         codes = load_city_codes(con, f)
     code_map = dict(con.execute("SELECT code, name FROM city_codes").fetchall())
-    rows = con.execute("SELECT chain, store_id, city_raw, address FROM stores").fetchall()
+    rows = con.execute("SELECT chain, store_id, city_raw, address, name FROM stores").fetchall()
+    known = sorted(set(code_map.values()))
     updates = []
-    for chain, sid, raw, address in rows:
+    inferred = 0
+    for chain, sid, raw, address, name in rows:
         raw = (raw or "").strip()
         city = code_map.get(raw.lstrip("0"), "") if raw.isdigit() else clean_city(raw)
+        if not city:
+            city = infer_city([name or "", address or ""], known)
+            inferred += bool(city)
         updates.append((city, chain, sid))
     with con:
         con.executemany("UPDATE stores SET city=? WHERE chain=? AND store_id=?", updates)
@@ -90,4 +140,4 @@ def refresh_store_locations(con: sqlite3.Connection, f: Fetcher) -> dict:
             "UPDATE stores SET lat=(SELECT lat FROM cities c WHERE c.name=stores.city), "
             "lon=(SELECT lon FROM cities c WHERE c.name=stores.city)"
         )
-    return {"city_codes": codes, "cities": len(names), "located": located}
+    return {"city_codes": codes, "cities": len(names), "located": located, "city_from_store_name": inferred}

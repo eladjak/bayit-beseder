@@ -17,7 +17,7 @@ from pathlib import Path
 from . import parse
 from .db import connect
 from .match import Matcher, load_rules
-from .sources import CHAINS, IL, SHUFERSAL_KIND_ORDER, Chain, Fetcher, FileRef, list_shufersal
+from .sources import CHAINS, IL, SHUFERSAL_KIND_ORDER, Chain, Fetcher, FileRef, list_shufersal, store_from_name
 
 MIN_OK_RATIO = 0.8  # a chain run with fewer parsed price files than this is rejected
 
@@ -52,7 +52,7 @@ def _download(f: Fetcher, refs: list[FileRef], raw_dir: Path, workers: int = 2) 
 
     def one(r: FileRef):
         try:
-            data = f.get(r.url)
+            data = (r.session or f).get(r.url)  # Cerberus files ride on the logged-in session
             (raw_dir / r.name.split("?")[0]).write_bytes(data)
             return r.name, data
         except Exception as e:  # recorded per file; the ratio decides the chain
@@ -89,6 +89,7 @@ def ingest_chain(con: sqlite3.Connection, chain: Chain, matcher: Matcher, f: Fet
         stores, products, cand, prices, promos = [], {}, set(), [], []
         code_cache: dict[str, list[str]] = {}
         store_pub: dict[str, str] = {}
+        header_chains: set[str] = set()
         ok = failed = 0
         price_refs = [r for r in refs if r.kind == "pricefull"]
         for r in refs:
@@ -105,10 +106,14 @@ def ingest_chain(con: sqlite3.Connection, chain: Chain, matcher: Matcher, f: Fet
                 elif r.kind == "pricefull":
                     header, it = parse.iter_prices(stream)
                     rows = list(it)
+                    file_chain = (header.get("chainid") or "").strip()
+                    if file_chain and file_chain != chain.chain_id:
+                        # the header is the chain's own word on whose file this is
+                        raise ValueError(f"file header chain {file_chain} != {chain.chain_id}")
+                    header_chains.add(file_chain or "?")
                     store_id = (header.get("storeid") or "").lstrip("0")
                     if not store_id:
-                        parts = r.name.split("-")
-                        store_id = (parts[-3].lstrip("0") or "0") if len(parts) >= 4 else "0"
+                        store_id = store_from_name(r.name) or "0"
                     for p in rows:
                         ids = code_cache.get(p.item_code)
                         if ids is None:
@@ -146,7 +151,7 @@ def ingest_chain(con: sqlite3.Connection, chain: Chain, matcher: Matcher, f: Fet
             data = payloads.get(r.name)
             if isinstance(data, Exception) or data is None:
                 continue
-            store_id = r.name.split("-")[-3].lstrip("0") or "0" if r.name.count("-") >= 4 else ""
+            store_id = store_from_name(r.name)  # both name shapes; "" if unrecognised
             try:
                 rows = list(parse.iter_promos(parse.open_payload(data)))
                 size: dict[str, int] = {}
@@ -186,7 +191,7 @@ def ingest_chain(con: sqlite3.Connection, chain: Chain, matcher: Matcher, f: Fet
                 (_now(), ok, failed, len(stores), len(products), len(prices), k),
             )
         return {"chain": chain.key, "ok": ok, "failed": failed, "stores": len(stores), "products": len(products),
-                "prices": len(prices), "promos": len(promos)}
+                "prices": len(prices), "promos": len(promos), "header_chain_ids": sorted(header_chains)}
     except Exception as e:
         con.execute("UPDATE chains SET last_error=? WHERE key=?", (f"{_now()} {e}"[:500], chain.key))
         con.commit()
