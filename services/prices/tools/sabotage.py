@@ -11,6 +11,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGET = ROOT / "bp" / "compare.py"
+SOURCES = ROOT / "bp" / "sources.py"
+INGEST = ROOT / "bp" / "ingest.py"
 
 CASES = [
     # (description, old, new, test that must fail)
@@ -35,11 +37,51 @@ CASES = [
     ("strict words ignored",
      "if req.strict and not req.pin_code:", "if False:",
      "test_extra_words_are_hard_constraints"),
+    # Cerberus portal (Rami Levy, Osher Ad, Yochananof, Tiv Taam)
+    ("cerberus posts a password",
+     '"username": self.username, "password": ""', '"username": self.username, "password": "guess"',
+     "test_login_posts_an_empty_password_and_lists", SOURCES),
+    ("configured password accepted",
+     'if entry.get("password") not in (None, ""):', "if False:",
+     "test_refuses_a_non_empty_password", SOURCES),
+    ("expired session not renewed",
+     "                with self._lock:", "                raise RuntimeError('no relogin')\n                with self._lock:",
+     "test_lost_session_logs_in_again_once", SOURCES),
+    ("HTML page accepted as a data file",
+     'if head.startswith(b"<!doctype html") or head.startswith(b"<html"):', "if False:",
+     "test_html_instead_of_a_file_is_an_error", SOURCES),
+    ("truncated listing accepted",
+     "if len(rows) < total:", "if False:",
+     "test_truncated_listing_is_an_error", SOURCES),
+    ("other chain's files listed",
+     "for n in names if chain_id in n and (k := _kind(n))]", "for n in names if (k := _kind(n))]",
+     "test_keeps_latest_full_files_of_this_chain_only", SOURCES),
+    ("file header chain id not checked",
+     "if file_chain and file_chain != chain.chain_id:", "if False:",
+     "test_file_from_another_chain_is_rejected", INGEST),
+    ("portal files downloaded without the session",
+     "data = (r.session or f).get(r.url)", "data = f.get(r.url)",
+     "test_downloads_ride_on_the_session", INGEST),
+    ("short file names collapse into one store",
+     "        if np and r.kind != \"stores\":", "        if False:",
+     "test_latest_per_store_keeps_short_names_apart", SOURCES),
+    ("files from 2024 ingested",
+     "return latest_per_store(drop_out_of_date(refs))", "return latest_per_store(refs)",
+     "test_lister_drops_files_long_out_of_date", SOURCES),
+    ("promo store id from the long name shape only",
+     "store_id = store_from_name(r.name)  # both", "store_id = r.name.split('-')[-3] if r.name.count('-') >= 4 else ''  # both",
+     "test_promos_of_short_named_files_land_on_their_store", INGEST),
+    ("city code 0 left without a city",
+     "            city = infer_city([name or \"\", address or \"\"], known)", "            city = ''",
+     "test_refresh_uses_the_store_name_when_the_city_code_is_zero", ROOT / "bp" / "geo.py"),
+    ("short settlement names matched inside text",
+     "if ft == fk or (len(core.replace(\" \", \"\")) >= 4 and fk in ft):", "if fk in ft:",
+     "test_store_name_wins_over_address_and_short_names_need_an_exact_match", ROOT / "bp" / "geo.py"),
 ]
 
 
 def run() -> tuple[int, str]:
-    p = subprocess.run([sys.executable, "-m", "unittest", "tests.test_compare"], cwd=ROOT,
+    p = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests"], cwd=ROOT,
                        capture_output=True, text=True, encoding="utf-8")
     return p.returncode, p.stdout + p.stderr
 
@@ -49,29 +91,35 @@ def main() -> int:
     if code != 0:
         print("baseline is already red; refusing to sabotage\n" + out[-1500:])
         return 2
-    backup = Path(tempfile.mkdtemp()) / "compare.py"
-    shutil.copy2(TARGET, backup)
-    original = TARGET.read_bytes()
+    targets = {TARGET} | {c[4] for c in CASES if len(c) > 4}
+    originals = {t: t.read_bytes() for t in targets}
+    keep = Path(tempfile.mkdtemp())
+    for t in targets:
+        shutil.copy2(t, keep / t.name)
     bad = 0
     try:
-        for desc, old, new, must_fail in CASES:
+        for case in CASES:
+            desc, old, new, must_fail = case[:4]
+            target = case[4] if len(case) > 4 else TARGET
+            original = originals[target]
             src = original.decode("utf-8")
             if old not in src:
                 print(f"[SETUP] {desc}: anchor not found")
                 bad += 1
                 continue
-            TARGET.write_text(src.replace(old, new, 1), encoding="utf-8")
-            assert TARGET.read_bytes() != original, "sabotage did not land"
+            target.write_text(src.replace(old, new, 1), encoding="utf-8", newline="")
+            assert target.read_bytes() != original, "sabotage did not land"
             code, out = run()
             hit = code != 0 and must_fail in out
             print(f"[{'RED as predicted' if hit else 'NOT CAUGHT'}] {desc} -> expects {must_fail}")
             if not hit:
                 bad += 1
                 print(out[-800:])
-            TARGET.write_bytes(original)
+            target.write_bytes(original)
     finally:
-        TARGET.write_bytes(original)
-    assert TARGET.read_bytes() == original
+        for t, b in originals.items():
+            t.write_bytes(b)
+    assert all(t.read_bytes() == b for t, b in originals.items())
     code, _ = run()
     print(f"restored, suite {'green' if code == 0 else 'RED'}")
     return 1 if bad or code else 0
