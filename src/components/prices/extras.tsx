@@ -1,5 +1,5 @@
 import type { CompareResponse, StoreResult } from "@/lib/prices/types";
-import { formatMoney, formatPublished, storeKey } from "./format";
+import { NO_AFFILIATION, PRICE_DISCLAIMER, formatMoney, formatPublished, priceAttribution, storeKey } from "./format";
 
 const CARD = "rounded-2xl border border-gray-200 dark:border-gray-700 bg-surface p-3";
 
@@ -80,9 +80,9 @@ export function UnknownItems({ data }: { data: CompareResponse }) {
 export function PricesFooter({ data }: { data: CompareResponse }) {
   return (
     <footer className="text-xs text-gray-600 dark:text-gray-400 space-y-2 pb-4">
-      <p>
-        המחירים מתוך קבצי שקיפות המחירים שהרשתות מפרסמות לפי חוק. מחיר מדף, בלי מבצעים ומועדונים. מלאי בסניף לא נבדק.
-      </p>
+      <p className="font-medium text-gray-700 dark:text-gray-300">{priceAttribution(data.chains)}</p>
+      <p>{PRICE_DISCLAIMER}</p>
+      <p>{NO_AFFILIATION}</p>
       <ul className="space-y-0.5">
         {data.chains.map((c) => {
           const pub = formatPublished(c.lastOk);
