@@ -1309,5 +1309,20 @@
    "auditDenied": "Refused, no permission",
    "auditRejected": "Refused",
    "auditFailed": "Failed"
-  }
+  },
+ "feedback": {
+  "button": "Send in-app feedback",
+  "title": "Feedback on Bayit BeSeder",
+  "ratingLabel": "How is your experience?",
+  "star": "{n} out of 5",
+  "messageLabel": "Anything to add? (optional)",
+  "messagePlaceholder": "What do you like, what is missing, what did not work?",
+  "submit": "Send",
+  "sending": "Sending...",
+  "cancel": "Cancel",
+  "ratingRequired": "Choose a star rating",
+  "success": "Thank you! Feedback received",
+  "error": "Could not send. Please try again",
+  "rateLimited": "You have sent several already. Please try again later"
+ }
 }

@@ -1309,5 +1309,20 @@
    "auditDenied": "נדחה, אין הרשאה",
    "auditRejected": "נדחה",
    "auditFailed": "נכשל"
-  }
+  },
+ "feedback": {
+  "button": "שלחו משוב באפליקציה",
+  "title": "משוב על בית בסדר",
+  "ratingLabel": "איך החוויה שלכם?",
+  "star": "{n} מתוך 5",
+  "messageLabel": "רוצים להוסיף משהו? (לא חובה)",
+  "messagePlaceholder": "מה אהבתם, מה חסר, מה לא עבד?",
+  "submit": "שליחה",
+  "sending": "שולחים...",
+  "cancel": "ביטול",
+  "ratingRequired": "בחרו דירוג בכוכבים",
+  "success": "תודה! המשוב התקבל",
+  "error": "לא הצלחנו לשלוח. נסו שוב",
+  "rateLimited": "שלחתם כבר כמה משובים. נסו שוב מאוחר יותר"
+ }
 }
