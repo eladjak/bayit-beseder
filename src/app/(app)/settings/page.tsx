@@ -31,6 +31,7 @@ import { DangerZone } from "@/components/settings/danger-zone";
 import { MembersSection } from "@/components/settings/members-section";
 import { SubscriptionSection } from "@/components/settings/subscription-section";
 import { AgentConnectSection } from "@/components/settings/agent-connect-section";
+import { FeedbackButton } from "@/components/feedback/feedback-button";
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -966,6 +967,7 @@ export default function SettingsPage() {
                 ? "Found a bug? Missing a feature? Have an idea?"
                 : "נתקלתם בבאג? חסר פיצ׳ר? יש רעיון? נשמח לשמוע!"}
             </p>
+            <FeedbackButton />
             <div className="flex gap-2">
               <a
                 href="mailto:contact@bayitbeseder.com?subject=משוב על בית בסדר"

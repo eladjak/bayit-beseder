@@ -1133,6 +1133,40 @@ export type Database = {
         };
         Relationships: [];
       };
+      // Migration 025: in-app feedback (append-only from the app).
+      app_feedback: {
+        Row: {
+          id: string;
+          user_id: string;
+          household_id: string | null;
+          rating: number;
+          message: string | null;
+          page: string | null;
+          app_version: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          household_id?: string | null;
+          rating: number;
+          message?: string | null;
+          page?: string | null;
+          app_version?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          household_id?: string | null;
+          rating?: number;
+          message?: string | null;
+          page?: string | null;
+          app_version?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: {
       [_ in never]: never;
