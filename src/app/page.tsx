@@ -220,7 +220,7 @@ export default function LandingPage() {
             <h1 className="max-w-xl text-[2.25rem] font-extrabold leading-[1.15] tracking-tight md:text-6xl">פחות לזכור.<br />יותר להיות בבית.</h1>
             <p className="mt-5 max-w-lg text-lg leading-8 text-muted">משימות, קניות ותכנון הבית במקום אחד, לכל מי שחי בו.</p>
             <div className="mt-7 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-4">
-              <Link href="/login" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-7 font-bold text-white hover:bg-primary-dark focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">בואו נתחיל</Link>
+              <Link href="/first-week" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-7 font-bold text-white hover:bg-primary-dark focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">בואו נתחיל</Link>
               <Link href="/login" className="inline-flex min-h-12 items-center justify-center px-2 font-semibold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">כבר יש לי חשבון</Link>
             </div>
           </div>
