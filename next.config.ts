@@ -6,7 +6,6 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 });
 
 const nextConfig: NextConfig = {
-  outputFileTracingIncludes: { "/*": ["./content/blog-syndicated/**/*.json"] },
   async rewrites() { return { beforeFiles: [{ source: "/sitemap.xml", destination: "/sitemap-index.xml" }] }; },
   // Enable gzip/brotli compression
   compress: true,

@@ -1,23 +1,21 @@
-import { marked } from "marked";
-import sanitizeHtml from "sanitize-html";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { notFound } from "next/navigation";
-import { syndicatedArticles } from "@/lib/syndicated";
+import type { Metadata } from 'next';
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { PortableText } from '@portabletext/react';
+import { getBlogPosts } from '@/lib/sanity/client';
 
-type Props = { params: Promise<{ slug: string }> };
-export async function generateMetadata({params}:Props): Promise<Metadata> {
-  const {slug} = await params;
-  const article = syndicatedArticles().find(p => p.slug === slug);
-  if (!article) return {};
-  return { title: article.title, description: article.description, alternates: {canonical:article.canonicalUrl}, robots: article.contentMode === "reprint" || process.env.VERCEL_ENV === "preview" ? {index:false,follow:false} : undefined };
+type Props = { params: Promise<{slug:string}> };
+async function find(slug:string) {
+  const posts=(await getBlogPosts()).filter(p=>p.slug.current===slug);
+  return posts.find(p=>p.language==='he') ?? posts[0];
+}
+export async function generateMetadata({params}:Props):Promise<Metadata> {
+  const {slug}=await params; const post=await find(slug); if(!post) return {};
+  return {title:post.seo?.metaTitle || post.title,description:post.seo?.metaDescription || post.excerpt,alternates:{canonical:`https://www.bayitbeseder.com/blog/${slug}`}};
 }
 export default async function ArticlePage({params}:Props) {
-  const {slug}=await params;
-  const article=syndicatedArticles().find(p=>p.slug===slug);
-  if (!article) notFound();
-  const imageUrl = article.image?.url.startsWith("https://www.bayitbeseder.com/images/") ? new URL(article.image.url).pathname : article.image?.url;
-  const schema={"@context":"https://schema.org","@type":"BlogPosting",headline:article.title,description:article.description,datePublished:article.dates.published,dateModified:article.dates.modified,inLanguage:article.language,author:{"@type":article.author.type === "Organization" ? "Organization" : "Person",name:article.author.name,url:article.author.url},mainEntityOfPage:article.canonicalUrl,...(article.image ? {image:article.image.url} : {})};
-  const html=sanitizeHtml(marked.parse(article.bodyMarkdown, {async:false}),{allowedTags:["p","h2","h3","h4","ul","ol","li","strong","em","a","blockquote","br"],allowedAttributes:{a:["href","title"]},allowedSchemes:["https","http","mailto"]});
-  return <main dir={article.language === "he" ? "rtl" : "ltr"} lang={article.language} className="max-w-3xl mx-auto px-6 py-12"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,"\\u003c")}}/><nav className="mb-8"><Link className="text-primary font-semibold inline-block py-3" href="/blog">← לכל המאמרים</Link></nav><article className="card-elevated p-6 md:p-10"><header><h1 className="text-3xl md:text-4xl font-bold leading-tight mb-4">{article.title}</h1><p className="text-muted text-lg leading-8">{article.description}</p><p className="text-sm text-muted mt-4">{article.author.name} · <time dateTime={article.dates.published}>{new Date(article.dates.published).toLocaleDateString("he-IL")}</time></p></header>{article.image && <img src={imageUrl} alt={article.image.alt} className="w-full rounded-2xl mt-8" />}<div className="mt-8 space-y-5 text-foreground leading-8 [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-xl [&_h3]:font-bold [&_ul]:list-disc [&_ol]:list-decimal [&_li]:ms-6 [&_a]:text-primary [&_a]:underline" dangerouslySetInnerHTML={{__html:html}} />{article.internalLinks?.length > 0 && <nav aria-label="קישורים נוספים" className="mt-8"><h2 className="text-xl font-bold">קישורים נוספים</h2><ul>{article.internalLinks.filter(link => (link.url.startsWith("/") && !link.url.startsWith("//")) || link.url.startsWith("https://")).map(link => <li key={link.url}><a className="text-primary underline inline-block py-3" href={link.url}>{link.label}</a></li>)}</ul></nav>}<p className="mt-8"><a className="text-primary underline inline-block py-3" href={article.source.url}>למאמר המקורי</a></p></article></main>;
+  const {slug}=await params; const post=await find(slug); if(!post) notFound();
+  const canonical=`https://www.bayitbeseder.com/blog/${slug}`;
+  const schema={'@context':'https://schema.org','@type':'BlogPosting',headline:post.title,description:post.excerpt,datePublished:post.publishedAt,inLanguage:post.language || 'he',author:{'@type':'Organization',name:'בית בסדר'},mainEntityOfPage:canonical,...(post.mainImageUrl?{image:post.mainImageUrl}:{})};
+  return <main dir={post.language==='en'?'ltr':'rtl'} lang={post.language || 'he'} className="max-w-3xl mx-auto px-6 py-12"><script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(schema).replace(/</g,'\\u003c')}}/><nav className="mb-8"><Link className="text-primary font-semibold inline-block py-3" href="/blog">← לכל המאמרים</Link></nav><article className="card-elevated p-6 md:p-10"><header><h1 className="text-3xl md:text-4xl font-bold leading-tight mb-4">{post.title}</h1><p className="text-muted text-lg leading-8">{post.excerpt}</p>{post.publishedAt && <time dateTime={post.publishedAt}>{new Date(post.publishedAt).toLocaleDateString('he-IL')}</time>}</header>{post.mainImageUrl && <img src={post.mainImageUrl} alt="" className="w-full rounded-2xl mt-8"/>}<div className="mt-8 space-y-5 text-foreground leading-8 [&_h2]:text-2xl [&_h2]:font-bold [&_a]:text-primary [&_a]:underline">{post.body && <PortableText value={post.body} components={{marks:{link:({children,value})=>{const href=value?.href; return typeof href==='string' && (/^https?:\/\//i.test(href)||/^\/(?!\/)/.test(href)) ? <a href={href}>{children}</a> : <>{children}</>;}}}}/>}</div></article></main>;
 }
