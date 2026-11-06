@@ -6,6 +6,7 @@ export const sanityClient = createClient({
   apiVersion: "2024-01-01",
   useCdn: true,
   perspective: "published",
+  timeout: 10000,
 });
 
 import type { PortableTextBlock } from "@portabletext/react";
