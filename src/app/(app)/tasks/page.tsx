@@ -57,7 +57,6 @@ import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { TaskTemplatePicker } from "@/components/task-template-picker";
 import type { TaskTemplate } from "@/lib/task-templates";
 import { useFirstVisit } from "@/hooks/useFirstVisit";
-import { FeatureTooltip } from "@/components/feature-tooltip";
 import { ilToday } from "@/lib/il-date";
 
 const VoiceInputButton = dynamic(
@@ -114,7 +113,7 @@ export default function TasksPage() {
     updateTask,
     refetch: refetchTasks,
   } = useTasks({ realtime: true });
-  const { markComplete, completions, isCompletedToday, refetch: refetchCompletions } = useCompletions({ limit: 500 });
+  const { markComplete, undoComplete, completions, isCompletedToday, refetch: refetchCompletions } = useCompletions({ limit: 500 });
   const { getStreak } = useTaskStreaks(completions);
   const { uploadPhoto } = useTaskPhoto();
   // taskId currently showing the photo capture UI
@@ -388,43 +387,19 @@ export default function TasksPage() {
           return next;
         });
 
-        if (isRecurring(task.recurring)) {
-          const supabase = (await import("@/lib/supabase")).createClient();
-          const startOfDay = new Date();
-          startOfDay.setHours(0, 0, 0, 0);
-          const { error: delError } = await supabase
-            .from("task_completions")
-            .delete()
-            .eq("task_id", taskId)
-            .eq("user_id", profile.id)
-            .gte("completed_at", startOfDay.toISOString());
-
-          if (!delError) {
-            await refetchCompletions();
-          }
-          setOptimisticUncompleted((prev) => {
-            const next = new Set(prev);
-            next.delete(taskId);
-            return next;
-          });
-
-          if (!delError) {
-            toast.info(t("tasks.removedMark"));
-          } else {
-            toast.error(t("tasks.operationFailed"));
-          }
+        const success = await undoComplete(taskId);
+        if (success) {
+          await Promise.all([refetchTasks(), refetchCompletions()]);
+        }
+        setOptimisticUncompleted((prev) => {
+          const next = new Set(prev);
+          next.delete(taskId);
+          return next;
+        });
+        if (success) {
+          toast.info(t("tasks.removedMark"));
         } else {
-          const success = await updateTask(taskId, { status: "pending" });
-          setOptimisticUncompleted((prev) => {
-            const next = new Set(prev);
-            next.delete(taskId);
-            return next;
-          });
-          if (success) {
-            toast.info(t("tasks.removedMark"));
-          } else {
-            toast.error(t("tasks.operationFailed"));
-          }
+          toast.error(t("tasks.operationFailed"));
         }
       } else {
         haptic("success");
@@ -473,7 +448,7 @@ export default function TasksPage() {
         }
       }
     },
-    [dbTasks, profile, markComplete, updateTask, optimisticCompleted, optimisticUncompleted, isCompletedToday, refetchCompletions, refetchTasks, pendingPhotoUrl, t]
+    [dbTasks, profile, markComplete, undoComplete, updateTask, optimisticCompleted, optimisticUncompleted, isCompletedToday, refetchCompletions, refetchTasks, pendingPhotoUrl, t]
   );
 
   // Add new task to DB
@@ -740,17 +715,16 @@ export default function TasksPage() {
                 <Plus className="w-4 h-4" />
                 <span>{t("tasks.addTaskShort")}</span>
               </button>
-              <FeatureTooltip
-                visible={showTasksTip && !tasksLoading && !tasksError}
-                text="לחצו כאן כדי להוסיף משימה חדשה"
-                onDismiss={dismissTasksTip}
-                position="below"
-                anchor="end"
-              />
             </div>
 
           </div>
         </div>
+        {showTasksTip && !tasksLoading && !tasksError && (
+          <div className="mt-3 flex items-center justify-between gap-3 rounded-xl bg-primary/10 px-4 py-2 text-sm text-foreground">
+            <p>{locale === "en" ? "Use Add to create a new task." : "אפשר להוסיף כאן משימה חדשה."}</p>
+            <button type="button" onClick={dismissTasksTip} className="min-h-11 shrink-0 font-semibold text-primary">{locale === "en" ? "Got it" : "הבנתי"}</button>
+          </div>
+        )}
       </div>
 
       <div className="px-4 space-y-4">

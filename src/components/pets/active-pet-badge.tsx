@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { PawPrint } from "lucide-react";
 import { getActivePet, type Pet } from "@/lib/pets";
 
 type Props = {
@@ -39,7 +40,7 @@ export function ActivePetBadge({ onClick }: Props) {
       aria-label={`החבר/ה שלך: ${pet.name}. לחץ להחלפה.`}
       className="inline-flex items-center justify-center size-11 rounded-full bg-indigo-50 border border-indigo-100 text-xl hover:scale-110 active:scale-95 transition-transform duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
     >
-      <span aria-hidden="true" className="select-none">{pet.emoji}</span>
+      <PawPrint aria-hidden="true" className="size-5 text-primary" />
     </button>
   );
 }

@@ -182,7 +182,25 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       <ServiceWorkerRegistrar />
       <ServiceWorkerUpdateToast />
       <main id="main-content" className="mx-auto max-w-lg pb-28 sm:max-w-xl lg:max-w-4xl lg:pb-12">
+      {/* Alopik v2 #3: Adult-toned onboarding wizard (once per user, re-trigger from settings) */}
+      <OnboardingWizard
+        open={onboardingOpen && !setupWizardVisible}
+        onClose={() => {
+          setOnboardingOpen(false);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("bayit-onboarding-done-v1", "1");
+          }
+        }}
+        onComplete={() => {
+          setOnboardingOpen(false);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("bayit-onboarding-done-v1", "1");
+          }
+        }}
+      />
+
         <PageTransition>{children}</PageTransition>
+        <WelcomeGiftModal />
       </main>
       <BottomNav />
 
@@ -200,25 +218,6 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       {/* Alopik v2 Phase 3: Celebration toast for new pet/background unlocks */}
       <CelebrationToast items={celebrationItems} />
 
-      {/* Alopik v2 Loop L: Welcome Gift modal (one-shot after onboarding) */}
-      <WelcomeGiftModal />
-
-      {/* Alopik v2 #3: Adult-toned onboarding wizard (once per user, re-trigger from settings) */}
-      <OnboardingWizard
-        open={onboardingOpen && !setupWizardVisible}
-        onClose={() => {
-          setOnboardingOpen(false);
-          if (typeof window !== "undefined") {
-            localStorage.setItem("bayit-onboarding-done-v1", "1");
-          }
-        }}
-        onComplete={() => {
-          setOnboardingOpen(false);
-          if (typeof window !== "undefined") {
-            localStorage.setItem("bayit-onboarding-done-v1", "1");
-          }
-        }}
-      />
 
       {/* AI Chat drawer */}
       <ChatDrawer open={chatOpen} onClose={() => setChatOpen(false)} />

@@ -4,7 +4,6 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Check, Sparkles, Home, Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useFocusTrap } from "@/hooks/useFocusTrap";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const VoiceInputButton = dynamic(
@@ -182,7 +181,6 @@ function ProgressDots({ current, total }: { current: number; total: number }) {
 }
 
 function OptionCard({
-  emoji,
   label,
   sublabel,
   selected,
@@ -206,7 +204,7 @@ function OptionCard({
           : "border-border bg-surface hover:border-primary/30"
       }`}
     >
-      <span className="text-2xl shrink-0">{emoji}</span>
+      <Sparkles className="size-6 shrink-0 text-primary" aria-hidden="true" />
       <div className="flex-1">
         <p className={`font-semibold text-sm ${selected ? "text-primary" : "text-foreground"}`}>
           {label}
@@ -223,7 +221,6 @@ function OptionCard({
 }
 
 function GridCard({
-  emoji,
   label,
   selected,
   onClick,
@@ -250,7 +247,7 @@ function GridCard({
           <Check className="w-3 h-3 text-white" />
         </span>
       )}
-      <span className="text-3xl" aria-hidden="true">{emoji}</span>
+      <Home className="size-7 text-primary" aria-hidden="true" />
       <span className={`text-xs font-medium ${selected ? "text-primary" : "text-foreground"}`}>
         {label}
       </span>
@@ -619,7 +616,7 @@ function StepPlanReady({
         transition={{ type: "spring", damping: 15 }}
         className="text-center mb-4"
       >
-        <span className="text-4xl">{t("onboarding.planReadyEmoji")}</span>
+        <Check className="size-10 mx-auto text-primary" aria-hidden="true" />
       </motion.div>
 
       <h2 className="text-xl font-bold text-foreground mb-1 text-center">
@@ -783,7 +780,6 @@ const TOTAL_STEPS = 7; // 0=welcome,1=name,2=rooms,3=residents,4=personality,5=g
 
 export function ConversationalOnboarding({ open, onComplete, onSkip }: ConversationalOnboardingProps) {
   const { t } = useTranslation();
-  const focusTrapRef = useFocusTrap<HTMLDivElement>(open, onSkip);
   const [step, setStep] = useState(0); // 0 = welcome
   const [homeName, setHomeName] = useState("");
   const [homeCity, setHomeCity] = useState("");
@@ -794,6 +790,36 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
   const [dailyMinutes, setDailyMinutes] = useState<DailyMinutes>(30);
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedTasks, setGeneratedTasks] = useState<TaskTemplate[] | null>(null);
+
+  const [draftReady, setDraftReady] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem("bayit-setup-draft-v1") || "null");
+      if (saved) {
+        setStep(Math.min(4, Math.max(0, Number(saved.step) || 0)));
+        if (typeof saved.homeName === "string") setHomeName(saved.homeName);
+        if (typeof saved.homeCity === "string") setHomeCity(saved.homeCity);
+        if (["studio", "2", "3", "4", "5+"].includes(saved.roomCount)) setRoomCount(saved.roomCount);
+        if (Array.isArray(saved.residents)) setResidents(new Set(saved.residents.filter((v: string) => ["couple", "kids", "pets", "parents"].includes(v))));
+        if (["daily", "sprint"].includes(saved.style)) setStyle(saved.style);
+        if ([15, 30, 60].includes(saved.dailyMinutes)) setDailyMinutes(saved.dailyMinutes);
+      }
+    } catch { /* A blocked or invalid draft should not prevent setup. */ }
+    setDraftReady(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!draftReady || !open || step >= 6) return;
+    try {
+      sessionStorage.setItem("bayit-setup-draft-v1", JSON.stringify({ step, homeName, homeCity, roomCount, residents: [...residents], style, dailyMinutes }));
+    } catch { /* Setup still works without storage. */ }
+  }, [draftReady, open, step, homeName, homeCity, roomCount, residents, style, dailyMinutes]);
+
+  const clearDraft = () => { try { sessionStorage.removeItem("bayit-setup-draft-v1"); } catch { /* Storage is optional. */ } };
 
   // step 6 = done/celebration screen
   const [showDone, setShowDone] = useState(false);
@@ -841,6 +867,7 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
         dailyMinutes,
         tasks: generatedTasks,
       });
+      clearDraft();
     }, 2200);
   }, [generatedTasks, homeName, homeCity, roomCount, residents, kidCount, style, dailyMinutes, onComplete]);
 
@@ -862,14 +889,12 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
 
   return (
     <div
-      ref={focusTrapRef}
-      role="dialog"
-      aria-modal="true"
+      role="region"
       aria-label={t("onboarding.dialogAriaLabel")}
       // Marker the app layout polls so the 6-step welcome tour queues behind
       // this wizard instead of opening underneath it with unclickable controls.
       data-setup-wizard="1"
-      className="fixed inset-0 z-[100] bg-background flex flex-col"
+      className="mb-5 overflow-hidden rounded-3xl border border-border bg-surface shadow-sm flex flex-col"
       dir="rtl"
     >
       {/* Slim progress bar — full width at top */}
@@ -889,7 +914,7 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
           {step < 6 && (
             <button
               type="button"
-              onClick={onSkip}
+              onClick={() => { clearDraft(); onSkip(); }}
               aria-label={t("onboarding.skipAriaLabel")}
               className="text-xs text-muted hover:text-foreground transition-colors px-2 py-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded"
             >

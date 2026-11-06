@@ -8,7 +8,7 @@ function iconOf(title: string, category: string, props: Record<string, unknown> 
   const { container } = render(
     <ShoppingItemCard item={{ ...base, title, category }} onToggle={() => {}} onRemove={() => {}} {...props} />
   );
-  return container.querySelector('span[aria-hidden]')?.textContent;
+  return container.querySelector('span[aria-hidden]')?.getAttribute('data-icon');
 }
 
 describe("ShoppingItemCard icon", () => {

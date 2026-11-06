@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, History, TrendingUp, Users, ChevronDown } from "lucide-react";
+import { Trophy, History, TrendingUp, Users, ChevronDown, BarChart3, Flame, CalendarDays } from "lucide-react";
 
 import { ACHIEVEMENTS } from "@/lib/achievements";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -176,7 +176,7 @@ function StreakVisualization({
   return (
     <div className="card-elevated p-4">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-semibold text-sm">🔥 {t("stats.streakActivity")}</h2>
+        <h2 className="font-semibold text-sm"><Flame aria-hidden="true" className="inline size-4" /> {t("stats.streakActivity")}</h2>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
             <span className="text-xs text-muted">{t("stats.streakNow")}</span>
@@ -552,7 +552,7 @@ export default function StatsPage() {
       <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
         <div className="flex items-center justify-between relative z-10">
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold text-white tracking-tight">📊 {t("stats.pageTitle")}</h1>
+            <h1 className="text-xl font-bold text-white tracking-tight"><BarChart3 aria-hidden="true" className="inline size-5" /> {t("stats.pageTitle")}</h1>
             <ShareButton
               title={t("share.statsTitle")}
               text={t("share.statsText")}
@@ -674,7 +674,7 @@ export default function StatsPage() {
         transition={{ duration: 0.3, delay: 0.2 }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold text-sm">📈 {t("stats.thisWeek")}</h2>
+          <h2 className="font-semibold text-sm"><TrendingUp aria-hidden="true" className="inline size-4" /> {t("stats.thisWeek")}</h2>
           <span className="text-[10px] text-muted bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
             {hasDbData ? t("stats.ourData") : t("stats.demo")}
           </span>
@@ -735,7 +735,7 @@ export default function StatsPage() {
       >
         <div className="flex items-center gap-2 mb-3">
           <Trophy className="w-5 h-5 text-amber-500" />
-          <h2 className="font-semibold text-sm">🏆 {t("badges.sectionTitle")}</h2>
+          <h2 className="font-semibold text-sm"><Trophy aria-hidden="true" className="inline size-4" /> {t("badges.sectionTitle")}</h2>
         </div>
         <BadgesDisplay />
       </motion.div>
@@ -749,7 +749,7 @@ export default function StatsPage() {
       >
         <div className="flex items-center gap-2 mb-3">
           <History className="w-5 h-5 text-primary" />
-          <h2 className="font-semibold text-sm">📅 {t("calendar.sectionTitle")}</h2>
+          <h2 className="font-semibold text-sm"><CalendarDays aria-hidden="true" className="inline size-4" /> {t("calendar.sectionTitle")}</h2>
         </div>
         <CalendarView />
       </motion.div>
@@ -768,7 +768,7 @@ export default function StatsPage() {
           aria-expanded={advancedOpen}
         >
           <div className="flex items-center gap-2">
-            <span className="text-base">📊</span>
+            <BarChart3 aria-hidden="true" className="size-4" />
             <h2 className="font-semibold text-sm">{t("stats.advancedStats")}</h2>
           </div>
           <motion.div
@@ -793,7 +793,7 @@ export default function StatsPage() {
               {/* Weekly Completion Trend — Line chart */}
               <div className="card-elevated p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-sm">📈 {t("stats.weeklyTrendTitle")}</h3>
+                  <h3 className="font-semibold text-sm"><TrendingUp aria-hidden="true" className="inline size-4" /> {t("stats.weeklyTrendTitle")}</h3>
                   {hasDbData && (
                     <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded-full font-medium">
                       {t("stats.ourData")}

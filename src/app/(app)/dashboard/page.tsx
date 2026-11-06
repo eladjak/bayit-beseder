@@ -78,7 +78,7 @@ const EVENING_SUBTITLES = [
 ];
 
 const NIGHT_SUBTITLES = [
-  "מאוחר אבל הבית לא שופט 🌙",
+  "מאוחר אבל הבית לא שופט",
   "לילה טוב — מחר מתחילים מחדש",
   "שינה טובה מגיעה למי שסידר היום",
 ];
@@ -89,11 +89,11 @@ function pickSubtitle(arr: string[]): string {
 
 function getTimeGreeting(name: string): { greeting: string; subtitle: string } {
   const hour = new Date().getHours();
-  if (hour < 6) return { greeting: `לילה טוב, ${name} 🌙`, subtitle: pickSubtitle(NIGHT_SUBTITLES) };
-  if (hour < 12) return { greeting: `בוקר טוב, ${name}! ☀️`, subtitle: pickSubtitle(MORNING_SUBTITLES) };
-  if (hour < 17) return { greeting: `צהריים טובים, ${name} 👋`, subtitle: pickSubtitle(AFTERNOON_SUBTITLES) };
-  if (hour < 21) return { greeting: `ערב טוב, ${name} 🌆`, subtitle: pickSubtitle(EVENING_SUBTITLES) };
-  return { greeting: `לילה טוב, ${name} 🌙`, subtitle: pickSubtitle(NIGHT_SUBTITLES) };
+  if (hour < 6) return { greeting: `לילה טוב, ${name}`, subtitle: pickSubtitle(NIGHT_SUBTITLES) };
+  if (hour < 12) return { greeting: `בוקר טוב, ${name}!`, subtitle: pickSubtitle(MORNING_SUBTITLES) };
+  if (hour < 17) return { greeting: `צהריים טובים, ${name}`, subtitle: pickSubtitle(AFTERNOON_SUBTITLES) };
+  if (hour < 21) return { greeting: `ערב טוב, ${name}`, subtitle: pickSubtitle(EVENING_SUBTITLES) };
+  return { greeting: `לילה טוב, ${name}`, subtitle: pickSubtitle(NIGHT_SUBTITLES) };
 }
 
 export default function DashboardPage() {
@@ -419,6 +419,13 @@ export default function DashboardPage() {
         ) : null}
       </AnimatePresence>
 
+      {/* Conversational onboarding for new users */}
+      <ConversationalOnboarding
+        open={showTaskWizard}
+        onComplete={handleOnboardingComplete}
+        onSkip={handleOnboardingSkip}
+      />
+
       <header className="px-4 pt-6 sm:px-6">
         <p className="text-sm font-semibold text-primary">{getHebrewDate(locale)}</p>
         <h1 className="mt-2 text-3xl font-bold">{locale === "en" ? `Hello, ${displayName}` : greeting}</h1>
@@ -583,12 +590,6 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Conversational onboarding for new users */}
-      <ConversationalOnboarding
-        open={showTaskWizard}
-        onComplete={handleOnboardingComplete}
-        onSkip={handleOnboardingSkip}
-      />
     </div>
   );
 }

@@ -11,7 +11,7 @@
  */
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, X, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Sparkles, Home } from "lucide-react";
 import {
   loadHousehold,
   saveHousehold,
@@ -121,12 +121,11 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
 
   return (
     <div
-      role="dialog"
-      aria-modal="true"
+      role="region"
       aria-labelledby="ob-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      className="px-4 pt-4"
     >
-      <div className="alopik-settle w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden">
+      <div className="w-full rounded-2xl border border-border bg-surface shadow-sm overflow-hidden">
         {/* Progress bar */}
         <div className="h-1.5 bg-gray-100">
           <div
@@ -145,7 +144,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1"
+            className="min-h-11 text-sm text-gray-600 hover:text-gray-800 px-2"
           >
             {t("onboardingTour.skip")}
           </button>
@@ -156,7 +155,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
             type="button"
             onClick={onClose}
             aria-label={t("onboardingTour.close")}
-            className="size-7 rounded-full hover:bg-gray-100 flex items-center justify-center"
+            className="size-11 rounded-full hover:bg-gray-100 flex items-center justify-center"
           >
             <X className="size-4" aria-hidden="true" />
           </button>
@@ -170,7 +169,7 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
             key={step.id}
             style={{ animation: "fadeInScale 240ms ease-out" }}
           >
-            {step.emoji}
+            <Home className="size-10 mx-auto text-primary" />
           </div>
           <h2 id="ob-title" className="text-xl font-bold text-gray-900 mb-3 text-balance">
             {t(step.titleKey)}
@@ -205,12 +204,6 @@ export function OnboardingWizard({ open, onClose, onComplete }: Props) {
                           loading="lazy"
                           className="bb-illus size-full"
                         />
-                        <span
-                          className="absolute bottom-1 left-1 text-lg drop-shadow-sm"
-                          aria-hidden="true"
-                        >
-                          {label.emoji}
-                        </span>
                       </div>
                       <div className="text-sm font-bold text-gray-900">{label.label}</div>
                       <div className="text-[11px] text-gray-500 mt-0.5 text-pretty">

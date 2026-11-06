@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronUp, RotateCcw, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, RotateCcw, Trash2, Package } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface PurchasedSectionProps {
@@ -90,7 +90,7 @@ export function PurchasedSection({ items, onUncheck, onClearAll, categoryIcons }
                       key={item.id}
                       className="flex items-center gap-3 px-4 py-2.5 bg-white/60 dark:bg-gray-900/40 group"
                     >
-                      <span className="text-base opacity-50">{icon}</span>
+                      <Package aria-hidden="true" data-icon={icon} className="size-4 opacity-50" />
                       <div className="flex-1 min-w-0 opacity-50">
                         <span className="text-sm line-through text-gray-500 dark:text-gray-400 truncate block">
                           {item.title}

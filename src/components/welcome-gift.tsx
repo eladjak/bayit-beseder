@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { Sparkles, X } from "lucide-react";
+import { Sparkles, X, Gift } from "lucide-react";
 import { toast } from "sonner";
 import {
   WELCOME_GIFT,
@@ -68,13 +68,9 @@ export function WelcomeGiftModal() {
   if (!open) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="wg-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-    >
-      <div className="alopik-settle w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden">
+    <details className="mx-4 mt-4 rounded-2xl border border-border bg-surface">
+      <summary className="flex min-h-12 cursor-pointer items-center gap-2 px-4 font-semibold text-primary"><Gift className="size-5" aria-hidden="true" />מתנת ההצטרפות שלכם</summary>
+      <div className="w-full rounded-2xl bg-white overflow-hidden">
         <div className="flex justify-end px-3 pt-3">
           <button
             type="button"
@@ -92,7 +88,7 @@ export function WelcomeGiftModal() {
             aria-hidden="true"
             style={{ animation: "wgRise 500ms ease-out" }}
           >
-            {WELCOME_GIFT.emoji}
+            <Gift className="size-12 mx-auto text-primary" />
           </div>
           <h2 id="wg-title" className="text-xl font-bold text-indigo-700 mb-2 text-balance">
             {WELCOME_GIFT.title}
@@ -121,7 +117,7 @@ export function WelcomeGiftModal() {
             onClick={handleClaim}
             className="w-full py-3 rounded-xl alopik-brand-gradient text-white font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-transform"
           >
-            🎉 פתחתי את המתנה!
+            פתחתי את המתנה!
           </button>
         </div>
       </div>
@@ -138,6 +134,6 @@ export function WelcomeGiftModal() {
           }
         }
       `}</style>
-    </div>
+    </details>
   );
 }

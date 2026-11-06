@@ -59,6 +59,7 @@ beforeEach(() => {
       { id: "t-a", household_id: HH_A, token_hash: sha(RAW_A), label: "a", created_at: "2026-01-01", revoked_at: null },
       { id: "t-b", household_id: HH_B, token_hash: sha(RAW_B), label: "b", created_at: "2026-01-01", revoked_at: null },
     ],
+    household_members: [{ household_id: HH_A, user_id: "user-a" }, { household_id: HH_B, user_id: "user-b" }],
     tasks: [
       { id: "aaaaaaaa-0000-4000-8000-000000000001", household_id: HH_A, title: "משימה של A", status: "pending", due_date: "2026-09-30", assigned_to: null, points: 10, category_id: null },
       { id: "bbbbbbbb-0000-4000-8000-000000000002", household_id: HH_B, title: "משימה של B", status: "pending", due_date: "2026-09-30", assigned_to: null, points: 10, category_id: null },
