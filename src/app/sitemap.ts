@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { syndicatedArticles } from "@/lib/syndicated";
 
 // Blog post IDs and their publish dates — keep in sync with blog-content.tsx
 const BLOG_POSTS = [
@@ -11,7 +12,7 @@ const BLOG_POSTS = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://www.bayitbeseder.com";
+  const base = process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://www.bayitbeseder.com";
   const now = new Date();
 
   const blogPostEntries: MetadataRoute.Sitemap = BLOG_POSTS.map((post) => ({
@@ -41,6 +42,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     ...blogPostEntries,
+    ...syndicatedArticles().map(post => ({ url: `${base}/blog/${post.slug}`, lastModified: new Date(post.dates.modified) })),
     {
       url: `${base}/contact`,
       lastModified: now,

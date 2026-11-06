@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { getBlogPosts, type SanityPost } from "@/lib/sanity/client";
+import { syndicatedArticles } from "@/lib/syndicated";
+import Link from "next/link";
 import { BlogContent } from "./blog-content";
 
 export const metadata: Metadata = {
@@ -154,6 +156,7 @@ export default async function BlogPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <section dir="rtl" className="max-w-3xl mx-auto px-6"><h2 className="text-2xl font-bold">מאמרים נוספים</h2>{syndicatedArticles().map(post => <article key={post.id} className="card-elevated p-6 my-4"><h3 className="text-xl font-bold"><Link href={`/blog/${post.slug}`}>{post.title}</Link></h3><p className="text-muted mt-2">{post.description}</p><Link className="text-primary inline-block py-3" href={`/blog/${post.slug}`}>קראו את המאמר ←</Link></article>)}</section>
       <BlogContent sanityPosts={sanityPosts} />
     </>
   );
