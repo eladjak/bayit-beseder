@@ -1,3 +1,12 @@
+DROP POLICY IF EXISTS "Users can delete own household completions" ON public.task_completions;
+CREATE POLICY "Users can delete own household completions"
+  ON public.task_completions FOR DELETE TO authenticated
+  USING (auth.uid() = user_id AND EXISTS (
+    SELECT 1 FROM public.tasks t
+    WHERE t.id = task_completions.task_id
+      AND public.is_household_member(t.household_id)
+  ));
+
 -- One transaction and one task-row lock serialize completion and undo.
 -- Invoker privileges retain the existing RLS policies. Service callers must
 -- supply the household verified by the agent token and a household member.
@@ -15,6 +24,7 @@ DECLARE
   v_task public.tasks%ROWTYPE;
   v_completion public.task_completions%ROWTYPE;
   v_user uuid;
+  v_recurring boolean;
   v_start timestamptz := date_trunc('day', now() AT TIME ZONE 'Asia/Jerusalem') AT TIME ZONE 'Asia/Jerusalem';
   v_end timestamptz := (date_trunc('day', now() AT TIME ZONE 'Asia/Jerusalem') + interval '1 day') AT TIME ZONE 'Asia/Jerusalem';
 BEGIN
@@ -35,6 +45,9 @@ BEGIN
     RAISE EXCEPTION 'Task not found' USING ERRCODE = '42501';
   END IF;
 
+  -- Match src/lib/task-flags.ts for both production text and boolean schemas.
+  v_recurring := coalesce(lower(btrim(v_task.recurring::text)) IN ('true', 't', '1', 'yes'), false);
+
   IF p_action = 'complete' THEN
     IF p_completion_id IS NULL THEN RAISE EXCEPTION 'Completion id required'; END IF;
     SELECT * INTO v_completion FROM public.task_completions WHERE id = p_completion_id;
@@ -45,7 +58,7 @@ BEGIN
       RETURN v_completion;
     END IF;
     IF v_task.status = 'skipped' THEN RAISE EXCEPTION 'Task is skipped'; END IF;
-    IF v_task.recurring THEN
+    IF v_recurring THEN
       SELECT * INTO v_completion FROM public.task_completions
         WHERE task_id = p_task_id AND completed_at >= v_start AND completed_at < v_end
         ORDER BY completed_at DESC, id DESC LIMIT 1;
@@ -58,7 +71,7 @@ BEGIN
     END IF;
     INSERT INTO public.task_completions (id, task_id, user_id, photo_url, notes)
       VALUES (p_completion_id, p_task_id, v_user, p_photo_url, p_notes) RETURNING * INTO v_completion;
-    IF NOT v_task.recurring THEN
+    IF NOT v_recurring THEN
       UPDATE public.tasks SET status = 'completed' WHERE id = p_task_id;
       IF NOT FOUND THEN RAISE EXCEPTION 'Task update denied'; END IF;
     END IF;
@@ -66,10 +79,10 @@ BEGIN
   ELSIF p_action = 'undo' THEN
     SELECT * INTO v_completion FROM public.task_completions
       WHERE task_id = p_task_id AND user_id = v_user
-        AND (NOT v_task.recurring OR (completed_at >= v_start AND completed_at < v_end))
+        AND (NOT v_recurring OR (completed_at >= v_start AND completed_at < v_end))
       ORDER BY completed_at DESC, id DESC LIMIT 1;
     IF NOT FOUND THEN
-      IF v_task.recurring OR v_task.status = 'pending' THEN
+      IF v_recurring OR v_task.status = 'pending' THEN
         v_completion.task_id := p_task_id;
         v_completion.user_id := v_user;
         RETURN v_completion;
@@ -78,7 +91,7 @@ BEGIN
     END IF;
     DELETE FROM public.task_completions WHERE id = v_completion.id;
     IF NOT FOUND THEN RAISE EXCEPTION 'Completion delete denied'; END IF;
-    IF NOT v_task.recurring THEN
+    IF NOT v_recurring THEN
       UPDATE public.tasks SET status = 'pending' WHERE id = p_task_id;
       IF NOT FOUND THEN RAISE EXCEPTION 'Task update denied'; END IF;
     END IF;
