@@ -1248,7 +1248,7 @@ export function BlogContent({ sanityPosts = [] }: BlogContentProps) {
   const lang = isRtl ? "he" : "en";
 
   const dynamicPosts = sanityPosts.filter(
-    (p) => p.language === locale || p.language === lang
+    (p) => (p.language === locale || p.language === lang) && !BLOG_POSTS.some((local) => local.id === p.slug.current)
   );
 
   const totalCount = dynamicPosts.length + BLOG_POSTS.length;
@@ -1424,25 +1424,7 @@ export function BlogContent({ sanityPosts = [] }: BlogContentProps) {
                   <p className="text-sm text-muted leading-relaxed mb-5">{post.excerpt}</p>
                 )}
 
-                {post.bodyText && (
-                  <details className="group">
-                    <summary className="inline-flex items-center gap-2 text-sm font-semibold text-primary cursor-pointer hover:opacity-80 transition-opacity select-none list-none">
-                      <span className="group-open:hidden">
-                        {isRtl ? "קראו את המאמר" : "Read article"} ↓
-                      </span>
-                      <span className="hidden group-open:inline">
-                        {isRtl ? "סגירה" : "Close"} ↑
-                      </span>
-                    </summary>
-                    <div className="mt-5 pt-5 border-t border-border/50 space-y-4">
-                      {post.bodyText.split("\n\n").map((paragraph, i) => (
-                        <p key={i} className="text-sm text-foreground/80 leading-7">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
-                  </details>
-                )}
+                <a href={`/blog/${post.slug.current}`} className="inline-flex min-h-11 items-center text-primary font-semibold underline">{expandLabel}</a>
               </div>
             </article>
           ))}
