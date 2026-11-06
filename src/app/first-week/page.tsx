@@ -52,11 +52,15 @@ export default function FirstWeekPage() {
     if (!started) return;
     heading.current?.focus();
     heading.current?.scrollIntoView({ block: "start" });
-    if (!seen.current.has(step)) {
-      seen.current.add(step);
-      const frame = requestAnimationFrame(() => firstWeekEvent(step === 1 ? "ready" : step === 2 ? "shopping" : "complete", draft.owner === "אני" ? "solo" : "shared", Date.now() - startedAt.current));
+  }, [started, step]);
+  useEffect(() => {
+    if (!started || seen.current.has(step)) return;
+      const frame = requestAnimationFrame(() => {
+        if (seen.current.has(step)) return;
+        seen.current.add(step);
+        firstWeekEvent(step === 1 ? "ready" : step === 2 ? "shopping" : "complete", draft.owner === "אני" ? "solo" : "shared", Date.now() - startedAt.current);
+      });
       return () => cancelAnimationFrame(frame);
-    }
   }, [started, step, draft.owner]);
   function save(next: Draft) {
     setDraft(next);
