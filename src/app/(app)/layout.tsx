@@ -210,7 +210,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
           reaction peek for something the user is already looking at. */}
       {assistantVisible && <ChatFAB onClick={() => setChatOpen(true)} panelOpen={chatOpen} />}
 
-      <details id="house-tools" className="mx-auto mb-24 max-w-lg px-4 lg:mb-8 lg:max-w-4xl">
+      <details id="house-tools" className="mx-auto mb-44 max-w-lg px-4 lg:mb-8 lg:max-w-4xl">
         <summary className="flex min-h-12 cursor-pointer items-center rounded-xl border border-border bg-surface px-4 font-semibold focus-visible:outline-2 focus-visible:outline-primary">{locale === "en" ? "Household tools" : "כלי הבית"}</summary>
         <div className="flex flex-wrap gap-2 py-3"><QuickLoveButton /><SurpriseBox /><WeeklyWheel /></div>
       </details>
