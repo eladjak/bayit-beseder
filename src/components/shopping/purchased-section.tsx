@@ -102,7 +102,7 @@ export function PurchasedSection({ items, onUncheck, onClearAll, categoryIcons }
                         type="button"
                         onClick={() => onUncheck(item.id)}
                         aria-label={t("shopping.restore") || "החזר"}
-                        className="opacity-0 group-hover:opacity-100 focus:opacity-100 p-1.5 rounded-full text-green-600 hover:bg-green-50 dark:hover:bg-green-900/30 transition-all"
+                        className="min-h-11 min-w-11 flex items-center justify-center rounded-full text-green-700 hover:bg-green-50 dark:hover:bg-green-900/30 transition-all"
                       >
                         <RotateCcw size={14} />
                       </button>
