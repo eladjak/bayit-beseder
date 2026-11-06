@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useState } from "react";
+import { PawPrint } from "lucide-react";
 import { getActivePet, type Pet } from "@/lib/pets";
 
 type Props = {
@@ -20,14 +21,14 @@ export function ActivePetBadge({ onClick }: Props) {
   const [pet, setPet] = useState<Pet | null>(null);
 
   useEffect(() => {
-    setPet(getActivePet());
+    const timer = window.setTimeout(() => setPet(getActivePet()), 0);
     // Re-read on visibility change (returning to tab) — picks up changes
     // from PetSelector in other tabs
     const onVisible = () => {
       if (document.visibilityState === "visible") setPet(getActivePet());
     };
     document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
+    return () => { window.clearTimeout(timer); document.removeEventListener("visibilitychange", onVisible); };
   }, []);
 
   if (!pet) return null;
@@ -37,9 +38,9 @@ export function ActivePetBadge({ onClick }: Props) {
       type="button"
       onClick={onClick}
       aria-label={`החבר/ה שלך: ${pet.name}. לחץ להחלפה.`}
-      className="inline-flex items-center justify-center size-9 rounded-full bg-indigo-50 border border-indigo-100 text-xl hover:scale-110 active:scale-95 transition-transform duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
+      className="inline-flex items-center justify-center size-11 rounded-full bg-indigo-50 border border-indigo-100 text-xl hover:scale-110 active:scale-95 transition-transform duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
     >
-      <span aria-hidden="true" className="select-none">{pet.emoji}</span>
+      <PawPrint aria-hidden="true" className="size-5 text-primary" />
     </button>
   );
 }

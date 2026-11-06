@@ -418,7 +418,7 @@ export function MembersSection({ onInviteClick }: MembersSectionProps) {
         toast.error(t("common.error"));
       }
     },
-    [profile?.household_id, ownerCount, refetch, t]
+    [profile, ownerCount, refetch, t]
   );
 
   const handleRemove = useCallback(
@@ -461,7 +461,7 @@ export function MembersSection({ onInviteClick }: MembersSectionProps) {
     } catch {
       toast.error(t("common.error"));
     }
-  }, [confirmRemove, profile?.household_id, refetch, t]);
+  }, [confirmRemove, profile, refetch, t]);
 
   // Don't render if not in a household
   if (!profile?.household_id) return null;

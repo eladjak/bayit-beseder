@@ -4,7 +4,7 @@ import { Fragment, useState, useMemo, useRef } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, X, ChevronDown, ChevronUp, Trash2, Settings, Share2 } from "lucide-react";
+import { Plus, X, ChevronDown, ChevronUp, Trash2, Settings, Share2, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useShoppingList } from "@/hooks/useShoppingList";
@@ -22,7 +22,6 @@ import { useProfile } from "@/hooks/useProfile";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Loader2, Printer } from "lucide-react";
 import { useFirstVisit } from "@/hooks/useFirstVisit";
-import { FeatureTooltip } from "@/components/feature-tooltip";
 import { PricesEntryLink } from "@/components/prices/prices-entry-link";
 
 const VIRTUALIZE_THRESHOLD = 10;
@@ -296,63 +295,30 @@ export default function ShoppingPage() {
 
   return (
     <div className="space-y-4 pb-28" dir="rtl">
-      {/* Header with gradient */}
-      <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
-        <div className="flex items-center justify-between relative z-10">
-          <div className="text-center flex-1">
-            <h1 className="text-xl font-bold text-white tracking-tight">
-              🛒 {t("shopping.titleShort")}
-            </h1>
-            {totalCount > 0 && (
-              <div className="mt-2 inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1 border border-white/10">
-                <span
-                  className="text-xs text-white/90 font-medium"
-                  aria-live="polite"
-                  aria-atomic="true"
-                  aria-label={`${checkedCount} מתוך ${totalCount} פריטים בסל`}
-                >
-                  {checkedCount}/{totalCount} {t("shopping.inCart")}
-                </span>
+      <div className="px-4 pt-6">
+        <div className="rounded-3xl border border-border bg-surface p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">{t("shopping.titleShort")}</h1>
+              <p className="mt-1 text-sm text-muted" aria-live="polite">
+                {totalCount > 0 ? `${checkedCount} מתוך ${totalCount} פריטים בסל` : "כל מה שחסר בבית, ברשימה משותפת אחת."}
+              </p>
+            </div>
+            <details className="relative">
+              <summary className="flex min-h-11 cursor-pointer items-center rounded-xl border border-border px-3 text-sm font-semibold">אפשרויות</summary>
+              <div className="absolute end-0 z-20 mt-2 w-52 rounded-2xl border border-border bg-surface p-2 shadow-lg">
+                <button onClick={() => { haptic("tap"); setShowShareSheet(true); }} className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-right text-sm hover:bg-background"><Share2 className="size-4" />{t("shopping.share.title")}</button>
+                <button onClick={() => setShowCategoryManager(true)} className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-right text-sm hover:bg-background"><Settings className="size-4" />{t("shopping.manageCategories")}</button>
+                {checkedCount > 0 && <button onClick={handleClearChecked} className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 text-right text-sm hover:bg-background"><Trash2 className="size-4" />{t("shopping.clearChecked")}</button>}
+                <div className="px-3 py-2"><PricesEntryLink /></div>
               </div>
-            )}
-            <PricesEntryLink />
-          </div>
-          <div className="flex items-center gap-2">
-            {/* Clear checked */}
-            {checkedCount > 0 && (
-              <motion.button
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                whileTap={{ scale: 0.88 }}
-                onClick={handleClearChecked}
-                aria-label={t("shopping.clearChecked")}
-                className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-colors border border-white/10"
-              >
-                <Trash2 className="w-4 h-4" />
-              </motion.button>
-            )}
-            {/* Share list */}
-            <button
-              onClick={() => { haptic("tap"); setShowShareSheet(true); }}
-              className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-all duration-100 active:scale-[0.90] border border-white/10"
-              aria-label={t("shopping.share.title")}
-            >
-              <Share2 className="w-4 h-4" />
-            </button>
-            {/* Category manager */}
-            <button
-              onClick={() => setShowCategoryManager(true)}
-              className="p-2.5 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white transition-all duration-100 active:scale-[0.90] border border-white/10"
-              aria-label={t("shopping.manageCategories")}
-            >
-              <Settings className="w-4 h-4" />
-            </button>
+            </details>
           </div>
         </div>
       </div>
 
       <div className="px-4 space-y-3">
+        {showShoppingTip && <div className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface px-4 py-2 text-sm"><p>כדי להוסיף פריט, לחצו על כפתור הפלוס.</p><button type="button" onClick={dismissShoppingTip} className="min-h-11 shrink-0 font-semibold text-primary">הבנתי</button></div>}
         {/* ---- Pesach shopping button ---- */}
         {seasonalMode.activation && !seasonalMode.activation.shoppingAdded && profile?.household_id && (
           <motion.button
@@ -415,6 +381,7 @@ export default function ShoppingPage() {
             const isCollapsed = collapsedCategories.has(categoryName);
             const color = categoryColorMap[categoryName] ?? "#6B7280";
             const icon = categoryIconMap[categoryName] ?? "📦";
+
             const checkedInCat = catItems.filter((i) => i.checked).length;
             const totalInCat = catItems.length;
 
@@ -442,7 +409,7 @@ export default function ShoppingPage() {
                     style={{ backgroundColor: `color-mix(in srgb, ${color} 18%, var(--color-surface, #fafaf9))` }}
                     aria-hidden
                   >
-                    {icon}
+                    <ShoppingCart className="size-4" />
                   </span>
 
                   {/* Category name */}
@@ -664,7 +631,7 @@ export default function ShoppingPage() {
 
               {autoGuess && !categoryTouched && (
                 <p className="mb-2 text-xs text-muted" aria-live="polite">
-                  {autoGuess.emoji} זוהה אוטומטית: {effectiveFormCategory} (אפשר לבחור קטגוריה אחרת למטה)
+                  זוהה אוטומטית: {effectiveFormCategory} (אפשר לבחור קטגוריה אחרת למטה)
                 </p>
               )}
 
@@ -691,7 +658,7 @@ export default function ShoppingPage() {
                       }}
                       className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 transition-colors active:scale-95"
                     >
-                      <span>{s.emoji}</span>
+
                       <span>{s.name}</span>
                     </button>
                   ))}
@@ -702,7 +669,6 @@ export default function ShoppingPage() {
               <div className="flex flex-wrap gap-1.5 mb-3 max-h-36 overflow-y-auto">
                 {orderedCategoryNames.map((cat) => {
                   const catColor = categoryColorMap[cat] ?? "#6B7280";
-                  const catIcon = categoryIconMap[cat] ?? "📦";
                   const isSelected = effectiveFormCategory === cat;
                   return (
                     <button
@@ -713,7 +679,7 @@ export default function ShoppingPage() {
                       }`}
                       style={isSelected ? { backgroundColor: catColor } : undefined}
                     >
-                      <span>{catIcon}</span>
+                      <ShoppingCart aria-hidden="true" className="size-4" />
                       <span>{cat}</span>
                     </button>
                   );
@@ -745,12 +711,6 @@ export default function ShoppingPage() {
           >
             <Plus className="w-7 h-7" />
           </motion.button>
-          <FeatureTooltip
-            visible={showShoppingTip}
-            text="לחצו על + כדי להוסיף פריט לרשימה"
-            onDismiss={dismissShoppingTip}
-            position="above"
-          />
         </div>
       )}
 

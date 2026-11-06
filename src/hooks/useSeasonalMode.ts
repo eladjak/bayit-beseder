@@ -75,6 +75,7 @@ export function useSeasonalMode(): SeasonalModeReturn {
 
   // Load activation from localStorage
   useEffect(() => {
+    const timer = window.setTimeout(() => {
     const stored = loadActivation();
     if (stored) {
       // Verify the template still exists
@@ -86,13 +87,15 @@ export function useSeasonalMode(): SeasonalModeReturn {
       }
     }
     setLoading(false);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   // Track progress of seasonal tasks
   useEffect(() => {
     if (!activation?.tasksCreated || activation.taskIds.length === 0) {
-      setProgress({ completed: 0, total: 0 });
-      return;
+      const timer = window.setTimeout(() => setProgress({ completed: 0, total: 0 }), 0);
+      return () => window.clearTimeout(timer);
     }
 
     let cancelled = false;

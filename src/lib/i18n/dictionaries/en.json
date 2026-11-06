@@ -345,7 +345,7 @@
  "tasks": {
   "title": "Tasks",
   "addTask": "Add task",
-  "addTaskShort": "+ Task",
+  "addTaskShort": "Task",
   "allCategories": "All",
   "manageCategories": "Manage categories",
   "markComplete": "Mark complete",
@@ -387,7 +387,7 @@
   "tryOtherCategory": "Try another category",
   "addFirstTask": "Add your first task",
   "completedSection": "Done",
-  "weDid": "Done 💪",
+  "weDid": "Done",
   "needsReviewTitle": "Old tasks to review",
   "needsReviewToggleShow": "Show old tasks to review",
   "needsReviewToggleHide": "Hide old tasks to review",
@@ -428,7 +428,7 @@
   "itemAdded": "Item added to list",
   "itemRemoved": "Removed from list",
   "itemsCleared": "Items cleared — nice! 🧹",
-  "emptyTitle": "List is empty — or was the shopping already done? 🛒",
+  "emptyTitle": "List is empty — or was the shopping already done?",
   "emptySubtitle": "Add the first item before the fridge starts talking",
   "addFirstItem": "Add first item",
   "addToCategory": "Add item to",
@@ -649,7 +649,7 @@
   "streakBest": "Best:",
   "streakDone": "Done",
   "streakNotDone": "Not done",
-  "emptyTitle": "Nothing to show yet 🌱",
+  "emptyTitle": "Nothing to show yet",
   "emptySubtitle": "Complete a few tasks and we'll start showing stats"
  },
  "auth": {

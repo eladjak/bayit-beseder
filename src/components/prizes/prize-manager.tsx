@@ -202,7 +202,8 @@ export function PrizeManager() {
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    setPrizes(loadPrizes());
+    const timer = window.setTimeout(() => setPrizes(loadPrizes()), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   function handleAdd(prize: Prize) {

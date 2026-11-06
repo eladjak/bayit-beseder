@@ -107,7 +107,8 @@ function createFakeSupabase(tasks: FakeTask[], tokens: FakeTokenRow[] = []) {
           return { data: null, error: null };
         }
       }
-      if (table === "task_completions" || table === "household_members" || table === "profiles") {
+      if (table === "household_members") return { data: { user_id: "member-a" }, error: null };
+      if (table === "task_completions" || table === "profiles") {
         calls.push({ table, op: state.op });
         return { data: null, error: null };
       }
@@ -165,8 +166,15 @@ function createFakeSupabase(tasks: FakeTask[], tokens: FakeTokenRow[] = []) {
     return builder;
   }
 
+  async function rpc(name: string, args: Record<string, string>) {
+    calls.push({ op: "rpc", name, args });
+    const task = store.get(args.p_task_id);
+    if (!task || task.household_id !== args.p_household_id) return { data: null, error: { message: "forbidden" } };
+    store.set(task.id, { ...task, status: "completed" });
+    return { data: {}, error: null };
+  }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return { client: { from } as any, calls, store };
+  return { client: { from, rpc } as any, calls, store };
 }
 
 let ipCounter = 0;

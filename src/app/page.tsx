@@ -9,7 +9,6 @@ import {
   FloatingCta,
   AnimatedFeatureCard,
   AnimatedHowItWorksSection,
-  PulsingCtaButton,
   FaqChat,
   StickyCta,
 } from "@/components/landing/landing-dynamics";
@@ -214,83 +213,26 @@ export default function LandingPage() {
       />
 
       {/* Hero Section */}
-      <header id="hero-section" className="relative overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{
-            // Same indigo -> violet -> fuchsia -> pink run, deepened one step so
-            // white text clears 4.5:1 on every stop. The old fuchsia/pink end
-            // measured 3.46 / 3.53 against solid white and worse under the
-            // translucent text below it.
-            background: "linear-gradient(135deg, #3730A3 0%, #5B21B6 40%, #86198F 70%, #9F1239 100%)",
-          }}
-        />
-        <div className="absolute inset-0 opacity-20" style={{
-          backgroundImage: "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 40%)",
-        }} />
-
-        <div className="relative z-10 max-w-4xl mx-auto px-6 py-20 text-center text-white">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/15 backdrop-blur-sm rounded-full text-sm font-medium mb-6 border border-white/20">
-            🏡 הבית שלך · מותאם לך
+      <header id="hero-section" className="bg-background text-foreground border-b border-border">
+        <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 pb-12 pt-10 sm:px-6 md:grid-cols-2 md:gap-16 md:py-24">
+          <div>
+            <p className="mb-4 text-sm font-bold text-primary">בית בסדר</p>
+            <h1 className="max-w-xl text-[2.25rem] font-extrabold leading-[1.15] tracking-tight md:text-6xl">פחות לזכור.<br />יותר להיות בבית.</h1>
+            <p className="mt-5 max-w-lg text-lg leading-8 text-muted">משימות, קניות ותכנון הבית במקום אחד, לכל מי שחי בו.</p>
+            <div className="mt-7 flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:gap-4">
+              <Link href="/first-week" className="inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-7 font-bold text-white hover:bg-primary-dark focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">בואו נתחיל</Link>
+              <Link href="/login" className="inline-flex min-h-12 items-center justify-center px-2 font-semibold text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary">כבר יש לי חשבון</Link>
+            </div>
           </div>
-
-          <h1 className="text-4xl md:text-5xl font-extrabold leading-tight mb-4 tracking-tight">
-            הבית שלכם.
-            <br />
-            <span className="text-white/90">ביחד. בסדר. בכיף.</span>
-          </h1>
-
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-5 text-sm text-white/85">
-            <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15">👫 זוגות</span>
-            <span className="text-white/85">·</span>
-            <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15">👨‍👩‍👧 משפחות</span>
-            <span className="text-white/85">·</span>
-            <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15">🤝 שותפים</span>
-            <span className="text-white/85">·</span>
-            <span className="px-3 py-1 rounded-full bg-white/10 border border-white/15">🙋 סינגלים</span>
+          <div className="relative mx-auto w-full max-w-lg">
+            <Image src="/hero-illustration.jpg" alt="איור של בית" width={1376} height={768} priority sizes="(max-width: 768px) 100vw, 500px" className="w-full rounded-3xl object-cover" />
+            <div className="relative -mt-8 mx-4 rounded-2xl border border-border bg-surface p-5 shadow-lg sm:mx-8">
+              <p className="text-xs font-semibold text-muted">דוגמה לתצוגת היום</p>
+              <p className="mt-2 text-lg font-bold">מה הצעד הבא בבית?</p>
+              <p className="mt-1 text-sm text-muted">המשימות והקניות שלכם יופיעו כאן.</p>
+              <div className="mt-4 rounded-xl bg-background p-3 text-sm text-muted">אין נתון על ארוחות</div>
+            </div>
           </div>
-
-          <p className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8 leading-relaxed">
-            משימות עם נקודות, תכנון שבועי חכם, רשימת קניות משותפת,
-            פטים ורקעים שנפתחים עם הרצף שלכם, וגלגל מזל יום שישי.
-            <br />
-            <span className="text-white/90 text-base">בלי ויכוחים. בלי שיפוט. רק אתם והבית. 💖</span>
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-            <PulsingCtaButton />
-            <a
-              href="#how-it-works"
-              className="px-6 py-3 bg-white/15 backdrop-blur-sm text-white font-medium rounded-2xl border border-white/20 hover:bg-white/25 transition-colors"
-            >
-              איך זה עובד? ↓
-            </a>
-          </div>
-
-          <p className="text-xs text-white/85 mt-4">
-            לא צריך להוריד מחנות. עובד ישר מהדפדפן.
-          </p>
-
-          {/* Custom brand hero illustration (Gemini-generated, indigo/violet) */}
-          <Image
-            src="/hero-illustration.jpg"
-            alt="זוג מסדר את הבית ביחד — בית בסדר"
-            width={1376}
-            height={768}
-            priority
-            sizes="(max-width: 768px) 100vw, 768px"
-            className="mt-8 mx-auto w-full max-w-2xl rounded-2xl shadow-2xl border border-white/10"
-          />
-
-          {/* App mockup */}
-          <Image
-            src="/illustrations/app-mockup.jpg"
-            alt="תצוגת האפליקציה — בית בסדר"
-            width={320}
-            height={640}
-            sizes="(max-width: 768px) 256px, 320px"
-            className="mt-6 mx-auto w-64 md:w-80 rounded-2xl shadow-2xl border-2 border-white/10"
-          />
         </div>
       </header>
 
@@ -307,7 +249,7 @@ export default function LandingPage() {
           כי לנהל בית ביחד לא חייב להיות מלחמה 🏳️
         </p>
 
-        <div className="grid md:grid-cols-3 gap-5">
+        <div className="grid md:grid-cols-3 gap-5 overflow-x-clip py-2">
           {[
             { icon: "✅", title: "משימות עם גיימיפיקציה", desc: "נקודות, רצפים, הישגים ופרסים. ניקיון הפך לגיים.", image: "/illustrations/landing/features-gamification.png" },
             { icon: "📅", title: "תכנון שבועי חכם", desc: "אלגוריתם שמחלק משימות לפי אזורים בבית, יום ועומס.", image: "/illustrations/landing/features-planning.png" },

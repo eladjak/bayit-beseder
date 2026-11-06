@@ -2,7 +2,7 @@
 
 import { memo, useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Check, Trash2, Pencil, Minus, Plus, ArrowRightLeft } from "lucide-react";
+import { Check, Trash2, Pencil, Minus, Plus, ArrowRightLeft, Package, Milk, Lightbulb, Droplets, Apple } from "lucide-react";
 import type { ShoppingItem as ShoppingItemType } from "@/hooks/useShoppingList";
 import { CATEGORY_COLORS, SHOPPING_CATEGORY_ICONS } from "@/hooks/useShoppingList";
 import { resolveItemIcon } from "@/lib/shopping-taxonomy";
@@ -45,6 +45,8 @@ export const ShoppingItemCard = memo(function ShoppingItemCard({
     itemEmoji && itemEmoji !== "🛒"
       ? itemEmoji
       : resolveItemIcon(item.title, categoryIcon ?? SHOPPING_CATEGORY_ICONS[item.category]);
+
+  const Icon = icon === "🥛" ? Milk : icon === "💡" ? Lightbulb : icon === "🧴" ? Droplets : icon === "🍅" ? Apple : Package;
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -102,7 +104,7 @@ export const ShoppingItemCard = memo(function ShoppingItemCard({
       </button>
 
       {/* Emoji icon */}
-      <span className="text-sm flex-shrink-0" aria-hidden>{icon}</span>
+      <span className="flex-shrink-0 text-muted" aria-hidden data-icon={icon}><Icon className="size-4" /></span>
 
       {/* Title — editable on tap */}
       <div className="flex-1 min-w-0">

@@ -28,6 +28,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   // Hydrate from localStorage on mount (check both keys for backwards compat)
   useEffect(() => {
+    const timer = window.setTimeout(() => {
     const stored = localStorage.getItem(STORAGE_KEY) as Locale | null;
     const legacy = localStorage.getItem("bayit-language") as Locale | null;
     const value = stored ?? legacy;
@@ -37,6 +38,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(STORAGE_KEY, value);
       localStorage.setItem("bayit-language", value);
     }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const setLocale = useCallback((next: Locale) => {

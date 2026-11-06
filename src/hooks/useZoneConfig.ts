@@ -33,8 +33,11 @@ export function useZoneConfig(): UseZoneConfigReturn {
 
   // Load from localStorage on mount
   useEffect(() => {
-    setZoneMode(isZoneModeEnabled());
-    setZoneMappings(loadZoneMappings());
+    const timer = window.setTimeout(() => {
+      setZoneMode(isZoneModeEnabled());
+      setZoneMappings(loadZoneMappings());
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const toggleZoneMode = useCallback(() => {

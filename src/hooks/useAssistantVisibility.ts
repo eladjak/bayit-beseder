@@ -5,14 +5,14 @@ import { useCallback, useEffect, useState } from "react";
 const STORAGE_KEY = "bayit-assistant-visible";
 
 function readStored(): boolean {
-  if (typeof window === "undefined") return true;
+  if (typeof window === "undefined") return false;
   try {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored === null) return true;
+    if (stored === null) return false;
     return stored === "1";
   } catch {
-    // localStorage unavailable (private mode, quota, etc.) — default to visible.
-    return true;
+    // localStorage unavailable (private mode, quota, etc.) — default to hidden.
+    return false;
   }
 }
 
@@ -28,11 +28,10 @@ function writeStored(visible: boolean) {
 /**
  * Whether the floating AI-assistant entry point (the chat bubble) should be
  * shown. Persisted per browser so a user who hides it stays in control of
- * their own screen. Defaults to visible — hiding it is an explicit choice,
- * not a state a first-time user can land in by accident.
+ * their own screen. Defaults to hidden; the labeled assistant button remains available.
  */
 export function useAssistantVisibility() {
-  // Deliberately NOT a lazy useState initializer: this renders "visible" on
+  // Deliberately NOT a lazy useState initializer: this renders "hidden" on
   // both the server and the client's first pass, then syncs from
   // localStorage after mount. A lazy initializer would read localStorage
   // during the client's first render too, which can disagree with the
@@ -41,7 +40,7 @@ export function useAssistantVisibility() {
   // usePetCollectionSync elsewhere in this app for the same reason. The
   // lint rule below flags the pattern; the hydration bug it would avoid
   // creating is worse than the warning.
-  const [visible, setVisibleState] = useState<boolean>(true);
+  const [visible, setVisibleState] = useState<boolean>(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- see comment above

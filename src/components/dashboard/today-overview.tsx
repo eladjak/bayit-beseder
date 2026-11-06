@@ -27,6 +27,8 @@ interface TodayOverviewProps {
   currentUserId?: string;
   /** Max tasks to show before "show more" button. 0 = show all. */
   maxItems?: number;
+  heading?: string;
+  single?: boolean;
 }
 
 const listVariants = {
@@ -59,8 +61,8 @@ const itemVariants = {
   },
 };
 
-export function TodayOverview({ tasks, onToggle, onClaim, onClearCompleted, currentUserId, maxItems = 0 }: TodayOverviewProps) {
-  const { t } = useTranslation();
+export function TodayOverview({ tasks, onToggle, onClaim, onClearCompleted, currentUserId, maxItems = 0, heading, single = false }: TodayOverviewProps) {
+  const { t, locale } = useTranslation();
   const [completing, setCompleting] = useState<string | null>(null);
   const [optimisticCompleted, setOptimisticCompleted] = useState<Set<string>>(new Set());
   const [expanded, setExpanded] = useState(false);
@@ -81,11 +83,10 @@ export function TodayOverview({ tasks, onToggle, onClaim, onClearCompleted, curr
 
     setOptimisticCompleted(newOptimistic);
     setCompleting(taskId);
-    haptic("success");
-
     try {
       // Wait for the parent handler to complete
       await onToggle(taskId);
+      haptic("success");
       // Success - keep the optimistic state
     } catch (error) {
       // Rollback on failure
@@ -94,6 +95,15 @@ export function TodayOverview({ tasks, onToggle, onClaim, onClearCompleted, curr
     } finally {
       setTimeout(() => setCompleting(null), 200);
     }
+  }
+
+  if (single && tasks[0]) {
+    const task = tasks[0];
+    const done = task.completed || optimisticCompleted.has(task.id);
+    return <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface p-4">
+      <span className="min-w-0 flex-1 font-semibold">{task.title}</span>
+      <button type="button" disabled={done || completing === task.id} onClick={() => handleToggle(task.id)} aria-label={done ? `${locale === "en" ? "Completed" : "הושלמה"}: ${task.title}` : `${t("tasks.markComplete")}: ${task.title}`} aria-pressed={done} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 font-bold text-white disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"><Check className="size-4" aria-hidden="true" />{done ? (locale === "en" ? "Completed" : "הושלמה") : (locale === "en" ? "Done" : "סיימתי")}</button>
+    </div>;
   }
 
   if (tasks.length === 0) {
@@ -123,7 +133,7 @@ export function TodayOverview({ tasks, onToggle, onClaim, onClearCompleted, curr
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between px-1">
-        <h2 className="font-semibold text-foreground">{t("dashboard.todayHeader")} 🏠</h2>
+        <h2 className="font-semibold text-foreground">{heading ?? t("dashboard.todayHeader")}</h2>
         <div className="flex items-center gap-2">
           {onClearCompleted && completed > 0 && (
             <button
@@ -183,10 +193,10 @@ export function TodayOverview({ tasks, onToggle, onClaim, onClearCompleted, curr
                 {/* Animated check button */}
                 <button
                   onClick={() => handleToggle(task.id)}
-                  disabled={isLoading}
-                  aria-label={isCompleted ? `${t("tasks.undoComplete")}: ${task.title}` : `${t("tasks.markComplete")}: ${task.title}`}
+                  disabled={isLoading || isCompleted}
+                  aria-label={isCompleted ? `הושלמה: ${task.title}` : `${t("tasks.markComplete")}: ${task.title}`}
                   aria-pressed={isCompleted}
-                  className="w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 relative overflow-hidden transition-all disabled:cursor-wait"
+                  className="w-11 h-11 rounded-full border-2 flex items-center justify-center flex-shrink-0 relative overflow-hidden transition-all disabled:cursor-wait"
                   style={{
                     borderColor: isCompleted
                       ? "var(--color-success)"
@@ -264,10 +274,10 @@ export function TodayOverview({ tasks, onToggle, onClaim, onClearCompleted, curr
                         {task.points} {t("difficulty.points")?.replace("{n}", "") || "pts"}
                       </span>
                     )}
-                    <span className="text-[10px] text-muted flex items-center gap-0.5">
+                    {task.estimated_minutes > 0 && <span className="text-[10px] text-muted flex items-center gap-0.5">
                       <Clock className="w-3 h-3" />
-                      {task.estimated_minutes} {t("common.minutes")}
-                    </span>
+                      {task.estimated_minutes > 0 && `${task.estimated_minutes} ${t("common.minutes")}`}
+                    </span>}
                   </div>
                 </div>
 

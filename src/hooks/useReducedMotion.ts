@@ -7,10 +7,10 @@ export function useReducedMotion(): boolean {
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
+    const timer = window.setTimeout(() => setReduced(mq.matches), 0);
     const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
     mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
+    return () => { window.clearTimeout(timer); mq.removeEventListener("change", handler); };
   }, []);
 
   return reduced;

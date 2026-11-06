@@ -25,19 +25,19 @@ export function WeeklyShareCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const percentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
-  const getEmoji = () => {
+  const getEmoji = useCallback(() => {
     if (percentage >= 90) return "🏆";
     if (percentage >= 70) return "⭐";
     if (percentage >= 50) return "💪";
     return "🌱";
-  };
+  }, [percentage]);
 
-  const getMessage = () => {
+  const getMessage = useCallback(() => {
     if (percentage >= 90) return "שבוע מושלם!";
     if (percentage >= 70) return "שבוע מצוין!";
     if (percentage >= 50) return "כל הכבוד!";
     return "בדרך הנכונה!";
-  };
+  }, [percentage]);
 
   const handleShare = useCallback(async () => {
     const text = `${getEmoji()} ${getMessage()}\n${householdName} — ${weekRange}\n✅ ${completedTasks}/${totalTasks} משימות (${percentage}%)\n🔥 ${streakDays} ימים ברצף\n\nבית בסדר — bayitbeseder.com\n🧪 גרסה ראשונה — נשמח למשוב! contact@bayitbeseder.com`;
@@ -57,7 +57,7 @@ export function WeeklyShareCard({
     } catch {
       toast.error("לא ניתן להעתיק");
     }
-  }, [completedTasks, totalTasks, percentage, streakDays, householdName, weekRange]);
+  }, [completedTasks, totalTasks, percentage, streakDays, householdName, weekRange, getEmoji, getMessage]);
 
   return (
     <motion.div

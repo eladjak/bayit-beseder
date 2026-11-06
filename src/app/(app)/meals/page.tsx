@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCw, ChevronDown, ChevronUp, Plus, Snowflake, ShoppingCart } from "lucide-react";
+import { RefreshCw, ChevronUp, Plus, Snowflake, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import { useMealPlanner, type SwapAlternative } from "@/hooks/useMealPlanner";
 import { ilDateString } from "@/lib/meals/timezone";
@@ -31,7 +31,7 @@ function DefrostBanner({
       </div>
       {items.map((item, i) => (
         <div key={i} className="text-sm text-amber-900">
-          {item.startNow ? "🔴 עכשיו: " : `🕐 עוד כ-${Math.max(0, Math.round(item.hoursUntilStart))} שעות: `}
+          {item.startNow ? "עכשיו: " : `עוד כ-${Math.max(0, Math.round(item.hoursUntilStart))} שעות: `}
           {item.prepNote ?? `${item.mealName} מהמקפיא`} — הארוחה מתוכננת {forHebrewDayLabel(item.date)} ({item.mealName})
         </div>
       ))}
@@ -82,34 +82,39 @@ function DayCard({
       <div className="text-xs text-muted">{STATUS_LABEL[status] ?? status}</div>
       {isToday && (
         <div className="flex flex-wrap gap-2 pt-1">
+          <details className="w-full">
+            <summary className="min-h-11 flex items-center cursor-pointer text-sm font-semibold text-primary">אפשרויות לארוחה</summary>
+            <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={onSwap}
-            className="px-3 py-1.5 rounded-xl border border-border text-sm active:scale-[0.96] transition-transform"
+            className="min-h-11 px-3 py-1.5 rounded-xl border border-border text-sm active:scale-[0.96] transition-transform"
           >
             החלפה מהירה
           </button>
           <button
             type="button"
             onClick={onCooked}
-            className="px-3 py-1.5 rounded-xl bg-primary text-white text-sm active:scale-[0.96] transition-transform"
+            className="min-h-11 px-3 py-1.5 rounded-xl bg-primary text-white text-sm active:scale-[0.96] transition-transform"
           >
-            בושל ✅
+            בושל
           </button>
           <button
             type="button"
             onClick={onLeftovers}
-            className="px-3 py-1.5 rounded-xl border border-border text-sm active:scale-[0.96] transition-transform"
+            className="min-h-11 px-3 py-1.5 rounded-xl border border-border text-sm active:scale-[0.96] transition-transform"
           >
             שאריות
           </button>
           <button
             type="button"
             onClick={onSkipped}
-            className="px-3 py-1.5 rounded-xl border border-border text-sm text-muted active:scale-[0.96] transition-transform"
+            className="min-h-11 px-3 py-1.5 rounded-xl border border-border text-sm text-muted active:scale-[0.96] transition-transform"
           >
             דילוג
           </button>
+            </div>
+          </details>
         </div>
       )}
     </div>
@@ -176,6 +181,8 @@ function AddMealForm({
       <input
         id="meal-prep"
         type="number"
+        dir="ltr"
+        inputMode="numeric"
         min={0}
         max={72}
         className="w-full rounded-xl border border-border px-3 py-2"
@@ -205,6 +212,7 @@ export default function MealsPage() {
     week,
     tonightPrep,
     regenerateWeek,
+    refetch,
     swapDay,
     markDay,
     fetchAlternatives,
@@ -224,9 +232,13 @@ export default function MealsPage() {
 
   async function openSwap(date: string) {
     haptic("tap");
-    const alts = await fetchAlternatives(date);
-    setAlternatives(alts);
-    setSwapTarget(date);
+    try {
+      const alts = await fetchAlternatives(date);
+      setAlternatives(alts);
+      setSwapTarget(date);
+    } catch {
+      toast.error("לא הצלחנו לטעון חלופות. אפשר לנסות שוב.");
+    }
   }
 
   async function openShoppingSuggest() {
@@ -234,8 +246,12 @@ export default function MealsPage() {
     setSuggestOpen(true);
     try {
       const res = await fetch("/api/meals/shopping-suggest");
+      if (!res.ok) throw new Error("suggestions failed");
       const body = await res.json();
       setSuggestions(body.suggestions ?? []);
+    } catch {
+      setSuggestOpen(false);
+      toast.error("לא הצלחנו לטעון הצעות. אפשר לנסות שוב.");
     } finally {
       setSuggestLoading(false);
     }
@@ -243,29 +259,30 @@ export default function MealsPage() {
 
   async function confirmSuggestions() {
     if (suggestions.length === 0) return;
-    const res = await fetch("/api/meals/shopping-suggest", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items: suggestions.map((s) => ({ title: s.title, quantity: s.quantity, unit: s.unit })) }),
-    });
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/meals/shopping-suggest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: suggestions.map((s) => ({ title: s.title, quantity: s.quantity, unit: s.unit })) }),
+      });
+      if (!res.ok) throw new Error("save failed");
       toast.success("נוסף לרשימת הקניות");
       setSuggestOpen(false);
       setSuggestions([]);
-    } else {
-      toast.error("לא הצלחנו להוסיף לרשימה");
+    } catch {
+      toast.error("לא הצלחנו להוסיף לרשימה. אפשר לנסות שוב.");
     }
   }
 
   return (
     <div className="space-y-4 pb-28 px-4 pt-6" dir="rtl">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">מתכנן הארוחות</h1>
+      <div className="flex items-start justify-between gap-3 rounded-3xl border border-border bg-surface p-5">
+        <div><h1 className="text-2xl font-bold">ארוחות הבית</h1><p className="mt-1 text-sm text-muted">התכנון השבועי וההכנה הקרובה במקום אחד.</p></div>
         <button
           type="button"
           onClick={() => void regenerateWeek()}
           aria-label="חשב תוכנית חדשה לשבוע"
-          className="p-2 rounded-xl border border-border active:scale-[0.9] transition-transform"
+          className="min-h-11 min-w-11 flex items-center justify-center rounded-xl border border-border active:scale-[0.9] transition-transform"
         >
           <RefreshCw className="w-4 h-4" aria-hidden="true" />
         </button>
@@ -273,12 +290,15 @@ export default function MealsPage() {
 
       {error && (
         <div className="rounded-xl bg-red-50 border border-red-200 text-red-700 p-3 text-sm" role="alert">
-          {error}
+          <p>לא הצלחנו לטעון את הארוחות. אם עדיין לא התחברתם, יש להתחבר ולנסות שוב.</p>
+          <button type="button" onClick={() => void refetch()} className="mt-2 min-h-11 rounded-xl border border-red-300 px-3 font-semibold">ניסיון נוסף</button>
         </div>
       )}
 
       <DefrostBanner items={tonightPrep} />
 
+      <details className="rounded-2xl border border-border bg-surface px-4">
+        <summary className="flex min-h-11 cursor-pointer items-center font-semibold">אפשרויות תכנון</summary>
       <button
         type="button"
         onClick={() => void openShoppingSuggest()}
@@ -288,7 +308,10 @@ export default function MealsPage() {
         הוסף מצרכים לרשימה
       </button>
 
-      {loading && !week && <div className="text-center text-muted py-8">טוען...</div>}
+      </details>
+
+      {loading && !week && <div role="status" className="text-center text-muted py-8">טוענים את תוכנית הארוחות...</div>}
+      {!loading && !week && !error && <div className="rounded-2xl border border-border bg-surface p-6 text-center"><p className="font-semibold">עדיין אין תוכנית ארוחות</p><p className="mt-1 text-sm text-muted">אפשר ליצור תוכנית חדשה או להוסיף ארוחה משלכם.</p></div>}
 
       {week && (
         <div className="space-y-3">
@@ -301,9 +324,9 @@ export default function MealsPage() {
               status={day.status}
               isToday={day.date === today}
               onSwap={() => void openSwap(day.date)}
-              onCooked={() => void markDay(day.date, "cooked")}
-              onSkipped={() => void markDay(day.date, "skipped")}
-              onLeftovers={() => void markDay(day.date, "leftovers")}
+              onCooked={() => void markDay(day.date, "cooked").catch(() => toast.error("לא הצלחנו לשמור. אפשר לנסות שוב."))}
+              onSkipped={() => void markDay(day.date, "skipped").catch(() => toast.error("לא הצלחנו לשמור. אפשר לנסות שוב."))}
+              onLeftovers={() => void markDay(day.date, "leftovers").catch(() => toast.error("לא הצלחנו לשמור. אפשר לנסות שוב."))}
             />
           ))}
         </div>
@@ -350,9 +373,13 @@ export default function MealsPage() {
                 type="button"
                 className="w-full text-right px-3 py-2 rounded-xl border border-border active:scale-[0.98] transition-transform"
                 onClick={async () => {
-                  await swapDay(swapTarget, alt.id);
-                  setSwapTarget(null);
-                  toast.success(`הוחלף ל${alt.name}`);
+                  try {
+                    await swapDay(swapTarget, alt.id);
+                    setSwapTarget(null);
+                    toast.success(`הוחלף ל${alt.name}`);
+                  } catch {
+                    toast.error("לא הצלחנו להחליף ארוחה. אפשר לנסות שוב.");
+                  }
                 }}
               >
                 {alt.name}
@@ -382,7 +409,7 @@ export default function MealsPage() {
             <div className="font-bold">מצרכים מוצעים לשבוע</div>
             {suggestLoading && <div className="text-sm text-muted">טוען...</div>}
             {!suggestLoading && suggestions.length === 0 && (
-              <div className="text-sm text-muted">כל המצרכים לשבוע כבר ברשימה שלכם 🎉</div>
+              <div className="text-sm text-muted">אין כרגע מצרכים מוצעים להוספה.</div>
             )}
             {!suggestLoading && suggestions.length > 0 && (
               <>

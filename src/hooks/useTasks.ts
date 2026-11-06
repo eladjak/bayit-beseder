@@ -34,7 +34,7 @@ interface UseTasksReturn {
  */
 export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
   const supabase = useSupabase();
-  const { profile } = useProfile();
+  const { profile, loading: profileLoading } = useProfile();
   const householdId = profile?.household_id ?? null;
   const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +42,11 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
   const initialLoadDone = useRef(false);
 
   const fetchTasks = useCallback(async () => {
+    // Wait for the profile before interpreting an absent household as empty.
+    if (profileLoading) {
+      setLoading(true);
+      return;
+    }
     // Only show loading spinner on initial fetch — refetches keep current data visible
     if (!initialLoadDone.current) {
       setLoading(true);
@@ -53,7 +58,7 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
     if (!householdId) {
       setTasks([]);
       setLoading(false);
-      initialLoadDone.current = true;
+      initialLoadDone.current = false;
       return;
     }
 
@@ -80,19 +85,17 @@ export function useTasks(options: UseTasksOptions = {}): UseTasksReturn {
       if (fetchError) {
         // Table might not exist yet - graceful fallback
         setError(fetchError.message);
-        setTasks([]);
       } else {
         setTasks(data ?? []);
       }
     } catch {
-      // Supabase not available
-      setTasks([]);
-      setError(null);
+      // Keep any previously loaded tasks and expose the failed read.
+      setError("Unable to load tasks");
     } finally {
       setLoading(false);
       initialLoadDone.current = true;
     }
-  }, [supabase, householdId, options.assignedTo, options.status, options.dueDate, options.categoryId]);
+  }, [supabase, householdId, profileLoading, options.assignedTo, options.status, options.dueDate, options.categoryId]);
 
   useEffect(() => {
     fetchTasks();

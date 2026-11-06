@@ -1172,7 +1172,18 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
-      [_ in never]: never;
+      transition_task_completion: {
+        Args: {
+          p_task_id: string;
+          p_action: string;
+          p_completion_id?: string | null;
+          p_photo_url?: string | null;
+          p_notes?: string | null;
+          p_household_id?: string | null;
+          p_user_id?: string | null;
+        };
+        Returns: Database["public"]["Tables"]["task_completions"]["Row"][];
+      };
     };
     Enums: {
       [_ in never]: never;

@@ -80,6 +80,7 @@ export function useMealPlanner(): UseMealPlannerReturn {
 
   const regenerateWeek = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/meals/plan", {
         method: "POST",
@@ -98,11 +99,12 @@ export function useMealPlanner(): UseMealPlannerReturn {
 
   const swapDay = useCallback(
     async (date: string, mealId: string) => {
-      await fetch("/api/meals/plan/day", {
+      const res = await fetch("/api/meals/plan/day", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date, action: "setMeal", mealId }),
       });
+      if (!res.ok) throw new Error("לא הצלחנו לשמור את השינוי. אפשר לנסות שוב.");
       await refetch();
     },
     [refetch]
@@ -110,11 +112,12 @@ export function useMealPlanner(): UseMealPlannerReturn {
 
   const markDay = useCallback(
     async (date: string, action: "cooked" | "skipped" | "leftovers") => {
-      await fetch("/api/meals/plan/day", {
+      const res = await fetch("/api/meals/plan/day", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ date, action }),
       });
+      if (!res.ok) throw new Error("לא הצלחנו לשמור את השינוי. אפשר לנסות שוב.");
       await refetch();
     },
     [refetch]
@@ -135,7 +138,7 @@ export function useMealPlanner(): UseMealPlannerReturn {
   const fetchAlternatives = useCallback(async (date: string): Promise<SwapAlternative[]> => {
     const res = await fetch(`/api/meals/plan/day?date=${date}`);
     const body = await safeJson(res);
-    if (!res.ok) return [];
+    if (!res.ok) throw new Error("לא הצלחנו לטעון חלופות");
     return (body?.alternatives ?? []).map((m: Meal) => ({
       id: m.id,
       name: m.name,

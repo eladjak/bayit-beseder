@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useState, useTransition } from "react";
-import { Gift, Sparkles, X } from "lucide-react";
+import { Gift, X } from "lucide-react";
 import { toast } from "sonner";
 import {
   openTodayBox,
@@ -21,7 +21,6 @@ import {
 } from "@/lib/surprise-box";
 import { playSparkle } from "@/lib/sound-effects";
 import { tryHaptic } from "@/lib/ux-preferences";
-import { copy } from "@/lib/copy-resolver";
 
 type Props = {
   /** Trigger: parent calls onAvailable() when first task completed today */
@@ -78,13 +77,9 @@ export function SurpriseBox({ trigger = 0 }: Props) {
           onClick={handleOpen}
           disabled={pending}
           aria-label="פתח את קופסת ההפתעה היומית"
-          className="alopik-brand-gradient alopik-shimmer fixed bottom-56 end-4 z-40 size-14 rounded-full text-white shadow-xl flex items-center justify-center hover:brightness-110 active:scale-95 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-primary"
         >
-          <Gift className="size-7" aria-hidden="true" />
-          <Sparkles
-            className="absolute -top-1 -end-1 size-4 text-violet-200 animate-pulse"
-            aria-hidden="true"
-          />
+          <Gift className="size-5" aria-hidden="true" /> קופסת ההפתעה
         </button>
       )}
 

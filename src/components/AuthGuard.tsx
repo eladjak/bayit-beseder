@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
@@ -20,21 +20,18 @@ interface AuthGuardProps {
 export function AuthGuard({ children, allowDemo = false }: AuthGuardProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (loading) return;
 
     if (!user && !allowDemo) {
-      setReady(false);
       router.replace("/login");
       return;
     }
 
-    setReady(true);
   }, [user, loading, allowDemo, router]);
 
-  if (loading || !ready) {
+  if (loading || (!user && !allowDemo)) {
     return (
       <div className="min-h-dvh flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">

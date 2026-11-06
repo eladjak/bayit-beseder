@@ -1,4 +1,4 @@
-import { describe, it, assert } from "node:test";
+import { describe, it } from "node:test";
 import assert2 from "node:assert/strict";
 
 // ============================================

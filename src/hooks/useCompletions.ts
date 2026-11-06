@@ -3,10 +3,8 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useSupabase } from "@/components/SupabaseProvider";
 import { trackEvent } from "@/lib/analytics";
-import { useOfflineQueue } from "@/hooks/useOfflineQueue";
 import type {
   TaskCompletionRow,
-  TaskCompletionInsert,
 } from "@/lib/types/database";
 
 interface UseCompletionsOptions {
@@ -35,6 +33,7 @@ interface UseCompletionsReturn {
     notes?: string;
     recurring?: boolean;
   }) => Promise<TaskCompletionRow | null>;
+  undoComplete: (taskId: string) => Promise<boolean>;
   getHistory: (taskId: string) => Promise<TaskCompletionRow[]>;
   /** Leaderboard data: completion count per user, sorted descending */
   leaderboard: LeaderboardEntry[];
@@ -57,7 +56,6 @@ export function useCompletions(
   const [completions, setCompletions] = useState<TaskCompletionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { queueAction, isOnline } = useOfflineQueue();
 
   const fetchCompletions = useCallback(async () => {
     setLoading(true);
@@ -101,13 +99,13 @@ export function useCompletions(
 
   // Compute today's completion IDs (task IDs completed today)
   const todayCompletionIds = useMemo((): Set<string> => {
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
+    const day = (value: Date) => new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Jerusalem", year: "numeric", month: "2-digit", day: "2-digit",
+    }).format(value);
+    const today = day(new Date());
     const ids = new Set<string>();
     for (const c of completions) {
-      if (new Date(c.completed_at).getTime() >= startOfDay.getTime()) {
-        ids.add(c.task_id);
-      }
+      if (day(new Date(c.completed_at)) === today) ids.add(c.task_id);
     }
     return ids;
   }, [completions]);
@@ -139,112 +137,48 @@ export function useCompletions(
       /** If true, don't permanently change the task status (for recurring tasks) */
       recurring?: boolean;
     }): Promise<TaskCompletionRow | null> => {
-      // When offline, queue the action and return an optimistic result
-      if (!isOnline) {
-        queueAction("complete_task", {
-          taskId: params.taskId,
-          userId: params.userId,
-          householdId: params.householdId ?? null,
-          photoUrl: params.photoUrl ?? null,
-          notes: params.notes ?? null,
-          recurring: params.recurring ?? false,
-          timestamp: new Date().toISOString(),
-        });
-
-        // Optimistic completion row (will be replaced when queue processes)
-        const optimisticRow: TaskCompletionRow = {
-          id: `offline-${Date.now()}`,
-          task_id: params.taskId,
-          user_id: params.userId,
-          completed_at: new Date().toISOString(),
-          photo_url: params.photoUrl ?? null,
-          notes: params.notes ?? null,
-        };
-        setCompletions((prev) => [optimisticRow, ...prev]);
-        trackEvent("task_complete");
-        return optimisticRow;
-      }
-
       try {
-        const insertion: TaskCompletionInsert = {
-          task_id: params.taskId,
-          user_id: params.userId,
-          photo_url: params.photoUrl ?? null,
-          notes: params.notes ?? null,
-        };
-
-        const { data, error: insertError } = await supabase
-          .from("task_completions")
-          .insert(insertion)
-          .select()
-          .single();
-
-        if (insertError) {
-          // Network error — queue for later
-          if (!navigator.onLine) {
-            queueAction("complete_task", {
-              taskId: params.taskId,
-              userId: params.userId,
-              recurring: params.recurring ?? false,
-              timestamp: new Date().toISOString(),
-            });
-            const optimisticRow: TaskCompletionRow = {
-              id: `offline-${Date.now()}`,
-              task_id: params.taskId,
-              user_id: params.userId,
-              completed_at: new Date().toISOString(),
-              photo_url: null,
-              notes: null,
-            };
-            setCompletions((prev) => [optimisticRow, ...prev]);
-            return optimisticRow;
-          }
-          console.error("Failed to insert task completion:", insertError);
-          setError(insertError.message);
+        const { data, error: rpcError } = await supabase.rpc("transition_task_completion", {
+          p_task_id: params.taskId,
+          p_action: "complete",
+          p_completion_id: crypto.randomUUID(),
+          p_photo_url: params.photoUrl ?? null,
+          p_notes: params.notes ?? null,
+        }).single();
+        if (rpcError || !data) {
+          setError("לא ניתן להשלים את המשימה");
           return null;
         }
-
-        // Only update the permanent task status for non-recurring tasks.
-        // Recurring tasks reset daily — their "completed" state is derived
-        // from today's task_completions entries.
-        if (!params.recurring) {
-          const { error: updateError } = await supabase
-            .from("tasks")
-            .update({ status: "completed" as const })
-            .eq("id", params.taskId);
-
-          if (updateError) {
-            console.error("Failed to update task status:", updateError);
-            setError(updateError.message);
-            return null;
-          }
-        }
-
-        setCompletions((prev) => [data, ...prev]);
+        setError(null);
+        setCompletions((prev) => [data, ...prev.filter((row) => row.id !== data.id)]);
         trackEvent("task_complete");
         return data;
-      } catch (err) {
-        // Network failure — queue the action
-        queueAction("complete_task", {
-          taskId: params.taskId,
-          userId: params.userId,
-          recurring: params.recurring ?? false,
-          timestamp: new Date().toISOString(),
-        });
-        const optimisticRow: TaskCompletionRow = {
-          id: `offline-${Date.now()}`,
-          task_id: params.taskId,
-          user_id: params.userId,
-          completed_at: new Date().toISOString(),
-          photo_url: null,
-          notes: null,
-        };
-        setCompletions((prev) => [optimisticRow, ...prev]);
-        return optimisticRow;
+      } catch {
+        setError("לא ניתן להשלים את המשימה. יש לנסות שוב כשהחיבור יחזור.");
+        return null;
       }
     },
-    [supabase, isOnline, queueAction]
+    [supabase]
   );
+
+  const undoComplete = useCallback(async (taskId: string): Promise<boolean> => {
+    try {
+      const { data, error: rpcError } = await supabase.rpc("transition_task_completion", {
+        p_task_id: taskId,
+        p_action: "undo",
+      }).single();
+      if (rpcError || !data) {
+        setError("לא ניתן לבטל את השלמת המשימה");
+        return false;
+      }
+      setError(null);
+      setCompletions((prev) => prev.filter((row) => row.id !== data.id));
+      return true;
+    } catch {
+      setError("לא ניתן לבטל את השלמת המשימה. יש לנסות שוב כשהחיבור יחזור.");
+      return false;
+    }
+  }, [supabase]);
 
   const getHistory = useCallback(
     async (taskId: string): Promise<TaskCompletionRow[]> => {
@@ -273,6 +207,7 @@ export function useCompletions(
     loading,
     error,
     markComplete,
+    undoComplete,
     getHistory,
     leaderboard,
     todayCompletionIds,

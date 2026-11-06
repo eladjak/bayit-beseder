@@ -49,8 +49,8 @@ export function InviteContent() {
   // Validate code and check auth on mount
   useEffect(() => {
     if (!code) {
-      setPageState("invalid");
-      return;
+      const timer = window.setTimeout(() => setPageState("invalid"), 0);
+      return () => window.clearTimeout(timer);
     }
 
     async function init() {

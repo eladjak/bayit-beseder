@@ -345,7 +345,7 @@
  "tasks": {
   "title": "משימות",
   "addTask": "הוספת משימה",
-  "addTaskShort": "+ משימה",
+  "addTaskShort": "משימה",
   "allCategories": "הכל",
   "manageCategories": "ניהול קטגוריות",
   "markComplete": "סמן כהושלם",
@@ -387,7 +387,7 @@
   "tryOtherCategory": "נסו קטגוריה אחרת",
   "addFirstTask": "הוסיפו משימה ראשונה",
   "completedSection": "בוצע",
-  "weDid": "עשינו 💪",
+  "weDid": "עשינו",
   "needsReviewTitle": "משימות ישנות לבדיקה",
   "needsReviewToggleShow": "הצג משימות ישנות לבדיקה",
   "needsReviewToggleHide": "הסתר משימות ישנות לבדיקה",
@@ -428,7 +428,7 @@
   "itemAdded": "הפריט נוסף לרשימה",
   "itemRemoved": "הוסר מהרשימה",
   "itemsCleared": "פריטים נקו — כיף! 🧹",
-  "emptyTitle": "הרשימה ריקה — או שהקנייה כבר הייתה? 🛒",
+  "emptyTitle": "הרשימה ריקה. אפשר להוסיף מה שחסר בבית.",
   "emptySubtitle": "הוסיפו פריט ראשון לפני שהמקרר מתחיל לדבר",
   "addFirstItem": "הוסיפו פריט ראשון",
   "addToCategory": "הוסף פריט ל",
@@ -649,7 +649,7 @@
   "streakBest": "שיא:",
   "streakDone": "בוצע",
   "streakNotDone": "לא בוצע",
-  "emptyTitle": "עדיין אין מה להראות 🌱",
+  "emptyTitle": "עדיין אין מה להראות",
   "emptySubtitle": "השלימו כמה משימות ונתחיל לראות תמונה"
  },
  "auth": {

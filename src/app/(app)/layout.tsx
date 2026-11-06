@@ -3,8 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { MotionConfig } from "framer-motion";
 import { useProfile } from "@/hooks/useProfile";
-import { usePetCollectionSync } from "@/hooks/usePetCollectionSync";
-import { syncBackgroundCollectionWithStreak } from "@/lib/backgrounds";
+import { usePetCollectionSync, useBackgroundCollectionSync } from "@/hooks/usePetCollectionSync";
 import { registerKonamiListener } from "@/lib/easter-eggs";
 import { toast } from "sonner";
 import dynamic from "next/dynamic";
@@ -22,6 +21,7 @@ import { KeyboardShortcutsHelp } from "@/components/keyboard-shortcuts-help";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useTranslation } from "@/hooks/useTranslation";
 import { useAssistantVisibility } from "@/hooks/useAssistantVisibility";
 
 // Lazy-load the AI chat components to keep the initial bundle lean
@@ -79,6 +79,7 @@ const OnboardingWizard = dynamic(
 
 function AppLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const { locale } = useTranslation();
   const [chatOpen, setChatOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
@@ -101,7 +102,8 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined") return;
     if (localStorage.getItem("bayit-onboarding-done-v1")) return;
 
-    setOnboardingOpen(true);
+    const timer = window.setTimeout(() => setOnboardingOpen(true), 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   // Whether the dashboard's household-setup wizard is currently on screen.
@@ -122,14 +124,10 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Alopik v2 Phase 3: auto-unlock pets + backgrounds when streak advances
-  const { profile } = useProfile();
-  const streak = profile?.streak ?? 0;
+  const { profile, loading: profileLoading } = useProfile();
+  const streak = profileLoading ? null : (profile?.streak ?? 0);
   const newPets = usePetCollectionSync(streak);
-  const [newBgs, setNewBgs] = useState<readonly { id: string; emoji: string; name: string }[]>([]);
-  useEffect(() => {
-    const bgs = syncBackgroundCollectionWithStreak(streak);
-    if (bgs.length > 0) setNewBgs(bgs);
-  }, [streak]);
+  const newBgs = useBackgroundCollectionSync(streak);
 
   const celebrationItems = useMemo(
     () => [
@@ -158,7 +156,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
   });
 
   return (
-    <div className="min-h-dvh bg-background lg:bg-muted/30">
+    <div className="min-h-dvh bg-background lg:pr-56">
       {/* Skip to main content — visible on keyboard focus, RTL-aware */}
       <a
         href="#main-content"
@@ -167,7 +165,8 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
         דלג לתוכן הראשי
       </a>
       {/* Global utility bar — bell + language toggle, sticky top bar inside content flow */}
-      <div className="sticky top-0 z-40 flex items-center gap-1.5 px-3 py-1.5 max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto justify-end">
+      <div className="sticky top-0 z-40 flex bg-background items-center gap-1.5 px-3 py-1.5 max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto justify-end">
+        <button type="button" onClick={() => setChatOpen(true)} className="min-h-11 rounded-xl px-3 text-sm font-semibold text-primary hover:bg-primary/10 focus-visible:outline-2 focus-visible:outline-primary">{locale === "en" ? "Ask the assistant" : "עזרה מהעוזר"}</button>
         <ActivePetBadge onClick={() => router.push("/settings#pets")} />
         <LanguageToggle />
         <NotificationCenter
@@ -182,32 +181,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       <PWAInstallBanner />
       <ServiceWorkerRegistrar />
       <ServiceWorkerUpdateToast />
-      <main id="main-content" className="pb-safe max-w-lg sm:max-w-xl lg:max-w-2xl mx-auto lg:bg-background lg:min-h-dvh lg:shadow-xl lg:border-x lg:border-border/50">
-        <PageTransition>{children}</PageTransition>
-      </main>
-      <BottomNav />
-
-      {/* AI Chat floating button — hidden when the user turned it off in
-          Settings (persisted; see useAssistantVisibility). panelOpen tells
-          it whether the full drawer is open, so it knows not to show a
-          reaction peek for something the user is already looking at. */}
-      {assistantVisible && <ChatFAB onClick={() => setChatOpen(true)} panelOpen={chatOpen} />}
-
-      {/* Alopik v2 #1: Quick Love floating button (bidirectional household member micro-recognition) */}
-      <QuickLoveButton />
-
-      {/* Alopik v2 #2: Daily Surprise Box (first task of day) */}
-      <SurpriseBox />
-
-      {/* Alopik v2 Phase 2: Weekly Wheel — appears Fri 14:00 → Sat night */}
-      <WeeklyWheel />
-
-      {/* Alopik v2 Phase 3: Celebration toast for new pet/background unlocks */}
-      <CelebrationToast items={celebrationItems} />
-
-      {/* Alopik v2 Loop L: Welcome Gift modal (one-shot after onboarding) */}
-      <WelcomeGiftModal />
-
+      <main id="main-content" className="mx-auto max-w-lg pb-28 sm:max-w-xl lg:max-w-4xl lg:pb-12">
       {/* Alopik v2 #3: Adult-toned onboarding wizard (once per user, re-trigger from settings) */}
       <OnboardingWizard
         open={onboardingOpen && !setupWizardVisible}
@@ -224,6 +198,26 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
           }
         }}
       />
+
+        <PageTransition>{children}</PageTransition>
+        <WelcomeGiftModal />
+      </main>
+      <BottomNav />
+
+      {/* AI Chat floating button — hidden when the user turned it off in
+          Settings (persisted; see useAssistantVisibility). panelOpen tells
+          it whether the full drawer is open, so it knows not to show a
+          reaction peek for something the user is already looking at. */}
+      {assistantVisible && <ChatFAB onClick={() => setChatOpen(true)} panelOpen={chatOpen} />}
+
+      <details id="house-tools" className="mx-auto mb-44 max-w-lg px-4 lg:mb-8 lg:max-w-4xl">
+        <summary className="flex min-h-12 cursor-pointer items-center rounded-xl border border-border bg-surface px-4 font-semibold focus-visible:outline-2 focus-visible:outline-primary">{locale === "en" ? "Household tools" : "כלי הבית"}</summary>
+        <div className="flex flex-wrap gap-2 py-3"><QuickLoveButton /><SurpriseBox /><WeeklyWheel /></div>
+      </details>
+
+      {/* Alopik v2 Phase 3: Celebration toast for new pet/background unlocks */}
+      <CelebrationToast items={celebrationItems} />
+
 
       {/* AI Chat drawer */}
       <ChatDrawer open={chatOpen} onClose={() => setChatOpen(false)} />

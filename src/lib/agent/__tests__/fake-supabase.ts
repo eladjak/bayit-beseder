@@ -163,5 +163,19 @@ export function createFakeSupabase(db: FakeDb) {
     };
     return builder;
   }
-  return { from };
+  async function rpc(name: string, args: Row) {
+    if (name !== "transition_task_completion") throw new Error(`Unsupported RPC: ${name}`);
+    const task = (db.tables.tasks ?? []).find((r) => r.id === args.p_task_id && r.household_id === args.p_household_id);
+    const member = (db.tables.household_members ?? []).find((r) => r.household_id === args.p_household_id && r.user_id === args.p_user_id);
+    if (!task || !member) return { data: null, error: { message: "not authorized" } };
+    const row = { id: args.p_completion_id, task_id: task.id, user_id: member.user_id, notes: args.p_notes };
+    (db.tables.task_completions ??= []).push(row);
+    db.writes.push({ table: "task_completions", op: "insert", row });
+    if (!task.recurring) {
+      task.status = "completed";
+      db.writes.push({ table: "tasks", op: "update", row: { status: "completed" } });
+    }
+    return { data: [row], error: null };
+  }
+  return { from, rpc };
 }

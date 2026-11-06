@@ -21,8 +21,8 @@ function useCountUp(target: number, duration = 600): number {
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
     ) {
       prevRef.current = target;
-      setDisplay(target);
-      return;
+      const timer = window.setTimeout(() => setDisplay(target), 0);
+      return () => window.clearTimeout(timer);
     }
     const startTime = performance.now();
     const animate = (now: number) => {

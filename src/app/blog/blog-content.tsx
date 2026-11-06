@@ -1298,40 +1298,13 @@ export function BlogContent({ sanityPosts = [] }: BlogContentProps) {
         </div>
       </nav>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden pt-14">
-        <div
-          className="absolute inset-0"
-          style={{
-            background: "linear-gradient(135deg, #6366F1 0%, #8B5CF6 40%, #D946EF 70%, #EC4899 100%)",
-          }}
-        />
-        <div
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 20% 80%, rgba(255,255,255,0.15) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.1) 0%, transparent 40%)",
-          }}
-        />
-
-        <div className="relative z-10 max-w-3xl mx-auto px-6 py-16 md:py-24 text-center text-white">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors mb-8 sm:hidden"
-          >
-            {backLabel}
-          </Link>
-
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/15 backdrop-blur-sm rounded-full text-sm font-medium mb-6 border border-white/20">
-            {articleCountLabel}
-          </div>
-
-          <h1 className="text-3xl md:text-5xl font-extrabold leading-tight mb-4 tracking-tight">
-            {heroTitle}
-          </h1>
-          <p className="text-lg md:text-xl text-white/80 max-w-xl mx-auto leading-relaxed">
-            {heroSubtitle}
-          </p>
+      {/* Editorial hero */}
+      <section className="border-b border-border bg-background pt-14">
+        <div className="mx-auto max-w-3xl px-6 py-14 md:py-20">
+          <Link href="/" className="mb-7 inline-flex min-h-11 items-center text-sm font-semibold text-primary hover:underline sm:hidden">{backLabel}</Link>
+          <p className="mb-4 text-sm font-semibold text-primary">{articleCountLabel}</p>
+          <h1 className="mb-4 text-4xl font-extrabold leading-tight tracking-tight text-foreground md:text-5xl">{heroTitle}</h1>
+          <p className="max-w-xl text-lg leading-relaxed text-muted">{heroSubtitle}</p>
         </div>
       </section>
 
@@ -1344,7 +1317,7 @@ export function BlogContent({ sanityPosts = [] }: BlogContentProps) {
               <a
                 key={cat}
                 href={`#${post?.id ?? ""}`}
-                className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium bg-surface border border-border hover:border-primary/30 hover:text-primary transition-colors"
+                className="flex min-h-11 flex-shrink-0 items-center rounded-full border border-border bg-surface px-4 text-sm font-medium hover:border-primary/30 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
               >
                 {cat}
               </a>
@@ -1361,7 +1334,7 @@ export function BlogContent({ sanityPosts = [] }: BlogContentProps) {
             <article
               key={post._id}
               id={post.slug.current}
-              className="card-elevated overflow-hidden scroll-mt-28"
+              className="overflow-hidden rounded-2xl border border-border bg-surface scroll-mt-28"
             >
               <div
                 className="h-1.5 w-full"
@@ -1454,7 +1427,7 @@ export function BlogContent({ sanityPosts = [] }: BlogContentProps) {
               <article
                 key={post.id}
                 id={post.id}
-                className="card-elevated overflow-hidden scroll-mt-28"
+                className="overflow-hidden rounded-2xl border border-border bg-surface scroll-mt-28"
               >
                 {/* Gradient accent bar */}
                 <div className="h-1.5 w-full" style={{ background: post.accentGradient }} />

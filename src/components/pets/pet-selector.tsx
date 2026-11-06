@@ -24,8 +24,11 @@ export function PetSelector({ currentStreak }: Props) {
   const [collected, setCollected] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    setActiveId(getActivePet().id);
-    setCollected(new Set(getCollection()));
+    const timer = window.setTimeout(() => {
+      setActiveId(getActivePet().id);
+      setCollected(new Set(getCollection()));
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const handleSelect = (pet: Pet) => {

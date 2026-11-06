@@ -512,20 +512,8 @@ async function handleComplete(
     );
   }
 
-  // 3. Mark the task completed
-  const { error: updateErr } = await supabase
-    .from("tasks")
-    .update({ status: "completed" as const })
-    .eq("id", task.id);
-
-  if (updateErr) {
-    return NextResponse.json(
-      { error: "שגיאה בעדכון המשימה", details: updateErr.message },
-      { status: 500 }
-    );
-  }
-
-  // 4. Resolve completor: use assigned_to or first household member (agent acts on behalf)
+  // The verified household token scopes the service-role RPC. Resolve an
+  // actual member before recording a completion on that member's behalf.
   let completorId = task.assigned_to;
   if (!completorId) {
     const { data: member } = await supabase
@@ -536,36 +524,22 @@ async function handleComplete(
       .single();
     completorId = member?.user_id ?? null;
   }
-
-  // 5. Insert task_completion record (best-effort; don't fail the whole request if it errors)
-  if (completorId) {
-    const completionInsert: {
-      task_id: string;
-      user_id: string;
-      notes?: string | null;
-    } = {
-      task_id: task.id,
-      user_id: completorId,
-    };
-    if (body.note) completionInsert.notes = body.note;
-
-    await supabase.from("task_completions").insert(completionInsert);
+  if (!completorId) {
+    return NextResponse.json({ error: "לא נמצא חבר במשק הבית" }, { status: 409 });
   }
-
-  // 6. Update profile points (best-effort — direct increment, no RPC needed)
-  if (completorId && task.points > 0) {
-    // Fetch current points then update (service-role, bypasses RLS)
-    const { data: prof } = await supabase
-      .from("profiles")
-      .select("points")
-      .eq("id", completorId)
-      .single();
-    if (prof) {
-      await supabase
-        .from("profiles")
-        .update({ points: (prof.points ?? 0) + task.points })
-        .eq("id", completorId);
-    }
+  const { error: completionError } = await supabase.rpc("transition_task_completion", {
+    p_task_id: task.id,
+    p_action: "complete",
+    p_completion_id: crypto.randomUUID(),
+    p_notes: body.note ?? null,
+    p_household_id: householdId,
+    p_user_id: completorId,
+  });
+  if (completionError) {
+    return NextResponse.json(
+      { error: "שגיאה בהשלמת המשימה", details: completionError.message },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json(

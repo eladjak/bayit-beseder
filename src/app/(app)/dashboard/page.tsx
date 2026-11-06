@@ -6,22 +6,13 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { TodayOverview, type TaskItem } from "@/components/dashboard/today-overview";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
-import { PartnerStatus, MembersStatus } from "@/components/dashboard/partner-status";
 // Moved to settings/weekly: EmergencyToggle (in quick links), WeeklySummaryCards, RoomConditions
 // These are inside the collapsible achievements accordion — lazy-load them
-const StreakTracker = dynamic(() => import("@/components/gamification/streak-tracker").then(m => ({ default: m.StreakTracker })), { ssr: false });
-const WeeklyChallenge = dynamic(() => import("@/components/gamification/weekly-challenge").then(m => ({ default: m.WeeklyChallenge })), { ssr: false });
-const CoupleRewards = dynamic(() => import("@/components/gamification/couple-rewards").then(m => ({ default: m.CoupleRewards })), { ssr: false });
 const WeeklyChallenges = dynamic(() => import("@/components/gamification/weekly-challenges").then(m => ({ default: m.WeeklyChallenges })), { ssr: false });
-const Leaderboard = dynamic(() => import("@/components/gamification/leaderboard").then(m => ({ default: m.Leaderboard })), { ssr: false });
 const ActivityFeed = dynamic(() => import("@/components/dashboard/activity-feed").then(m => ({ default: m.ActivityFeed })), { ssr: false });
 const HouseMap = dynamic(() => import("@/components/dashboard/house-map").then(m => ({ default: m.HouseMap })), { ssr: false });
 const PrizeCard = dynamic(() => import("@/components/prizes/prize-card").then(m => ({ default: m.PrizeCard })), { ssr: false });
-const QuickStatsBar = dynamic(() => import("@/components/dashboard/quick-stats-bar").then(m => ({ default: m.QuickStatsBar })), { ssr: false });
-const GamificationRow = dynamic(() => import("@/components/dashboard/gamification-row").then(m => ({ default: m.GamificationRow })), { ssr: false });
 import { getRandomMessage } from "@/lib/coaching-messages";
-import { computeRoomHealth } from "@/lib/room-health";
-import { computeRewardsProgress } from "@/lib/rewards";
 import { computeBestStreak } from "@/lib/task-stats";
 import { filterTasksByEnergy } from "@/lib/energy-filter";
 import type { EnergyLevel } from "@/lib/energy-filter";
@@ -32,24 +23,19 @@ import { useCompletions } from "@/hooks/useCompletions";
 import { useCategories } from "@/hooks/useCategories";
 import { useAppSounds } from "@/hooks/useAppSound";
 
-import { usePartner } from "@/hooks/usePartner";
 import { useHouseholdMembers } from "@/hooks/useHouseholdMembers";
 import { useWeeklyChallenges } from "@/hooks/useWeeklyChallenges";
 import { useLeaderboard } from "@/hooks/useLeaderboard";
 import { TaskListSkeleton } from "@/components/skeleton";
 import { toast } from "sonner";
 import { CATEGORY_NAME_TO_KEY, CATEGORY_LABELS, CATEGORY_ICONS, CATEGORY_COLORS } from "@/lib/categories";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { FairnessBalanceMeter } from "@/components/dashboard/fairness-balance-meter";
 import { GoldenRuleSection } from "@/components/dashboard/golden-rule-section";
-import { PlaylistCard } from "@/components/dashboard/playlist-card";
 import { EnergyModeSection } from "@/components/dashboard/energy-mode-section";
-import { CoachingInsight } from "@/components/dashboard/coaching-insight";
 import { CoachingTips } from "@/components/dashboard/coaching-tips";
 const PesachCountdownBanner = dynamic(() => import("@/components/seasonal/pesach-countdown-banner").then(m => ({ default: m.PesachCountdownBanner })), { ssr: false });
 import { useSeasonalMode } from "@/hooks/useSeasonalMode";
 import { useTranslation } from "@/hooks/useTranslation";
-import { ChevronDown } from "lucide-react";
 
 // Lazy-load components that aren't always visible (modals, overlays, coaching)
 const CelebrationOverlay = dynamic(() => import("@/components/gamification/celebration-overlay").then(m => ({ default: m.CelebrationOverlay })), { ssr: false });
@@ -59,27 +45,11 @@ const PesachActivationModal = dynamic(() => import("@/components/seasonal/pesach
 const ConversationalOnboarding = dynamic(() => import("@/components/onboarding/conversational-onboarding").then(m => ({ default: m.ConversationalOnboarding })), { ssr: false });
 import { useHousehold, normalizeHouseholdCity } from "@/hooks/useHousehold";
 import { OfflineIndicator } from "@/components/offline-indicator";
-import { useFirstVisit } from "@/hooks/useFirstVisit";
-import { FeatureTooltip } from "@/components/feature-tooltip";
 import { pushAssistantReaction } from "@/lib/assistant-reactions";
 import { ilToday } from "@/lib/il-date";
 
-// ============================================
-// Mock data (fallback when Supabase not connected)
-// ============================================
-const MOCK_TASKS: TaskItem[] = [
-  { id: "1", title: "שטיפת כלים / הפעלת מדיח", category: "kitchen", estimated_minutes: 15, completed: false },
-  { id: "2", title: "האכלת חתולים (בוקר)", category: "pets", estimated_minutes: 5, completed: true },
-  { id: "3", title: "הוצאת אשפה", category: "kitchen", estimated_minutes: 5, completed: false },
-  { id: "4", title: "ניקוי משטחי עבודה במטבח", category: "kitchen", estimated_minutes: 5, completed: false },
-  { id: "5", title: "סידור מהיר של הסלון", category: "living", estimated_minutes: 5, completed: true },
-  { id: "6", title: "מים טריים לחתולים", category: "pets", estimated_minutes: 2, completed: false },
-  { id: "7", title: "ניקוי ארגז חול", category: "pets", estimated_minutes: 5, completed: false },
-  { id: "8", title: "איוורור הבית", category: "general", estimated_minutes: 2, completed: true },
-];
-
-function getHebrewDate(): string {
-  return new Date().toLocaleDateString("he-IL", {
+function getHebrewDate(locale: "he" | "en"): string {
+  return new Date().toLocaleDateString(locale === "en" ? "en-US" : "he-IL", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -108,7 +78,7 @@ const EVENING_SUBTITLES = [
 ];
 
 const NIGHT_SUBTITLES = [
-  "מאוחר אבל הבית לא שופט 🌙",
+  "מאוחר אבל הבית לא שופט",
   "לילה טוב — מחר מתחילים מחדש",
   "שינה טובה מגיעה למי שסידר היום",
 ];
@@ -119,42 +89,31 @@ function pickSubtitle(arr: string[]): string {
 
 function getTimeGreeting(name: string): { greeting: string; subtitle: string } {
   const hour = new Date().getHours();
-  if (hour < 6) return { greeting: `לילה טוב, ${name} 🌙`, subtitle: pickSubtitle(NIGHT_SUBTITLES) };
-  if (hour < 12) return { greeting: `בוקר טוב, ${name}! ☀️`, subtitle: pickSubtitle(MORNING_SUBTITLES) };
-  if (hour < 17) return { greeting: `צהריים טובים, ${name} 👋`, subtitle: pickSubtitle(AFTERNOON_SUBTITLES) };
-  if (hour < 21) return { greeting: `ערב טוב, ${name} 🌆`, subtitle: pickSubtitle(EVENING_SUBTITLES) };
-  return { greeting: `לילה טוב, ${name} 🌙`, subtitle: pickSubtitle(NIGHT_SUBTITLES) };
+  if (hour < 6) return { greeting: `לילה טוב, ${name}`, subtitle: pickSubtitle(NIGHT_SUBTITLES) };
+  if (hour < 12) return { greeting: `בוקר טוב, ${name}!`, subtitle: pickSubtitle(MORNING_SUBTITLES) };
+  if (hour < 17) return { greeting: `צהריים טובים, ${name}`, subtitle: pickSubtitle(AFTERNOON_SUBTITLES) };
+  if (hour < 21) return { greeting: `ערב טוב, ${name}`, subtitle: pickSubtitle(EVENING_SUBTITLES) };
+  return { greeting: `לילה טוב, ${name}`, subtitle: pickSubtitle(NIGHT_SUBTITLES) };
 }
 
-// CATEGORY_INFO derived from shared categories.ts
-const CATEGORY_INFO = Object.fromEntries(
-  Object.keys(CATEGORY_COLORS).map((key) => [
-    key,
-    { label: CATEGORY_LABELS[key] ?? key, icon: CATEGORY_ICONS[key] ?? "🏠", color: CATEGORY_COLORS[key] },
-  ])
-) as Record<string, { label: string; icon: string; color: string }>;
-
 export default function DashboardPage() {
-  const { t } = useTranslation();
-  const { isFirstVisit: showDashboardTip, dismiss: dismissDashboardTip } = useFirstVisit("dashboard");
+  const { t, locale } = useTranslation();
   // ---- Supabase hooks ----
   const { profile } = useProfile();
-  const { tasks: dbTasks, loading: tasksLoading, refetch: refetchTasks } = useTasks({
+  const { tasks: dbTasks, loading: tasksLoading, error: tasksError, refetch: refetchTasks } = useTasks({
     realtime: true,
   });
   const { completions: allCompletions, markComplete, isCompletedToday } = useCompletions({ limit: 500 });
   const { categoryMap } = useCategories();
-  const { playComplete, playAchievement, playStreak } = useAppSounds();
+  const { playComplete } = useAppSounds();
   const todayStr = useMemo(() => ilToday(), []);
-  const { partner } = usePartner(profile?.partner_id, todayStr);
-  const { household, updateHousehold } = useHousehold(profile?.household_id ?? null);
+  const { updateHousehold } = useHousehold(profile?.household_id ?? null);
   // N-member support: prefer household_members table; falls back to partner_id
-  const { members: householdMembers, loading: membersLoading } = useHouseholdMembers(
+  const { members: householdMembers } = useHouseholdMembers(
     profile?.household_id ?? null,
     todayStr
   );
   // Members other than the current user (for the "household activity" section)
-  const otherMembers = householdMembers.filter((m) => m.id !== profile?.id);
 
   // ---- Gamification: weekly challenges & leaderboard ----
   const { progress: challengeProgress, weekNum } = useWeeklyChallenges({
@@ -174,13 +133,13 @@ export default function DashboardPage() {
   const [showTaskWizard, setShowTaskWizard] = useState(false);
   const seedAttempted = useRef(false);
   useEffect(() => {
-    if (seedAttempted.current || tasksLoading || !profile) return;
+    if (seedAttempted.current || tasksLoading || tasksError || !profile) return;
     // Show onboarding if no tasks exist AND onboarding not yet done
     const onboardingDone = localStorage.getItem("bayit-beseder-onboarding-done");
     if (dbTasks.length > 0 || onboardingDone) return;
     seedAttempted.current = true;
     setShowTaskWizard(true);
-  }, [tasksLoading, dbTasks.length, profile]);
+  }, [tasksLoading, tasksError, dbTasks.length, profile]);
 
   const handleOnboardingComplete = useCallback(
     async (result: { homeName: string; homeCity?: string; tasks: { title: string; category: string; estimatedMinutes: number; recurring: boolean; frequency: string }[] }) => {
@@ -236,7 +195,6 @@ export default function DashboardPage() {
   // was shown 8 fabricated chores with working checkboxes that wrote to
   // localStorage instead of the database. A brand-new home's first screen was
   // therefore a list of chores nobody had ever added, and ticking them was theatre.
-  const hasDbTasks = !tasksLoading && (!!profile?.household_id || dbTasks.length > 0);
 
   const dbTaskItems: TaskItem[] = useMemo(
     () =>
@@ -247,14 +205,12 @@ export default function DashboardPage() {
           : "general";
         // Recurring tasks: check today's completions for daily reset.
         // One-time tasks: use permanent status.
-        const completed = isRecurring(t.recurring)
-          ? isCompletedToday(t.id)
-          : t.status === "completed";
+        const completed = isCompletedToday(t.id) || (!isRecurring(t.recurring) && t.status === "completed");
         return {
           id: t.id,
           title: t.title,
           category: categoryKey,
-          estimated_minutes: 10,
+          estimated_minutes: 0,
           completed,
           points: t.points ?? 0,
           assigned_to: t.assigned_to,
@@ -263,27 +219,9 @@ export default function DashboardPage() {
     [dbTasks, categoryMap, isCompletedToday]
   );
 
-  const [mockTasks] = useState(MOCK_TASKS);
-  const [mockCompletedIds, setMockCompletedIds] = useState<Set<string>>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("bayit-completed-tasks");
-      return stored ? new Set(JSON.parse(stored)) : new Set();
-    }
-    return new Set();
-  });
-
-  useEffect(() => {
-    if (!hasDbTasks) {
-      localStorage.setItem("bayit-completed-tasks", JSON.stringify([...mockCompletedIds]));
-    }
-  }, [mockCompletedIds, hasDbTasks]);
-
-  const tasks = hasDbTasks
-    ? dbTaskItems
-    : mockTasks.map(t => ({ ...t, completed: mockCompletedIds.has(t.id) }));
+  const tasks = dbTaskItems;
 
   const [emergencyMode, setEmergencyMode] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [energyLevel, setEnergyLevel] = useState<EnergyLevel>(() => {
     if (typeof window !== "undefined") {
       return (localStorage.getItem("bayit-energy-mode") as EnergyLevel) || "all";
@@ -327,70 +265,29 @@ export default function DashboardPage() {
   const percentage = filteredTasks.length > 0 ? Math.round((completedCount / filteredTasks.length) * 100) : 0;
   const target = emergencyMode ? 50 : 80;
 
-  const streakCount = profile?.streak ?? 5;
+  const streakCount = profile?.streak ?? 0;
   const displayName = profile?.name ?? "שלום";
-  const { greeting, subtitle } = getTimeGreeting(displayName);
+  const { greeting } = getTimeGreeting(displayName);
+  const remainingTasks = tasks.filter(task => !task.completed);
 
-  const handleToggle = useCallback(
-    async (taskId: string) => {
-      if (hasDbTasks && profile) {
-        const task = dbTasks.find((t) => t.id === taskId);
-        // For recurring tasks, check today's completions; for one-time, check status
-        const alreadyDone = isRecurring(task?.recurring)
-          ? isCompletedToday(taskId)
-          : task?.status === "completed";
-        if (task && !alreadyDone) {
-          const result = await markComplete({ taskId, userId: profile.id, recurring: isRecurring(task.recurring) });
-          if (result === null) {
-            toast.error("לא ניתן לסמן את המשימה כהושלמה. נסה שוב.");
-            return;
-          }
-          setCompletionModal({ isOpen: true, taskId, taskTitle: task.title });
-          const msg = getRandomMessage("task_complete");
-          setCelebration({ visible: true, type: "task", message: msg.message, emoji: msg.emoji });
-          playComplete();
-        }
-        return;
-      }
-
-      const isCurrentlyCompleted = mockCompletedIds.has(taskId);
-      const newCompletedIds = new Set(mockCompletedIds);
-      if (isCurrentlyCompleted) {
-        newCompletedIds.delete(taskId);
-      } else {
-        newCompletedIds.add(taskId);
-      }
-      setMockCompletedIds(newCompletedIds);
-
-      const newCompleted = newCompletedIds.size;
-      const newPct = Math.round((newCompleted / mockTasks.length) * 100);
-      const wasCompleting = !isCurrentlyCompleted;
-
-      if (wasCompleting) {
-        if (newCompleted === mockTasks.length) {
-          const msg = getRandomMessage("all_daily_done");
-          setCelebration({ visible: true, type: "all_daily", message: msg.message, emoji: msg.emoji });
-          playAchievement();
-        } else if (newPct >= target) {
-          const prevPct = Math.round(((newCompleted - 1) / mockTasks.length) * 100);
-          if (prevPct < target) {
-            const msg = getRandomMessage("golden_rule_hit");
-            setCelebration({ visible: true, type: "golden_rule", message: msg.message, emoji: msg.emoji });
-            playStreak();
-          } else {
-            const msg = getRandomMessage("task_complete");
-            setCelebration({ visible: true, type: "task", message: msg.message, emoji: msg.emoji });
-            playComplete();
-          }
-        } else {
-          const msg = getRandomMessage("task_complete");
-          setCelebration({ visible: true, type: "task", message: msg.message, emoji: msg.emoji });
-          playComplete();
-        }
-      }
-    },
-    [target, hasDbTasks, profile, dbTasks, markComplete, isCompletedToday, playComplete, playAchievement, playStreak, mockCompletedIds, mockTasks.length]
-  );
+  const handleToggle = useCallback(async (taskId: string) => {
+    const task = dbTasks.find((item) => item.id === taskId);
+    if (!profile || !task || (isRecurring(task.recurring) ? isCompletedToday(taskId) : task.status === "completed")) {
+      throw new Error("Task cannot be completed");
+    }
+    const result = await markComplete({ taskId, userId: profile.id, recurring: isRecurring(task.recurring) });
+    if (result === null) {
+      toast.error("לא ניתן לסמן את המשימה כהושלמה. כדאי לנסות שוב.");
+      throw new Error("Task completion failed");
+    }
+    if (result.id.startsWith("offline-")) {
+      toast.success("הסימון נשמר לשליחה כשהחיבור יחזור");
+    } else {
+      toast.success("המשימה סומנה כהושלמה", { action: { label: "הוספת משוב", onClick: () => setCompletionModal({ isOpen: true, taskId, taskTitle: task.title }) } });
+    }
+    playComplete();
+    if (!result.id.startsWith("offline-")) void refetchTasks();
+  }, [profile, dbTasks, isCompletedToday, markComplete, playComplete, refetchTasks]);
 
   const handleCompletionFeedback = useCallback(
     async (feedback: { rating: number; notes: string; photoFile: File | null }): Promise<boolean> => {
@@ -449,39 +346,7 @@ export default function DashboardPage() {
     pushAssistantReaction(msg.message, msg.emoji);
   }, []);
 
-  const completionDates = useMemo(
-    () => allCompletions.map((c) => c.completed_at),
-    [allCompletions]
-  );
-
   const bestStreak = useMemo(() => computeBestStreak(allCompletions), [allCompletions]);
-
-  const categoryHealthData = useMemo(() => {
-    const now = new Date();
-    const categoriesWithData = new Set<string>();
-    const latestByCategory: Record<string, Date> = {};
-    for (const t of tasks) {
-      categoriesWithData.add(t.category);
-      if (t.completed) {
-        const existing = latestByCategory[t.category];
-        if (!existing || now > existing) latestByCategory[t.category] = now;
-      }
-    }
-    return Object.entries(CATEGORY_INFO)
-      .filter(([key]) => categoriesWithData.has(key) || key === "kitchen" || key === "bathroom" || key === "living")
-      .map(([key, info]) => ({
-        category: key,
-        label: info.label,
-        icon: info.icon,
-        color: info.color,
-        health: computeRoomHealth(latestByCategory[key] ?? null, "daily", now),
-      }));
-  }, [tasks]);
-
-  const rewardsProgress = useMemo(
-    () => computeRewardsProgress([], { user1Streak: streakCount, user2Streak: Math.max(streakCount - 2, 0) }, 0, [], todayStr),
-    [streakCount, todayStr]
-  );
 
   // Pull-to-refresh hint: track touch drag and trigger refresh on sufficient pull
   const pullStartY = useRef(0);
@@ -516,18 +381,6 @@ export default function DashboardPage() {
       setPullDistance(0);
     }
   }, [isPulling, pullDistance, refetchTasks]);
-
-  const handleClearCompleted = useCallback(() => {
-    if (hasDbTasks) {
-      // For DB tasks: recurring tasks auto-reset daily, so "clear" just refreshes
-      refetchTasks();
-      toast.success(t("dashboard.tasksAutoReset") || "המשימות מתאפסות אוטומטית כל יום 🔄");
-    } else {
-      // Mock mode: clear all completed
-      setMockCompletedIds(new Set());
-      toast.success(t("dashboard.clearedCompleted") || "סומנו כלא-הושלמו");
-    }
-  }, [hasDbTasks, refetchTasks, t]);
 
   const pullProgress = Math.min(pullDistance / PULL_THRESHOLD, 1);
 
@@ -566,51 +419,38 @@ export default function DashboardPage() {
         ) : null}
       </AnimatePresence>
 
-      <DashboardHeader
-        displayName={displayName}
-        greeting={greeting}
-        subtitle={subtitle}
-        hebrewDate={getHebrewDate()}
-        avatarUrl={profile?.avatar_url}
-        completedCount={completedCount}
-        totalCount={filteredTasks.length}
+      {/* Conversational onboarding for new users */}
+      <ConversationalOnboarding
+        open={showTaskWizard}
+        onComplete={handleOnboardingComplete}
+        onSkip={handleOnboardingSkip}
       />
 
-      {/* Content area with padding */}
-      <div className="px-4 space-y-4 -mt-6">
-        {seasonalMode.activeTemplate && (
-          <PesachCountdownBanner
-            daysUntilHoliday={seasonalMode.daysUntilHoliday}
-            progress={seasonalMode.progress}
-            onTap={() => setShowSeasonalModal(true)}
-          />
-        )}
-
-        {/* ═══ SECTION 1: Quick Stats Bar ═══ */}
-        <QuickStatsBar
-          tasksCompleted={completedCount}
-          tasksTotal={filteredTasks.length}
-          streakDays={streakCount}
-          totalPoints={completedCount * 10}
-          rank={householdMembers.length > 1 ? 1 : 0}
-        />
-
-        {/* ═══ SECTION 2: Today's Tasks (limited to 5, expandable) ═══ */}
-        <div className="relative">
-          {tasksLoading ? (
-            <TaskListSkeleton count={5} />
-          ) : (
-            <TodayOverview tasks={filteredTasks} onToggle={handleToggle} onClearCompleted={handleClearCompleted} maxItems={5} />
-          )}
-          <FeatureTooltip
-            visible={showDashboardTip && !tasksLoading}
-            text="הנה המשימות שלכם להיום. לחצו על V כשמסיימים!"
-            onDismiss={dismissDashboardTip}
-            position="below"
-            className="left-0 right-auto"
-          />
+      <header className="px-4 pt-6 sm:px-6">
+        <p className="text-sm font-semibold text-primary">{getHebrewDate(locale)}</p>
+        <h1 className="mt-2 text-3xl font-bold">{locale === "en" ? `Hello, ${displayName}` : greeting}</h1>
+        <p className="mt-2 text-muted">{locale === "en" ? "Make space for what matters, one step at a time." : "נעשה מקום למה שחשוב, צעד אחד בכל פעם."}</p>
+      </header>
+      <div className="space-y-4 px-4 sm:px-6">
+        {seasonalMode.activeTemplate && <PesachCountdownBanner daysUntilHoliday={seasonalMode.daysUntilHoliday} progress={seasonalMode.progress} onTap={() => setShowSeasonalModal(true)} />}
+        <section aria-label="הצעד הבא" className="rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:p-6">
+          <h2 className="text-lg font-bold">{locale === "en" ? "Your next step" : "הצעד הבא שלך"}</h2>
+          <p className="mb-4 mt-1 text-sm text-muted">{locale === "en" ? "The most recently added open task in your household list." : "המשימה הפתוחה שנוספה לאחרונה לרשימת הבית."}</p>
+          {tasksLoading ? <TaskListSkeleton count={1} /> : tasksError ? <div role="alert"><p>{locale === "en" ? "We could not load your tasks. Check your connection and try again." : "לא הצלחנו לטעון את המשימות. כדאי לבדוק את החיבור ולנסות שוב."}</p><button type="button" onClick={() => refetchTasks()} className="min-h-11 font-semibold text-primary">{locale === "en" ? "Try again" : "ניסיון נוסף"}</button></div> : remainingTasks.length ? <TodayOverview tasks={remainingTasks.slice(0, 1)} onToggle={handleToggle} single /> : <p className="rounded-xl bg-surface p-4 text-muted">{locale === "en" ? "There are no open tasks in the list right now." : "אין כרגע משימות פתוחות ברשימה."}</p>}
+          {!tasksLoading && !tasksError && <Link href="/tasks" className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">{locale === "en" ? `${remainingTasks.length} tasks remaining · All tasks →` : `${remainingTasks.length} משימות נותרו · לכל המשימות ←`}</Link>}
+        </section>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Link href="/meals" className="rounded-2xl border border-border bg-surface p-5 hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-primary"><h2 className="text-lg font-bold">{locale === "en" ? "What are we eating?" : "מה אוכלים?"}</h2><p className="mt-2 text-sm text-muted">{locale === "en" ? "Meal planning and ideas in one place." : "תכנון הארוחות והרעיונות של הבית במקום אחד."}</p><span className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">{locale === "en" ? "Meal plan →" : "לתוכנית הארוחות ←"}</span></Link>
+          <Link href="/shopping" className="rounded-2xl border border-border bg-surface p-5 hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-primary"><h2 className="text-lg font-bold">{locale === "en" ? "Shopping list" : "רשימת הקניות"}</h2><p className="mt-2 text-sm text-muted">{locale === "en" ? "Everything you need to buy, in a shared list." : "כל מה שצריך לקנות, ברשימה משותפת."}</p><span className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">{locale === "en" ? "Open list →" : "לרשימה ←"}</span></Link>
         </div>
+        <details className="rounded-2xl border border-border bg-surface p-4"><summary className="flex min-h-11 cursor-pointer items-center font-bold focus-visible:outline-2 focus-visible:outline-primary">{locale === "en" ? "How home is going" : "איך הבית מתקדם"}</summary>
+        <div className="space-y-4 pt-3">
+        {!tasksLoading && !tasksError && tasks.length === 0 && <p className="text-sm text-muted">כשתוסיפו משימות ותשלימו אותן, אפשר יהיה לראות כאן את התקדמות הבית.</p>}
+        <button type="button" aria-pressed={emergencyMode} onClick={() => setEmergencyMode(value => !value)} className="min-h-11 rounded-xl border border-border px-3 text-sm font-semibold">{emergencyMode ? "יעד חירום פעיל" : "הפעלת יעד חירום"}</button>
+        <EnergyModeSection energyLevel={energyLevel} onToggle={cycleEnergyLevel} filteredCount={filteredTasks.length} totalCount={tasks.length} />
+        {tasks.length > 0 && <PrizeCard currentPoints={rankings.find(entry => entry.member.id === profile?.id)?.points ?? 0} />}
 
+        {tasks.length > 0 && <>
         {/* ═══ SECTION 2.5: Fairness Balance Meter (the painkiller — council #1) ═══ */}
         <FairnessBalanceMeter
           completions={allCompletions}
@@ -624,25 +464,7 @@ export default function DashboardPage() {
           categories={Object.entries(CATEGORY_ICONS).map(([key, icon]) => ({ id: key, name: CATEGORY_LABELS[key] ?? key, icon: icon ?? "📦", color: CATEGORY_COLORS[key] ?? "#6366F1" }))}
         />
 
-        {/* ═══ SECTION 4: Gamification Row (horizontal scroll) ═══ */}
-        <GamificationRow
-          streakDays={streakCount}
-          streakTarget={streakCount < 7 ? 7 : streakCount < 14 ? 14 : streakCount < 30 ? 30 : 60}
-          currentPoints={completedCount * 10}
-          nextPrizeThreshold={50}
-          nextPrizeName="גלידה לכולם"
-          nextPrizeEmoji="🍦"
-          challengeTitle={t("dashboard.achievementsSection") || "אתגר שבועי"}
-          challengeProgress={Math.min(100, Math.round((completedCount / Math.max(filteredTasks.length, 1)) * 100))}
-          challengeActive={true}
-        />
-
-        {/* ═══ SECTION 5: AI Coaching Tip ═══ */}
         <CoachingTips completedCount={completedCount} totalCount={filteredTasks.length} />
-
-        {/* ═══ SECTION 6: Prize Card ═══ */}
-        <PrizeCard currentPoints={completedCount * 10} />
-
         {/* ═══ SECTION 7: Mini Leaderboard — always visible when 2+ members ═══ */}
         {householdMembers.length > 1 && rankings.length > 0 && (
           <div className="card-elevated overflow-hidden">
@@ -721,50 +543,13 @@ export default function DashboardPage() {
 
         {/* ═══ SECTION 8: Activity Feed (inside gamification accordion) ═══ */}
 
-        {/* ═══ SECTION 9: More Details (collapsible) ═══ */}
-        <div>
-          <button
-            type="button"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full flex items-center justify-between p-3 card-elevated text-sm font-medium text-foreground hover:bg-surface-hover transition-colors duration-150 active:scale-[0.99]"
-          >
-            <span>🎖️ {t("dashboard.achievementsSection")}</span>
-            <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
-          </button>
-          {showAdvanced && (
-            <div className="space-y-4 mt-2">
-              <GoldenRuleSection percentage={percentage} target={target} loading={tasksLoading} />
-              <StreakDisplay count={streakCount} bestCount={bestStreak} />
-              <WeeklyChallenges progress={challengeProgress} weekNum={weekNum} />
-              <div>
-                <h3 className="font-semibold text-foreground px-1 mb-2 text-sm">
-                  {t("activity.sectionTitle")}
-                </h3>
-                <ActivityFeed />
-              </div>
-            </div>
-          )}
-        </div>
+        <GoldenRuleSection percentage={percentage} target={target} loading={tasksLoading} />
+        <StreakDisplay count={streakCount} bestCount={bestStreak} />
+        <WeeklyChallenges progress={challengeProgress} weekNum={weekNum} />
+        <div><h3 className="mb-2 px-1 text-sm font-semibold">{t("activity.sectionTitle")}</h3><ActivityFeed /></div>
+        </>}
 
-        {/* ═══ SECTION 9: Quick Links (2x2 grid) ═══ */}
-        <div className="grid grid-cols-2 gap-2">
-          <Link href="/blog" className="card-elevated p-3 flex flex-col items-center gap-1.5 text-center hover:scale-[0.98] active:scale-[0.96] transition-transform">
-            <span className="text-2xl">{"✍️"}</span>
-            <span className="text-xs font-semibold text-foreground">{t("common.login") === "Login" ? "Blog" : "טיפים"}</span>
-          </Link>
-          <Link href="/tasks/print" className="card-elevated p-3 flex flex-col items-center gap-1.5 text-center hover:scale-[0.98] active:scale-[0.96] transition-transform">
-            <span className="text-2xl">{"🖨️"}</span>
-            <span className="text-xs font-semibold text-foreground">{t("print.button") || "הדפסה"}</span>
-          </Link>
-          <a href="/" className="card-elevated p-3 flex flex-col items-center gap-1.5 text-center hover:scale-[0.98] active:scale-[0.96] transition-transform bg-gradient-to-br from-primary/5 to-purple-500/5 border border-primary/20">
-            <span className="text-2xl">{"🌐"}</span>
-            <span className="text-xs font-semibold text-primary">{t("common.login") === "Login" ? "Our Site" : "דף הנחיתה"}</span>
-          </a>
-          <button onClick={() => setEmergencyMode((prev) => !prev)} className={`card-elevated p-3 flex flex-col items-center gap-1.5 text-center hover:scale-[0.98] active:scale-[0.96] transition-transform ${emergencyMode ? "ring-2 ring-red-500" : ""}`}>
-            <span className="text-2xl">{"⚡"}</span>
-            <span className="text-xs font-semibold text-foreground">{emergencyMode ? "🔴 חירום" : "חירום"}</span>
-          </button>
-        </div>
+        </div></details>
       </div>
 
       <CelebrationOverlay
@@ -805,12 +590,6 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Conversational onboarding for new users */}
-      <ConversationalOnboarding
-        open={showTaskWizard}
-        onComplete={handleOnboardingComplete}
-        onSkip={handleOnboardingSkip}
-      />
     </div>
   );
 }

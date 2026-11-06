@@ -24,7 +24,7 @@ export function LanguageToggle() {
       aria-label={isHebrew ? "Switch to English" : "עבור לעברית"}
       className={[
         "",
-        "h-7 min-w-[28px] px-2",
+        "min-h-11 min-w-11 px-2",
         "rounded-full",
         "bg-background/70 backdrop-blur-sm",
         "border border-border/60",
