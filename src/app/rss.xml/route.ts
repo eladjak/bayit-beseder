@@ -1,3 +1,4 @@
+export const revalidate = 60;
 import { getBlogPosts, uniquePosts } from '@/lib/sanity/client';
 import { xmlEscape as x } from '@/lib/blog-xml';
 export async function GET() {

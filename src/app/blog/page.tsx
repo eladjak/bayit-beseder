@@ -1,3 +1,4 @@
+export const revalidate = 60;
 import type { Metadata } from "next";
 import { getBlogPosts, type SanityPost } from "@/lib/sanity/client";
 import { BlogContent } from "./blog-content";

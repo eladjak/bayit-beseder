@@ -1,3 +1,4 @@
+export const revalidate = 60;
 import sitemap from "../sitemap";
 import { xmlEscape as x } from "@/lib/blog-xml";
 export async function GET() {

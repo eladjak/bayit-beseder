@@ -1,3 +1,4 @@
+export const revalidate = 60;
 import type { MetadataRoute } from "next";
 import { getBlogPosts, uniquePosts } from "@/lib/sanity/client";
 
