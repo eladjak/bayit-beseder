@@ -11,10 +11,11 @@
  */
 
 import { createClient } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 // NOTE: surprise_box_opens table added in migration 012 — Database type
 // regen pending. Cast to bypass stale types until regen runs post-deploy.
-type AnySupabase = ReturnType<typeof createClient> & { from: (t: string) => any; rpc: (n: string, a?: any) => any };
+type AnySupabase = SupabaseClient;
 
 export type RewardTier = "small" | "medium" | "large";
 export type RewardType =
@@ -128,7 +129,7 @@ export type OpenBoxResult =
   | { ok: false; error: "NOT_AUTHED" | "NO_HOUSEHOLD" | "DB_ERROR"; details?: string };
 
 export async function openTodayBox(): Promise<OpenBoxResult> {
-  const supabase = createClient() as AnySupabase;
+  const supabase = createClient() as unknown as AnySupabase;
   const { data: userData, error: userErr } = await supabase.auth.getUser();
   if (userErr || !userData.user) return { ok: false, error: "NOT_AUTHED" };
 
@@ -182,7 +183,7 @@ export async function openTodayBox(): Promise<OpenBoxResult> {
 }
 
 export async function isBoxAvailableToday(): Promise<boolean> {
-  const supabase = createClient() as AnySupabase;
+  const supabase = createClient() as unknown as AnySupabase;
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) return false;
   const today = todayInIsrael();

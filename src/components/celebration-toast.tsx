@@ -30,7 +30,7 @@ export function CelebrationToast({ items }: Props) {
 
   useEffect(() => {
     if (items.length === 0) return;
-    setVisible((prev) => [...prev, ...items]);
+    const initialTimer = window.setTimeout(() => setVisible((prev) => [...prev, ...items]), 0);
     playUnlockChime();
     // Auto-dismiss each after 3.5s (staggered by 200ms per item)
     items.forEach((item, idx) => {
@@ -38,6 +38,7 @@ export function CelebrationToast({ items }: Props) {
         setVisible((cur) => cur.filter((i) => i.id !== item.id));
       }, 3500 + idx * 200);
     });
+    return () => window.clearTimeout(initialTimer);
   }, [items]);
 
   if (visible.length === 0) return null;

@@ -36,9 +36,9 @@ export function WeeklyWheel() {
   const [availableNow, setAvailableNow] = useState(false);
 
   useEffect(() => {
-    setAvailableNow(isWheelAvailableTime());
+    const initial = setTimeout(() => setAvailableNow(isWheelAvailableTime()), 0);
     const id = setInterval(() => setAvailableNow(isWheelAvailableTime()), 60_000);
-    return () => clearInterval(id);
+    return () => { clearTimeout(initial); clearInterval(id); };
   }, []);
 
   // Segment angles for the wheel display
@@ -100,9 +100,9 @@ export function WeeklyWheel() {
             handleSpin();
           }}
           aria-label="פתח את גלגל המזל השבועי"
-          className="fixed bottom-72 end-4 z-40 size-14 rounded-full bg-gradient-to-br alopik-brand-gradient alopik-shimmer text-white shadow-xl flex items-center justify-center hover:brightness-110 active:scale-95 transition-transform duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-primary"
         >
-          <span aria-hidden="true" className="text-2xl">🎡</span>
+          <span aria-hidden="true">🎡</span> גלגל המזל
         </button>
       )}
 
@@ -142,7 +142,7 @@ export function WeeklyWheel() {
                     transition: "transform 1.8s cubic-bezier(0.16, 1, 0.3, 1)",
                     transform:
                       state.kind === "spinning"
-                        ? `rotate(${1080 + Math.random() * 360}deg)`
+                        ? `rotate(${1260}deg)`
                         : state.kind === "result" || state.kind === "redeemed"
                           ? `rotate(${360 - segmentAngles.find((sa) => sa.segment.id === ("segment" in state ? state.segment.id : ""))!.midDeg}deg)`
                           : "rotate(0deg)",

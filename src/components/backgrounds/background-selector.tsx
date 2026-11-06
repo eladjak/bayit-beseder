@@ -28,8 +28,11 @@ export function BackgroundSelector({ currentStreak }: Props) {
   const [collected, setCollected] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    setActiveId(getActiveBackground().id);
-    setCollected(new Set(getBackgroundCollection()));
+    const timer = window.setTimeout(() => {
+      setActiveId(getActiveBackground().id);
+      setCollected(new Set(getBackgroundCollection()));
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const handleSelect = (bg: Background) => {

@@ -70,10 +70,13 @@ export function UxPreferencesPanel() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const loaded = loadPreferences();
-    setPrefs(loaded);
-    applyFontToDom(loaded.fontFamily);
-    setMounted(true);
+    const timer = window.setTimeout(() => {
+      const loaded = loadPreferences();
+      setPrefs(loaded);
+      applyFontToDom(loaded.fontFamily);
+      setMounted(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const update = (patch: Partial<UxPreferences>) => {

@@ -9,12 +9,13 @@
  */
 
 import { createClient } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 // NOTE: Tables (love_tokens) + RPC (count_love_tokens_today) added in
 // migration 012 but Database type regen not yet run. Cast supabase client
 // to bypass stale types until `bunx supabase gen types` is run post-deploy.
 // Spec: docs/ALOPIK-INTEGRATION-SPEC.md
-type AnySupabase = ReturnType<typeof createClient> & { from: (t: string) => any; rpc: (n: string, a?: any) => any };
+type AnySupabase = SupabaseClient;
 
 export const DAILY_SEND_LIMIT = 6;
 export const PRESET_VALUES = [1, 3, 5, 10] as const;
@@ -57,7 +58,7 @@ export async function sendLoveToken(input: LoveTokenInput): Promise<SendResult> 
   const validation = validateInput(input);
   if (!validation.ok) return { ok: false, error: "INVALID_INPUT", details: validation.reason };
 
-  const supabase = createClient() as AnySupabase;
+  const supabase = createClient() as unknown as AnySupabase;
   const { data: userData, error: userErr } = await supabase.auth.getUser();
   if (userErr || !userData.user) return { ok: false, error: "NOT_HOUSEHOLD_MEMBER", details: "no auth" };
 
@@ -117,7 +118,7 @@ export async function sendLoveToken(input: LoveTokenInput): Promise<SendResult> 
 }
 
 export async function getRemainingSendsToday(recipientId: string): Promise<number> {
-  const supabase = createClient() as AnySupabase;
+  const supabase = createClient() as unknown as AnySupabase;
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) return 0;
   const { data, error } = await supabase.rpc("count_love_tokens_today", {

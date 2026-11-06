@@ -124,9 +124,9 @@ export function QuickLoveButton() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={copy("quickLoveAria")}
-        className="alopik-brand-gradient fixed bottom-24 end-4 z-40 size-14 rounded-full text-white shadow-lg flex items-center justify-center hover:brightness-110 active:scale-95 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-300"
+        className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-primary"
       >
-        <Heart className="size-6" fill="currentColor" aria-hidden="true" />
+        <Heart className="size-5" aria-hidden="true" /> מילה טובה
       </button>
 
       {/* Sheet */}

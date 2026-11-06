@@ -39,7 +39,7 @@ export function OfflineIndicator({ pendingCount: externalCount }: OfflineIndicat
 
   useEffect(() => {
     // Read initial queue count
-    setLocalQueueCount(getQueueCount());
+    const initialTimer = window.setTimeout(() => setLocalQueueCount(getQueueCount()), 0);
 
     const handleOnline = () => {
       setIsOnline(true);
@@ -63,6 +63,7 @@ export function OfflineIndicator({ pendingCount: externalCount }: OfflineIndicat
     window.addEventListener("offline", handleOffline);
 
     return () => {
+      window.clearTimeout(initialTimer);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
       if (pollInterval) clearInterval(pollInterval);

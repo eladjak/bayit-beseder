@@ -96,9 +96,12 @@ export function useThemeColor() {
   const [currentColor, setCurrentColorState] = useState<ThemeColorKey>(DEFAULT_COLOR);
 
   useEffect(() => {
-    const stored = getStoredThemeColor();
-    setCurrentColorState(stored);
-    applyThemeColor(stored);
+    const timer = window.setTimeout(() => {
+      const stored = getStoredThemeColor();
+      setCurrentColorState(stored);
+      applyThemeColor(stored);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const setColor = useCallback((colorKey: ThemeColorKey) => {

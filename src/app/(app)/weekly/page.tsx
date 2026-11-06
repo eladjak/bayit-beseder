@@ -69,10 +69,7 @@ export default function WeeklyPage() {
   );
   const [showSuggestions, setShowSuggestions] = useState(true);
 
-  const mockTasksRef = useRef<ReturnType<typeof generateMockWeeklyTasks> | null>(null);
-  if (mockTasksRef.current === null) {
-    mockTasksRef.current = generateMockWeeklyTasks();
-  }
+  const [mockTasks] = useState(generateMockWeeklyTasks);
 
   const startOfWeek = useMemo(() => {
     // Sunday of the current week in Israel, as a local-midnight Date.
@@ -134,7 +131,7 @@ export default function WeeklyPage() {
     wizard.generate(weekTasksForWizard, memberIds, startOfWeek, zoneConfig.zoneMode);
     setShowWizard(true);
     haptic("tap");
-  }, [profile, partner, householdMembers, tasks, startOfWeek, endOfWeek, wizard, zoneConfig.zoneMappings, zoneConfig.zoneMode, canUse]);
+  }, [profile, partner, householdMembers, tasks, startOfWeek, endOfWeek, wizard, zoneConfig.zoneMappings, zoneConfig.zoneMode, canUse, t]);
 
   const handleRegenerateWithZones = useCallback(() => {
     if (!profile) return;
@@ -180,7 +177,7 @@ export default function WeeklyPage() {
     if (created === 0 && errors.length === 0) {
       toast.info(t("weekly.weekFull"));
     }
-  }, [wizard, refetch]);
+  }, [wizard, refetch, t]);
 
   const seedAttempted = useRef(false);
   useEffect(() => {
@@ -198,14 +195,14 @@ export default function WeeklyPage() {
 
   const weekTasks = useMemo(() => {
     if (loading) return [];
-    if (tasks.length === 0) return mockTasksRef.current ?? [];
+    if (tasks.length === 0) return mockTasks;
     const startStr = ilDay(startOfWeek);
     const endStr = ilDay(endOfWeek);
     return tasks.filter((t) => {
       if (!t.due_date) return false;
       return t.due_date >= startStr && t.due_date <= endStr;
     });
-  }, [tasks, loading, startOfWeek, endOfWeek]);
+  }, [tasks, loading, startOfWeek, endOfWeek, mockTasks]);
 
   const dailyLoads = useMemo(
     () =>
@@ -268,7 +265,7 @@ export default function WeeklyPage() {
       if (ok) toast.success(t("weekly.moved"));
       else toast.error(t("weekly.moveFailed"));
     },
-    [updateTask]
+    [updateTask, t]
   );
 
   const handleClaimTask = useCallback(
@@ -305,7 +302,7 @@ export default function WeeklyPage() {
       if (ok) toast.success(t("weekly.shifted"));
       else toast.error(t("weekly.shiftFailed"));
     },
-    [updateTask]
+    [updateTask, t]
   );
 
   const handleApplySuggestion = useCallback(
@@ -333,7 +330,7 @@ export default function WeeklyPage() {
       if (ok) toast.success(`"${taskToMove.title}" ${t("weekly.taskMovedSuccess")}`);
       else toast.error(t("weekly.moveError"));
     },
-    [weekTasks, updateTask, isRealData]
+    [weekTasks, updateTask, isRealData, t]
   );
 
   const [activeDragTask, setActiveDragTask] = useState<{
@@ -393,7 +390,7 @@ export default function WeeklyPage() {
       toast.error(t("weekly.addFailed"));
       return false;
     },
-    [profile?.id, createTask]
+    [profile?.id, createTask, t]
   );
 
   const handleToggleComplete = useCallback(
@@ -414,7 +411,7 @@ export default function WeeklyPage() {
         toast.error(t("weekly.updateFailed"));
       }
     },
-    [updateTask]
+    [updateTask, t]
   );
 
   const weekRange = getWeekRange(startOfWeek);

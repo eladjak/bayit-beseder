@@ -101,13 +101,14 @@ export default function TasksPage() {
   const [newTaskCategory, setNewTaskCategory] = useState("general");
   const [editingTask, setEditingTask] = useState<DbTaskView | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
 
   // Supabase hooks
   const { profile } = useProfile();
   const {
     tasks: dbTasks,
     loading: tasksLoading,
+    error: tasksError,
     createTask,
     deleteTask,
     updateTask,
@@ -186,7 +187,7 @@ export default function TasksPage() {
   // ---- Auto-seed tasks for authenticated users on first visit ----
   const seedAttempted = useRef(false);
   useEffect(() => {
-    if (seedAttempted.current || tasksLoading || dbTasks.length > 0 || !profile) return;
+    if (seedAttempted.current || tasksLoading || tasksError || dbTasks.length > 0 || !profile?.household_id) return;
     seedAttempted.current = true;
     fetch("/api/seed", { method: "POST" })
       .then((res) => res.json())
@@ -198,7 +199,7 @@ export default function TasksPage() {
       .catch(() => {
         // Seed failed - will use mock data fallback
       });
-  }, [tasksLoading, dbTasks.length, profile, refetchTasks]);
+  }, [tasksLoading, tasksError, dbTasks.length, profile, refetchTasks]);
 
   // Determine if we should use DB data or mock.
   // "Sticky" — once we see real DB tasks, don't flip back to mock during refetches.
@@ -398,6 +399,9 @@ export default function TasksPage() {
             .eq("user_id", profile.id)
             .gte("completed_at", startOfDay.toISOString());
 
+          if (!delError) {
+            await refetchCompletions();
+          }
           setOptimisticUncompleted((prev) => {
             const next = new Set(prev);
             next.delete(taskId);
@@ -405,7 +409,6 @@ export default function TasksPage() {
           });
 
           if (!delError) {
-            await refetchCompletions();
             toast.info(t("tasks.removedMark"));
           } else {
             toast.error(t("tasks.operationFailed"));
@@ -441,11 +444,20 @@ export default function TasksPage() {
 
         const photoUrl = pendingPhotoUrl[taskId] ?? undefined;
         const result = await markComplete({ taskId, userId: profile.id, recurring: isRecurring(task.recurring), photoUrl });
-        setOptimisticCompleted((prev) => {
-          const next = new Set(prev);
-          next.delete(taskId);
-          return next;
-        });
+        // Non-recurring completion updates the task in the database through a
+        // separate hook. Refresh before dropping the optimistic state so a
+        // delayed or absent realtime event cannot put the row back in pending.
+        // Queued offline rows have no server update to fetch yet.
+        if (result && !isRecurring(task.recurring) && !result.id.startsWith("offline-")) {
+          await refetchTasks();
+        }
+        if (!result?.id.startsWith("offline-")) {
+          setOptimisticCompleted((prev) => {
+            const next = new Set(prev);
+            next.delete(taskId);
+            return next;
+          });
+        }
         // Clear pending photo
         if (photoUrl) {
           setPendingPhotoUrl((prev) => {
@@ -461,7 +473,7 @@ export default function TasksPage() {
         }
       }
     },
-    [dbTasks, profile, markComplete, updateTask, optimisticCompleted, optimisticUncompleted, isCompletedToday, refetchCompletions, pendingPhotoUrl, t]
+    [dbTasks, profile, markComplete, updateTask, optimisticCompleted, optimisticUncompleted, isCompletedToday, refetchCompletions, refetchTasks, pendingPhotoUrl, t]
   );
 
   // Add new task to DB
@@ -697,13 +709,13 @@ export default function TasksPage() {
 
   return (
     <div className="space-y-4" dir="rtl">
-      {/* Header with gradient */}
-      <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 overflow-hidden">
+      {/* Calm header and primary action */}
+      <div className="px-4 pt-6 pb-3">
         <div className="flex items-center justify-between relative z-10">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight">{t("tasks.title")} 📋</h1>
-            {hasDbTasks && (
-              <p className="text-xs text-white/60 mt-0.5">
+            <h1 className="text-[28px] leading-tight font-bold text-foreground tracking-tight">{t("tasks.title")}</h1>
+            {hasDbTasks && !tasksLoading && !tasksError && (
+              <p className="text-sm text-muted mt-1">
                 {filteredDbTasks.filter(ft => ft.isCompleted).length}/{filteredDbTasks.length} {t("tasks.weDid")}
               </p>
             )}
@@ -713,64 +725,74 @@ export default function TasksPage() {
               <button
                 onClick={() => {
                   dismissTasksTip();
-                  // Authenticated users (even with zero tasks yet) can always add
-                  // their first task. The demo "login to add" toast is only for
-                  // genuinely logged-out visitors browsing the mock list.
-                  if (hasDbTasks || profile) {
+                  // A household can add its first task; demo visitors are prompted to sign in.
+                  if (hasDbTasks) {
                     setShowAddForm((prev) => !prev);
-                  } else {
+                  } else if (!profile) {
                     toast(t("tasks.loginToAdd"));
+                  } else {
+                    toast(locale === "he" ? "יש להגדיר בית לפני הוספת משימות" : "Set up a household before adding tasks");
                   }
                 }}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl gradient-primary text-white text-sm font-semibold shadow-lg shadow-primary/30 active:scale-95 transition-transform border border-white/20"
+                className="flex min-h-11 items-center gap-1.5 px-4 rounded-xl bg-primary text-white text-sm font-semibold hover:bg-primary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 aria-label={t("tasks.addTask")}
               >
                 <Plus className="w-4 h-4" />
                 <span>{t("tasks.addTaskShort")}</span>
               </button>
               <FeatureTooltip
-                visible={showTasksTip}
+                visible={showTasksTip && !tasksLoading && !tasksError}
                 text="לחצו כאן כדי להוסיף משימה חדשה"
                 onDismiss={dismissTasksTip}
                 position="below"
+                anchor="end"
               />
             </div>
-            {hasDbTasks && (
-              <button
-                onClick={() => setShowTemplatePicker(true)}
-                className="p-2 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white/70 transition-colors border border-white/10"
-                aria-label={t("templates.title")}
-                title={t("templates.title")}
-              >
-                <LayoutTemplate className="w-4 h-4" />
-              </button>
-            )}
-            <Link
-              href="/tasks/print"
-              className="p-2 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white/70 transition-colors border border-white/10"
-              aria-label="Print tasks"
-            >
-              <Printer className="w-4 h-4" />
-            </Link>
-            <button
-              onClick={() => setShowFilters((prev) => !prev)}
-              className="relative p-2 rounded-xl bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white/70 transition-colors border border-white/10"
-              aria-label={t("tasks.filterByCategory")}
-              aria-expanded={showFilters}
-            >
-              <Filter className="w-4 h-4" />
-              {activeCategory !== "all" && (
-                <span className="absolute top-1.5 start-1.5 w-2 h-2 rounded-full bg-amber-400" />
-              )}
-            </button>
+
           </div>
         </div>
       </div>
 
       <div className="px-4 space-y-4">
+      <details className="rounded-2xl border border-border bg-surface px-4">
+        <summary className="flex min-h-12 cursor-pointer items-center font-semibold text-foreground focus-visible:outline-2 focus-visible:outline-primary">{t("tasks.filterByCategory")} / {t("templates.title")}</summary>
+        <div className="flex flex-wrap items-center gap-2 pb-4">
+            {hasDbTasks && (
+              <button
+                onClick={() => setShowTemplatePicker(true)}
+                className="min-h-11 flex items-center justify-center gap-2 rounded-xl bg-surface px-3 text-sm hover:bg-primary/10 text-foreground border border-border"
+                aria-label={t("templates.title")}
+                title={t("templates.title")}
+              >
+                <LayoutTemplate className="w-4 h-4" />
+                {t("templates.title")}
+              </button>
+            )}
+            <Link
+              href="/tasks/print"
+              className="min-h-11 flex items-center justify-center gap-2 rounded-xl bg-surface px-3 text-sm hover:bg-primary/10 text-foreground border border-border"
+              aria-label={locale === "he" ? "הדפסת משימות" : "Print tasks"}
+            >
+              <Printer className="w-4 h-4" />
+              {locale === "he" ? "הדפסה" : "Print"}
+            </Link>
+            <button
+              onClick={() => setShowFilters((prev) => !prev)}
+              className="relative min-h-11 flex items-center justify-center gap-2 rounded-xl bg-surface px-3 text-sm hover:bg-primary/10 text-foreground border border-border"
+              aria-label={t("tasks.filterByCategory")}
+              aria-expanded={showFilters}
+            >
+              <Filter className="w-4 h-4" />
+              {t("tasks.filterByCategory")}
+              {activeCategory !== "all" && (
+                <span className="absolute top-1.5 start-1.5 w-2 h-2 rounded-full bg-amber-400" />
+              )}
+            </button>
+        </div>
+      </details>
 
       {/* Mock mode: login prompt banner */}
-      {!hasDbTasks && !tasksLoading && (
+      {!hasDbTasks && !profile && !tasksLoading && (
         <div className="rounded-xl overflow-hidden border-2 border-amber-300/70 dark:border-amber-700/50 shadow-md shadow-amber-100/50 dark:shadow-amber-950/20">
           <div className="bg-amber-50 dark:bg-amber-950/30 p-4 text-center">
             <p className="text-base font-bold text-amber-900 dark:text-amber-100">👀 {t("common.peekMode")}</p>
@@ -787,6 +809,13 @@ export default function TasksPage() {
         </div>
       )}
 
+      {profile && !profile.household_id && !hasDbTasks && !tasksLoading && (
+        <div className="rounded-2xl border border-border bg-surface p-5 text-foreground">
+          <p className="font-semibold">{t("tasks.title")}</p>
+          <p className="mt-2 text-sm text-muted">{locale === "he" ? "כדי להוסיף משימות, צריך קודם להגדיר את הבית." : "Set up your household before adding tasks."}</p>
+          <Link href="/dashboard" className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">{locale === "he" ? "להגדרת הבית" : "Set up household"} ←</Link>
+        </div>
+      )}
       {/* Add Task Form (DB mode only) */}
       {showAddForm && hasDbTasks && (
         <motion.div
@@ -930,8 +959,15 @@ export default function TasksPage() {
           <TaskListSkeleton count={6} />
         )}
 
+        {tasksError && (
+          <div role="alert" className="rounded-2xl border border-border bg-surface p-5">
+            <p className="font-semibold text-foreground">{locale === "he" ? "לא הצלחנו לטעון את המשימות" : "Could not load tasks"}</p>
+            <p className="mt-1 text-sm text-muted">{locale === "he" ? "כדאי לבדוק את החיבור ולנסות שוב." : "Check your connection and try again."}</p>
+            <button type="button" onClick={() => void refetchTasks()} className="mt-3 min-h-11 rounded-xl bg-primary px-4 font-semibold text-white">{locale === "he" ? "ניסיון נוסף" : "Try again"}</button>
+          </div>
+        )}
         {/* Empty state for DB tasks */}
-        {hasDbTasks && filteredDbTasks.length === 0 && (
+        {!tasksLoading && !tasksError && hasDbTasks && filteredDbTasks.length === 0 && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -968,7 +1004,7 @@ export default function TasksPage() {
         )}
 
         {/* ---- Pending Tasks ---- */}
-        {tasksLoading && !sawDbTasks.current ? null : hasDbTasks ? (
+        {tasksLoading && !sawDbTasks.current || tasksError ? null : hasDbTasks ? (
           <DndContext
             sensors={reorderSensors}
             collisionDetection={closestCenter}
@@ -1003,7 +1039,7 @@ export default function TasksPage() {
                       }}
                     >
                       <div
-                        className={`card-elevated p-3.5 flex items-start gap-3 relative overflow-hidden transition-opacity duration-150 ${
+                        className={`card-elevated p-4 flex flex-wrap items-start gap-2 relative overflow-hidden transition-opacity duration-150 ${
                           task.isOverdue ? "ring-1 ring-red-500/20" : ""
                         }`}
                         style={{
@@ -1021,7 +1057,7 @@ export default function TasksPage() {
                           aria-pressed={false}
                           whileTap={{ scale: 1.3 }}
                           transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
-                          className={`relative mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                          className={`relative mt-0.5 min-w-11 min-h-11 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                             celebratingId === task.id
                               ? "bg-success border-success"
                               : task.isOverdue
@@ -1031,8 +1067,8 @@ export default function TasksPage() {
                         >
                           <TaskCompleteMark active={celebratingId === task.id} />
                         </motion.button>
-                        <div className="flex-1 min-w-0">
-                          <p className={`text-sm font-medium leading-snug ${
+                        <div className="flex-1 min-w-[120px]">
+                          <p className={`text-base font-semibold leading-snug ${
                             task.isOverdue ? "text-red-700 dark:text-red-400" : "text-foreground"
                           }`}>
                             {task.title}
@@ -1065,7 +1101,7 @@ export default function TasksPage() {
                               onClick={() => claimTask(task.id, task.title)}
                               whileTap={{ scale: 0.88 }}
                               transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
-                              className="text-[11px] px-2 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary font-bold hover:bg-primary hover:text-white transition-colors"
+                              className="min-h-11 text-xs px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary font-bold hover:bg-primary hover:text-white transition-colors"
                               aria-label={t("tasks.claim.button")}
                             >
                               {t("tasks.claim.button")}
@@ -1077,20 +1113,33 @@ export default function TasksPage() {
                               onClick={() => unclaimTask(task.id)}
                               whileTap={{ scale: 0.88 }}
                               transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
-                              className="text-[11px] px-2 py-1 rounded-full bg-primary/15 border border-primary/40 text-primary font-medium hover:bg-red-50 hover:border-red-300 hover:text-red-500 dark:hover:bg-red-950/30 transition-colors"
+                              className="min-h-11 text-xs px-3 py-1 rounded-full bg-primary/15 border border-primary/40 text-primary font-medium hover:bg-red-50 hover:border-red-300 hover:text-red-500 dark:hover:bg-red-950/30 transition-colors"
                               aria-label={t("tasks.claim.unclaim")}
                             >
                               ✓ {t("tasks.claim.unclaim")}
                             </motion.button>
                           )}
-                          <button
-                            onClick={() => handleDeleteTask(task.id)}
-                            className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-                            aria-label={t("tasks.deleteTask")}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+
                         </div>
+                    <TaskRowOptions
+                      task={task}
+                      photoOpen={photoTaskId === task.id}
+                      photoAttached={!!pendingPhotoUrl[task.id]}
+                      onEdit={() => setEditingTask(task)}
+                      onDelete={() => handleDeleteTask(task.id)}
+                      onTogglePhoto={() => setPhotoTaskId((prev) => prev === task.id ? null : task.id)}
+                      onPhotoSelected={async (file) => {
+                        const url = await uploadPhoto(file, task.id);
+                        if (url) {
+                          setPendingPhotoUrl((prev) => ({ ...prev, [task.id]: url }));
+                          toast.success(t("tasks.photo.ready"));
+                        } else {
+                          toast.error(t("tasks.photo.uploadFailed"));
+                        }
+                        setPhotoTaskId(null);
+                      }}
+                      onCancelPhoto={() => setPhotoTaskId(null)}
+                    />
                       </div>
                     </div>
                   );
@@ -1108,7 +1157,7 @@ export default function TasksPage() {
                   <SortableTaskRow
                     key={task.id}
                     id={task.id}
-                    className={`card-elevated p-3.5 flex items-start gap-3 relative overflow-hidden hover:shadow-md transition-shadow duration-150 ${
+                    className={`card-elevated p-4 flex flex-wrap items-start gap-2 relative overflow-hidden hover:shadow-md transition-shadow duration-150 ${
                       task.isOverdue ? "ring-1 ring-red-500/20" : ""
                     } ${skipped ? "opacity-50" : ""}`}
                     style={{
@@ -1128,7 +1177,7 @@ export default function TasksPage() {
                       {...listeners}
                       type="button"
                       disabled={disabled}
-                      className="mt-0.5 p-1 rounded-lg touch-none cursor-grab active:cursor-grabbing text-muted/40 hover:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-30"
+                      className="mt-0.5 min-w-11 min-h-11 flex items-center justify-center rounded-lg touch-none cursor-grab active:cursor-grabbing text-muted/40 hover:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary disabled:opacity-30"
                       aria-label={`${t("tasks.dragHandle")}: ${task.title}`}
                       title={t("tasks.dragHandle")}
                     >
@@ -1140,7 +1189,7 @@ export default function TasksPage() {
                       aria-pressed={false}
                       whileTap={{ scale: 1.3 }}
                       transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
-                      className={`relative mt-0.5 w-6 h-6 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                      className={`relative mt-0.5 min-w-11 min-h-11 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                         celebratingId === task.id
                           ? "bg-success border-success"
                           : task.isOverdue
@@ -1150,8 +1199,8 @@ export default function TasksPage() {
                     >
                       <TaskCompleteMark active={celebratingId === task.id} />
                     </motion.button>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium leading-snug ${
+                    <div className="flex-1 min-w-[120px]">
+                      <p className={`text-base font-semibold leading-snug ${
                         task.isOverdue ? "text-red-700 dark:text-red-400" : "text-foreground"
                       }`}>
                         {task.title}
@@ -1192,42 +1241,7 @@ export default function TasksPage() {
                           </span>
                         )}
                       </div>
-                      {/* Photo capture UI */}
-                      <AnimatePresence>
-                        {photoTaskId === task.id && (
-                          <motion.div
-                            key="photo-capture"
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="mt-2 overflow-hidden"
-                          >
-                            <TaskPhotoCapture
-                              onPhotoSelected={async (file) => {
-                                const url = await uploadPhoto(file, task.id);
-                                if (url) {
-                                  setPendingPhotoUrl((prev) => ({ ...prev, [task.id]: url }));
-                                  toast.success(t("tasks.photo.ready"));
-                                } else {
-                                  toast.error(t("tasks.photo.uploadFailed"));
-                                }
-                                setPhotoTaskId(null);
-                              }}
-                              onCancel={() => setPhotoTaskId(null)}
-                            />
-                          </motion.div>
-                        )}
-                        {pendingPhotoUrl[task.id] && photoTaskId !== task.id && (
-                          <motion.div
-                            key="photo-badge"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            className="mt-1.5 text-[10px] text-primary font-medium flex items-center gap-1"
-                          >
-                            📷 {t("tasks.photo.attached")}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       {/* Claim button (unassigned tasks only) */}
@@ -1236,7 +1250,7 @@ export default function TasksPage() {
                           onClick={() => claimTask(task.id, task.title)}
                           whileTap={{ scale: 0.88 }}
                           transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
-                          className="text-[11px] px-2 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary font-bold hover:bg-primary hover:text-white transition-colors"
+                          className="min-h-11 text-xs px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary font-bold hover:bg-primary hover:text-white transition-colors"
                           aria-label={t("tasks.claim.button")}
                           title={t("tasks.claim.button")}
                         >
@@ -1249,7 +1263,7 @@ export default function TasksPage() {
                           onClick={() => unclaimTask(task.id)}
                           whileTap={{ scale: 0.88 }}
                           transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
-                          className="text-[11px] px-2 py-1 rounded-full bg-primary/15 border border-primary/40 text-primary font-medium hover:bg-red-50 hover:border-red-300 hover:text-red-500 dark:hover:bg-red-950/30 transition-colors"
+                          className="min-h-11 text-xs px-3 py-1 rounded-full bg-primary/15 border border-primary/40 text-primary font-medium hover:bg-red-50 hover:border-red-300 hover:text-red-500 dark:hover:bg-red-950/30 transition-colors"
                           aria-label={t("tasks.claim.unclaim")}
                           title={t("tasks.claim.unclaim")}
                         >
@@ -1263,7 +1277,7 @@ export default function TasksPage() {
                             toggleSkip(task.id);
                             haptic("tap");
                           }}
-                          className={`p-1.5 rounded-lg transition-colors text-[10px] font-medium ${
+                          className={`min-w-11 min-h-11 inline-flex items-center justify-center rounded-lg transition-colors text-[10px] font-medium ${
                             skipped
                               ? "text-muted bg-muted/10 hover:bg-muted/20"
                               : "text-muted/50 hover:text-muted hover:bg-muted/10"
@@ -1274,35 +1288,27 @@ export default function TasksPage() {
                           ⏭
                         </button>
                       )}
-                      <button
-                        onClick={() => setEditingTask(task)}
-                        className="p-1.5 rounded-lg text-muted/50 hover:text-primary hover:bg-primary/5 transition-colors"
-                        aria-label={`${t("tasks.editTask")}: ${task.title}`}
-                        title={t("tasks.editTask")}
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      {/* Camera button */}
-                      <button
-                        onClick={() => setPhotoTaskId((prev) => prev === task.id ? null : task.id)}
-                        className={`p-1.5 rounded-lg transition-colors ${
-                          pendingPhotoUrl[task.id]
-                            ? "text-primary bg-primary/10"
-                            : "text-muted/50 hover:text-primary hover:bg-primary/5"
-                        }`}
-                        aria-label={t("tasks.photo.addPhoto")}
-                        aria-pressed={photoTaskId === task.id}
-                      >
-                        <Camera className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteTask(task.id)}
-                        className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-muted/50 hover:text-red-500 transition-colors"
-                        aria-label={t("tasks.deleteTask")}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+
                     </div>
+                    <TaskRowOptions
+                      task={task}
+                      photoOpen={photoTaskId === task.id}
+                      photoAttached={!!pendingPhotoUrl[task.id]}
+                      onEdit={() => setEditingTask(task)}
+                      onDelete={() => handleDeleteTask(task.id)}
+                      onTogglePhoto={() => setPhotoTaskId((prev) => prev === task.id ? null : task.id)}
+                      onPhotoSelected={async (file) => {
+                        const url = await uploadPhoto(file, task.id);
+                        if (url) {
+                          setPendingPhotoUrl((prev) => ({ ...prev, [task.id]: url }));
+                          toast.success(t("tasks.photo.ready"));
+                        } else {
+                          toast.error(t("tasks.photo.uploadFailed"));
+                        }
+                        setPhotoTaskId(null);
+                      }}
+                      onCancelPhoto={() => setPhotoTaskId(null)}
+                    />
                       </>
                     )}
                   </SortableTaskRow>
@@ -1312,7 +1318,7 @@ export default function TasksPage() {
           )}
             </SortableContext>
           </DndContext>
-        ) : (
+        ) : !profile ? (
           /* ---- Mock Tasks (fallback) ---- */
           <AnimatePresence mode="popLayout">
             {filteredMockTasks.map((task, i) => {
@@ -1324,7 +1330,7 @@ export default function TasksPage() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   whileTap={{ scale: 0.99 }}
-                  className={`card-elevated p-3 flex items-start gap-3 relative overflow-hidden hover:shadow-md transition-shadow duration-150 ${
+                  className={`card-elevated p-4 flex items-start gap-3 relative overflow-hidden hover:shadow-md transition-shadow duration-150 ${
                     isCompleted ? "opacity-60" : ""
                   }`}
                 >
@@ -1334,7 +1340,7 @@ export default function TasksPage() {
                     aria-pressed={isCompleted}
                     whileTap={{ scale: 1.3 }}
                     transition={{ type: "spring", stiffness: 600, damping: 15, mass: 0.5 }}
-                    className={`mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                    className={`mt-0.5 min-w-11 min-h-11 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
                       isCompleted
                         ? "bg-success border-success"
                         : "border-border hover:border-primary"
@@ -1350,9 +1356,9 @@ export default function TasksPage() {
                       </motion.div>
                     )}
                   </motion.button>
-                  <div className="flex-1 min-w-0">
+                  <div className="flex-1 min-w-[120px]">
                     <p
-                      className={`text-sm font-medium ${
+                      className={`text-base font-semibold ${
                         isCompleted
                           ? "line-through text-muted"
                           : "text-foreground"
@@ -1392,10 +1398,10 @@ export default function TasksPage() {
               );
             })}
           </AnimatePresence>
-        )}
+        ) : null}
 
         {/* ---- Completed Tasks Section ---- */}
-        {hasDbTasks && completedDbTasks.length > 0 && (
+        {!tasksError && hasDbTasks && completedDbTasks.length > 0 && (
           <div className="mt-4">
             <button
               onClick={() => setShowCompleted((prev) => !prev)}
@@ -1467,7 +1473,7 @@ export default function TasksPage() {
                             </div>
                             <button
                               onClick={() => setEditingTask(task)}
-                              className="p-1.5 rounded-lg text-muted/60 hover:text-primary hover:bg-primary/5 transition-colors"
+                              className="min-w-11 min-h-11 inline-flex items-center justify-center rounded-lg text-muted/60 hover:text-primary hover:bg-primary/5 transition-colors"
                               aria-label={`${t("tasks.editTask")}: ${task.title}`}
                               title={t("tasks.editTask")}
                             >
@@ -1521,7 +1527,7 @@ export default function TasksPage() {
                         </div>
                         <button
                           onClick={() => setEditingTask(task)}
-                          className="p-1.5 rounded-lg text-muted/60 hover:text-primary hover:bg-primary/5 transition-colors"
+                          className="min-w-11 min-h-11 inline-flex items-center justify-center rounded-lg text-muted/60 hover:text-primary hover:bg-primary/5 transition-colors"
                           aria-label={`${t("tasks.editTask")}: ${task.title}`}
                           title={t("tasks.editTask")}
                         >
@@ -1542,7 +1548,7 @@ export default function TasksPage() {
             -- they stay right where they are, with their real due_date, so
             it's obvious how long they've actually been waiting. This is
             the "משימות ישנות לבדיקה" visibility Elad asked for. */}
-        {hasDbTasks && needsReviewDbTasks.length > 0 && (
+        {!tasksError && hasDbTasks && needsReviewDbTasks.length > 0 && (
           <div className="mt-4">
             <button
               onClick={() => setShowNeedsReview((prev) => !prev)}
@@ -1624,6 +1630,7 @@ export default function TasksPage() {
       <AnimatePresence>
         {editingTask && (
           <EditTaskModal
+            key={editingTask.id}
             task={editingTask}
             taskCategories={taskCategories}
             categoryMap={categoryMap}
@@ -1686,6 +1693,33 @@ function SortableTaskRow({
   );
 }
 
+function TaskRowOptions({ task, photoOpen, photoAttached, onEdit, onDelete, onTogglePhoto, onPhotoSelected, onCancelPhoto }: {
+  task: DbTaskView;
+  photoOpen: boolean;
+  photoAttached: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+  onTogglePhoto: () => void;
+  onPhotoSelected: (file: File) => Promise<void>;
+  onCancelPhoto: () => void;
+}) {
+  const { t, locale } = useTranslation();
+  return (
+    <details className="w-full border-t border-border/60">
+      <summary className="flex min-h-11 cursor-pointer items-center gap-2 text-sm font-semibold text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary" aria-label={`${locale === "he" ? "אפשרויות" : "Options"}: ${task.title}`}>
+        {locale === "he" ? "אפשרויות" : "Options"}
+      </summary>
+      <div className="flex flex-wrap gap-2 pb-2">
+        <button type="button" onClick={onEdit} aria-label={`${t("tasks.editTask")}: ${task.title}`} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border px-3 text-sm text-foreground hover:bg-background"><Pencil className="h-4 w-4" />{t("tasks.editTask")}</button>
+        <button type="button" onClick={onTogglePhoto} aria-label={`${t("tasks.photo.addPhoto")}: ${task.title}`} aria-pressed={photoOpen} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border px-3 text-sm text-foreground hover:bg-background"><Camera className="h-4 w-4" />{t("tasks.photo.addPhoto")}</button>
+        <button type="button" onClick={onDelete} aria-label={`${t("tasks.deleteTask")}: ${task.title}`} className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-border px-3 text-sm text-foreground hover:bg-background"><Trash2 className="h-4 w-4" />{t("tasks.deleteTask")}</button>
+      </div>
+      {photoOpen && <TaskPhotoCapture onPhotoSelected={onPhotoSelected} onCancel={onCancelPhoto} />}
+      {photoAttached && !photoOpen && <p className="pb-2 text-sm text-primary">{t("tasks.photo.attached")}</p>}
+    </details>
+  );
+}
+
 function resolveTaskCategoryName({
   task,
   taskCategories,
@@ -1725,11 +1759,6 @@ function EditTaskModal({
     resolveTaskCategoryName({ task, taskCategories, categoryMap })
   );
   const focusRef = useFocusTrap<HTMLFormElement>(true, onClose);
-
-  useEffect(() => {
-    setTitle(task.title);
-    setCategoryName(resolveTaskCategoryName({ task, taskCategories, categoryMap }));
-  }, [task, taskCategories, categoryMap]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

@@ -69,11 +69,11 @@ export function StepRoomTasks({
 
   useEffect(() => {
     const storedTemplates = readCustomTemplates();
-    setSavedTemplateKeys(
+    const timer = window.setTimeout(() => setSavedTemplateKeys(
       new Set(storedTemplates.map((template) => getTemplateKey(template.title, template.category)))
-    );
+    ), 0);
 
-    if (hydratedRoomsRef.current.has(room.id)) return;
+    if (hydratedRoomsRef.current.has(room.id)) return () => window.clearTimeout(timer);
     hydratedRoomsRef.current.add(room.id);
 
     const existingKeys = new Set(tasks.map((task) => getTemplateKey(task.title, room.id)));
@@ -83,7 +83,7 @@ export function StepRoomTasks({
         !existingKeys.has(getTemplateKey(template.title, template.category))
     );
 
-    if (templatesForRoom.length === 0) return;
+    if (templatesForRoom.length === 0) return () => window.clearTimeout(timer);
 
     onUpdate([
       ...tasks,
@@ -97,6 +97,7 @@ export function StepRoomTasks({
         custom: true,
       })),
     ]);
+    return () => window.clearTimeout(timer);
   }, [room.id, tasks, onUpdate]);
 
   const toggleTask = useCallback((index: number) => {

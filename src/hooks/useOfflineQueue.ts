@@ -107,7 +107,8 @@ export function useOfflineQueue(
   // Auto-process queue when coming back online
   useEffect(() => {
     if (isOnline && queue.length > 0 && processAction) {
-      processQueue();
+      const timer = window.setTimeout(() => { void processQueue(); }, 0);
+      return () => window.clearTimeout(timer);
     }
   }, [isOnline]); // eslint-disable-line react-hooks/exhaustive-deps
 

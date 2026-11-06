@@ -56,14 +56,14 @@ export function usePWAInstall() {
   useEffect(() => {
     // Check if already installed as standalone
     if (typeof window !== "undefined" && window.matchMedia("(display-mode: standalone)").matches) {
-      setIsInstalled(true);
-      return;
+      const timer = window.setTimeout(() => setIsInstalled(true), 0);
+      return () => window.clearTimeout(timer);
     }
 
     // Check dismissal state
     if (isDismissedLongTerm() || isRecentlyDismissed()) {
-      setIsDismissed(true);
-      return;
+      const timer = window.setTimeout(() => setIsDismissed(true), 0);
+      return () => window.clearTimeout(timer);
     }
 
     const handler = (e: Event) => {

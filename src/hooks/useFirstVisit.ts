@@ -17,10 +17,10 @@ export function useFirstVisit(pageKey: string): UseFirstVisitReturn {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const seen = localStorage.getItem(storageKey);
-    if (!seen) {
-      setIsFirstVisit(true);
-    }
+    const timer = window.setTimeout(() => {
+      if (!localStorage.getItem(storageKey)) setIsFirstVisit(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [storageKey]);
 
   const dismiss = useCallback(() => {

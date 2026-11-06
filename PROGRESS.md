@@ -1,5 +1,16 @@
 # BayitBeSeder (בית בסדר) - Progress
 
+## 2026-11-06 — Local usability redesign (work in progress)
+
+Branch `redesign/simple-2026-11` is based on master `8c90c57`. This is locally verified work; no production deployment, merge, or household-data changes were performed as part of this redesign.
+
+- **Experience:** five destinations (Today, Tasks, Shopping, Meals, More) on mobile and desktop; a calmer dashboard with one real open task, generic meal/shopping entry points, and a disclosure for household progress. More retains paths to planning, emergency mode, history, settings and other tools. Existing assistant, notifications, onboarding, household tools and completion feedback remain reachable. Tasks and weekly views have also been simplified.
+- **Data and completion:** removed the authenticated dashboard's mock-task fallback; the dashboard reports completion failure and does not offer a fictitious undo. Offline completion is identified as queued. Initial pet/background collection hydration is silent, while later streak unlocks remain celebrated.
+- **Important limitation:** `useCompletions` inserts a completion before updating a non-recurring task's status. A failed second write can leave inconsistent records; this needs a separately designed atomic server-side fix and failure/retry tests. Today currently uses the newest-created open household task, not a due-date prioritization; its meal doorway does not show an actual planned meal. Full production data, permissions and save flows have not been verified.
+- **Local evidence:** `../evidence/final-*.log` contains the final local checks: TypeScript, build, lint (39 warnings, no errors), 893 Vitest tests and 154 Node tests passed; React Doctor did not produce a result within the timeout on the available Node version. Synthetic browser screenshots and QA findings are in `../evidence/qa/`; they are not proof of production behavior.
+- **Handoff:** original context in `docs/AGENT-INTERFACE.md`; design, audit and follow-up specifications are in `../design/`, `../UX-AUDIT-he.md`, and `../SPEC-he.md`. The independent document fact check and work-package ledger are in `../evidence/doc-fact-review.md` and `../evidence/WORK-PACKAGES.md`.
+
+
 ## 2026-10-02 — Price comparison: Rami Levy, Osher Ad, Yochananof, Tiv Taam (PR #31)
 
 Elad approved the chains' public portal logins (1.10.2026, 23:32). Fetched from url.publishedprices.co.il with each chain's public username and an empty password; usernames in `/opt/bayit-prices/config/portal_users.json` (600, outside git), a non-empty password is refused.

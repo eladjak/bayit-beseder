@@ -28,12 +28,13 @@ beforeEach(() => {
 });
 
 describe("useAssistantVisibility", () => {
-  it("defaults to visible with nothing in storage", async () => {
+  it("defaults to hidden with nothing in storage", async () => {
     const { result } = renderHook(() => useAssistantVisibility());
-    await waitFor(() => expect(result.current.visible).toBe(true));
+    await waitFor(() => expect(result.current.visible).toBe(false));
   });
 
   it("persists hiding the assistant across a simulated reload (a fresh hook instance)", async () => {
+    localStorageMock.setItem(STORAGE_KEY, "1");
     const first = renderHook(() => useAssistantVisibility());
     await waitFor(() => expect(first.result.current.visible).toBe(true));
 
@@ -66,6 +67,7 @@ describe("useAssistantVisibility", () => {
   });
 
   it("never throws when localStorage.setItem fails (private-mode/quota), and the in-tab toggle still works", async () => {
+    localStorageMock.setItem(STORAGE_KEY, "1");
     const { result } = renderHook(() => useAssistantVisibility());
     await waitFor(() => expect(result.current.visible).toBe(true));
 

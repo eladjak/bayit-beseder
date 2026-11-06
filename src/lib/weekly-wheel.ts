@@ -11,9 +11,10 @@
  */
 
 import { createClient } from "@/lib/supabase";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 // Cast to bypass stale Database types (migration 012 regen pending)
-type AnySupabase = ReturnType<typeof createClient> & { from: (t: string) => any };
+type AnySupabase = SupabaseClient;
 
 export type WheelSegment = {
   readonly id: string;
@@ -85,7 +86,7 @@ export async function getOrSpin(): Promise<SpinResult> {
     return { ok: false, error: "NOT_AVAILABLE_YET", details: "הגלגל פתוח רק מיום שישי 14:00 עד שבת בלילה" };
   }
 
-  const supabase = createClient() as AnySupabase;
+  const supabase = createClient() as unknown as AnySupabase;
   const { data: userData, error: userErr } = await supabase.auth.getUser();
   if (userErr || !userData.user) return { ok: false, error: "NOT_AUTHED" };
 
@@ -148,7 +149,7 @@ export async function getOrSpin(): Promise<SpinResult> {
 }
 
 export async function redeemSpin(spinId: string): Promise<{ ok: true } | { ok: false; error: string }> {
-  const supabase = createClient() as AnySupabase;
+  const supabase = createClient() as unknown as AnySupabase;
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) return { ok: false, error: "NOT_AUTHED" };
 
