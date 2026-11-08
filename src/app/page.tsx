@@ -213,7 +213,7 @@ export default function LandingPage() {
       />
 
       {/* Hero Section */}
-      <header id="hero-section" className="bg-background text-foreground border-b border-border">
+      <header id="hero-section" data-joy-restore="landing" className="joy-landing text-foreground border-b border-border">
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 pb-12 pt-10 sm:px-6 md:grid-cols-2 md:gap-16 md:py-24">
           <div>
             <p className="mb-4 text-sm font-bold text-primary">בית בסדר</p>

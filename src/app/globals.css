@@ -670,3 +670,42 @@ textarea:focus-visible {
 [dir="ltr"] .bb-bar {
   transform-origin: left center;
 }
+
+/* Soft category labels preserve readable foreground in both themes. */
+.joy-category-label { background: #fce9d4; color: #523c30; }
+.dark .joy-category-label { background: #443330; color: #ffeadb; }
+@media (prefers-color-scheme: dark) { :root:not(.light) .joy-category-label { background: #443330; color: #ffeadb; } }
+
+.joy-category-label[data-category="bathroom"], .joy-category-label[data-category="laundry"] { background: #dceff3; color: #214c57; }
+.joy-category-label[data-category="living"], .joy-category-label[data-category="bedroom"] { background: #f3e1e5; color: #603b4a; }
+.joy-category-label[data-category="outdoor"], .joy-category-label[data-category="pets"] { background: #e1efdf; color: #315339; }
+.dark .joy-category-label[data-category] { background: #36314b; color: #eee8ff; }
+@media (prefers-color-scheme: dark) { :root:not(.light) .joy-category-label[data-category] { background: #36314b; color: #eee8ff; } }
+
+/* Brand surfaces are intentionally quiet behind the primary action. */
+.joy-landing { background: linear-gradient(135deg, #faf6f0, #fff0dc); }
+.joy-surface-honey { background: #fff2dc; }
+.joy-surface-peach { background: #fae9e2; }
+.joy-surface-mint { background: #e6f2e9; }
+.dark .joy-landing { background: linear-gradient(135deg, #171425, #302330); }
+.dark .joy-surface-honey { background: #332c28; }
+.dark .joy-surface-peach { background: #342a31; }
+.dark .joy-surface-mint { background: #26332f; }
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) .joy-landing { background: linear-gradient(135deg, #171425, #302330); }
+  :root:not(.light) .joy-surface-honey { background: #332c28; }
+  :root:not(.light) .joy-surface-peach { background: #342a31; }
+  :root:not(.light) .joy-surface-mint { background: #26332f; }
+}
+
+.dark .joy-surface .text-primary { color: #bdb9ff; }
+.dark .joy-surface .bg-primary { background-color: #4f46e5; }
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) .joy-surface .text-primary { color: #bdb9ff; }
+  :root:not(.light) .joy-surface .bg-primary { background-color: #4f46e5; }
+}
+
+/* Give the illustrated success icon its own space in Sonner’s single toast. */
+[data-sonner-toast][data-styled="true"].joy-success-toast { padding: 12px; }
+[data-sonner-toast][data-styled="true"].joy-success-toast [data-icon] { width: 40px; height: 40px; }
+[data-sonner-toast][data-styled="true"].joy-success-toast [data-button] { min-height: 44px; }

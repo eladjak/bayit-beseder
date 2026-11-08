@@ -15,6 +15,11 @@ export const CATEGORY_NAME_TO_KEY: Record<string, string> = {
   "כללי": "general",
 };
 
+/** Resolve a category name, preserving household-specific category IDs. */
+export function resolveCategoryKey(name: string | null | undefined, dynamicNames: Record<string, string>): string {
+  return name ? (dynamicNames[name] ?? CATEGORY_NAME_TO_KEY[name] ?? "general") : "general";
+}
+
 /** Map internal category keys back to Hebrew names (for DB lookups) */
 export const CATEGORY_KEY_TO_NAME: Record<string, string> = {
   kitchen: "מטבח",

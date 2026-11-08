@@ -1,0 +1,6 @@
+
+Running 1 test using 1 worker
+
+  ✓  1 [desktop] › e2e/landing.spec.ts:22:3 › Landing Page › should display FAQ section (2.0s)
+
+  1 passed (3.2s)

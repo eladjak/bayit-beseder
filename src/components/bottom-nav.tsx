@@ -17,7 +17,7 @@ export function BottomNav() {
   const pathname = usePathname();
   const { locale } = useTranslation();
   const secondary = ["/more", "/weekly", "/stats", "/settings", "/history", "/emergency", "/playlists"];
-  return <nav aria-label={locale === "en" ? "Main navigation" : "ניווט ראשי"} className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-1 pb-[env(safe-area-inset-bottom)] shadow-lg lg:inset-y-0 lg:right-0 lg:left-auto lg:w-56 lg:border-t-0 lg:border-l lg:px-4 lg:pt-8">
+  return <nav aria-label={locale === "en" ? "Main navigation" : "ניווט ראשי"} className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface px-1 pb-[env(safe-area-inset-bottom)] shadow-lg lg:inset-y-0 lg:right-0 lg:left-auto lg:w-56 lg:border-t-0 lg:border-l lg:px-4 lg:pt-8">
     <div className="hidden px-3 pb-8 text-xl font-bold lg:block">בית בסדר</div>
     <div className="flex justify-around lg:flex-col lg:gap-1">
       {items.map(({ href, label, en, icon: Icon }) => {

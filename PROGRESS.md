@@ -1,5 +1,9 @@
 # BayitBeSeder (בית בסדר) - Progress
 
+## 2026-11-08 — Joy restore release preparation
+
+The simple redesign retained its clear navigation and hierarchy; joy restore adds warm surfaces, original illustrations, honest empty states and brief confirmed-completion feedback. Floating buttons, metric clutter, looping animations and unverified streak rewards remain absent. See `docs/STATUS-he.md`, `docs/joy-restore/REPORT-he.md`, and `docs/joy-restore/ROLLBACK.md`. Release verification is recorded in `docs/joy-restore/evidence/release/`; SQL requires an isolated database.
+
 ## 2026-11-06 — Local usability redesign (work in progress)
 
 Branch `redesign/simple-2026-11` is based on master `8c90c57`. This is locally verified work; no production deployment, merge, or household-data changes were performed as part of this redesign.

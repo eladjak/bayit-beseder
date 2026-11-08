@@ -1,0 +1,5 @@
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/app/(app)/tasks/page.tsx
+  457:5  warning  React Hook useCallback has an unnecessary dependency: 'updateTask'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+✖ 1 problem (0 errors, 1 warning)

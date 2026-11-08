@@ -141,16 +141,16 @@ function LoginContent() {
   return (
     <div className="min-h-dvh flex flex-col items-center justify-center px-6 py-8 relative overflow-y-auto overflow-x-hidden">
       {/* Animated gradient background */}
-      <div className="absolute inset-0 gradient-hero animate-gradient opacity-90" />
+      <div className="absolute inset-0 gradient-hero opacity-90" />
 
       {/* Decorative floating shapes */}
-      <div className="absolute top-20 right-10 w-20 h-20 rounded-full bg-white/10 animate-float" />
-      <div className="absolute bottom-32 left-8 w-14 h-14 rounded-2xl bg-white/10 animate-float" style={{ animationDelay: "1s" }} />
-      <div className="absolute top-40 left-16 w-8 h-8 rounded-full bg-white/15 animate-float" style={{ animationDelay: "2s" }} />
+      <div className="absolute top-20 right-10 w-20 h-20 rounded-full bg-white/10" />
+      <div className="absolute bottom-32 left-8 w-14 h-14 rounded-2xl bg-white/10" style={{ animationDelay: "1s" }} />
+      <div className="absolute top-40 left-16 w-8 h-8 rounded-full bg-white/15" style={{ animationDelay: "2s" }} />
 
       <div className="w-full max-w-sm flex flex-col items-center gap-5 relative z-10">
         {/* Logo & Title */}
-        <div className="flex flex-col items-center gap-3 mb-2">
+        <div data-joy-restore="login" className="flex flex-col items-center gap-3 mb-2">
           <Image
             src="/illustrations/welcome-home.jpg"
             alt={t("auth.welcome")}

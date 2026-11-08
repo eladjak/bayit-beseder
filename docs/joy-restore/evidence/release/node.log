@@ -1,0 +1,1015 @@
+
+> bayit-beseder@1.0.0 test:node
+> node --test src/__tests__/task-stats.test.mjs src/__tests__/notifications.test.mjs src/__tests__/auto-scheduler.test.mjs src/__tests__/room-health.test.mjs src/__tests__/rewards.test.mjs src/__tests__/golden-rule-rotation.test.mjs src/__tests__/energy-filter.test.mjs src/__tests__/push-notifications.test.mjs
+
+TAP version 13
+# Subtest: isTemplateDueOnDate
+    # Subtest: daily template is always due
+    ok 1 - daily template is always due
+      ---
+      duration_ms: 1.238152
+      ...
+    # Subtest: weekly template is due on matching day of week
+    ok 2 - weekly template is due on matching day of week
+      ---
+      duration_ms: 0.645545
+      ...
+    # Subtest: weekly template returns false when recurrence_day is null
+    ok 3 - weekly template returns false when recurrence_day is null
+      ---
+      duration_ms: 0.23436
+      ...
+    # Subtest: biweekly template is due on matching day only in even ISO weeks
+    ok 4 - biweekly template is due on matching day only in even ISO weeks
+      ---
+      duration_ms: 0.315171
+      ...
+    # Subtest: biweekly template is false on wrong day even in even week
+    ok 5 - biweekly template is false on wrong day even in even week
+      ---
+      duration_ms: 0.242762
+      ...
+    # Subtest: monthly template is due on matching day of month
+    ok 6 - monthly template is due on matching day of month
+      ---
+      duration_ms: 0.184155
+      ...
+    # Subtest: quarterly template is due on matching day in quarter months only
+    ok 7 - quarterly template is due on matching day in quarter months only
+      ---
+      duration_ms: 0.205877
+      ...
+    # Subtest: yearly template is due on matching day of year
+    ok 8 - yearly template is due on matching day of year
+      ---
+      duration_ms: 0.411365
+      ...
+    # Subtest: unknown recurrence_type returns false
+    ok 9 - unknown recurrence_type returns false
+      ---
+      duration_ms: 0.483963
+      ...
+    1..9
+ok 1 - isTemplateDueOnDate
+  ---
+  duration_ms: 5.998615
+  type: 'suite'
+  ...
+# Subtest: getTemplatesDueOnDate
+    # Subtest: filters out inactive templates
+    ok 1 - filters out inactive templates
+      ---
+      duration_ms: 0.391345
+      ...
+    # Subtest: returns only templates due on the given date
+    ok 2 - returns only templates due on the given date
+      ---
+      duration_ms: 0.236693
+      ...
+    # Subtest: returns empty array when no templates match
+    ok 3 - returns empty array when no templates match
+      ---
+      duration_ms: 0.141271
+      ...
+    1..3
+ok 2 - getTemplatesDueOnDate
+  ---
+  duration_ms: 1.094235
+  type: 'suite'
+  ...
+# Subtest: formatDate
+    # Subtest: formats date as YYYY-MM-DD
+    ok 1 - formats date as YYYY-MM-DD
+      ---
+      duration_ms: 0.377563
+      ...
+    1..1
+ok 3 - formatDate
+  ---
+  duration_ms: 0.604394
+  type: 'suite'
+  ...
+# Subtest: getISOWeekNumber
+    # Subtest: returns correct ISO week for known date
+    ok 1 - returns correct ISO week for known date
+      ---
+      duration_ms: 0.116644
+      ...
+    # Subtest: returns week 8 for 2026-02-18
+    ok 2 - returns week 8 for 2026-02-18
+      ---
+      duration_ms: 0.05328
+      ...
+    1..2
+ok 4 - getISOWeekNumber
+  ---
+  duration_ms: 0.262863
+  type: 'suite'
+  ...
+# Subtest: getDayOfYear
+    # Subtest: January 1 is day 1
+    ok 1 - January 1 is day 1
+      ---
+      duration_ms: 0.14732
+      ...
+    # Subtest: February 1 is day 32
+    ok 2 - February 1 is day 32
+      ---
+      duration_ms: 1.644687
+      ...
+    # Subtest: December 31 of non-leap year is day 365
+    ok 3 - December 31 of non-leap year is day 365
+      ---
+      duration_ms: 0.097105
+      ...
+    1..3
+ok 5 - getDayOfYear
+  ---
+  duration_ms: 2.066639
+  type: 'suite'
+  ...
+# Subtest: inferDifficulty
+    # Subtest: task with heavy keyword 'עמוק' in title returns 3
+    ok 1 - task with heavy keyword 'עמוק' in title returns 3
+      ---
+      duration_ms: 2.738783
+      ...
+    # Subtest: task with heavy keyword 'ארגון' in title returns 3
+    ok 2 - task with heavy keyword 'ארגון' in title returns 3
+      ---
+      duration_ms: 0.252567
+      ...
+    # Subtest: task with heavy keyword 'תנור' in title returns 3
+    ok 3 - task with heavy keyword 'תנור' in title returns 3
+      ---
+      duration_ms: 0.32738
+      ...
+    # Subtest: task with light keyword 'מים' in title returns 1
+    ok 4 - task with light keyword 'מים' in title returns 1
+      ---
+      duration_ms: 0.291717
+      ...
+    # Subtest: task with light keyword 'איוורור' in title returns 1
+    ok 5 - task with light keyword 'איוורור' in title returns 1
+      ---
+      duration_ms: 0.216625
+      ...
+    # Subtest: task with light keyword 'בדיקת' in title returns 1
+    ok 6 - task with light keyword 'בדיקת' in title returns 1
+      ---
+      duration_ms: 0.329793
+      ...
+    # Subtest: task with estimated_minutes <= 5 returns 1
+    ok 7 - task with estimated_minutes <= 5 returns 1
+      ---
+      duration_ms: 0.22047
+      ...
+    # Subtest: task with estimated_minutes >= 20 returns 3
+    ok 8 - task with estimated_minutes >= 20 returns 3
+      ---
+      duration_ms: 0.353036
+      ...
+    # Subtest: standard task no keywords, 8 min returns 2
+    ok 9 - standard task no keywords, 8 min returns 2
+      ---
+      duration_ms: 0.429522
+      ...
+    # Subtest: task with estimated_minutes exactly 10 returns 2
+    ok 10 - task with estimated_minutes exactly 10 returns 2
+      ---
+      duration_ms: 0.564254
+      ...
+    1..10
+ok 6 - inferDifficulty
+  ---
+  duration_ms: 7.76766
+  type: 'suite'
+  ...
+# Subtest: filterTasksByEnergy
+    # Subtest: 'all' returns all tasks
+    ok 1 - 'all' returns all tasks
+      ---
+      duration_ms: 0.252707
+      ...
+    # Subtest: 'moderate' filters out heavy tasks
+    ok 2 - 'moderate' filters out heavy tasks
+      ---
+      duration_ms: 0.285336
+      ...
+    # Subtest: 'light' returns only light tasks
+    ok 3 - 'light' returns only light tasks
+      ---
+      duration_ms: 0.151246
+      ...
+    # Subtest: empty array returns empty
+    ok 4 - empty array returns empty
+      ---
+      duration_ms: 0.143254
+      ...
+    1..4
+ok 7 - filterTasksByEnergy
+  ---
+  duration_ms: 1.107696
+  type: 'suite'
+  ...
+# Subtest: getEnergyLabel
+    # Subtest: returns correct label for all levels
+    ok 1 - returns correct label for all levels
+      ---
+      duration_ms: 0.225256
+      ...
+    1..1
+ok 8 - getEnergyLabel
+  ---
+  duration_ms: 0.363183
+  type: 'suite'
+  ...
+# Subtest: getEnergyEmoji
+    # Subtest: returns correct emoji for all levels
+    ok 1 - returns correct emoji for all levels
+      ---
+      duration_ms: 0.177626
+      ...
+    1..1
+ok 9 - getEnergyEmoji
+  ---
+  duration_ms: 0.283573
+  type: 'suite'
+  ...
+# Subtest: DIFFICULTY_WEIGHT
+    # Subtest: maps difficulty 1 to weight 1 (light)
+    ok 1 - maps difficulty 1 to weight 1 (light)
+      ---
+      duration_ms: 3.257939
+      ...
+    # Subtest: maps difficulty 2 to weight 2 (moderate)
+    ok 2 - maps difficulty 2 to weight 2 (moderate)
+      ---
+      duration_ms: 0.232328
+      ...
+    # Subtest: maps difficulty 3 to weight 3 (heavy)
+    ok 3 - maps difficulty 3 to weight 3 (heavy)
+      ---
+      duration_ms: 0.263735
+      ...
+    1..3
+ok 10 - DIFFICULTY_WEIGHT
+  ---
+  duration_ms: 5.582013
+  type: 'suite'
+  ...
+# Subtest: computeWeightedLoad
+    # Subtest: returns 0 for empty instances
+    ok 1 - returns 0 for empty instances
+      ---
+      duration_ms: 0.473809
+      ...
+    # Subtest: returns correct weight for a single instance
+    ok 2 - returns correct weight for a single instance
+      ---
+      duration_ms: 0.216413
+      ...
+    # Subtest: sums weights for multiple instances assigned to same member
+    ok 3 - sums weights for multiple instances assigned to same member
+      ---
+      duration_ms: 0.193719
+      ...
+    # Subtest: ignores instances assigned to other members
+    ok 4 - ignores instances assigned to other members
+      ---
+      duration_ms: 0.298656
+      ...
+    # Subtest: defaults to weight 2 when difficulty is missing
+    ok 5 - defaults to weight 2 when difficulty is missing
+      ---
+      duration_ms: 0.396272
+      ...
+    # Subtest: handles mixed instances with and without difficulty
+    ok 6 - handles mixed instances with and without difficulty
+      ---
+      duration_ms: 0.257615
+      ...
+    1..6
+ok 11 - computeWeightedLoad
+  ---
+  duration_ms: 2.556522
+  type: 'suite'
+  ...
+# Subtest: selectAssignee with golden rule
+    # Subtest: 80/20 split assigns more to user-a when user-a is under target
+    ok 1 - 80/20 split assigns more to user-a when user-a is under target
+      ---
+      duration_ms: 0.46863
+      ...
+    # Subtest: 80/20 split assigns to user-b when user-b is under target
+    ok 2 - 80/20 split assigns to user-b when user-b is under target
+      ---
+      duration_ms: 0.14049
+      ...
+    # Subtest: 50/50 split assigns to member with less weighted load
+    ok 3 - 50/50 split assigns to member with less weighted load
+      ---
+      duration_ms: 0.165207
+      ...
+    # Subtest: 50/50 split with equal loads alternates by index
+    ok 4 - 50/50 split with equal loads alternates by index
+      ---
+      duration_ms: 0.199128
+      ...
+    # Subtest: with no history, alternates by index
+    ok 5 - with no history, alternates by index
+      ---
+      duration_ms: 0.253128
+      ...
+    # Subtest: still respects default_assignee even with golden rule
+    ok 6 - still respects default_assignee even with golden rule
+      ---
+      duration_ms: 0.132538
+      ...
+    1..6
+ok 12 - selectAssignee with golden rule
+  ---
+  duration_ms: 1.698719
+  type: 'suite'
+  ...
+# Subtest: selectAssignee without golden rule (backward compatible)
+    # Subtest: uses count-based rotation when no goldenRuleTarget
+    ok 1 - uses count-based rotation when no goldenRuleTarget
+      ---
+      duration_ms: 0.11331
+      ...
+    # Subtest: uses count-based rotation when goldenRuleTarget is undefined
+    ok 2 - uses count-based rotation when goldenRuleTarget is undefined
+      ---
+      duration_ms: 0.16752
+      ...
+    # Subtest: returns empty string for no members
+    ok 3 - returns empty string for no members
+      ---
+      duration_ms: 0.147712
+      ...
+    1..3
+ok 13 - selectAssignee without golden rule (backward compatible)
+  ---
+  duration_ms: 2.099357
+  type: 'suite'
+  ...
+# Subtest: formatRelativeTime
+    # Subtest: returns 'now' for timestamps less than 1 minute ago
+    ok 1 - returns 'now' for timestamps less than 1 minute ago
+      ---
+      duration_ms: 4.029752
+      ...
+    # Subtest: returns minutes for timestamps between 1-59 minutes ago
+    ok 2 - returns minutes for timestamps between 1-59 minutes ago
+      ---
+      duration_ms: 0.313849
+      ...
+    # Subtest: returns 'an hour ago' for exactly 1 hour
+    ok 3 - returns 'an hour ago' for exactly 1 hour
+      ---
+      duration_ms: 0.215501
+      ...
+    # Subtest: returns hours for timestamps between 2-23 hours ago
+    ok 4 - returns hours for timestamps between 2-23 hours ago
+      ---
+      duration_ms: 0.11398
+      ...
+    # Subtest: returns 'yesterday' for 1 day ago
+    ok 5 - returns 'yesterday' for 1 day ago
+      ---
+      duration_ms: 0.231335
+      ...
+    # Subtest: returns days for timestamps between 2-6 days ago
+    ok 6 - returns days for timestamps between 2-6 days ago
+      ---
+      duration_ms: 0.205638
+      ...
+    # Subtest: returns weeks for timestamps 7+ days ago
+    ok 7 - returns weeks for timestamps 7+ days ago
+      ---
+      duration_ms: 0.191165
+      ...
+    1..7
+ok 14 - formatRelativeTime
+  ---
+  duration_ms: 7.503474
+  type: 'suite'
+  ...
+# Subtest: computeConsecutiveStreak
+    # Subtest: returns 0 when no completions
+    ok 1 - returns 0 when no completions
+      ---
+      duration_ms: 0.515129
+      ...
+    # Subtest: returns 0 when no completion on today
+    ok 2 - returns 0 when no completion on today
+      ---
+      duration_ms: 0.331605
+      ...
+    # Subtest: returns 1 when only today has a completion
+    ok 3 - returns 1 when only today has a completion
+      ---
+      duration_ms: 0.318987
+      ...
+    # Subtest: returns correct streak for consecutive days
+    ok 4 - returns correct streak for consecutive days
+      ---
+      duration_ms: 0.141501
+      ...
+    # Subtest: stops counting at gap
+    ok 5 - stops counting at gap
+      ---
+      duration_ms: 0.070906
+      ...
+    # Subtest: handles multiple completions on same day
+    ok 6 - handles multiple completions on same day
+      ---
+      duration_ms: 0.077926
+      ...
+    # Subtest: handles month boundary
+    ok 7 - handles month boundary
+      ---
+      duration_ms: 0.069965
+      ...
+    1..7
+ok 15 - computeConsecutiveStreak
+  ---
+  duration_ms: 2.187039
+  type: 'suite'
+  ...
+# Subtest: computeWeeklyChallengeProgress
+    # Subtest: returns 0 progress when no completions
+    ok 1 - returns 0 progress when no completions
+      ---
+      duration_ms: 0.295241
+      ...
+    # Subtest: counts completions in current week only
+    ok 2 - counts completions in current week only
+      ---
+      duration_ms: 0.200599
+      ...
+    # Subtest: caps percentage at 100 when exceeding target
+    ok 3 - caps percentage at 100 when exceeding target
+      ---
+      duration_ms: 0.214431
+      ...
+    # Subtest: returns 0 percentage when target is 0
+    ok 4 - returns 0 percentage when target is 0
+      ---
+      duration_ms: 0.164336
+      ...
+    # Subtest: handles Sunday (first day of week) as today
+    ok 5 - handles Sunday (first day of week) as today
+      ---
+      duration_ms: 1.795805
+      ...
+    # Subtest: handles exact target completion
+    ok 6 - handles exact target completion
+      ---
+      duration_ms: 0.203445
+      ...
+    1..6
+ok 16 - computeWeeklyChallengeProgress
+  ---
+  duration_ms: 3.200083
+  type: 'suite'
+  ...
+# Subtest: Push Notifications
+    # Subtest: isValidSubscription
+        # Subtest: validates a correct subscription
+        ok 1 - validates a correct subscription
+          ---
+          duration_ms: 0.921236
+          ...
+        # Subtest: rejects subscription without endpoint
+        ok 2 - rejects subscription without endpoint
+          ---
+          duration_ms: 0.228562
+          ...
+        # Subtest: rejects subscription with non-https endpoint
+        ok 3 - rejects subscription with non-https endpoint
+          ---
+          duration_ms: 0.203054
+          ...
+        # Subtest: rejects subscription without keys
+        ok 4 - rejects subscription without keys
+          ---
+          duration_ms: 0.118216
+          ...
+        # Subtest: rejects subscription with missing p256dh
+        ok 5 - rejects subscription with missing p256dh
+          ---
+          duration_ms: 0.091807
+          ...
+        # Subtest: rejects subscription with empty auth
+        ok 6 - rejects subscription with empty auth
+          ---
+          duration_ms: 0.178086
+          ...
+        # Subtest: rejects null
+        ok 7 - rejects null
+          ---
+          duration_ms: 0.473208
+          ...
+        # Subtest: rejects string
+        ok 8 - rejects string
+          ---
+          duration_ms: 0.242302
+          ...
+        1..8
+    ok 1 - isValidSubscription
+      ---
+      duration_ms: 3.69999
+      type: 'suite'
+      ...
+    # Subtest: sendPushToAllSync
+        # Subtest: returns zeros for empty array
+        ok 1 - returns zeros for empty array
+          ---
+          duration_ms: 1.099203
+          ...
+        # Subtest: sends to valid subscriptions
+        ok 2 - sends to valid subscriptions
+          ---
+          duration_ms: 0.503363
+          ...
+        # Subtest: fails for invalid subscriptions
+        ok 3 - fails for invalid subscriptions
+          ---
+          duration_ms: 0.171095
+          ...
+        # Subtest: handles mix of valid and invalid
+        ok 4 - handles mix of valid and invalid
+          ---
+          duration_ms: 0.146159
+          ...
+        1..4
+    ok 2 - sendPushToAllSync
+      ---
+      duration_ms: 3.31201
+      type: 'suite'
+      ...
+    # Subtest: urlBase64ToUint8Array
+        # Subtest: converts a base64url string to Uint8Array
+        ok 1 - converts a base64url string to Uint8Array
+          ---
+          duration_ms: 0.393347
+          ...
+        # Subtest: handles base64url with - and _ characters
+        ok 2 - handles base64url with - and _ characters
+          ---
+          duration_ms: 0.147501
+          ...
+        # Subtest: handles empty string
+        ok 3 - handles empty string
+          ---
+          duration_ms: 1.6596
+          ...
+        1..3
+    ok 3 - urlBase64ToUint8Array
+      ---
+      duration_ms: 2.411894
+      type: 'suite'
+      ...
+    # Subtest: buildPushPayload
+        # Subtest: creates payload with defaults
+        ok 1 - creates payload with defaults
+          ---
+          duration_ms: 0.271646
+          ...
+        # Subtest: creates payload with custom options
+        ok 2 - creates payload with custom options
+          ---
+          duration_ms: 0.174661
+          ...
+        # Subtest: creates Hebrew morning brief payload
+        ok 3 - creates Hebrew morning brief payload
+          ---
+          duration_ms: 0.177554
+          ...
+        # Subtest: creates Hebrew evening summary payload
+        ok 4 - creates Hebrew evening summary payload
+          ---
+          duration_ms: 0.131937
+          ...
+        1..4
+    ok 4 - buildPushPayload
+      ---
+      duration_ms: 1.074606
+      type: 'suite'
+      ...
+    1..4
+ok 17 - Push Notifications
+  ---
+  duration_ms: 13.762309
+  type: 'suite'
+  ...
+# Subtest: computeRewardsProgress
+    # Subtest: returns progress for all 10 rewards
+    ok 1 - returns progress for all 10 rewards
+      ---
+      duration_ms: 4.258815
+      ...
+    # Subtest: all rewards start at 0 with no data
+    ok 2 - all rewards start at 0 with no data
+      ---
+      duration_ms: 0.432246
+      ...
+    # Subtest: calculates combined_streak correctly (home-break: 7 days)
+    ok 3 - calculates combined_streak correctly (home-break: 7 days)
+      ---
+      duration_ms: 0.319929
+      ...
+    # Subtest: calculates combined_streak for romantic-weekend (30 days)
+    ok 4 - calculates combined_streak for romantic-weekend (30 days)
+      ---
+      duration_ms: 0.428391
+      ...
+    # Subtest: calculates weekly_tasks (coffee-dessert: 15 combined)
+    ok 5 - calculates weekly_tasks (coffee-dessert: 15 combined)
+      ---
+      duration_ms: 4.291884
+      ...
+    # Subtest: calculates golden_rule hits (dinner-out: 5)
+    ok 6 - calculates golden_rule hits (dinner-out: 5)
+      ---
+      duration_ms: 0.374549
+      ...
+    # Subtest: calculates total_tasks for monthly (movie-theater: 50)
+    ok 7 - calculates total_tasks for monthly (movie-theater: 50)
+      ---
+      duration_ms: 0.656251
+      ...
+    # Subtest: calculates total_tasks all-time (surprise: 100)
+    ok 8 - calculates total_tasks all-time (surprise: 100)
+      ---
+      duration_ms: 1.941501
+      ...
+    # Subtest: calculates both_daily streak (movie-night: 3 days)
+    ok 9 - calculates both_daily streak (movie-night: 3 days)
+      ---
+      duration_ms: 0.611924
+      ...
+    # Subtest: calculates category_complete streak (ready-meal: kitchen 7 days)
+    ok 10 - calculates category_complete streak (ready-meal: kitchen 7 days)
+      ---
+      duration_ms: 0.974096
+      ...
+    # Subtest: progress is capped at 100
+    ok 11 - progress is capped at 100
+      ---
+      duration_ms: 0.322993
+      ...
+    # Subtest: shopping-together requires both partners to have 10 each
+    ok 12 - shopping-together requires both partners to have 10 each
+      ---
+      duration_ms: 0.316392
+      ...
+    1..12
+ok 18 - computeRewardsProgress
+  ---
+  duration_ms: 17.229631
+  type: 'suite'
+  ...
+# Subtest: getNextReward
+    # Subtest: returns closest to unlock
+    ok 1 - returns closest to unlock
+      ---
+      duration_ms: 0.176213
+      ...
+    # Subtest: returns null when all unlocked
+    ok 2 - returns null when all unlocked
+      ---
+      duration_ms: 0.181982
+      ...
+    # Subtest: returns null for empty array
+    ok 3 - returns null for empty array
+      ---
+      duration_ms: 0.151306
+      ...
+    1..3
+ok 19 - getNextReward
+  ---
+  duration_ms: 0.690531
+  type: 'suite'
+  ...
+# Subtest: getUnlockedCount
+    # Subtest: counts unlocked rewards
+    ok 1 - counts unlocked rewards
+      ---
+      duration_ms: 0.2278
+      ...
+    # Subtest: returns 0 for empty array
+    ok 2 - returns 0 for empty array
+      ---
+      duration_ms: 0.112097
+      ...
+    # Subtest: returns 0 when none unlocked
+    ok 3 - returns 0 when none unlocked
+      ---
+      duration_ms: 0.189473
+      ...
+    1..3
+ok 20 - getUnlockedCount
+  ---
+  duration_ms: 0.72953
+  type: 'suite'
+  ...
+# Subtest: computeRoomHealth
+    # Subtest: returns 0 when never completed (null)
+    ok 1 - returns 0 when never completed (null)
+      ---
+      duration_ms: 1.502957
+      ...
+    # Subtest: returns 100 when just completed
+    ok 2 - returns 100 when just completed
+      ---
+      duration_ms: 0.312838
+      ...
+    # Subtest: returns 50 for daily task completed 24h ago
+    ok 3 - returns 50 for daily task completed 24h ago
+      ---
+      duration_ms: 0.24675
+      ...
+    # Subtest: returns 0 for daily task completed 48h+ ago
+    ok 4 - returns 0 for daily task completed 48h+ ago
+      ---
+      duration_ms: 0.201732
+      ...
+    # Subtest: returns 0 for daily task completed way in the past
+    ok 5 - returns 0 for daily task completed way in the past
+      ---
+      duration_ms: 0.32759
+      ...
+    # Subtest: returns ~50 for weekly task completed 7 days ago
+    ok 6 - returns ~50 for weekly task completed 7 days ago
+      ---
+      duration_ms: 0.259177
+      ...
+    # Subtest: returns ~75 for biweekly task completed 7 days ago
+    ok 7 - returns ~75 for biweekly task completed 7 days ago
+      ---
+      duration_ms: 0.157555
+      ...
+    # Subtest: returns ~50 for monthly task completed 30 days ago
+    ok 8 - returns ~50 for monthly task completed 30 days ago
+      ---
+      duration_ms: 0.290605
+      ...
+    # Subtest: returns high score for quarterly task completed recently
+    ok 9 - returns high score for quarterly task completed recently
+      ---
+      duration_ms: 0.463613
+      ...
+    # Subtest: returns high score for yearly task completed recently
+    ok 10 - returns high score for yearly task completed recently
+      ---
+      duration_ms: 0.892583
+      ...
+    # Subtest: clamps to 100 when completed in the future
+    ok 11 - clamps to 100 when completed in the future
+      ---
+      duration_ms: 0.149513
+      ...
+    1..11
+ok 21 - computeRoomHealth
+  ---
+  duration_ms: 7.984373
+  type: 'suite'
+  ...
+# Subtest: getHealthColor
+    # Subtest: returns green for score 80-100
+    ok 1 - returns green for score 80-100
+      ---
+      duration_ms: 0.248031
+      ...
+    # Subtest: returns yellow for score 50-79
+    ok 2 - returns yellow for score 50-79
+      ---
+      duration_ms: 0.154301
+      ...
+    # Subtest: returns orange for score 25-49
+    ok 3 - returns orange for score 25-49
+      ---
+      duration_ms: 0.140642
+      ...
+    # Subtest: returns red for score 0-24
+    ok 4 - returns red for score 0-24
+      ---
+      duration_ms: 0.166219
+      ...
+    1..4
+ok 22 - getHealthColor
+  ---
+  duration_ms: 1.029689
+  type: 'suite'
+  ...
+# Subtest: getHealthLabel
+    # Subtest: returns correct Hebrew labels for each threshold
+    ok 1 - returns correct Hebrew labels for each threshold
+      ---
+      duration_ms: 0.171607
+      ...
+    1..1
+ok 23 - getHealthLabel
+  ---
+  duration_ms: 0.290144
+  type: 'suite'
+  ...
+# Subtest: computeCategoryHealth
+    # Subtest: returns 0 when no items match the category
+    ok 1 - returns 0 when no items match the category
+      ---
+      duration_ms: 0.757482
+      ...
+    # Subtest: averages health across multiple templates in a category
+    ok 2 - averages health across multiple templates in a category
+      ---
+      duration_ms: 0.252697
+      ...
+    # Subtest: returns 100 when all tasks just completed
+    ok 3 - returns 100 when all tasks just completed
+      ---
+      duration_ms: 0.513097
+      ...
+    # Subtest: returns 0 when all tasks never completed
+    ok 4 - returns 0 when all tasks never completed
+      ---
+      duration_ms: 0.196193
+      ...
+    1..4
+ok 24 - computeCategoryHealth
+  ---
+  duration_ms: 4.098867
+  type: 'suite'
+  ...
+# Subtest: addDays
+    # Subtest: adds positive days correctly
+    ok 1 - adds positive days correctly
+      ---
+      duration_ms: 1.437238
+      ...
+    # Subtest: subtracts days when negative offset
+    ok 2 - subtracts days when negative offset
+      ---
+      duration_ms: 0.238526
+      ...
+    # Subtest: handles month boundary crossing
+    ok 3 - handles month boundary crossing
+      ---
+      duration_ms: 0.177265
+      ...
+    # Subtest: returns same date for zero offset
+    ok 4 - returns same date for zero offset
+      ---
+      duration_ms: 0.184646
+      ...
+    1..4
+ok 25 - addDays
+  ---
+  duration_ms: 3.208024
+  type: 'suite'
+  ...
+# Subtest: computeCompletionRate
+    # Subtest: returns 0 for empty task list
+    ok 1 - returns 0 for empty task list
+      ---
+      duration_ms: 0.453849
+      ...
+    # Subtest: returns 100 when all tasks completed
+    ok 2 - returns 100 when all tasks completed
+      ---
+      duration_ms: 0.260449
+      ...
+    # Subtest: returns 0 when no tasks completed
+    ok 3 - returns 0 when no tasks completed
+      ---
+      duration_ms: 0.210585
+      ...
+    # Subtest: rounds to nearest integer
+    ok 4 - rounds to nearest integer
+      ---
+      duration_ms: 0.342201
+      ...
+    # Subtest: handles single task completed
+    ok 5 - handles single task completed
+      ---
+      duration_ms: 0.326067
+      ...
+    1..5
+ok 26 - computeCompletionRate
+  ---
+  duration_ms: 2.150644
+  type: 'suite'
+  ...
+# Subtest: countUpcomingTasks
+    # Subtest: returns 0 when no tasks
+    ok 1 - returns 0 when no tasks
+      ---
+      duration_ms: 0.42811
+      ...
+    # Subtest: counts pending tasks due within next 7 days
+    ok 2 - counts pending tasks due within next 7 days
+      ---
+      duration_ms: 0.221101
+      ...
+    # Subtest: excludes completed tasks
+    ok 3 - excludes completed tasks
+      ---
+      duration_ms: 0.090285
+      ...
+    # Subtest: excludes skipped tasks
+    ok 4 - excludes skipped tasks
+      ---
+      duration_ms: 0.066359
+      ...
+    # Subtest: excludes tasks due after 7 days
+    ok 5 - excludes tasks due after 7 days
+      ---
+      duration_ms: 0.148411
+      ...
+    # Subtest: excludes tasks with no due_date
+    ok 6 - excludes tasks with no due_date
+      ---
+      duration_ms: 0.088022
+      ...
+    1..6
+ok 27 - countUpcomingTasks
+  ---
+  duration_ms: 1.425371
+  type: 'suite'
+  ...
+# Subtest: computeMonthlyData
+    # Subtest: returns exactly 30 data points
+    ok 1 - returns exactly 30 data points
+      ---
+      duration_ms: 2.049894
+      ...
+    # Subtest: last point corresponds to today
+    ok 2 - last point corresponds to today
+      ---
+      duration_ms: 0.28795
+      ...
+    # Subtest: counts completions on matching day
+    ok 3 - counts completions on matching day
+      ---
+      duration_ms: 0.252297
+      ...
+    # Subtest: days outside 30-day window have count 0
+    ok 4 - days outside 30-day window have count 0
+      ---
+      duration_ms: 0.23469
+      ...
+    # Subtest: all counts are zero when no completions
+    ok 5 - all counts are zero when no completions
+      ---
+      duration_ms: 0.135973
+      ...
+    1..5
+ok 28 - computeMonthlyData
+  ---
+  duration_ms: 3.140764
+  type: 'suite'
+  ...
+# Subtest: computeCategoryStats
+    # Subtest: returns empty array for empty task list
+    ok 1 - returns empty array for empty task list
+      ---
+      duration_ms: 0.205557
+      ...
+    # Subtest: groups tasks by category correctly
+    ok 2 - groups tasks by category correctly
+      ---
+      duration_ms: 0.312046
+      ...
+    # Subtest: uses general for unknown category_id
+    ok 3 - uses general for unknown category_id
+      ---
+      duration_ms: 0.127691
+      ...
+    # Subtest: uses general for null category_id
+    ok 4 - uses general for null category_id
+      ---
+      duration_ms: 0.062643
+      ...
+    # Subtest: sorts by total descending
+    ok 5 - sorts by total descending
+      ---
+      duration_ms: 0.257656
+      ...
+    1..5
+ok 29 - computeCategoryStats
+  ---
+  duration_ms: 1.135798
+  type: 'suite'
+  ...
+1..29
+# tests 154
+# suites 33
+# pass 154
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 161.936725

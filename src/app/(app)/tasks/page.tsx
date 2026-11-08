@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import { JoyCompletion, isConfirmedCompletion } from "@/components/joy-completion";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Camera, Check, Clock, Filter, GripVertical, LayoutTemplate, Loader2, Pencil, Plus, Printer, Settings, Trash2 } from "lucide-react";
@@ -36,6 +37,7 @@ import {
   CATEGORY_KEY_TO_NAME,
   CATEGORY_NAME_TO_KEY,
   CATEGORY_ILLUSTRATIONS,
+  resolveCategoryKey,
   getCategoryColor,
   getCategoryLabel,
 } from "@/lib/categories";
@@ -96,6 +98,7 @@ export default function TasksPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [titleError, setTitleError] = useState<string | null>(null);
+  const [joyConfirmation, setJoyConfirmation] = useState(0);
   const [celebratingId, setCelebratingId] = useState<string | null>(null);
   const [newTaskCategory, setNewTaskCategory] = useState("general");
   const [editingTask, setEditingTask] = useState<DbTaskView | null>(null);
@@ -236,9 +239,7 @@ export default function TasksPage() {
       dbTasks.map((dbTask) => {
         const categoryName = dbTask.category_id ? categoryMap[dbTask.category_id] : null;
         // Prefer dynamic category id lookup, fall back to hardcoded key
-        const categoryKey = categoryName
-          ? (dynamicCategoryNameToKey[categoryName] ?? CATEGORY_KEY_TO_NAME[categoryName] ?? "general")
-          : "general";
+        const categoryKey = resolveCategoryKey(categoryName, dynamicCategoryNameToKey);
 
         // Overdue is a one-off concept — a recurring chore is simply due again.
         // See isTaskOverdue: this is what produced the 43-item shame wall.
@@ -442,13 +443,18 @@ export default function TasksPage() {
           });
         }
         if (result) {
-          toast.success(t("tasks.taskCompleted"));
+          if (isConfirmedCompletion(result)) {
+            setJoyConfirmation(Date.now());
+            toast.success(t("tasks.taskCompleted"), { className: "joy-success-toast", icon: <Image data-joy-restore="completion" src="/illustrations/tasks-done.jpg" alt="" width={40} height={40} className="h-10 w-10 rounded-xl object-cover" /> });
+          } else {
+            toast.info(locale === "he" ? "הסימון נשמר לשליחה כשהחיבור יחזור" : "Saved to send when the connection returns");
+          }
         } else {
           toast.error(t("tasks.operationFailed"));
         }
       }
     },
-    [dbTasks, profile, markComplete, undoComplete, updateTask, optimisticCompleted, optimisticUncompleted, isCompletedToday, refetchCompletions, refetchTasks, pendingPhotoUrl, t]
+    [dbTasks, profile, markComplete, undoComplete, updateTask, optimisticCompleted, optimisticUncompleted, isCompletedToday, refetchCompletions, refetchTasks, pendingPhotoUrl, t, locale]
   );
 
   // Add new task to DB
@@ -684,6 +690,7 @@ export default function TasksPage() {
 
   return (
     <div className="space-y-4" dir="rtl">
+      <JoyCompletion confirmation={joyConfirmation} />
       {/* Calm header and primary action */}
       <div className="px-4 pt-6 pb-3">
         <div className="flex items-center justify-between relative z-10">
@@ -948,15 +955,17 @@ export default function TasksPage() {
             className="bb-joy p-8 text-center"
           >
             <Image
-              src={activeCategory === "all" ? "/illustrations/tasks-done.jpg" : "/illustrations/empty-tasks.jpg"}
-              alt={activeCategory === "all" ? t("tasks.allDone") : t("tasks.noCategoryTasks")}
+              src={activeCategory === "all" && dbTasks.length > 0 ? "/illustrations/tasks-done.jpg" : "/illustrations/empty-tasks.jpg"}
+              alt=""
               width={192}
               height={192}
               sizes="192px"
               className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
             />
             <p className="font-medium text-foreground">
-              {activeCategory === "all"
+              {activeCategory === "all" && dbTasks.length === 0
+                ? (locale === "he" ? "עוד לא הוספתם משימות לבית" : "No tasks have been added yet")
+                : activeCategory === "all"
                 ? t("tasks.allDone")
                 : t("tasks.noCategoryTasks")}
             </p>
@@ -1041,6 +1050,7 @@ export default function TasksPage() {
                         >
                           <TaskCompleteMark active={celebratingId === task.id} />
                         </motion.button>
+                        <Image data-joy-restore="category" src={CATEGORY_ILLUSTRATIONS[CATEGORY_NAME_TO_KEY[display.label] ?? task.categoryKey] ?? CATEGORY_ILLUSTRATIONS.general} alt="" width={44} height={44} className="h-11 w-11 shrink-0 rounded-xl object-cover" />
                         <div className="flex-1 min-w-[120px]">
                           <p className={`text-base font-semibold leading-snug ${
                             task.isOverdue ? "text-red-700 dark:text-red-400" : "text-foreground"
@@ -1049,8 +1059,8 @@ export default function TasksPage() {
                           </p>
                           <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                             <span
-                              className="text-[10px] px-2 py-0.5 rounded-md text-white font-medium"
-                              style={{ backgroundColor: display.color }}
+                              data-category={CATEGORY_NAME_TO_KEY[display.label] ?? task.categoryKey}
+                              className="joy-category-label text-xs px-2 py-0.5 rounded-md font-medium"
                             >
                               {display.icon ? `${display.icon} ` : ""}{display.label}
                             </span>
@@ -1173,7 +1183,8 @@ export default function TasksPage() {
                     >
                       <TaskCompleteMark active={celebratingId === task.id} />
                     </motion.button>
-                    <div className="flex-1 min-w-[120px]">
+                    <Image data-joy-restore="category" src={CATEGORY_ILLUSTRATIONS[CATEGORY_NAME_TO_KEY[display.label] ?? task.categoryKey] ?? CATEGORY_ILLUSTRATIONS.general} alt="" width={44} height={44} className="h-11 w-11 shrink-0 rounded-xl object-cover" />
+                        <div className="flex-1 min-w-[120px]">
                       <p className={`text-base font-semibold leading-snug ${
                         task.isOverdue ? "text-red-700 dark:text-red-400" : "text-foreground"
                       }`}>
@@ -1181,8 +1192,8 @@ export default function TasksPage() {
                       </p>
                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                         <span
-                          className="text-[10px] px-2 py-0.5 rounded-md text-white font-medium"
-                          style={{ backgroundColor: display.color }}
+                          data-category={CATEGORY_NAME_TO_KEY[display.label] ?? task.categoryKey}
+                              className="joy-category-label text-xs px-2 py-0.5 rounded-md font-medium"
                         >
                           {display.icon ? `${display.icon} ` : ""}{display.label}
                         </span>
@@ -1330,7 +1341,8 @@ export default function TasksPage() {
                       </motion.div>
                     )}
                   </motion.button>
-                  <div className="flex-1 min-w-[120px]">
+                  <Image data-joy-restore="category" src={CATEGORY_ILLUSTRATIONS[task.category] ?? CATEGORY_ILLUSTRATIONS.general} alt="" width={44} height={44} className="h-11 w-11 shrink-0 rounded-xl object-cover" />
+                        <div className="flex-1 min-w-[120px]">
                     <p
                       className={`text-base font-semibold ${
                         isCompleted

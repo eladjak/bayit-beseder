@@ -1,0 +1,4 @@
+1d2b5a6dfce78834a9ca0404ad8e153a587e2e51f3442b0a1c9393d0abd201fa  -
+affbf3c8966c71b218ef5e4e66ecbabb0171df5511f5b6f7d5128e129bc30141  src/components/joy-completion.tsx
+67a37f435d90aa9cb0fb5ba5e838b67049b867b90b23e4cc7a75f60476409108  src/components/__tests__/joy-completion.test.tsx
+ecff444bc36d18752131fc262c9c5322ee1ee14de4b8deb687c56bc8873ae3fe  src/lib/__tests__/category-key.test.ts

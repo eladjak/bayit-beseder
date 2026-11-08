@@ -1,0 +1,5 @@
+# Retain local rendering outputs and intermediate recordings without versioning them.
+documents/
+evidence/*/page@*.webm
+evidence/validation/preview-*.html
+evidence/comparisons/
