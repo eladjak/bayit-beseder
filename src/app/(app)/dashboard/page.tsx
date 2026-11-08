@@ -3,7 +3,9 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
+import { JoyCompletion, isConfirmedCompletion } from "@/components/joy-completion";
 import { TodayOverview, type TaskItem } from "@/components/dashboard/today-overview";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 // Moved to settings/weekly: EmergencyToggle (in quick links), WeeklySummaryCards, RoomConditions
@@ -243,6 +245,7 @@ export default function DashboardPage() {
     taskTitle: string;
   }>({ isOpen: false, taskId: "", taskTitle: "" });
 
+  const [joyConfirmation, setJoyConfirmation] = useState(0);
   const [celebration, setCelebration] = useState<{
     visible: boolean;
     type: "task" | "all_daily" | "golden_rule";
@@ -283,7 +286,8 @@ export default function DashboardPage() {
     if (result.id.startsWith("offline-")) {
       toast.success("הסימון נשמר לשליחה כשהחיבור יחזור");
     } else {
-      toast.success("המשימה סומנה כהושלמה", { action: { label: "הוספת משוב", onClick: () => setCompletionModal({ isOpen: true, taskId, taskTitle: task.title }) } });
+      if (isConfirmedCompletion(result)) setJoyConfirmation(Date.now());
+      toast.success("המשימה סומנה כהושלמה", { icon: <Image src="/illustrations/tasks-done.jpg" alt="" width={40} height={40} className="rounded-lg" />, action: { label: "הוספת משוב", onClick: () => setCompletionModal({ isOpen: true, taskId, taskTitle: task.title }) } });
     }
     playComplete();
     if (!result.id.startsWith("offline-")) void refetchTasks();
@@ -391,6 +395,7 @@ export default function DashboardPage() {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
+      <JoyCompletion confirmation={joyConfirmation} message={locale === "en" ? "Nicely done!" : "כל הכבוד, עוד צעד לבית נעים!"} />
       {/* Offline indicator */}
       <OfflineIndicator />
 
@@ -426,22 +431,25 @@ export default function DashboardPage() {
         onSkip={handleOnboardingSkip}
       />
 
-      <header className="px-4 pt-6 sm:px-6">
+      <header data-joy-restore="today" className="flex items-center justify-between gap-4 px-4 pt-6 sm:px-6">
+        <div>
         <p className="text-sm font-semibold text-primary">{getHebrewDate(locale)}</p>
         <h1 className="mt-2 text-3xl font-bold">{locale === "en" ? `Hello, ${displayName}` : greeting}</h1>
         <p className="mt-2 text-muted">{locale === "en" ? "Make space for what matters, one step at a time." : "נעשה מקום למה שחשוב, צעד אחד בכל פעם."}</p>
+        </div>
+        <Image src="/illustrations/mascot-home.jpg" alt="" width={96} height={96} className="h-20 w-20 shrink-0 rounded-2xl object-cover sm:h-24 sm:w-24" />
       </header>
       <div className="space-y-4 px-4 sm:px-6">
         {seasonalMode.activeTemplate && <PesachCountdownBanner daysUntilHoliday={seasonalMode.daysUntilHoliday} progress={seasonalMode.progress} onTap={() => setShowSeasonalModal(true)} />}
-        <section aria-label="הצעד הבא" className="rounded-2xl border border-primary/15 bg-primary/5 p-4 sm:p-6">
+        <section aria-label="הצעד הבא" className="joy-surface joy-surface-honey rounded-2xl p-4 sm:p-6">
           <h2 className="text-lg font-bold">{locale === "en" ? "Your next step" : "הצעד הבא שלך"}</h2>
           <p className="mb-4 mt-1 text-sm text-muted">{locale === "en" ? "The most recently added open task in your household list." : "המשימה הפתוחה שנוספה לאחרונה לרשימת הבית."}</p>
-          {tasksLoading ? <TaskListSkeleton count={1} /> : tasksError ? <div role="alert"><p>{locale === "en" ? "We could not load your tasks. Check your connection and try again." : "לא הצלחנו לטעון את המשימות. כדאי לבדוק את החיבור ולנסות שוב."}</p><button type="button" onClick={() => refetchTasks()} className="min-h-11 font-semibold text-primary">{locale === "en" ? "Try again" : "ניסיון נוסף"}</button></div> : remainingTasks.length ? <TodayOverview tasks={remainingTasks.slice(0, 1)} onToggle={handleToggle} single /> : <p className="rounded-xl bg-surface p-4 text-muted">{locale === "en" ? "There are no open tasks in the list right now." : "אין כרגע משימות פתוחות ברשימה."}</p>}
+          {tasksLoading ? <TaskListSkeleton count={1} /> : tasksError ? <div role="alert"><p>{locale === "en" ? "We could not load your tasks. Check your connection and try again." : "לא הצלחנו לטעון את המשימות. כדאי לבדוק את החיבור ולנסות שוב."}</p><button type="button" onClick={() => refetchTasks()} className="min-h-11 font-semibold text-primary">{locale === "en" ? "Try again" : "ניסיון נוסף"}</button></div> : remainingTasks.length ? <TodayOverview tasks={remainingTasks.slice(0, 1)} onToggle={handleToggle} single /> : <div data-joy-restore="empty" className="flex items-center gap-4 rounded-xl bg-surface p-4"><Image src="/illustrations/empty-tasks.jpg" alt="" width={88} height={88} className="h-20 w-20 shrink-0 rounded-xl object-cover" /><p className="text-muted">{locale === "en" ? "There are no open tasks in the list right now." : "אין כרגע משימות פתוחות ברשימה."}</p></div>}
           {!tasksLoading && !tasksError && <Link href="/tasks" className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">{locale === "en" ? `${remainingTasks.length} tasks remaining · All tasks →` : `${remainingTasks.length} משימות נותרו · לכל המשימות ←`}</Link>}
         </section>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Link href="/meals" className="rounded-2xl border border-border bg-surface p-5 hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-primary"><h2 className="text-lg font-bold">{locale === "en" ? "What are we eating?" : "מה אוכלים?"}</h2><p className="mt-2 text-sm text-muted">{locale === "en" ? "Meal planning and ideas in one place." : "תכנון הארוחות והרעיונות של הבית במקום אחד."}</p><span className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">{locale === "en" ? "Meal plan →" : "לתוכנית הארוחות ←"}</span></Link>
-          <Link href="/shopping" className="rounded-2xl border border-border bg-surface p-5 hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-primary"><h2 className="text-lg font-bold">{locale === "en" ? "Shopping list" : "רשימת הקניות"}</h2><p className="mt-2 text-sm text-muted">{locale === "en" ? "Everything you need to buy, in a shared list." : "כל מה שצריך לקנות, ברשימה משותפת."}</p><span className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">{locale === "en" ? "Open list →" : "לרשימה ←"}</span></Link>
+          <Link href="/meals" className="joy-surface joy-surface-peach rounded-2xl p-5 hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-primary"><Image src="/illustrations/weekly-plan.jpg" alt="" width={64} height={64} className="float-end ms-3 h-16 w-16 rounded-xl object-cover" /><h2 className="text-lg font-bold">{locale === "en" ? "What are we eating?" : "מה אוכלים?"}</h2><p className="mt-2 text-sm text-muted">{locale === "en" ? "Meal planning and ideas in one place." : "תכנון הארוחות והרעיונות של הבית במקום אחד."}</p><span className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">{locale === "en" ? "Meal plan →" : "לתוכנית הארוחות ←"}</span></Link>
+          <Link href="/shopping" className="joy-surface joy-surface-mint rounded-2xl p-5 hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-primary"><Image src="/illustrations/shopping-food.jpg" alt="" width={64} height={64} className="float-end ms-3 h-16 w-16 rounded-xl object-cover" /><h2 className="text-lg font-bold">{locale === "en" ? "Shopping list" : "רשימת הקניות"}</h2><p className="mt-2 text-sm text-muted">{locale === "en" ? "Everything you need to buy, in a shared list." : "כל מה שצריך לקנות, ברשימה משותפת."}</p><span className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">{locale === "en" ? "Open list →" : "לרשימה ←"}</span></Link>
         </div>
         <details className="rounded-2xl border border-border bg-surface p-4"><summary className="flex min-h-11 cursor-pointer items-center font-bold focus-visible:outline-2 focus-visible:outline-primary">{locale === "en" ? "How home is going" : "איך הבית מתקדם"}</summary>
         <div className="space-y-4 pt-3">

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, Clock, Trash2, RefreshCw } from "lucide-react";
+import { CATEGORY_ILLUSTRATIONS } from "@/lib/categories";
 import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
 import { haptic } from "@/lib/haptics";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -101,7 +102,7 @@ export function TodayOverview({ tasks, onToggle, onClaim, onClearCompleted, curr
     const task = tasks[0];
     const done = task.completed || optimisticCompleted.has(task.id);
     return <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface p-4">
-      <span className="min-w-0 flex-1 font-semibold">{task.title}</span>
+      <Image src={CATEGORY_ILLUSTRATIONS[task.category] ?? CATEGORY_ILLUSTRATIONS.general} alt="" width={48} height={48} className="h-12 w-12 rounded-xl object-cover" /><span className="min-w-0 flex-1 font-semibold">{task.title}<span className="mt-1 block text-sm font-normal text-muted">{getCategoryLabel(task.category)}</span></span>
       <button type="button" disabled={done || completing === task.id} onClick={() => handleToggle(task.id)} aria-label={done ? `${locale === "en" ? "Completed" : "הושלמה"}: ${task.title}` : `${t("tasks.markComplete")}: ${task.title}`} aria-pressed={done} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-primary px-4 font-bold text-white disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"><Check className="size-4" aria-hidden="true" />{done ? (locale === "en" ? "Completed" : "הושלמה") : (locale === "en" ? "Done" : "סיימתי")}</button>
     </div>;
   }

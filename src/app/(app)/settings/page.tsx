@@ -449,8 +449,9 @@ export default function SettingsPage() {
   return (
     <div className="space-y-4 bg-background min-h-dvh" dir="rtl">
       {/* Header with gradient */}
-      <div className="gradient-hero mesh-overlay rounded-b-[2rem] px-4 pt-6 pb-5 text-center overflow-hidden">
-        <h1 className="text-xl font-bold text-white tracking-tight relative z-10">⚙️ {t("settings.title")}</h1>
+      <div data-joy-restore="settings" className="joy-surface joy-surface-peach flex items-center justify-center gap-4 rounded-b-[2rem] px-4 pt-6 pb-5">
+        <Image src="/illustrations/category-general.jpg" alt="" width={64} height={64} className="h-16 w-16 rounded-xl object-cover" />
+        <h1 className="text-xl font-bold text-foreground tracking-tight">{t("settings.title")}</h1>
       </div>
 
       <div className="px-4 space-y-4">
