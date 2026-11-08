@@ -126,7 +126,15 @@ See `.env.example` for all optional variables (WhatsApp, Google Calendar, Web Pu
 
 ### Database Setup
 
-Run `supabase/migration.sql` in the Supabase SQL Editor to create all tables and RLS policies.
+**Database setup is unresolved:** `supabase/migration.sql` and
+`supabase/migrations/001_initial.sql` are incompatible baselines. Running the
+numbered migrations alone on an empty database fails at 003 because households
+is missing; running the standalone file before 001 fails on duplicate policies.
+Neither path is a complete, verified rebuild. Do not apply either path to a
+real project as a setup recipe. Reconcile the historical schema against an
+approved, independently verified baseline and test every migration on a fresh
+isolated database before documenting or running a production procedure. See
+`supabase/local-bootstrap/README.md` for the experimental local-only reconstruction.
 
 ### Run
 
