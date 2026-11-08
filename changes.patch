@@ -1,0 +1,268 @@
+diff --git a/src/app/(app)/dashboard/page.tsx b/src/app/(app)/dashboard/page.tsx
+index c50a2ba..c5c3849 100644
+--- a/src/app/(app)/dashboard/page.tsx
++++ b/src/app/(app)/dashboard/page.tsx
+@@ -287,7 +287,7 @@ export default function DashboardPage() {
+       toast.success("הסימון נשמר לשליחה כשהחיבור יחזור");
+     } else {
+       if (isConfirmedCompletion(result)) setJoyConfirmation(Date.now());
+-      toast.success("המשימה סומנה כהושלמה", { className: "joy-success-toast", icon: <Image data-joy-restore="completion" src="/illustrations/tasks-done.jpg" alt="" width={56} height={56} className="h-14 w-14 rounded-xl object-cover" />, action: { label: "הוספת משוב", onClick: () => setCompletionModal({ isOpen: true, taskId, taskTitle: task.title }) } });
++      toast.success("המשימה סומנה כהושלמה", { className: "joy-success-toast", icon: <Image data-joy-restore="completion" src="/illustrations/tasks-done.jpg" alt="" width={40} height={40} className="h-10 w-10 rounded-xl object-cover" />, action: { label: "הוספת משוב", onClick: () => setCompletionModal({ isOpen: true, taskId, taskTitle: task.title }) } });
+     }
+     playComplete();
+     if (!result.id.startsWith("offline-")) void refetchTasks();
+@@ -435,7 +435,7 @@ export default function DashboardPage() {
+         <div>
+         <p className="text-sm font-semibold text-primary">{getHebrewDate(locale)}</p>
+         <h1 className="mt-2 text-3xl font-bold">{locale === "en" ? `Hello, ${displayName}` : greeting}</h1>
+-        <p className="mt-2 text-muted">{locale === "en" ? "Make space for what matters, one step at a time." : "נעשה מקום למה שחשוב, צעד אחד בכל פעם."}</p>
++        <p className="mt-2 text-muted">{locale === "en" ? "A little each day makes home nicer." : "קצת בכל יום, יותר נעים בבית."}</p>
+         </div>
+         <Image src="/illustrations/mascot-home.jpg" alt="" width={96} height={96} className="h-20 w-20 shrink-0 rounded-2xl object-cover sm:h-24 sm:w-24" />
+       </header>
+@@ -443,7 +443,7 @@ export default function DashboardPage() {
+         {seasonalMode.activeTemplate && <PesachCountdownBanner daysUntilHoliday={seasonalMode.daysUntilHoliday} progress={seasonalMode.progress} onTap={() => setShowSeasonalModal(true)} />}
+         <section aria-label="הצעד הבא" className="joy-surface joy-surface-honey rounded-2xl p-4 sm:p-6">
+           <h2 className="text-lg font-bold">{locale === "en" ? "Your next step" : "הצעד הבא שלך"}</h2>
+-          <p className="mb-4 mt-1 text-sm text-muted">{locale === "en" ? "The most recently added open task in your household list." : "המשימה הפתוחה שנוספה לאחרונה לרשימת הבית."}</p>
++          {!tasksLoading && !tasksError && <p className="mb-4 mt-1 text-sm text-muted">{remainingTasks.length ? (locale === "en" ? "The most recently added open task in your household list." : "המשימה הפתוחה שנוספה לאחרונה לרשימת הבית.") : (locale === "en" ? "Add a task whenever you are ready." : "אפשר להוסיף משימה כשתרצו.")}</p>}
+           {tasksLoading ? <TaskListSkeleton count={1} /> : tasksError ? <div role="alert"><p>{locale === "en" ? "We could not load your tasks. Check your connection and try again." : "לא הצלחנו לטעון את המשימות. כדאי לבדוק את החיבור ולנסות שוב."}</p><button type="button" onClick={() => refetchTasks()} className="min-h-11 font-semibold text-primary">{locale === "en" ? "Try again" : "ניסיון נוסף"}</button></div> : remainingTasks.length ? <TodayOverview tasks={remainingTasks.slice(0, 1)} onToggle={handleToggle} single /> : <div data-joy-restore="empty" className="flex items-center gap-4 rounded-xl bg-surface p-4"><Image src="/illustrations/empty-tasks.jpg" alt="" width={88} height={88} className="h-20 w-20 shrink-0 rounded-xl object-cover" /><p className="text-muted">{locale === "en" ? "There are no open tasks in the list right now." : "אין כרגע משימות פתוחות ברשימה."}</p></div>}
+           {!tasksLoading && !tasksError && <Link href="/tasks" className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary">{locale === "en" ? `${remainingTasks.length} tasks remaining · All tasks →` : `${remainingTasks.length} משימות נותרו · לכל המשימות ←`}</Link>}
+         </section>
+
+diff --git a/src/app/(app)/layout.tsx b/src/app/(app)/layout.tsx
+index 41b7c7e..7eb1b11 100644
+--- a/src/app/(app)/layout.tsx
++++ b/src/app/(app)/layout.tsx
+@@ -201,6 +201,10 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
+ 
+         <PageTransition>{children}</PageTransition>
+         <WelcomeGiftModal />
++      <details id="house-tools" className="mx-auto mt-4 max-w-lg px-4 lg:max-w-4xl">
++        <summary className="flex min-h-12 cursor-pointer items-center rounded-xl border border-border bg-surface px-4 font-semibold focus-visible:outline-2 focus-visible:outline-primary">{locale === "en" ? "Household tools" : "כלי הבית"}</summary>
++        <div className="flex flex-wrap gap-2 py-3"><QuickLoveButton /><SurpriseBox /><WeeklyWheel /></div>
++      </details>
+       </main>
+       <BottomNav />
+ 
+@@ -210,10 +214,6 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
+           reaction peek for something the user is already looking at. */}
+       {assistantVisible && <ChatFAB onClick={() => setChatOpen(true)} panelOpen={chatOpen} />}
+ 
+-      <details id="house-tools" className="mx-auto mb-44 max-w-lg px-4 lg:mb-8 lg:max-w-4xl">
+-        <summary className="flex min-h-12 cursor-pointer items-center rounded-xl border border-border bg-surface px-4 font-semibold focus-visible:outline-2 focus-visible:outline-primary">{locale === "en" ? "Household tools" : "כלי הבית"}</summary>
+-        <div className="flex flex-wrap gap-2 py-3"><QuickLoveButton /><SurpriseBox /><WeeklyWheel /></div>
+-      </details>
+ 
+       {/* Alopik v2 Phase 3: Celebration toast for new pet/background unlocks */}
+       <CelebrationToast items={celebrationItems} />
+
+diff --git a/src/app/(app)/settings/page.tsx b/src/app/(app)/settings/page.tsx
+index d7134aa..d67dc7a 100644
+--- a/src/app/(app)/settings/page.tsx
++++ b/src/app/(app)/settings/page.tsx
+@@ -50,6 +50,7 @@ import {
+   Trophy,
+   Sliders,
+   LogOut,
++  Settings,
+ } from "lucide-react";
+ import Link from "next/link";
+ import { usePWAInstall } from "@/hooks/usePWAInstall";
+@@ -451,7 +452,7 @@ export default function SettingsPage() {
+       {/* Header with gradient */}
+       <div data-joy-restore="settings" className="joy-surface joy-surface-peach flex items-center justify-center gap-4 rounded-b-[2rem] px-4 pt-6 pb-5">
+         <Image src="/illustrations/category-general.jpg" alt="" width={64} height={64} className="h-16 w-16 rounded-xl object-cover" />
+-        <h1 className="text-xl font-bold text-foreground tracking-tight">{t("settings.title")}</h1>
++        <h1 className="flex items-center gap-2 text-xl font-bold text-foreground tracking-tight"><Settings className="h-5 w-5" aria-hidden="true" />{t("settings.title")}</h1>
+       </div>
+ 
+       <div className="px-4 space-y-4">
+
+diff --git a/src/app/(app)/tasks/page.tsx b/src/app/(app)/tasks/page.tsx
+index 343dc28..a958465 100644
+--- a/src/app/(app)/tasks/page.tsx
++++ b/src/app/(app)/tasks/page.tsx
+@@ -445,7 +445,7 @@ export default function TasksPage() {
+         if (result) {
+           if (isConfirmedCompletion(result)) {
+             setJoyConfirmation(Date.now());
+-            toast.success(t("tasks.taskCompleted"), { className: "joy-success-toast", icon: <Image data-joy-restore="completion" src="/illustrations/tasks-done.jpg" alt="" width={56} height={56} className="h-14 w-14 rounded-xl object-cover" /> });
++            toast.success(t("tasks.taskCompleted"), { className: "joy-success-toast", icon: <Image data-joy-restore="completion" src="/illustrations/tasks-done.jpg" alt="" width={40} height={40} className="h-10 w-10 rounded-xl object-cover" /> });
+           } else {
+             toast.info(locale === "he" ? "הסימון נשמר לשליחה כשהחיבור יחזור" : "Saved to send when the connection returns");
+           }
+
+diff --git a/src/app/globals.css b/src/app/globals.css
+index 9165117..c2c9f77 100644
+--- a/src/app/globals.css
++++ b/src/app/globals.css
+@@ -706,5 +706,6 @@ textarea:focus-visible {
+ }
+ 
+ /* Give the illustrated success icon its own space in Sonner’s single toast. */
+-[data-sonner-toast][data-styled="true"].joy-success-toast [data-icon] { width: 56px; height: 56px; }
++[data-sonner-toast][data-styled="true"].joy-success-toast { padding: 12px; }
++[data-sonner-toast][data-styled="true"].joy-success-toast [data-icon] { width: 40px; height: 40px; }
+ [data-sonner-toast][data-styled="true"].joy-success-toast [data-button] { min-height: 44px; }
+
+diff --git a/src/app/upgrade/page.tsx b/src/app/upgrade/page.tsx
+index 20ebbd9..1dd9f15 100644
+--- a/src/app/upgrade/page.tsx
++++ b/src/app/upgrade/page.tsx
+@@ -43,7 +43,7 @@ export default function UpgradePage() {
+       return;
+     }
+     if (!profile?.household_id) {
+-      toast.error(t("subscriptionSection.upgradeError"));
++      toast.error(t("settings.subscriptionSection.upgradeError"));
+       return;
+     }
+     setCheckingOut(true);
+@@ -55,13 +55,13 @@ export default function UpgradePage() {
+       });
+       const data = await res.json();
+       if (!res.ok || !data.checkoutUrl) {
+-        toast.error(data.error || t("subscriptionSection.upgradeError"));
++        toast.error(data.error || t("settings.subscriptionSection.upgradeError"));
+         setCheckingOut(false);
+         return;
+       }
+       window.location.href = data.checkoutUrl;
+     } catch {
+-      toast.error(t("subscriptionSection.upgradeError"));
++      toast.error(t("settings.subscriptionSection.upgradeError"));
+       setCheckingOut(false);
+     }
+   };
+
+diff --git a/src/components/bottom-nav.tsx b/src/components/bottom-nav.tsx
+index 9b926d0..de9a7df 100644
+--- a/src/components/bottom-nav.tsx
++++ b/src/components/bottom-nav.tsx
+@@ -17,7 +17,7 @@ export function BottomNav() {
+   const pathname = usePathname();
+   const { locale } = useTranslation();
+   const secondary = ["/more", "/weekly", "/stats", "/settings", "/history", "/emergency", "/playlists"];
+-  return <nav aria-label={locale === "en" ? "Main navigation" : "ניווט ראשי"} className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 px-1 pb-[env(safe-area-inset-bottom)] shadow-lg lg:inset-y-0 lg:right-0 lg:left-auto lg:w-56 lg:border-t-0 lg:border-l lg:px-4 lg:pt-8">
++  return <nav aria-label={locale === "en" ? "Main navigation" : "ניווט ראשי"} className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface px-1 pb-[env(safe-area-inset-bottom)] shadow-lg lg:inset-y-0 lg:right-0 lg:left-auto lg:w-56 lg:border-t-0 lg:border-l lg:px-4 lg:pt-8">
+     <div className="hidden px-3 pb-8 text-xl font-bold lg:block">בית בסדר</div>
+     <div className="flex justify-around lg:flex-col lg:gap-1">
+       {items.map(({ href, label, en, icon: Icon }) => {
+
+diff --git a/src/components/settings/subscription-section.tsx b/src/components/settings/subscription-section.tsx
+index 4fd3403..99c3a53 100644
+--- a/src/components/settings/subscription-section.tsx
++++ b/src/components/settings/subscription-section.tsx
+@@ -63,10 +63,10 @@ function SubscriptionSectionContent() {
+ 
+   useEffect(() => {
+     if (upgradeParam === "success" && isPlus) {
+-      toast.success(t("subscriptionSection.plusStatus"));
++      toast.success(t("settings.subscriptionSection.plusStatus"));
+     }
+     if (upgradeParam === "cancelled") {
+-      toast.info(t("subscriptionSection.canceledStatus"));
++      toast.info(t("settings.subscriptionSection.canceledStatus"));
+     }
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+   }, [upgradeParam, isPlus]);
+@@ -82,20 +82,20 @@ function SubscriptionSectionContent() {
+       });
+       const data = await res.json();
+       if (!res.ok || !data.checkoutUrl) {
+-        toast.error(data.error || t("subscriptionSection.upgradeError"));
++        toast.error(data.error || t("settings.subscriptionSection.upgradeError"));
+         setCheckingOut(false);
+         return;
+       }
+       window.location.href = data.checkoutUrl;
+     } catch {
+-      toast.error(t("subscriptionSection.upgradeError"));
++      toast.error(t("settings.subscriptionSection.upgradeError"));
+       setCheckingOut(false);
+     }
+   }
+ 
+   async function handleCancel() {
+     if (!householdId) return;
+-    if (!confirm(t("subscriptionSection.cancelConfirm"))) return;
++    if (!confirm(t("settings.subscriptionSection.cancelConfirm"))) return;
+     setCanceling(true);
+     try {
+       const res = await fetch("/api/sumit/cancel-subscription", {
+@@ -105,14 +105,14 @@ function SubscriptionSectionContent() {
+       });
+       const data = await res.json();
+       if (!res.ok) {
+-        toast.error(data.error || t("subscriptionSection.cancelError"));
++        toast.error(data.error || t("settings.subscriptionSection.cancelError"));
+         setCanceling(false);
+         return;
+       }
+-      toast.success(t("subscriptionSection.cancelSuccess"));
++      toast.success(t("settings.subscriptionSection.cancelSuccess"));
+       refresh();
+     } catch {
+-      toast.error(t("subscriptionSection.cancelError"));
++      toast.error(t("settings.subscriptionSection.cancelError"));
+     } finally {
+       setCanceling(false);
+     }
+@@ -120,12 +120,12 @@ function SubscriptionSectionContent() {
+ 
+   const statusLabel =
+     status === "past_due"
+-      ? t("subscriptionSection.pastDueStatus")
++      ? t("settings.subscriptionSection.pastDueStatus")
+       : status === "canceled"
+-        ? t("subscriptionSection.canceledStatus")
++        ? t("settings.subscriptionSection.canceledStatus")
+         : isPlus
+-          ? t("subscriptionSection.plusStatus")
+-          : t("subscriptionSection.freeStatus");
++          ? t("settings.subscriptionSection.plusStatus")
++          : t("settings.subscriptionSection.freeStatus");
+ 
+   return (
+     <div className="space-y-3">
+@@ -146,13 +146,13 @@ function SubscriptionSectionContent() {
+ 
+       {isPlus && currentPeriodEnd && !canceledAt && (
+         <p className="text-xs text-muted">
+-          {t("subscriptionSection.renewsOn")}: {new Date(currentPeriodEnd).toLocaleDateString("he-IL")}
++          {t("settings.subscriptionSection.renewsOn")}: {new Date(currentPeriodEnd).toLocaleDateString("he-IL")}
+         </p>
+       )}
+ 
+       {status === "canceled" && canceledAt && (
+         <p className="text-xs text-muted">
+-          {t("subscriptionSection.canceledOn")}: {new Date(canceledAt).toLocaleDateString("he-IL")}
++          {t("settings.subscriptionSection.canceledOn")}: {new Date(canceledAt).toLocaleDateString("he-IL")}
+         </p>
+       )}
+ 
+@@ -163,7 +163,7 @@ function SubscriptionSectionContent() {
+           disabled={canceling}
+           className="w-full py-2.5 rounded-xl border border-red-200 dark:border-red-800 text-red-500 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-40"
+         >
+-          {canceling ? <Loader2 className="w-4 h-4 animate-spin mx-auto" aria-hidden="true" /> : t("subscriptionSection.cancelButton")}
++          {canceling ? <Loader2 className="w-4 h-4 animate-spin mx-auto" aria-hidden="true" /> : t("settings.subscriptionSection.cancelButton")}
+         </button>
+       ) : (
+         <button
+@@ -172,12 +172,12 @@ function SubscriptionSectionContent() {
+           disabled={checkingOut || !user}
+           className="w-full py-2.5 rounded-xl gradient-primary text-white text-sm font-bold active:scale-[0.97] transition-transform disabled:opacity-40"
+         >
+-          {checkingOut ? <Loader2 className="w-4 h-4 animate-spin mx-auto" aria-hidden="true" /> : t("subscriptionSection.upgradeButton")}
++          {checkingOut ? <Loader2 className="w-4 h-4 animate-spin mx-auto" aria-hidden="true" /> : t("settings.subscriptionSection.upgradeButton")}
+         </button>
+       )}
+ 
+       {isPlus && (
+-        <p className="text-[11px] text-muted/80">{t("subscriptionSection.cancelNote")}</p>
++        <p className="text-[11px] text-muted/80">{t("settings.subscriptionSection.cancelNote")}</p>
+       )}
+     </div>
+   );

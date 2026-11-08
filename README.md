@@ -1,0 +1,1 @@
+Partial worktree backup from /root/work/growth-bayit-20261106/joy-new. Apply changes.patch to the exact base SHA; restore new-files/ to the matching paths. Base history, data, evidence, secrets, binaries, generated files, and scanner findings are excluded.
