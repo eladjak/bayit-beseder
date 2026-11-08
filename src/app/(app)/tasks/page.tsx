@@ -37,6 +37,7 @@ import {
   CATEGORY_KEY_TO_NAME,
   CATEGORY_NAME_TO_KEY,
   CATEGORY_ILLUSTRATIONS,
+  resolveCategoryKey,
   getCategoryColor,
   getCategoryLabel,
 } from "@/lib/categories";
@@ -238,9 +239,7 @@ export default function TasksPage() {
       dbTasks.map((dbTask) => {
         const categoryName = dbTask.category_id ? categoryMap[dbTask.category_id] : null;
         // Prefer dynamic category id lookup, fall back to hardcoded key
-        const categoryKey = categoryName
-          ? (dynamicCategoryNameToKey[categoryName] ?? CATEGORY_KEY_TO_NAME[categoryName] ?? "general")
-          : "general";
+        const categoryKey = resolveCategoryKey(categoryName, dynamicCategoryNameToKey);
 
         // Overdue is a one-off concept — a recurring chore is simply due again.
         // See isTaskOverdue: this is what produced the 43-item shame wall.
@@ -446,7 +445,7 @@ export default function TasksPage() {
         if (result) {
           if (isConfirmedCompletion(result)) {
             setJoyConfirmation(Date.now());
-            toast.success(t("tasks.taskCompleted"));
+            toast.success(t("tasks.taskCompleted"), { className: "joy-success-toast", icon: <Image data-joy-restore="completion" src="/illustrations/tasks-done.jpg" alt="" width={56} height={56} className="h-14 w-14 rounded-xl object-cover" /> });
           } else {
             toast.info(locale === "he" ? "הסימון נשמר לשליחה כשהחיבור יחזור" : "Saved to send when the connection returns");
           }
@@ -691,7 +690,7 @@ export default function TasksPage() {
 
   return (
     <div className="space-y-4" dir="rtl">
-      <JoyCompletion confirmation={joyConfirmation} message={locale === "he" ? "כל הכבוד, עוד צעד לבית נעים!" : "Nicely done!"} />
+      <JoyCompletion confirmation={joyConfirmation} />
       {/* Calm header and primary action */}
       <div className="px-4 pt-6 pb-3">
         <div className="flex items-center justify-between relative z-10">

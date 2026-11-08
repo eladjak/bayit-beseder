@@ -287,7 +287,7 @@ export default function DashboardPage() {
       toast.success("הסימון נשמר לשליחה כשהחיבור יחזור");
     } else {
       if (isConfirmedCompletion(result)) setJoyConfirmation(Date.now());
-      toast.success("המשימה סומנה כהושלמה", { icon: <Image src="/illustrations/tasks-done.jpg" alt="" width={40} height={40} className="rounded-lg" />, action: { label: "הוספת משוב", onClick: () => setCompletionModal({ isOpen: true, taskId, taskTitle: task.title }) } });
+      toast.success("המשימה סומנה כהושלמה", { className: "joy-success-toast", icon: <Image data-joy-restore="completion" src="/illustrations/tasks-done.jpg" alt="" width={56} height={56} className="h-14 w-14 rounded-xl object-cover" />, action: { label: "הוספת משוב", onClick: () => setCompletionModal({ isOpen: true, taskId, taskTitle: task.title }) } });
     }
     playComplete();
     if (!result.id.startsWith("offline-")) void refetchTasks();
@@ -395,7 +395,7 @@ export default function DashboardPage() {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <JoyCompletion confirmation={joyConfirmation} message={locale === "en" ? "Nicely done!" : "כל הכבוד, עוד צעד לבית נעים!"} />
+      <JoyCompletion confirmation={joyConfirmation} />
       {/* Offline indicator */}
       <OfflineIndicator />
 

@@ -697,13 +697,14 @@ textarea:focus-visible {
   :root:not(.light) .joy-surface-peach { background: #342a31; }
   :root:not(.light) .joy-surface-mint { background: #26332f; }
 }
-@media (prefers-reduced-motion: no-preference) {
-  .joy-completion { animation: joy-arrive 180ms ease-out both; }
-  @keyframes joy-arrive { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-}
+
 .dark .joy-surface .text-primary { color: #bdb9ff; }
 .dark .joy-surface .bg-primary { background-color: #4f46e5; }
 @media (prefers-color-scheme: dark) {
   :root:not(.light) .joy-surface .text-primary { color: #bdb9ff; }
   :root:not(.light) .joy-surface .bg-primary { background-color: #4f46e5; }
 }
+
+/* Give the illustrated success icon its own space in Sonner’s single toast. */
+[data-sonner-toast][data-styled="true"].joy-success-toast [data-icon] { width: 56px; height: 56px; }
+[data-sonner-toast][data-styled="true"].joy-success-toast [data-button] { min-height: 44px; }

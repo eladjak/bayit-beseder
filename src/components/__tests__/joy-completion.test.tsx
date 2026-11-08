@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render } from "@testing-library/react";
 import { JoyCompletion, isConfirmedCompletion } from "../joy-completion";
 
 const confetti = vi.hoisted(() => vi.fn());
@@ -14,10 +14,9 @@ describe("completion acknowledgement", () => {
     expect(isConfirmedCompletion({ id: "server-123" })).toBe(true);
   });
 
-  it("shows a text acknowledgement without confetti for reduced motion", async () => {
+  it("does not launch confetti for reduced motion", () => {
     vi.stubGlobal("matchMedia", vi.fn(() => ({ matches: true })));
-    render(<JoyCompletion confirmation={1} message="כל הכבוד" />);
-    await waitFor(() => expect(screen.getByRole("status").textContent).toContain("כל הכבוד"));
+    render(<JoyCompletion confirmation={1} />);
     expect(confetti).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
   });
