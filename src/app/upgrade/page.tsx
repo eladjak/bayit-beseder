@@ -43,7 +43,7 @@ export default function UpgradePage() {
       return;
     }
     if (!profile?.household_id) {
-      toast.error(t("subscriptionSection.upgradeError"));
+      toast.error(t("settings.subscriptionSection.upgradeError"));
       return;
     }
     setCheckingOut(true);
@@ -55,13 +55,13 @@ export default function UpgradePage() {
       });
       const data = await res.json();
       if (!res.ok || !data.checkoutUrl) {
-        toast.error(data.error || t("subscriptionSection.upgradeError"));
+        toast.error(data.error || t("settings.subscriptionSection.upgradeError"));
         setCheckingOut(false);
         return;
       }
       window.location.href = data.checkoutUrl;
     } catch {
-      toast.error(t("subscriptionSection.upgradeError"));
+      toast.error(t("settings.subscriptionSection.upgradeError"));
       setCheckingOut(false);
     }
   };

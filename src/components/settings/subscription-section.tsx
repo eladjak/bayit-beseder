@@ -63,10 +63,10 @@ function SubscriptionSectionContent() {
 
   useEffect(() => {
     if (upgradeParam === "success" && isPlus) {
-      toast.success(t("subscriptionSection.plusStatus"));
+      toast.success(t("settings.subscriptionSection.plusStatus"));
     }
     if (upgradeParam === "cancelled") {
-      toast.info(t("subscriptionSection.canceledStatus"));
+      toast.info(t("settings.subscriptionSection.canceledStatus"));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [upgradeParam, isPlus]);
@@ -82,20 +82,20 @@ function SubscriptionSectionContent() {
       });
       const data = await res.json();
       if (!res.ok || !data.checkoutUrl) {
-        toast.error(data.error || t("subscriptionSection.upgradeError"));
+        toast.error(data.error || t("settings.subscriptionSection.upgradeError"));
         setCheckingOut(false);
         return;
       }
       window.location.href = data.checkoutUrl;
     } catch {
-      toast.error(t("subscriptionSection.upgradeError"));
+      toast.error(t("settings.subscriptionSection.upgradeError"));
       setCheckingOut(false);
     }
   }
 
   async function handleCancel() {
     if (!householdId) return;
-    if (!confirm(t("subscriptionSection.cancelConfirm"))) return;
+    if (!confirm(t("settings.subscriptionSection.cancelConfirm"))) return;
     setCanceling(true);
     try {
       const res = await fetch("/api/sumit/cancel-subscription", {
@@ -105,14 +105,14 @@ function SubscriptionSectionContent() {
       });
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.error || t("subscriptionSection.cancelError"));
+        toast.error(data.error || t("settings.subscriptionSection.cancelError"));
         setCanceling(false);
         return;
       }
-      toast.success(t("subscriptionSection.cancelSuccess"));
+      toast.success(t("settings.subscriptionSection.cancelSuccess"));
       refresh();
     } catch {
-      toast.error(t("subscriptionSection.cancelError"));
+      toast.error(t("settings.subscriptionSection.cancelError"));
     } finally {
       setCanceling(false);
     }
@@ -120,12 +120,12 @@ function SubscriptionSectionContent() {
 
   const statusLabel =
     status === "past_due"
-      ? t("subscriptionSection.pastDueStatus")
+      ? t("settings.subscriptionSection.pastDueStatus")
       : status === "canceled"
-        ? t("subscriptionSection.canceledStatus")
+        ? t("settings.subscriptionSection.canceledStatus")
         : isPlus
-          ? t("subscriptionSection.plusStatus")
-          : t("subscriptionSection.freeStatus");
+          ? t("settings.subscriptionSection.plusStatus")
+          : t("settings.subscriptionSection.freeStatus");
 
   return (
     <div className="space-y-3">
@@ -146,13 +146,13 @@ function SubscriptionSectionContent() {
 
       {isPlus && currentPeriodEnd && !canceledAt && (
         <p className="text-xs text-muted">
-          {t("subscriptionSection.renewsOn")}: {new Date(currentPeriodEnd).toLocaleDateString("he-IL")}
+          {t("settings.subscriptionSection.renewsOn")}: {new Date(currentPeriodEnd).toLocaleDateString("he-IL")}
         </p>
       )}
 
       {status === "canceled" && canceledAt && (
         <p className="text-xs text-muted">
-          {t("subscriptionSection.canceledOn")}: {new Date(canceledAt).toLocaleDateString("he-IL")}
+          {t("settings.subscriptionSection.canceledOn")}: {new Date(canceledAt).toLocaleDateString("he-IL")}
         </p>
       )}
 
@@ -163,7 +163,7 @@ function SubscriptionSectionContent() {
           disabled={canceling}
           className="w-full py-2.5 rounded-xl border border-red-200 dark:border-red-800 text-red-500 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-40"
         >
-          {canceling ? <Loader2 className="w-4 h-4 animate-spin mx-auto" aria-hidden="true" /> : t("subscriptionSection.cancelButton")}
+          {canceling ? <Loader2 className="w-4 h-4 animate-spin mx-auto" aria-hidden="true" /> : t("settings.subscriptionSection.cancelButton")}
         </button>
       ) : (
         <button
@@ -172,12 +172,12 @@ function SubscriptionSectionContent() {
           disabled={checkingOut || !user}
           className="w-full py-2.5 rounded-xl gradient-primary text-white text-sm font-bold active:scale-[0.97] transition-transform disabled:opacity-40"
         >
-          {checkingOut ? <Loader2 className="w-4 h-4 animate-spin mx-auto" aria-hidden="true" /> : t("subscriptionSection.upgradeButton")}
+          {checkingOut ? <Loader2 className="w-4 h-4 animate-spin mx-auto" aria-hidden="true" /> : t("settings.subscriptionSection.upgradeButton")}
         </button>
       )}
 
       {isPlus && (
-        <p className="text-[11px] text-muted/80">{t("subscriptionSection.cancelNote")}</p>
+        <p className="text-[11px] text-muted/80">{t("settings.subscriptionSection.cancelNote")}</p>
       )}
     </div>
   );

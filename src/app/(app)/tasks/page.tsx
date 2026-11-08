@@ -445,7 +445,7 @@ export default function TasksPage() {
         if (result) {
           if (isConfirmedCompletion(result)) {
             setJoyConfirmation(Date.now());
-            toast.success(t("tasks.taskCompleted"), { className: "joy-success-toast", icon: <Image data-joy-restore="completion" src="/illustrations/tasks-done.jpg" alt="" width={56} height={56} className="h-14 w-14 rounded-xl object-cover" /> });
+            toast.success(t("tasks.taskCompleted"), { className: "joy-success-toast", icon: <Image data-joy-restore="completion" src="/illustrations/tasks-done.jpg" alt="" width={40} height={40} className="h-10 w-10 rounded-xl object-cover" /> });
           } else {
             toast.info(locale === "he" ? "הסימון נשמר לשליחה כשהחיבור יחזור" : "Saved to send when the connection returns");
           }

@@ -706,5 +706,6 @@ textarea:focus-visible {
 }
 
 /* Give the illustrated success icon its own space in Sonner’s single toast. */
-[data-sonner-toast][data-styled="true"].joy-success-toast [data-icon] { width: 56px; height: 56px; }
+[data-sonner-toast][data-styled="true"].joy-success-toast { padding: 12px; }
+[data-sonner-toast][data-styled="true"].joy-success-toast [data-icon] { width: 40px; height: 40px; }
 [data-sonner-toast][data-styled="true"].joy-success-toast [data-button] { min-height: 44px; }
