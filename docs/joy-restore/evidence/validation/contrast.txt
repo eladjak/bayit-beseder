@@ -1,0 +1,18 @@
+Light surface text
+#2a2440 #fff2dc=13.33:1 #fae9e2=12.51:1 #e6f2e9=12.80:1
+#5c5472 #fff2dc=6.40:1 #fae9e2=6.01:1 #e6f2e9=6.15:1
+#4f46e5 #fff2dc=5.68:1 #fae9e2=5.33:1 #e6f2e9=5.46:1
+Dark surface text
+#e2e0f0 #332c28=10.55:1 #342a31=10.62:1 #26332f=10.12:1
+#b0accc #332c28=6.28:1 #342a31=6.32:1 #26332f=6.02:1
+#bdb9ff #332c28=7.54:1 #342a31=7.59:1 #26332f=7.23:1
+Category labels
+#523c30 #fce9d4=8.67:1 #dceff3=8.64:1 #f3e1e5=8.16:1 #e1efdf=8.60:1
+#214c57 #fce9d4=7.94:1 #dceff3=7.91:1 #f3e1e5=7.47:1 #e1efdf=7.88:1
+#603b4a #fce9d4=7.99:1 #dceff3=7.96:1 #f3e1e5=7.52:1 #e1efdf=7.93:1
+#315339 #fce9d4=7.31:1 #dceff3=7.29:1 #f3e1e5=6.89:1 #e1efdf=7.26:1
+Dark label
+#eee8ff #36314b=10.38:1
+Primary button
+#ffffff #4f46e5=6.29:1
+New surfaces do not introduce control strokes. Existing checkbox and focus indicators remain unchanged.
