@@ -1,0 +1,116 @@
+
+> bayit-beseder@1.0.0 lint
+> eslint
+
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/__tests__/push-notifications.test.mjs
+  11:43  warning  'payload' is defined but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/app/(app)/settings/page.tsx
+  1017:26  warning  '_tasks' is defined but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/app/(app)/shopping/page.tsx
+  53:26  warning  Compilation Skipped: Use of incompatible library
+
+This API returns functions which cannot be memoized without leading to stale UI. To prevent this, by default React Compiler will skip memoizing this component/hook. However, you may see issues if values from this API are passed to other components/hooks that are memoized.
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/app/(app)/shopping/page.tsx:53:26
+  51 |   const containerRef = useRef<HTMLDivElement>(null);
+  52 |
+> 53 |   const rowVirtualizer = useVirtualizer({
+     |                          ^^^^^^^^^^^^^^ TanStack Virtual's `useVirtualizer()` API returns functions that cannot be memoized safely
+  54 |     count: items.length,
+  55 |     getScrollElement: () => containerRef.current,
+  56 |     estimateSize: () => ITEM_HEIGHT + ITEM_GAP,  react-hooks/incompatible-library
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/app/(app)/stats/page.tsx
+   10:10  warning  'ACHIEVEMENTS' is defined but never used                   @typescript-eslint/no-unused-vars
+  439:24  warning  'categoryDistribution' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  518:9   warning  'unlockedAchievements' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/app/(app)/tasks/page.tsx
+  457:5  warning  React Hook useCallback has an unnecessary dependency: 'updateTask'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/app/(app)/weekly/page.tsx
+   35:24  warning  'TaskInsert' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+  134:6   warning  React Hook useCallback has an unnecessary dependency: 'partner'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/app/api/coaching/insights/route.ts
+  15:27  warning  '_request' is defined but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/app/blog/page.tsx
+  2:29  warning  'SanityPost' is defined but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/app/first-week/page.tsx
+  88:7  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/components/calendar-settings.tsx
+  154:6  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/components/category-card.tsx
+  18:3  warning  'categoryKey' is defined but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/components/dashboard/coaching-tips.tsx
+  161:10  warning  'aiLoading' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/components/gamification/weekly-challenges.tsx
+  133:3  warning  'defaultOpen' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  185:3  warning  'weekNum' is defined but never used               @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/components/gamification/weekly-share-card.tsx
+  4:18  warning  'Download' is defined but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/components/invite-partner.tsx
+  65:6  warning  React Hook useEffect has a missing dependency: 't'. Either include it or remove the dependency array    react-hooks/exhaustive-deps
+  85:6  warning  React Hook useCallback has a missing dependency: 't'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/components/playlist-player.tsx
+  84:3  warning  'isRunning' is defined but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/components/print-tasks.tsx
+  75:9  warning  'categoryMap' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/components/setup-wizard/setup-wizard.tsx
+  78:9  warning  'progress' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/components/tasks/calendar-view.tsx
+  93:15  warning  The attribute aria-pressed is not supported by the role gridcell  jsx-a11y/role-supports-aria-props
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/components/weekly/weekly-generator-modal.tsx
+  861:3  warning  'plan' is defined but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/components/weekly/weekly-stats.tsx
+  28:3  warning  'partnerName' is defined but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/hooks/useCalendarData.ts
+  141:11  warning  'dt' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/hooks/useShoppingList.ts
+  543:6  warning  React Hook useCallback has an unnecessary dependency: 'items'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/hooks/useTaskCategories.ts
+  145:25  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  247:46  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  261:23  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  273:23  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  293:11  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/hooks/useUserAchievements.ts
+  6:11  warning  'UserAchievementRecord' is defined but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/lib/__tests__/google-calendar.dst.test.ts
+  1:32  warning  'beforeEach' is defined but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/lib/smart-scheduler.ts
+  61:17  warning  'category' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/lib/weekly-generator.ts
+   55:7  warning  'TARGET_MINUTES_PER_DAY' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  379:3  warning  '_originalDay' is defined but never used                     @typescript-eslint/no-unused-vars
+
+/root/work/growth-bayit-20261106/bayit-beseder/src/lib/whatsapp-messages.ts
+  95:10  warning  'getHebrewDay' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 39 problems (0 errors, 39 warnings)
+  0 errors and 5 warnings potentially fixable with the `--fix` option.
+

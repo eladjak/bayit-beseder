@@ -1,0 +1,107 @@
+
+> bayit-beseder@1.0.0 prebuild
+> node scripts/stamp-sw.mjs
+
+stamp-sw: no commit sha in env, leaving sw.js unchanged
+
+> bayit-beseder@1.0.0 build
+> next build
+
+▲ Next.js 16.2.9 (Turbopack)
+- Environments: .env.local
+
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+  Creating an optimized production build ...
+✓ Compiled successfully in 10.9s
+  Running TypeScript ...
+  Finished TypeScript in 20.7s ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/58) ...
+  Generating static pages using 15 workers (14/58) 
+  Generating static pages using 15 workers (28/58) 
+  Generating static pages using 15 workers (43/58) 
+✓ Generating static pages using 15 workers (58/58) in 1407ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /about
+├ ƒ /api/agent-tokens
+├ ƒ /api/agent-tokens/[id]
+├ ƒ /api/agent/brief
+├ ƒ /api/agent/capabilities
+├ ○ /api/agent/openapi.json
+├ ƒ /api/agent/plan
+├ ƒ /api/agent/prep
+├ ƒ /api/agent/task
+├ ƒ /api/ai/chat
+├ ƒ /api/ai/coaching-tip
+├ ƒ /api/auth/callback/google-calendar
+├ ƒ /api/calendar/connect
+├ ƒ /api/calendar/disconnect
+├ ƒ /api/calendar/events
+├ ƒ /api/calendar/sync
+├ ƒ /api/coaching/insights
+├ ƒ /api/cron/auto-schedule
+├ ƒ /api/cron/calendar-sync
+├ ƒ /api/cron/daily-brief
+├ ƒ /api/cron/daily-summary
+├ ƒ /api/feedback
+├ ƒ /api/first-week
+├ ƒ /api/invite
+├ ƒ /api/invite/join
+├ ƒ /api/love-tokens/read
+├ ƒ /api/love-tokens/sent
+├ ƒ /api/mcp
+├ ƒ /api/meals
+├ ƒ /api/meals/plan
+├ ƒ /api/meals/plan/day
+├ ƒ /api/meals/shopping-suggest
+├ ƒ /api/prices/candidates
+├ ƒ /api/prices/cities
+├ ƒ /api/prices/compare
+├ ƒ /api/prices/pin
+├ ƒ /api/prices/status
+├ ƒ /api/push/send
+├ ƒ /api/push/subscribe
+├ ƒ /api/seed
+├ ƒ /api/sumit/cancel-subscription
+├ ƒ /api/sumit/checkout
+├ ƒ /api/sumit/webhook
+├ ƒ /api/whatsapp/send
+├ ƒ /api/whatsapp/webhook
+├ ○ /blog
+├ ƒ /callback
+├ ○ /contact
+├ ○ /dashboard
+├ ○ /emergency
+├ ○ /first-week
+├ ○ /history
+├ ○ /how-it-works
+├ ○ /icon.svg
+├ ƒ /invite/[code]
+├ ○ /login
+├ ○ /meals
+├ ○ /more
+├ ○ /offline
+├ ○ /playlists
+├ ○ /privacy
+├ ○ /register
+├ ○ /settings
+├ ○ /shopping
+├ ○ /shopping/prices
+├ ○ /sitemap.xml
+├ ○ /stats
+├ ○ /tasks
+├ ○ /tasks/print
+├ ○ /terms
+├ ○ /upgrade
+└ ○ /weekly
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
