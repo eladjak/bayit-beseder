@@ -1,5 +1,9 @@
 # BayitBeSeder (בית בסדר) - Progress
 
+## 2026-11-08 — Joy restore merged; live verification incomplete
+
+PR #38 merged at 08:09:23 UTC to master `f6610dac355e46298416ae8e605850f6f7479840`. Pre-merge checks: TypeScript and build passed, 907 Vitest, 154 Node and 28 Playwright tests passed against the production build; lint had 39 warnings and no errors. Earlier local pre-restart evidence records Vercel deployment `dpl_7NkXG9n4EGy9dS24LYQ2KNs6zE3q` READY, a landing HTTP 200 and the landing marker; the login browser showed a security checkpoint; deployment status was not rechecked via the Vercel API. The custom domain is recorded in this repository, but its current deployment association was not verified. At 08:19 UTC, requests from this server to both recorded public domains returned 403 for `/` and `/login`, so current served content and markers remain unverified. No real fixture account was found and no authenticated production dashboard was tested. Historical screenshots and current HTTP results are in `docs/joy-restore/evidence/release/`; the PC browser checklist is in `docs/STATUS-he.md`. Rollback options are in `docs/joy-restore/ROLLBACK.md`.
+
 ## 2026-11-08 — Joy restore release preparation
 
 The simple redesign retained its clear navigation and hierarchy; joy restore adds warm surfaces, original illustrations, honest empty states and brief confirmed-completion feedback. Floating buttons, metric clutter, looping animations and unverified streak rewards remain absent. See `docs/STATUS-he.md`, `docs/joy-restore/REPORT-he.md`, and `docs/joy-restore/ROLLBACK.md`. Release verification is recorded in `docs/joy-restore/evidence/release/`; SQL requires an isolated database.
