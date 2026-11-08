@@ -1,0 +1,4 @@
+locator.click: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('a[href="/login"]').first()[22m
+

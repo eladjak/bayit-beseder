@@ -1,0 +1,29 @@
+UTC: 2026-11-08T08:19:26.650589+00:00
+
+URL https://www.bayitbeseder.com/
+HTTP 403
+Effective URL https://www.bayitbeseder.com/
+Content type text/html; charset=utf-8
+curl exit 0
+data-joy-restore landing marker: False
+
+URL https://www.bayitbeseder.com/login
+HTTP 403
+Effective URL https://www.bayitbeseder.com/login
+Content type text/html; charset=utf-8
+curl exit 0
+data-joy-restore landing marker: False
+
+URL https://bayit-beseder.vercel.app/
+HTTP 403
+Effective URL https://bayit-beseder.vercel.app/
+Content type text/html; charset=utf-8
+curl exit 0
+data-joy-restore landing marker: False
+
+URL https://bayit-beseder.vercel.app/login
+HTTP 403
+Effective URL https://bayit-beseder.vercel.app/login
+Content type text/html; charset=utf-8
+curl exit 0
+data-joy-restore landing marker: False
