@@ -790,3 +790,9 @@ Env var: `GEMINI_API_KEY` (used by `src/app/api/ai/chat/route.ts` and `.../coach
 - Public first-week flow offers a deterministic plant-based menu, serving sizes, swaps, pantry checklist, local shopping list and optional invitation. The household save endpoint authenticates and fills only unoccupied plan dates; stable meal IDs allow sequential retry after a partial failure. Existing meal planner generates the connected shopping suggestions after user confirmation; pantry and responsibility selections remain local.
 - 375px browser flow and empty/error/blocked/mock-success screens inspected with inert Supabase configuration. Typecheck and production build passed with inert URL/key. New focused tests passed; full Vitest under Bun exposed existing Zod import runtime incompatibility, while Node tests passed. No real household database or invitation was exercised.
 - Implementation worker explicitly selected gpt-6.1-terra medium; integration and review completed in the parent execution. Static disconnected preview prepared separately; deploy failed while retrieving project. No production changes.
+
+### 2026-11-08 — GTM2 auth page review
+
+- Production public landing, login, registration, privacy and terms returned HTTP 200. No authorized repository test account was found, so signup and household isolation remain unverified; no production account or test data was created.
+- Added direct terms and privacy links to login and registration, and corrected padding that overlapped email and password-confirmation placeholders with icons. Local 375px review with dummy configuration confirmed links and no horizontal overflow.
+- Typecheck passed. Vitest did not start under Node 18 or Node 22.11; a newer Node 22.23.4 runtime exists and should be used by the next worker after escalation. Build status and further evidence are recorded outside the repo in `/root/work/gtm2-bayit/`.
