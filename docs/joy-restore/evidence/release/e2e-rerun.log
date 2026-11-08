@@ -1,0 +1,115 @@
+
+Running 28 tests using 1 worker
+
+  ✓   1 [mobile] › e2e/auth.spec.ts:4:3 › Authentication › login page loads correctly (1.4s)
+  ✓   2 [mobile] › e2e/auth.spec.ts:14:3 › Authentication › register page loads correctly (1.7s)
+  ✓   3 [mobile] › e2e/auth.spec.ts:19:3 › Authentication › unauthenticated users see demo/mock data on app pages (3.6s)
+  ✓   4 [mobile] › e2e/landing.spec.ts:4:3 › Landing Page › should load and display Hebrew content (1.7s)
+  ✓   5 [mobile] › e2e/landing.spec.ts:10:3 › Landing Page › should have login CTA (1.8s)
+  ✓   6 [mobile] › e2e/landing.spec.ts:16:3 › Landing Page › should navigate to login page (1.6s)
+  ✘   7 [mobile] › e2e/landing.spec.ts:22:3 › Landing Page › should display FAQ section (6.2s)
+  ✓   8 [mobile] › e2e/landing.spec.ts:31:3 › Landing Page › should have working language switcher (1.3s)
+  ✓   9 [mobile] › e2e/navigation.spec.ts:4:3 › Navigation › bottom nav renders on app pages (2.3s)
+  ✓  10 [mobile] › e2e/navigation.spec.ts:14:3 › Navigation › RTL direction on all pages (5.9s)
+  ✓  11 [mobile] › e2e/static-pages.spec.ts:12:5 › Static Pages › /privacy loads correctly (1.6s)
+  ✓  12 [mobile] › e2e/static-pages.spec.ts:12:5 › Static Pages › /terms loads correctly (1.1s)
+  ✓  13 [mobile] › e2e/static-pages.spec.ts:12:5 › Static Pages › /contact loads correctly (1.3s)
+  ✓  14 [mobile] › e2e/static-pages.spec.ts:12:5 › Static Pages › /offline loads correctly (1.2s)
+  ✓  15 [desktop] › e2e/auth.spec.ts:4:3 › Authentication › login page loads correctly (1.1s)
+  ✓  16 [desktop] › e2e/auth.spec.ts:14:3 › Authentication › register page loads correctly (1.2s)
+  ✓  17 [desktop] › e2e/auth.spec.ts:19:3 › Authentication › unauthenticated users see demo/mock data on app pages (3.1s)
+  ✓  18 [desktop] › e2e/landing.spec.ts:4:3 › Landing Page › should load and display Hebrew content (1.1s)
+  ✓  19 [desktop] › e2e/landing.spec.ts:10:3 › Landing Page › should have login CTA (1.2s)
+  ✓  20 [desktop] › e2e/landing.spec.ts:16:3 › Landing Page › should navigate to login page (1.4s)
+  ✘  21 [desktop] › e2e/landing.spec.ts:22:3 › Landing Page › should display FAQ section (6.0s)
+  ✓  22 [desktop] › e2e/landing.spec.ts:31:3 › Landing Page › should have working language switcher (1.3s)
+  ✓  23 [desktop] › e2e/navigation.spec.ts:4:3 › Navigation › bottom nav renders on app pages (3.7s)
+  ✓  24 [desktop] › e2e/navigation.spec.ts:14:3 › Navigation › RTL direction on all pages (6.0s)
+  ✓  25 [desktop] › e2e/static-pages.spec.ts:12:5 › Static Pages › /privacy loads correctly (1.1s)
+  ✘  26 [desktop] › e2e/static-pages.spec.ts:12:5 › Static Pages › /terms loads correctly (2.5s)
+
+
+  1) [mobile] › e2e/landing.spec.ts:22:3 › Landing Page › should display FAQ section ───────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('text=שאלות נפוצות').or(locator('text=FAQ')).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('text=שאלות נפוצות').or(locator('text=FAQ')).first() with timeout 5000ms
+      - waiting for locator('text=שאלות נפוצות').or(locator('text=FAQ')).first()
+
+
+      26 |       .locator("text=שאלות נפוצות")
+      27 |       .or(page.locator("text=FAQ"));
+    > 28 |     await expect(faqSection.first()).toBeVisible();
+         |                                      ^
+      29 |   });
+      30 |
+      31 |   test("should have working language switcher", async ({ page }) => {
+        at /root/work/growth-bayit-20261106/bayit-beseder/e2e/landing.spec.ts:28:38
+
+    Error Context: test-results/landing-Landing-Page-should-display-FAQ-section-mobile/error-context.md
+
+  2) [desktop] › e2e/landing.spec.ts:22:3 › Landing Page › should display FAQ section ──────────────
+
+    Error: expect(locator).toBeVisible() failed
+
+    Locator: locator('text=שאלות נפוצות').or(locator('text=FAQ')).first()
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeVisible" locator('text=שאלות נפוצות').or(locator('text=FAQ')).first() with timeout 5000ms
+      - waiting for locator('text=שאלות נפוצות').or(locator('text=FAQ')).first()
+
+
+      26 |       .locator("text=שאלות נפוצות")
+      27 |       .or(page.locator("text=FAQ"));
+    > 28 |     await expect(faqSection.first()).toBeVisible();
+         |                                      ^
+      29 |   });
+      30 |
+      31 |   test("should have working language switcher", async ({ page }) => {
+        at /root/work/growth-bayit-20261106/bayit-beseder/e2e/landing.spec.ts:28:38
+
+    Error Context: test-results/landing-Landing-Page-should-display-FAQ-section-desktop/error-context.md
+
+  3) [desktop] › e2e/static-pages.spec.ts:12:5 › Static Pages › /terms loads correctly ─────────────
+
+    Test was interrupted.
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator: locator('html')
+    Expected: "rtl"
+    Error: Test ended.
+
+    Call log:
+      - Expect "toHaveAttribute" locator('html') with timeout 5000ms
+      - waiting for locator('html')
+      - Test ended.
+
+
+      12 |     test(`${path} loads correctly`, async ({ page }) => {
+      13 |       await page.goto(path);
+    > 14 |       await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+         |                                          ^
+      15 |       await expect(page.locator("html")).toHaveAttribute("lang", "he");
+      16 |       // Page should render without errors
+      17 |       await expect(page.locator("body")).not.toBeEmpty();
+        at /root/work/growth-bayit-20261106/bayit-beseder/e2e/static-pages.spec.ts:14:42
+
+    Error Context: test-results/static-pages-Static-Pages-terms-loads-correctly-desktop/error-context.md
+
+  2 failed
+    [mobile] › e2e/landing.spec.ts:22:3 › Landing Page › should display FAQ section ────────────────
+    [desktop] › e2e/landing.spec.ts:22:3 › Landing Page › should display FAQ section ───────────────
+  1 interrupted
+    [desktop] › e2e/static-pages.spec.ts:12:5 › Static Pages › /terms loads correctly ──────────────
+  2 did not run
+  23 passed (1.1m)
