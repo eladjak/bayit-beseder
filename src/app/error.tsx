@@ -15,6 +15,9 @@ export default function Error({
     if (process.env.NODE_ENV === "development") {
       console.error("[Error Boundary]", error);
     }
+    // Stale build (chunk 404): clean caches and reload once via the inline boot guard.
+    const w = window as unknown as { __bbsIsChunkError?: (e: unknown) => boolean; __bbsRecover?: () => void };
+    if (w.__bbsIsChunkError?.(error)) w.__bbsRecover?.();
   }, [error]);
 
   return (

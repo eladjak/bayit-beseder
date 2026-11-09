@@ -53,6 +53,12 @@ self.addEventListener("activate", (event) => {
     (async () => {
       // Remove all old caches
       const keys = await caches.keys();
+      // Pre-v7 workers served stale HTML (stale-while-revalidate). A page they
+      // served after a deploy points at hashed chunks that now 404 = white
+      // screen, and that old HTML has no recovery code. Detected by cache name
+      // (v1..v6, unstamped); stamped v7+ caches never trigger this, so a normal
+      // deploy never reloads a tab the user is working in.
+      const upgradedFromLegacy = keys.some((key) => /^bayit-beseder-v[0-6]$/.test(key));
       await Promise.all(
         keys
           .filter((key) => key !== CACHE_NAME)
@@ -66,6 +72,15 @@ self.addEventListener("activate", (event) => {
       const clients = await self.clients.matchAll({ includeUncontrolled: true });
       for (const client of clients) {
         client.postMessage({ type: "SW_UPDATED", version: CACHE_VERSION });
+      }
+
+      // Self-heal: reload the legacy-served windows once onto the live build.
+      if (upgradedFromLegacy) {
+        for (const client of clients) {
+          if (client.type === "window" && typeof client.navigate === "function") {
+            client.navigate(client.url).catch(() => {});
+          }
+        }
       }
     })()
   );
