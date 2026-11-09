@@ -3,6 +3,8 @@ import { Heebo } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider, ThemeScript } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
+import { BootReady } from "@/components/BootReady";
+import { BOOT_GUARD_SOURCE } from "@/lib/boot-guard";
 import "./globals.css";
 
 const heebo = Heebo({
@@ -125,6 +127,8 @@ export default function RootLayout({
     // page logs a hydration-mismatch warning to the console (the "1 Issue" badge).
     <html lang="he" dir="rtl" suppressHydrationWarning>
       <head>
+        {/* Must run before any app chunk: recovers from stale-build 404s (white screen). */}
+        <script dangerouslySetInnerHTML={{ __html: BOOT_GUARD_SOURCE }} />
         <ThemeScript />
         {/* Preconnect to Google Fonts to reduce font loading latency */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -141,6 +145,7 @@ export default function RootLayout({
         )}
       </head>
       <body className={`${heebo.variable} font-sans antialiased`}>
+        <BootReady />
         <ThemeProvider>
           <LanguageProvider>
           {children}
