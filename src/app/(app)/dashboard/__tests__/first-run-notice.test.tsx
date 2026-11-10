@@ -1,0 +1,56 @@
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+
+vi.mock('next/dynamic', () => ({ default: () => (props: {open?: boolean; onComplete?: (x: unknown) => void; onSkip?: () => void}) => props.open ? <div><button onClick={() => props.onComplete?.({homeName: '', tasks: [{title:'clean', category:'general', estimatedMinutes:5, recurring:true, frequency:'daily'}]})}>complete onboarding</button><button onClick={props.onSkip}>skip onboarding</button></div> : null }));
+vi.mock('next/image', () => ({ default: () => null }));
+vi.mock('next/link', () => ({ default: ({children}: {children: React.ReactNode}) => <>{children}</> }));
+vi.mock('framer-motion', () => ({ motion: { div: ({children}: {children: React.ReactNode}) => <div>{children}</div>, span: ({children}: {children: React.ReactNode}) => <span>{children}</span> }, AnimatePresence: ({children}: {children: React.ReactNode}) => <>{children}</> }));
+vi.mock('@/hooks/useProfile', () => ({useProfile: () => ({profile: {id:'user', name:'test', household_id:'house'}})}));
+vi.mock('@/hooks/useTasks', () => ({useTasks: () => ({tasks: [], loading:false, error:null, refetch: vi.fn()})}));
+vi.mock('@/hooks/useCompletions', () => ({useCompletions: () => ({completions: [], markComplete: vi.fn(), isCompletedToday: () => false})}));
+vi.mock('@/hooks/useCategories', () => ({useCategories: () => ({categoryMap:{}})}));
+vi.mock('@/hooks/useAppSound', () => ({useAppSounds: () => ({playComplete: vi.fn()})}));
+vi.mock('@/hooks/useHousehold', () => ({useHousehold: () => ({updateHousehold: vi.fn()}), normalizeHouseholdCity: (s:string) => s}));
+vi.mock('@/hooks/useHouseholdMembers', () => ({useHouseholdMembers: () => ({members:[]})}));
+vi.mock('@/hooks/useWeeklyChallenges', () => ({useWeeklyChallenges: () => ({progress:[], weekNum:1})}));
+vi.mock('@/hooks/useLeaderboard', () => ({useLeaderboard: () => ({rankings:[], period:'day', setPeriod:vi.fn()})}));
+vi.mock('@/hooks/useSeasonalMode', () => ({useSeasonalMode: () => ({activeTemplate:null})}));
+vi.mock('@/hooks/useTranslation', () => ({useTranslation: () => ({locale:'he', t:(s:string) => s})}));
+vi.mock('@/components/joy-completion', () => ({JoyCompletion: () => null, isConfirmedCompletion: () => false}));
+vi.mock('@/components/dashboard/today-overview', () => ({TodayOverview: () => null}));
+vi.mock('@/components/dashboard/streak-display', () => ({StreakDisplay: () => null}));
+vi.mock('@/components/dashboard/fairness-balance-meter', () => ({FairnessBalanceMeter: () => null}));
+vi.mock('@/components/dashboard/golden-rule-section', () => ({GoldenRuleSection: () => null}));
+vi.mock('@/components/dashboard/energy-mode-section', () => ({EnergyModeSection: () => null}));
+vi.mock('@/components/dashboard/coaching-tips', () => ({CoachingTips: () => null}));
+vi.mock('@/components/offline-indicator', () => ({OfflineIndicator: () => null}));
+import DashboardPage from '../page';
+
+beforeEach(() => { vi.stubEnv('NEXT_PUBLIC_NEW_UI', 'true'); localStorage.clear(); });
+afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });
+it.each(['complete onboarding', 'skip onboarding'])('%s failure can retry with the same request or start empty', async (action) => {
+  const fetcher = vi.fn().mockResolvedValue(new Response('{}', {status:500}));
+  vi.stubGlobal('fetch', fetcher);
+  const setItem = vi.spyOn(Storage.prototype, 'setItem');
+  render(<DashboardPage />);
+  fireEvent.click(await screen.findByText(action));
+  expect(await screen.findByRole('alert')).toBeTruthy();
+  expect(setItem).not.toHaveBeenCalledWith('bayit-beseder-onboarding-done', 'true');
+  fireEvent.click(screen.getByText('לנסות שוב'));
+  await waitFor(() => expect(fetcher).toHaveBeenCalledTimes(2));
+  expect(fetcher.mock.calls[1]).toEqual(fetcher.mock.calls[0]);
+  await waitFor(() => expect(screen.getByText('להתחיל ריק').hasAttribute('disabled')).toBe(false));
+  fireEvent.click(screen.getByText('להתחיל ריק'));
+  expect(setItem).toHaveBeenCalledWith('bayit-beseder-onboarding-done', 'true');
+});
+it.each(['{"seeded":true}', '{"seeded":false,"message":"Tasks already exist"}'])('marks onboarding done only after confirmed response %s', async (body) => {
+  let respond!: (response: Response) => void;
+  vi.stubGlobal('fetch', vi.fn().mockReturnValue(new Promise<Response>(resolve => { respond = resolve; })));
+  const setItem = vi.spyOn(Storage.prototype, 'setItem');
+  render(<DashboardPage />);
+  fireEvent.click(await screen.findByText('complete onboarding'));
+  expect(setItem).not.toHaveBeenCalledWith('bayit-beseder-onboarding-done', 'true');
+  respond(new Response(body, { status: 200 }));
+  await waitFor(() => expect(setItem).toHaveBeenCalledWith('bayit-beseder-onboarding-done', 'true'));
+});
