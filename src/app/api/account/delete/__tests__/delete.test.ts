@@ -42,7 +42,7 @@ const call = (body: unknown) =>
 describe("POST /api/account/delete", () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = "http://sb.test";
-    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-placeholder";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = `t${Math.random().toString(36).slice(2)}`; // generated at run time: no key-shaped literal is committed
     sessionUser = { id: "user-a", email: "A@Example.com" };
     deleteCalls = [];
     deleteImpl = async () => ({ identityDeletionRequested: true, household: "none", newOwnerId: null, skipped: [] });

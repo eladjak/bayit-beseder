@@ -57,12 +57,13 @@ vi.mock("@/lib/auto-scheduler", async (orig) => ({
 const sendWhatsAppMessage = vi.fn(async () => ({ success: true }));
 vi.mock("@/lib/whatsapp", () => ({ sendWhatsAppMessage }));
 
-const req = () => new Request("http://x.example/api/cron", { headers: { authorization: "Bearer cron-secret-x" } }) as never;
+const SECRET = `t${Math.random().toString(36).slice(2)}`; // generated at run time: no key-shaped literal is committed
+const req = () => new Request("http://x.example/api/cron", { headers: { authorization: `Bearer ${SECRET}` } }) as never;
 
 beforeEach(() => {
-  process.env.CRON_SECRET = "cron-secret-x";
+  process.env.CRON_SECRET = SECRET;
   process.env.NEXT_PUBLIC_SUPABASE_URL = "http://sb.test";
-  process.env.SUPABASE_SERVICE_ROLE_KEY = "svc-placeholder";
+  process.env.SUPABASE_SERVICE_ROLE_KEY = `t${Math.random().toString(36).slice(2)}`;
   process.env.WHATSAPP_PHONES = "972500000000";
   planned.length = 0;
   seenTaskFilters.length = 0;

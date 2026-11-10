@@ -57,9 +57,9 @@ describe("POST /api/ai/chat privacy gate", () => {
     authImpl = async () => ({ data: { user: { id: "user-a" } }, error: null });
     lookup = async () => ({ data: FULL, error: null });
     geminiCalls.mockReset();
-    process.env.GEMINI_API_KEY = "test-placeholder";
+    process.env.GEMINI_API_KEY = `t${Math.random().toString(36).slice(2)}`;
     process.env.NEXT_PUBLIC_SUPABASE_URL = "http://sb.test";
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-placeholder";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = `t${Math.random().toString(36).slice(2)}`;
     vi.stubGlobal("fetch", async (...args: unknown[]) => {
       geminiCalls(...args);
       return new Response('data: {"candidates":[{"content":{"parts":[{"text":"hi"}]}}]}\n', { status: 200 });

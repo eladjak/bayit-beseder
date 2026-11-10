@@ -12,7 +12,7 @@ import { createClient } from "@supabase/supabase-js";
 import { verifyAgentRequest } from "../auth";
 
 const H = "65337bdd-3ade-4c1d-a618-ef316d9d93d2";
-const RAW = "bbs_agent_test_token";
+const RAW = `t${Math.random().toString(36).slice(2)}`; // generated at run time: no key-shaped literal is committed
 const FULL = { policy_version: POLICY_VERSION, age_confirmed: true, privacy_accepted: true, terms_accepted: true };
 
 interface Cfg {
@@ -64,7 +64,7 @@ const use = (cfg: Cfg) => vi.mocked(createClient).mockReturnValue(fake(cfg) as n
 beforeEach(() => {
   vi.clearAllMocks();
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://fake.supabase.co";
-  process.env.SUPABASE_SERVICE_ROLE_KEY = "fake-service-role-key";
+  process.env.SUPABASE_SERVICE_ROLE_KEY = `t${Math.random().toString(36).slice(2)}`;
   delete process.env.BAYIT_AGENT_KEY;
 });
 
