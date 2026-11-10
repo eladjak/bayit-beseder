@@ -27,6 +27,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:db": "bash supabase/tests/privacy/run.sh",
     "test:node": "node --test src/__tests__/task-stats.test.mjs src/__tests__/notifications.test.mjs src/__tests__/auto-scheduler.test.mjs src/__tests__/room-health.test.mjs src/__tests__/rewards.test.mjs src/__tests__/golden-rule-rotation.test.mjs src/__tests__/energy-filter.test.mjs src/__tests__/push-notifications.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",

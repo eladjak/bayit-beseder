@@ -129,7 +129,7 @@ export function InviteContent() {
       }
 
       // Privacy gate: whoever joins a household passes the same gate first.
-      const consent = await checkConsent(user);
+      const consent = await checkConsent();
       // If the check itself failed we continue: the server refuses the join without consent and sends us back here.
       setPageState(consent === "needed" ? "needs_consent" : "ready_to_join");
       } catch {

@@ -24,12 +24,6 @@ export async function signUp(
   email: string,
   password: string,
   displayName: string,
-  /**
-   * Consent ticked on the register form. Stored in the account metadata so the
-   * first sign-in can turn it into a real consent record (there is no session
-   * yet when email confirmation is on). Only honoured for the current policy version.
-   */
-  consent?: { version: string; locale: "he" | "en" }
 ): Promise<AuthResult<User>> {
   try {
     const supabase = createClient();
@@ -37,21 +31,9 @@ export async function signUp(
       email,
       password,
       options: {
-        data: {
-          full_name: displayName,
-          ...(consent
-            ? {
-                privacy_consent: {
-                  version: consent.version,
-                  age: true,
-                  privacy: true,
-                  terms: true,
-                  locale: consent.locale,
-                  at: new Date().toISOString(),
-                },
-              }
-            : {}),
-        },
+        // Consent is NOT written here: account metadata is user-controlled and cannot be
+        // evidence. The record is created only by POST /api/privacy/consent after an explicit action.
+        data: { full_name: displayName },
       },
     });
 

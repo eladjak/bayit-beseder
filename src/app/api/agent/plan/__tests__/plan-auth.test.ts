@@ -11,6 +11,12 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+// About the legacy-key pinning, not the privacy gate (tested in lib/agent/__tests__/auth-consent.test.ts).
+vi.mock("@/lib/privacy/consent-server", async (orig) => ({
+  ...(await orig<typeof import("@/lib/privacy/consent-server")>()),
+  householdConsentOk: async () => true,
+}));
 import { NextRequest } from "next/server";
 
 vi.mock("@supabase/supabase-js", () => ({

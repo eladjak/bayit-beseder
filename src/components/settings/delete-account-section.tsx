@@ -17,7 +17,7 @@ type Phase = "idle" | "deleting";
  * person to type their own email address. The server checks it again and only
  * ever deletes the signed-in user.
  */
-export function DeleteAccountSection() {
+export function DeleteAccountSection({ onGate = false }: { onGate?: boolean }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const router = useRouter();
@@ -83,11 +83,13 @@ export function DeleteAccountSection() {
       setError(
         data.error === "active_subscription"
           ? t("privacy.delete.errSubscription")
-          : data.error === "confirmation_mismatch"
-            ? t("privacy.delete.errMismatch")
-            : res.status === 429
-              ? t("privacy.delete.errTooMany")
-              : t("privacy.delete.errGeneric"),
+          : data.error === "delete_unavailable"
+            ? t("privacy.delete.errUnavailable")
+            : data.error === "confirmation_mismatch"
+              ? t("privacy.delete.errMismatch")
+              : res.status === 429
+                ? t("privacy.delete.errTooMany")
+                : t("privacy.delete.errGeneric"),
       );
     } catch {
       setError(t("privacy.delete.errGeneric"));
@@ -99,7 +101,7 @@ export function DeleteAccountSection() {
   return (
     <div className="border-t border-border pt-4">
       <h2 className="mb-2 text-sm font-semibold">{t("privacy.delete.title")}</h2>
-      <p className="mb-3 text-xs text-muted">{t("privacy.delete.desc")}</p>
+      <p className="mb-3 text-xs text-muted">{t(onGate ? "privacy.delete.descGate" : "privacy.delete.desc")}</p>
       <button
         ref={openerRef}
         type="button"

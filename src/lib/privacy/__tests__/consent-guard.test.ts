@@ -4,7 +4,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { POLICY_VERSION, isConsentCurrent } from "../policy";
-import { hasCurrentConsent, requireConsent } from "../consent-server";
+import { hasCurrentConsent, requireConsent, getConsentStatus, filterConsentedUserIds, householdConsentOk } from "../consent-server";
 
 const FULL = {
   policy_version: POLICY_VERSION,
@@ -68,8 +68,81 @@ describe("hasCurrentConsent / requireConsent", () => {
     expect(res?.status).toBe(403);
   });
 
-  it("FAILS CLOSED when the lookup itself errors (e.g. table missing, network)", async () => {
+  it("a lookup that RETURNS an error is 'unavailable': 503, not 403 (we could not check, the person did not refuse)", async () => {
     const res = await requireConsent(fakeClient({ data: FULL, error: { message: "boom" } }), { id: "u" });
-    expect(res?.status).toBe(403);
+    expect(res?.status).toBe(503);
+    expect(await res?.json()).toEqual({ error: "consent_unavailable" });
+  });
+
+  it("a lookup that THROWS fails closed, never rejects, and is 'unavailable' (red before the fix: it rejected / was read as no-consent)", async () => {
+    const throwing = { from: () => { throw new Error("network down"); } } as never;
+    await expect(getConsentStatus(throwing, "u")).resolves.toBe("unavailable");
+    await expect(hasCurrentConsent(throwing, "u")).resolves.toBe(false);
+    const res = await requireConsent(throwing, { id: "u" });
+    expect(res?.status).toBe(503);
+  });
+
+  it("a lookup whose promise REJECTS fails closed too", async () => {
+    const rejecting = {
+      from: () => {
+        const b = { select: () => b, eq: () => b, maybeSingle: async () => { throw new TypeError("fetch failed"); } };
+        return b;
+      },
+    } as never;
+    await expect(getConsentStatus(rejecting, "u")).resolves.toBe("unavailable");
+  });
+
+  it("tells the three answers apart", async () => {
+    expect(await getConsentStatus(fakeClient({ data: FULL, error: null }), "u")).toBe("accepted");
+    expect(await getConsentStatus(fakeClient({ data: null, error: null }), "u")).toBe("needed");
+    expect(await getConsentStatus(fakeClient({ data: null, error: { message: "x" } }), "u")).toBe("unavailable");
+  });
+});
+
+/** A service-style client for the "who has consent" questions (no session involved). */
+function listClient(result: { data: unknown; error: { message: string } | null } | "throw", households: { user_id: string }[] = []) {
+  return {
+    from: (t: string) => {
+      let only: string[] | null = null;
+      const b = {
+        select: () => b,
+        in: (_c: string, ids: string[]) => ((only = ids), b),
+        eq: () => (t === "household_members" ? Promise.resolve({ data: households, error: null }) : b),
+        then: (res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) =>
+          (result === "throw"
+            ? Promise.reject(new Error("down"))
+            : Promise.resolve(
+                only && Array.isArray(result.data)
+                  ? { ...result, data: (result.data as { user_id: string }[]).filter((r) => only!.includes(r.user_id)) }
+                  : result,
+              )
+          ).then(res, rej),
+      };
+      return b;
+    },
+  } as never;
+}
+
+describe("filterConsentedUserIds / householdConsentOk (no session: agent tokens, webhook, cron)", () => {
+  const rows = [
+    { user_id: "a", ...FULL },
+    { user_id: "b", ...FULL, terms_accepted: false },
+    { user_id: "c", ...FULL, policy_version: "old" },
+  ];
+  it("returns only users with a FULL, CURRENT record", async () => {
+    expect([...(await filterConsentedUserIds(listClient({ data: rows, error: null }), ["a", "b", "c", "d"]))]).toEqual(["a"]);
+  });
+  it("fails closed on an error, a throw, and an empty list", async () => {
+    expect((await filterConsentedUserIds(listClient({ data: null, error: { message: "x" } }), ["a"])).size).toBe(0);
+    expect((await filterConsentedUserIds(listClient("throw"), ["a"])).size).toBe(0);
+    expect((await filterConsentedUserIds(listClient({ data: rows, error: null }), [])).size).toBe(0);
+  });
+  it("a token needs its creator to have consented; with no creator, one consenting member is enough", async () => {
+    const c = listClient({ data: rows, error: null }, [{ user_id: "b" }, { user_id: "a" }]);
+    expect(await householdConsentOk(c, "h", "a")).toBe(true);
+    expect(await householdConsentOk(c, "h", "b")).toBe(false);
+    expect(await householdConsentOk(c, "h", null)).toBe(true);
+    expect(await householdConsentOk(listClient({ data: rows, error: null }, [{ user_id: "b" }]), "h", null)).toBe(false);
+    expect(await householdConsentOk(listClient("throw"), "h", "a")).toBe(false);
   });
 });

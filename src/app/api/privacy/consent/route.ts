@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { hasCurrentConsent } from "@/lib/privacy/consent-server";
+import { getConsentStatus, consentUnavailableResponse } from "@/lib/privacy/consent-server";
 import { POLICY_VERSION, type ConsentSource } from "@/lib/privacy/policy";
 
 const limiter = rateLimit({ windowMs: 60_000, max: 20 });
 const SOURCES: ConsentSource[] = ["register", "gate", "invite"];
 
-/** GET /api/privacy/consent  ->  { accepted: boolean, version } */
+/**
+ * GET /api/privacy/consent
+ *   200 { accepted: boolean, version }   we could check: true / false
+ *   503 { error: "consent_unavailable" } we could NOT check (outage). NOT the same as
+ *       "not accepted": the app shows a retry, not the consent form.
+ */
 export async function GET() {
   const supabase = await createClient();
   const {
@@ -15,14 +20,19 @@ export async function GET() {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const accepted = await hasCurrentConsent(supabase, user.id);
-  return NextResponse.json({ accepted, version: POLICY_VERSION });
+  const status = await getConsentStatus(supabase, user.id);
+  if (status === "unavailable") return consentUnavailableResponse();
+  return NextResponse.json({ accepted: status === "accepted", version: POLICY_VERSION });
 }
 
 /**
  * POST /api/privacy/consent
  * Body: { ageConfirmed, privacyAccepted, termsAccepted: true, locale?, source? }
- * Records consent for the CURRENT policy version. All three must be true.
+ * Records consent for the CURRENT policy version. All three must be the boolean
+ * `true` (not "true", not 1). This endpoint is the ONLY place a consent record is
+ * created, and only as the answer to an explicit action (the confirm button).
+ * Account metadata is never read: it is user-controlled, so it cannot be evidence.
+ * `source` and `locale` are informational labels chosen by the client, not proof.
  */
 export async function POST(request: NextRequest) {
   const limit = await limiter.check(getClientIp(request));

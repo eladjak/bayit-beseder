@@ -1,3 +1,4 @@
+import { filterConsentedUserIds } from "@/lib/privacy/consent-server";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
@@ -203,8 +204,14 @@ export async function GET(request: NextRequest) {
     .select("id, push_subscription")
     .not("push_subscription", "is", null);
 
-  if (pushProfiles && pushProfiles.length > 0) {
-    const subs = pushProfiles
+  // Privacy gate: only people who accepted the current policy get pushes.
+  const consentedPush = pushProfiles
+    ? await filterConsentedUserIds(supabase, pushProfiles.map((p) => p.id))
+    : new Set<string>();
+  const pushRecipients = (pushProfiles ?? []).filter((p) => consentedPush.has(p.id));
+
+  if (pushRecipients.length > 0) {
+    const subs = pushRecipients
       .map((p) => p.push_subscription as PushSubscriptionData | null)
       .filter((s): s is PushSubscriptionData => s !== null && !!s.endpoint);
 
@@ -217,7 +224,7 @@ export async function GET(request: NextRequest) {
 
     // Clean up expired subscriptions
     if (pushResult.expired.length > 0) {
-      for (const profile of pushProfiles) {
+      for (const profile of pushRecipients) {
         const sub = profile.push_subscription as PushSubscriptionData | null;
         if (sub && pushResult.expired.includes(sub.endpoint)) {
           await supabase

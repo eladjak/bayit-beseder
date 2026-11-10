@@ -17,7 +17,6 @@ import { signUp, signInWithGoogle } from "@/lib/auth";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
 import { ConsentChecks, type ConsentChecksHandle, type ConsentErrors, type ConsentValues } from "@/components/privacy/ConsentChecks";
-import { POLICY_VERSION } from "@/lib/privacy/policy";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -73,10 +72,7 @@ export function RegisterForm() {
     }
 
     setLoading(true);
-    const result = await signUp(email, password, name, {
-      version: POLICY_VERSION,
-      locale: locale === "en" ? "en" : "he",
-    });
+    const result = await signUp(email, password, name);
     setLoading(false);
 
     if (result.error) {
@@ -85,7 +81,7 @@ export function RegisterForm() {
     }
 
     // Signed in right away (no email confirmation): record the consent now.
-    // Otherwise the first sign-in does it from the account metadata (ConsentGuard).
+    // Otherwise the privacy gate asks once, at the first sign-in (ConsentGuard).
     if (result.data?.email_confirmed_at) {
       try {
         await fetch("/api/privacy/consent", {

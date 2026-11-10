@@ -35,3 +35,6 @@ export function isConsentCurrent(record: Partial<ConsentRecord> | null | undefin
 
 /** Error body that server routes return when consent is missing. */
 export const CONSENT_REQUIRED_ERROR = "consent_required";
+
+/** Error body when the consent check itself could not be performed (not the same as "not accepted"). */
+export const CONSENT_UNAVAILABLE_ERROR = "consent_unavailable";

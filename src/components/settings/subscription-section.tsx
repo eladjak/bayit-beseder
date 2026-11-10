@@ -24,15 +24,15 @@ import { useTranslation } from "@/hooks/useTranslation";
  * Wrapped in its own <Suspense> because useSearchParams() requires one in
  * the App Router — same pattern as src/app/(auth)/login/page.tsx.
  */
-export function SubscriptionSection() {
+export function SubscriptionSection({ cancelOnly = false }: { cancelOnly?: boolean }) {
   return (
     <Suspense fallback={<div className="h-16" />}>
-      <SubscriptionSectionContent />
+      <SubscriptionSectionContent cancelOnly={cancelOnly} />
     </Suspense>
   );
 }
 
-function SubscriptionSectionContent() {
+function SubscriptionSectionContent({ cancelOnly }: { cancelOnly: boolean }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { profile } = useProfile();
@@ -127,8 +127,13 @@ function SubscriptionSectionContent() {
           ? t("settings.subscriptionSection.plusStatus")
           : t("settings.subscriptionSection.freeStatus");
 
+  // On the privacy gate (cancelOnly) there is nothing to show unless money is
+  // actually being billed: no upgrade offer, no status line, just the way out.
+  if (cancelOnly && !isPlus) return null;
+
   return (
     <div className="space-y-3">
+      {cancelOnly && <p className="text-xs text-muted">{t("privacy.gate.subscriptionNote")}</p>}
       {pendingConfirmation && (
         <div className="flex items-center gap-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-800/40 px-3 py-2.5 text-sm text-indigo-700 dark:text-indigo-300">
           <Loader2 className="w-4 h-4 animate-spin shrink-0" aria-hidden="true" />
@@ -161,7 +166,7 @@ function SubscriptionSectionContent() {
           type="button"
           onClick={handleCancel}
           disabled={canceling}
-          className="w-full py-2.5 rounded-xl border border-red-200 dark:border-red-800 text-red-500 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-40"
+          className="w-full min-h-11 py-2.5 rounded-xl border border-red-200 dark:border-red-800 text-red-500 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-40"
         >
           {canceling ? <Loader2 className="w-4 h-4 animate-spin mx-auto" aria-hidden="true" /> : t("settings.subscriptionSection.cancelButton")}
         </button>

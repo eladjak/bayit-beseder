@@ -56,6 +56,8 @@
  *   independently from the Vercel cron jobs.
  */
 
+import { householdConsentOk } from "@/lib/privacy/consent-server";
+import { CONSENT_REQUIRED_ERROR, CONSENT_UNAVAILABLE_ERROR } from "@/lib/privacy/policy";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
@@ -149,7 +151,7 @@ export function getServiceClient() {
  * `null` on success (legacy key, no pin) — callers must check it separately
  * before touching any household-scoped data.
  */
-export async function verifyAgentRequest(request: Request): Promise<AgentAuthResult> {
+async function verifyAgentCredentials(request: Request): Promise<AgentAuthResult> {
   const legacyKey = getAgentKey();
   const supabase = getServiceClient();
 
@@ -252,4 +254,24 @@ export async function verifyAgentRequest(request: Request): Promise<AgentAuthRes
   }
 
   return { ok: false, status: 403, error: "אסימון הרשאה שגוי.", householdId: null };
+}
+
+/**
+ * Verify the bearer credential AND the privacy gate. A token proves who may
+ * act on a household; it does not prove the people in that household accepted
+ * the current policy. Without consent the agent API serves nothing (403), and
+ * if we cannot check, it serves nothing either (503). See consent-server.ts.
+ */
+export async function verifyAgentRequest(request: Request): Promise<AgentAuthResult> {
+  const auth = await verifyAgentCredentials(request);
+  if (!auth.ok || !auth.householdId) return auth;
+  const service = getServiceClient();
+  if (!service) {
+    return { ok: false, status: 503, error: CONSENT_UNAVAILABLE_ERROR, householdId: null };
+  }
+  const ok = await householdConsentOk(service, auth.householdId, auth.createdBy ?? null);
+  if (!ok) {
+    return { ok: false, status: 403, error: CONSENT_REQUIRED_ERROR, householdId: null };
+  }
+  return auth;
 }

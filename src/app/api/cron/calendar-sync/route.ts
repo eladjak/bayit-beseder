@@ -1,3 +1,4 @@
+import { filterConsentedUserIds } from "@/lib/privacy/consent-server";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
@@ -97,6 +98,10 @@ export async function GET(request: NextRequest) {
   if (!profiles || profiles.length === 0) {
     return NextResponse.json({ message: "No users with Google Calendar connected", synced: 0 });
   }
+  // Privacy gate: household tasks are written to a person's calendar only if
+  // that person has accepted the current policy (fails closed).
+  const consented = await filterConsentedUserIds(supabase, profiles.map((p) => p.id));
+  const eligible = profiles.filter((p) => consented.has(p.id));
 
   // Date range for this sync: today → 7 days
   const now = new Date();
@@ -116,7 +121,7 @@ export async function GET(request: NextRequest) {
     reason?: string;
   }> = [];
 
-  for (const profile of profiles) {
+  for (const profile of eligible) {
     const rawTokens = profile.google_calendar_tokens;
     if (!rawTokens) {
       results.push({ userId: profile.id, status: "skipped", reason: "no tokens" });
@@ -252,11 +257,11 @@ export async function GET(request: NextRequest) {
     .filter((r) => r.status === "success")
     .reduce((sum, r) => sum + (r.created ?? 0), 0);
 
-  console.info(`[cron/calendar-sync] Done: ${successful}/${profiles.length} users synced, ${totalCreated} events created`);
+  console.info(`[cron/calendar-sync] Done: ${successful}/${eligible.length} users synced, ${totalCreated} events created`);
 
   return NextResponse.json({
     success: true,
-    usersProcessed: profiles.length,
+    usersProcessed: eligible.length,
     usersSucceeded: successful,
     totalEventsCreated: totalCreated,
     results,

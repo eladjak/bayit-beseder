@@ -2,7 +2,8 @@ import { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
-import { hasCurrentConsent } from "@/lib/privacy/consent-server";
+import { getConsentStatus } from "@/lib/privacy/consent-server";
+import { CONSENT_REQUIRED_ERROR, CONSENT_UNAVAILABLE_ERROR } from "@/lib/privacy/policy";
 import { buildPriceContext } from "@/lib/prices/assistant-context";
 
 // ---------------------------------------------------------------------------
@@ -132,17 +133,27 @@ export async function POST(request: NextRequest) {
     if (user) {
       authedClient = supabase;
       authedUserId = user.id;
-      // Privacy gate: a signed-in user who has not accepted the current policy
-      // gets no AI call (their text would be sent to Google).
-      if (!(await hasCurrentConsent(supabase, user.id))) {
-        return new Response(JSON.stringify({ error: "consent_required" }), {
-          status: 403,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
     }
   } catch {
-    // Auth failure is non-fatal — continue in demo mode
+    // Auth failure is non-fatal — continue in demo mode. (The privacy gate is
+    // deliberately NOT inside this try: see below.)
+  }
+
+  // Privacy gate. Outside the try/catch above on purpose: a signed-in user who
+  // has not accepted the current policy, or whose consent we cannot check, gets
+  // no AI call (their text would be sent to Google). getConsentStatus never
+  // throws; "unavailable" refuses too. Nothing here can fall through to demo mode.
+  if (authedClient && authedUserId) {
+    const status = await getConsentStatus(authedClient, authedUserId);
+    if (status !== "accepted") {
+      return new Response(
+        JSON.stringify({ error: status === "needed" ? CONSENT_REQUIRED_ERROR : CONSENT_UNAVAILABLE_ERROR }),
+        {
+          status: status === "needed" ? 403 : 503,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
   }
 
   // 3. Parse request body

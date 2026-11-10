@@ -1,44 +1,39 @@
-import type { User } from "@supabase/supabase-js";
-import { POLICY_VERSION } from "./policy";
-
 export type ConsentCheck = "accepted" | "needed" | "error";
+
+/** How long the browser waits for the consent check before it gives up and offers a retry. */
+export const CONSENT_CHECK_TIMEOUT_MS = 8000;
 
 /**
  * Browser-side: does the signed-in user have consent for the CURRENT policy?
  *
- * Fails CLOSED ("error", never "accepted") when the check itself fails.
+ *   "accepted"  the server says yes
+ *   "needed"    the server checked and there is no current record -> show the form
+ *   "error"     we could not find out (outage, 5xx, network, timeout) -> show a retry,
+ *               NEVER the form (someone who already consented must not be asked again
+ *               because of an outage) and NEVER the app (fails closed)
  *
- * Registration with email confirmation cannot write the record (no session
- * yet), so the register form leaves a note in the account metadata. Here we
- * turn that note into a real record, but ONLY if it names the current policy
- * version and carries all three confirmations.
+ * Nothing in the account's user_metadata is read: that field is user-controlled
+ * and cannot be evidence that anybody ticked anything. A consent record is
+ * created only by the explicit confirm action (ConsentGate -> POST /api/privacy/consent).
+ *
+ * Pass an AbortSignal to discard a check that is no longer wanted.
  */
-export async function checkConsent(user: Pick<User, "user_metadata">): Promise<ConsentCheck> {
+export async function checkConsent(signal?: AbortSignal, timeoutMs: number = CONSENT_CHECK_TIMEOUT_MS): Promise<ConsentCheck> {
+  const timeout = new AbortController();
+  const timer = setTimeout(() => timeout.abort(), timeoutMs);
+  const onOuterAbort = () => timeout.abort();
+  signal?.addEventListener("abort", onOuterAbort);
   try {
-    const res = await fetch("/api/privacy/consent", { cache: "no-store" });
+    const res = await fetch("/api/privacy/consent", { cache: "no-store", signal: timeout.signal });
     if (!res.ok) return "error";
-    const { accepted } = (await res.json()) as { accepted: boolean };
-    if (accepted) return "accepted";
-
-    const note = user.user_metadata?.privacy_consent as
-      | { version?: string; age?: boolean; privacy?: boolean; terms?: boolean; locale?: string }
-      | undefined;
-    if (note?.version === POLICY_VERSION && note.age && note.privacy && note.terms) {
-      const save = await fetch("/api/privacy/consent", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ageConfirmed: true,
-          privacyAccepted: true,
-          termsAccepted: true,
-          locale: note.locale === "en" ? "en" : "he",
-          source: "register",
-        }),
-      });
-      if (save.ok) return "accepted";
-    }
-    return "needed";
+    const body = (await res.json()) as { accepted?: unknown };
+    if (body.accepted === true) return "accepted";
+    if (body.accepted === false) return "needed";
+    return "error";
   } catch {
     return "error";
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", onOuterAbort);
   }
 }

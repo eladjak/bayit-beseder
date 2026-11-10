@@ -1,187 +1,91 @@
 /**
- * deleteAccount: scoping (user A can never touch user B's rows), household
- * handling, the shared-database rule, and the active-subscription block.
- * The database is a recording fake: no network, no real data.
+ * deleteAccount (TypeScript side). WHAT gets deleted, and whether the shared auth
+ * user may go, is decided inside the database function bayit_delete_account
+ * (migration 027) and is proven against a real Postgres in
+ * supabase/tests/privacy/run.sh. Here: the wrapper calls only that function, with
+ * only the given id, never deletes the auth user itself, maps its answers, and
+ * fails closed (nothing deleted) when the function is missing or misbehaves.
  */
 import { describe, it, expect } from "vitest";
 import { DeleteAccountError, deleteAccount } from "../delete-account";
 
-interface Call {
-  table: string;
-  op: "select" | "update" | "delete";
-  payload?: unknown;
-  filters: [string, string, unknown][];
-}
-
-function makeDb(respond: (c: Call) => unknown[] | null | { error: { code?: string; message: string } }) {
-  const calls: Call[] = [];
+function makeDb(rpcResult: { data?: unknown; error?: { code?: string; message: string } | null } | "throw") {
+  const rpcCalls: [string, unknown][] = [];
   const removed: string[][] = [];
-  const deletedAuthUsers: string[] = [];
-
-  function from(table: string) {
-    const call: Call = { table, op: "select", filters: [] };
-    let committed = false;
-    const settle = () => {
-      if (!committed) {
-        committed = true;
-        calls.push(call);
-      }
-      const out = respond(call);
-      if (out && !Array.isArray(out) && "error" in out) return { data: null, error: out.error };
-      return { data: out ?? [], error: null };
-    };
-    const chain: Record<string, unknown> = {
-      select: () => chain,
-      update: (p: unknown) => ((call.op = "update"), (call.payload = p), chain),
-      delete: () => ((call.op = "delete"), chain),
-      eq: (c: string, v: unknown) => (call.filters.push(["eq", c, v]), chain),
-      neq: (c: string, v: unknown) => (call.filters.push(["neq", c, v]), chain),
-      in: (c: string, v: unknown) => (call.filters.push(["in", c, v]), chain),
-      not: (c: string, _o: string, v: unknown) => (call.filters.push(["not", c, v]), chain),
-      order: () => chain,
-      limit: () => chain,
-      maybeSingle: async () => {
-        const r = settle();
-        return { data: Array.isArray(r.data) ? (r.data[0] ?? null) : r.data, error: r.error };
-      },
-      then: (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) =>
-        Promise.resolve(settle()).then(resolve, reject),
-    };
-    return chain;
-  }
-
+  const touched: string[] = [];
   const db = {
-    from,
+    rpc: async (fn: string, args: unknown) => {
+      rpcCalls.push([fn, args]);
+      if (rpcResult === "throw") throw new TypeError("fetch failed");
+      return { data: rpcResult.data ?? null, error: rpcResult.error ?? null };
+    },
+    // Anything else would mean the wrapper is deleting by itself again: record it.
+    from: (t: string) => (touched.push(`from:${t}`), {}),
+    auth: { admin: { deleteUser: async (id: string) => (touched.push(`deleteUser:${id}`), { error: null }) } },
     storage: { from: () => ({ remove: async (names: string[]) => (removed.push(names), { error: null }) }) },
-    auth: { admin: { deleteUser: async (id: string) => (deletedAuthUsers.push(id), { error: null }) } },
   };
-  return { db: db as never, calls, removed, deletedAuthUsers };
+  return { db: db as never, rpcCalls, removed, touched };
 }
 
-const A = "user-a";
-const B = "user-b";
-
-/** Every filter on every write must be scoped by A, or by A's last household / its tasks. */
-function writes(calls: Call[]) {
-  return calls.filter((c) => c.op !== "select");
-}
+const OK = { auth_user_deleted: true, household: "deleted", new_owner_id: null, photo_urls: [], kept_because: [] };
 
 describe("deleteAccount", () => {
-  it("refuses while a paid subscription is still billing, and deletes nothing", async () => {
-    const { db, calls } = makeDb((c) => (c.table === "subscriptions" && c.op === "select" ? [{ status: "active" }] : []));
-    await expect(deleteAccount(db, A)).rejects.toMatchObject({ code: "active_subscription" });
-    await expect(deleteAccount(db, A)).rejects.toBeInstanceOf(DeleteAccountError);
-    expect(writes(calls)).toHaveLength(0);
+  it("calls ONLY bayit_delete_account with the given id, and never touches tables or the auth admin API itself", async () => {
+    const { db, rpcCalls, touched } = makeDb({ data: OK });
+    await deleteAccount(db, "user-a");
+    expect(rpcCalls).toEqual([["bayit_delete_account", { p_user: "user-a" }]]);
+    expect(touched).toEqual([]);
   });
 
-  it("last member: deletes the household with everything in it, then profile and auth user", async () => {
-    const { db, calls, deletedAuthUsers, removed } = makeDb((c) => {
-      if (c.table === "profiles" && c.op === "select" && c.filters.some((f) => f[0] === "eq" && f[1] === "id"))
-        return [{ household_id: "h1" }];
-      if (c.table === "household_members" && c.filters.some((f) => f[1] === "user_id" && f[0] === "eq"))
-        return [{ household_id: "h1" }];
-      if (c.table === "tasks" && c.op === "select") return [{ id: "t1" }, { id: "t2" }];
-      if (c.table === "task_completions" && c.op === "select")
-        return [{ photo_url: "https://x.supabase.co/storage/v1/object/public/task-photos/t1-1.jpg" }];
-      return []; // no other members, no subscriptions, no user_roles
+  it("maps the answer: signed-in user deleted / household deleted", async () => {
+    const { db } = makeDb({ data: OK });
+    expect(await deleteAccount(db, "u")).toEqual({ authUserDeleted: true, household: "deleted", newOwnerId: null, skipped: [] });
+  });
+
+  it("KEPT sign-in (the events app still has data): authUserDeleted is false, so the person is told", async () => {
+    const { db } = makeDb({
+      data: { ...OK, auth_user_deleted: false, household: "left", new_owner_id: "u2", kept_because: ["public.event_assignments"] },
     });
-    const res = await deleteAccount(db, A);
-    expect(res).toMatchObject({ household: "deleted", authUserDeleted: true });
-    const del = writes(calls).filter((c) => c.op === "delete").map((c) => c.table);
-    for (const t of ["task_completions", "tasks", "meals", "meal_plan", "shopping_items", "household_members", "households", "profiles", "privacy_consents"]) {
-      expect(del).toContain(t);
-    }
-    expect(del.indexOf("households")).toBeGreaterThan(del.indexOf("household_members"));
-    expect(del.indexOf("households")).toBeGreaterThan(del.indexOf("tasks"));
-    expect(deletedAuthUsers).toEqual([A]);
-    expect(removed.flat()).toContain("t1-1.jpg");
+    expect(await deleteAccount(db, "u")).toEqual({ authUserDeleted: false, household: "left", newOwnerId: "u2", skipped: [] });
   });
 
-  it("other members remain: leaves the household, hands over ownership, deletes NO shared rows", async () => {
-    const { db, calls, deletedAuthUsers } = makeDb((c) => {
-      if (c.table === "profiles" && c.op === "select" && c.filters.some((f) => f[1] === "id" && f[0] === "eq"))
-        return [{ household_id: "h1" }];
-      if (c.table === "household_members" && c.op === "select" && c.filters.some((f) => f[0] === "neq"))
-        return [{ user_id: B, role: "member", joined_at: "2026-01-01" }];
-      if (c.table === "household_members" && c.op === "select") return [{ household_id: "h1" }];
-      return [];
+  it("removes the stored photos the database reported, by object name", async () => {
+    const { db, removed } = makeDb({
+      data: {
+        ...OK,
+        photo_urls: ["https://x.supabase.co/storage/v1/object/public/task-photos/h1/a%20b.jpg?t=1", "https://other.example/none.jpg"],
+      },
     });
-    const res = await deleteAccount(db, A);
-    expect(res).toMatchObject({ household: "left", newOwnerId: B, authUserDeleted: true });
-    const w = writes(calls);
-    // B is promoted, and only B.
-    const promote = w.find((c) => c.table === "household_members" && c.op === "update");
-    expect(promote?.payload).toEqual({ role: "owner" });
-    expect(promote?.filters).toContainEqual(["eq", "user_id", B]);
-    // The household itself and its shared tables are untouched.
-    const deletedTables = w.filter((c) => c.op === "delete").map((c) => c.table);
-    expect(deletedTables).not.toContain("households");
-    expect(deletedTables).not.toContain("tasks");
-    expect(deletedTables).not.toContain("meals");
-    expect(deletedTables).not.toContain("shopping_items");
-    expect(deletedAuthUsers).toEqual([A]);
+    const r = await deleteAccount(db, "u");
+    expect(removed).toEqual([["h1/a b.jpg"]]);
+    expect(r.skipped).toEqual([]);
   });
 
-  it("never writes with user B's id except to promote B to owner", async () => {
-    const { db, calls } = makeDb((c) => {
-      if (c.table === "profiles" && c.op === "select" && c.filters.some((f) => f[1] === "id" && f[0] === "eq"))
-        return [{ household_id: "h1" }];
-      if (c.table === "household_members" && c.op === "select" && c.filters.some((f) => f[0] === "neq"))
-        return [{ user_id: B, role: "member", joined_at: "2026-01-01" }];
-      if (c.table === "household_members" && c.op === "select") return [{ household_id: "h1" }];
-      return [];
-    });
-    await deleteAccount(db, A);
-    const touchingB = writes(calls).filter((c) => JSON.stringify(c.filters).includes(B));
-    expect(touchingB.map((c) => `${c.table}:${c.op}`)).toEqual(["household_members:update"]);
+  it("a photo that cannot be removed is reported, not hidden", async () => {
+    const { db } = makeDb({ data: { ...OK, photo_urls: ["https://x/task-photos/a.jpg"] } });
+    (db as { storage: unknown }).storage = { from: () => ({ remove: async () => ({ error: { message: "boom" } }) }) };
+    expect((await deleteAccount(db, "u")).skipped).toEqual(["storage.task-photos"]);
   });
 
-  it("the automatic default role row (every sign-up gets one) does NOT block deletion", async () => {
-    const { db, calls, deletedAuthUsers } = makeDb((c) =>
-      c.table === "user_roles" && c.op === "select" ? [{ role: "youth_volunteer" }] : [],
-    );
-    const res = await deleteAccount(db, A);
-    expect(res.authUserDeleted).toBe(true);
-    expect(deletedAuthUsers).toEqual([A]);
-    const w = writes(calls);
-    const roleDel = w.find((c) => c.table === "user_roles" && c.op === "delete");
-    expect(roleDel?.filters).toContainEqual(["eq", "user_id", A]);
-    expect(roleDel?.filters).toContainEqual(["eq", "role", "youth_volunteer"]);
+  it("active subscription -> DeleteAccountError(active_subscription)", async () => {
+    const { db } = makeDb({ error: { code: "P0001", message: "active_subscription" } });
+    await expect(deleteAccount(db, "u")).rejects.toMatchObject({ name: "DeleteAccountError", code: "active_subscription" });
   });
 
-  it("shared database: an elevated events-app role keeps the profile and the sign-in", async () => {
-    const { db, calls, deletedAuthUsers } = makeDb((c) =>
-      c.table === "user_roles" && c.op === "select" ? [{ role: "admin" }] : [],
-    );
-    const res = await deleteAccount(db, A);
-    expect(res.authUserDeleted).toBe(false);
-    expect(deletedAuthUsers).toEqual([]);
-    const w = writes(calls);
-    expect(w.some((c) => c.table === "profiles" && c.op === "delete")).toBe(false);
-    const scrub = w.find((c) => c.table === "profiles" && c.op === "update");
-    expect(scrub?.payload).toMatchObject({ household_id: null, push_subscription: null, google_calendar_tokens: null, whatsapp_phone: null });
+  it("function missing (migration 027 not applied) -> not_available, and nothing else is attempted", async () => {
+    const { db, touched } = makeDb({ error: { code: "PGRST202", message: "Could not find the function" } });
+    await expect(deleteAccount(db, "u")).rejects.toMatchObject({ code: "not_available" });
+    expect(touched).toEqual([]);
   });
 
-  it("shared database: rows of the events app's own (e.g. assignments) also keep the sign-in", async () => {
-    const { db, deletedAuthUsers } = makeDb((c) => (c.table === "event_assignments" ? [{ user_id: A }] : []));
-    const res = await deleteAccount(db, A);
-    expect(res.authUserDeleted).toBe(false);
-    expect(deletedAuthUsers).toEqual([]);
-  });
-
-  it("a missing table or column is skipped and reported, not fatal", async () => {
-    const { db } = makeDb((c) =>
-      c.table === "wheel_spins" ? { error: { code: "42P01", message: "relation does not exist" } } : [],
-    );
-    const res = await deleteAccount(db, A);
-    expect(res.skipped).toContain("wheel_spins");
-  });
-
-  it("any other database error aborts (and the auth user is NOT deleted)", async () => {
-    const { db, deletedAuthUsers } = makeDb((c) =>
-      c.table === "streaks" ? { error: { code: "23503", message: "fk violation" } } : [],
-    );
-    await expect(deleteAccount(db, A)).rejects.toMatchObject({ code: "step_failed", step: "streaks" });
-    expect(deletedAuthUsers).toEqual([]);
+  it.each([
+    ["a database error", { error: { code: "XX000", message: "boom" } }],
+    ["a thrown network error", "throw" as const],
+    ["an answer that is not the expected shape", { data: { hello: "world" } }],
+    ["an empty answer", { data: null }],
+  ])("fails closed on %s (DeleteAccountError, no fallback deletion)", async (_n, result) => {
+    const { db, touched } = makeDb(result as never);
+    await expect(deleteAccount(db, "u")).rejects.toBeInstanceOf(DeleteAccountError);
+    expect(touched).toEqual([]);
   });
 });

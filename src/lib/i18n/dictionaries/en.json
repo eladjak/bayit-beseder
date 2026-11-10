@@ -1345,13 +1345,21 @@
       "accept": "Confirm and continue",
       "saving": "Saving...",
       "retry": "Try again",
-      "notNow": "Not now, sign me out",
+      "notNow": "Not now",
       "saveError": "We could not save your confirmation. Check your connection and try again.",
       "tooMany": "Too many attempts. Wait a minute and try again.",
       "checking": "Checking your confirmation...",
       "version": "Version {version}",
-      "youCanDelete": "You can delete your account any time in Settings.",
-      "inviteTitle": "One moment before you join the household"
+      "youCanDelete": "You can delete your account any time: in Settings, or here after tapping \"Not now\".",
+      "inviteTitle": "One moment before you join the household",
+      "checkError": "We could not check right now whether you already confirmed. This is a temporary problem on our side, not a problem with your account.",
+      "checkErrorHint": "If you confirmed before, you do not need to confirm again. Please try again in a moment.",
+      "signOut": "Sign out",
+      "declinedTitle": "Without your confirmation we cannot open the app",
+      "declinedBody": "That is completely fine. You can go back and confirm, sign out, or delete your account and data right here.",
+      "declinedBack": "Back to the confirmation",
+      "declinedMore": "What you can do now",
+      "subscriptionNote": "Do you have an active Plus subscription? You can cancel it here so you are not charged."
     },
     "register": {
       "age": "I am 18 or older",
@@ -1378,6 +1386,7 @@
     "delete": {
       "title": "Delete my account",
       "desc": "Deletes your account and personal data. You can download a copy of your data first, using the export above.",
+      "descGate": "Deletes your account and personal data.",
       "open": "Delete my account",
       "dialogTitle": "Delete your account?",
       "intro": "This is what happens as soon as you confirm:",
@@ -1396,7 +1405,8 @@
       "errGeneric": "The deletion did not finish. You can try again, and nothing already deleted is affected. If it keeps happening, write to privacy@bayitbeseder.com.",
       "errTooMany": "Too many attempts. Wait a minute and try again.",
       "done": "Your account was deleted. Thank you for being with us.",
-      "keptNote": "Your account is also used by another app of ours, so only the Bayit BeSeder data was deleted."
+      "keptNote": "Your Bayit BeSeder data was deleted. We kept your sign-in because another app of ours uses the same account and still holds data of yours there. To delete that too, write to privacy@bayitbeseder.com.",
+      "errUnavailable": "Deletion is not available right now, and nothing was deleted. Please try again later or write to privacy@bayitbeseder.com."
     }
   }
 }

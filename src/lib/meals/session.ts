@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
-import { hasCurrentConsent } from "@/lib/privacy/consent-server";
-import { CONSENT_REQUIRED_ERROR } from "@/lib/privacy/policy";
+import { getConsentStatus } from "@/lib/privacy/consent-server";
+import { CONSENT_REQUIRED_ERROR, CONSENT_UNAVAILABLE_ERROR } from "@/lib/privacy/policy";
 
 export type SessionResult =
   | { ok: true; userId: string; householdId: string }
@@ -25,8 +25,12 @@ export async function resolveHousehold(
   }
 
   // Privacy gate: no household data without the current policy accepted.
-  if (!(await hasCurrentConsent(supabase, user.id))) {
-    return { ok: false, status: 403, error: CONSENT_REQUIRED_ERROR };
+  // "needed" -> 403, "could not check" -> 503. Never a pass.
+  const consent = await getConsentStatus(supabase, user.id);
+  if (consent !== "accepted") {
+    return consent === "needed"
+      ? { ok: false, status: 403, error: CONSENT_REQUIRED_ERROR }
+      : { ok: false, status: 503, error: CONSENT_UNAVAILABLE_ERROR };
   }
 
   const { data: profile, error: profileError } = await supabase

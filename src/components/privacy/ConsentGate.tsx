@@ -10,6 +10,7 @@ import {
   Home,
   Loader2,
   AlertCircle,
+  LogOut,
   Share2,
   ShieldCheck,
   Sparkles,
@@ -18,6 +19,8 @@ import {
 import { createClient } from "@/lib/supabase";
 import { useTranslation } from "@/hooks/useTranslation";
 import { LanguageToggle } from "@/components/language-toggle";
+import { DeleteAccountSection } from "@/components/settings/delete-account-section";
+import { SubscriptionSection } from "@/components/settings/subscription-section";
 import { GATE_CARDS } from "@/lib/privacy/content";
 import { POLICY_VERSION, type ConsentSource } from "@/lib/privacy/policy";
 import {
@@ -56,6 +59,7 @@ export function ConsentGate({ onAccepted, source = "gate", title }: Props) {
   const [saving, setSaving] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [declined, setDeclined] = useState(false);
 
   async function handleAccept(e: React.FormEvent) {
     e.preventDefault();
@@ -95,13 +99,69 @@ export function ConsentGate({ onAccepted, source = "gate", title }: Props) {
     }
   }
 
-  async function handleNotNow() {
+  async function handleSignOut() {
     setSigningOut(true);
     try {
       await createClient().auth.signOut();
     } finally {
       router.replace("/login");
     }
+  }
+
+  if (declined) {
+    return (
+      <MotionConfig reducedMotion="user">
+        <div className="flex min-h-dvh flex-col items-center bg-background px-4 pb-10 pt-4" dir={locale === "he" ? "rtl" : "ltr"}>
+          <div className="flex w-full max-w-lg justify-end">
+            <LanguageToggle />
+          </div>
+          <motion.main
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="w-full max-w-lg"
+            aria-labelledby="declined-title"
+          >
+            <header className="mb-6 mt-2 flex flex-col items-center gap-3 text-center">
+              <div className="flex size-16 items-center justify-center rounded-2xl bg-primary shadow-[var(--shadow-warm-md)]">
+                <Home className="size-8 text-white" aria-hidden="true" />
+              </div>
+              <h1 id="declined-title" className="text-2xl font-bold text-foreground">
+                {t("privacy.gate.declinedTitle")}
+              </h1>
+              <p className="max-w-sm text-sm leading-relaxed text-muted">{t("privacy.gate.declinedBody")}</p>
+            </header>
+
+            <button
+              type="button"
+              onClick={() => setDeclined(false)}
+              className="mb-6 flex min-h-12 w-full items-center justify-center rounded-2xl bg-primary px-4 text-sm font-bold text-white shadow-[var(--shadow-warm-md)] transition-transform duration-150 hover:bg-primary-dark active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none motion-reduce:active:scale-100"
+            >
+              {t("privacy.gate.declinedBack")}
+            </button>
+
+            <section aria-labelledby="declined-more" className="space-y-4 rounded-2xl border border-border bg-surface p-4 shadow-[var(--shadow-warm-sm)]">
+              <h2 id="declined-more" className="text-sm font-bold text-foreground">
+                {t("privacy.gate.declinedMore")}
+              </h2>
+              <SubscriptionSection cancelOnly />
+              <DeleteAccountSection onGate />
+              <div className="border-t border-border pt-4">
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  disabled={signingOut}
+                  className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-border text-sm font-medium text-foreground transition-colors duration-150 hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60"
+                >
+                  {signingOut ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <LogOut className="size-4" aria-hidden="true" />}
+                  {t("privacy.gate.signOut")}
+                </button>
+              </div>
+            </section>
+          </motion.main>
+        </div>
+      </MotionConfig>
+    );
   }
 
   const busy = saving || signingOut;
@@ -214,11 +274,11 @@ export function ConsentGate({ onAccepted, source = "gate", title }: Props) {
 
             <button
               type="button"
-              onClick={handleNotNow}
+              onClick={() => setDeclined(true)}
               disabled={busy}
               className="flex min-h-11 w-full items-center justify-center rounded-xl text-sm font-medium text-muted transition-colors duration-150 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-60"
             >
-              {signingOut ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : t("privacy.gate.notNow")}
+              {t("privacy.gate.notNow")}
             </button>
           </form>
 

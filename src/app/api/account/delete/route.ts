@@ -15,6 +15,9 @@ const limiter = rateLimit({ windowMs: 60_000, max: 5 });
  * verified session cookie; anything else in the body (e.g. a "userId") is
  * ignored, so user A can never delete user B.
  *
+ * What is deleted, and when the sign-in is kept because the events app shares
+ * it, is decided inside the database (migration 027); see lib/privacy/delete-account.ts.
+ *
  * Deliberately NOT behind the consent guard: a person who has not accepted the
  * current policy must still be able to erase their data.
  */
@@ -79,6 +82,11 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     if (err instanceof DeleteAccountError && err.code === "active_subscription") {
       return NextResponse.json({ error: "active_subscription" }, { status: 409 });
+    }
+    if (err instanceof DeleteAccountError && err.code === "not_available") {
+      // The database function is missing: nothing was deleted. Say so, do not pretend it failed halfway.
+      console.error("[account/delete] database function missing (migration 027 not applied)");
+      return NextResponse.json({ error: "delete_unavailable" }, { status: 503 });
     }
     console.error("[account/delete] failed:", err instanceof Error ? err.message : err);
     return NextResponse.json({ error: "delete_failed" }, { status: 500 });
