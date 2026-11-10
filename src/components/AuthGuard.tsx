@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { safeNext } from "@/lib/safe-next";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 
@@ -20,16 +21,22 @@ interface AuthGuardProps {
 export function AuthGuard({ children, allowDemo = false }: AuthGuardProps) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (loading) return;
 
     if (!user && !allowDemo) {
-      router.replace("/login");
+      const next = safeNext(`${pathname}${window.location.search}`);
+      router.replace(
+        process.env.NEXT_PUBLIC_NEW_UI === "true" && next !== "/dashboard"
+          ? `/login?next=${encodeURIComponent(next)}`
+          : "/login"
+      );
       return;
     }
 
-  }, [user, loading, allowDemo, router]);
+  }, [user, loading, allowDemo, router, pathname]);
 
   if (loading || (!user && !allowDemo)) {
     return (
