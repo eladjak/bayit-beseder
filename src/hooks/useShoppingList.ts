@@ -92,6 +92,10 @@ const STORAGE_KEY = "bayit-beseder-shopping-list";
 
 interface UseShoppingListReturn {
   items: ShoppingItem[];
+  storage: "server" | "device";
+  loadError: string | null;
+  deviceItems: ShoppingItem[];
+  retry: () => Promise<void>;
   loading: boolean;
   addItem: (
     title: string,
@@ -132,24 +136,28 @@ function toShoppingItem(row: {
 export function useShoppingList(): UseShoppingListReturn {
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [storage, setStorage] = useState<"server" | "device">("server");
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [deviceItems, setDeviceItems] = useState<ShoppingItem[]>([]);
+  const enabled = process.env.NEXT_PUBLIC_NEW_UI === "true";
   const usingMockRef = useRef(false);
   // Keep a ref that always reflects the latest items so async callbacks
   // (e.g. toggleItem) never capture a stale closure value.
   const itemsRef = useRef<ShoppingItem[]>([]);
 
   // ---- Load from localStorage or use defaults ----
-  const loadFromLocalStorage = useCallback((): ShoppingItem[] => {
-    if (typeof window === "undefined") return DEFAULT_MOCK_ITEMS;
+  const loadFromLocalStorage = useCallback((defaults = true): ShoppingItem[] => {
+    if (typeof window === "undefined") return defaults ? DEFAULT_MOCK_ITEMS : [];
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        return Array.isArray(parsed) ? parsed : DEFAULT_MOCK_ITEMS;
+        return Array.isArray(parsed) ? (defaults ? parsed : parsed.filter((item: ShoppingItem) => !DEFAULT_MOCK_ITEMS.some((demo) => demo.id === item.id && demo.created_at === item.created_at))) : (defaults ? DEFAULT_MOCK_ITEMS : []);
       }
     } catch {
       // Invalid JSON in storage
     }
-    return DEFAULT_MOCK_ITEMS;
+    return defaults ? DEFAULT_MOCK_ITEMS : [];
   }, []);
 
   // ---- Save to localStorage ----
@@ -166,6 +174,8 @@ export function useShoppingList(): UseShoppingListReturn {
   const fetchItems = useCallback(async () => {
     if (!isSupabaseConfigured()) {
       usingMockRef.current = true;
+      setStorage("device");
+      setLoadError("device");
       const localItems = loadFromLocalStorage();
       setItems(localItems);
       setLoading(false);
@@ -182,21 +192,28 @@ export function useShoppingList(): UseShoppingListReturn {
       if (error) {
         // Table may not exist yet -- fall back to localStorage mock
         usingMockRef.current = true;
-        const localItems = loadFromLocalStorage();
+        setStorage("device");
+        setLoadError("device");
+        const localItems = loadFromLocalStorage(!enabled);
         setItems(localItems);
       } else {
         usingMockRef.current = false;
+        setStorage("server");
+        setLoadError(null);
+        if (enabled) setDeviceItems(loadFromLocalStorage(false));
         setItems((data ?? []).map(toShoppingItem));
       }
     } catch {
       // Supabase not reachable
       usingMockRef.current = true;
-      const localItems = loadFromLocalStorage();
+      setStorage("device");
+      setLoadError("device");
+      const localItems = loadFromLocalStorage(!enabled);
       setItems(localItems);
     } finally {
       setLoading(false);
     }
-  }, [loadFromLocalStorage]);
+  }, [loadFromLocalStorage, enabled]);
 
   useEffect(() => {
     fetchItems();
@@ -214,6 +231,7 @@ export function useShoppingList(): UseShoppingListReturn {
           "postgres_changes",
           { event: "*", schema: "public", table: "shopping_items" },
           (payload) => {
+            if (enabled && usingMockRef.current) return;
             if (payload.eventType === "INSERT") {
               const newItem = toShoppingItem(payload.new as {
                 id: string;
@@ -260,7 +278,7 @@ export function useShoppingList(): UseShoppingListReturn {
     } catch {
       // Realtime not available -- silently ignore
     }
-  }, []);
+  }, [enabled]);
 
   // ---- CRUD operations ----
 
@@ -545,5 +563,5 @@ export function useShoppingList(): UseShoppingListReturn {
   // Keep ref in sync with state so async callbacks read the latest value
   itemsRef.current = items;
 
-  return { items, loading, addItem, toggleItem, removeItem, editItem, moveItemToCategory, clearChecked };
+  return { items, loading, storage, loadError, deviceItems, retry: fetchItems, addItem, toggleItem, removeItem, editItem, moveItemToCategory, clearChecked };
 }

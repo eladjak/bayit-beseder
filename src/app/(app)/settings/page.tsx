@@ -113,7 +113,7 @@ export default function SettingsPage() {
   const { user } = useAuth();
   const { profile, updateProfile } = useProfile();
   const { t, setLocale: i18nSetLocale } = useTranslation();
-  const { household, updateHousehold } = useHousehold(profile?.household_id ?? null);
+  const { household, updateHousehold, status: householdStatus, retry: retryHousehold } = useHousehold(profile?.household_id ?? null);
 
   // Profile state
   const [displayName, setDisplayName] = useState("");
@@ -323,6 +323,7 @@ export default function SettingsPage() {
   );
 
   function copyInviteCode() {
+    if (process.env.NEXT_PUBLIC_NEW_UI === "true" && !household.inviteCode) return;
     void navigator.clipboard.writeText(household.inviteCode).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -507,6 +508,8 @@ export default function SettingsPage() {
           defaultOpen
         >
           <HouseholdSection
+            status={householdStatus}
+            retry={retryHousehold}
             householdName={householdName}
             city={householdCity}
             cityError={householdCityError}

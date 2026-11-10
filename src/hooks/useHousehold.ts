@@ -38,12 +38,16 @@ const MOCK_HOUSEHOLD: HouseholdData = {
  * Falls back to mock data when Supabase is not available or no household is linked.
  */
 export function useHousehold(householdId: string | null | undefined) {
-  const [household, setHousehold] = useState<HouseholdData>(MOCK_HOUSEHOLD);
+  const enabled = process.env.NEXT_PUBLIC_NEW_UI === "true";
+  const [household, setHousehold] = useState<HouseholdData>(() => enabled ? { ...MOCK_HOUSEHOLD, inviteCode: "" } : MOCK_HOUSEHOLD);
   const [loading, setLoading] = useState(true);
-
+  const [status, setStatus] = useState<"loading" | "ready" | "no-household" | "error">("loading");
   const fetchHousehold = useCallback(async () => {
+    const placeholder = enabled ? { ...MOCK_HOUSEHOLD, inviteCode: "" } : MOCK_HOUSEHOLD;
+    setStatus("loading");
     if (!householdId) {
-      setHousehold(MOCK_HOUSEHOLD);
+      setHousehold(placeholder);
+      setStatus("no-household");
       setLoading(false);
       return;
     }
@@ -51,18 +55,20 @@ export function useHousehold(householdId: string | null | undefined) {
     try {
       const supabase = createClient();
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("households")
         .select("name, invite_code, golden_rule_target, city")
         .eq("id", householdId)
         .single();
 
-      if (!data) {
-        setHousehold(MOCK_HOUSEHOLD);
+      if (!data || (enabled && error)) {
+        setHousehold(placeholder);
+        setStatus("error");
         setLoading(false);
         return;
       }
 
+      setStatus("ready");
       setHousehold({
         name: data.name,
         inviteCode: data.invite_code,
@@ -70,11 +76,12 @@ export function useHousehold(householdId: string | null | undefined) {
         city: data.city ?? null,
       });
     } catch {
-      setHousehold(MOCK_HOUSEHOLD);
+      setHousehold(placeholder);
+      setStatus("error");
     } finally {
       setLoading(false);
     }
-  }, [householdId]);
+  }, [householdId, enabled]);
 
   useEffect(() => {
     fetchHousehold();
@@ -106,5 +113,5 @@ export function useHousehold(householdId: string | null | undefined) {
     [householdId]
   );
 
-  return { household, loading, updateHousehold };
+  return { household, loading, updateHousehold, status, isReal: status === "ready", retry: fetchHousehold };
 }

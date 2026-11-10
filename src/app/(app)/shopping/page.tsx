@@ -105,9 +105,14 @@ const VoiceInputButton = dynamic(
   { ssr: false }
 );
 
+const COPY = {
+  he: { device: "הרשימה נשמרת כרגע רק בטלפון הזה ולא תגיע לשאר בני הבית.", retry: "נסו שוב", saved: (n: number) => n === 1 ? "יש פריט אחד שנשמר רק בטלפון הזה" : `יש ${n} פריטים שנשמרו רק בטלפון הזה` },
+  en: { device: "This list is currently saved only on this phone and will not reach the rest of your household.", retry: "Try again", saved: (n: number) => n === 1 ? "One item is saved only on this phone" : `${n} items are saved only on this phone` },
+};
+
 export default function ShoppingPage() {
   const { isFirstVisit: showShoppingTip, dismiss: dismissShoppingTip } = useFirstVisit("shopping");
-  const { items, loading, addItem, toggleItem, removeItem, editItem, moveItemToCategory, clearChecked } =
+  const { items, loading, storage, deviceItems, retry, addItem, toggleItem, removeItem, editItem, moveItemToCategory, clearChecked } =
     useShoppingList();
   const {
     categories: dynamicCategories,
@@ -118,7 +123,7 @@ export default function ShoppingPage() {
   } = useShoppingCategories();
   const seasonalMode = useSeasonalMode();
   const { profile } = useProfile();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [addingSeasonalShopping, setAddingSeasonalShopping] = useState(false);
 
   // Add-item form state
@@ -295,6 +300,9 @@ export default function ShoppingPage() {
 
   return (
     <div className="space-y-4 pb-28" dir="rtl">
+      {process.env.NEXT_PUBLIC_NEW_UI === "true" && (storage === "device" || deviceItems.length > 0) && <div role="status" className="mx-4 mt-4 rounded-xl border border-border bg-surface p-4 text-sm">
+        {storage === "device" ? <><p>{COPY[locale].device}</p><button type="button" onClick={() => void retry()} className="min-h-11 font-semibold text-primary">{COPY[locale].retry}</button></> : <><p>{COPY[locale].saved(deviceItems.length)}</p><ul className="list-disc ps-5">{deviceItems.map(item => <li key={item.id}>{item.title}</li>)}</ul></>}
+      </div>}
       <div className="px-4 pt-6">
         <div className="rounded-3xl border border-border bg-surface p-5">
           <div className="flex items-start justify-between gap-3">
