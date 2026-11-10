@@ -42,3 +42,10 @@ describe('household section states', () => {
     expect(screen.queryByLabelText('settings.householdSection.copyInviteCode')).toBeNull();
   });
 });
+
+it('keeps the existing placeholder when the redesign switch is off', async () => {
+  vi.stubEnv('NEXT_PUBLIC_NEW_UI', 'false');
+  const { result } = renderHook(() => useHousehold(null));
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  expect(result.current.household.inviteCode).toBe('BAYIT-ABC123');
+});

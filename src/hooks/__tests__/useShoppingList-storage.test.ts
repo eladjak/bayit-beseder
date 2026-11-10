@@ -21,3 +21,12 @@ describe('shopping device fallback', () => {
     await waitFor(() => expect(next.result.current.deviceItems.length).toBe(1));
   });
 });
+
+it('retains existing fallback defaults when the redesign switch is off', async () => {
+  vi.stubEnv('NEXT_PUBLIC_NEW_UI', 'false');
+  localStorage.clear();
+  order.mockResolvedValueOnce({data:null,error:{message:'offline'}});
+  const { result } = renderHook(() => useShoppingList());
+  await waitFor(() => expect(result.current.loading).toBe(false));
+  expect(result.current.items.some(item => item.id === 's1')).toBe(true);
+});
