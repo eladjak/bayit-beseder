@@ -57,6 +57,8 @@ function CheckRow({ id, inputRef, checked, onToggle, label, error, disabled }: R
               : "border-border bg-surface hover:bg-surface-hover"
         } ${disabled ? "opacity-60" : "cursor-pointer"}`}
       >
+        {/* The visible box is 24px; its tap area is 44px (the whole row is also the label's target). */}
+        <span data-touch-target className="-m-2.5 flex size-11 shrink-0 items-center justify-center">
         <input
           id={id}
           ref={inputRef}
@@ -68,8 +70,9 @@ function CheckRow({ id, inputRef, checked, onToggle, label, error, disabled }: R
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errId : undefined}
           onChange={(e) => onToggle(e.target.checked)}
-          className="mt-0.5 size-6 shrink-0 cursor-pointer accent-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          className="size-6 shrink-0 cursor-pointer accent-[var(--color-primary)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         />
+        </span>
         <span className="text-foreground">{label}</span>
       </label>
       {error && (
@@ -108,7 +111,7 @@ export const ConsentChecks = forwardRef<ConsentChecksHandle, Props>(function Con
   }));
 
   const linkClass =
-    "font-semibold text-primary underline underline-offset-2 hover:text-primary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm";
+    "py-3.5 font-semibold text-primary underline underline-offset-2 hover:text-primary-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-sm"; // py-3.5: a 44px tap area for the inline link without moving the text
 
   const privacyLink = (
     <Link href="/privacy" target="_blank" rel="noopener" className={linkClass}>

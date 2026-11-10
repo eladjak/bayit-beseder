@@ -10,13 +10,20 @@ import { POLICY_VERSION } from "@/lib/privacy/policy";
 type Lookup = () => Promise<{ data: unknown; error: { message: string } | null }>;
 let lookup: Lookup;
 let signedIn: boolean;
+let authImpl: () => Promise<{ data: { user: { id: string } | null }; error?: { status?: number; message: string } | null }>;
+let cookiesThrow: boolean;
 
 const FULL = { policy_version: POLICY_VERSION, age_confirmed: true, privacy_accepted: true, terms_accepted: true };
 
-vi.mock("next/headers", () => ({ cookies: async () => ({ getAll: () => [], set: () => undefined }) }));
+vi.mock("next/headers", () => ({
+  cookies: async () => {
+    if (cookiesThrow) throw new Error("cookies unavailable");
+    return { getAll: () => (signedIn ? [{ name: "sb-proj-auth-token", value: "x" }] : []), set: () => undefined };
+  },
+}));
 vi.mock("@supabase/ssr", () => ({
   createServerClient: () => ({
-    auth: { getUser: async () => ({ data: { user: signedIn ? { id: "user-a" } : null } }) },
+    auth: { getUser: () => authImpl() },
     from(table: string) {
       const b = {
         select: () => b,
@@ -46,6 +53,8 @@ function req() {
 describe("POST /api/ai/chat privacy gate", () => {
   beforeEach(() => {
     signedIn = true;
+    cookiesThrow = false;
+    authImpl = async () => ({ data: { user: { id: "user-a" } }, error: null });
     lookup = async () => ({ data: FULL, error: null });
     geminiCalls.mockReset();
     process.env.GEMINI_API_KEY = "test-placeholder";
@@ -98,5 +107,37 @@ describe("POST /api/ai/chat privacy gate", () => {
     const res = await POST(req());
     expect(res.status).toBe(200);
     expect(res.headers.get("X-Auth")).toBe("demo");
+  });
+
+  it("AUTH LOOKUP RETURNS an error while a session cookie is present: refused (503), NOT continued as anonymous", async () => {
+    authImpl = async () => ({ data: { user: null }, error: { status: 500, message: "auth server down" } });
+    const { POST } = await import("../route");
+    const res = await POST(req());
+    expect(res.status).toBe(503);
+    expect((await res.json()).error).toBe("auth_unavailable");
+    expect(geminiCalls).not.toHaveBeenCalled();
+  });
+
+  it("AUTH LOOKUP THROWS while a session cookie is present: refused, provider NOT called", async () => {
+    authImpl = async () => {
+      throw new TypeError("fetch failed");
+    };
+    const { POST } = await import("../route");
+    expect((await POST(req())).status).toBe(503);
+    expect(geminiCalls).not.toHaveBeenCalled();
+  });
+
+  it("an invalid or expired session (401 from auth) is refused with 401, not served as a demo user", async () => {
+    authImpl = async () => ({ data: { user: null }, error: { status: 401, message: "invalid JWT" } });
+    const { POST } = await import("../route");
+    expect((await POST(req())).status).toBe(401);
+    expect(geminiCalls).not.toHaveBeenCalled();
+  });
+
+  it("if even reading the cookies fails we cannot tell anonymous from signed in: refused", async () => {
+    cookiesThrow = true;
+    const { POST } = await import("../route");
+    expect((await POST(req())).status).toBe(503);
+    expect(geminiCalls).not.toHaveBeenCalled();
   });
 });

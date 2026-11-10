@@ -1390,10 +1390,11 @@
       "open": "Delete my account",
       "dialogTitle": "Delete your account?",
       "intro": "This is what happens as soon as you confirm:",
-      "i1": "Your account, profile, points, achievements and personal history are deleted.",
+      "i1": "Your profile, points, achievements and personal history in Bayit BeSeder are deleted now.",
       "i2": "Your WhatsApp, Google Calendar and notification connections are disconnected and deleted.",
       "i3": "If the household has other members, you leave it. The shared tasks and lists stay with them.",
       "i4": "Receipts and accounting documents are kept by the payment company as the law requires.",
+      "i5": "The login itself (email and password) is deleted within the time the law allows, after a manual check, because the account is shared with another app of ours.",
       "cannotUndo": "This cannot be undone.",
       "typeLabel": "To confirm, type your account email address",
       "typeExample": "For example name@example.com",
@@ -1404,9 +1405,10 @@
       "errSubscription": "You have an active Plus subscription. Cancel it first in Settings (subscription section), then you can delete the account.",
       "errGeneric": "The deletion did not finish. You can try again, and nothing already deleted is affected. If it keeps happening, write to privacy@bayitbeseder.com.",
       "errTooMany": "Too many attempts. Wait a minute and try again.",
-      "done": "Your account was deleted. Thank you for being with us.",
-      "keptNote": "Your Bayit BeSeder data was deleted. We kept your sign-in because another app of ours uses the same account and still holds data of yours there. To delete that too, write to privacy@bayitbeseder.com.",
-      "errUnavailable": "Deletion is not available right now, and nothing was deleted. Please try again later or write to privacy@bayitbeseder.com."
+      "done": "Your data in Bayit BeSeder was deleted.",
+      "keptNote": "The login itself (the account is shared with another app of ours) will be removed within the time the law allows, after a manual check. Until then it holds none of your Bayit BeSeder data.",
+      "errUnavailable": "Deletion is not available right now, and nothing was deleted. Please try again later or write to privacy@bayitbeseder.com.",
+      "photosPending": "Some photos are still waiting to be deleted and will be removed shortly."
     }
   }
 }

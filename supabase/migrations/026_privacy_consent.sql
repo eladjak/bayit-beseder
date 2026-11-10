@@ -66,6 +66,25 @@ BEGIN
   END IF;
 END $$;
 
+-- The time of consent is the SERVER's, never the client's: a signed-in user can insert their own row
+-- directly under RLS, so a client-supplied accepted_at would be worthless as evidence. (source and
+-- locale stay informational labels chosen by the client.)
+CREATE OR REPLACE FUNCTION public.bayit_consent_server_time()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $fn$
+BEGIN
+  NEW.accepted_at := now();
+  RETURN NEW;
+END;
+$fn$;
+
+DROP TRIGGER IF EXISTS bayit_consent_server_time ON public.privacy_consents;
+CREATE TRIGGER bayit_consent_server_time
+  BEFORE INSERT ON public.privacy_consents
+  FOR EACH ROW EXECUTE FUNCTION public.bayit_consent_server_time();
+
 COMMENT ON TABLE public.privacy_consents IS
   'Privacy gate: user confirmed age 18+, privacy policy and terms, for one policy version. Append-only from the app.';
 

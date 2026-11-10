@@ -45,7 +45,7 @@ describe("POST /api/account/delete", () => {
     process.env.SUPABASE_SERVICE_ROLE_KEY = "test-placeholder";
     sessionUser = { id: "user-a", email: "A@Example.com" };
     deleteCalls = [];
-    deleteImpl = async () => ({ authUserDeleted: true, household: "none", newOwnerId: null, skipped: [] });
+    deleteImpl = async () => ({ identityDeletionRequested: true, household: "none", newOwnerId: null, skipped: [] });
   });
 
   it("401 without a session, deletes nothing", async () => {

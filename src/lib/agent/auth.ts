@@ -257,10 +257,11 @@ async function verifyAgentCredentials(request: Request): Promise<AgentAuthResult
 }
 
 /**
- * Verify the bearer credential AND the privacy gate. A token proves who may
- * act on a household; it does not prove the people in that household accepted
- * the current policy. Without consent the agent API serves nothing (403), and
- * if we cannot check, it serves nothing either (503). See consent-server.ts.
+ * Verify the bearer credential AND the privacy gate. A token proves which household an
+ * assistant may act on; it does not prove the people in it accepted the current policy.
+ * The assistant may act only when EVERY current member of the household has current
+ * consent (new members, old tokens and the legacy key follow the same rule). Otherwise it
+ * is refused with a message the agent can pass on; if we cannot check, it is refused too.
  */
 export async function verifyAgentRequest(request: Request): Promise<AgentAuthResult> {
   const auth = await verifyAgentCredentials(request);
@@ -269,9 +270,16 @@ export async function verifyAgentRequest(request: Request): Promise<AgentAuthRes
   if (!service) {
     return { ok: false, status: 503, error: CONSENT_UNAVAILABLE_ERROR, householdId: null };
   }
-  const ok = await householdConsentOk(service, auth.householdId, auth.createdBy ?? null);
-  if (!ok) {
-    return { ok: false, status: 403, error: CONSENT_REQUIRED_ERROR, householdId: null };
+  if (!(await householdConsentOk(service, auth.householdId))) {
+    return {
+      ok: false,
+      status: 403,
+      error:
+        `${CONSENT_REQUIRED_ERROR}: not every member of this household has accepted the current privacy policy, ` +
+        "so the assistant may not act for it yet. Ask each member to open Bayit BeSeder and confirm. " +
+        "(לא כל חברי הבית אישרו את מדיניות הפרטיות העדכנית, ולכן העוזר לא יכול לפעול עבור הבית. כל חבר צריך לפתוח את בית בסדר ולאשר.)",
+      householdId: null,
+    };
   }
   return auth;
 }

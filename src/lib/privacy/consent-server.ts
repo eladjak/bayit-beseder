@@ -72,6 +72,8 @@ export async function requireConsent(supabase: AnyClient, user: Pick<User, "id">
   return refusalFor(await getConsentStatus(supabase, user.id));
 }
 
+const CHUNK = 150;
+
 /**
  * For code that has NO user session but acts for a household or a phone number
  * (agent tokens, the WhatsApp webhook, cron jobs): ask with a service client
@@ -81,41 +83,61 @@ export async function requireConsent(supabase: AnyClient, user: Pick<User, "id">
 export async function filterConsentedUserIds(service: AnyClient, userIds: string[]): Promise<Set<string>> {
   const unique = [...new Set(userIds.filter(Boolean))];
   if (unique.length === 0) return new Set();
+  const ok = new Set<string>();
   try {
-    const { data, error } = await service
-      .from("privacy_consents")
-      .select("user_id, policy_version, age_confirmed, privacy_accepted, terms_accepted")
-      .in("user_id", unique)
-      .eq("policy_version", POLICY_VERSION);
-    if (error || !Array.isArray(data)) return new Set();
-    return new Set(
-      (data as { user_id: string }[])
-        .filter((row) => isConsentCurrent(row as never))
-        .map((row) => row.user_id),
-    );
+    for (let i = 0; i < unique.length; i += CHUNK) {
+      const { data, error } = await service
+        .from("privacy_consents")
+        .select("user_id, policy_version, age_confirmed, privacy_accepted, terms_accepted")
+        .in("user_id", unique.slice(i, i + CHUNK))
+        .eq("policy_version", POLICY_VERSION);
+      if (error || !Array.isArray(data)) return new Set();
+      for (const row of data as { user_id: string }[]) if (isConsentCurrent(row as never)) ok.add(row.user_id);
+    }
+    return ok;
   } catch {
     return new Set();
   }
 }
 
 /**
- * A household may be served over an agent token (no user session) only if the
- * person who created the token has consent; a token with no known creator (old
- * tokens, the shared legacy key) needs at least one household member with
- * consent. Fails CLOSED.
+ * Households in which EVERY current member has a current consent record.
+ * "Member" is anyone in household_members OR whose profile points at the household.
+ * A household with no members is not served. Pass `only` to restrict the question to some
+ * households. Fails CLOSED: any error or throw returns [].
+ *
+ * This is the rule for everything that acts for a household without a signed-in person:
+ * agent tokens (and MCP), cron jobs. One person's consent is not another's.
  */
-export async function householdConsentOk(
-  service: AnyClient,
-  householdId: string,
-  createdBy: string | null,
-): Promise<boolean> {
+export async function consentedHouseholdIds(service: AnyClient, only?: string[]): Promise<string[]> {
   try {
-    if (createdBy) return (await filterConsentedUserIds(service, [createdBy])).has(createdBy);
-    const { data, error } = await service.from("household_members").select("user_id").eq("household_id", householdId);
-    if (error || !Array.isArray(data)) return false;
-    const ids = (data as { user_id: string }[]).map((m) => m.user_id);
-    return (await filterConsentedUserIds(service, ids)).size > 0;
+    const members = new Map<string, Set<string>>();
+    const add = (household: string | null | undefined, user: string | null | undefined) => {
+      if (!household || !user) return;
+      if (!members.has(household)) members.set(household, new Set());
+      members.get(household)!.add(user);
+    };
+    let hm = service.from("household_members").select("household_id, user_id");
+    let pr = service.from("profiles").select("id, household_id").not("household_id", "is", null);
+    if (only) {
+      hm = hm.in("household_id", only);
+      pr = pr.in("household_id", only);
+    }
+    const [m, p] = await Promise.all([hm, pr]);
+    if (m.error || p.error || !Array.isArray(m.data) || !Array.isArray(p.data)) return [];
+    for (const r of m.data as { household_id: string; user_id: string }[]) add(r.household_id, r.user_id);
+    for (const r of p.data as { id: string; household_id: string }[]) add(r.household_id, r.id);
+    const everyone = [...members.values()].flatMap((set) => [...set]);
+    const consented = await filterConsentedUserIds(service, everyone);
+    return [...members.entries()]
+      .filter(([household, set]) => (!only || only.includes(household)) && set.size > 0 && [...set].every((u) => consented.has(u)))
+      .map(([household]) => household);
   } catch {
-    return false;
+    return [];
   }
+}
+
+/** May an agent act for this household? Only if every current member has consented. Fails CLOSED. */
+export async function householdConsentOk(service: AnyClient, householdId: string): Promise<boolean> {
+  return (await consentedHouseholdIds(service, [householdId])).includes(householdId);
 }

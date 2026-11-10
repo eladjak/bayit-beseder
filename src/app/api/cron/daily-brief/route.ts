@@ -1,4 +1,4 @@
-import { filterConsentedUserIds } from "@/lib/privacy/consent-server";
+import { consentedHouseholdIds, filterConsentedUserIds } from "@/lib/privacy/consent-server";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
@@ -38,6 +38,13 @@ export async function GET(request: NextRequest) {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
   const today = ilToday();
 
+  // Privacy gate: only households in which EVERY member has accepted the current policy are
+  // processed (fails closed: an error means none).
+  const consentedIds = await consentedHouseholdIds(supabase);
+  if (consentedIds.length === 0) {
+    return NextResponse.json({ message: "No household with full consent, skipping" });
+  }
+
   // Get WhatsApp phone numbers from env (comma-separated)
   const phones = (process.env.WHATSAPP_PHONES ?? "").split(",").filter(Boolean);
   if (phones.length === 0) {
@@ -48,6 +55,7 @@ export async function GET(request: NextRequest) {
   const { data: tasks } = await supabase
     .from("tasks")
     .select("title, assigned_to, status")
+    .in("household_id", consentedIds)
     .eq("due_date", today)
     .neq("status", "completed");
 
@@ -59,6 +67,7 @@ export async function GET(request: NextRequest) {
   const { data: overdueTasks } = await supabase
     .from("tasks")
     .select("id")
+    .in("household_id", consentedIds)
     .lt("due_date", today)
     .neq("status", "completed");
 
@@ -85,6 +94,7 @@ export async function GET(request: NextRequest) {
   const { data: streaks } = await supabase
     .from("streaks")
     .select("current_count")
+    .in("household_id", consentedIds)
     .eq("streak_type", "daily")
     .limit(1);
 
@@ -100,6 +110,7 @@ export async function GET(request: NextRequest) {
     const { data: anyProfile } = await supabase
       .from("profiles")
       .select("household_id")
+      .in("household_id", consentedIds)
       .not("household_id", "is", null)
       .limit(1)
       .single();

@@ -1,8 +1,8 @@
 /**
- * Agent tokens prove WHICH household an assistant may act on. They do not prove
- * the people in it accepted the current policy. verifyAgentRequest (with the real
- * consent helper, only the database faked) must refuse without consent and when
- * the consent check cannot run.
+ * Agent tokens prove WHICH household an assistant may act on. They do not prove the people in it
+ * accepted the current policy. verifyAgentRequest (with the real consent helper, only the database
+ * faked) serves a household only when EVERY current member has current consent, for new tokens,
+ * old tokens (no creator) and the legacy key alike, and refuses when the check cannot run.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POLICY_VERSION } from "@/lib/privacy/policy";
@@ -19,6 +19,7 @@ interface Cfg {
   createdBy: string | null;
   members: string[];
   consentedIds: string[];
+  oldVersionIds?: string[];
   consentThrows?: boolean;
   consentError?: boolean;
 }
@@ -26,23 +27,30 @@ interface Cfg {
 function fake(cfg: Cfg) {
   return {
     from(table: string) {
+      let only: unknown[] | null = null;
       const b: Record<string, unknown> = {
         select: () => b,
         is: () => b,
-        in: () => b,
-        eq: () =>
-          table === "household_members"
-            ? Promise.resolve({ data: cfg.members.map((user_id) => ({ user_id })), error: null })
-            : b,
+        not: () => b,
+        eq: () => b,
+        in: (_c: string, vs: unknown[]) => ((only = vs), b),
         maybeSingle: async () => ({
           data: { id: "t1", household_id: H, label: "x", scopes: ["read"], created_by: cfg.createdBy },
           error: null,
         }),
         then: (res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) => {
+          if (table === "household_members") {
+            return Promise.resolve({ data: cfg.members.map((user_id) => ({ household_id: H, user_id })), error: null }).then(res, rej);
+          }
+          if (table === "profiles") return Promise.resolve({ data: [], error: null }).then(res, rej);
           if (table !== "privacy_consents") return Promise.resolve({ data: [], error: null }).then(res, rej);
           if (cfg.consentThrows) return Promise.reject(new Error("down")).then(res, rej);
           if (cfg.consentError) return Promise.resolve({ data: null, error: { message: "x" } }).then(res, rej);
-          return Promise.resolve({ data: cfg.consentedIds.map((user_id) => ({ user_id, ...FULL })), error: null }).then(res, rej);
+          const rows = [
+            ...cfg.consentedIds.map((user_id) => ({ user_id, ...FULL })),
+            ...(cfg.oldVersionIds ?? []).map((user_id) => ({ user_id, ...FULL, policy_version: "old" })),
+          ].filter((r) => (only ? only.includes(r.user_id) : true));
+          return Promise.resolve({ data: rows, error: null }).then(res, rej);
         },
       };
       return b;
@@ -51,6 +59,7 @@ function fake(cfg: Cfg) {
 }
 
 const req = () => new Request("https://x.example/api/agent/brief", { headers: { authorization: `Bearer ${RAW}` } });
+const use = (cfg: Cfg) => vi.mocked(createClient).mockReturnValue(fake(cfg) as never);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -59,29 +68,43 @@ beforeEach(() => {
   delete process.env.BAYIT_AGENT_KEY;
 });
 
-describe("verifyAgentRequest privacy gate", () => {
-  it("control: token whose creator consented is served", async () => {
-    vi.mocked(createClient).mockReturnValue(fake({ createdBy: "u1", members: ["u1"], consentedIds: ["u1"] }) as never);
+describe("verifyAgentRequest privacy gate: every current member must have consented", () => {
+  it("control: all members consented -> served", async () => {
+    use({ createdBy: "u1", members: ["u1", "u2"], consentedIds: ["u1", "u2"] });
     const r = await verifyAgentRequest(req());
     expect(r.ok).toBe(true);
     expect(r.householdId).toBe(H);
   });
 
-  it("token whose creator has NOT consented: 403 consent_required, no household returned", async () => {
-    vi.mocked(createClient).mockReturnValue(fake({ createdBy: "u1", members: ["u1", "u2"], consentedIds: ["u2"] }) as never);
+  it("the token creator consented but ANOTHER member did not: refused with a message the agent can pass on (red under the old creator-only rule)", async () => {
+    use({ createdBy: "u1", members: ["u1", "u2"], consentedIds: ["u1"] });
     const r = await verifyAgentRequest(req());
-    expect(r).toMatchObject({ ok: false, status: 403, error: "consent_required", householdId: null });
+    expect(r).toMatchObject({ ok: false, status: 403, householdId: null });
+    expect(r.error).toContain("consent_required");
+    expect(r.error).toContain("every member");
   });
 
-  it("token with no known creator: needs at least one consenting member", async () => {
-    vi.mocked(createClient).mockReturnValue(fake({ createdBy: null, members: ["u1", "u2"], consentedIds: [] }) as never);
+  it("an OLD token (no creator) follows the same rule: one consenting member is not enough", async () => {
+    use({ createdBy: null, members: ["u1", "u2"], consentedIds: ["u2"] });
     expect((await verifyAgentRequest(req())).status).toBe(403);
-    vi.mocked(createClient).mockReturnValue(fake({ createdBy: null, members: ["u1", "u2"], consentedIds: ["u2"] }) as never);
+    use({ createdBy: null, members: ["u1", "u2"], consentedIds: ["u1", "u2"] });
     expect((await verifyAgentRequest(req())).ok).toBe(true);
   });
 
+  it("a member who consented to an OLD policy version does not count; a member who joins later closes it again", async () => {
+    use({ createdBy: "u1", members: ["u1", "u2"], consentedIds: ["u1"], oldVersionIds: ["u2"] });
+    expect((await verifyAgentRequest(req())).status).toBe(403);
+    use({ createdBy: "u1", members: ["u1", "u2", "u3"], consentedIds: ["u1", "u2"] });
+    expect((await verifyAgentRequest(req())).status).toBe(403);
+  });
+
+  it("a household with no members is not served", async () => {
+    use({ createdBy: "u1", members: [], consentedIds: ["u1"] });
+    expect((await verifyAgentRequest(req())).ok).toBe(false);
+  });
+
   it.each([{ consentThrows: true }, { consentError: true }])("consent lookup fails (%j): refused, not served", async (extra) => {
-    vi.mocked(createClient).mockReturnValue(fake({ createdBy: "u1", members: ["u1"], consentedIds: ["u1"], ...extra }) as never);
+    use({ createdBy: "u1", members: ["u1"], consentedIds: ["u1"], ...extra });
     const r = await verifyAgentRequest(req());
     expect(r.ok).toBe(false);
     expect(r.householdId).toBeNull();

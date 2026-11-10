@@ -4,7 +4,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { POLICY_VERSION, isConsentCurrent } from "../policy";
-import { hasCurrentConsent, requireConsent, getConsentStatus, filterConsentedUserIds, householdConsentOk } from "../consent-server";
+import { hasCurrentConsent, requireConsent, getConsentStatus, filterConsentedUserIds, householdConsentOk, consentedHouseholdIds } from "../consent-server";
 
 const FULL = {
   policy_version: POLICY_VERSION,
@@ -99,50 +99,78 @@ describe("hasCurrentConsent / requireConsent", () => {
   });
 });
 
-/** A service-style client for the "who has consent" questions (no session involved). */
-function listClient(result: { data: unknown; error: { message: string } | null } | "throw", households: { user_id: string }[] = []) {
+/** A service client over small in-memory tables, honouring .in / .eq / .not for what the helpers use. */
+function dbClient(cfg: { consents?: Record<string, unknown>[]; members?: { household_id: string; user_id: string }[]; profiles?: { id: string; household_id: string | null }[]; fail?: "consents" | "members" | "throw" }) {
   return {
-    from: (t: string) => {
-      let only: string[] | null = null;
+    from(table: string) {
+      let rows: Record<string, unknown>[] =
+        table === "privacy_consents" ? cfg.consents ?? [] : table === "household_members" ? (cfg.members as never) ?? [] : table === "profiles" ? (cfg.profiles as never) ?? [] : [];
       const b = {
         select: () => b,
-        in: (_c: string, ids: string[]) => ((only = ids), b),
-        eq: () => (t === "household_members" ? Promise.resolve({ data: households, error: null }) : b),
-        then: (res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) =>
-          (result === "throw"
-            ? Promise.reject(new Error("down"))
-            : Promise.resolve(
-                only && Array.isArray(result.data)
-                  ? { ...result, data: (result.data as { user_id: string }[]).filter((r) => only!.includes(r.user_id)) }
-                  : result,
-              )
-          ).then(res, rej),
+        eq: (c: string, v: unknown) => ((rows = rows.filter((r) => r[c] === v)), b),
+        in: (c: string, vs: unknown[]) => ((rows = rows.filter((r) => vs.includes(r[c]))), b),
+        not: (c: string, _op: string, v: unknown) => ((rows = rows.filter((r) => r[c] !== v)), b),
+        then: (res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) => {
+          if (cfg.fail === "throw") return Promise.reject(new Error("down")).then(res, rej);
+          if ((cfg.fail === "consents" && table === "privacy_consents") || (cfg.fail === "members" && table === "household_members"))
+            return Promise.resolve({ data: null, error: { message: "x" } }).then(res, rej);
+          return Promise.resolve({ data: rows, error: null }).then(res, rej);
+        },
       };
       return b;
     },
   } as never;
 }
+const C = (user_id: string, over: Record<string, unknown> = {}) => ({ user_id, ...FULL, ...over });
 
-describe("filterConsentedUserIds / householdConsentOk (no session: agent tokens, webhook, cron)", () => {
-  const rows = [
-    { user_id: "a", ...FULL },
-    { user_id: "b", ...FULL, terms_accepted: false },
-    { user_id: "c", ...FULL, policy_version: "old" },
-  ];
+describe("filterConsentedUserIds (no session: webhook, cron)", () => {
   it("returns only users with a FULL, CURRENT record", async () => {
-    expect([...(await filterConsentedUserIds(listClient({ data: rows, error: null }), ["a", "b", "c", "d"]))]).toEqual(["a"]);
+    const db = dbClient({ consents: [C("a"), C("b", { terms_accepted: false }), C("c", { policy_version: "old" })] });
+    expect([...(await filterConsentedUserIds(db, ["a", "b", "c", "d"]))]).toEqual(["a"]);
   });
   it("fails closed on an error, a throw, and an empty list", async () => {
-    expect((await filterConsentedUserIds(listClient({ data: null, error: { message: "x" } }), ["a"])).size).toBe(0);
-    expect((await filterConsentedUserIds(listClient("throw"), ["a"])).size).toBe(0);
-    expect((await filterConsentedUserIds(listClient({ data: rows, error: null }), [])).size).toBe(0);
+    expect((await filterConsentedUserIds(dbClient({ fail: "consents" }), ["a"])).size).toBe(0);
+    expect((await filterConsentedUserIds(dbClient({ fail: "throw" }), ["a"])).size).toBe(0);
+    expect((await filterConsentedUserIds(dbClient({ consents: [C("a")] }), [])).size).toBe(0);
   });
-  it("a token needs its creator to have consented; with no creator, one consenting member is enough", async () => {
-    const c = listClient({ data: rows, error: null }, [{ user_id: "b" }, { user_id: "a" }]);
-    expect(await householdConsentOk(c, "h", "a")).toBe(true);
-    expect(await householdConsentOk(c, "h", "b")).toBe(false);
-    expect(await householdConsentOk(c, "h", null)).toBe(true);
-    expect(await householdConsentOk(listClient({ data: rows, error: null }, [{ user_id: "b" }]), "h", null)).toBe(false);
-    expect(await householdConsentOk(listClient("throw"), "h", "a")).toBe(false);
+  it("handles more ids than one query takes (chunking)", async () => {
+    const ids = Array.from({ length: 400 }, (_, i) => `u${i}`);
+    const db = dbClient({ consents: ids.map((i) => C(i)) });
+    expect((await filterConsentedUserIds(db, ids)).size).toBe(400);
+  });
+});
+
+describe("consentedHouseholdIds / householdConsentOk: EVERY member must have consented", () => {
+  const members = [
+    { household_id: "h1", user_id: "a" },
+    { household_id: "h1", user_id: "b" },
+    { household_id: "h2", user_id: "c" },
+    { household_id: "h3", user_id: "d" },
+  ];
+  it("serves a household only when all of its members consented", async () => {
+    const db = dbClient({ members, profiles: [], consents: [C("a"), C("c"), C("d")] }); // b has not consented
+    expect(await consentedHouseholdIds(db)).toEqual(["h2", "h3"]);
+    expect(await householdConsentOk(db, "h1")).toBe(false);
+    expect(await householdConsentOk(db, "h2")).toBe(true);
+  });
+  it("one person's consent does not cover another: two members, one consent, refused (red under the old 'creator or any one member' rule)", async () => {
+    const db = dbClient({ members: members.slice(0, 2), profiles: [], consents: [C("a")] });
+    expect(await householdConsentOk(db, "h1")).toBe(false);
+  });
+  it("a member known only through profiles.household_id counts too", async () => {
+    const db = dbClient({ members: [{ household_id: "h1", user_id: "a" }], profiles: [{ id: "z", household_id: "h1" }], consents: [C("a")] });
+    expect(await householdConsentOk(db, "h1")).toBe(false);
+  });
+  it("a new member who has not consented closes the household again; an old-version consent does not count", async () => {
+    const db = dbClient({ members: members.slice(0, 2), profiles: [], consents: [C("a"), C("b", { policy_version: "old" })] });
+    expect(await householdConsentOk(db, "h1")).toBe(false);
+  });
+  it("a household with no members is not served", async () => {
+    expect(await householdConsentOk(dbClient({ members: [], profiles: [], consents: [C("a")] }), "h1")).toBe(false);
+  });
+  it("fails closed on a lookup error and on a throw", async () => {
+    expect(await householdConsentOk(dbClient({ members, profiles: [], consents: [C("a"), C("b")], fail: "consents" }), "h1")).toBe(false);
+    expect(await householdConsentOk(dbClient({ members, profiles: [], consents: [C("a"), C("b")], fail: "members" }), "h1")).toBe(false);
+    expect(await householdConsentOk(dbClient({ fail: "throw" }), "h1")).toBe(false);
   });
 });

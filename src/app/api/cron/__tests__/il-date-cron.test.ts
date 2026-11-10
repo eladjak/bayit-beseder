@@ -20,6 +20,12 @@ function makeChain() {
 vi.mock("@supabase/supabase-js", () => ({ createClient: () => makeChain() }));
 vi.mock("@/lib/whatsapp", () => ({ sendWhatsAppMessage: vi.fn() }));
 vi.mock("@/lib/push", () => ({ sendPushToAll: vi.fn() }));
+// This file is about the Israeli date, not the privacy gate (tested in consent.test.ts next to it): gate open.
+vi.mock("@/lib/privacy/consent-server", async (orig) => ({
+  ...(await orig<typeof import("@/lib/privacy/consent-server")>()),
+  consentedHouseholdIds: async () => ["h1"],
+  filterConsentedUserIds: async (_db: unknown, ids: string[]) => new Set(ids),
+}));
 
 const dueDateFilters = () =>
   calls.filter(([m, a]) => m === "eq" && a[0] === "due_date").map(([, a]) => a[1]);

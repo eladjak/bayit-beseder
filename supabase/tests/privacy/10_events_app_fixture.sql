@@ -20,3 +20,17 @@ CREATE TABLE public.event_assignments (id uuid PRIMARY KEY DEFAULT gen_random_uu
 CREATE TABLE public.volunteer_notes (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), volunteer_id uuid, note text);
 -- a table whose name and column name nobody listed anywhere:
 CREATE TABLE public.zz_unknown_app_table (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), owner_ref uuid REFERENCES auth.users(id) ON DELETE CASCADE);
+
+-- The numbered migrations on a fresh database leave household_members with a policy that reads
+-- household_members itself ("infinite recursion detected in policy"), because migration 010 does not
+-- apply cleanly on a fresh chain. The live project has the repaired form (is_household_member());
+-- the tests use that form, so they exercise the policies production really has.
+DO $$
+DECLARE r record;
+BEGIN
+  FOR r IN SELECT policyname FROM pg_policies WHERE schemaname = 'public' AND tablename = 'household_members' LOOP
+    EXECUTE format('DROP POLICY %I ON public.household_members', r.policyname);
+  END LOOP;
+END $$;
+CREATE POLICY "Household members can view household_members" ON public.household_members
+  FOR SELECT TO authenticated USING (public.is_household_member(household_id));

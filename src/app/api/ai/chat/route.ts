@@ -100,43 +100,57 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // 2. Optional auth check (allow demo mode)
+  // 2. Authentication. Anonymous demo mode is a DELIBERATE case: the request carries no
+  // Supabase session cookie at all. A request that carries one must resolve to a user; if the
+  // session cannot be resolved (error, expired or invalid token, thrown exception) the request is
+  // REFUSED, never continued as anonymous (the person may be signed in, and we could not check consent).
   let isAuthenticated = false;
   let authedClient: ReturnType<typeof createServerClient> | null = null;
   let authedUserId: string | null = null;
+  const refuseAuth = (status: number) =>
+    new Response(JSON.stringify({ error: "auth_unavailable" }), {
+      status,
+      headers: { "Content-Type": "application/json" },
+    });
   try {
     const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            try {
-              for (const { name, value, options } of cookiesToSet) {
-                cookieStore.set(name, value, options);
+    const carriesSession = cookieStore.getAll().some((c) => /^sb-.+-auth-token/.test(c.name));
+    if (carriesSession) {
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return cookieStore.getAll();
+            },
+            setAll(cookiesToSet) {
+              try {
+                for (const { name, value, options } of cookiesToSet) {
+                  cookieStore.set(name, value, options);
+                }
+              } catch {
+                // Ignore in server component context
               }
-            } catch {
-              // Ignore in server component context
-            }
+            },
           },
-        },
+        }
+      );
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+      if (authError || !user) {
+        const status = (authError as { status?: number } | null)?.status;
+        return refuseAuth(status === 401 || status === 403 || (!authError && !user) ? 401 : 503);
       }
-    );
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    isAuthenticated = !!user;
-    if (user) {
+      isAuthenticated = true;
       authedClient = supabase;
       authedUserId = user.id;
     }
   } catch {
-    // Auth failure is non-fatal — continue in demo mode. (The privacy gate is
-    // deliberately NOT inside this try: see below.)
+    // We could not even tell whether this is an anonymous demo request: fail closed.
+    return refuseAuth(503);
   }
 
   // Privacy gate. Outside the try/catch above on purpose: a signed-in user who

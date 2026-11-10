@@ -1,23 +1,20 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
- * Delete one user's BayitBeSeder data, and their sign-in only when that is safe.
+ * Delete one user's BayitBeSeder data. The shared login is NEVER deleted here.
  *
  * THE DECISIONS LIVE IN THE DATABASE, NOT HERE.
- * The Supabase project is shared with the events app, so "is it safe to delete
- * the auth user?" has to be answered and acted on inside ONE transaction with
- * the user row locked, otherwise the other app can write between the check and
- * the delete. That is `public.bayit_delete_account(uuid)` (migration 027,
- * service role only). It:
- *   - removes this app's own rows for the user (and the household, if the user
- *     is its last member), enumerated in the migration;
- *   - deletes the profile, the default role row and the auth user ONLY if no
- *     table outside this app's list holds anything for the user (foreign keys
- *     are found from the catalog, so tables nobody listed are still seen);
- *   - otherwise KEEPS the auth user and profile and clears only this app's own
- *     profile columns;
+ * The Supabase project is shared with the events app, so the auth user and the profile row
+ * belong to both apps and nobody can prove from this app that the other one no longer needs them.
+ * `public.bayit_delete_account(uuid)` (migration 027, service role only), in one transaction:
+ *   - deletes this app's own rows for the user (and the household, if the user is its last member);
+ *   - clears this app's own columns on the shared profile and KEEPS the profile and the auth user;
+ *   - records "full identity deletion requested" in bayit_identity_deletion_requests, for the owner
+ *     to handle by hand within the legal time;
+ *   - queues the person's stored photo objects (bayit_storage_cleanup) and returns their names;
+ *   - refuses only for a subscription that really bills (a paid plan), never for a free row;
  *   - rolls everything back if any step fails.
- * This file only calls it and then removes the stored photos it reports.
+ * This file only calls it, then removes the photo objects and clears them from the queue.
  * If migration 027 is not applied the call fails and NOTHING is deleted.
  *
  * The id comes from the verified session in the route, never from the body.
@@ -38,8 +35,8 @@ export class DeleteAccountError extends Error {
 }
 
 export interface DeleteAccountResult {
-  /** The auth user and profile row were deleted. False when the events app still needs them. */
-  authUserDeleted: boolean;
+  /** Always true on success: the login stays until the owner removes it by hand. */
+  identityDeletionRequested: boolean;
   /** What happened to the user's household. */
   household: "none" | "left" | "deleted";
   /** If the user was the owner and others remained, who became owner (id only). */
@@ -51,25 +48,32 @@ export interface DeleteAccountResult {
 const PHOTO_BUCKET = "task-photos";
 
 interface RpcResult {
-  auth_user_deleted?: unknown;
+  identity_deletion_requested?: unknown;
   household?: unknown;
   new_owner_id?: unknown;
-  photo_urls?: unknown;
-  kept_because?: unknown;
+  object_names?: unknown;
 }
 
-/** Remove the stored photos behind these public URLs. Failure is reported, never silent. */
-async function removePhotos(db: Db, urls: string[], skipped: string[]) {
-  const names = urls
-    .map((u) => u.split(`/${PHOTO_BUCKET}/`)[1]?.split("?")[0])
-    .filter((n): n is string => !!n)
-    .map((n) => decodeURIComponent(n));
+/**
+ * Remove the stored photo objects the database reported (it only reports names that provably
+ * belong to the person) and clear them from the durable queue. A failure keeps them queued
+ * and is reported, never hidden.
+ */
+async function removePhotos(db: Db, names: string[], skipped: string[]) {
   if (names.length === 0) return;
+  const objects = names.map((n) => {
+    try {
+      return decodeURIComponent(n);
+    } catch {
+      return n;
+    }
+  });
   try {
-    const { error } = await db.storage.from(PHOTO_BUCKET).remove(names);
+    const { error } = await db.storage.from(PHOTO_BUCKET).remove(objects);
     if (error) throw new Error(error.message);
+    await db.from("bayit_storage_cleanup").delete().in("object_name", names);
   } catch (err) {
-    console.error("[delete-account] could not remove stored photos:", err instanceof Error ? err.message : err);
+    console.error("[delete-account] could not remove stored photos (kept in the cleanup queue):", err instanceof Error ? err.message : err);
     skipped.push("storage.task-photos");
   }
 }
@@ -96,21 +100,16 @@ export async function deleteAccount(db: Db, userId: string): Promise<DeleteAccou
   }
 
   const r = (data ?? {}) as RpcResult;
-  if (typeof r.auth_user_deleted !== "boolean") {
+  if (r.identity_deletion_requested !== true) {
     throw new DeleteAccountError("step_failed", "bayit_delete_account returned an unexpected answer", "bayit_delete_account");
   }
   const skipped: string[] = [];
-  const photoUrls = Array.isArray(r.photo_urls) ? (r.photo_urls as unknown[]).filter((u): u is string => typeof u === "string") : [];
-  await removePhotos(db, photoUrls, skipped);
-
-  if (r.auth_user_deleted === false && Array.isArray(r.kept_because) && r.kept_because.length > 0) {
-    // Table names only, no personal data: tells the operator which other-app data kept the sign-in.
-    console.info("[delete-account] auth user kept because of:", (r.kept_because as unknown[]).join(", "));
-  }
+  const names = Array.isArray(r.object_names) ? (r.object_names as unknown[]).filter((u): u is string => typeof u === "string") : [];
+  await removePhotos(db, names, skipped);
 
   const household = r.household === "left" || r.household === "deleted" ? r.household : "none";
   return {
-    authUserDeleted: r.auth_user_deleted,
+    identityDeletionRequested: true,
     household,
     newOwnerId: typeof r.new_owner_id === "string" ? r.new_owner_id : null,
     skipped,

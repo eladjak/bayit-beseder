@@ -27,6 +27,7 @@ export const GUARD_CALLS = [
   "requireConsent(",
   "getConsentStatus(",
   "hasCurrentConsent(",
+  "consentedHouseholdIds(",
   "refusalFor(",
   "filterConsentedUserIds(",
   "householdConsentOk(",
@@ -36,10 +37,23 @@ export const GUARD_CALLS = [
   "requireHouseholdMember(", // lib/agent/token-access.ts
 ];
 
+function stripComments(source: string): string {
+  return source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+}
+
 /** True when the source calls one of the guards (comments do not count). */
 export function isGuarded(source: string): boolean {
-  const code = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
+  const code = stripComments(source);
   return GUARD_CALLS.some((g) => code.includes(g));
+}
+
+const METHOD = /export\s+(?:async\s+)?function\s+(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\b|export\s+const\s+(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)\b/g;
+
+/** Every exported HTTP handler with its own source text: a guard in POST does not cover GET. */
+export function handlers(source: string): { method: string; body: string }[] {
+  const code = stripComments(source);
+  const marks = [...code.matchAll(METHOD)].map((m) => ({ method: (m[1] ?? m[2]) as string, at: m.index as number }));
+  return marks.map((m, i) => ({ method: m.method, body: code.slice(m.at, marks[i + 1]?.at ?? code.length) }));
 }
 
 /**
@@ -55,9 +69,20 @@ const ALLOW: Record<string, string> = {
   "(auth)/callback/route.ts": "sign-in redirect: exchanges the login code and serves no household data (sign-out is a client call to Supabase)",
   // Never serve a person's data:
   "api/agent/openapi.json/route.ts": "static public API description, no household data",
-  "api/cron/auto-schedule/route.ts": "CRON_SECRET job that re-orders tasks inside the database; it sends and returns nothing personal",
-  "api/sumit/webhook/route.ts": "payment-provider callback authenticated by a shared secret; it records billing events only",
-  "api/whatsapp/send/route.ts": "CRON_SECRET relay that sends a message the caller wrote to a number the caller chose; it reads no household data",
+  // Narrowly justified exceptions. What each one reads / writes / returns / sends:
+  "api/sumit/webhook/route.ts": "payment-provider callback authenticated by a shared secret. Reads and writes billing events and the subscription status of the household named in the provider payload (needed to honour the contract); returns only ok/duplicate, no household data",
+  "api/whatsapp/send/route.ts": "CRON_SECRET relay. Reads no household data; sends exactly the message and number the (trusted, secret-holding) caller provides and returns only the provider message id",
+};
+
+/**
+ * Individual handlers (not whole files) that need no consent, each with the reason. A guarded POST in
+ * the same file does not excuse an unguarded GET, so these are listed per method.
+ */
+const ALLOW_METHOD: Record<string, string> = {
+  "api/push/subscribe/route.ts DELETE": "withdrawing a notification subscription must always work; it only clears the caller's own push endpoint",
+  "api/invite/route.ts GET": "invite-link check for a NOT-yet-signed-in invitee, authenticated only by the secret invite code; returns the household name and the owner's first name, nothing else (open decision: gate it on the household's consent)",
+  "api/mcp/route.ts GET": "returns 405 (no streaming transport); touches no data",
+  "api/mcp/route.ts DELETE": "returns 405 (stateless transport); touches no data",
 };
 
 describe("consent guard coverage", () => {
@@ -75,6 +100,28 @@ describe("consent guard coverage", () => {
   it("EVERY route handler calls a consent guard or is on the allow-list", () => {
     const unguarded = files.filter((f) => !isGuarded(f.src)).map((f) => f.rel).filter((rel) => !(rel in ALLOW));
     expect(unguarded).toEqual([]);
+  });
+
+  it("EVERY exported handler (GET, POST, ...) of every guarded route has its own guard: a guarded POST does not cover an unguarded GET", () => {
+    const bad = files
+      .filter((f) => !(f.rel in ALLOW))
+      .flatMap((f) => handlers(f.src).filter((h) => !isGuarded(h.body)).map((h) => `${f.rel} ${h.method}`))
+      .filter((k) => !(k in ALLOW_METHOD));
+    expect(bad).toEqual([]);
+    // every per-method exception still exists and is still unguarded (no stale entries, no needless ones)
+    const all = new Map(files.flatMap((f) => handlers(f.src).map((h): [string, string] => [`${f.rel} ${h.method}`, h.body])));
+    for (const [k, reason] of Object.entries(ALLOW_METHOD)) {
+      expect(all.has(k), `stale per-method exception ${k}`).toBe(true);
+      expect(isGuarded(all.get(k)!), `${k} is guarded now; remove it from the exception list`).toBe(false);
+      expect(reason.length).toBeGreaterThan(25);
+    }
+    // the scan really sees handlers (it is not vacuously empty)
+    expect(files.flatMap((f) => handlers(f.src)).length).toBeGreaterThan(45);
+  });
+
+  it("the per-handler scanner can fail: a guarded POST next to an unguarded GET is flagged", () => {
+    const src = "export async function GET(){ return Response.json(await load()) }\nexport async function POST(){ const g = await requireConsent(s,u); if (g) return g; }";
+    expect(handlers(src).map((h) => [h.method, isGuarded(h.body)])).toEqual([["GET", false], ["POST", true]]);
   });
 
   it("allow-list entries still exist, carry a real reason, and are not secretly guarded already", () => {

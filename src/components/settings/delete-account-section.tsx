@@ -65,7 +65,7 @@ export function DeleteAccountSection({ onGate = false }: { onGate?: boolean }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ confirmEmail: typed.trim() }),
       });
-      const data = (await res.json().catch(() => ({}))) as { error?: string; authUserDeleted?: boolean };
+      const data = (await res.json().catch(() => ({}))) as { error?: string; skipped?: string[] };
       if (res.ok) {
         await createClient().auth.signOut().catch(() => undefined);
         try {
@@ -74,8 +74,9 @@ export function DeleteAccountSection({ onGate = false }: { onGate?: boolean }) {
           // Storage can be blocked; the account is gone either way.
         }
         toast.success(t("privacy.delete.done"), {
-          description: data.authUserDeleted === false ? t("privacy.delete.keptNote") : undefined,
-          duration: 8000,
+          // Always said: the login itself is removed by hand, within the legal time.
+          description: `${t("privacy.delete.keptNote")}${data.skipped?.length ? " " + t("privacy.delete.photosPending") : ""}`,
+          duration: 14000,
         });
         router.replace("/");
         return;
@@ -137,7 +138,7 @@ export function DeleteAccountSection({ onGate = false }: { onGate?: boolean }) {
 
             <p className="mb-2 text-sm text-muted">{t("privacy.delete.intro")}</p>
             <ul className="mb-3 space-y-2 text-sm text-foreground">
-              {(["i1", "i2", "i3", "i4"] as const).map((k) => (
+              {(["i1", "i2", "i3", "i5", "i4"] as const).map((k) => (
                 <li key={k} className="flex gap-2.5">
                   <span aria-hidden="true" className="mt-2 size-1.5 shrink-0 rounded-full bg-danger/70" />
                   <span>{t(`privacy.delete.${k}`)}</span>

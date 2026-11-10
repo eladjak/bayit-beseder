@@ -82,3 +82,9 @@ SELECT pg_temp.ok(pg_temp.as_user('authenticated', '', 'select * from public.pri
 DELETE FROM auth.users WHERE id = :'B';
 SELECT pg_temp.ok((SELECT count(*) FROM public.privacy_consents WHERE user_id = :'B') = 0, 'deleting the auth user removes their consent (ON DELETE CASCADE)');
 SELECT pg_temp.ok((SELECT count(*) FROM public.privacy_consents WHERE user_id = :'A') = 1, '...and only theirs');
+
+-- Evidence: the consent time is the server's, whatever the client sent.
+INSERT INTO auth.users (id, email) VALUES ('c1000000-0000-0000-0000-0000000000c1', 'c@t.test');
+SELECT pg_temp.ok(pg_temp.as_user('authenticated', 'c1000000-0000-0000-0000-0000000000c1',
+  $q$insert into public.privacy_consents (user_id, policy_version, age_confirmed, privacy_accepted, terms_accepted, accepted_at) values ('c1000000-0000-0000-0000-0000000000c1','v1',true,true,true,'2001-01-01')$q$) = '1', 'a user can insert their own consent with a made-up accepted_at');
+SELECT pg_temp.ok((SELECT accepted_at > now() - interval '1 minute' FROM public.privacy_consents WHERE user_id = 'c1000000-0000-0000-0000-0000000000c1'), 'accepted_at is the SERVER time, not the client-supplied 2001 value');

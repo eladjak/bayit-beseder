@@ -15,8 +15,9 @@ const limiter = rateLimit({ windowMs: 60_000, max: 5 });
  * verified session cookie; anything else in the body (e.g. a "userId") is
  * ignored, so user A can never delete user B.
  *
- * What is deleted, and when the sign-in is kept because the events app shares
- * it, is decided inside the database (migration 027); see lib/privacy/delete-account.ts.
+ * This app's data is deleted now, inside the database (migration 027). The shared login is
+ * NOT deleted here (the events app shares it): a "full identity deletion requested" row is
+ * recorded for the owner to handle by hand. See lib/privacy/delete-account.ts.
  *
  * Deliberately NOT behind the consent guard: a person who has not accepted the
  * current policy must still be able to erase their data.
