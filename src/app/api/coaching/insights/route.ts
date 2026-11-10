@@ -6,6 +6,7 @@ import {
   getBestCoachingStyle,
 } from "@/lib/coaching-tracker";
 import { requirePlus } from "@/lib/require-plus";
+import { requireConsent } from "@/lib/privacy/consent-server";
 
 /**
  * GET /api/coaching/insights
@@ -42,6 +43,10 @@ export async function GET(_request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  {
+    const consentGuard = await requireConsent(supabase, user);
+    if (consentGuard) return consentGuard;
   }
 
   // "coaching" is a Plus-gated feature (see useSubscription's FEATURE_MATRIX).

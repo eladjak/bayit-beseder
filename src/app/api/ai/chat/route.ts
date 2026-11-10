@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { hasCurrentConsent } from "@/lib/privacy/consent-server";
 import { buildPriceContext } from "@/lib/prices/assistant-context";
 
 // ---------------------------------------------------------------------------
@@ -131,6 +132,14 @@ export async function POST(request: NextRequest) {
     if (user) {
       authedClient = supabase;
       authedUserId = user.id;
+      // Privacy gate: a signed-in user who has not accepted the current policy
+      // gets no AI call (their text would be sent to Google).
+      if (!(await hasCurrentConsent(supabase, user.id))) {
+        return new Response(JSON.stringify({ error: "consent_required" }), {
+          status: 403,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
     }
   } catch {
     // Auth failure is non-fatal — continue in demo mode

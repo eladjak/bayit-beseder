@@ -9,6 +9,7 @@ import {
 } from "@/lib/google-calendar";
 import type { Json } from "@/lib/types/database";
 import { ilDay } from "@/lib/il-date";
+import { requireConsent } from "@/lib/privacy/consent-server";
 
 /**
  * POST /api/calendar/sync
@@ -28,6 +29,10 @@ export async function POST() {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  {
+    const consentGuard = await requireConsent(supabase, user);
+    if (consentGuard) return consentGuard;
   }
 
   // Load profile + tokens
@@ -192,6 +197,10 @@ export async function GET() {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  {
+    const consentGuard = await requireConsent(supabase, user);
+    if (consentGuard) return consentGuard;
   }
 
   const { data: profile } = await supabase

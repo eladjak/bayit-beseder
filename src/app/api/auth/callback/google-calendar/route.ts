@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { hasCurrentConsent } from "@/lib/privacy/consent-server";
 import { createClient } from "@/lib/supabase/server";
 import { exchangeCodeForTokens } from "@/lib/google-calendar";
 import type { Json } from "@/lib/types/database";
@@ -57,6 +58,10 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return NextResponse.redirect(`${appUrl}/login?error=not_authenticated`);
+    }
+
+    if (!(await hasCurrentConsent(supabase, user.id))) {
+      return NextResponse.redirect(`${appUrl}/settings?calendar=error&reason=consent_required`);
     }
 
     // Persist tokens in the profiles table (cast via Json which is the DB column type)

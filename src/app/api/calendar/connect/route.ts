@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { buildOAuthUrl } from "@/lib/google-calendar";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { requireConsent } from "@/lib/privacy/consent-server";
 
 // 5 requests per minute — OAuth initiations should be rare; tight limit
 // prevents token-generation spam.
@@ -37,6 +38,10 @@ export async function GET(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  {
+    const consentGuard = await requireConsent(supabase, user);
+    if (consentGuard) return consentGuard;
   }
 
   try {

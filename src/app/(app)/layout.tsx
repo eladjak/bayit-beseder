@@ -10,6 +10,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { BottomNav } from "@/components/bottom-nav";
 import { AuthGuard } from "@/components/AuthGuard";
+import { ConsentGuard } from "@/components/privacy/ConsentGuard";
 import { NotificationBanner } from "@/components/NotificationBanner";
 import { ServiceWorkerRegistrar } from "@/components/ServiceWorkerRegistrar";
 import { ServiceWorkerUpdateToast } from "@/components/ServiceWorkerUpdateToast";
@@ -235,9 +236,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SupabaseProvider>
       <AuthGuard allowDemo={false}>
-        <MotionConfig reducedMotion="user">
-          <AppLayoutInner>{children}</AppLayoutInner>
-        </MotionConfig>
+        {/* Privacy gate: nothing below renders until the current policy is accepted. */}
+        <ConsentGuard>
+          <MotionConfig reducedMotion="user">
+            <AppLayoutInner>{children}</AppLayoutInner>
+          </MotionConfig>
+        </ConsentGuard>
       </AuthGuard>
     </SupabaseProvider>
   );

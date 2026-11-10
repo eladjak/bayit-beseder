@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { DeleteAccountSection } from "./delete-account-section";
 
 interface DangerZoneProps {
   onClearLocalData: () => void;
@@ -100,6 +101,8 @@ export function DangerZone({ onClearLocalData }: DangerZoneProps) {
             {t("settings.dangerSection.clearData")}
           </button>
         </div>
+
+        <DeleteAccountSection />
       </div>
     </>
   );

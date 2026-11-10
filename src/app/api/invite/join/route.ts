@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { requireConsent } from "@/lib/privacy/consent-server";
 
 // 5 requests per minute — brute-force protection on invite code submission.
 const limiter = rateLimit({ windowMs: 60_000, max: 5 });
@@ -35,6 +36,10 @@ export async function POST(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  {
+    const consentGuard = await requireConsent(supabase, user);
+    if (consentGuard) return consentGuard;
   }
 
   let body: { code?: string };

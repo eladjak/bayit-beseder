@@ -17,6 +17,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSumitClient } from '@/lib/sumit-client-inline';
 import { createClient } from '@/lib/supabase/server';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
+import { requireConsent } from "@/lib/privacy/consent-server";
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +45,10 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  {
+    const consentGuard = await requireConsent(supabase, user);
+    if (consentGuard) return consentGuard;
   }
 
   // 3. Parse + validate body — only the household id is meaningful input now;

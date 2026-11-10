@@ -6,6 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Home, Loader2, UserPlus, Heart, LogIn } from "lucide-react";
 import { createClient } from "@/lib/supabase";
 import { toast } from "sonner";
+import { useTranslation } from "@/hooks/useTranslation";
+import { ConsentGate } from "@/components/privacy/ConsentGate";
+import { checkConsent } from "@/lib/privacy/client";
 
 type PageState =
   | "loading"
@@ -13,6 +16,7 @@ type PageState =
   | "not_logged_in"
   | "already_in_household"
   | "own_household"
+  | "needs_consent"
   | "ready_to_join"
   | "joining"
   | "success";
@@ -35,6 +39,7 @@ async function fireConfetti() {
 }
 
 export function InviteContent() {
+  const { t } = useTranslation();
   const params = useParams();
   const router = useRouter();
   const code = typeof params.code === "string" ? params.code.toUpperCase() : "";
@@ -123,7 +128,10 @@ export function InviteContent() {
         return;
       }
 
-      setPageState("ready_to_join");
+      // Privacy gate: whoever joins a household passes the same gate first.
+      const consent = await checkConsent(user);
+      // If the check itself failed we continue: the server refuses the join without consent and sends us back here.
+      setPageState(consent === "needed" ? "needs_consent" : "ready_to_join");
       } catch {
         // Network / unexpected failure during validation — don't hang on the
         // loading spinner. Fall back to the graceful "invalid link" screen.
@@ -155,6 +163,8 @@ export function InviteContent() {
         if (data.error === "already_in_household") {
           toast.error("כבר אתם חלק מבית!");
           setPageState("already_in_household");
+        } else if (data.error === "consent_required") {
+          setPageState("needs_consent");
         } else if (data.error === "cannot_join_own_household") {
           setPageState("own_household");
         } else {
@@ -189,6 +199,16 @@ export function InviteContent() {
   const handleLoginRedirect = useCallback(() => {
     router.push(`/login`);
   }, [router]);
+
+  if (pageState === "needs_consent") {
+    return (
+      <ConsentGate
+        source="invite"
+        title={t("privacy.gate.inviteTitle")}
+        onAccepted={() => setPageState("ready_to_join")}
+      />
+    );
+  }
 
   return (
     <div

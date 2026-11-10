@@ -23,7 +23,13 @@ interface AuthResult<T = void> {
 export async function signUp(
   email: string,
   password: string,
-  displayName: string
+  displayName: string,
+  /**
+   * Consent ticked on the register form. Stored in the account metadata so the
+   * first sign-in can turn it into a real consent record (there is no session
+   * yet when email confirmation is on). Only honoured for the current policy version.
+   */
+  consent?: { version: string; locale: "he" | "en" }
 ): Promise<AuthResult<User>> {
   try {
     const supabase = createClient();
@@ -33,6 +39,18 @@ export async function signUp(
       options: {
         data: {
           full_name: displayName,
+          ...(consent
+            ? {
+                privacy_consent: {
+                  version: consent.version,
+                  age: true,
+                  privacy: true,
+                  terms: true,
+                  locale: consent.locale,
+                  at: new Date().toISOString(),
+                },
+              }
+            : {}),
         },
       },
     });

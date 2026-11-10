@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { requireConsent } from "@/lib/privacy/consent-server";
 
 // 10 requests per minute for household creation / retrieval.
 const postLimiter = rateLimit({ windowMs: 60_000, max: 10 });
@@ -42,6 +43,10 @@ export async function POST(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  {
+    const consentGuard = await requireConsent(supabase, user);
+    if (consentGuard) return consentGuard;
   }
 
   // Fetch the user's profile to check for an existing household

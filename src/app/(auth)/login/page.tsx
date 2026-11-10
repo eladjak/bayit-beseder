@@ -424,7 +424,10 @@ function LoginContent() {
         </div>
 
         <p className="text-xs text-white/90 text-center">
-          בהתחברות אתם מסכימים לתנאי השימוש ולמדיניות הפרטיות
+          לפני הכניסה לאפליקציה נבקש אישור ל
+          <Link href="/privacy" className="underline underline-offset-2">מדיניות הפרטיות</Link>
+          {" "}ול
+          <Link href="/terms" className="underline underline-offset-2">תנאי השימוש</Link>
         </p>
       </div>
     </div>
