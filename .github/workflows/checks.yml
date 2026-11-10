@@ -26,7 +26,9 @@ jobs:
       postgres:
         image: postgres:17
         env:
-          POSTGRES_PASSWORD: postgres
+          # Throwaway container reachable only from this job: no password exists to leak or to be
+          # flagged by secret scanners.
+          POSTGRES_HOST_AUTH_METHOD: trust
         ports: ["5432:5432"]
         options: >-
           --health-cmd "pg_isready -U postgres"
@@ -37,7 +39,6 @@ jobs:
       PGHOST: localhost
       PGPORT: "5432"
       PGUSER: postgres
-      PGPASSWORD: postgres
     steps:
       - uses: actions/checkout@v4
       - run: bash supabase/tests/privacy/run.sh
