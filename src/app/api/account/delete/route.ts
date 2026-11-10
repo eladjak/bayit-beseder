@@ -59,7 +59,10 @@ export async function POST(request: NextRequest) {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  // Best effort: ask Google to invalidate the calendar token we hold.
+  // The calendar token must be read BEFORE the database deletion (the deletion clears it), but it is
+  // revoked with Google only AFTER the deletion has committed: if the deletion fails and rolls back, the
+  // person keeps a working calendar connection.
+  let toRevoke: string | undefined;
   try {
     const { data: profile } = await supabase
       .from("profiles")
@@ -67,16 +70,21 @@ export async function POST(request: NextRequest) {
       .eq("id", user.id)
       .maybeSingle();
     const tokens = profile?.google_calendar_tokens as { access_token?: string; refresh_token?: string } | null;
-    const toRevoke = tokens?.refresh_token ?? tokens?.access_token;
-    if (toRevoke) {
-      await fetch(`https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(toRevoke)}`, { method: "POST" });
-    }
+    toRevoke = tokens?.refresh_token ?? tokens?.access_token;
   } catch {
-    // Non-fatal: the stored tokens are deleted below either way.
+    // Non-fatal: nothing to revoke.
   }
 
   try {
     const result = await deleteAccount(service, user.id);
+    // Committed. Now, and only now, ask Google to invalidate the calendar token we held (best effort).
+    if (toRevoke) {
+      try {
+        await fetch(`https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(toRevoke)}`, { method: "POST" });
+      } catch {
+        // Non-fatal: the stored token is already cleared in our database.
+      }
+    }
     // Drop the session cookies on this response as well.
     await supabase.auth.signOut().catch(() => undefined);
     return NextResponse.json({ success: true, ...result });

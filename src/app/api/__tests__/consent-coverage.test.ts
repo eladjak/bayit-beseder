@@ -64,7 +64,7 @@ const ALLOW: Record<string, string> = {
   // The five the product requires to work without consent:
   "api/privacy/consent/route.ts": "this is the route that reads and records the consent itself",
   "api/account/delete/route.ts": "a person who has not consented must still be able to erase their data",
-  "api/sumit/cancel-subscription/route.ts": "stopping a charge must always work, consent or not",
+  "api/sumit/cancel-subscription/route.ts": "stopping a charge must always work, consent or not. GET returns only a boolean (is there a paid plan to cancel); POST cancels the caller's own plan; both use the service client, never the session's household tables",
   "api/calendar/disconnect/route.ts": "withdrawing a connection must always work",
   "(auth)/callback/route.ts": "sign-in redirect: exchanges the login code and serves no household data (sign-out is a client call to Supabase)",
   // Never serve a person's data:

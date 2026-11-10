@@ -1,5 +1,14 @@
 /**
+ * GET  /api/sumit/cancel-subscription — { cancellable: boolean } and nothing else: does one of MY households,
+ *       where I am the owner, have an active paid plan in our records? (used by the privacy gate screen,
+ *       where the browser may not read this app's tables)
  * POST /api/sumit/cancel-subscription — household owner cancels their Plus subscription.
+ *
+ * Both work WITHOUT privacy consent (allow-listed): stopping a charge must always work. They use the
+ * service client for every lookup, because the consent gate in the database (migration 028) closes the
+ * household tables to the browser session for someone who has not consented. The caller is identified
+ * only by the verified session; a body householdId is optional and, if given, must be one of the
+ * caller's own households.
  *
  * ── What this does and does NOT guarantee ───────────────────────────────────
  * Sumit's public documentation (help.sumit.co.il) and the two targeted web
@@ -28,6 +37,7 @@
  * not something this code can respond to via API.
  */
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient as createServiceClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createSumitClient } from '@/lib/sumit-client-inline';
 import { createClient } from '@/lib/supabase/server';
 import { rateLimit, getClientIp } from '@/lib/rate-limit';
@@ -36,14 +46,71 @@ export const dynamic = 'force-dynamic';
 
 const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 
+function tooMany(rl: { reset: number }) {
+  return NextResponse.json(
+    { error: 'Too many requests' },
+    { status: 429, headers: { 'Retry-After': String(Math.ceil(rl.reset / 1000)) } },
+  );
+}
+
+/** Households where this person is the OWNER (service client: works without consent). */
+async function ownedHouseholds(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  service: SupabaseClient<any, any, any>,
+  userId: string,
+): Promise<{ ids: string[] } | { error: true }> {
+  const { data, error } = await service
+    .from('household_members')
+    .select('household_id')
+    .eq('user_id', userId)
+    .eq('role', 'owner');
+  if (error || !Array.isArray(data)) return { error: true };
+  return { ids: (data as { household_id: string }[]).map((r) => r.household_id) };
+}
+
+function serviceClient() {
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!serviceKey || !url) return null;
+  return createServiceClient(url, serviceKey);
+}
+
+/**
+ * A paid plan that is active in OUR records (the same notion the deletion function uses; we do not
+ * ask the payment provider). Free rows never count.
+ */
+const PAID_ACTIVE = { column: 'tier', notValue: 'free' } as const;
+
+export async function GET(req: NextRequest) {
+  const rl = await limiter.check(getClientIp(req));
+  if (!rl.success) return tooMany(rl);
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const service = serviceClient();
+  if (!service) return NextResponse.json({ error: 'Server not configured' }, { status: 500 });
+
+  const owned = await ownedHouseholds(service, user.id);
+  if ('error' in owned) return NextResponse.json({ error: 'Lookup failed' }, { status: 500 });
+  if (owned.ids.length === 0) return NextResponse.json({ cancellable: false });
+
+  const { data, error } = await service
+    .from('subscriptions')
+    .select('id')
+    .in('household_id', owned.ids)
+    .eq('status', 'active')
+    .neq(PAID_ACTIVE.column, PAID_ACTIVE.notValue)
+    .limit(1);
+  if (error) return NextResponse.json({ error: 'Lookup failed' }, { status: 500 });
+  // A boolean and nothing else: never row data.
+  return NextResponse.json({ cancellable: Array.isArray(data) && data.length > 0 });
+}
+
 export async function POST(req: NextRequest) {
   const rl = await limiter.check(getClientIp(req));
-  if (!rl.success) {
-    return NextResponse.json(
-      { error: 'Too many requests' },
-      { status: 429, headers: { 'Retry-After': String(Math.ceil(rl.reset / 1000)) } },
-    );
-  }
+  if (!rl.success) return tooMany(rl);
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -51,38 +118,52 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { householdId } = await req.json();
-  if (!householdId || typeof householdId !== 'string') {
+  const body = (await req.json().catch(() => ({}))) as { householdId?: unknown };
+  const requested = typeof body.householdId === 'string' ? body.householdId : null;
+  if (body.householdId !== undefined && !requested) {
     return NextResponse.json({ error: 'Invalid householdId' }, { status: 400 });
   }
 
-  // Household-owner only — same pattern as the RLS-level owner check added in
-  // migration 019_close_live_rls_holes.sql (public.is_household_owner).
-  const { data: membership, error: memErr } = await supabase
-    .from('household_members')
-    .select('role')
-    .eq('user_id', user.id)
-    .eq('household_id', householdId)
-    .maybeSingle();
-  if (memErr || !membership || membership.role !== 'owner') {
-    return NextResponse.json({ error: 'Forbidden — household owner only' }, { status: 403 });
-  }
+  const service = serviceClient();
+  if (!service) return NextResponse.json({ error: 'Server not configured' }, { status: 500 });
 
-  // Service-role client: subscriptions writes are service-role only per RLS
-  // (see 022_billing.sql) — the same reasoning as the webhook route.
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!serviceKey || !url) {
-    return NextResponse.json({ error: 'Server not configured' }, { status: 500 });
+  // Household-owner only (same rule as is_household_owner in migration 019), decided with the service
+  // client so that it also works for someone who has not consented.
+  const owned = await ownedHouseholds(service, user.id);
+  if ('error' in owned) return NextResponse.json({ error: 'Lookup failed' }, { status: 500 });
+  let householdId = requested;
+  if (householdId) {
+    if (!owned.ids.includes(householdId)) {
+      return NextResponse.json({ error: 'Forbidden — household owner only' }, { status: 403 });
+    }
+  } else {
+    if (owned.ids.length === 0) {
+      return NextResponse.json({ error: 'Forbidden — household owner only' }, { status: 403 });
+    }
+    // No household named: the one (of the caller's own) that has an active paid plan.
+    const { data: rows, error } = await service
+      .from('subscriptions')
+      .select('household_id')
+      .in('household_id', owned.ids)
+      .eq('status', 'active')
+      .neq(PAID_ACTIVE.column, PAID_ACTIVE.notValue);
+    if (error) return NextResponse.json({ error: 'Lookup failed' }, { status: 500 });
+    const candidates = [...new Set(((rows ?? []) as { household_id: string }[]).map((r) => r.household_id))];
+    if (candidates.length === 0) {
+      return NextResponse.json({ error: 'No active subscription for this household' }, { status: 404 });
+    }
+    if (candidates.length > 1) {
+      return NextResponse.json({ error: 'Several households have a plan; name one (householdId)' }, { status: 400 });
+    }
+    householdId = candidates[0];
   }
-  const { createClient: createServiceClient } = await import('@supabase/supabase-js');
-  const service = createServiceClient(url, serviceKey);
 
   const { data: activeRow, error: findErr } = await service
     .from('subscriptions')
     .select('id, sumit_payment_method_id')
     .eq('household_id', householdId)
     .eq('status', 'active')
+    .neq(PAID_ACTIVE.column, PAID_ACTIVE.notValue)
     .maybeSingle();
   if (findErr) {
     console.error('[sumit/cancel-subscription] lookup failed:', findErr.message);

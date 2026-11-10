@@ -14,9 +14,7 @@ vi.mock("@/components/language-toggle", () => ({ LanguageToggle: () => <span>lan
 vi.mock("@/components/settings/delete-account-section", () => ({
   DeleteAccountSection: ({ onGate }: { onGate?: boolean }) => <div data-testid="delete-account" data-on-gate={String(!!onGate)} />,
 }));
-vi.mock("@/components/settings/subscription-section", () => ({
-  SubscriptionSection: ({ cancelOnly }: { cancelOnly?: boolean }) => <div data-testid="cancel-subscription" data-cancel-only={String(!!cancelOnly)} />,
-}));
+vi.mock("../GateBilling", () => ({ GateBilling: () => <div data-testid="cancel-subscription" /> }));
 
 import { ConsentGate } from "../ConsentGate";
 
@@ -33,7 +31,7 @@ describe("ConsentGate: declining", () => {
     expect(signOut).not.toHaveBeenCalled();
     expect(screen.getByText("privacy.gate.declinedTitle")).toBeTruthy();
     expect(screen.getByTestId("delete-account").getAttribute("data-on-gate")).toBe("true");
-    expect(screen.getByTestId("cancel-subscription").getAttribute("data-cancel-only")).toBe("true");
+    expect(screen.getByTestId("cancel-subscription")).toBeTruthy();
     expect(screen.getByText("privacy.gate.signOut")).toBeTruthy();
   });
 

@@ -140,4 +140,11 @@ describe("POST /api/ai/chat privacy gate", () => {
     expect((await POST(req())).status).toBe(503);
     expect(geminiCalls).not.toHaveBeenCalled();
   });
+
+  it("a request carrying an Authorization header cannot be told apart from a signed-in person: refused (401), provider NOT called", async () => {
+    const { POST } = await import("../route");
+    const res = await POST(new Request("http://x.example/api/ai/chat", { method: "POST", headers: { authorization: "Bearer abc" }, body: JSON.stringify({ message: "hello" }) }) as never);
+    expect(res.status).toBe(401);
+    expect(geminiCalls).not.toHaveBeenCalled();
+  });
 });

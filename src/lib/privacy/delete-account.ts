@@ -7,7 +7,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  * The Supabase project is shared with the events app, so the auth user and the profile row
  * belong to both apps and nobody can prove from this app that the other one no longer needs them.
  * `public.bayit_delete_account(uuid)` (migration 027, service role only), in one transaction:
- *   - deletes this app's own rows for the user (and the household, if the user is its last member);
+ *   - deletes only the requester's OWN rows. Rows authored by or addressed to another person are never
+ *     deleted (not even when the requester is the last current member): where a row is shared, the
+ *     requester's side is set to NULL, or the row is kept and listed (keptShared). A household left
+ *     with nobody is marked for cleanup and only loses rows that belong to nobody else;
  *   - clears this app's own columns on the shared profile and KEEPS the profile and the auth user;
  *   - records "full identity deletion requested" in bayit_identity_deletion_requests, for the owner
  *     to handle by hand within the legal time;
@@ -38,7 +41,9 @@ export interface DeleteAccountResult {
   /** Always true on success: the login stays until the owner removes it by hand. */
   identityDeletionRequested: boolean;
   /** What happened to the user's household. */
-  household: "none" | "left" | "deleted";
+  household: "none" | "left" | "deleted" | "emptied";
+  /** Shared rows that could not be anonymised (NOT NULL columns) and still carry the person's id: table.column. */
+  keptShared: string[];
   /** If the user was the owner and others remained, who became owner (id only). */
   newOwnerId: string | null;
   /** Steps that did not complete and need a human look (e.g. stored photos that could not be removed). */
@@ -52,6 +57,7 @@ interface RpcResult {
   household?: unknown;
   new_owner_id?: unknown;
   object_names?: unknown;
+  kept_shared?: unknown;
 }
 
 /**
@@ -107,11 +113,12 @@ export async function deleteAccount(db: Db, userId: string): Promise<DeleteAccou
   const names = Array.isArray(r.object_names) ? (r.object_names as unknown[]).filter((u): u is string => typeof u === "string") : [];
   await removePhotos(db, names, skipped);
 
-  const household = r.household === "left" || r.household === "deleted" ? r.household : "none";
+  const household = r.household === "left" || r.household === "deleted" || r.household === "emptied" ? r.household : "none";
   return {
     identityDeletionRequested: true,
     household,
     newOwnerId: typeof r.new_owner_id === "string" ? r.new_owner_id : null,
+    keptShared: Array.isArray(r.kept_shared) ? (r.kept_shared as unknown[]).filter((x): x is string => typeof x === "string") : [],
     skipped,
   };
 }

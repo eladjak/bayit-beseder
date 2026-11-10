@@ -77,10 +77,9 @@ SELECT pg_temp.ok(pg_temp.as_user('authenticated', :'U', $q$update public.tasks 
 SELECT pg_temp.ok(pg_temp.as_user('authenticated', :'U', $q$delete from public.shopping_items where household_id = 'a1000000-0000-0000-0000-0000000000a1'$q$) = '0', 'no consent: cannot delete');
 SELECT pg_temp.ok((SELECT title FROM public.tasks WHERE id = 'a1000000-0000-0000-0000-0000000000f1') = 't1' AND (SELECT count(*) FROM public.shopping_items WHERE household_id = 'a1000000-0000-0000-0000-0000000000a1') = 1, '...and the data is intact (checked as the owner)');
 
--- allowed exceptions
+-- the only exceptions: own profile, own consent (no read of anything else)
 SELECT pg_temp.ok(pg_temp.as_user('authenticated', :'U', 'select * from public.profiles where id = auth.uid()') = '1', 'exception: can read their own profile (the gate needs it)');
-SELECT pg_temp.ok(pg_temp.as_user('authenticated', :'U', 'select * from public.subscriptions') = '1', 'exception: can read their OWN subscription row (to cancel a paid plan), and only that');
-SELECT pg_temp.ok(pg_temp.as_user('authenticated', :'U', $q$update public.subscriptions set status = 'canceled'$q$) = '0', 'but cannot change it');
+SELECT pg_temp.ok(pg_temp.as_user('authenticated', :'U', 'select * from public.subscriptions') = '0', 'no consent: cannot read even their OWN subscription row (the gate asks a server route instead)');
 SELECT pg_temp.ok(pg_temp.as_user('authenticated', :'U', 'select * from public.privacy_consents') = '0', 'exception: reading own consent works (none yet)');
 -- an OLD policy version does not open the gate
 SELECT pg_temp.ok(pg_temp.as_user('authenticated', :'U', $q$insert into public.privacy_consents (user_id, policy_version, age_confirmed, privacy_accepted, terms_accepted) values ('a0000000-0000-0000-0000-00000000000a','2020-01-01',true,true,true)$q$) = '1', 'exception: can insert own consent (any version)');

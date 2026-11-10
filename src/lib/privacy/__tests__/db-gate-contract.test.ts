@@ -33,19 +33,18 @@ describe("migration 028 and policy.ts agree", () => {
 });
 
 describe("what the browser queries while the gate is showing is still reachable without consent", () => {
-  // Reachable without consent after 028: profiles (not gated: shared with the events app),
-  // privacy_consents (own rows), subscriptions (own rows may be READ, to cancel a paid plan).
-  const OPEN = new Set(["profiles", "privacy_consents", "subscriptions"]);
+  // Reachable without consent after 028: profiles (not gated: shared with the events app) and
+  // privacy_consents (own rows). NOT subscriptions, NOT any other table of this app: the cancel option
+  // gets its yes/no from a server route (see GateBilling), never from a browser query.
+  const OPEN = new Set(["profiles", "privacy_consents"]);
   const GATE_TREE = [
     "src/components/AuthGuard.tsx",
     "src/components/privacy/ConsentGuard.tsx",
     "src/components/privacy/ConsentGate.tsx",
     "src/components/privacy/ConsentChecks.tsx",
     "src/components/settings/delete-account-section.tsx",
-    "src/components/settings/subscription-section.tsx",
+    "src/components/privacy/GateBilling.tsx",
     "src/hooks/useAuth.ts",
-    "src/hooks/useProfile.ts",
-    "src/hooks/useSubscription.ts",
     "src/lib/privacy/client.ts",
   ];
 
@@ -53,7 +52,24 @@ describe("what the browser queries while the gate is showing is still reachable 
     const used = new Set<string>();
     for (const f of GATE_TREE) for (const m of read(f).matchAll(/\.from\(\s*["']([a-z_]+)["']\s*\)/g)) used.add(m[1]);
     expect([...used].filter((t) => !OPEN.has(t))).toEqual([]);
-    expect(used.has("profiles")).toBe(true); // the scan sees something (it is not vacuous)
+    // control: the same scan DOES find a table read where one exists (it is not vacuous)
+    const control = new Set<string>();
+    for (const m of read("src/hooks/useProfile.ts").matchAll(/\.from\(\s*["']([a-z_]+)["']\s*\)/g)) control.add(m[1]);
+    expect([...control]).toContain("profiles");
+    expect(GATE_TREE.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it("028 has NO read exception: no policy lets a person without consent read any row of this app", () => {
+    const sql = read("supabase/migrations/028_consent_gate_rls.sql");
+    expect(sql).not.toMatch(/user_id\s*=\s*auth\.uid\(\)\s*\)/);
+    expect(sql).not.toMatch(/consent\(\)\s+OR/i);
+    expect(sql).not.toContain("bayit_consent_gate_select");
+  });
+
+  it("the gate tree does not import the subscription hooks (they read the subscriptions table)", () => {
+    for (const f of GATE_TREE) {
+      expect(read(f)).not.toMatch(/useSubscription|SubscriptionSection/);
+    }
   });
 
   it("the layout renders AppLayoutInner (all the other data hooks) only INSIDE the consent guard", () => {

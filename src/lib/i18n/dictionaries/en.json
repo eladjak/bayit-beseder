@@ -1359,7 +1359,8 @@
       "declinedBody": "That is completely fine. You can go back and confirm, sign out, or delete your account and data right here.",
       "declinedBack": "Back to the confirmation",
       "declinedMore": "What you can do now",
-      "subscriptionNote": "Do you have an active Plus subscription? You can cancel it here so you are not charged."
+      "subscriptionNote": "Do you have an active Plus subscription? You can cancel it here so you are not charged.",
+      "billingCheckError": "We could not check right now whether there is a paid subscription. You can try again."
     },
     "register": {
       "age": "I am 18 or older",
@@ -1402,7 +1403,7 @@
       "confirm": "Delete permanently",
       "deleting": "Deleting...",
       "errMismatch": "That address does not match the account email. Check and try again.",
-      "errSubscription": "You have an active Plus subscription. Cancel it first in Settings (subscription section), then you can delete the account.",
+      "errSubscription": "According to our records you have a paid subscription that is still active. Cancel it first (in Settings, or right here on this screen), then you can delete the account.",
       "errGeneric": "The deletion did not finish. You can try again, and nothing already deleted is affected. If it keeps happening, write to privacy@bayitbeseder.com.",
       "errTooMany": "Too many attempts. Wait a minute and try again.",
       "done": "Your data in Bayit BeSeder was deleted.",

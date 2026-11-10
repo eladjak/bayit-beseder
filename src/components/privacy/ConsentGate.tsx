@@ -20,7 +20,7 @@ import { createClient } from "@/lib/supabase";
 import { useTranslation } from "@/hooks/useTranslation";
 import { LanguageToggle } from "@/components/language-toggle";
 import { DeleteAccountSection } from "@/components/settings/delete-account-section";
-import { SubscriptionSection } from "@/components/settings/subscription-section";
+import { GateBilling } from "./GateBilling";
 import { GATE_CARDS } from "@/lib/privacy/content";
 import { POLICY_VERSION, type ConsentSource } from "@/lib/privacy/policy";
 import {
@@ -144,7 +144,7 @@ export function ConsentGate({ onAccepted, source = "gate", title }: Props) {
               <h2 id="declined-more" className="text-sm font-bold text-foreground">
                 {t("privacy.gate.declinedMore")}
               </h2>
-              <SubscriptionSection cancelOnly />
+              <GateBilling />
               <DeleteAccountSection onGate />
               <div className="border-t border-border pt-4">
                 <button

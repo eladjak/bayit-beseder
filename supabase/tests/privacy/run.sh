@@ -161,16 +161,21 @@ echo "== 4. migration 027: delete my account never touches the shared identity =
 build_db t027 026 $M/027_bayit_delete_account.sql $M/028_consent_gate_rls.sql
 if run_sql_test t027 $HERE/20_delete_account_test.sql; then pass "20_delete_account_test.sql ($PASSES assertions, with the 028 gate active)"; else fail "delete account"; echo "$LAST" | tail -15; fi
 
-echo "== 4b. mutants: each must be caught at the predicted assertion =="
-mutant $T/m1.sql "s/^  -- The login itself is for the owner to remove by hand\./  DELETE FROM auth.users WHERE id = p_user;/" $M/027_bayit_delete_account.sql
-build_db t027m1 026 $T/m1.sql $M/028_consent_gate_rls.sql
-if run_sql_test t027m1 $HERE/20_delete_account_test.sql; then fail "mutant that deletes the auth user was NOT detected"; else expect_assertion_failure "mutant that deletes the shared auth user is detected" "S1 the auth user is KEPT"; fi
-mutant $T/m2.sql "s/AND tier <> 'free'/AND true/" $M/027_bayit_delete_account.sql
-build_db t027m2 026 $T/m2.sql $M/028_consent_gate_rls.sql
-if run_sql_test t027m2 $HERE/20_delete_account_test.sql; then fail "mutant that blocks on free subscriptions was NOT detected"; else expect_assertion_failure "mutant that blocks on FREE subscriptions is detected" "S2a"; fi
-mutant $T/m4.sql "s/UPDATE public.profiles SET household_id = NULL WHERE id = p_user;/UPDATE public.profiles SET household_id = NULL;/" $M/027_bayit_delete_account.sql
-build_db t027m4 026 $T/m4.sql $M/028_consent_gate_rls.sql
-if run_sql_test t027m4 $HERE/20_delete_account_test.sql; then fail "mutant that detaches EVERY profile was NOT detected"; else expect_assertion_failure "mutant that touches other people's profiles is detected" "S8 bystander profile"; fi
+echo "== 4b. mutants of 027: each must be caught at the predicted assertion =="
+run027mutant() { # run027mutant <name> <sed expression> <expected assertion text> <label>
+  mutant $T/$1.sql "$2" $M/027_bayit_delete_account.sql
+  build_db t027_$1 026 $T/$1.sql $M/028_consent_gate_rls.sql
+  if run_sql_test t027_$1 $HERE/20_delete_account_test.sql; then fail "$4 was NOT detected"; else expect_assertion_failure "$4 is detected" "$3"; fi
+}
+run027mutant m1 "s/^  INSERT INTO public.bayit_identity_deletion_requests (user_id, kept_shared)/  DELETE FROM public.weekly_syncs WHERE created_by = p_user; DELETE FROM auth.users WHERE id = p_user;\n  INSERT INTO public.bayit_identity_deletion_requests (user_id, kept_shared)/" "IDENTITY the auth user" "mutant that deletes the shared login"
+run027mutant m2 "s/AND tier <> 'free'/AND true/" "SUB a FREE" "mutant that blocks on FREE subscriptions"
+run027mutant m4 "s/UPDATE public.profiles SET household_id = NULL WHERE id = p_user AND household_id = hh;/UPDATE public.profiles SET household_id = NULL;/" "IDENTITY a bystander" "mutant that detaches everybody's profile"
+run027mutant m5 "s/DELETE FROM public.task_completions WHERE user_id = p_user;/DELETE FROM public.task_completions WHERE user_id = p_user OR task_id IN (SELECT id FROM public.tasks WHERE household_id = ANY (v_hhs));/" "OWN task_completions" "mutant that deletes ALL completions of the household (the round-2 behaviour)"
+run027mutant m6 "s/sender_id = p_user AND recipient_id = p_user;/sender_id = p_user OR recipient_id = p_user;/" "SHARED love_tokens" "mutant that deletes love tokens addressed to or from others"
+run027mutant m7 "s/IF cardinality(v_left) = 0 THEN/IF true THEN/" "OWN streaks" "mutant that deletes the household (and, by cascade, a former member's rows) regardless"
+run027mutant m8 "s/IF v_nullable = 'YES' THEN/IF false THEN/" "SHARED tasks" "mutant that never anonymises shared rows"
+run027mutant m9 "s/EXECUTE format('DELETE FROM public.%I WHERE %I = \$1', v_own_delete\[i\]\[1\], v_own_delete\[i\]\[2\]) USING p_user;/EXECUTE format('DELETE FROM public.%I WHERE %I IS NOT NULL OR \$1 IS NULL', v_own_delete[i][1], v_own_delete[i][2]) USING p_user;/" "IDENTITY a bystander" "mutant that deletes other people's own-class rows"
+run027mutant m10 "s/ AND NOT EXISTS (SELECT 1 FROM public.task_completions c WHERE c.task_id = tasks.id)//" "OWN task_completions" "mutant that deletes tasks a former member completed (cascade over their completion)"
 
 echo "== 5. migration 028: the consent gate in the database =="
 build_db t028 026 $M/027_bayit_delete_account.sql $M/028_consent_gate_rls.sql
@@ -182,9 +187,13 @@ if run_sql_test t028m1 $HERE/40_consent_gate_rls_test.sql; then fail "mutant tha
 mutant $T/g2.sql "s/AS RESTRICTIVE FOR ALL TO authenticated USING (public.bayit_has_current_consent()) WITH CHECK (public.bayit_has_current_consent())/AS RESTRICTIVE FOR ALL TO authenticated USING (true) WITH CHECK (true)/" $M/028_consent_gate_rls.sql
 build_db t028m2 026 $M/027_bayit_delete_account.sql $T/g2.sql
 if run_sql_test t028m2 $HERE/40_consent_gate_rls_test.sql; then fail "mutant with an open gate was NOT detected"; else expect_assertion_failure "mutant with an open gate is detected" "no consent: cannot read"; fi
-mutant $T/g3.sql "s/'agent_audit_log','agent_confirmations','app_feedback','coaching_events',/'agent_audit_log','agent_confirmations','app_feedback','coaching_events','profiles','user_roles',/" $M/028_consent_gate_rls.sql
+mutant $T/g3.sql "s/'agent_audit_log','agent_confirmations','app_feedback','coaching_events',/'agent_audit_log','agent_confirmations','app_feedback','coaching_events','profiles',/" $M/028_consent_gate_rls.sql
 build_db t028m3 026 $M/027_bayit_delete_account.sql $T/g3.sql
 if run_sql_test t028m3 $HERE/40_consent_gate_rls_test.sql; then fail "mutant that gates the SHARED profiles table was NOT detected"; else expect_assertion_failure "mutant that gates the shared profiles / events tables is detected" "NO gate policy on the shared profiles"; fi
+
+mutant $T/g4.sql "s/^COMMIT;/DROP POLICY bayit_consent_gate ON public.subscriptions;\nCREATE POLICY bayit_consent_gate ON public.subscriptions AS RESTRICTIVE FOR ALL TO authenticated USING (public.bayit_has_current_consent() OR user_id = auth.uid()) WITH CHECK (public.bayit_has_current_consent());\nCOMMIT;/" $M/028_consent_gate_rls.sql
+build_db t028m4 026 $M/027_bayit_delete_account.sql $T/g4.sql
+if run_sql_test t028m4 $HERE/40_consent_gate_rls_test.sql; then fail "mutant that re-adds a subscription read exception was NOT detected"; else expect_assertion_failure "mutant that re-adds a read exception for the person's own subscription is detected" "OWN subscription"; fi
 
 echo "== 6. races: a join while the last member's deletion is in flight, and a second deletion of the same person =="
 build_db t027c 026 $M/027_bayit_delete_account.sql

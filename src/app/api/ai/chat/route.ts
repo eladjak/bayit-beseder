@@ -113,6 +113,9 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
     });
   try {
+    // A bearer token is not a supported way to sign in to this endpoint, but a request that carries one
+    // may well be a signed-in person: refuse rather than treat it as an anonymous demo request.
+    if (request.headers.get("authorization")) return refuseAuth(401);
     const cookieStore = await cookies();
     const carriesSession = cookieStore.getAll().some((c) => /^sb-.+-auth-token/.test(c.name));
     if (carriesSession) {

@@ -44,7 +44,12 @@ describe("deleteAccount", () => {
 
   it("maps the answer: the data is deleted and a full identity deletion is REQUESTED (never done here)", async () => {
     const { db } = makeDb({ data: OK });
-    expect(await deleteAccount(db, "u")).toEqual({ identityDeletionRequested: true, household: "deleted", newOwnerId: null, skipped: [] });
+    expect(await deleteAccount(db, "u")).toEqual({ identityDeletionRequested: true, household: "deleted", newOwnerId: null, keptShared: [], skipped: [] });
+  });
+
+  it("reports an EMPTIED household (kept and marked, because former members' rows remain) and the rows that still carry the id", async () => {
+    const { db } = makeDb({ data: { ...OK, household: "emptied", kept_shared: ["love_tokens.sender_id", 5, "weekly_syncs.created_by"] } });
+    expect(await deleteAccount(db, "u")).toMatchObject({ household: "emptied", keptShared: ["love_tokens.sender_id", "weekly_syncs.created_by"] });
   });
 
   it("reports a household that was left and the new owner", async () => {

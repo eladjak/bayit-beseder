@@ -1,4 +1,4 @@
-import { filterConsentedUserIds } from "@/lib/privacy/consent-server";
+import { consentedHouseholdIds, filterConsentedUserIds } from "@/lib/privacy/consent-server";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
   // Fetch all profiles with Google Calendar tokens
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
-    .select("id, google_calendar_tokens, google_calendar_id")
+    .select("id, household_id, google_calendar_tokens, google_calendar_id")
     .not("google_calendar_tokens", "is", null);
 
   if (profilesError) {
@@ -98,10 +98,16 @@ export async function GET(request: NextRequest) {
   if (!profiles || profiles.length === 0) {
     return NextResponse.json({ message: "No users with Google Calendar connected", synced: 0 });
   }
-  // Privacy gate: household tasks are written to a person's calendar only if
-  // that person has accepted the current policy (fails closed).
+  // Privacy gate: the household's tasks are written to a person's calendar only if that person AND every
+  // other member of the household have accepted the current policy (fails closed).
   const consented = await filterConsentedUserIds(supabase, profiles.map((p) => p.id));
-  const eligible = profiles.filter((p) => consented.has(p.id));
+  const households = new Set(
+    await consentedHouseholdIds(
+      supabase,
+      [...new Set(profiles.map((p) => p.household_id).filter((h): h is string => !!h))],
+    ),
+  );
+  const eligible = profiles.filter((p) => consented.has(p.id) && !!p.household_id && households.has(p.household_id));
 
   // Date range for this sync: today → 7 days
   const now = new Date();
@@ -264,6 +270,8 @@ export async function GET(request: NextRequest) {
     usersProcessed: eligible.length,
     usersSucceeded: successful,
     totalEventsCreated: totalCreated,
-    results,
+    usersSkippedNoConsent: profiles.length - eligible.length,
+    // Counts only: no user ids and no per-user reasons are returned.
+    usersFailed: results.filter((r) => r.status === "error").length,
   });
 }

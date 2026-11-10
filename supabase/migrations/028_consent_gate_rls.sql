@@ -10,8 +10,10 @@
 -- app's tables, and NOTHING to public.profiles (shared with the events app, whose users have no
 -- consent row; the profile stays reachable, which is also what the gate needs to render).
 -- public.privacy_consents itself has no restrictive policy: own insert / own select (migration 026).
--- Exception on purpose: a person can always READ THEIR OWN subscription rows
--- (user_id = auth.uid()), so the gate can offer "cancel my subscription".
+-- NO read exceptions: a person without a current consent reads NOTHING of this app's data from the
+-- browser, not even their own subscription rows. The gate screen learns "is there a billing
+-- subscription to cancel" from a server route (GET /api/sumit/cancel-subscription, a boolean only),
+-- and cancelling goes through the same allow-listed route.
 -- The deletion function (027) is SECURITY DEFINER and is not subject to these policies.
 -- Service role bypasses row-level security as before.
 --
@@ -59,25 +61,12 @@ BEGIN
       CONTINUE;
     END IF;
     IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid = format('public.%I', t)::regclass) THEN
-      RAISE NOTICE 'consent gate: table % has row level security OFF, a policy would do nothing, skipped', t;
-      CONTINUE;
+      -- A policy on a table with row level security OFF would silently do nothing, and turning it on here
+      -- would lock people out. Refuse: this must be decided deliberately, not skipped.
+      RAISE EXCEPTION 'consent gate: table public.% has row level security OFF; enable it deliberately before applying this migration', t;
     END IF;
 
-    IF t = 'subscriptions' THEN
-      -- reads of one's own rows stay possible without consent (to cancel a paid plan)
-      IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = t AND policyname = 'bayit_consent_gate_select') THEN
-        EXECUTE format('CREATE POLICY bayit_consent_gate_select ON public.%I AS RESTRICTIVE FOR SELECT TO authenticated USING (public.bayit_has_current_consent() OR user_id = auth.uid())', t);
-      END IF;
-      IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = t AND policyname = 'bayit_consent_gate_insert') THEN
-        EXECUTE format('CREATE POLICY bayit_consent_gate_insert ON public.%I AS RESTRICTIVE FOR INSERT TO authenticated WITH CHECK (public.bayit_has_current_consent())', t);
-      END IF;
-      IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = t AND policyname = 'bayit_consent_gate_update') THEN
-        EXECUTE format('CREATE POLICY bayit_consent_gate_update ON public.%I AS RESTRICTIVE FOR UPDATE TO authenticated USING (public.bayit_has_current_consent()) WITH CHECK (public.bayit_has_current_consent())', t);
-      END IF;
-      IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = t AND policyname = 'bayit_consent_gate_delete') THEN
-        EXECUTE format('CREATE POLICY bayit_consent_gate_delete ON public.%I AS RESTRICTIVE FOR DELETE TO authenticated USING (public.bayit_has_current_consent())', t);
-      END IF;
-    ELSIF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = t AND policyname = 'bayit_consent_gate') THEN
+    IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = t AND policyname = 'bayit_consent_gate') THEN
       EXECUTE format('CREATE POLICY bayit_consent_gate ON public.%I AS RESTRICTIVE FOR ALL TO authenticated USING (public.bayit_has_current_consent()) WITH CHECK (public.bayit_has_current_consent())', t);
     END IF;
   END LOOP;
