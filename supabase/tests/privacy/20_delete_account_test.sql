@@ -7,8 +7,7 @@
 --   * SHARED rows keep the other person's content: the requester's side is set to NULL, or the row is
 --     kept and listed when the column is NOT NULL;
 --   * the requester being the last CURRENT member does not make a FORMER member's rows theirs;
---   * a household left with nobody is marked, loses only rows that belong to nobody else, and is
---     deleted only if nothing at all remains in it.
+--   * a household left with nobody and its shared content are retained and marked for manual review.
 \set ON_ERROR_STOP on
 \pset tuples_only on
 
@@ -134,6 +133,7 @@ END $$;
 
 SELECT pg_temp.ins('tasks', jsonb_build_object('id','a0000000-0000-0000-0000-00000000000a','title','t-R','household_id',:'HS','assigned_to',:'R'));
 SELECT pg_temp.ins('tasks', jsonb_build_object('id','b0000000-0000-0000-0000-00000000000b','title','t-P','household_id',:'HS','assigned_to',:'P'));
+SELECT pg_temp.ins('task_completions', jsonb_build_object('task_id','a0000000-0000-0000-0000-00000000000a','user_id',:'R','photo_url','https://x.example/storage/v1/object/public/task-photos/a0000000-0000-0000-0000-00000000000a-shared.webp'));
 SELECT pg_temp.ins('task_completions', jsonb_build_object('task_id','a0000000-0000-0000-0000-00000000000a','user_id',:'R','photo_url','https://x.example/storage/v1/object/public/task-photos/' || :'R' || '/a-1.webp'));
 SELECT pg_temp.ins('task_completions', jsonb_build_object('task_id','b0000000-0000-0000-0000-00000000000b','user_id',:'P','photo_url','https://x.example/storage/v1/object/public/task-photos/' || :'P' || '/b-1.webp'));
 SELECT pg_temp.ins('task_completions', jsonb_build_object('task_id','b0000000-0000-0000-0000-00000000000b','user_id',:'R','notes','R helped with the P task'));
@@ -179,6 +179,10 @@ BEGIN
 END $$;
 SELECT pg_temp.ins('tasks', jsonb_build_object('id','10000000-0000-0000-0000-000000000001','title','t-F-completed','household_id',:'HE'));
 SELECT pg_temp.ins('task_completions', jsonb_build_object('task_id','10000000-0000-0000-0000-000000000001','user_id',:'F','notes','F did this'));
+CREATE TABLE public.unknown_household_parent (id integer PRIMARY KEY, household_id uuid REFERENCES public.households(id) ON DELETE CASCADE);
+CREATE TABLE public.unknown_household_child (parent_id integer REFERENCES public.unknown_household_parent(id) ON DELETE CASCADE, content text);
+INSERT INTO public.unknown_household_parent VALUES (1, :'HZ');
+INSERT INTO public.unknown_household_child VALUES (1, 'former member content');
 SELECT pg_temp.ins('tasks', jsonb_build_object('id','20000000-0000-0000-0000-000000000002','title','t-nobody','household_id',:'HE'));
 SELECT pg_temp.ins('tasks', jsonb_build_object('id','30000000-0000-0000-0000-000000000003','title','t-R-only','household_id',:'HE','assigned_to',:'R'));
 SELECT pg_temp.ins('task_templates', jsonb_build_object('id','40000000-0000-0000-0000-000000000004','household_id',:'HE','title','tpl-nobody','category','general','recurrence_type','daily'));
@@ -218,6 +222,9 @@ SELECT pg_temp.delete_as_service(:'R') AS r \gset
 SELECT pg_temp.ok(EXISTS (SELECT 1 FROM auth.users WHERE id = :'R') AND EXISTS (SELECT 1 FROM public.profiles WHERE id = :'R'), 'IDENTITY the auth user and the shared profile row are KEPT');
 SELECT pg_temp.ok((:'r'::jsonb ->> 'identity_deletion_requested')::boolean AND EXISTS (SELECT 1 FROM public.bayit_identity_deletion_requests WHERE user_id = :'R' AND status = 'pending'), 'IDENTITY a full identity deletion is REQUESTED for the owner, not done');
 SELECT pg_temp.ok((SELECT household_id IS NULL AND points = 0 AND streak = 0 AND whatsapp_phone IS NULL FROM public.profiles WHERE id = :'R'), 'IDENTITY only this app columns on the profile are cleared');
+SELECT pg_temp.ok((:'r'::jsonb -> 'kept_shared') @> to_jsonb('photo_unverified:a0000000-0000-0000-0000-00000000000a-shared.webp'::text), 'ROUND4 unverified photo retained for manual review');
+SELECT pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.bayit_storage_cleanup WHERE object_name = 'a0000000-0000-0000-0000-00000000000a-shared.webp'), 'ROUND4 task-only photo ownership is unproven');
+SELECT pg_temp.ok(pg_temp.cnt('tasks', 'title = ''t-R-only'' AND assigned_to IS NULL') = 1, 'ROUND4 shared task assigned to requester survives');
 SELECT pg_temp.ok(pg_temp.other_app_fingerprint() = (SELECT other_app FROM snap), 'IDENTITY the CONTENT of every other-app table is identical (hash of every row, not a row count)');
 SELECT pg_temp.ok(to_jsonb((SELECT p FROM public.profiles p WHERE id = :'B')) = (SELECT b_profile FROM snap) AND pg_temp.cnt('tasks', 'household_id = ''' || :'HB' || '''') = 1 AND pg_temp.cnt('streaks', 'user_id = ''' || :'B' || '''') = 1, 'IDENTITY a bystander in another household is untouched');
 
@@ -246,15 +253,17 @@ SELECT pg_temp.ok(pg_temp.cnt('wheel_spins', 'segment_label = ''R-alone''') = 0 
 SELECT pg_temp.ok(CASE WHEN pg_temp.is_nullable('profiles', 'partner_id') THEN pg_temp.cnt('profiles', 'partner_id IS NOT NULL AND id = ''' || :'P' || '''') = 0 ELSE true END, 'SHARED profiles.partner_id: the P pointer to R is set to NULL');
 SELECT pg_temp.ok(EXISTS (SELECT 1 FROM public.households WHERE id = :'HS') AND (SELECT role FROM public.household_members WHERE user_id = :'P') = 'owner' AND (:'r'::jsonb ->> 'new_owner_id') = :'P', 'HS the household carries on: P became owner');
 
+SELECT pg_temp.ok(EXISTS (SELECT 1 FROM public.unknown_household_child WHERE content = 'former member content') AND EXISTS (SELECT 1 FROM public.households WHERE id = :'HZ'), 'ROUND4 unknown household cascade survives');
+
 -- HE: R was the last CURRENT member; F is a former one
 SELECT pg_temp.ok(pg_temp.cnt('task_completions', 'user_id = ''' || :'F' || '''') = 1 AND pg_temp.cnt('tasks', 'title = ''t-F-completed''') = 1, 'FORMER MEMBER F task completion and the task it belongs to are KEPT (R being last current member does not make them R)');
 SELECT pg_temp.ok(pg_temp.cnt('app_feedback', 'user_id = ''' || :'F' || '''') = (CASE WHEN to_regclass('public.app_feedback') IS NULL THEN 0 ELSE 1 END) AND pg_temp.cnt('streaks', 'user_id = ''' || :'F' || '''') = 1 AND pg_temp.cnt('user_medals', 'user_id = ''' || :'F' || '''') = 1 AND pg_temp.cnt('shopping_items', 'title = ''item-F'' AND added_by = ''' || :'F' || '''') = 1, 'FORMER MEMBER F feedback, streak, medal and shopping item are KEPT');
 SELECT pg_temp.ok(pg_temp.fp('weekly_syncs', 'household_id = ''' || :'HE' || '''') = (SELECT syncs_he FROM snap), 'FORMER MEMBER F weekly sync is byte-for-byte unchanged');
 SELECT pg_temp.ok(pg_temp.cnt('love_tokens', 'sender_id = ''' || :'F' || ''' AND recipient_id = ''' || :'R' || '''') = 1 AND pg_temp.cnt('love_tokens', 'sender_id = ''' || :'R' || ''' AND recipient_id = ''' || :'F' || '''') = 1, 'FORMER MEMBER F love tokens to and from R are KEPT (F content)');
-SELECT pg_temp.ok(pg_temp.cnt('tasks', 'title = ''t-nobody''') = 0 AND pg_temp.cnt('tasks', 'title = ''t-R-only''') = 0 AND pg_temp.cnt('task_templates', 'title = ''tpl-nobody''') = 0 AND pg_temp.cnt('meals', 'household_id = ''' || :'HE' || '''') = 0 AND pg_temp.cnt('shopping_categories', 'household_id = ''' || :'HE' || '''') = 0 AND pg_temp.cnt('shopping_items', 'title = ''item-nobody''') = 0 AND pg_temp.cnt('household_agent_tokens', 'token_hash = ''hash-HE''') = 0, 'HE rows that belong to NOBODY are deleted (unassigned tasks nobody completed, templates, meals, categories, items, tokens)');
+SELECT pg_temp.ok(pg_temp.cnt('tasks', 'title = ''t-nobody''') = 1 AND pg_temp.cnt('tasks', 'title = ''t-R-only''') = 1 AND pg_temp.cnt('shopping_items', 'title = ''item-nobody''') = 1, 'HE shared content retained for review');
 SELECT pg_temp.ok((:'r'::jsonb ->> 'household') = 'emptied' AND EXISTS (SELECT 1 FROM public.households WHERE id = :'HE') AND EXISTS (SELECT 1 FROM public.bayit_household_cleanup WHERE household_id = :'HE'), 'HE the household is KEPT and MARKED for cleanup (deleting it would cascade over F rows)');
 SELECT pg_temp.ok((SELECT remaining_tables @> ARRAY['tasks','love_tokens','weekly_syncs'] FROM public.bayit_household_cleanup WHERE household_id = :'HE'), 'HE the mark says which tables still hold other people rows');
-SELECT pg_temp.ok(NOT EXISTS (SELECT 1 FROM public.households WHERE id = :'HZ') AND pg_temp.cnt('tasks', 'household_id = ''' || :'HZ' || '''') = 0 AND NOT EXISTS (SELECT 1 FROM public.bayit_household_cleanup WHERE household_id = :'HZ'), 'HZ a household with nothing of anyone else is deleted completely, with no leftover mark');
+SELECT pg_temp.ok(EXISTS (SELECT 1 FROM public.households WHERE id = :'HZ') AND EXISTS (SELECT 1 FROM public.bayit_household_cleanup WHERE household_id = :'HZ'), 'HZ retained and marked for manual review');
 
 -- a second run is harmless
 SELECT pg_temp.delete_as_service(:'R') AS r2 \gset

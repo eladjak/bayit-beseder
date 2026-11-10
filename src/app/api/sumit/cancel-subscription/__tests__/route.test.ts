@@ -102,6 +102,12 @@ describe("GET /api/sumit/cancel-subscription (for the gate screen)", () => {
     expect(await (await GET(get())).json()).toEqual({ cancellable: false });
   });
 
+  it("offers cancellation for a past-due paid plan", async () => {
+    tables.subscriptions = [{ id: "late", household_id: "h-mine", tier: "plus", status: "past_due" }];
+    expect(await (await GET(get())).json()).toEqual({ cancellable: true });
+    expect((await POST(post({}))).status).toBe(200);
+  });
+
   it("401 without a session", async () => {
     sessionUser = null;
     expect((await GET(get())).status).toBe(401);

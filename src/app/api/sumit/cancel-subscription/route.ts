@@ -76,8 +76,8 @@ function serviceClient() {
 }
 
 /**
- * A paid plan that is active in OUR records (the same notion the deletion function uses; we do not
- * ask the payment provider). Free rows never count.
+ * A paid plan in an active or past-due state in our records. This does not establish provider billing
+ * status and is broader than the deletion function’s billing-evidence predicate. Free rows never count.
  */
 const PAID_ACTIVE = { column: 'tier', notValue: 'free' } as const;
 
@@ -100,7 +100,7 @@ export async function GET(req: NextRequest) {
     .from('subscriptions')
     .select('id')
     .in('household_id', owned.ids)
-    .eq('status', 'active')
+    .in('status', ['active', 'past_due'])
     .neq(PAID_ACTIVE.column, PAID_ACTIVE.notValue)
     .limit(1);
   if (error) return NextResponse.json({ error: 'Lookup failed' }, { status: 500 });
@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
       .from('subscriptions')
       .select('household_id')
       .in('household_id', owned.ids)
-      .eq('status', 'active')
+      .in('status', ['active', 'past_due'])
       .neq(PAID_ACTIVE.column, PAID_ACTIVE.notValue);
     if (error) return NextResponse.json({ error: 'Lookup failed' }, { status: 500 });
     const candidates = [...new Set(((rows ?? []) as { household_id: string }[]).map((r) => r.household_id))];
@@ -162,7 +162,7 @@ export async function POST(req: NextRequest) {
     .from('subscriptions')
     .select('id, sumit_payment_method_id')
     .eq('household_id', householdId)
-    .eq('status', 'active')
+    .in('status', ['active', 'past_due'])
     .neq(PAID_ACTIVE.column, PAID_ACTIVE.notValue)
     .maybeSingle();
   if (findErr) {

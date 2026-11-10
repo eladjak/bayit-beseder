@@ -44,21 +44,17 @@
 --                                      notification_preferences, google_calendar_tokens/id, whatsapp_phone cleared;
 --                                      the row itself and the shared columns stay
 --  meals, meal_plan, shopping_categories, task_categories, agent_confirmations   HOUSEHOLD
---                                      kept while anybody belongs to the household; deleted when it is empty
+--                                      always kept for manual dependency and ownership review
 --  achievements, categories, coaching_messages, billing_events    catalogs / provider events: never touched
 --
--- A household with NO current member left is MARKED for cleanup (bayit_household_cleanup). Its rows that
--- belong to nobody else are deleted (tasks nobody completed and nobody is assigned to, unassigned
--- instances/templates/items, household-level rows, access tokens). Rows that belong to someone else are
--- kept; the household row itself is deleted only when nothing at all remains in it (it would otherwise
--- cascade over someone else's rows), otherwise it stays marked.
+-- Empty households and their shared rows are retained and marked for manual review.
 --
 -- OTHER RULES
 --   * Only a subscription that LOOKS like billing in our own records blocks deletion (a paid tier, active or
 --     past due, not cancelled, with a provider subscription id or a future period end). We do not ask the
 --     payment provider; free "active" rows never block.
 --   * Stored photo objects are queued durably (bayit_storage_cleanup); only object names that provably
---     belong to the person (name starts with the id of the completion's own task, or with the person's id).
+--     use the person's folder; legacy names are retained and listed for manual review.
 --   * Everything is rolled back if any step fails; the households involved are locked first.
 --
 -- Callable ONLY with the service role. Additive: three small service-only tables and one function.
@@ -126,25 +122,6 @@ DECLARE
     ['task_templates','default_assignee'],['shopping_items','added_by'],
     ['weekly_syncs','created_by'],['subscriptions','user_id'],['profiles','partner_id']
   ];
-  -- HOUSEHOLD cleanup when nobody is left: (table, columns that must exist ('!x' = must NOT exist), rows that belong to nobody else).
-  v_cleanup text[][] := ARRAY[
-    ['whatsapp_webhook_events','task_id','task_id IN (SELECT t.id FROM public.tasks t WHERE t.household_id = $1 AND t.assigned_to IS NULL AND NOT EXISTS (SELECT 1 FROM public.task_completions c WHERE c.task_id = t.id))'],
-    ['tasks','assigned_to','household_id = $1 AND assigned_to IS NULL AND NOT EXISTS (SELECT 1 FROM public.task_completions c WHERE c.task_id = tasks.id)'],
-    ['task_instances','assigned_to,completed_by','household_id = $1 AND assigned_to IS NULL AND completed_by IS NULL'],
-    ['task_templates','default_assignee','household_id = $1 AND default_assignee IS NULL AND NOT EXISTS (SELECT 1 FROM public.task_instances i WHERE i.template_id = task_templates.id)'],
-    ['meal_plan','household_id','household_id = $1'],
-    ['meals','household_id','household_id = $1'],
-    ['shopping_items','added_by','household_id = $1 AND added_by IS NULL'],
-    ['shopping_categories','household_id','household_id = $1'],
-    ['task_categories','household_id','household_id = $1'],
-    ['agent_confirmations','household_id','household_id = $1'],
-    ['agent_audit_log','actor_user_id','household_id = $1 AND actor_user_id IS NULL'],
-    ['household_agent_tokens','household_id','household_id = $1'],
-    ['coaching_events','user_id','household_id = $1 AND user_id IS NULL'],
-    ['coaching_events','!user_id','household_id = $1'],
-    ['weekly_syncs','created_by','household_id = $1 AND created_by IS NULL'],
-    ['subscriptions','user_id','household_id = $1 AND user_id IS NULL AND NOT (tier <> ''free'' AND status IN (''active'', ''past_due'') AND canceled_at IS NULL)']
-  ];
   -- This app's own columns on the shared profiles row, and what they are reset to.
   v_profile_scrub text[][] := ARRAY[
     ['household_id','NULL'],['partner_id','NULL'],['points','0'],['streak','0'],
@@ -196,8 +173,14 @@ BEGIN
   SELECT coalesce(array_agg(DISTINCT n), ARRAY[]::text[]) INTO v_more FROM (
     SELECT regexp_replace(split_part(photo_url, '/task-photos/', 2), '\?.*$', '') AS n, task_id
       FROM public.task_completions WHERE user_id = p_user AND photo_url LIKE '%/task-photos/%'
-  ) x WHERE n LIKE task_id::text || '-%' OR n LIKE p_user::text || '/%';
+  ) x WHERE n LIKE p_user::text || '/%';
   v_photos := v_photos || v_more;
+  -- Legacy task-only names are not proof of ownership. Retain their paths for human review.
+  SELECT v_kept || coalesce(array_agg(DISTINCT 'photo_unverified:' || n), ARRAY[]::text[])
+    INTO v_kept FROM (
+      SELECT regexp_replace(split_part(photo_url, '/task-photos/', 2), '\?.*$', '') AS n
+        FROM public.task_completions WHERE user_id = p_user AND photo_url LIKE '%/task-photos/%'
+    ) x WHERE n <> '' AND n NOT LIKE p_user::text || '/%';
   DELETE FROM public.task_completions WHERE user_id = p_user;
 
   FOR i IN 1 .. array_length(v_own_delete, 1) LOOP
@@ -251,22 +234,8 @@ BEGIN
       END IF;
       IF v_household NOT IN ('emptied', 'deleted') THEN v_household := 'left'; END IF;
     ELSE
-      -- Nobody left: delete only what belongs to nobody else.
-      FOR i IN 1 .. array_length(v_cleanup, 1) LOOP
-        IF to_regclass(format('public.%I', v_cleanup[i][1])) IS NULL THEN CONTINUE; END IF;
-        v_ok := true;
-        FOREACH c IN ARRAY string_to_array(v_cleanup[i][2], ',') LOOP
-          IF left(c, 1) = '!' THEN
-            IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = v_cleanup[i][1] AND column_name = substr(c, 2)) THEN v_ok := false; END IF;
-          ELSIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = v_cleanup[i][1] AND column_name = c) THEN
-            v_ok := false;
-          END IF;
-        END LOOP;
-        IF v_ok THEN
-          EXECUTE format('DELETE FROM public.%I WHERE ' || v_cleanup[i][3], v_cleanup[i][1]) USING hh;
-        END IF;
-      END LOOP;
-      -- Is anything left in the household (rows of former members)?
+      -- Unknown foreign keys and former members' content make all automatic cleanup unsafe.
+      -- Keep the household and every shared row for a human dependency/ownership audit.
       v_left := ARRAY[]::text[];
       FOR i IN 1 .. array_length(v_hh_tables, 1) LOOP
         IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = v_hh_tables[i] AND column_name = 'household_id') THEN
@@ -274,15 +243,9 @@ BEGIN
           IF v_has THEN v_left := array_append(v_left, v_hh_tables[i]); END IF;
         END IF;
       END LOOP;
-      IF cardinality(v_left) = 0 THEN
-        DELETE FROM public.bayit_household_cleanup WHERE household_id = hh;
-        DELETE FROM public.households WHERE id = hh;
-        IF v_household <> 'emptied' THEN v_household := 'deleted'; END IF;
-      ELSE
-        INSERT INTO public.bayit_household_cleanup (household_id, remaining_tables) VALUES (hh, v_left)
-          ON CONFLICT (household_id) DO UPDATE SET marked_at = now(), remaining_tables = EXCLUDED.remaining_tables;
-        v_household := 'emptied';
-      END IF;
+      INSERT INTO public.bayit_household_cleanup (household_id, remaining_tables) VALUES (hh, v_left)
+        ON CONFLICT (household_id) DO UPDATE SET marked_at = now(), remaining_tables = EXCLUDED.remaining_tables;
+      v_household := 'emptied';
     END IF;
   END LOOP;
 

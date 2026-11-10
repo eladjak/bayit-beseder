@@ -10,12 +10,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
  *   - deletes only the requester's OWN rows. Rows authored by or addressed to another person are never
  *     deleted (not even when the requester is the last current member): where a row is shared, the
  *     requester's side is set to NULL, or the row is kept and listed (keptShared). A household left
- *     with nobody is marked for cleanup and only loses rows that belong to nobody else;
+ *     with nobody is retained and marked for manual review;
  *   - clears this app's own columns on the shared profile and KEEPS the profile and the auth user;
  *   - records "full identity deletion requested" in bayit_identity_deletion_requests, for the owner
  *     to handle by hand within the legal time;
  *   - queues the person's stored photo objects (bayit_storage_cleanup) and returns their names;
- *   - refuses only for a subscription that really bills (a paid plan), never for a free row;
+ *   - blocks locally recorded potentially billable subscriptions, never a free row;
  *   - rolls everything back if any step fails.
  * This file only calls it, then removes the photo objects and clears them from the queue.
  * If migration 027 is not applied the call fails and NOTHING is deleted.

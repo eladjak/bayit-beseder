@@ -172,10 +172,8 @@ run027mutant m2 "s/AND tier <> 'free'/AND true/" "SUB a FREE" "mutant that block
 run027mutant m4 "s/UPDATE public.profiles SET household_id = NULL WHERE id = p_user AND household_id = hh;/UPDATE public.profiles SET household_id = NULL;/" "IDENTITY a bystander" "mutant that detaches everybody's profile"
 run027mutant m5 "s/DELETE FROM public.task_completions WHERE user_id = p_user;/DELETE FROM public.task_completions WHERE user_id = p_user OR task_id IN (SELECT id FROM public.tasks WHERE household_id = ANY (v_hhs));/" "OWN task_completions" "mutant that deletes ALL completions of the household (the round-2 behaviour)"
 run027mutant m6 "s/sender_id = p_user AND recipient_id = p_user;/sender_id = p_user OR recipient_id = p_user;/" "SHARED love_tokens" "mutant that deletes love tokens addressed to or from others"
-run027mutant m7 "s/IF cardinality(v_left) = 0 THEN/IF true THEN/" "OWN streaks" "mutant that deletes the household (and, by cascade, a former member's rows) regardless"
-run027mutant m8 "s/IF v_nullable = 'YES' THEN/IF false THEN/" "SHARED tasks" "mutant that never anonymises shared rows"
+run027mutant m8 "s/IF v_nullable = 'YES' THEN/IF false THEN/" "ROUND4 shared task" "mutant that never anonymises shared rows"
 run027mutant m9 "s/EXECUTE format('DELETE FROM public.%I WHERE %I = \$1', v_own_delete\[i\]\[1\], v_own_delete\[i\]\[2\]) USING p_user;/EXECUTE format('DELETE FROM public.%I WHERE %I IS NOT NULL OR \$1 IS NULL', v_own_delete[i][1], v_own_delete[i][2]) USING p_user;/" "IDENTITY a bystander" "mutant that deletes other people's own-class rows"
-run027mutant m10 "s/ AND NOT EXISTS (SELECT 1 FROM public.task_completions c WHERE c.task_id = tasks.id)//" "OWN task_completions" "mutant that deletes tasks a former member completed (cascade over their completion)"
 
 echo "== 5. migration 028: the consent gate in the database =="
 build_db t028 026 $M/027_bayit_delete_account.sql $M/028_consent_gate_rls.sql
@@ -223,7 +221,7 @@ wait $S1
 WAITED=$((T1 - T0))
 GONE=$(sql t027c -At -c "SELECT NOT EXISTS (SELECT 1 FROM public.households WHERE id='d1000000-0000-0000-0000-0000000000d1')")
 JOINED=$(sql t027c -At -c "SELECT count(*) FROM public.household_members WHERE user_id='e0000000-0000-0000-0000-00000000000e'")
-if [ "$WAITED" -ge 2 ] && grep -qi 'foreign key\|violates' $T/s2.txt && [ "$GONE" = t ] && [ "$JOINED" = 0 ]; then pass "a join waited ${WAITED}s for the household lock, then failed its foreign key; no member attached to a deleted household"; else fail "household race not handled (waited ${WAITED}s gone=$GONE joined=$JOINED: $(head -c 200 $T/s2.txt))"; fi
+if [ "$WAITED" -ge 2 ] && [ "$GONE" = f ] && [ "$JOINED" = 1 ]; then pass "a join waited ${WAITED}s for the household lock and joined the retained household"; else fail "household race not handled (waited ${WAITED}s gone=$GONE joined=$JOINED: $(head -c 200 $T/s2.txt))"; fi
 
 echo
 if [ -n "${LIVE_DUMP:-}" ]; then
