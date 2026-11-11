@@ -11,12 +11,13 @@ html[data-ui="v2"] .print-v2-row { display: flex; align-items: center; gap: .75r
 html[data-ui="v2"] .print-v2-title { flex: 1; overflow-wrap: anywhere; }
 html[data-ui="v2"] .print-v2-check { display: inline-block; width: 6mm; height: 6mm; border: 1px solid currentColor; flex: none; }
 @media print {
-  html[data-ui="v2"] body:has(.print-v2) .sticky, html[data-ui="v2"] #house-tools, html[data-ui="v2"] nav[aria-label], html[data-ui="v2"] [data-sonner-toaster], html[data-ui="v2"] button, html[data-ui="v2"] .no-print { display: none !important; }
-  html[data-ui="v2"] body, html[data-ui="v2"] .print-v2 { margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; }
-  html[data-ui="v2"] .print-v2, html[data-ui="v2"] .print-v2 * { background: transparent !important; color: black !important; box-shadow: none !important; font-size: 11pt; }
-  html[data-ui="v2"] .print-v2-header h1 { font-size: 18pt; }
-  html[data-ui="v2"] .print-v2 h2 { font-size: 13pt; break-after: avoid; }
-  html[data-ui="v2"] .print-v2-row { break-inside: avoid; }
-  html[data-ui="v2"] .print-v2 { page: print-v2; }
+  html[data-ui="v2"]:has(.print-v2) body:has(.print-v2) .sticky, html[data-ui="v2"]:has(.print-v2) #house-tools, html[data-ui="v2"]:has(.print-v2) nav[aria-label], html[data-ui="v2"]:has(.print-v2) [data-sonner-toaster], html[data-ui="v2"]:has(.print-v2) button, html[data-ui="v2"]:has(.print-v2) .no-print { display: none !important; }
+  html[data-ui="v2"]:has(.print-v2) body:has(.print-v2) > div, html[data-ui="v2"]:has(.print-v2) body:has(.print-v2) main { min-height: 0 !important; padding: 0 !important; max-width: none !important; background: transparent !important; }
+  html[data-ui="v2"]:has(.print-v2) body, html[data-ui="v2"]:has(.print-v2) .print-v2 { margin: 0 !important; padding: 0 !important; background: white !important; color: black !important; }
+  html[data-ui="v2"]:has(.print-v2) .print-v2, html[data-ui="v2"]:has(.print-v2) .print-v2 * { background: transparent !important; color: black !important; box-shadow: none !important; font-size: 11pt; }
+  html[data-ui="v2"]:has(.print-v2) .print-v2-header h1 { font-size: 18pt; }
+  html[data-ui="v2"]:has(.print-v2) .print-v2 h2 { font-size: 13pt; break-after: avoid; }
+  html[data-ui="v2"]:has(.print-v2) .print-v2-row { break-inside: avoid; }
+  html[data-ui="v2"]:has(.print-v2) body { page: print-v2; }
   @page print-v2 { size: A4; margin: 15mm; }
 }
