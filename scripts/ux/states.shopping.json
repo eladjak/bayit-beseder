@@ -1,0 +1,164 @@
+[
+  {
+    "route": "/shopping",
+    "name": "normal-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/shopping",
+    "name": "normal-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "en"
+    }
+  },
+  {
+    "route": "/shopping",
+    "name": "empty-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/shopping",
+    "name": "empty-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "en"
+    }
+  },
+  {
+    "route": "/shopping",
+    "name": "device-only-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "he",
+      "bayit-beseder-shopping-list": "[{\"id\": \"local1\", \"title\": \"קפה מקומי\", \"category\": \"שונות\", \"checked\": false, \"added_by\": \"unknown\", \"created_at\": \"2026-01-01T00:00:00Z\"}]"
+    }
+  },
+  {
+    "route": "/shopping",
+    "name": "device-only-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "en",
+      "bayit-beseder-shopping-list": "[{\"id\": \"local1\", \"title\": \"קפה מקומי\", \"category\": \"שונות\", \"checked\": false, \"added_by\": \"unknown\", \"created_at\": \"2026-01-01T00:00:00Z\"}]"
+    }
+  },
+  {
+    "route": "/shopping",
+    "name": "table-error-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/shopping",
+    "name": "table-error-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "en"
+    }
+  },
+  {
+    "route": "/shopping",
+    "name": "slow-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/shopping",
+    "name": "slow-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "en"
+    }
+  }
+]

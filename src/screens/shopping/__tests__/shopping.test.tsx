@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import ShoppingV2 from '../ShoppingV2';
-const mocks = vi.hoisted(() => ({ toggle: vi.fn(), remove: vi.fn(), edit: vi.fn(), toast: vi.fn(), items: [] as any[], storage: 'server', deviceItems: [] as any[], flag: null as boolean | null, loading: false }));
+import type { ShoppingItem } from '@/hooks/useShoppingList';
+import type { CopyFragment } from '@/lib/i18n/fragments/types';
+const mocks = vi.hoisted(() => ({ toggle: vi.fn(), remove: vi.fn(), edit: vi.fn(), toast: vi.fn(), items: [] as ShoppingItem[], storage: 'server', deviceItems: [] as ShoppingItem[], flag: null as boolean | null, loading: false }));
 vi.mock('@/hooks/useShoppingList', () => ({ useShoppingList: () => ({ items: mocks.items, loading: mocks.loading, storage: mocks.storage, deviceItems: mocks.deviceItems, retrying: false, retry: vi.fn(), addItem: vi.fn(), toggleItem: mocks.toggle, removeItem: mocks.remove, editItem: mocks.edit }) }));
 vi.mock('@/hooks/useNewUi', () => ({ useNewUi: () => mocks.flag }));
 vi.mock('@/hooks/useSeasonalMode', () => ({ useSeasonalMode: () => ({}) }));
@@ -9,7 +11,7 @@ vi.mock('@/hooks/useFirstVisit', () => ({ useFirstVisit: () => ({ isFirstVisit: 
 vi.mock('@/hooks/useShoppingCategories', () => ({ useShoppingCategories: () => ({ categories: [] }) }));
 vi.mock('@/hooks/useProfile', () => ({ useProfile: () => ({ profile: { household_id: 'h' }, loading: false }) }));
 vi.mock('@/hooks/useTranslation', () => ({ useTranslation: () => ({ locale: 'he' }) }));
-vi.mock('@/hooks/useCopy', () => ({ useCopy: (fragment: any) => ({ c: (key: string) => fragment.he[key] }) }));
+vi.mock('@/hooks/useCopy', () => ({ useCopy: (fragment: CopyFragment) => ({ c: (key: string) => fragment.he[key] }) }));
 vi.mock('sonner', () => ({ toast: mocks.toast }));
 vi.mock('@/components/v2/QuickAdd', () => ({ QuickAdd: () => <div>quick add</div> }));
 const item = (id: string, title: string) => ({ id, title, category: 'שונות', checked: false, added_by: 'unknown', created_at: '2026-01-01' });
