@@ -111,9 +111,10 @@ function setStoredLanguage(lang: Language) {
 export default function SettingsPage() {
   const router = useRouter();
   const { user } = useAuth();
-  const { profile, updateProfile } = useProfile();
+  const { profile, loading: profileLoading, refetch: refetchProfile, updateProfile } = useProfile();
   const { t, setLocale: i18nSetLocale } = useTranslation();
-  const { household, updateHousehold, status: householdStatus, retry: retryHousehold } = useHousehold(profile?.household_id ?? null);
+  const { household, updateHousehold, status: householdStatus, retry: retryHousehold } = useHousehold(profile ? profile.household_id : undefined);
+  const visibleHouseholdStatus = !profile ? (profileLoading ? "loading" : "error") : householdStatus;
 
   // Profile state
   const [displayName, setDisplayName] = useState("");
@@ -257,14 +258,14 @@ export default function SettingsPage() {
   }, [profile, user]);
 
   useEffect(() => {
-    if (household) {
+    if (household && visibleHouseholdStatus === "ready") {
       setHouseholdName(household.name);
       setGoldenTarget(household.goldenRuleTarget);
       setHouseholdCity(household.city ?? "");
       localStorage.setItem("bayit-household-name", household.name);
       localStorage.setItem("bayit-golden-target", String(household.goldenRuleTarget));
     }
-  }, [household]);
+  }, [household, visibleHouseholdStatus]);
 
   useEffect(() => {
     setNotifPrefs(getNotificationPrefs());
@@ -323,7 +324,7 @@ export default function SettingsPage() {
   );
 
   function copyInviteCode() {
-    if (process.env.NEXT_PUBLIC_NEW_UI === "true" && !household.inviteCode) return;
+    if (!household.inviteCode) return;
     void navigator.clipboard.writeText(household.inviteCode).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -331,6 +332,7 @@ export default function SettingsPage() {
   }
 
   const handleSaveHousehold = useCallback(async () => {
+    if (visibleHouseholdStatus !== "ready") return;
     const normalizedCity = normalizeHouseholdCity(householdCity);
     if (normalizedCity === undefined) {
       setHouseholdCityError(t("settings.householdSection.cityTooLong"));
@@ -356,7 +358,7 @@ export default function SettingsPage() {
     } else {
       toast.error("לא הצלחנו לשמור — נסו שוב");
     }
-  }, [householdName, householdCity, goldenTarget, profile?.household_id, updateHousehold, t]);
+  }, [householdName, householdCity, goldenTarget, profile?.household_id, updateHousehold, t, visibleHouseholdStatus]);
 
   const supabaseNotifKeys = new Set<string>(["morning", "midday", "evening", "partnerActivity"]);
 
@@ -508,8 +510,8 @@ export default function SettingsPage() {
           defaultOpen
         >
           <HouseholdSection
-            status={householdStatus}
-            retry={retryHousehold}
+            status={visibleHouseholdStatus}
+            retry={profile ? retryHousehold : refetchProfile}
             householdName={householdName}
             city={householdCity}
             cityError={householdCityError}

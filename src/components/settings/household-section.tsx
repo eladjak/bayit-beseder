@@ -44,7 +44,15 @@ export function HouseholdSection({
 }: HouseholdSectionProps) {
   const { t, locale } = useTranslation();
   const copy = COPY[locale];
-  const enabled = process.env.NEXT_PUBLIC_NEW_UI === "true";
+  const enabled = true;
+
+  if (enabled && status !== "ready") {
+    if (status === "loading") return <p role="status">{locale === "he" ? "טוענים את פרטי הבית..." : "Loading home details..."}</p>;
+    return <div role="status" className="rounded-xl border border-border bg-background p-4 text-sm">
+      <p>{status === "no-household" ? copy.none : copy.error}</p>
+      {status === "no-household" ? <a href="#invite-partner-section" className="inline-flex min-h-11 items-center font-semibold text-primary">{copy.invite}</a> : <button type="button" onClick={retry} className="min-h-11 font-semibold text-primary">{copy.retry}</button>}
+    </div>;
+  }
 
   return (
     <div className="space-y-4">
@@ -93,7 +101,7 @@ export function HouseholdSection({
           <code className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm font-mono text-foreground">
             {inviteCode}
           </code>
-          <button
+          {(!enabled || inviteCode) && <button
             onClick={onCopyInviteCode}
             className={enabled ? "min-h-11 min-w-11 flex items-center justify-center rounded-lg bg-background border border-border hover:bg-surface-hover text-muted" : "p-2 rounded-lg bg-background border border-border hover:bg-surface-hover text-muted"}
             aria-label={t("settings.householdSection.copyInviteCode")}
@@ -103,7 +111,7 @@ export function HouseholdSection({
             ) : (
               <Copy className="w-4 h-4 text-muted" />
             )}
-          </button>
+          </button>}
         </div>
       </div>}
       <div>

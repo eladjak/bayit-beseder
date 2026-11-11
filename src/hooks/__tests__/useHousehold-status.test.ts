@@ -43,9 +43,43 @@ describe('household section states', () => {
   });
 });
 
-it('keeps the existing placeholder when the redesign switch is off', async () => {
+it('keeps the honest placeholder when the redesign switch is off', async () => {
   vi.stubEnv('NEXT_PUBLIC_NEW_UI', 'false');
   const { result } = renderHook(() => useHousehold(null));
   await waitFor(() => expect(result.current.loading).toBe(false));
-  expect(result.current.household.inviteCode).toBe('BAYIT-ABC123');
+  expect(result.current.household.inviteCode).toBe('');
+});
+
+describe('review regressions', () => {
+  beforeEach(() => { cleanup(); vi.stubEnv('NEXT_PUBLIC_NEW_UI', 'true'); single.mockReset(); });
+  it('keeps unknown profile loading rather than claiming no home', () => {
+    const { result } = renderHook(() => useHousehold(undefined));
+    expect(result.current.status).toBe('loading');
+  });
+  it('treats a missing household as no household', async () => {
+    single.mockResolvedValue({data:null, error:{code:'PGRST116'}});
+    const {result} = renderHook(() => useHousehold('missing'));
+    await waitFor(() => expect(result.current.status).toBe('no-household'));
+  });
+  it('ignores an obsolete household response', async () => {
+    let resolveOld!: (value: unknown) => void;
+    single.mockImplementationOnce(() => new Promise(resolve => {resolveOld = resolve;})).mockResolvedValueOnce({data:{name:'New',invite_code:'NEW'},error:null});
+    const {result, rerender} = renderHook(({id}) => useHousehold(id), {initialProps:{id:'old'}});
+    rerender({id:'new'});
+    await waitFor(() => expect(result.current.household.name).toBe('New'));
+    await act(async () => resolveOld({data:{name:'Old',invite_code:'OLD'},error:null}));
+    expect(result.current.household.name).toBe('New');
+  });
+  it('does not permit saving placeholder fields after an error', () => {
+    const save = vi.fn();
+    const screen = render(createElement(HouseholdSection, {householdName:'בית', city:'', cityError:null, goldenTarget:80, inviteCode:'', copied:false, householdSaving:false, onNameChange:vi.fn(), onCityChange:vi.fn(), onTargetChange:vi.fn(), onCopyInviteCode:vi.fn(), onSave:save, retry:vi.fn(), status:'error'}));
+    expect(screen.queryByText('settings.householdSection.saveHousehold')).toBeNull();
+    expect(save).not.toHaveBeenCalled();
+  });
+});
+
+it('does not offer copying an empty invitation code', () => {
+  cleanup(); vi.stubEnv('NEXT_PUBLIC_NEW_UI', 'true');
+  const screen = render(createElement(HouseholdSection, {householdName:'בית', city:'', cityError:null, goldenTarget:80, inviteCode:'', copied:false, householdSaving:false, onNameChange:vi.fn(), onCityChange:vi.fn(), onTargetChange:vi.fn(), onCopyInviteCode:vi.fn(), onSave:vi.fn(), retry:vi.fn(), status:'ready'}));
+  expect(screen.queryByLabelText('settings.householdSection.copyInviteCode')).toBeNull();
 });

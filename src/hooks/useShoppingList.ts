@@ -94,6 +94,7 @@ interface UseShoppingListReturn {
   items: ShoppingItem[];
   storage: "server" | "device";
   loadError: string | null;
+  retrying: boolean;
   deviceItems: ShoppingItem[];
   retry: () => Promise<void>;
   loading: boolean;
@@ -137,9 +138,10 @@ export function useShoppingList(): UseShoppingListReturn {
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [storage, setStorage] = useState<"server" | "device">("server");
+  const [retrying, setRetrying] = useState(false);
+  const retryingRef = useRef(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [deviceItems, setDeviceItems] = useState<ShoppingItem[]>([]);
-  const enabled = process.env.NEXT_PUBLIC_NEW_UI === "true";
   const usingMockRef = useRef(false);
   // Keep a ref that always reflects the latest items so async callbacks
   // (e.g. toggleItem) never capture a stale closure value.
@@ -175,7 +177,7 @@ export function useShoppingList(): UseShoppingListReturn {
     if (!isSupabaseConfigured()) {
       usingMockRef.current = true;
       setStorage("device");
-      setLoadError("device");
+      setLoadError("Unable to load the shared shopping list.");
       const localItems = loadFromLocalStorage();
       setItems(localItems);
       setLoading(false);
@@ -193,27 +195,34 @@ export function useShoppingList(): UseShoppingListReturn {
         // Table may not exist yet -- fall back to localStorage mock
         usingMockRef.current = true;
         setStorage("device");
-        setLoadError("device");
-        const localItems = loadFromLocalStorage(!enabled);
+        setLoadError("Unable to load the shared shopping list.");
+        const localItems = loadFromLocalStorage(false);
         setItems(localItems);
       } else {
         usingMockRef.current = false;
         setStorage("server");
         setLoadError(null);
-        if (enabled) setDeviceItems(loadFromLocalStorage(false));
+        setDeviceItems(loadFromLocalStorage(false));
         setItems((data ?? []).map(toShoppingItem));
       }
     } catch {
       // Supabase not reachable
       usingMockRef.current = true;
       setStorage("device");
-      setLoadError("device");
-      const localItems = loadFromLocalStorage(!enabled);
+      setLoadError("Unable to load the shared shopping list.");
+      const localItems = loadFromLocalStorage(false);
       setItems(localItems);
     } finally {
       setLoading(false);
     }
-  }, [loadFromLocalStorage, enabled]);
+  }, [loadFromLocalStorage]);
+
+  const retry = useCallback(async () => {
+    if (retryingRef.current) return;
+    retryingRef.current = true;
+    setRetrying(true);
+    try { await fetchItems(); } finally { retryingRef.current = false; setRetrying(false); }
+  }, [fetchItems]);
 
   useEffect(() => {
     fetchItems();
@@ -231,7 +240,7 @@ export function useShoppingList(): UseShoppingListReturn {
           "postgres_changes",
           { event: "*", schema: "public", table: "shopping_items" },
           (payload) => {
-            if (enabled && usingMockRef.current) return;
+            if (usingMockRef.current) return;
             if (payload.eventType === "INSERT") {
               const newItem = toShoppingItem(payload.new as {
                 id: string;
@@ -278,7 +287,7 @@ export function useShoppingList(): UseShoppingListReturn {
     } catch {
       // Realtime not available -- silently ignore
     }
-  }, [enabled]);
+  }, []);
 
   // ---- CRUD operations ----
 
@@ -563,5 +572,5 @@ export function useShoppingList(): UseShoppingListReturn {
   // Keep ref in sync with state so async callbacks read the latest value
   itemsRef.current = items;
 
-  return { items, loading, storage, loadError, deviceItems, retry: fetchItems, addItem, toggleItem, removeItem, editItem, moveItemToCategory, clearChecked };
+  return { items, loading, storage, loadError, deviceItems, retrying, retry, addItem, toggleItem, removeItem, editItem, moveItemToCategory, clearChecked };
 }

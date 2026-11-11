@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase";
 
 interface HouseholdData {
@@ -38,13 +38,17 @@ const MOCK_HOUSEHOLD: HouseholdData = {
  * Falls back to mock data when Supabase is not available or no household is linked.
  */
 export function useHousehold(householdId: string | null | undefined) {
-  const enabled = process.env.NEXT_PUBLIC_NEW_UI === "true";
-  const [household, setHousehold] = useState<HouseholdData>(() => enabled ? { ...MOCK_HOUSEHOLD, inviteCode: "" } : MOCK_HOUSEHOLD);
+  const [household, setHousehold] = useState<HouseholdData>(() => ({ ...MOCK_HOUSEHOLD, inviteCode: "" }));
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<"loading" | "ready" | "no-household" | "error">("loading");
+  const sequence = useRef(0);
   const fetchHousehold = useCallback(async () => {
-    const placeholder = enabled ? { ...MOCK_HOUSEHOLD, inviteCode: "" } : MOCK_HOUSEHOLD;
+    const request = ++sequence.current;
+    const placeholder = { ...MOCK_HOUSEHOLD, inviteCode: "" };
     setStatus("loading");
+    setLoading(true);
+    setHousehold(placeholder);
+    if (householdId === undefined) return;
     if (!householdId) {
       setHousehold(placeholder);
       setStatus("no-household");
@@ -61,7 +65,13 @@ export function useHousehold(householdId: string | null | undefined) {
         .eq("id", householdId)
         .single();
 
-      if (!data || (enabled && error)) {
+      if (request !== sequence.current) return;
+      if ((!data && !error) || error?.code === "PGRST116") {
+        setHousehold(placeholder);
+        setStatus("no-household");
+        return;
+      }
+      if (!data || error) {
         setHousehold(placeholder);
         setStatus("error");
         setLoading(false);
@@ -76,15 +86,19 @@ export function useHousehold(householdId: string | null | undefined) {
         city: data.city ?? null,
       });
     } catch {
-      setHousehold(placeholder);
-      setStatus("error");
+      if (request === sequence.current) {
+        setHousehold(placeholder);
+        setStatus("error");
+      }
     } finally {
-      setLoading(false);
+      if (request === sequence.current) setLoading(false);
     }
-  }, [householdId, enabled]);
+  }, [householdId]);
 
   useEffect(() => {
+    const currentSequence = sequence;
     fetchHousehold();
+    return () => { currentSequence.current++; };
   }, [fetchHousehold]);
 
   const updateHousehold = useCallback(
