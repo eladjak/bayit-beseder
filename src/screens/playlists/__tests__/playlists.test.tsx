@@ -1,0 +1,28 @@
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { Player } from '../Player';
+import { playlistMinutes, taskPlaylist } from '../useTaskPlaylist';
+import type { TaskRow } from '@/lib/types/database';
+import PlaylistsPage from '@/app/(app)/playlists/page';
+const mocks = vi.hoisted(() => ({ mark: vi.fn(), undo: vi.fn(), flag: null as boolean | null }));
+vi.mock('@/hooks/useCompletions', () => ({ useCompletions: () => ({ markComplete:mocks.mark, undoComplete:mocks.undo, todayCompletionIds:new Set(), loading:false, error:null, refetch:vi.fn() }) }));
+vi.mock('@/hooks/useProfile', () => ({ useProfile: () => ({ profile:{ id:'user', household_id:'home' } }) }));
+vi.mock('@/hooks/useTasks', () => ({ useTasks: () => ({ tasks:[], loading:false, error:null, refetch:vi.fn() }) }));
+vi.mock('@/hooks/useNewUi', () => ({ useNewUi: () => mocks.flag }));
+vi.mock('@/hooks/useTranslation', () => ({ useTranslation: () => ({ t:(key:string) => key, locale:'en' }) }));
+vi.mock('@/hooks/useCopy', () => ({ useCopy: () => ({ c:(key:string) => key }) }));
+vi.mock('@/hooks/usePlaylistTimer', () => ({ usePlaylistTimer: () => ({ currentPlaylist:null }) }));
+vi.mock('@/components/playlist-player', () => ({ PlaylistPlayer: () => null }));
+vi.mock('sonner', () => ({ toast:Object.assign(vi.fn(), { error:vi.fn() }) }));
+const task = (id:string, date:string, created:string) => ({ id, title:id, due_date:date, created_at:created, status:'pending', recurring:false }) as TaskRow;
+const tasks = [task('later','2026-11-11','2026-01-02'), task('first','2026-11-11','2026-01-01')];
+const playlist = { id:'today', name:'Today', icon:'', totalMinutes:999, tasks:tasks.map(t => ({title:t.title,durationSeconds:1})) };
+afterEach(() => { cleanup(); vi.clearAllMocks(); vi.useRealTimers(); });
+describe('playlist contract', () => {
+ it('calculates totals from step durations', () => expect(playlistMinutes([{title:'a',durationSeconds:120},{title:'b',durationSeconds:30}])).toBe(3));
+ it('orders open today tasks and excludes completed or other days', () => expect(taskPlaylist([...tasks,task('tomorrow','2026-11-12','2026-01-01')], '2026-11-11').map(t=>t.id)).toEqual(['first','later']));
+ it('finishing the player never completes tasks', () => { render(<Player playlist={playlist} tasks={tasks} onStop={()=>{}}/>); fireEvent.click(screen.getByText('skip')); fireEvent.click(screen.getByText('skip')); expect(screen.getByText('review')).toBeTruthy(); expect(mocks.mark).not.toHaveBeenCalled(); });
+ it('checks a task only after server confirmation', async () => { mocks.mark.mockResolvedValueOnce({id:'completion'}); render(<Player playlist={playlist} tasks={tasks} onStop={()=>{}}/>); fireEvent.click(screen.getByText('skip')); fireEvent.click(screen.getByText('skip')); const check=screen.getByRole('checkbox',{name:'complete: first'}); fireEvent.click(check); await waitFor(()=>expect(mocks.mark).toHaveBeenCalledWith(expect.objectContaining({taskId:'first',userId:'user'}))); await waitFor(()=>expect(check.getAttribute('aria-checked')).toBe('true')); });
+ it.each(['2026-12-03T21:00:00Z','2026-12-04T16:00:00Z'])('makes no sound or vibration at %s', date => { vi.useFakeTimers(); vi.setSystemTime(new Date(date)); const vibrate=vi.fn(); const audio = vi.spyOn(window, 'Audio'); Object.defineProperty(navigator,'vibrate',{value:vibrate,configurable:true}); render(<Player playlist={playlist} tasks={tasks} onStop={()=>{}}/>); fireEvent.click(screen.getByText('skip')); fireEvent.click(screen.getByText('skip')); expect(vibrate).not.toHaveBeenCalled(); expect(audio).not.toHaveBeenCalled(); audio.mockRestore(); });
+ it('renders V1 for null and false and can toggle without a hook order error', () => { mocks.flag=null; const view=render(<PlaylistsPage/>); expect(screen.getByText('playlists.title')).toBeTruthy(); mocks.flag=true; view.rerender(<PlaylistsPage/>); expect(screen.getByText('title')).toBeTruthy(); mocks.flag=false; view.rerender(<PlaylistsPage/>); expect(screen.getByText('playlists.title')).toBeTruthy(); });
+});

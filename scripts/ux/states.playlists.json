@@ -1,0 +1,428 @@
+[
+  {
+    "route": "/playlists",
+    "name": "he-list",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "normal",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "למשימות ללא משך מוגדר הוקצו 5 דקות כהערכה."
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "fake"
+        }
+      }
+    ]
+  },
+  {
+    "route": "/playlists",
+    "name": "he-running",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "normal",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "למשימות ללא משך מוגדר הוקצו 5 דקות כהערכה."
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "מהמשימות שלנו",
+        "exact": false
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "fake"
+        }
+      }
+    ]
+  },
+  {
+    "route": "/playlists",
+    "name": "he-paused",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "normal",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "למשימות ללא משך מוגדר הוקצו 5 דקות כהערכה."
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "מהמשימות שלנו",
+        "exact": false
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "השהיה"
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "fake"
+        }
+      }
+    ]
+  },
+  {
+    "route": "/playlists",
+    "name": "he-end",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "normal",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "למשימות ללא משך מוגדר הוקצו 5 דקות כהערכה."
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "מהמשימות שלנו",
+        "exact": false
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "דילוג"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "דילוג"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "דילוג"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "דילוג"
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "fake"
+        }
+      }
+    ]
+  },
+  {
+    "route": "/playlists",
+    "name": "he-empty",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "empty",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "אין משימות פתוחות להיום. אפשר לבחור רשימה מוכנה."
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "fake"
+        }
+      }
+    ]
+  },
+  {
+    "route": "/playlists",
+    "name": "en-list",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "normal",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Tasks without a duration are estimated at 5 minutes."
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "fake"
+        }
+      }
+    ]
+  },
+  {
+    "route": "/playlists",
+    "name": "en-running",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "normal",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Tasks without a duration are estimated at 5 minutes."
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "From our tasks",
+        "exact": false
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "fake"
+        }
+      }
+    ]
+  },
+  {
+    "route": "/playlists",
+    "name": "en-paused",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "normal",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Tasks without a duration are estimated at 5 minutes."
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "From our tasks",
+        "exact": false
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Pause"
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "fake"
+        }
+      }
+    ]
+  },
+  {
+    "route": "/playlists",
+    "name": "en-end",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "normal",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Tasks without a duration are estimated at 5 minutes."
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "From our tasks",
+        "exact": false
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Skip"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Skip"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Skip"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Skip"
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "fake"
+        }
+      }
+    ]
+  },
+  {
+    "route": "/playlists",
+    "name": "en-empty",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "empty",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "There are no open tasks for today. Choose a ready-made list."
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "fake"
+        }
+      }
+    ]
+  }
+]
