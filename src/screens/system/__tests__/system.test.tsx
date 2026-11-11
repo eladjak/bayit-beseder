@@ -38,6 +38,9 @@ it('keeps the old app error at null and false and switches without hook errors',
   flag.value = null;
   const view = render(<AppError {...props} />);
   expect(screen.getByRole('link', { name: /דשבורד/ })).toBeTruthy();
+  flag.value = false; view.rerender(<AppError {...props} />);
+  expect(screen.getByRole('link', { name: /דשבורד/ })).toBeTruthy();
+  flag.value = null; view.rerender(<AppError {...props} />);
   flag.value = true; view.rerender(<AppError {...props} />);
   expect(screen.getByText('משהו לא הסתדר. אפשר לנסות שוב.')).toBeTruthy();
   flag.value = false; view.rerender(<AppError {...props} />);
@@ -157,4 +160,33 @@ it('root error retains V1 for null and false and safely toggles', async () => {
   expect(screen.getByText('משהו לא הסתדר. אפשר לנסות שוב.')).toBeTruthy();
   flag.value = false; view.rerender(<RootError {...props} />);
   expect(screen.getByText('משהו השתבש')).toBeTruthy();
+});
+
+it('centers the error and gives it a visible icon', () => {
+  const { container } = render(<ErrorV2 error={new Error('private')} reset={vi.fn()} />);
+  expect(container.querySelector('svg.lucide-circle-alert')).toBeTruthy();
+  expect(screen.getByRole('heading').parentElement?.className).toContain('text-center');
+});
+
+it('centers the offline page with a connection icon and honest instructions', () => {
+  const { container } = render(<OfflineV2 />);
+  expect(container.querySelector('svg.lucide-wifi-off')).toBeTruthy();
+  expect(screen.getByRole('heading').parentElement?.className).toContain('text-center');
+  expect(screen.getByText(/תוכן שכבר נמצא במכשיר עשוי להיות זמין/)).toBeTruthy();
+});
+
+it('identifies the installed app and makes dismissal a bordered action', async () => {
+  Object.defineProperty(window, 'matchMedia', { configurable: true, value: () => ({ matches: false }) });
+  localStorage.clear();
+  const { InstallBannerV2 } = await import('../InstallBannerV2');
+  const { container } = render(<InstallBannerV2 />);
+  act(() => { window.dispatchEvent(new Event('beforeinstallprompt', { cancelable: true })); });
+  expect(container.querySelector('img[src="/icons/icon-192.png"]')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'סגירה' }).className).toContain('border');
+});
+
+it('blends the 404 illustration into the light paper surface', async () => {
+  const { NotFoundV2 } = await import('../NotFoundV2');
+  const { container } = render(<NotFoundV2 />);
+  expect(container.querySelector('.mix-blend-multiply img')).toBeTruthy();
 });
