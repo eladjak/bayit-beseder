@@ -1,0 +1,240 @@
+[
+  {
+    "route": "/weekly",
+    "name": "weekly-he-normal",
+    "widths": [
+      375,
+      1280
+    ],
+    "scenario": "normal",
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "status": 200,
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  },
+  {
+    "route": "/weekly",
+    "name": "weekly-he-empty",
+    "widths": [
+      375,
+      1280
+    ],
+    "scenario": "empty",
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "status": 200,
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  },
+  {
+    "route": "/weekly",
+    "name": "weekly-he-menu",
+    "widths": [
+      375,
+      1280
+    ],
+    "scenario": "normal",
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "actions": [
+      {
+        "type": "click",
+        "role": "combobox",
+        "name": "בחירת יום להעברה של לשטוף כלים"
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "status": 200,
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  },
+  {
+    "route": "/weekly",
+    "name": "weekly-he-error",
+    "widths": [
+      375,
+      1280
+    ],
+    "scenario": "error:tasks",
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "status": 200,
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  },
+  {
+    "route": "/weekly",
+    "name": "weekly-en-normal",
+    "widths": [
+      375,
+      1280
+    ],
+    "scenario": "normal",
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "status": 200,
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  },
+  {
+    "route": "/weekly",
+    "name": "weekly-en-empty",
+    "widths": [
+      375,
+      1280
+    ],
+    "scenario": "empty",
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "status": 200,
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  },
+  {
+    "route": "/weekly",
+    "name": "weekly-en-menu",
+    "widths": [
+      375,
+      1280
+    ],
+    "scenario": "normal",
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "actions": [
+      {
+        "type": "click",
+        "role": "combobox",
+        "name": "Choose a day to move לשטוף כלים"
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "status": 200,
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  },
+  {
+    "route": "/weekly",
+    "name": "weekly-en-error",
+    "widths": [
+      375,
+      1280
+    ],
+    "scenario": "error:tasks",
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "status": 200,
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  }
+]
