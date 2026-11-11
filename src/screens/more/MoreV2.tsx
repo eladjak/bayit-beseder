@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BookOpen, CalendarDays, ChevronLeft, History, Keyboard, Music, Printer, Settings, ShieldAlert, type LucideIcon } from 'lucide-react';
+import { BookOpen, CalendarDays, ChevronLeft, History, Keyboard, Music, Printer, Settings, ShieldAlert, Wrench, type LucideIcon } from 'lucide-react';
 import { useCopy } from '@/hooks/useCopy';
 import moreCopy from '@/lib/i18n/fragments/more';
 
@@ -13,7 +13,10 @@ const groups: { title: string; items: Item[] }[] = [
     { href: '/history', title: 'history', description: 'historyDesc', icon: History },
     { href: '/tasks/print', title: 'print', description: 'printDesc', icon: Printer },
   ] },
-  { title: 'home', items: [{ href: '/playlists', title: 'playlists', description: 'playlistsDesc', icon: Music }] },
+  { title: 'home', items: [
+    { href: '/playlists', title: 'playlists', description: 'playlistsDesc', icon: Music },
+    { href: '/more#house-tools', title: 'tools', description: 'toolsDesc', icon: Wrench },
+  ] },
   { title: 'account', items: [
     { href: '/settings', title: 'settings', description: 'settingsDesc', icon: Settings },
     { href: '/settings#shortcuts', title: 'shortcuts', description: 'shortcutsDesc', icon: Keyboard },

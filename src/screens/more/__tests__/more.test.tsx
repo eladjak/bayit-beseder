@@ -2,8 +2,8 @@
 import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import MoreV2 from '../MoreV2';
 import MorePage from '@/app/(app)/more/page';
 
@@ -23,7 +23,17 @@ function routeFile(href: string): string | undefined {
   const [route, anchor] = href.split('#');
   return pages(join(process.cwd(), 'src/app')).find(file => {
     const relative = file.slice(join(process.cwd(), 'src/app').length).replace(/\/\([^/]+\)/g, '').replace(/\/page\.tsx$/, '') || '/';
-    return relative === route && (!anchor || new RegExp(`id=["']${anchor}["']`).test(readFileSync(file, 'utf8')));
+    if (relative !== route) return false;
+    if (!anchor) return true;
+    const pattern = new RegExp(`id=["']${anchor}["']`);
+    if (pattern.test(readFileSync(file, 'utf8'))) return true;
+    const root = join(process.cwd(), 'src/app');
+    for (let dir = dirname(file); dir.startsWith(root); dir = dirname(dir)) {
+      const layout = join(dir, 'layout.tsx');
+      if (existsSync(layout) && pattern.test(readFileSync(layout, 'utf8'))) return true;
+      if (dir === root) break;
+    }
+    return false;
   });
 }
 
@@ -33,6 +43,10 @@ describe('More redesign', () => {
     const links = screen.getAllByRole('link');
     expect(links.length).toBeGreaterThan(0);
     for (const link of links) expect(routeFile(link.getAttribute('href')!), link.getAttribute('href')!).toBeTruthy();
+  });
+  it('links to the household tools anchor supplied by the app layout', () => {
+    render(<MoreV2 />);
+    expect(screen.getAllByRole('link').find(link => link.getAttribute('href') === '/more#house-tools')).toBeTruthy();
   });
   it('places the emergency link first, with real descriptive links', () => {
     render(<MoreV2 />);
