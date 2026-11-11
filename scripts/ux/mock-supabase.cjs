@@ -4,6 +4,9 @@ const { randomUUID } = require('node:crypto');
 const { user, fixtures } = require('./fixtures.cjs');
 function createMock() {
   let scenario = 'normal', data = fixtures(), writes = 0;
+  const sessions = new Map(), revoked = new Set();
+  const partnerUser = {...user, id:'00000000-0000-4000-8000-000000000003', email:'partner@example.invalid'};
+  const memberUser = {...user, email:'member@example.invalid'};
   const reset = name => { scenario = name; data = fixtures(name); writes = 0; };
   const send = (res, status, body, headers={}) => {res.writeHead(status, {'Content-Type':'application/json', ...headers}); res.end(JSON.stringify(body));};
   const error = (res, code, message) => send(res, code, {code:'MOCK_ERROR',message,details:null,hint:null});
@@ -28,7 +31,18 @@ function createMock() {
       reset(body.name); return send(res,200,{scenario,writes});
     }
     if (scenario.startsWith('slow:')) await new Promise(resolve=>setTimeout(resolve,Math.min(Number(scenario.slice(5)),30000)));
-    if (url.pathname === '/auth/v1/user' && req.method === 'GET') return send(res,200,user);
+    const token = (req.headers.authorization || '').replace(/^Bearer /i,'');
+    if (url.pathname === '/auth/v1/token' && req.method === 'POST' && url.searchParams.get('grant_type') === 'password') {
+      const person = body.email === memberUser.email ? memberUser : body.email === partnerUser.email ? partnerUser : null;
+      if (!person || body.password !== 'fake-password') return error(res,400,'Invalid credentials');
+      const encode = value => Buffer.from(JSON.stringify(value)).toString('base64url');
+      const access_token = `${encode({alg:'none',typ:'JWT'})}.${encode({sub:person.id,exp:Math.floor(Date.now()/1000)+3600,role:'authenticated',nonce:randomUUID()})}.fake`;
+      sessions.set(access_token,person);
+      return send(res,200,{access_token,token_type:'bearer',expires_in:3600,expires_at:Math.floor(Date.now()/1000)+3600,refresh_token:randomUUID(),user:person});
+    }
+    if (url.pathname === '/auth/v1/logout' && req.method === 'POST') { sessions.delete(token); revoked.add(token); res.writeHead(204); return res.end(); }
+    if (url.pathname === '/auth/v1/user' && req.method === 'GET') return revoked.has(token) ? error(res,401,'Session ended') : send(res,200,sessions.get(token) || user);
+    const actor = sessions.get(token) || user;
     const rpc = url.pathname.match(/^\/rest\/v1\/rpc\/([a-z_]+)$/);
     if (rpc) {
       if (scenario === `rpc-error:${rpc[1]}`) return error(res,500,'Simulated RPC failure');
@@ -42,16 +56,16 @@ function createMock() {
       if (body.p_action === 'complete') {
         if (!body.p_completion_id) return error(res,400,'Completion id required');
         row = data.task_completions.find(x=>x.id===body.p_completion_id);
-        if (row && (row.task_id!==task.id || row.user_id!==user.id)) return error(res,403,'Completion id already used');
+        if (row && (row.task_id!==task.id || row.user_id!==actor.id)) return error(res,403,'Completion id already used');
         if (!row && task.status==='skipped') return error(res,400,'Task is skipped');
         if (!row && (recurring || task.status==='completed')) row = data.task_completions.filter(x=>x.task_id===task.id && current(x)).sort((a,b)=>String(b.completed_at).localeCompare(String(a.completed_at)))[0];
         if (!row && !recurring && task.status==='completed') return error(res,400,'Task already completed without a completion record');
-        if (!row) {row={id:body.p_completion_id,task_id:task.id,household_id:task.household_id,user_id:user.id,completed_by:user.id,completed_at:new Date().toISOString(),photo_url:body.p_photo_url || null,notes:body.p_notes || null}; data.task_completions.push(row); if (!recurring) task.status='completed'; writes++;}
+        if (!row) {row={id:body.p_completion_id,task_id:task.id,household_id:task.household_id,user_id:actor.id,completed_by:actor.id,completed_at:new Date().toISOString(),photo_url:body.p_photo_url || null,notes:body.p_notes || null}; data.task_completions.push(row); if (!recurring) task.status='completed'; writes++;}
       } else {
-        row = data.task_completions.filter(x=>x.task_id===task.id && x.user_id===user.id && current(x)).sort((a,b)=>String(b.completed_at).localeCompare(String(a.completed_at)))[0];
+        row = data.task_completions.filter(x=>x.task_id===task.id && x.user_id===actor.id && current(x)).sort((a,b)=>String(b.completed_at).localeCompare(String(a.completed_at)))[0];
         if (!row && !recurring && task.status!=='pending') return error(res,403,'No own completion to undo');
         if (row) {data.task_completions=data.task_completions.filter(x=>x!==row); if (!recurring) task.status='pending'; writes++;}
-        else row={task_id:task.id,user_id:user.id};
+        else row={task_id:task.id,user_id:actor.id};
       }
       return send(res,200,(req.headers.accept || '').includes('vnd.pgrst.object')?row:[row]);
     }
