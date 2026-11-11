@@ -61,6 +61,6 @@ describe('weekly polish', () => {
  afterEach(cleanup);
  it('uses a compact button to reveal the move choices', () => {render(<WeeklyV2/>); expect(screen.getByRole('button',{name:'Move task'})).toBeTruthy(); expect(screen.queryByRole('combobox')).toBeNull();});
  it('shows short weekday labels with dates and task counts', () => {render(<WeeklyV2/>); expect(screen.getByRole('button',{name:/Sun.*1 task/})).toBeTruthy();});
- it('provides an accessible weekly progress indicator', () => {render(<WeeklyV2/>); expect(screen.getByRole('progressbar').getAttribute('max')).toBe('1');});
+ it('provides an accessible weekly progress indicator', () => {render(<WeeklyV2/>); expect(screen.getByRole('progressbar').getAttribute('aria-valuemax')).toBe('1');});
  it('keeps desktop day columns wide enough for readable cards', () => {const {container}=render(<WeeklyV2/>); expect(container.querySelector('.md\\:min-w-\\[180px\\]')).toBeTruthy();});
 });
