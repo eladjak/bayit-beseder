@@ -12,9 +12,9 @@ import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/re
 import { afterEach, beforeEach, vi } from 'vitest';
 import MealsV2 from '../MealsV2';
 import MealsPage from '@/app/(app)/meals/page';
-const mocks = vi.hoisted(() => ({ swap: vi.fn(), regenerate: vi.fn(), alternatives: vi.fn(), toast: vi.fn(), flag: null as boolean | null, empty: false, error: null as string | null, loading: false, unplanned: false }));
+const mocks = vi.hoisted(() => ({ swap: vi.fn(), regenerate: vi.fn(), alternatives: vi.fn(), toast: vi.fn(), flag: null as boolean | null, empty: false, error: null as string | null, loading: false, unplanned: false, includePast: false }));
 vi.mock('@/hooks/useNewUi', () => ({ useNewUi: () => mocks.flag }));
-vi.mock('@/hooks/useMealPlanner', () => ({ useMealPlanner: () => ({ loading:mocks.loading, error:mocks.error, week:mocks.loading ? null : {weekStart:'2026-12-01', days:mocks.empty ? [] : [{date:'2026-12-02', dayName:'רביעי', mealId:mocks.unplanned ? null : 'old', mealName:mocks.unplanned ? null : 'Soup', status:'planned', ruleNotes:[]}]}, meals:[], tonightPrep:[], regenerateWeek:mocks.regenerate, swapDay:mocks.swap, fetchAlternatives:mocks.alternatives, refetch:vi.fn(), markDay:vi.fn(), addMeal:vi.fn() }) }));
+vi.mock('@/hooks/useMealPlanner', () => ({ useMealPlanner: () => ({ loading:mocks.loading, error:mocks.error, week:mocks.loading ? null : {weekStart:'2026-12-01', days:mocks.empty ? [] : [...(mocks.includePast ? [{date:'2026-12-01', dayName:'שלישי', mealId:'past', mealName:'Rice', status:'planned', ruleNotes:[]}] : []), {date:'2026-12-02', dayName:'רביעי', mealId:mocks.unplanned ? null : 'old', mealName:mocks.unplanned ? null : 'Soup', status:'planned', ruleNotes:[]}]}, meals:[], tonightPrep:[], regenerateWeek:mocks.regenerate, swapDay:mocks.swap, fetchAlternatives:mocks.alternatives, refetch:vi.fn(), markDay:vi.fn(), addMeal:vi.fn() }) }));
 vi.mock('sonner', () => ({ toast: Object.assign(vi.fn(), {success:mocks.toast, error:vi.fn()}) }));
 vi.mock('@/components/v2/Sheet', () => ({ Sheet: ({open,title,children}: {open:boolean;title:string;children:React.ReactNode}) => open ? <div role="dialog" aria-label={title}>{children}</div> : null }));
 vi.mock('@/components/v2/Dialog', () => ({ Dialog: ({open,title,children}: {open:boolean;title:string;children:React.ReactNode}) => open ? <div role="dialog" aria-label={title}>{children}</div> : null }));
@@ -33,4 +33,30 @@ describe('meal interactions', () => {
   it('does not offer an irreversible swap for a day with no previous meal', () => { mocks.unplanned = true; render(<MealsV2 />); fireEvent.click(screen.getByRole('button', {name:/אין ארוחה מתוכננת/})); expect(screen.queryByRole('button', {name:'החלפת ארוחה'})).toBeNull(); });
   it('shows an honest offline notice', () => { vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false); render(<MealsV2 />); expect(screen.getByRole('status').textContent).toContain('אין חיבור לאינטרנט'); vi.restoreAllMocks(); });
   it('renders the old page off and survives null, true, false changes', () => { mocks.flag = null; const {rerender} = render(<MealsPage />); expect(screen.getByText('אפשרויות תכנון')).toBeTruthy(); mocks.flag = true; rerender(<MealsPage />); expect(screen.getByText('התוכנית לשבוע, במקום אחד')).toBeTruthy(); mocks.flag = false; rerender(<MealsPage />); expect(screen.getByText('אפשרויות תכנון')).toBeTruthy(); });
+});
+
+describe('meal screen polish', () => {
+  beforeEach(() => { vi.clearAllMocks(); vi.useFakeTimers(); vi.setSystemTime(new Date('2026-12-02T12:00:00Z')); mocks.alternatives.mockResolvedValue([{id:'new',name:'Pasta',tags:[],prepLeadHours:0}]); mocks.empty = false; mocks.error = null; mocks.loading = false; mocks.unplanned = false; mocks.includePast = true; });
+  afterEach(() => { cleanup(); vi.useRealTimers(); });
+  it('distinguishes today and past days and indicates that rows open', () => {
+    render(<MealsV2 />);
+    const row = screen.getByRole('button', {name:/Soup/});
+    expect(row.getAttribute('aria-current')).toBe('date');
+    expect(row.className).toContain('bg-bb-primary-50');
+    expect(screen.getByRole('button', {name:/Rice/}).className).toContain('text-bb-ink-3');
+  });
+  it('shows a directional cue on each day row', () => {
+    render(<MealsV2 />);
+    expect(screen.getByRole('button', {name:/Soup/}).querySelector('[data-affordance="open-day"]')).toBeTruthy();
+  });
+  it('offers a direct change action for today', () => {
+    render(<MealsV2 />);
+    fireEvent.click(screen.getByRole('button', {name:'החלפת ארוחה'}));
+    expect(mocks.alternatives).toHaveBeenCalledWith('2026-12-02');
+  });
+  it('makes shopping the primary action and regeneration secondary', () => {
+    render(<MealsV2 />);
+    expect(screen.getByRole('button', {name:'הוספת מצרכים לקניות'}).className).toContain('bg-bb-primary ');
+    expect(screen.getByRole('button', {name:'תוכנית חדשה לשבוע'}).className).toContain('bg-bb-card');
+  });
 });

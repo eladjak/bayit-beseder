@@ -10,6 +10,8 @@ import { Sheet } from '@/components/v2/Sheet';
 import { Dialog } from '@/components/v2/Dialog';
 import { Illustration } from '@/components/v2/Illustration';
 import { todayMeal } from './useMealsModel';
+import { ilDateString } from '@/lib/meals/timezone';
+import { ChevronRight } from 'lucide-react';
 import type { GeneratedMealDay } from '@/lib/meals/generator';
 
 type Item = { title: string; quantity?: number; unit?: string };
@@ -31,6 +33,7 @@ export default function MealsV2() {
   const [shoppingLoading, setShoppingLoading] = useState(false);
   useEffect(() => { const update = () => setOffline(!navigator.onLine); update(); window.addEventListener('online', update); window.addEventListener('offline', update); return () => { window.removeEventListener('online', update); window.removeEventListener('offline', update); }; }, []);
   const today = todayMeal(planner.week?.days ?? []);
+  const todayDate = ilDateString(new Date());
   async function openAlternatives(target: GeneratedMealDay) {
     setDay(target); setAlternatives(null); setDayError(null);
     try { setAlternatives(await planner.fetchAlternatives(target.date)); } catch { setDayError({ date: target.date }); setDay(null); }
@@ -63,9 +66,9 @@ export default function MealsV2() {
     {planner.error && <div role="alert" className="space-y-2 rounded-bb-md bg-bb-danger-50 p-4 text-bb-danger-ink"><p>{error}</p><Button variant="quiet" onClick={() => void planner.refetch()}>{c('retry')}</Button></div>}
     {!planner.loading && !planner.error && (!planner.week || planner.week.days.length === 0) && <section className="space-y-4 rounded-bb-lg bg-bb-card p-5"><div className="max-w-48"><Illustration id="emptyWeekly" sizes="192px" decorative /></div><p>{c('empty')}</p><Button onClick={() => void planner.regenerateWeek()}>{c('build')}</Button></section>}
     {planner.week && planner.week.days.length > 0 && <>
-      <section className="space-y-2 rounded-bb-lg bg-bb-card p-5"><h2 className="text-bb-lg font-bold">{c('today')}</h2><p className="text-bb-xl font-semibold">{today?.mealName ?? c('noMeal')}</p></section>
-      <section><h2 className="mb-3 text-bb-lg font-bold">{c('week')}</h2><ul className="divide-y divide-bb-line rounded-bb-md bg-bb-card">{planner.week.days.map(d => <li key={d.date}><button type="button" className={row} onClick={() => {setDay(d); setAlternatives(null);}}><span className="flex flex-wrap justify-between gap-2"><span className="font-semibold">{new Intl.DateTimeFormat(locale === 'he' ? 'he-IL' : 'en-US', {weekday:'long', day:'numeric', month:'short', timeZone:'UTC'}).format(new Date(`${d.date}T12:00:00Z`))}{d.date === today?.date && ` · ${c('today')}`}</span><span>{d.mealName ?? c('noMeal')}</span></span></button>{dayError?.date === d.date && <div role="alert" className="px-4 pb-3 text-bb-danger-ink"><p>{c('failed')}</p><Button variant="quiet" onClick={() => dayError.mealId ? void swap(d, dayError.mealId) : void openAlternatives(d)}>{c('retry')}</Button></div>}</li>)}</ul></section>
-      <div className="flex flex-wrap gap-3"><Button variant="quiet" onClick={() => setConfirm(true)}>{c('regenerate')}</Button><Button variant="quiet" onClick={() => void loadShopping()}>{c('shopping')}</Button></div>
+      <section className="space-y-3 rounded-bb-lg bg-bb-primary-50 p-5"><h2 className="text-bb-lg font-bold">{c('today')}</h2><p className="text-bb-xl font-semibold">{today?.mealName ?? c('noMeal')}</p>{today?.mealId && <Button variant="quiet" onClick={() => void openAlternatives(today)}>{c('change')}</Button>}</section>
+      <section><h2 className="mb-3 text-bb-lg font-bold">{c('week')}</h2><ul className="divide-y divide-bb-line rounded-bb-md bg-bb-card">{planner.week.days.map(d => <li key={d.date}><button type="button" aria-current={d.date === todayDate ? "date" : undefined} className={`${row} ${d.date === todayDate ? "bg-bb-primary-50 font-bold" : d.date < todayDate ? "text-bb-ink-3" : ""}`} onClick={() => {setDay(d); setAlternatives(null);}}><span className="flex items-center gap-3"><span className="flex flex-1 flex-wrap justify-between gap-2"><span className="font-semibold">{new Intl.DateTimeFormat(locale === 'he' ? 'he-IL' : 'en-US', {weekday:'long', day:'numeric', month:'short', timeZone:'UTC'}).format(new Date(`${d.date}T12:00:00Z`))}{d.date === today?.date && ` · ${c('today')}`}</span><span>{d.mealName ?? c('noMeal')}</span></span><ChevronRight aria-hidden="true" data-affordance="open-day" className="size-5 shrink-0 rtl:rotate-180" /></span></button>{dayError?.date === d.date && <div role="alert" className="px-4 pb-3 text-bb-danger-ink"><p>{c('failed')}</p><Button variant="quiet" onClick={() => dayError.mealId ? void swap(d, dayError.mealId) : void openAlternatives(d)}>{c('retry')}</Button></div>}</li>)}</ul></section>
+      <div className="flex flex-wrap gap-3"><Button onClick={() => void loadShopping()}>{c('shopping')}</Button><Button variant="quiet" onClick={() => setConfirm(true)}>{c('regenerate')}</Button></div>
     </>}
     <Sheet open={!!day} title={day?.mealName ?? c('noMeal')} onClose={() => setDay(null)}>{day && <div className="space-y-3 pt-4"><p>{day.date}</p>{alternatives === null ? (day.mealId && <Button onClick={() => void openAlternatives(day)}>{c('change')}</Button>) : <><p>{c('alternatives')}</p>{alternatives.length === 0 && <p>{c('none')}</p>}{alternatives.map(alt => <button disabled={busy} key={alt.id} className={row} onClick={() => void swap(day, alt.id)}>{alt.name}</button>)}</>}</div>}</Sheet>
     <Dialog open={confirm} title={c('confirmTitle')} onClose={() => setConfirm(false)}><div className="space-y-4 pt-4"><p>{c('confirmText')}</p><div className="flex flex-wrap gap-2"><Button onClick={() => {setConfirm(false); void planner.regenerateWeek();}}>{c('confirm')}</Button><Button variant="quiet" onClick={() => setConfirm(false)}>{c('cancel')}</Button></div></div></Dialog>
