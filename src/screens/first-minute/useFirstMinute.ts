@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useSupabase } from "@/components/SupabaseProvider";
 import { useProfile } from "@/hooks/useProfile";
 import { useCompletions } from "@/hooks/useCompletions";
@@ -25,6 +25,7 @@ const FOCUS_TASKS: Record<string, typeof FIRST_TASK> = {
 export function useFirstMinute() {
   const [step, setStep] = useState<"household"|"focus"|"ready"|"win"|"celebrate"|"invite">(() => typeof window !== "undefined" && localStorage.getItem("bayit-beseder-onboarding-done") && localStorage.getItem("bayit-first-minute-invite") ? "invite" : "household");
   const [busy, setBusy] = useState(false);
+  const busyRef = useRef(false);
   const [error, setError] = useState(false);
   const [taskId, setTaskId] = useState<string | null>(null);
   const [focus, setFocus] = useState<string[]>([]);
@@ -32,8 +33,8 @@ export function useFirstMinute() {
   const { profile } = useProfile();
   const { markComplete } = useCompletions();
   async function prepare() {
-    if (busy || !profile?.household_id) { if (!profile?.household_id) setError(true); return; }
-    setBusy(true); setError(false);
+    if (busyRef.current || !profile?.household_id) { if (!profile?.household_id) setError(true); return; }
+    busyRef.current = true; setBusy(true); setError(false);
     try {
       const selected = focus.map(item => FOCUS_TASKS[item]).filter(Boolean);
       const seed = await runStarterSeed(fetch, selected.length ? [FIRST_TASK, ...selected] : TASKS);
@@ -45,21 +46,30 @@ export function useFirstMinute() {
         if (insertError) throw insertError;
       }
       const { data: tasks, error: taskError } = await supabase.from("tasks").select("id,title").eq("household_id", profile.household_id).eq("title", FIRST_TASK.title).limit(1);
-      if (taskError || !tasks?.[0]) throw new Error("task missing");
-      setTaskId(tasks[0].id);
+      if (taskError) throw taskError;
+      let firstTaskId = tasks?.[0]?.id;
+      // A household may already have tasks on a new device. The seed endpoint
+      // deliberately leaves those untouched, so add only the missing first win.
+      if (!firstTaskId && !seed.seeded) {
+        const { data: created, error: createError } = await supabase.from("tasks").insert({ household_id: profile.household_id, title: FIRST_TASK.title, assigned_to: profile.id, recurring: true }).select("id").single();
+        if (createError || !created) throw new Error("task missing");
+        firstTaskId = created.id;
+      }
+      if (!firstTaskId) throw new Error("task missing");
+      setTaskId(firstTaskId);
       setStep("ready");
-    } catch { setError(true); } finally { setBusy(false); }
+    } catch { setError(true); } finally { busyRef.current = false; setBusy(false); }
   }
   async function complete() {
-    if (!taskId || !profile || busy) return;
-    setBusy(true); setError(false);
+    if (!taskId || !profile || busyRef.current) return;
+    busyRef.current = true; setBusy(true); setError(false);
     try {
       const result = await markComplete({ taskId, userId: profile.id, householdId: profile.household_id ?? undefined, recurring: true });
       if (!result) throw new Error("completion");
       localStorage.setItem("bayit-beseder-onboarding-done", "true");
       localStorage.setItem("bayit-first-minute-invite", "1");
       setStep("celebrate");
-    } catch { setError(true); } finally { setBusy(false); }
+    } catch { setError(true); } finally { busyRef.current = false; setBusy(false); }
   }
   return { step, setStep, busy, error, focus, setFocus, prepare, complete, profile };
 }

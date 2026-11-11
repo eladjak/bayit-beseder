@@ -23,6 +23,13 @@
         "body": {
           "seeded": true
         }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
+        }
       }
     ],
     "actions": [
@@ -55,6 +62,13 @@
         "status": 200,
         "body": {
           "seeded": true
+        }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
         }
       }
     ],
@@ -93,6 +107,13 @@
         "status": 500,
         "body": {
           "seeded": true
+        }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
         }
       }
     ],
@@ -137,6 +158,13 @@
         "body": {
           "seeded": true
         }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
+        }
       }
     ],
     "actions": [
@@ -179,6 +207,13 @@
         "status": 200,
         "body": {
           "seeded": true
+        }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
         }
       }
     ],
@@ -227,6 +262,13 @@
         "status": 200,
         "body": {
           "seeded": true
+        }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
         }
       }
     ],
@@ -280,6 +322,13 @@
         "status": 200,
         "body": {
           "seeded": true
+        }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
         }
       }
     ],
@@ -339,6 +388,13 @@
         "body": {
           "seeded": true
         }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
+        }
       }
     ],
     "actions": [
@@ -371,6 +427,13 @@
         "status": 200,
         "body": {
           "seeded": true
+        }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
         }
       }
     ],
@@ -409,6 +472,13 @@
         "status": 500,
         "body": {
           "seeded": true
+        }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
         }
       }
     ],
@@ -453,6 +523,13 @@
         "body": {
           "seeded": true
         }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
+        }
       }
     ],
     "actions": [
@@ -495,6 +572,13 @@
         "status": 200,
         "body": {
           "seeded": true
+        }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
         }
       }
     ],
@@ -543,6 +627,13 @@
         "status": 200,
         "body": {
           "seeded": true
+        }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
         }
       }
     ],
@@ -596,6 +687,13 @@
         "status": 200,
         "body": {
           "seeded": true
+        }
+      },
+      {
+        "url": "/api/ai/",
+        "status": 503,
+        "body": {
+          "error": "disabled in local capture"
         }
       }
     ],

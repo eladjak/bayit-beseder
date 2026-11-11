@@ -15,6 +15,7 @@ try {
  await context.route('**/*',async route=>{
   const url=new URL(route.request().url());
   if(!['localhost','127.0.0.1','[::1]'].includes(url.hostname)) return route.abort();
+  if(url.pathname.startsWith('/api/ai/')) return route.fulfill({status:503,json:{error:'disabled in local capture'}});
   if(url.pathname==='/api/privacy/consent') return route.fulfill({json:{accepted:true}});
   if(url.pathname==='/api/seed') {
    const body=route.request().postDataJSON();
@@ -27,9 +28,10 @@ try {
  const page=await context.newPage(); await page.goto(`${base}/dashboard`);
  await page.getByRole('heading',{name:'מי גר כאן?'}).waitFor({timeout:60000});
  const start=performance.now();
- await page.getByRole('button',{name:'בזוג'}).click();
- await page.getByRole('button',{name:'מכינים את הבית'}).click();
- await page.getByRole('button',{name:'קדימה'}).click();
+ await page.waitForTimeout(1000);
+ await page.getByRole('button',{name:'בזוג'}).click(); await page.waitForTimeout(1000);
+ await page.getByRole('button',{name:'מכינים את הבית'}).click(); await page.waitForTimeout(1000);
+ await page.getByRole('button',{name:'קדימה'}).click(); await page.waitForTimeout(2000);
  await page.getByRole('button',{name:'סיימתי'}).click();
  await page.getByRole('heading',{name:'צעד קטן, בית נעים יותר'}).waitFor({timeout:15000});
  const seconds=(performance.now()-start)/1000;
