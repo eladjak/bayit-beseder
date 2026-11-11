@@ -28,3 +28,17 @@ it('shows when actions remain on this device while offline', async () => {
   localStorage.removeItem('bayit-offline-queue');
   Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
 });
+
+const flag = vi.hoisted(() => ({ value: null as boolean | null }));
+vi.mock('@/hooks/useNewUi', () => ({ useNewUi: () => flag.value }));
+it('keeps the old app error at null and false and switches without hook errors', async () => {
+  const { default: AppError } = await import('../../../app/(app)/error');
+  const props = { error: new Error('hidden'), reset: vi.fn() };
+  flag.value = null;
+  const view = render(<AppError {...props} />);
+  expect(screen.getByRole('link', { name: /דשבורד/ })).toBeTruthy();
+  flag.value = true; view.rerender(<AppError {...props} />);
+  expect(screen.getByText('משהו לא הסתדר. אפשר לנסות שוב.')).toBeTruthy();
+  flag.value = false; view.rerender(<AppError {...props} />);
+  expect(screen.getByRole('link', { name: /דשבורד/ })).toBeTruthy();
+});

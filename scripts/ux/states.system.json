@@ -1,0 +1,6 @@
+[
+ {"route":"/not-found-ux-219","name":"404-he","widths":[375,1280],"storage":{"bayit-ui":"v2","bayit-beseder-language":"he"}},
+ {"route":"/not-found-ux-219","name":"404-en","widths":[375,1280],"storage":{"bayit-ui":"v2","bayit-beseder-language":"en"}},
+ {"route":"/offline","name":"offline-he","widths":[375,1280],"storage":{"bayit-ui":"v2","bayit-beseder-language":"he"}},
+ {"route":"/offline","name":"offline-en","widths":[375,1280],"storage":{"bayit-ui":"v2","bayit-beseder-language":"en"}}
+]
