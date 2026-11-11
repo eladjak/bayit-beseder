@@ -42,3 +42,16 @@ it('keeps the old app error at null and false and switches without hook errors',
   flag.value = false; view.rerender(<AppError {...props} />);
   expect(screen.getByRole('link', { name: /דשבורד/ })).toBeTruthy();
 });
+
+it('replaces the legacy update toast when the flag turns on and restores it when off', async () => {
+  const { ServiceWorkerUpdateToast } = await import('@/components/ServiceWorkerUpdateToast');
+  const worker = new EventTarget();
+  Object.defineProperty(navigator, 'serviceWorker', { configurable: true, value: worker });
+  flag.value = true;
+  const view = render(<ServiceWorkerUpdateToast />);
+  worker.dispatchEvent(new MessageEvent('message', { data: { type: 'SW_UPDATED' } }));
+  expect(await screen.findByText('יש גרסה חדשה לבית בסדר.')).toBeTruthy();
+  flag.value = false;
+  view.rerender(<ServiceWorkerUpdateToast />);
+  expect(screen.queryByText('יש גרסה חדשה לבית בסדר.')).toBeNull();
+});
