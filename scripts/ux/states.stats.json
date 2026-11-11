@@ -22,6 +22,13 @@
           "version": "test"
         }
       }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "יחד סגרנו",
+        "exact": false
+      }
     ]
   },
   {
@@ -46,6 +53,13 @@
           "accepted": true,
           "version": "test"
         }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Together we completed",
+        "exact": false
       }
     ]
   },
@@ -76,6 +90,13 @@
         "url": "/rest/v1/task_completions",
         "body": []
       }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "עוד אין מספיק נתונים",
+        "exact": false
+      }
     ]
   },
   {
@@ -104,6 +125,13 @@
       {
         "url": "/rest/v1/task_completions",
         "body": []
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "There is not enough data",
+        "exact": false
       }
     ]
   },
@@ -137,6 +165,13 @@
           "message": "simulated"
         }
       }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לא הצלחנו לטעון",
+        "exact": false
+      }
     ]
   },
   {
@@ -169,6 +204,13 @@
           "message": "simulated"
         }
       }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "We could not load",
+        "exact": false
+      }
     ]
   },
   {
@@ -194,6 +236,13 @@
           "version": "test"
         }
       }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לשטוף כלים",
+        "exact": false
+      }
     ]
   },
   {
@@ -218,6 +267,13 @@
           "accepted": true,
           "version": "test"
         }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לשטוף כלים",
+        "exact": false
       }
     ]
   },
@@ -248,6 +304,13 @@
         "url": "/rest/v1/task_completions",
         "body": []
       }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "עדיין אין משימות",
+        "exact": false
+      }
     ]
   },
   {
@@ -276,6 +339,13 @@
       {
         "url": "/rest/v1/task_completions",
         "body": []
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "No completed tasks",
+        "exact": false
       }
     ]
   }

@@ -32,3 +32,18 @@ it('renders V1 while unknown or off and can toggle without a hook-order error', 
  flag.value=true; view.rerender(<StatsPage/>); expect(screen.getByText('V2 stats')).toBeTruthy();
  flag.value=false; view.rerender(<StatsPage/>); expect(screen.queryByText('V2 stats')).toBeNull();
 });
+
+import * as modelModule from '../useStatsModel';
+const {default: StatsV2} = await vi.importActual<typeof import('../StatsV2')>('../StatsV2');
+import {fireEvent} from '@testing-library/react';
+it('shows fixture totals and charts, with no personal comparison, and changes period', () => {
+ const model = vi.spyOn(modelModule, 'useStatsModel').mockReturnValue({loading:false,error:false,noHousehold:false,retry:vi.fn(),data:{total:2,days:[{label:'2026-11-11',value:2}],rooms:[{label:'Kitchen',value:2}]}});
+ const view=render(<StatsV2/>);
+ expect(view.container.textContent).toContain('2'); expect(screen.getByText('Kitchen')).toBeTruthy(); expect(view.container.textContent).not.toMatch(/Noa|Yoni|%/);
+ fireEvent.click(screen.getByRole('button',{name:'month'})); expect(model).toHaveBeenLastCalledWith('month'); model.mockRestore();
+});
+it('shows honest empty and retry on error', () => {
+ const model=vi.spyOn(modelModule,'useStatsModel').mockReturnValue({loading:false,error:false,noHousehold:false,retry:vi.fn(),data:{total:0,days:[],rooms:[]}});
+ const view=render(<StatsV2/>); expect(screen.getByText('empty')).toBeTruthy();
+ const retry=vi.fn(); model.mockReturnValue({loading:false,error:true,noHousehold:false,retry,data:null}); view.rerender(<StatsV2/>); fireEvent.click(screen.getByText('retry')); expect(retry).toHaveBeenCalledOnce(); model.mockRestore();
+});
