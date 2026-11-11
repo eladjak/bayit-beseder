@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { FirstMinute } from '../FirstMinute';
-import { FIRST_TASK } from '../useFirstMinute';
+import { FIRST_TASK, isQuietTime } from '../useFirstMinute';
 import { ConversationalOnboarding } from '@/components/onboarding/conversational-onboarding';
 import { OnboardingWizard } from '@/components/onboarding/onboarding-wizard';
 import { WelcomeGiftModal } from '@/components/welcome-gift';
@@ -21,10 +21,11 @@ async function focusStep() { render(<FirstMinute />); fireEvent.click(screen.get
 async function firstWin() { await focusStep(); fireEvent.click(screen.getByRole('button', { name: 'Prepare my home' })); await screen.findByText('Your home is ready'); fireEvent.click(screen.getByRole('button', { name: 'Show me' })); }
 describe('first minute', () => {
   it('starts with a thirty second task', () => expect(FIRST_TASK.estimatedMinutes).toBe(0.5));
-  it('offers a retry and never shows ready if the seed fails', async () => { mock.seed.mockResolvedValueOnce({ ok: false }); await focusStep(); fireEvent.click(screen.getByRole('button', { name: 'Prepare my home' })); expect((await screen.findByRole('alert')).textContent).toContain("couldn't prepare"); expect(screen.queryByText('Your home is ready')).toBeNull(); fireEvent.click(screen.getByRole('button', { name: 'Prepare my home' })); expect(await screen.findByText('Your home is ready')).toBeTruthy(); });
-  it('waits for real completion before welcoming or offering an invite', async () => { let resolve!: (value: unknown) => void; mock.complete.mockReturnValue(new Promise(r => { resolve = r; })); await firstWin(); fireEvent.click(screen.getByRole('button', { name: 'Done' })); expect(screen.queryByText('A little start, a warmer home')).toBeNull(); expect(screen.queryByText('Make home a team effort')).toBeNull(); expect(localStorage.getItem('bayit-beseder-onboarding-done')).toBeNull(); resolve({ id: 'completion' }); await screen.findByText('A little start, a warmer home'); expect(localStorage.getItem('bayit-beseder-onboarding-done')).toBe('true'); fireEvent.click(screen.getByRole('button', { name: 'Continue to Today' })); expect(screen.getByText('Make home a team effort')).toBeTruthy(); });
+  it('offers a retry and never shows ready if the seed fails', async () => { mock.seed.mockResolvedValueOnce({ ok: false }); await focusStep(); fireEvent.click(screen.getByRole('button', { name: 'Prepare my home' })); expect((await screen.findByRole('alert')).textContent).toContain("couldn't prepare"); expect(screen.queryByText('Your home is ready')).toBeNull(); fireEvent.click(screen.getByRole('button', { name: 'Try again' })); expect(await screen.findByText('Your home is ready')).toBeTruthy(); });
+  it('waits for real completion before welcoming or offering an invite', async () => { let resolve!: (value: unknown) => void; mock.complete.mockReturnValue(new Promise(r => { resolve = r; })); await firstWin(); fireEvent.click(screen.getByRole('button', { name: 'Done' })); expect(screen.queryByText('A little start, a warmer home')).toBeNull(); expect(screen.queryByText('Make home a team effort')).toBeNull(); expect(localStorage.getItem('bayit-beseder-onboarding-done')).toBeNull(); resolve({ id: 'completion' }); await screen.findByText('A little start, a warmer home'); expect(localStorage.getItem('bayit-beseder-onboarding-done')).toBe('true'); expect(localStorage.getItem('bayit-first-minute-invite')).toBe('1'); cleanup(); render(<FirstMinute />); expect(screen.getByText('Make home a team effort')).toBeTruthy(); });
+  it('uses the selected focus to choose starter tasks', async () => { await focusStep(); fireEvent.click(screen.getByRole('button', { name: 'Laundry' })); fireEvent.click(screen.getByRole('button', { name: 'Prepare my home' })); await screen.findByText('Your home is ready'); expect(mock.seed.mock.calls[0][1].some((task: {category: string}) => task.category === 'laundry')).toBe(true); });
   it('does not claim readiness when shopping fails', async () => { mock.insert.mockResolvedValueOnce({ error: { message: 'offline' } }); await focusStep(); fireEvent.click(screen.getByRole('button', { name: 'Prepare my home' })); await screen.findByRole('alert'); expect(screen.queryByText('Your home is ready')).toBeNull(); });
-  it('shows text confirmation without animation at night or on Friday evening', async () => { vi.useFakeTimers({ shouldAdvanceTime: true }); vi.setSystemTime(new Date('2026-12-04T16:00:00Z')); mock.complete.mockResolvedValue({ id: 'completion' }); await firstWin(); fireEvent.click(screen.getByRole('button', { name: 'Done' })); await screen.findByText('A little start, a warmer home'); expect(document.querySelector('canvas, video, audio')).toBeNull(); vi.useRealTimers(); });
+  it('shows text confirmation without animation at night or on Friday evening', async () => { vi.useFakeTimers({ shouldAdvanceTime: true }); vi.setSystemTime(new Date('2026-12-04T16:00:00Z')); mock.complete.mockResolvedValue({ id: 'completion' }); await firstWin(); fireEvent.click(screen.getByRole('button', { name: 'Done' })); await screen.findByText('A little start, a warmer home'); expect(document.querySelector('canvas, video, audio, img')).toBeNull(); vi.useRealTimers(); });
 });
 
 
@@ -42,5 +43,13 @@ describe('switch wrappers', () => {
     view.rerender(<><OnboardingWizard open {...callbacks} /><ConversationalOnboarding open={false} onComplete={vi.fn()} onSkip={vi.fn()} /><WelcomeGiftModal /></>);
     expect(screen.queryByText('Who lives here?')).toBeNull();
     expect(view.container.textContent).not.toBe('');
+  });
+});
+
+describe('Israel quiet times', () => {
+  it('uses text-only confirmation at 23:00 in Israel and on a December Friday evening', () => {
+    expect(isQuietTime(new Date('2026-12-08T21:00:00Z'))).toBe(true);
+    expect(isQuietTime(new Date('2026-12-04T16:00:00Z'))).toBe(true);
+    expect(isQuietTime(new Date('2026-12-08T10:00:00Z'))).toBe(false);
   });
 });

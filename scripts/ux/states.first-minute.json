@@ -9,6 +9,626 @@
     "plannerFake": true,
     "storage": {
       "bayit-beseder-language": "he"
-    }
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 200,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "מי גר כאן?"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-focus-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 200,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בזוג"
+      },
+      {
+        "type": "waitForText",
+        "text": "מה חשוב השבוע?"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-failure-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 500,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בזוג"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "מכינים את הבית"
+      },
+      {
+        "type": "waitForText",
+        "text": "לא הצלחנו להכין את הבית. אפשר לנסות שוב."
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-ready-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 200,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בזוג"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "מכינים את הבית"
+      },
+      {
+        "type": "waitForText",
+        "text": "הבית מוכן"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-win-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 200,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בזוג"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "מכינים את הבית"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "קדימה"
+      },
+      {
+        "type": "waitForText",
+        "text": "מתחילים ב־30 שניות"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-celebrate-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 200,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בזוג"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "מכינים את הבית"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "קדימה"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "סיימתי"
+      },
+      {
+        "type": "waitForText",
+        "text": "צעד קטן, בית נעים יותר"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-invite-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 200,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בזוג"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "מכינים את הבית"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "קדימה"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "סיימתי"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "ממשיכים להיום"
+      },
+      {
+        "type": "waitForText",
+        "text": "בית מסדרים ביחד"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-household-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 200,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Who lives here?"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-focus-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 200,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "A couple"
+      },
+      {
+        "type": "waitForText",
+        "text": "What matters this week?"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-failure-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 500,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "A couple"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Prepare my home"
+      },
+      {
+        "type": "waitForText",
+        "text": "We couldn't prepare your home. Please try again."
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-ready-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 200,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "A couple"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Prepare my home"
+      },
+      {
+        "type": "waitForText",
+        "text": "Your home is ready"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-win-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 200,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "A couple"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Prepare my home"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Show me"
+      },
+      {
+        "type": "waitForText",
+        "text": "A 30-second start"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-celebrate-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 200,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "A couple"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Prepare my home"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Show me"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Done"
+      },
+      {
+        "type": "waitForText",
+        "text": "A little start, a warmer home"
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "first-minute-invite-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/seed",
+        "status": 200,
+        "body": {
+          "seeded": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "A couple"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Prepare my home"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Show me"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Done"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Continue to Today"
+      },
+      {
+        "type": "waitForText",
+        "text": "Make home a team effort"
+      }
+    ]
   }
 ]
