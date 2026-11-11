@@ -105,9 +105,14 @@ const VoiceInputButton = dynamic(
   { ssr: false }
 );
 
+const COPY = {
+  he: { device: "הרשימה נשמרת כרגע רק בטלפון הזה ולא תגיע לשאר בני הבית.", retry: "נסו שוב", saved: (n: number) => n === 1 ? "יש פריט אחד שנשמר רק בטלפון הזה" : `יש ${n} פריטים שנשמרו רק בטלפון הזה` },
+  en: { device: "This list is currently saved only on this phone and will not reach the rest of your household.", retry: "Try again", saved: (n: number) => n === 1 ? "One item is saved only on this phone" : `${n} items are saved only on this phone` },
+};
+
 export default function ShoppingPage() {
   const { isFirstVisit: showShoppingTip, dismiss: dismissShoppingTip } = useFirstVisit("shopping");
-  const { items, loading, addItem, toggleItem, removeItem, editItem, moveItemToCategory, clearChecked } =
+  const { items, loading, storage, deviceItems, retrying, retry, addItem, toggleItem, removeItem, editItem, moveItemToCategory, clearChecked } =
     useShoppingList();
   const {
     categories: dynamicCategories,
@@ -118,7 +123,7 @@ export default function ShoppingPage() {
   } = useShoppingCategories();
   const seasonalMode = useSeasonalMode();
   const { profile } = useProfile();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [addingSeasonalShopping, setAddingSeasonalShopping] = useState(false);
 
   // Add-item form state
@@ -295,13 +300,16 @@ export default function ShoppingPage() {
 
   return (
     <div className="space-y-4 pb-28" dir="rtl">
+      {(storage === "device" || deviceItems.length > 0) && <div role="status" className="mx-4 mt-4 rounded-xl border border-border bg-surface p-4 text-sm">
+        {storage === "device" ? <><p>{COPY[locale].device}</p><button type="button" onClick={() => void retry()} disabled={retrying} className="min-h-11 font-semibold text-primary disabled:opacity-50">{retrying ? (locale === "he" ? "מנסים להתחבר..." : "Connecting...") : COPY[locale].retry}</button></> : <><p>{COPY[locale].saved(deviceItems.length)}</p><ul className="list-disc ps-5">{deviceItems.map(item => <li key={item.id}>{item.title}</li>)}</ul></>}
+      </div>}
       <div className="px-4 pt-6">
         <div className="rounded-3xl border border-border bg-surface p-5">
           <div className="flex items-start justify-between gap-3">
             <div>
               <h1 className="text-2xl font-bold tracking-tight">{t("shopping.titleShort")}</h1>
               <p className="mt-1 text-sm text-muted" aria-live="polite">
-                {totalCount > 0 ? `${checkedCount} מתוך ${totalCount} פריטים בסל` : "כל מה שחסר בבית, ברשימה משותפת אחת."}
+                {totalCount > 0 ? `${checkedCount} מתוך ${totalCount} פריטים בסל` : (storage === "device" ? (locale === "he" ? "רשימת הקניות בטלפון הזה." : "Your shopping list on this phone.") : "כל מה שחסר בבית, ברשימה משותפת אחת.")}
               </p>
             </div>
             <details className="relative">
@@ -363,8 +371,8 @@ export default function ShoppingPage() {
               sizes="192px"
               className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
             />
-            <p className="font-medium text-foreground">{t("shopping.emptyTitle")}</p>
-            <p className="text-sm text-muted mt-1">{t("shopping.emptySubtitle")}</p>
+            <p className="font-medium text-foreground">{storage === "device" ? (locale === "he" ? "אין פריטים שמורים בטלפון הזה" : "No items saved on this phone") : t("shopping.emptyTitle")}</p>
+            <p className="text-sm text-muted mt-1">{storage === "device" ? (locale === "he" ? "אפשר להוסיף פריטים לטלפון הזה או לנסות להתחבר שוב." : "Add items on this phone or try connecting again.") : t("shopping.emptySubtitle")}</p>
             <button
               onClick={() => openAddForm()}
               className="mt-4 inline-flex items-center gap-2 px-6 py-2.5 rounded-xl gradient-primary text-white text-sm font-semibold shadow-md shadow-primary/25 active:scale-95 transition-transform"

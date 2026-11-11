@@ -4,7 +4,14 @@ import { Save, Loader2, Copy, Check } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { InlineHelp } from "@/components/ui/inline-help";
 
+const COPY = {
+  he: { none: "עוד אין בית משותף. אפשר ליצור אחד ולהזמין את בן או בת הזוג.", invite: "הזמנת בן או בת הזוג", error: "לא הצלחנו לטעון את פרטי הבית.", retry: "נסו שוב" },
+  en: { none: "There is no shared home yet. Create one and invite your partner.", invite: "Invite your partner", error: "We couldn’t load your home details.", retry: "Try again" },
+};
+
 interface HouseholdSectionProps {
+  status: "loading" | "ready" | "no-household" | "error";
+  retry: () => void;
   householdName: string;
   city: string;
   cityError: string | null;
@@ -20,6 +27,8 @@ interface HouseholdSectionProps {
 }
 
 export function HouseholdSection({
+  status,
+  retry,
   householdName,
   city,
   cityError,
@@ -33,7 +42,17 @@ export function HouseholdSection({
   onCopyInviteCode,
   onSave,
 }: HouseholdSectionProps) {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const copy = COPY[locale];
+  const enabled = true;
+
+  if (enabled && status !== "ready") {
+    if (status === "loading") return <p role="status">{locale === "he" ? "טוענים את פרטי הבית..." : "Loading home details..."}</p>;
+    return <div role="status" className="rounded-xl border border-border bg-background p-4 text-sm">
+      <p>{status === "no-household" ? copy.none : copy.error}</p>
+      {status === "no-household" ? <a href="#invite-partner-section" className="inline-flex min-h-11 items-center font-semibold text-primary">{copy.invite}</a> : <button type="button" onClick={retry} className="min-h-11 font-semibold text-primary">{copy.retry}</button>}
+    </div>;
+  }
 
   return (
     <div className="space-y-4">
@@ -69,7 +88,12 @@ export function HouseholdSection({
           </p>
         ) : null}
       </div>
-      <div>
+      {enabled && status !== "ready" ? (
+        status === "loading" ? null : <div role="status" className="rounded-xl border border-border bg-background p-4 text-sm">
+          <p>{status === "no-household" ? copy.none : copy.error}</p>
+          {status === "no-household" ? <a href="#invite-partner-section" className="inline-flex min-h-11 items-center font-semibold text-primary">{copy.invite}</a> : <button type="button" onClick={retry} className="min-h-11 font-semibold text-primary">{copy.retry}</button>}
+        </div>
+      ) : <div>
         <label className="text-xs text-muted block mb-1">
           {t("settings.householdSection.inviteCodeLabel")}
         </label>
@@ -77,9 +101,9 @@ export function HouseholdSection({
           <code className="flex-1 bg-background border border-border rounded-lg px-3 py-2 text-sm font-mono text-foreground">
             {inviteCode}
           </code>
-          <button
+          {(!enabled || inviteCode) && <button
             onClick={onCopyInviteCode}
-            className="p-2 rounded-lg bg-background border border-border hover:bg-surface-hover text-muted"
+            className={enabled ? "min-h-11 min-w-11 flex items-center justify-center rounded-lg bg-background border border-border hover:bg-surface-hover text-muted" : "p-2 rounded-lg bg-background border border-border hover:bg-surface-hover text-muted"}
             aria-label={t("settings.householdSection.copyInviteCode")}
           >
             {copied ? (
@@ -87,9 +111,9 @@ export function HouseholdSection({
             ) : (
               <Copy className="w-4 h-4 text-muted" />
             )}
-          </button>
+          </button>}
         </div>
-      </div>
+      </div>}
       <div>
         <label className="text-xs text-muted mb-2 flex items-center gap-1">
           {t("settings.householdSection.goldenTargetLabel")}: {goldenTarget}%
