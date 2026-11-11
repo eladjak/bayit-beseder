@@ -36,6 +36,7 @@ describe('switch wrappers', () => {
     mock.flag = null;
     const view = render(<><OnboardingWizard open {...callbacks} /><ConversationalOnboarding open={false} onComplete={vi.fn()} onSkip={vi.fn()} /><WelcomeGiftModal /></>);
     expect(view.container.textContent).not.toBe('');
+    const originalMarkup = view.container.innerHTML;
     mock.flag = true;
     view.rerender(<><OnboardingWizard open {...callbacks} /><ConversationalOnboarding open={false} onComplete={vi.fn()} onSkip={vi.fn()} /><WelcomeGiftModal /></>);
     expect(screen.getByText('Who lives here?')).toBeTruthy();
@@ -43,7 +44,7 @@ describe('switch wrappers', () => {
     mock.flag = false;
     view.rerender(<><OnboardingWizard open {...callbacks} /><ConversationalOnboarding open={false} onComplete={vi.fn()} onSkip={vi.fn()} /><WelcomeGiftModal /></>);
     expect(screen.queryByText('Who lives here?')).toBeNull();
-    expect(view.container.textContent).not.toBe('');
+    expect(view.container.innerHTML).toBe(originalMarkup);
   });
 });
 
