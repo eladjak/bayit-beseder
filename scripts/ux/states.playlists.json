@@ -199,7 +199,7 @@
     "actions": [
       {
         "type": "waitForText",
-        "text": "אין משימות פתוחות להיום. אפשר לבחור רשימה מוכנה."
+        "text": "אין משימות פתוחות להיום או באיחור. אפשר לבחור רשימה מוכנה."
       }
     ],
     "routes": [
@@ -412,7 +412,7 @@
     "actions": [
       {
         "type": "waitForText",
-        "text": "There are no open tasks for today. Choose a ready-made list."
+        "text": "There are no open tasks due today or overdue. Choose a ready-made list."
       }
     ],
     "routes": [
