@@ -49,6 +49,7 @@ import { useHousehold, normalizeHouseholdCity } from "@/hooks/useHousehold";
 import { OfflineIndicator } from "@/components/offline-indicator";
 import { pushAssistantReaction } from "@/lib/assistant-reactions";
 import { ilToday } from "@/lib/il-date";
+import { runStarterSeed, type StarterTask } from "@/lib/first-run-seed";
 
 function getHebrewDate(locale: "he" | "en"): string {
   return new Date().toLocaleDateString(locale === "en" ? "en-US" : "he-IL", {
@@ -134,6 +135,24 @@ export default function DashboardPage() {
   // ---- Conversational Onboarding for new authenticated users ----
   const [showTaskWizard, setShowTaskWizard] = useState(false);
   const seedAttempted = useRef(false);
+  const [seedFailure, setSeedFailure] = useState(false);
+  const [seedBusy, setSeedBusy] = useState(false);
+  const pendingSeed = useRef<StarterTask[] | undefined>(undefined);
+  const seedLock = useRef(false);
+  const runSeed = useCallback(async (tasks?: StarterTask[]) => {
+    if (seedLock.current) return;
+    seedLock.current = true;
+    setSeedBusy(true);
+    pendingSeed.current = tasks;
+    const result = await runStarterSeed(fetch, tasks);
+    seedLock.current = false;
+    setSeedBusy(false);
+    if (!result.ok) { setSeedFailure(true); return; }
+    localStorage.setItem("bayit-beseder-onboarding-done", "true");
+    setSeedFailure(false);
+    void refetchTasks();
+    if (tasks && result.seeded) toast.success(`${tasks.length} משימות נוצרו בהצלחה!`);
+  }, [refetchTasks]);
   useEffect(() => {
     if (seedAttempted.current || tasksLoading || tasksError || !profile) return;
     // Show onboarding if no tasks exist AND onboarding not yet done
@@ -160,35 +179,32 @@ export default function DashboardPage() {
           void updateHousehold({ city: normalizedCity });
         }
       }
-      // Mark conversational onboarding as done
-      localStorage.setItem("bayit-beseder-onboarding-done", "true");
-      try {
-        const res = await fetch("/api/seed", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tasks: result.tasks }),
-        });
-        const data = await res.json();
-        if (data.seeded) {
-          refetchTasks();
-          toast.success(`${result.tasks.length} משימות נוצרו בהצלחה!`);
-        }
-      } catch {
-        toast.error("שגיאה ביצירת המשימות. נסו שוב.");
+      if (process.env.NEXT_PUBLIC_NEW_UI === "true") {
+        await runSeed(result.tasks);
+      } else {
+        localStorage.setItem("bayit-beseder-onboarding-done", "true");
+        try {
+          const res = await fetch("/api/seed", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tasks: result.tasks }) });
+          const data = await res.json();
+          if (data.seeded) { refetchTasks(); toast.success(`${result.tasks.length} משימות נוצרו בהצלחה!`); }
+        } catch { toast.error("שגיאה ביצירת המשימות. נסו שוב."); }
       }
     },
-    [profile, refetchTasks, updateHousehold]
+    [profile, refetchTasks, updateHousehold, runSeed]
   );
 
   const handleOnboardingSkip = useCallback(() => {
     setShowTaskWizard(false);
-    localStorage.setItem("bayit-beseder-onboarding-done", "true");
-    // Fall back to default seed
-    fetch("/api/seed", { method: "POST" })
-      .then((res) => res.json())
-      .then((data) => { if (data.seeded) refetchTasks(); })
-      .catch(() => {});
-  }, [refetchTasks]);
+    if (process.env.NEXT_PUBLIC_NEW_UI === "true") {
+      void runSeed();
+    } else {
+      localStorage.setItem("bayit-beseder-onboarding-done", "true");
+      fetch("/api/seed", { method: "POST" })
+        .then((res) => res.json())
+        .then((data) => { if (data.seeded) refetchTasks(); })
+        .catch(() => {});
+    }
+  }, [refetchTasks, runSeed]);
 
   // An authenticated member of a household always sees their REAL list — even
   // when that list is empty. MOCK_TASKS is now strictly the logged-out demo.
@@ -430,6 +446,19 @@ export default function DashboardPage() {
         onComplete={handleOnboardingComplete}
         onSkip={handleOnboardingSkip}
       />
+
+      {seedFailure && (
+        <section role="alert" className="mx-4 rounded-2xl border border-border bg-surface p-4 text-start sm:mx-6">
+          <div className="flex items-center gap-4">
+            <Image src="/illustrations/empty-tasks.jpg" alt="" width={80} height={80} className="h-20 w-20 shrink-0 rounded-xl object-cover" />
+            <p>{locale === "en" ? "We could not prepare your starter tasks. Try again, or start empty and add your first task." : "לא הצלחנו להכין את משימות הפתיחה. אפשר לנסות שוב, או להתחיל ריק ולהוסיף משימה ראשונה."}</p>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button type="button" disabled={seedBusy} onClick={() => void runSeed(pendingSeed.current)} className="min-h-12 rounded-xl bg-primary px-4 font-semibold text-white hover:opacity-90 active:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50">{seedBusy ? (locale === "en" ? "Trying..." : "מנסים שוב...") : (locale === "en" ? "Try again" : "לנסות שוב")}</button>
+            <button type="button" disabled={seedBusy} onClick={() => { localStorage.setItem("bayit-beseder-onboarding-done", "true"); setSeedFailure(false); }} className="min-h-12 rounded-xl border border-border px-4 font-semibold hover:bg-surface-hover active:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:opacity-50">{locale === "en" ? "Start empty" : "להתחיל ריק"}</button>
+          </div>
+        </section>
+      )}
 
       <header data-joy-restore="today" className="flex items-center justify-between gap-4 px-4 pt-6 sm:px-6">
         <div>
