@@ -55,7 +55,7 @@ export function BusyDayV2() {
     try { ok = wasDone ? await completions.undoComplete(task.id) : !!(await completions.markComplete({ taskId: task.id, userId, recurring: isRecurring(task.recurring) })); } catch { ok = false; }
     if (ok) {
       setOverrides(prev => ({ ...prev, [task.id]: !wasDone }));
-      if (!wasDone) toast(c('done'), { duration: 5000, action: { label: c('undo'), onClick: () => { void toggle(task, true); } } });
+      if (!wasDone) toast(c('done'), { duration: 5000, actionButtonStyle: { minHeight: 44, minWidth: 44 }, action: { label: c('undo'), onClick: () => { void toggle(task, true); } } });
     } else setFailures(prev => ({ ...prev, [task.id]: wasDone }));
     pendingRef.current.delete(task.id); setPending(prev => { const next = new Set(prev); next.delete(task.id); return next; });
     return ok;
