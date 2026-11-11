@@ -6,7 +6,7 @@ import honestyCopy from "@/lib/i18n/fragments/honesty-weekly-stats";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
-import { Trophy, History, TrendingUp, Users, ChevronDown, BarChart3, Flame, CalendarDays } from "lucide-react";
+import { History, TrendingUp, Users, ChevronDown, BarChart3, Flame } from "lucide-react";
 
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import {
@@ -39,17 +39,6 @@ import { useAdvancedStats } from "@/hooks/useAdvancedStats";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradePrompt } from "@/components/upgrade-prompt";
 import { addDaysStr, ilToday } from "@/lib/il-date";
-
-// Badges + Calendar — lazy-load
-const BadgesDisplay = dynamic(
-  () => import("@/components/gamification/badges-display").then((m) => m.BadgesDisplay),
-  { ssr: false, loading: () => <div className="h-40 bg-muted/30 rounded-xl animate-pulse" /> }
-);
-
-const CalendarView = dynamic(
-  () => import("@/components/tasks/calendar-view").then((m) => m.CalendarView),
-  { ssr: false, loading: () => <div className="h-64 bg-muted/30 rounded-xl animate-pulse" /> }
-);
 
 // Recharts is ~200 KB — lazy-load the two chart panels independently
 const WeeklyBarChart = dynamic(
@@ -487,7 +476,7 @@ export default function StatsPage() {
 
       <div className="px-4 space-y-4">
 
-      {!hasDbData && (
+      {completions.length === 0 && (
         <div className="card-elevated p-5 text-center">
           <p className="font-medium">{c("statsEmpty")}</p>
           <Link href="/tasks" className="inline-flex min-h-11 items-center mt-3 px-4 rounded-xl gradient-primary text-white">{c("statsAction")}</Link>
@@ -520,7 +509,7 @@ export default function StatsPage() {
       )}
 
       {/* Rest of stats — only shown to plus/family */}
-      {canUse("stats_full") && hasDbData && (<>
+      {canUse("stats_full") && completions.length > 0 && (<>
 
       {/* Weekly share card */}
       <WeeklyShareCard
@@ -528,7 +517,7 @@ export default function StatsPage() {
         completedTasks={weeklyTotal}
         totalTasks={tasks.filter((task) => task.due_date && task.due_date >= addDaysStr(today, -new Date(today).getUTCDay()) && task.due_date <= addDaysStr(today, 6 - new Date(today).getUTCDay())).length}
         streakDays={profile?.streak ?? 0}
-        topCategory={null}
+        topCategory={categoryDistribution[0] ? { name: categoryDistribution[0].name, icon: categoryDistribution[0].icon, count: categoryDistribution[0].value } : null}
         householdName="הבית שלנו"
       />
 
@@ -620,34 +609,6 @@ export default function StatsPage() {
           )}
         </motion.div>
       )}
-
-      {/* Badges Display Case */}
-      <motion.div
-        className="card-elevated p-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.6 }}
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <Trophy className="w-5 h-5 text-amber-500" />
-          <h2 className="font-semibold text-sm"><Trophy aria-hidden="true" className="inline size-4" /> {t("badges.sectionTitle")}</h2>
-        </div>
-        {completions.length > 0 && <BadgesDisplay />}
-      </motion.div>
-
-      {/* Task Calendar */}
-      <motion.div
-        className="card-elevated p-4"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.65 }}
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <History className="w-5 h-5 text-primary" />
-          <h2 className="font-semibold text-sm"><CalendarDays aria-hidden="true" className="inline size-4" /> {t("calendar.sectionTitle")}</h2>
-        </div>
-        <CalendarView />
-      </motion.div>
 
       {/* ── Advanced Statistics Accordion ─────────────────────────── */}
       <motion.div

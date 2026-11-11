@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useRef, useCallback } from "react";
 import Image from "next/image";
-import { Calendar } from "lucide-react";
+import { Calendar, CircleAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
 import { ZoneDaySummary } from "@/components/weekly/zone-day-summary";
@@ -72,6 +72,7 @@ export default function WeeklyPage() {
 
   const { c } = useCopy(honestyCopy);
   const addAreaRef = useRef<HTMLDivElement>(null);
+  const completingTasks = useRef(new Set<string>());
   const [completionError, setCompletionError] = useState<TaskRow | null>(null);
 
   const startOfWeek = useMemo(() => {
@@ -192,8 +193,8 @@ export default function WeeklyPage() {
     return tasks.filter((t) => {
       if (!t.due_date) return false;
       return t.due_date >= startStr && t.due_date <= endStr;
-    }).map((task) => isRecurring(task.recurring) && isCompletedToday(task.id) ? { ...task, status: "completed" as const } : task);
-  }, [tasks, loading, startOfWeek, endOfWeek, isCompletedToday]);
+    }).map((task) => isRecurring(task.recurring) && task.due_date === todayStr && isCompletedToday(task.id) ? { ...task, status: "completed" as const } : task);
+  }, [tasks, loading, startOfWeek, endOfWeek, isCompletedToday, todayStr]);
 
   const dailyLoads = useMemo(
     () =>
@@ -386,7 +387,10 @@ export default function WeeklyPage() {
 
   const handleToggleComplete = useCallback(
     async (task: TaskRow) => {
-      if (!profile?.id) return;
+      if (completingTasks.current.has(task.id)) return;
+      if (!profile?.id) { setCompletionError(task); return; }
+      completingTasks.current.add(task.id);
+      try {
       haptic("tap");
       const completed = task.status === "completed";
       const result = completed
@@ -401,6 +405,11 @@ export default function WeeklyPage() {
       if (!completed) {
         haptic("success");
         toast.success(t("weekly.completed"));
+      }
+      } catch {
+        setCompletionError(task);
+      } finally {
+        completingTasks.current.delete(task.id);
       }
     },
     [profile, markComplete, undoComplete, refetch, refetchCompletions, t]
@@ -527,7 +536,8 @@ export default function WeeklyPage() {
                 zoneMode={zoneConfig.zoneMode}
               />
               {completionError && dayLoad.tasks.some((task) => task.id === completionError.id) && (
-                <div role="alert" className="p-3 text-sm text-red-700 dark:text-red-300">
+                <div role="alert" className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-base text-red-800 dark:bg-red-950 dark:text-red-200">
+                  <CircleAlert aria-hidden="true" className="size-5 shrink-0" />
                   {c("completionError", { title: completionError.title })} <button type="button" className="underline min-h-11 px-2" onClick={retryCompletion}>{c("retry")}</button>
                 </div>
               )}
@@ -549,13 +559,13 @@ export default function WeeklyPage() {
         </DndContext>
 
         {/* This Week's Summary */}
-        <WeeklyStats
+        {weekTasks.length > 0 && <WeeklyStats
           stats={stats}
           dailyLoads={dailyLoads}
           calendarConnected={calendarConnected}
           calendarEvents={calendarEvents}
           partnerName={partner?.name}
-        />
+        />}
       </div>
 
       {/* Weekly Generator Modal */}

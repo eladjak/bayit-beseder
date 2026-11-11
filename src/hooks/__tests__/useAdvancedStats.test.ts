@@ -44,7 +44,7 @@ function makeTask(overrides: Partial<TaskRow> & { id: string }): TaskRow {
 // ── Tests ──────────────────────────────────────────────────────────────────────
 
 describe("useAdvancedStats — empty data defaults", () => {
-  it("returns mock trend data when no completions", () => {
+  it("returns an empty trend when no completions", () => {
     const { result } = renderHook(() =>
       useAdvancedStats({
         completions: [],
@@ -56,12 +56,10 @@ describe("useAdvancedStats — empty data defaults", () => {
     );
 
     const trend = result.current.weeklyTrend;
-    expect(trend).toHaveLength(4);
-    // Mock data always has the last week labelled "השבוע"
-    expect(trend[3].week).toBe("השבוע");
+    expect(trend).toHaveLength(0);
   });
 
-  it("returns mock category distribution when no completions", () => {
+  it("returns an empty category distribution when no completions", () => {
     const { result } = renderHook(() =>
       useAdvancedStats({
         completions: [],
@@ -72,14 +70,7 @@ describe("useAdvancedStats — empty data defaults", () => {
     );
 
     const dist = result.current.categoryDistribution;
-    expect(dist.length).toBeGreaterThan(0);
-    for (const point of dist) {
-      expect(point).toHaveProperty("key");
-      expect(point).toHaveProperty("name");
-      expect(point).toHaveProperty("value");
-      expect(point).toHaveProperty("color");
-      expect(point).toHaveProperty("icon");
-    }
+    expect(dist).toHaveLength(0);
   });
 
   it("returns empty personal records when no completions", () => {
