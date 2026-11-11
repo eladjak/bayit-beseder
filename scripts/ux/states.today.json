@@ -1,0 +1,52 @@
+[
+  {
+    "route": "/dashboard",
+    "name": "normal-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "status": 200,
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "normal-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "status": 200,
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  }
+]

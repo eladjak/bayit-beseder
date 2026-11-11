@@ -1,5 +1,8 @@
 "use client";
 
+import { useNewUi } from "@/hooks/useNewUi";
+import { TodayV2 } from "@/screens/today/TodayV2";
+
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -99,7 +102,7 @@ function getTimeGreeting(name: string): { greeting: string; subtitle: string } {
   return { greeting: `לילה טוב, ${name}`, subtitle: pickSubtitle(NIGHT_SUBTITLES) };
 }
 
-export default function DashboardPage() {
+function DashboardPageV1() {
   const { t, locale } = useTranslation();
   // ---- Supabase hooks ----
   const { profile } = useProfile();
@@ -629,4 +632,9 @@ export default function DashboardPage() {
 
     </div>
   );
+}
+
+export default function DashboardPage() {
+  const newUi = useNewUi();
+  return newUi ? <TodayV2 /> : <DashboardPageV1 />;
 }
