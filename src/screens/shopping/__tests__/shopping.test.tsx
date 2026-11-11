@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, renderHook, screen, fireEvent, cleanup } from '@testing-library/react';
 import ShoppingV2 from '../ShoppingV2';
+import { useShoppingModel } from '../useShoppingModel';
 import type { ShoppingItem } from '@/hooks/useShoppingList';
 import type { CopyFragment } from '@/lib/i18n/fragments/types';
 const mocks = vi.hoisted(() => ({ toggle: vi.fn(), remove: vi.fn(), edit: vi.fn(), toast: vi.fn(), items: [] as ShoppingItem[], storage: 'server', deviceItems: [] as ShoppingItem[], flag: null as boolean | null, loading: false }));
@@ -26,3 +27,5 @@ describe('shopping v2', () => {
 });
 
 it('keeps V1 when off and switches null to true to false safely', async () => { const { default: Page } = await import('@/app/(app)/shopping/page'); mocks.loading = true; mocks.flag = null; const view = render(<Page />); expect(view.container.querySelector('.shimmer')).toBeTruthy(); mocks.flag = true; view.rerender(<Page />); expect(screen.getByText('רשימת קניות')).toBeTruthy(); mocks.flag = false; view.rerender(<Page />); expect(view.container.querySelector('.shimmer')).toBeTruthy(); });
+
+it('renders a repeated category name only once', () => { const categories = [{ name: 'ירקות' }, { name: 'ירקות' }]; const items = [item('4', 'עגבניות')]; const { result } = renderHook(() => useShoppingModel(items, categories)); expect(result.current.groups.filter(group => group.name === 'ירקות')).toHaveLength(1); });
