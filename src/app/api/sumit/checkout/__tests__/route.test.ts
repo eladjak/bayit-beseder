@@ -12,6 +12,7 @@
  * so Sumit still took the money twice for no extra benefit to the user).
  */
 
+import { POLICY_VERSION } from "@/lib/privacy/policy";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const AUTH_USER = { id: "user-1", email: "a@b.com", user_metadata: {} };
@@ -39,6 +40,12 @@ vi.mock("@/lib/supabase/server", () => ({
           return builder;
         },
         async maybeSingle() {
+          if (table === "privacy_consents") {
+            return {
+              data: { policy_version: POLICY_VERSION, age_confirmed: true, privacy_accepted: true, terms_accepted: true },
+              error: null,
+            };
+          }
           if (table === "household_members") {
             return { data: cfg.membership ?? null, error: null };
           }

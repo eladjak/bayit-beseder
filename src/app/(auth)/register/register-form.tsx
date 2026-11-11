@@ -16,6 +16,7 @@ import {
 import { signUp, signInWithGoogle } from "@/lib/auth";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
+import { ConsentChecks, type ConsentChecksHandle, type ConsentErrors, type ConsentValues } from "@/components/privacy/ConsentChecks";
 
 export function RegisterForm() {
   const router = useRouter();
@@ -26,7 +27,10 @@ export function RegisterForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
+  const [consent, setConsent] = useState<ConsentValues>({ age: false, privacy: false, terms: false });
+  const [consentErrors, setConsentErrors] = useState<ConsentErrors>({});
+  const consentRef = useRef<ConsentChecksHandle>(null);
 
   // Every failure used to go to a toast only: no focus move, nothing tied to
   // the field, and an empty submit hit a bare `return` that said nothing at all.
@@ -49,6 +53,11 @@ export function RegisterForm() {
     if (!confirmPassword) next.confirmPassword = t("auth.errors.confirmPasswordRequired");
     else if (password && password !== confirmPassword) next.confirmPassword = t("auth.errors.passwordsDoNotMatch");
 
+    const cErr: ConsentErrors = {};
+    if (!consent.age) cErr.age = t("privacy.register.errAge");
+    if (!(consent.privacy && consent.terms)) cErr.privacy = t("privacy.register.errAgree");
+    setConsentErrors(cErr);
+
     if (next.name || next.email || next.password || next.confirmPassword) {
       setErrors(next);
       // Focus the FIRST invalid field, in DOM order.
@@ -57,6 +66,10 @@ export function RegisterForm() {
       return;
     }
     setErrors({});
+    if (cErr.age || cErr.privacy) {
+      consentRef.current?.focusFirstInvalid(cErr);
+      return;
+    }
 
     setLoading(true);
     const result = await signUp(email, password, name);
@@ -65,6 +78,26 @@ export function RegisterForm() {
     if (result.error) {
       toast.error(result.error);
       return;
+    }
+
+    // Signed in right away (no email confirmation): record the consent now.
+    // Otherwise the privacy gate asks once, at the first sign-in (ConsentGuard).
+    if (result.data?.email_confirmed_at) {
+      try {
+        await fetch("/api/privacy/consent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ageConfirmed: true,
+            privacyAccepted: true,
+            termsAccepted: true,
+            locale: locale === "en" ? "en" : "he",
+            source: "register",
+          }),
+        });
+      } catch {
+        // The app-level gate will ask again; nothing is lost.
+      }
     }
 
     // Check if email confirmation is needed
@@ -216,6 +249,19 @@ export function RegisterForm() {
             )}
           </div>
 
+          <ConsentChecks
+            ref={consentRef}
+            idPrefix="reg"
+            variant="two"
+            values={consent}
+            errors={consentErrors}
+            disabled={loading}
+            onChange={(v) => {
+              setConsent(v);
+              setConsentErrors({});
+            }}
+          />
+
           <button
             type="submit"
             disabled={loading}
@@ -278,9 +324,7 @@ export function RegisterForm() {
           </Link>
         </p>
 
-        <p className="text-xs text-muted text-center">
-          בהרשמה אתם מסכימים לתנאי השימוש ולמדיניות הפרטיות
-        </p>
+        <p className="text-xs text-muted text-center">{t("privacy.register.googleNote")}</p>
       </div>
     </div>
   );

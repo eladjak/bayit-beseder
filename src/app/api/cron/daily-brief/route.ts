@@ -1,3 +1,4 @@
+import { consentedHouseholdIds, filterConsentedUserIds } from "@/lib/privacy/consent-server";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendWhatsAppMessage } from "@/lib/whatsapp";
@@ -37,6 +38,13 @@ export async function GET(request: NextRequest) {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
   const today = ilToday();
 
+  // Privacy gate: only households in which EVERY member has accepted the current policy are
+  // processed (fails closed: an error means none).
+  const consentedIds = await consentedHouseholdIds(supabase);
+  if (consentedIds.length === 0) {
+    return NextResponse.json({ message: "No household with full consent, skipping" });
+  }
+
   // Get WhatsApp phone numbers from env (comma-separated)
   const phones = (process.env.WHATSAPP_PHONES ?? "").split(",").filter(Boolean);
   if (phones.length === 0) {
@@ -47,6 +55,7 @@ export async function GET(request: NextRequest) {
   const { data: tasks } = await supabase
     .from("tasks")
     .select("title, assigned_to, status")
+    .in("household_id", consentedIds)
     .eq("due_date", today)
     .neq("status", "completed");
 
@@ -58,6 +67,7 @@ export async function GET(request: NextRequest) {
   const { data: overdueTasks } = await supabase
     .from("tasks")
     .select("id")
+    .in("household_id", consentedIds)
     .lt("due_date", today)
     .neq("status", "completed");
 
@@ -84,6 +94,7 @@ export async function GET(request: NextRequest) {
   const { data: streaks } = await supabase
     .from("streaks")
     .select("current_count")
+    .in("household_id", consentedIds)
     .eq("streak_type", "daily")
     .limit(1);
 
@@ -99,6 +110,7 @@ export async function GET(request: NextRequest) {
     const { data: anyProfile } = await supabase
       .from("profiles")
       .select("household_id")
+      .in("household_id", consentedIds)
       .not("household_id", "is", null)
       .limit(1)
       .single();
@@ -169,8 +181,14 @@ export async function GET(request: NextRequest) {
     .select("id, push_subscription")
     .not("push_subscription", "is", null);
 
-  if (pushProfiles && pushProfiles.length > 0) {
-    const subs = pushProfiles
+  // Privacy gate: only people who accepted the current policy get pushes.
+  const consentedPush = pushProfiles
+    ? await filterConsentedUserIds(supabase, pushProfiles.map((p) => p.id))
+    : new Set<string>();
+  const pushRecipients = (pushProfiles ?? []).filter((p) => consentedPush.has(p.id));
+
+  if (pushRecipients.length > 0) {
+    const subs = pushRecipients
       .map((p) => p.push_subscription as PushSubscriptionData | null)
       .filter((s): s is PushSubscriptionData => s !== null && !!s.endpoint);
 
@@ -183,7 +201,7 @@ export async function GET(request: NextRequest) {
 
     // Clean up expired subscriptions
     if (pushResult.expired.length > 0) {
-      for (const profile of pushProfiles) {
+      for (const profile of pushRecipients) {
         const sub = profile.push_subscription as PushSubscriptionData | null;
         if (sub && pushResult.expired.includes(sub.endpoint)) {
           await supabase

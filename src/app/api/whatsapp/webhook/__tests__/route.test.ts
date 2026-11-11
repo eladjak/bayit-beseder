@@ -16,6 +16,7 @@
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
+import { POLICY_VERSION } from "@/lib/privacy/policy";
 
 vi.mock("@supabase/supabase-js", () => ({
   createClient: vi.fn(),
@@ -48,6 +49,8 @@ interface FakeSupabaseConfig {
   updateError?: { message: string } | null;
   dedupeCheckError?: { message: string } | null;
   dedupeInsertError?: { message: string } | null;
+  /** user ids that have a current consent record. Default: every profile in the fake. */
+  consentedUserIds?: string[];
 }
 
 type FakeCall =
@@ -87,6 +90,21 @@ function createFakeSupabase(cfg: FakeSupabaseConfig) {
         return { data: null, error: null };
       }
 
+      if (table === "privacy_consents") {
+        const all = Object.values(cfg.profilesByPhone ?? {}).map((p) => p.id);
+        const ids = cfg.consentedUserIds ?? all;
+        return {
+          data: ids.map((user_id) => ({
+            user_id,
+            policy_version: POLICY_VERSION,
+            age_confirmed: true,
+            privacy_accepted: true,
+            terms_accepted: true,
+          })),
+          error: null,
+        };
+      }
+
       if (table === "profiles") {
         const phone = state.eqs.find(([c]) => c === "whatsapp_phone")?.[1] as string;
         calls.push({ table, op: "select", phone });
@@ -116,6 +134,7 @@ function createFakeSupabase(cfg: FakeSupabaseConfig) {
       update: (row: Record<string, unknown>) => typeof builder;
       eq: (col: string, val: unknown) => typeof builder;
       neq: (col: string, val: unknown) => typeof builder;
+      in: (col: string, val: unknown) => typeof builder;
       order: () => typeof builder;
       single: () => Promise<{ data: unknown; error: unknown }>;
       maybeSingle: () => Promise<{ data: unknown; error: unknown }>;
@@ -142,6 +161,9 @@ function createFakeSupabase(cfg: FakeSupabaseConfig) {
         return builder;
       },
       neq() {
+        return builder;
+      },
+      in() {
         return builder;
       },
       order() {
@@ -435,5 +457,22 @@ describe("POST /api/whatsapp/webhook — household boundary", () => {
     // No update ever touched household B's task.
     const update = fake.calls.find((c) => c.table === "tasks" && c.op === "update");
     expect(update).toBeUndefined();
+  });
+});
+
+describe("POST /api/whatsapp/webhook — privacy gate", () => {
+  it("a sender who has not accepted the current policy gets nothing: no reply, no task read, no update", async () => {
+    process.env.WHATSAPP_WEBHOOK_TOKEN = "correct-token";
+    vi.mocked(sendWhatsAppMessage).mockClear();
+    const fake = useFakeSupabase({
+      profilesByPhone: { "972501234567": { id: "user-1", household_id: HOUSEHOLD_A } },
+      tasksByHousehold: { [HOUSEHOLD_A]: [{ id: "task-1", title: "שטיפת כלים", status: "pending" }] },
+      consentedUserIds: [],
+    });
+    const res = await POST(makeRequest(makePayload({ text: "1" }), { authorization: "Bearer correct-token" }));
+    expect(res.status).toBe(200);
+    expect((await res.json()).message).toBe("consent required");
+    expect(sendWhatsAppMessage).not.toHaveBeenCalled();
+    expect(fake.calls.some((c) => c.table === "tasks")).toBe(false);
   });
 });

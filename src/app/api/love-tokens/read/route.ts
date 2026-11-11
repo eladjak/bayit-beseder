@@ -10,6 +10,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { requireConsent } from "@/lib/privacy/consent-server";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   const { data: userData, error: userErr } = await supabase.auth.getUser();
   if (userErr || !userData.user) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  {
+    const consentGuard = await requireConsent(supabase, userData.user);
+    if (consentGuard) return consentGuard;
   }
 
   let body: { ids?: unknown };

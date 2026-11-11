@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { runNightlyPlannerForHouseholds, formatDate, getTodayInIsrael } from "@/lib/auto-scheduler";
 import type { Database } from "@/lib/types/database";
+import { consentedHouseholdIds } from "@/lib/privacy/consent-server";
 
 /**
  * GET /api/cron/auto-schedule
@@ -59,32 +60,33 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ message: "No households found" });
   }
 
+  // Privacy gate: a household is processed only if EVERY member has accepted the current
+  // policy. Fails closed: if consent cannot be read, no household is processed.
+  const consented = new Set(await consentedHouseholdIds(supabase, households.map((h) => h.id)));
+  const eligible = households.map((h) => h.id).filter((id) => consented.has(id));
+  const skippedNoConsent = households.length - eligible.length;
+
   // Israel's calendar day, not the server's UTC day -- see
   // getTodayInIsrael()'s doc comment for the bug this avoids (the cron
   // fires at 22:00 UTC, already past midnight in Israel).
   const today = getTodayInIsrael();
 
-  const { results, summary } = await runNightlyPlannerForHouseholds(
-    supabase,
-    households.map((h) => h.id),
-    today
-  );
+  const { summary } = await runNightlyPlannerForHouseholds(supabase, eligible, today);
 
-  // One-line summary: counts only, never household names, task titles, or
-  // user ids -- see rules/how-elad-gets-told + the agent brief for this
-  // task ("log a one-line summary ... without personal data").
+  // One-line summary: counts only, never household ids or names, task titles, or user ids.
   console.log(
-    `[auto-schedule] households=${summary.householdsProcessed} movedToday=${summary.tasksMovedToday} movedLater=${summary.tasksMovedLater} flaggedForReview=${summary.tasksFlaggedForReview} errors=${summary.errors.length}`
+    `[auto-schedule] households=${summary.householdsProcessed} skippedNoConsent=${skippedNoConsent} movedToday=${summary.tasksMovedToday} movedLater=${summary.tasksMovedLater} flaggedForReview=${summary.tasksFlaggedForReview} errors=${summary.errors.length}`
   );
 
+  // The response carries counts only: no per-household results, no ids, no error text.
   return NextResponse.json({
     success: summary.errors.length === 0,
     date: formatDate(today),
     householdsProcessed: summary.householdsProcessed,
+    householdsSkippedNoConsent: skippedNoConsent,
     tasksMovedToday: summary.tasksMovedToday,
     tasksMovedLater: summary.tasksMovedLater,
     tasksFlaggedForReview: summary.tasksFlaggedForReview,
-    errors: summary.errors,
-    results,
+    errorCount: summary.errors.length,
   });
 }

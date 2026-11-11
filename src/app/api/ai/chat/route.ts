@@ -2,6 +2,8 @@ import { NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { getConsentStatus } from "@/lib/privacy/consent-server";
+import { CONSENT_REQUIRED_ERROR, CONSENT_UNAVAILABLE_ERROR } from "@/lib/privacy/policy";
 import { buildPriceContext } from "@/lib/prices/assistant-context";
 
 // ---------------------------------------------------------------------------
@@ -98,42 +100,77 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // 2. Optional auth check (allow demo mode)
+  // 2. Authentication. Anonymous demo mode is a DELIBERATE case: the request carries no
+  // Supabase session cookie at all. A request that carries one must resolve to a user; if the
+  // session cannot be resolved (error, expired or invalid token, thrown exception) the request is
+  // REFUSED, never continued as anonymous (the person may be signed in, and we could not check consent).
   let isAuthenticated = false;
   let authedClient: ReturnType<typeof createServerClient> | null = null;
   let authedUserId: string | null = null;
+  const refuseAuth = (status: number) =>
+    new Response(JSON.stringify({ error: "auth_unavailable" }), {
+      status,
+      headers: { "Content-Type": "application/json" },
+    });
   try {
+    // A bearer token is not a supported way to sign in to this endpoint, but a request that carries one
+    // may well be a signed-in person: refuse rather than treat it as an anonymous demo request.
+    if (request.headers.get("authorization")) return refuseAuth(401);
     const cookieStore = await cookies();
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll();
-          },
-          setAll(cookiesToSet) {
-            try {
-              for (const { name, value, options } of cookiesToSet) {
-                cookieStore.set(name, value, options);
+    const carriesSession = cookieStore.getAll().some((c) => /^sb-.+-auth-token/.test(c.name));
+    if (carriesSession) {
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return cookieStore.getAll();
+            },
+            setAll(cookiesToSet) {
+              try {
+                for (const { name, value, options } of cookiesToSet) {
+                  cookieStore.set(name, value, options);
+                }
+              } catch {
+                // Ignore in server component context
               }
-            } catch {
-              // Ignore in server component context
-            }
+            },
           },
-        },
+        }
+      );
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
+      if (authError || !user) {
+        const status = (authError as { status?: number } | null)?.status;
+        return refuseAuth(status === 401 || status === 403 || (!authError && !user) ? 401 : 503);
       }
-    );
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    isAuthenticated = !!user;
-    if (user) {
+      isAuthenticated = true;
       authedClient = supabase;
       authedUserId = user.id;
     }
   } catch {
-    // Auth failure is non-fatal — continue in demo mode
+    // We could not even tell whether this is an anonymous demo request: fail closed.
+    return refuseAuth(503);
+  }
+
+  // Privacy gate. Outside the try/catch above on purpose: a signed-in user who
+  // has not accepted the current policy, or whose consent we cannot check, gets
+  // no AI call (their text would be sent to Google). getConsentStatus never
+  // throws; "unavailable" refuses too. Nothing here can fall through to demo mode.
+  if (authedClient && authedUserId) {
+    const status = await getConsentStatus(authedClient, authedUserId);
+    if (status !== "accepted") {
+      return new Response(
+        JSON.stringify({ error: status === "needed" ? CONSENT_REQUIRED_ERROR : CONSENT_UNAVAILABLE_ERROR }),
+        {
+          status: status === "needed" ? 403 : 503,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
   }
 
   // 3. Parse request body

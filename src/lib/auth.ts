@@ -23,7 +23,7 @@ interface AuthResult<T = void> {
 export async function signUp(
   email: string,
   password: string,
-  displayName: string
+  displayName: string,
 ): Promise<AuthResult<User>> {
   try {
     const supabase = createClient();
@@ -31,9 +31,9 @@ export async function signUp(
       email,
       password,
       options: {
-        data: {
-          full_name: displayName,
-        },
+        // Consent is NOT written here: account metadata is user-controlled and cannot be
+        // evidence. The record is created only by POST /api/privacy/consent after an explicit action.
+        data: { full_name: displayName },
       },
     });
 

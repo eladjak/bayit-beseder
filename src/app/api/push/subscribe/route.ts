@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { requireConsent } from "@/lib/privacy/consent-server";
 
 // 10 requests per minute — prevents repeated subscription spam.
 const limiter = rateLimit({ windowMs: 60_000, max: 10 });
@@ -43,6 +44,10 @@ export async function POST(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  {
+    const consentGuard = await requireConsent(supabase, user);
+    if (consentGuard) return consentGuard;
   }
 
   let body: { userId?: string; subscription?: unknown };

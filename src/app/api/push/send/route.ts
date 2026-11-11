@@ -5,6 +5,7 @@ import {
   type PushSubscriptionData,
   type PushPayload,
 } from "@/lib/push";
+import { filterConsentedUserIds } from "@/lib/privacy/consent-server";
 
 /**
  * POST /api/push/send
@@ -69,7 +70,10 @@ export async function POST(request: NextRequest) {
   const subscriptions: PushSubscriptionData[] = [];
   const profileIds: string[] = [];
 
+  // Privacy gate: only people who accepted the current policy are pushed to.
+  const consented = await filterConsentedUserIds(supabase, profiles.map((p) => p.id));
   for (const p of profiles) {
+    if (!consented.has(p.id)) continue;
     const sub = p.push_subscription as PushSubscriptionData | null;
     if (sub?.endpoint && sub?.keys?.p256dh && sub?.keys?.auth) {
       subscriptions.push(sub);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { requirePlus } from "@/lib/require-plus";
+import { requireConsent } from "@/lib/privacy/consent-server";
 
 const limiter = rateLimit({ windowMs: 60_000, max: 10 });
 
@@ -32,6 +33,10 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
     return NextResponse.json({ tip: getRandomFallbackTip() });
+  }
+  {
+    const consentGuard = await requireConsent(supabase, user);
+    if (consentGuard) return consentGuard;
   }
 
   // "coaching" is a Plus-gated feature (see useSubscription's FEATURE_MATRIX).

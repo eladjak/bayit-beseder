@@ -10,6 +10,7 @@ import {
 } from "@/lib/google-calendar";
 import type { Json } from "@/lib/types/database";
 import type { ClientCalendarEvent } from "@/lib/types/calendar";
+import { requireConsent } from "@/lib/privacy/consent-server";
 
 /**
  * Normalize a Google Calendar event into a flat client-friendly shape.
@@ -64,6 +65,10 @@ export async function GET(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  {
+    const consentGuard = await requireConsent(supabase, user);
+    if (consentGuard) return consentGuard;
   }
 
   // Parse query params

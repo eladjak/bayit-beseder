@@ -5,6 +5,7 @@ import * as Sentry from "@sentry/nextjs";
 import { sendWhatsAppMessage, extractPhoneFromChatId } from "@/lib/whatsapp";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { ilToday } from "@/lib/il-date";
+import { filterConsentedUserIds } from "@/lib/privacy/consent-server";
 
 // 30 requests per minute — allows burst traffic from Green API retries
 // while blocking abusive callers.
@@ -235,6 +236,12 @@ export async function POST(request: NextRequest) {
   if (!profile) {
     // Unknown sender – silently ignore to avoid leaking task info to strangers.
     return NextResponse.json({ ok: true });
+  }
+
+  // Privacy gate: a sender who has not accepted the current policy gets no
+  // household data (fails closed: if we cannot check, nobody is served).
+  if (!(await filterConsentedUserIds(supabase, [profile.id])).has(profile.id)) {
+    return NextResponse.json({ ok: true, message: "consent required" });
   }
 
   if (!profile.household_id) {

@@ -3,6 +3,7 @@
  * Supabase and the rate limiter are faked; no real DB or Redis.
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { POLICY_VERSION } from "@/lib/privacy/policy";
 
 let user: { id: string } | null;
 let limiterOk: boolean;
@@ -19,6 +20,22 @@ vi.mock("@/lib/supabase/server", () => ({
           eq: () => b,
           limit: () => b,
           maybeSingle: async () => ({ data: { household_id: "house-1" }, error: null }),
+        };
+        return b;
+      }
+      if (table === "privacy_consents") {
+        const b = {
+          select: () => b,
+          eq: () => b,
+          maybeSingle: async () => ({
+            data: {
+              policy_version: POLICY_VERSION,
+              age_confirmed: true,
+              privacy_accepted: true,
+              terms_accepted: true,
+            },
+            error: null,
+          }),
         };
         return b;
       }

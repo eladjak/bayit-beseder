@@ -15,7 +15,7 @@ test.describe("Landing Page", () => {
 
   test("should navigate to login page", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: /התחברו|כניסה|התחילו/i }).first().click();
+    await page.getByRole("link", { name: "כבר יש לי חשבון" }).click();
     await expect(page).toHaveURL(/login/);
   });
 

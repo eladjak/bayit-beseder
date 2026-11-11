@@ -1,4 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
+// These tests are about token scopes / household isolation, not the privacy gate:
+// the gate is stubbed OPEN here and tested for real in
+// src/lib/agent/__tests__/auth-consent.test.ts and src/lib/privacy/__tests__/consent-guard.test.ts.
+vi.mock("@/lib/privacy/consent-server", async (orig) => ({
+  ...(await orig<typeof import("@/lib/privacy/consent-server")>()),
+  householdConsentOk: async () => true,
+  requireConsent: async () => null,
+}));
 import { makeSupabaseMock } from "@/lib/meals/__tests__/supabaseMock";
 import { makeMeal } from "@/lib/meals/__tests__/fixtures";
 

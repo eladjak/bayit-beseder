@@ -6,6 +6,16 @@
  * OUR route logic and wiring without ever touching production Supabase,
  * which is exactly what's forbidden here.
  */
+import { POLICY_VERSION } from "@/lib/privacy/policy";
+
+/** A signed-in user who accepted the CURRENT policy (the privacy gate lets them through). */
+export const CURRENT_CONSENT = {
+  policy_version: POLICY_VERSION,
+  age_confirmed: true,
+  privacy_accepted: true,
+  terms_accepted: true,
+};
+
 export interface MockCall {
   table: string;
   op: string;
@@ -18,9 +28,12 @@ export interface SupabaseMockOptions {
 }
 
 export function makeSupabaseMock(
-  responses: Record<string, unknown[]>,
+  seeded: Record<string, unknown[]>,
   options: SupabaseMockOptions = {}
 ) {
+  // By default the user has accepted the current policy. A test of the gate itself
+  // passes `privacy_consents: []` to prove the route refuses.
+  const responses: Record<string, unknown[]> = { privacy_consents: [CURRENT_CONSENT], ...seeded };
   const calls: MockCall[] = [];
   const inserted: Record<string, unknown[]> = {};
 

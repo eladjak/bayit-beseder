@@ -13,6 +13,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { createClient as createSessionClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/types/database";
+import { requireConsent } from "@/lib/privacy/consent-server";
 
 const householdIdSchema = z.string().uuid();
 
@@ -45,6 +46,10 @@ export async function requireHouseholdMember(householdIdRaw: unknown): Promise<G
       response: NextResponse.json({ error: "יש להתחבר כדי לנהל חיבורי סוכנים." }, { status: 401 }),
     };
   }
+
+  // Privacy gate: managing assistant access is household data work.
+  const consentGuard = await requireConsent(session, user);
+  if (consentGuard) return { ok: false, response: consentGuard };
 
   // `is_household_member` is not part of the generated Functions typing.
   const { data: isMember, error } = await (

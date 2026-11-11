@@ -32,7 +32,7 @@ supabase/           → SQL migration
 
 ## Database
 - Run `supabase/migration.sql` in Supabase SQL Editor
-- Uses existing Supabase project (kidushishi)
+- Supabase project uqumzjmyejlhoyliyesu is SHARED with the events app ("kidushishi"): measured 10.11.2026, 45 public tables, 12 of them the events app's, plus its user_roles. profiles and the auth users are shared too. Never drop or rewrite shared tables; see supabase/migrations/026 and src/lib/privacy/delete-account.ts.
 - RLS enabled on all tables
 - Realtime on: task_instances, households, streaks
 

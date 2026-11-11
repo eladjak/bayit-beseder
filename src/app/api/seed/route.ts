@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { ilDayOffset, ilToday } from "@/lib/il-date";
+import { requireConsent } from "@/lib/privacy/consent-server";
 
 // 3 requests per minute — seeding is a one-time action; very strict limit.
 const limiter = rateLimit({ windowMs: 60_000, max: 3 });
@@ -34,6 +35,10 @@ export async function POST(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  {
+    const consentGuard = await requireConsent(supabase, user);
+    if (consentGuard) return consentGuard;
   }
 
   // Tasks are household-scoped (migration 014) — resolve the user's household.
