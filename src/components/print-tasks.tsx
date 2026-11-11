@@ -1,5 +1,11 @@
 "use client";
 
+import { Printer } from "lucide-react";
+import { useNewUi } from "@/hooks/useNewUi";
+import { useLanguage } from "@/components/LanguageProvider";
+import { useCopy } from "@/hooks/useCopy";
+import printCopy from "@/lib/i18n/fragments/print";
+
 export interface PrintTask {
   id: string;
   title: string;
@@ -7,6 +13,7 @@ export interface PrintTask {
   assigned_to: string | null;
   points: number;
   status: string;
+  due_date?: string | null;
 }
 
 export interface PrintCategory {
@@ -58,6 +65,9 @@ function formatHebrewDate(date: Date): string {
 }
 
 export function PrintTasks({ tasks, categories, members, houseName }: PrintTasksProps) {
+  const newUi = useNewUi();
+  const { locale } = useLanguage();
+  const { c } = useCopy(printCopy);
   const today = new Date();
   const dateStr = formatHebrewDate(today);
 
@@ -89,6 +99,24 @@ export function PrintTasks({ tasks, categories, members, houseName }: PrintTasks
 
   const totalRooms = orderedGroups.length;
   const totalTasks = tasks.length;
+
+  if (newUi) {
+    const dates = tasks.map(t => t.due_date).filter((date): date is string => Boolean(date)).sort();
+    const format = (date: string) => new Date(`${date}T12:00:00`).toLocaleDateString(locale === "he" ? "he-IL" : "en-US");
+    const range = dates.length ? `${format(dates[0])} – ${format(dates[dates.length - 1])}` : c("noDates");
+    return <div className="print-v2" dir={locale === "he" ? "rtl" : "ltr"}>
+      <div className="print-v2-actions"><button type="button" onClick={() => window.print()}><Printer size={20} aria-hidden="true" />{c("print")}</button></div>
+      <header className="print-v2-header"><h1>{houseName}</h1><p>{c("range")}: {range}</p><p>{c("printed")}: {today.toLocaleDateString(locale === "he" ? "he-IL" : "en-US")}</p></header>
+      {orderedGroups.length === 0 && <p>{c("empty")}</p>}
+      {orderedGroups.map(group => <section key={group.id ?? "__none__"}>
+        <h2>{group.id === null ? c("general") : group.name}</h2>
+        {group.tasks.map(task => <div className="print-v2-row" key={task.id}>
+          <span className="print-v2-check" aria-hidden="true" /><span className="print-v2-title">{task.title}</span>
+          <span>{task.assigned_to ? memberMap.get(task.assigned_to) : ""}</span>
+        </div>)}
+      </section>)}
+    </div>;
+  }
 
   const pageStyle: React.CSSProperties = {
     fontFamily: "'Heebo', 'Arial Hebrew', Arial, sans-serif",

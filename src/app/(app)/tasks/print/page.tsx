@@ -9,6 +9,7 @@ import { useHouseholdMembers } from "@/hooks/useHouseholdMembers";
 import { useHousehold } from "@/hooks/useHousehold";
 import { useProfile } from "@/hooks/useProfile";
 import { PrintTasks, type PrintMember } from "@/components/print-tasks";
+import "@/styles/print-v2.css";
 import { ilToday } from "@/lib/il-date";
 
 function PrintPageSkeleton() {
@@ -133,6 +134,7 @@ export default function PrintPage() {
           assigned_to: t.assigned_to,
           points: t.points,
           status: t.status,
+          due_date: t.due_date,
         })),
     [tasks],
   );
