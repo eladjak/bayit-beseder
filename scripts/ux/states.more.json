@@ -1,0 +1,60 @@
+[
+  {
+    "route": "/more",
+    "name": "more-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "עוד בבית"
+      }
+    ]
+  },
+  {
+    "route": "/more",
+    "name": "more-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "More at home"
+      }
+    ]
+  }
+]
