@@ -1,0 +1,908 @@
+[
+  {
+    "route": "/shopping/prices",
+    "name": "city-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit.prices.city": "חיפה",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/prices/compare",
+        "status": 400,
+        "body": {
+          "error": "need_location"
+        }
+      },
+      {
+        "url": "/api/prices/cities",
+        "body": {
+          "cities": [
+            {
+              "name": "חיפה",
+              "stores": 2
+            },
+            {
+              "name": "תל אביב",
+              "stores": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "route": "/shopping/prices",
+    "name": "verdict-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit.prices.city": "חיפה",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/prices/compare",
+        "status": 200,
+        "body": {
+          "generatedAt": "2026-11-10",
+          "origin": {
+            "label": "חיפה",
+            "lat": 0,
+            "lon": 0
+          },
+          "items": [
+            {
+              "key": "milk",
+              "canonicalId": "m",
+              "qty": 1,
+              "strict": [],
+              "pinned": false
+            },
+            {
+              "key": "bread",
+              "canonicalId": "b",
+              "qty": 1,
+              "strict": [],
+              "pinned": false
+            }
+          ],
+          "unknownItems": [],
+          "ranked": [
+            {
+              "chain": "test",
+              "chainName": "רשת בדיקה",
+              "storeId": "1",
+              "name": "סניף מרכז",
+              "city": "חיפה",
+              "address": "",
+              "distanceKm": 1,
+              "published": "2026-11-10T09:00:00Z",
+              "fresh": true,
+              "lines": {
+                "milk": {
+                  "name": "חלב טרי",
+                  "code": "1",
+                  "price": 6,
+                  "cost": 6,
+                  "packs": 1,
+                  "weighted": false,
+                  "estimate": false,
+                  "promo": null
+                },
+                "bread": null
+              },
+              "foundCount": 1,
+              "foundTotal": 6
+            }
+          ],
+          "otherStores": [],
+          "online": [],
+          "commonKeys": [
+            "milk"
+          ],
+          "verdict": {
+            "storeKey": "test:1",
+            "basis": "common",
+            "commonCount": 1,
+            "itemsMatched": 2,
+            "savingVsDearest": 3
+          },
+          "split": null,
+          "chains": [],
+          "pins": {},
+          "titles": {
+            "milk": "חלב",
+            "bread": "לחם"
+          },
+          "labels": {}
+        }
+      },
+      {
+        "url": "/api/prices/cities",
+        "body": {
+          "cities": [
+            {
+              "name": "חיפה",
+              "stores": 2
+            },
+            {
+              "name": "תל אביב",
+              "stores": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "route": "/shopping/prices",
+    "name": "unmatched-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit.prices.city": "חיפה",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/prices/compare",
+        "status": 200,
+        "body": {
+          "generatedAt": "2026-11-10",
+          "origin": {
+            "label": "חיפה",
+            "lat": 0,
+            "lon": 0
+          },
+          "items": [
+            {
+              "key": "milk",
+              "canonicalId": "m",
+              "qty": 1,
+              "strict": [],
+              "pinned": false
+            },
+            {
+              "key": "bread",
+              "canonicalId": "b",
+              "qty": 1,
+              "strict": [],
+              "pinned": false
+            }
+          ],
+          "unknownItems": [],
+          "ranked": [
+            {
+              "chain": "test",
+              "chainName": "רשת בדיקה",
+              "storeId": "1",
+              "name": "סניף מרכז",
+              "city": "חיפה",
+              "address": "",
+              "distanceKm": 1,
+              "published": "2026-11-10T09:00:00Z",
+              "fresh": true,
+              "lines": {
+                "milk": {
+                  "name": "חלב טרי",
+                  "code": "1",
+                  "price": 6,
+                  "cost": 6,
+                  "packs": 1,
+                  "weighted": false,
+                  "estimate": false,
+                  "promo": null
+                },
+                "bread": null
+              },
+              "foundCount": 1,
+              "foundTotal": 6
+            }
+          ],
+          "otherStores": [],
+          "online": [],
+          "commonKeys": [
+            "milk"
+          ],
+          "verdict": {
+            "storeKey": "test:1",
+            "basis": "common",
+            "commonCount": 1,
+            "itemsMatched": 2,
+            "savingVsDearest": 3
+          },
+          "split": null,
+          "chains": [],
+          "pins": {},
+          "titles": {
+            "milk": "חלב",
+            "bread": "לחם"
+          },
+          "labels": {}
+        }
+      },
+      {
+        "url": "/api/prices/cities",
+        "body": {
+          "cities": [
+            {
+              "name": "חיפה",
+              "stores": 2
+            },
+            {
+              "name": "תל אביב",
+              "stores": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "route": "/shopping/prices",
+    "name": "unavailable-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit.prices.city": "חיפה",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/prices/compare",
+        "status": 200,
+        "body": {
+          "generatedAt": "2026-11-10",
+          "origin": {
+            "label": "חיפה",
+            "lat": 0,
+            "lon": 0
+          },
+          "items": [
+            {
+              "key": "milk",
+              "canonicalId": "m",
+              "qty": 1,
+              "strict": [],
+              "pinned": false
+            },
+            {
+              "key": "bread",
+              "canonicalId": "b",
+              "qty": 1,
+              "strict": [],
+              "pinned": false
+            }
+          ],
+          "unknownItems": [],
+          "ranked": [],
+          "otherStores": [],
+          "online": [],
+          "commonKeys": [
+            "milk"
+          ],
+          "verdict": null,
+          "split": null,
+          "chains": [],
+          "pins": {},
+          "titles": {
+            "milk": "חלב",
+            "bread": "לחם"
+          },
+          "labels": {}
+        }
+      },
+      {
+        "url": "/api/prices/cities",
+        "body": {
+          "cities": [
+            {
+              "name": "חיפה",
+              "stores": 2
+            },
+            {
+              "name": "תל אביב",
+              "stores": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "route": "/shopping/prices",
+    "name": "denied-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit.prices.city": "חיפה",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/prices/compare",
+        "status": 404,
+        "body": {
+          "error": "not found"
+        }
+      },
+      {
+        "url": "/api/prices/cities",
+        "body": {
+          "cities": [
+            {
+              "name": "חיפה",
+              "stores": 2
+            },
+            {
+              "name": "תל אביב",
+              "stores": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "route": "/shopping/prices",
+    "name": "error-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit.prices.city": "חיפה",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/prices/compare",
+        "status": 500,
+        "body": {
+          "error": "error"
+        }
+      },
+      {
+        "url": "/api/prices/cities",
+        "body": {
+          "cities": [
+            {
+              "name": "חיפה",
+              "stores": 2
+            },
+            {
+              "name": "תל אביב",
+              "stores": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "route": "/shopping/prices",
+    "name": "city-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit.prices.city": "חיפה",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/prices/compare",
+        "status": 400,
+        "body": {
+          "error": "need_location"
+        }
+      },
+      {
+        "url": "/api/prices/cities",
+        "body": {
+          "cities": [
+            {
+              "name": "חיפה",
+              "stores": 2
+            },
+            {
+              "name": "תל אביב",
+              "stores": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "route": "/shopping/prices",
+    "name": "verdict-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit.prices.city": "חיפה",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/prices/compare",
+        "status": 200,
+        "body": {
+          "generatedAt": "2026-11-10",
+          "origin": {
+            "label": "חיפה",
+            "lat": 0,
+            "lon": 0
+          },
+          "items": [
+            {
+              "key": "milk",
+              "canonicalId": "m",
+              "qty": 1,
+              "strict": [],
+              "pinned": false
+            },
+            {
+              "key": "bread",
+              "canonicalId": "b",
+              "qty": 1,
+              "strict": [],
+              "pinned": false
+            }
+          ],
+          "unknownItems": [],
+          "ranked": [
+            {
+              "chain": "test",
+              "chainName": "רשת בדיקה",
+              "storeId": "1",
+              "name": "סניף מרכז",
+              "city": "חיפה",
+              "address": "",
+              "distanceKm": 1,
+              "published": "2026-11-10T09:00:00Z",
+              "fresh": true,
+              "lines": {
+                "milk": {
+                  "name": "חלב טרי",
+                  "code": "1",
+                  "price": 6,
+                  "cost": 6,
+                  "packs": 1,
+                  "weighted": false,
+                  "estimate": false,
+                  "promo": null
+                },
+                "bread": null
+              },
+              "foundCount": 1,
+              "foundTotal": 6
+            }
+          ],
+          "otherStores": [],
+          "online": [],
+          "commonKeys": [
+            "milk"
+          ],
+          "verdict": {
+            "storeKey": "test:1",
+            "basis": "common",
+            "commonCount": 1,
+            "itemsMatched": 2,
+            "savingVsDearest": 3
+          },
+          "split": null,
+          "chains": [],
+          "pins": {},
+          "titles": {
+            "milk": "חלב",
+            "bread": "לחם"
+          },
+          "labels": {}
+        }
+      },
+      {
+        "url": "/api/prices/cities",
+        "body": {
+          "cities": [
+            {
+              "name": "חיפה",
+              "stores": 2
+            },
+            {
+              "name": "תל אביב",
+              "stores": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "route": "/shopping/prices",
+    "name": "unmatched-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit.prices.city": "חיפה",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/prices/compare",
+        "status": 200,
+        "body": {
+          "generatedAt": "2026-11-10",
+          "origin": {
+            "label": "חיפה",
+            "lat": 0,
+            "lon": 0
+          },
+          "items": [
+            {
+              "key": "milk",
+              "canonicalId": "m",
+              "qty": 1,
+              "strict": [],
+              "pinned": false
+            },
+            {
+              "key": "bread",
+              "canonicalId": "b",
+              "qty": 1,
+              "strict": [],
+              "pinned": false
+            }
+          ],
+          "unknownItems": [],
+          "ranked": [
+            {
+              "chain": "test",
+              "chainName": "רשת בדיקה",
+              "storeId": "1",
+              "name": "סניף מרכז",
+              "city": "חיפה",
+              "address": "",
+              "distanceKm": 1,
+              "published": "2026-11-10T09:00:00Z",
+              "fresh": true,
+              "lines": {
+                "milk": {
+                  "name": "חלב טרי",
+                  "code": "1",
+                  "price": 6,
+                  "cost": 6,
+                  "packs": 1,
+                  "weighted": false,
+                  "estimate": false,
+                  "promo": null
+                },
+                "bread": null
+              },
+              "foundCount": 1,
+              "foundTotal": 6
+            }
+          ],
+          "otherStores": [],
+          "online": [],
+          "commonKeys": [
+            "milk"
+          ],
+          "verdict": {
+            "storeKey": "test:1",
+            "basis": "common",
+            "commonCount": 1,
+            "itemsMatched": 2,
+            "savingVsDearest": 3
+          },
+          "split": null,
+          "chains": [],
+          "pins": {},
+          "titles": {
+            "milk": "חלב",
+            "bread": "לחם"
+          },
+          "labels": {}
+        }
+      },
+      {
+        "url": "/api/prices/cities",
+        "body": {
+          "cities": [
+            {
+              "name": "חיפה",
+              "stores": 2
+            },
+            {
+              "name": "תל אביב",
+              "stores": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "route": "/shopping/prices",
+    "name": "unavailable-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit.prices.city": "חיפה",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/prices/compare",
+        "status": 200,
+        "body": {
+          "generatedAt": "2026-11-10",
+          "origin": {
+            "label": "חיפה",
+            "lat": 0,
+            "lon": 0
+          },
+          "items": [
+            {
+              "key": "milk",
+              "canonicalId": "m",
+              "qty": 1,
+              "strict": [],
+              "pinned": false
+            },
+            {
+              "key": "bread",
+              "canonicalId": "b",
+              "qty": 1,
+              "strict": [],
+              "pinned": false
+            }
+          ],
+          "unknownItems": [],
+          "ranked": [],
+          "otherStores": [],
+          "online": [],
+          "commonKeys": [
+            "milk"
+          ],
+          "verdict": null,
+          "split": null,
+          "chains": [],
+          "pins": {},
+          "titles": {
+            "milk": "חלב",
+            "bread": "לחם"
+          },
+          "labels": {}
+        }
+      },
+      {
+        "url": "/api/prices/cities",
+        "body": {
+          "cities": [
+            {
+              "name": "חיפה",
+              "stores": 2
+            },
+            {
+              "name": "תל אביב",
+              "stores": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "route": "/shopping/prices",
+    "name": "denied-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit.prices.city": "חיפה",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/prices/compare",
+        "status": 404,
+        "body": {
+          "error": "not found"
+        }
+      },
+      {
+        "url": "/api/prices/cities",
+        "body": {
+          "cities": [
+            {
+              "name": "חיפה",
+              "stores": 2
+            },
+            {
+              "name": "תל אביב",
+              "stores": 3
+            }
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "route": "/shopping/prices",
+    "name": "error-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit.prices.city": "חיפה",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/api/prices/compare",
+        "status": 500,
+        "body": {
+          "error": "error"
+        }
+      },
+      {
+        "url": "/api/prices/cities",
+        "body": {
+          "cities": [
+            {
+              "name": "חיפה",
+              "stores": 2
+            },
+            {
+              "name": "תל אביב",
+              "stores": 3
+            }
+          ]
+        }
+      }
+    ]
+  }
+]

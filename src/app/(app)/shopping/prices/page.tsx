@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNewUi } from "@/hooks/useNewUi";
+import PricesV2 from "@/screens/prices/PricesV2";
 import Link from "next/link";
 import { ArrowRight, MapPin } from "lucide-react";
 import { toast } from "sonner";
@@ -41,7 +43,7 @@ function saveCity(c: string) {
   }
 }
 
-export default function PricesPage() {
+function PricesPageV1() {
   const { profile, loading: profileLoading } = useProfile();
   const { household, loading: householdLoading, updateHousehold } = useHousehold(profile?.household_id);
   const [view, setView] = useState<View>({ kind: "loading" });
@@ -302,4 +304,9 @@ export default function PricesPage() {
       )}
     </div>
   );
+}
+
+export default function PricesPage() {
+  const newUi = useNewUi();
+  return newUi ? <PricesV2 /> : <PricesPageV1 />;
 }
