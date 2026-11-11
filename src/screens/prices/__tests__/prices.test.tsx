@@ -24,3 +24,22 @@ it('renders V1 for unknown and off and toggles without a hook order error', asyn
  flag=true; rerender(<Page/>); expect(await screen.findByText('השוואת המחירים אינה זמינה')).toBeTruthy();
  flag=false; rerender(<Page/>); expect(screen.getByText('השוואת מחירים')).toBeTruthy();
 });
+it('searches cities and remembers the selected city', async () => {
+ const fetcher = vi.fn((url: string) => Promise.resolve(url.includes('/cities') ? response({cities:[{name:'חיפה',stores:1},{name:'ירושלים',stores:2}]}) : url.includes('city=') ? response(data) : response({error:'need_location'},400)));
+ vi.stubGlobal('fetch',fetcher); render(<PricesV2/>);
+ fireEvent.click(await screen.findByText('change'));
+ fireEvent.change(await screen.findByLabelText('search'),{target:{value:'ירו'}});
+ fireEvent.click(await screen.findByText('ירושלים'));
+ await waitFor(()=>expect(localStorage.getItem('bayit.prices.city')).toBe('ירושלים'));
+ expect(fetcher.mock.calls.some(([u])=>u.includes('city='))).toBe(true);
+});
+it('offers a retry after an error', async () => {
+ const fetcher=vi.fn().mockResolvedValueOnce(response({},500)).mockResolvedValue(response(data)); vi.stubGlobal('fetch',fetcher);
+ render(<PricesV2/>); fireEvent.click(await screen.findByText('retry'));
+ expect(await screen.findByText('לא מצאנו התאמה')).toBeTruthy();
+});
+it('undo uses the existing pin route with a null item', async () => {
+ const pinned={...data,items:[{...data.items[0],pinned:true}]}; const fetcher=vi.fn((url:string, options?:RequestInit)=>{ void url; void options; return Promise.resolve(response(pinned)); }); vi.stubGlobal('fetch',fetcher);
+ render(<PricesV2/>); fireEvent.click(await screen.findByText('undo'));
+ await waitFor(()=>expect(fetcher.mock.calls.some(([url,options])=>url==='/api/prices/pin' && JSON.parse(options?.body as string).itemCode===null)).toBe(true));
+});
