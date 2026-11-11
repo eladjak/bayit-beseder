@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useNewUi } from "@/hooks/useNewUi";
+import MealsV2 from "@/screens/meals/MealsV2";
 import { motion, AnimatePresence } from "framer-motion";
 import { RefreshCw, ChevronUp, Plus, Snowflake, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
@@ -205,7 +207,7 @@ function AddMealForm({
   );
 }
 
-export default function MealsPage() {
+function MealsPageV1() {
   const {
     loading,
     error,
@@ -442,4 +444,9 @@ export default function MealsPage() {
       )}
     </div>
   );
+}
+
+export default function MealsPage() {
+  const newUi = useNewUi();
+  return newUi ? <MealsV2 /> : <MealsPageV1 />;
 }
