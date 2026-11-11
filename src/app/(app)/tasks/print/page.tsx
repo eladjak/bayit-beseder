@@ -10,6 +10,9 @@ import { useHousehold } from "@/hooks/useHousehold";
 import { useProfile } from "@/hooks/useProfile";
 import { PrintTasks, type PrintMember } from "@/components/print-tasks";
 import "@/styles/print-v2.css";
+import { useNewUi } from "@/hooks/useNewUi";
+import { useCopy } from "@/hooks/useCopy";
+import printCopy from "@/lib/i18n/fragments/print";
 import { ilToday } from "@/lib/il-date";
 
 function PrintPageSkeleton() {
@@ -95,6 +98,8 @@ function PrintPageSkeleton() {
 
 export default function PrintPage() {
   const today = ilToday();
+  const newUi = useNewUi();
+  const { c } = useCopy(printCopy);
 
   const { profile, loading: profileLoading } = useProfile();
   const householdId = profile?.household_id ?? null;
@@ -170,7 +175,7 @@ export default function PrintPage() {
           }}
         >
           <ArrowRight size={16} />
-          חזרה למשימות
+          {newUi ? c("back") : "חזרה למשימות"}
         </Link>
       </div>
 

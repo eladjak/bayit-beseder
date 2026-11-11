@@ -1,3 +1,6 @@
+html[data-ui="v2"]:has(.print-v2) .no-print { top: 60px !important; }
+html[data-ui="v2"]:has(.print-v2) .no-print a { min-height: 44px; }
+html[data-ui="v2"]:lang(en):has(.print-v2) .no-print svg { transform: scaleX(-1); }
 html[data-ui="v2"] .print-v2 { max-width: 210mm; margin: 0 auto; padding: 5rem 1rem 2rem; color: var(--bb-ink); background: var(--bb-card); }
 html[data-ui="v2"] .print-v2-actions { margin-block-end: 1rem; }
 html[data-ui="v2"] .print-v2-actions button { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; padding-inline: 1rem; border: 1px solid currentColor; border-radius: .5rem; cursor: pointer; }
