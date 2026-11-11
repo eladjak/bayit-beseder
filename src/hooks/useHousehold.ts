@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createClient } from "@/lib/supabase";
 
 interface HouseholdData {
@@ -38,12 +38,20 @@ const MOCK_HOUSEHOLD: HouseholdData = {
  * Falls back to mock data when Supabase is not available or no household is linked.
  */
 export function useHousehold(householdId: string | null | undefined) {
-  const [household, setHousehold] = useState<HouseholdData>(MOCK_HOUSEHOLD);
+  const [household, setHousehold] = useState<HouseholdData>(() => ({ ...MOCK_HOUSEHOLD, inviteCode: "" }));
   const [loading, setLoading] = useState(true);
-
+  const [status, setStatus] = useState<"loading" | "ready" | "no-household" | "error">("loading");
+  const sequence = useRef(0);
   const fetchHousehold = useCallback(async () => {
+    const request = ++sequence.current;
+    const placeholder = { ...MOCK_HOUSEHOLD, inviteCode: "" };
+    setStatus("loading");
+    setLoading(true);
+    setHousehold(placeholder);
+    if (householdId === undefined) return;
     if (!householdId) {
-      setHousehold(MOCK_HOUSEHOLD);
+      setHousehold(placeholder);
+      setStatus("no-household");
       setLoading(false);
       return;
     }
@@ -51,18 +59,26 @@ export function useHousehold(householdId: string | null | undefined) {
     try {
       const supabase = createClient();
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("households")
         .select("name, invite_code, golden_rule_target, city")
         .eq("id", householdId)
         .single();
 
-      if (!data) {
-        setHousehold(MOCK_HOUSEHOLD);
+      if (request !== sequence.current) return;
+      if ((!data && !error) || error?.code === "PGRST116") {
+        setHousehold(placeholder);
+        setStatus("no-household");
+        return;
+      }
+      if (!data || error) {
+        setHousehold(placeholder);
+        setStatus("error");
         setLoading(false);
         return;
       }
 
+      setStatus("ready");
       setHousehold({
         name: data.name,
         inviteCode: data.invite_code,
@@ -70,14 +86,19 @@ export function useHousehold(householdId: string | null | undefined) {
         city: data.city ?? null,
       });
     } catch {
-      setHousehold(MOCK_HOUSEHOLD);
+      if (request === sequence.current) {
+        setHousehold(placeholder);
+        setStatus("error");
+      }
     } finally {
-      setLoading(false);
+      if (request === sequence.current) setLoading(false);
     }
   }, [householdId]);
 
   useEffect(() => {
+    const currentSequence = sequence;
     fetchHousehold();
+    return () => { currentSequence.current++; };
   }, [fetchHousehold]);
 
   const updateHousehold = useCallback(
@@ -106,5 +127,5 @@ export function useHousehold(householdId: string | null | undefined) {
     [householdId]
   );
 
-  return { household, loading, updateHousehold };
+  return { household, loading, updateHousehold, status, isReal: status === "ready", retry: fetchHousehold };
 }

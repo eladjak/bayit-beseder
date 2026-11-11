@@ -84,7 +84,7 @@ export function useAdvancedStats({
 }: UseAdvancedStatsInput) {
   // ── 4-week trend ───────────────────────────────────────────────────────────
   const weeklyTrend = useMemo((): WeeklyTrendPoint[] => {
-    if (completions.length === 0) return buildMockTrend();
+    if (completions.length === 0) return [];
 
     const todayDate = new Date(today);
     const currentWeekStart = isoWeekStart(todayDate);
@@ -125,7 +125,7 @@ export function useAdvancedStats({
 
   // ── Category distribution ──────────────────────────────────────────────────
   const categoryDistribution = useMemo((): CategoryDistPoint[] => {
-    if (completions.length === 0) return buildMockCategoryDist();
+    if (completions.length === 0) return [];
 
     const counts: Record<string, number> = {};
 
@@ -147,7 +147,7 @@ export function useAdvancedStats({
       }))
       .sort((a, b) => b.value - a.value);
 
-    return result.length > 0 ? result : buildMockCategoryDist();
+    return result;
   }, [completions, tasks, categoryIdToKey]);
 
   // ── Activity heatmap (last 28 days = 4 weeks × 7 days) ────────────────────
@@ -265,26 +265,4 @@ export function useAdvancedStats({
   }, [completions, tasks, categoryIdToKey, today, userId]);
 
   return { weeklyTrend, categoryDistribution, heatmapData, personalRecords };
-}
-
-// ── Mock data for demo mode ────────────────────────────────────────────────────
-
-function buildMockTrend(): WeeklyTrendPoint[] {
-  return [
-    { week: "3 שב׳", myPct: 60, avgPct: 55, myCount: 18, totalCount: 33 },
-    { week: "2 שב׳", myPct: 72, avgPct: 68, myCount: 22, totalCount: 41 },
-    { week: "שב׳ שעבר", myPct: 65, avgPct: 70, myCount: 20, totalCount: 42 },
-    { week: "השבוע", myPct: 80, avgPct: 75, myCount: 24, totalCount: 45 },
-  ];
-}
-
-function buildMockCategoryDist(): CategoryDistPoint[] {
-  return [
-    { key: "kitchen", name: "מטבח", value: 35, color: CATEGORY_COLORS.kitchen, icon: CATEGORY_ICONS.kitchen },
-    { key: "bathroom", name: "אמבטיה", value: 20, color: CATEGORY_COLORS.bathroom, icon: CATEGORY_ICONS.bathroom },
-    { key: "living", name: "סלון", value: 15, color: CATEGORY_COLORS.living, icon: CATEGORY_ICONS.living },
-    { key: "laundry", name: "כביסה", value: 15, color: CATEGORY_COLORS.laundry, icon: CATEGORY_ICONS.laundry },
-    { key: "outdoor", name: "חיצוני", value: 10, color: CATEGORY_COLORS.outdoor, icon: CATEGORY_ICONS.outdoor },
-    { key: "general", name: "כללי", value: 5, color: CATEGORY_COLORS.general, icon: CATEGORY_ICONS.general },
-  ];
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Shield, Check, Clock, Loader2, AlertTriangle } from "lucide-react";
@@ -8,7 +8,8 @@ import { getCategoryColor, getCategoryLabel } from "@/lib/seed-data";
 import { createClient } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
-import { isTaskOverdue } from "@/lib/task-flags";
+import { useCompletions } from "@/hooks/useCompletions";
+import { isRecurring, isTaskOverdue } from "@/lib/task-flags";
 import { ilToday } from "@/lib/il-date";
 
 interface EmergencyTask {
@@ -21,6 +22,11 @@ interface EmergencyTask {
   /** Live column is `text` ("true"/"false") — read via isRecurring, never `!!`. */
   recurring: unknown;
 }
+
+const COPY = {
+  he: { failure: "לא הצלחנו לשמור. נסו שוב.", retry: "נסו שוב", pending: "שומר…", offline: "אין חיבור לאינטרנט. התחברו ונסו שוב." },
+  en: { failure: "We couldn't save. Please try again.", retry: "Try again", pending: "Saving…", offline: "No internet connection. Reconnect and try again." },
+};
 
 // Emergency mode state is stored in localStorage since the households table
 // does not have an emergency_mode column in the production schema.
@@ -37,9 +43,16 @@ function setStoredEmergencyMode(value: boolean): void {
 }
 
 export default function EmergencyPage() {
-  const { t } = useTranslation();
+  const completions = useCompletions();
+  const { t, locale } = useTranslation();
+  const copy = COPY[locale];
+  const [userId, setUserId] = useState<string | null>(null);
+  const [overrides, setOverrides] = useState<Record<string, boolean>>({});
+  const [pending, setPending] = useState<Set<string>>(new Set());
+  const [failures, setFailures] = useState<Set<string>>(new Set());
   const [tasks, setTasks] = useState<EmergencyTask[]>([]);
-  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
+  const pendingRef = useRef(new Set<string>());
+  const [offlineFailures, setOfflineFailures] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [emergencyMode, setEmergencyMode] = useState(false);
   const [togglingEmergency, setTogglingEmergency] = useState(false);
@@ -58,14 +71,14 @@ export default function EmergencyPage() {
         return;
       }
 
-      // Fetch today's and overdue pending tasks from the tasks table
+      setUserId(user.id);
+      // Fetch today's and overdue tasks from the tasks table
       const today = ilToday();
-      const { data: pendingTasks } = await supabase
+      const query = supabase
         .from("tasks")
         .select("id, title, category_id, due_date, status, points, recurring")
-        .lte("due_date", today)
-        .eq("status", "pending")
-        .order("due_date", { ascending: true });
+        .lte("due_date", today);
+      const { data: pendingTasks } = await query.in("status", ["pending", "completed"]).order("due_date", { ascending: true });
 
       if (pendingTasks && pendingTasks.length > 0) {
         // In emergency mode, show all pending + overdue tasks as essential
@@ -91,44 +104,44 @@ export default function EmergencyPage() {
     fetchData();
   }, [fetchData]);
 
-  const completedCount = completedIds.size;
-  const totalCount = tasks.length;
+  function isDone(task: EmergencyTask) {
+    return overrides[task.id] ?? (isRecurring(task.recurring)
+      ? completions.isCompletedToday(task.id) : task.status === "completed");
+  }
+  // Old completed one-time tasks must not inflate today's progress.
+  const visibleTasks = tasks.filter((task) => isRecurring(task.recurring) ||
+    task.status !== "completed" || completions.isCompletedToday(task.id) || overrides[task.id] !== undefined);
+  const completedCount = visibleTasks.filter(isDone).length;
+  const totalCount = visibleTasks.length;
   const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   async function toggleTask(taskId: string) {
-    setCompletedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(taskId)) {
-        next.delete(taskId);
-      } else {
-        next.add(taskId);
+    const task = tasks.find((item) => item.id === taskId);
+    if (!task || pendingRef.current.has(taskId)) return;
+    if (!userId) {
+      setFailures((prev) => new Set(prev).add(taskId));
+      return;
+    }
+    const done = isDone(task);
+    if (done && !(overrides[taskId] === true || completions.isCompletedToday(taskId))) return;
+    pendingRef.current.add(taskId);
+    setPending((prev) => new Set(prev).add(taskId));
+    setFailures((prev) => { const next = new Set(prev); next.delete(taskId); return next; });
+    setOfflineFailures((prev) => { const next = new Set(prev); next.delete(taskId); return next; });
+    try {
+      const success = done ? await completions.undoComplete(taskId)
+        : await completions.markComplete({ taskId, userId, recurring: isRecurring(task.recurring) });
+      if (success) setOverrides((prev) => ({ ...prev, [taskId]: !done }));
+      else {
+        setFailures((prev) => new Set(prev).add(taskId));
+        if (!navigator.onLine) setOfflineFailures((prev) => new Set(prev).add(taskId));
       }
-      return next;
-    });
-
-    // Mark as completed in DB
-    const isNowCompleted = !completedIds.has(taskId);
-    if (isNowCompleted) {
-      try {
-        const supabase = createClient();
-        await supabase
-          .from("tasks")
-          .update({ status: "completed" })
-          .eq("id", taskId);
-      } catch {
-        // Silently ignore - optimistic update still works
-      }
-    } else {
-      // Undo completion
-      try {
-        const supabase = createClient();
-        await supabase
-          .from("tasks")
-          .update({ status: "pending" })
-          .eq("id", taskId);
-      } catch {
-        // Silently ignore
-      }
+    } catch {
+      setFailures((prev) => new Set(prev).add(taskId));
+      if (!navigator.onLine) setOfflineFailures((prev) => new Set(prev).add(taskId));
+    } finally {
+      pendingRef.current.delete(taskId);
+      setPending((prev) => { const next = new Set(prev); next.delete(taskId); return next; });
     }
   }
 
@@ -141,7 +154,7 @@ export default function EmergencyPage() {
     setTogglingEmergency(false);
   }
 
-  if (loading) {
+  if (loading || completions.loading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -239,10 +252,11 @@ export default function EmergencyPage() {
           {/* Emergency Tasks */}
           <div className="space-y-2">
             <h2 className="font-semibold text-sm text-foreground px-1">
-              {t("emergency.essentialOnly")} {tasks.length === 0 && "— אין פתוחות, כל הכבוד! 🎉"}
+              {t("emergency.essentialOnly")} {visibleTasks.length === 0 && "— אין פתוחות, כל הכבוד! 🎉"}
             </h2>
-            {tasks.map((task: EmergencyTask, i: number) => {
-              const isCompleted = completedIds.has(task.id);
+            {visibleTasks.map((task: EmergencyTask, i: number) => {
+              const isCompleted = isDone(task);
+              const cannotUndo = isCompleted && overrides[task.id] !== true && !completions.isCompletedToday(task.id);
               return (
                 <motion.div
                   key={task.id}
@@ -255,12 +269,17 @@ export default function EmergencyPage() {
                 >
                   <button
                     onClick={() => toggleTask(task.id)}
-                    className={`w-7 h-7 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                    role="checkbox"
+                    aria-label={task.title}
+                    aria-checked={isCompleted}
+                    disabled={pending.has(task.id) || cannotUndo}
+                    className={`w-11 h-11 focus-visible:outline focus-visible:outline-2 disabled:opacity-60 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                       isCompleted
                         ? "bg-blue-500 border-blue-500"
                         : "border-blue-300 hover:border-blue-500"
                     }`}
                   >
+                    {pending.has(task.id) && <span className="sr-only">{copy.pending}</span>}
                     {isCompleted && (
                       <Check className="w-4 h-4 text-white" strokeWidth={3} />
                     )}
@@ -275,6 +294,12 @@ export default function EmergencyPage() {
                     >
                       {task.title}
                     </p>
+                    {<div aria-live="polite">
+                      {failures.has(task.id) && <div className="text-sm text-red-600 dark:text-red-400">
+                        <p>{offlineFailures.has(task.id) ? copy.offline : copy.failure}</p>
+                        <button className="min-h-11 min-w-11 underline focus-visible:outline focus-visible:outline-2" disabled={pending.has(task.id)} onClick={() => toggleTask(task.id)}>{copy.retry}</button>
+                      </div>}
+                    </div>}
                     <div className="flex items-center gap-2 mt-0.5">
                       <span
                         className="text-[10px] px-1.5 py-0.5 rounded-full text-white font-medium"
@@ -295,7 +320,7 @@ export default function EmergencyPage() {
               );
             })}
 
-            {tasks.length === 0 && (
+            {visibleTasks.length === 0 && (
               <div className="text-center py-8 text-muted text-sm">
                 <Shield className="w-10 h-10 mx-auto mb-2 text-blue-300" />
                 <p>{t("emergency.allDone")}</p>
