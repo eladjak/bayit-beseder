@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef, useCallback } from "react";
+import { useMemo, useState, useRef, useCallback } from "react";
 import Image from "next/image";
-import { Calendar } from "lucide-react";
+import { Calendar, CircleAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useZoneConfig } from "@/hooks/useZoneConfig";
 import { ZoneDaySummary } from "@/components/weekly/zone-day-summary";
+import { useCompletions } from "@/hooks/useCompletions";
+import { isRecurring } from "@/lib/task-flags";
+import { useCopy } from "@/hooks/useCopy";
+import honestyCopy from "@/lib/i18n/fragments/honesty-weekly-stats";
 import { useTasks } from "@/hooks/useTasks";
 import { useProfile } from "@/hooks/useProfile";
 import { usePartner } from "@/hooks/usePartner";
@@ -32,10 +36,10 @@ import {
   getWeekRange,
   type Suggestion,
 } from "@/lib/smart-scheduler";
-import type { TaskRow, TaskInsert } from "@/lib/types/database";
+import type { TaskRow } from "@/lib/types/database";
 import { haptic } from "@/lib/haptics";
 import { useTranslation } from "@/hooks/useTranslation";
-import { CATEGORY_ICONS } from "@/lib/categories";
+import { CATEGORY_ICONS, CATEGORY_LABELS } from "@/lib/categories";
 import {
   DndContext,
   closestCenter,
@@ -52,10 +56,7 @@ import { WeeklySmartSuggestions } from "@/components/weekly/weekly-smart-suggest
 import { WeeklyZonePanel } from "@/components/weekly/weekly-zone-panel";
 import { WeeklyStats } from "@/components/weekly/weekly-stats";
 import { WeeklyHeader } from "@/components/weekly/weekly-header";
-import {
-  generateMockWeeklyTasks,
-  getCategoryFromId,
-} from "@/lib/weekly-mock-data";
+
 import { addDaysStr, ilDay, ilToday } from "@/lib/il-date";
 
 export default function WeeklyPage() {
@@ -69,7 +70,10 @@ export default function WeeklyPage() {
   );
   const [showSuggestions, setShowSuggestions] = useState(true);
 
-  const [mockTasks] = useState(generateMockWeeklyTasks);
+  const { c } = useCopy(honestyCopy);
+  const addAreaRef = useRef<HTMLDivElement>(null);
+  const completingTasks = useRef(new Set<string>());
+  const [completionError, setCompletionError] = useState<TaskRow | null>(null);
 
   const startOfWeek = useMemo(() => {
     // Sunday of the current week in Israel, as a local-midnight Date.
@@ -98,6 +102,7 @@ export default function WeeklyPage() {
 
   const { tasks, loading, createTask, updateTask, refetch } = useTasks({});
 
+  const { markComplete, undoComplete, isCompletedToday, refetch: refetchCompletions } = useCompletions({ limit: 500 });
   const { canUse } = useSubscription(profile?.household_id ?? null);
   const zoneConfig = useZoneConfig();
   const wizard = useWeeklyGenerator();
@@ -179,30 +184,17 @@ export default function WeeklyPage() {
     }
   }, [wizard, refetch, t]);
 
-  const seedAttempted = useRef(false);
-  useEffect(() => {
-    if (seedAttempted.current || loading || tasks.length > 0 || !profile) return;
-    seedAttempted.current = true;
-    fetch("/api/seed", { method: "POST" })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.seeded) refetch();
-      })
-      .catch(() => {});
-  }, [loading, tasks.length, profile, refetch]);
-
-  const isRealData = !loading && tasks.length > 0;
+  const isRealData = !loading;
 
   const weekTasks = useMemo(() => {
     if (loading) return [];
-    if (tasks.length === 0) return mockTasks;
     const startStr = ilDay(startOfWeek);
     const endStr = ilDay(endOfWeek);
     return tasks.filter((t) => {
       if (!t.due_date) return false;
       return t.due_date >= startStr && t.due_date <= endStr;
-    });
-  }, [tasks, loading, startOfWeek, endOfWeek, mockTasks]);
+    }).map((task) => isRecurring(task.recurring) && task.due_date === todayStr && isCompletedToday(task.id) ? { ...task, status: "completed" as const } : task);
+  }, [tasks, loading, startOfWeek, endOfWeek, isCompletedToday, todayStr]);
 
   const dailyLoads = useMemo(
     () =>
@@ -395,24 +387,34 @@ export default function WeeklyPage() {
 
   const handleToggleComplete = useCallback(
     async (task: TaskRow) => {
-      if (task.id.startsWith("mock-")) {
-        toast.info(t("weekly.dbRequired"));
+      if (completingTasks.current.has(task.id)) return;
+      if (!profile?.id) { setCompletionError(task); return; }
+      completingTasks.current.add(task.id);
+      try {
+      haptic("tap");
+      const completed = task.status === "completed";
+      const result = completed
+        ? await undoComplete(task.id)
+        : await markComplete({ taskId: task.id, userId: profile.id, recurring: isRecurring(task.recurring) });
+      if (!result || (typeof result === "object" && result.id.startsWith("offline-"))) {
+        setCompletionError(task);
         return;
       }
-      const newStatus = task.status === "completed" ? "pending" : "completed";
-      haptic("tap");
-      const ok = await updateTask(task.id, { status: newStatus });
-      if (ok) {
-        if (newStatus === "completed") {
-          haptic("success");
-          toast.success(t("weekly.completed"));
-        }
-      } else {
-        toast.error(t("weekly.updateFailed"));
+      setCompletionError(null);
+      await Promise.all([refetch(), refetchCompletions()]);
+      if (!completed) {
+        haptic("success");
+        toast.success(t("weekly.completed"));
+      }
+      } catch {
+        setCompletionError(task);
+      } finally {
+        completingTasks.current.delete(task.id);
       }
     },
-    [updateTask, t]
+    [profile, markComplete, undoComplete, refetch, refetchCompletions, t]
   );
+  const retryCompletion = () => { if (completionError) void handleToggleComplete(completionError); };
 
   const weekRange = getWeekRange(startOfWeek);
 
@@ -484,21 +486,10 @@ export default function WeeklyPage() {
           </div>
         )}
 
-        {/* Demo mode banner */}
-        {!isRealData && !loading && (
-          <div className="card-elevated p-4 text-center bg-amber-50 dark:bg-amber-950/20 border border-amber-200/50 dark:border-amber-800/30 rounded-xl">
-            <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-              {t("weekly.demoBannerTitle")}
-            </p>
-            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-              {t("weekly.demoBannerDesc")}
-            </p>
-            <a
-              href="/login"
-              className="inline-block mt-2 px-4 py-1.5 rounded-xl gradient-primary text-white text-xs font-semibold"
-            >
-              {t("weekly.demoBannerCta")}
-            </a>
+        {!loading && weekTasks.length === 0 && (
+          <div className="card-elevated p-5 text-center">
+            <p className="font-medium">{c("weeklyEmpty")}</p>
+            <button type="button" className="mt-3 min-h-11 px-4 rounded-xl gradient-primary text-white" onClick={() => addAreaRef.current?.querySelector<HTMLButtonElement>(`button[aria-label="${t("weekly.addTaskToDay")}"]`)?.click()}>{c("weeklyAdd")}</button>
           </div>
         )}
 
@@ -523,10 +514,10 @@ export default function WeeklyPage() {
           onDragStart={handleDndDragStart}
           onDragEnd={handleDndDragEnd}
         >
-          <div className="space-y-3">
+          <div className="space-y-3" ref={addAreaRef}>
             {dailyLoads.map((dayLoad, idx) => (
+              <div key={dayLoad.date}>
               <WeeklyDayCard
-                key={dayLoad.date}
                 dayLoad={dayLoad}
                 index={idx}
                 isRealData={isRealData}
@@ -544,6 +535,13 @@ export default function WeeklyPage() {
                 onUnclaimTask={handleUnclaimTask}
                 zoneMode={zoneConfig.zoneMode}
               />
+              {completionError && dayLoad.tasks.some((task) => task.id === completionError.id) && (
+                <div role="alert" className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-base text-red-800 dark:bg-red-950 dark:text-red-200">
+                  <CircleAlert aria-hidden="true" className="size-5 shrink-0" />
+                  {c("completionError", { title: completionError.title })} <button type="button" className="underline min-h-11 px-2" onClick={retryCompletion}>{c("retry")}</button>
+                </div>
+              )}
+              </div>
             ))}
           </div>
 
@@ -552,7 +550,7 @@ export default function WeeklyPage() {
             {activeDragTask && (
               <div className="bg-primary/15 rounded-lg px-3 py-2 text-xs shadow-lg border-2 border-primary opacity-90 text-foreground">
                 <span className="ms-1">
-                  {CATEGORY_ICONS[getCategoryFromId(activeDragTask.task.category_id)] ?? "🏠"}
+                  {CATEGORY_ICONS[(activeDragTask.task.category_id && activeDragTask.task.category_id in CATEGORY_LABELS ? activeDragTask.task.category_id : "general")] ?? "🏠"}
                 </span>
                 {activeDragTask.task.title}
               </div>
@@ -561,13 +559,13 @@ export default function WeeklyPage() {
         </DndContext>
 
         {/* This Week's Summary */}
-        <WeeklyStats
+        {weekTasks.length > 0 && <WeeklyStats
           stats={stats}
           dailyLoads={dailyLoads}
           calendarConnected={calendarConnected}
           calendarEvents={calendarEvents}
           partnerName={partner?.name}
-        />
+        />}
       </div>
 
       {/* Weekly Generator Modal */}
