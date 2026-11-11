@@ -98,3 +98,9 @@ suite('meal read', () => {
   expect(await screen.findByText('noMeal')).toBeTruthy();
  });
 });
+
+it('shows offline guidance instead of household data when disconnected', () => {
+  Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
+  try { render(<TodayV2/>); expect(screen.getByRole('alert').textContent).toBe('offline'); }
+  finally { Reflect.deleteProperty(navigator, 'onLine'); }
+});

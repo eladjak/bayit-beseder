@@ -48,6 +48,7 @@ export function TodayV2() {
  const retry = () => { void refetchProfile(); void home.retry(); void tasks.refetch(); void completions.refetch(); };
  const base = 'mx-auto flex w-full max-w-5xl flex-col gap-5 px-4 py-6 text-bb-ink';
  if (profileLoading || home.loading || tasks.loading || completions.loading) return <main className={base} aria-busy="true">{c('loading')}</main>;
+ if (typeof navigator !== 'undefined' && !navigator.onLine) return <main className={base}><p role="alert">{c('offline')}</p><button className="min-h-11 self-start text-bb-primary underline focus-visible:outline-2" onClick={retry}>{c('retry')}</button></main>;
  if (profileError || home.status === 'error' || tasks.error || completions.error) return <main className={base}><p role="alert">{typeof navigator !== 'undefined' && !navigator.onLine ? c('offline') : c('error')}</p><button className="min-h-11 self-start text-bb-primary underline focus-visible:outline-2" onClick={retry}>{c('retry')}</button></main>;
  if (!profile?.household_id || home.status === 'no-household') return <main className={base}><h1 className="text-2xl font-bold">{c('noHome')}</h1><Link href="/settings" className="inline-flex min-h-11 items-center text-bb-primary underline focus-visible:outline-2">{c('setup')}</Link></main>;
  const count = shopping.items.filter(item => !item.checked).length;
