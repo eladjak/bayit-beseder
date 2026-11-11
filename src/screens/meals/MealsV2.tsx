@@ -56,7 +56,7 @@ export default function MealsV2() {
   }
   const noHousehold = planner.error?.includes('משק בית');
   const error = offline ? c('offline') : noHousehold ? c('household') : c('error');
-  return <main dir={locale === 'he' ? 'rtl' : 'ltr'} className="mx-auto max-w-3xl space-y-6 px-5 pb-28 pt-6 text-bb-ink sm:px-8">
+  return <div dir={locale === 'he' ? 'rtl' : 'ltr'} className="mx-auto max-w-3xl space-y-6 px-5 pb-28 pt-6 text-bb-ink sm:px-8">
     <header><h1 className="text-bb-2xl font-bold">{c('title')}</h1><p className="text-bb-ink-2">{c('subtitle')}</p></header>
     {offline && !planner.error && <p role="status" className="rounded-bb-md bg-bb-warning-50 p-4 text-bb-warning-ink">{c('offline')}</p>}
     {planner.loading && !planner.week && <p role="status">{c('load')}</p>}
@@ -70,5 +70,5 @@ export default function MealsV2() {
     <Sheet open={!!day} title={day?.mealName ?? c('noMeal')} onClose={() => setDay(null)}>{day && <div className="space-y-3 pt-4"><p>{day.date}</p>{alternatives === null ? (day.mealId && <Button onClick={() => void openAlternatives(day)}>{c('change')}</Button>) : <><p>{c('alternatives')}</p>{alternatives.length === 0 && <p>{c('none')}</p>}{alternatives.map(alt => <button disabled={busy} key={alt.id} className={row} onClick={() => void swap(day, alt.id)}>{alt.name}</button>)}</>}</div>}</Sheet>
     <Dialog open={confirm} title={c('confirmTitle')} onClose={() => setConfirm(false)}><div className="space-y-4 pt-4"><p>{c('confirmText')}</p><div className="flex flex-wrap gap-2"><Button onClick={() => {setConfirm(false); void planner.regenerateWeek();}}>{c('confirm')}</Button><Button variant="quiet" onClick={() => setConfirm(false)}>{c('cancel')}</Button></div></div></Dialog>
     <Sheet open={preview} title={c('preview')} onClose={() => setPreview(false)}><div className="space-y-3 pt-4"><p>{c('choose')}</p>{shoppingLoading && <p role="status">{c('load')}</p>}{shoppingError && <div role="alert"><p>{c('shoppingError')}</p><Button variant="quiet" onClick={() => void loadShopping()}>{c('retry')}</Button></div>}{!shoppingLoading && !shoppingError && items.length === 0 && <p>{c('noItems')}</p>}<ul>{items.map((item, i) => <li key={`${item.title}-${i}`}><label className="flex min-h-12 cursor-pointer items-center gap-3"><input className="size-11 accent-bb-primary" type="checkbox" checked={selected[i] ?? false} onChange={e => setSelected(s => s.map((v, n) => n === i ? e.target.checked : v))} /><span>{item.title}{item.quantity ? ` · ${item.quantity} ${item.unit ?? ''}` : ''}</span></label></li>)}</ul>{items.length > 0 && <Button disabled={busy || !selected.some(Boolean)} onClick={() => void addShopping()}>{c('add')}</Button>}</div></Sheet>
-  </main>;
+  </div>;
 }
