@@ -1,4 +1,56 @@
 @import "tailwindcss";
+@import "../styles/bb-tokens.css";
+
+@theme inline {
+  --color-bb-primary: var(--bb-primary);
+  --color-bb-primary-hover: var(--bb-primary-hover);
+  --color-bb-primary-50: var(--bb-primary-50);
+  --color-bb-on-primary: var(--bb-on-primary);
+  --color-bb-ink: var(--bb-ink);
+  --color-bb-ink-2: var(--bb-ink-2);
+  --color-bb-ink-3: var(--bb-ink-3);
+  --color-bb-ink-4: var(--bb-ink-4);
+  --color-bb-paper: var(--bb-paper);
+  --color-bb-card: var(--bb-card);
+  --color-bb-card-hover: var(--bb-card-hover);
+  --color-bb-line: var(--bb-line);
+  --color-bb-line-strong: var(--bb-line-strong);
+  --color-bb-honey: var(--bb-honey);
+  --color-bb-peach: var(--bb-peach);
+  --color-bb-coral: var(--bb-coral);
+  --color-bb-sky: var(--bb-sky);
+  --color-bb-mint: var(--bb-mint);
+  --color-bb-honey-50: var(--bb-honey-50);
+  --color-bb-peach-50: var(--bb-peach-50);
+  --color-bb-coral-50: var(--bb-coral-50);
+  --color-bb-sky-50: var(--bb-sky-50);
+  --color-bb-mint-50: var(--bb-mint-50);
+  --color-bb-success-ink: var(--bb-success-ink);
+  --color-bb-success-50: var(--bb-success-50);
+  --color-bb-warning-ink: var(--bb-warning-ink);
+  --color-bb-warning-50: var(--bb-warning-50);
+  --color-bb-danger-ink: var(--bb-danger-ink);
+  --color-bb-danger-50: var(--bb-danger-50);
+  --radius-bb-sm: var(--bb-r-sm);
+  --radius-bb-md: var(--bb-r-md);
+  --radius-bb-lg: var(--bb-r-lg);
+  --radius-bb-pill: var(--bb-r-pill);
+  --shadow-bb-1: var(--bb-shadow-1);
+  --shadow-bb-2: var(--bb-shadow-2);
+  --shadow-bb-3: var(--bb-shadow-3);
+  --text-bb-xs: var(--bb-text-xs);
+  --text-bb-xs--line-height: var(--bb-text-xs-line-height);
+  --text-bb-sm: var(--bb-text-sm);
+  --text-bb-sm--line-height: var(--bb-text-sm-line-height);
+  --text-bb-base: var(--bb-text-base);
+  --text-bb-base--line-height: var(--bb-text-base-line-height);
+  --text-bb-lg: var(--bb-text-lg);
+  --text-bb-lg--line-height: var(--bb-text-lg-line-height);
+  --text-bb-xl: var(--bb-text-xl);
+  --text-bb-xl--line-height: var(--bb-text-xl-line-height);
+  --text-bb-2xl: var(--bb-text-2xl);
+  --text-bb-2xl--line-height: var(--bb-text-2xl-line-height);
+}
 
 /* Enable Tailwind dark mode using the 'dark' class on <html> */
 @custom-variant dark (&:where(.dark, .dark *));
