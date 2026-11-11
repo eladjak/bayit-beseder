@@ -37,4 +37,5 @@ try {
  const seconds=(performance.now()-start)/1000;
  const state=await fetch(`${fake}/__state`).then(r=>r.json());
  console.log(JSON.stringify({seconds, fakeWrites:state.writes, note:'Seed route simulated against in-memory fake; completion uses fake RPC.'}));
+ if (seconds >= 60) throw new Error('First confirmed completion exceeded 60 seconds');
 } finally { await browser.close(); }
