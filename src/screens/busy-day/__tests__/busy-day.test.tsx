@@ -58,10 +58,12 @@ describe('busy day contract', () => {
   });
   it('renders the old page when unknown or off, including transitions', async () => {
     const view = render(<EmergencyPage />);
+    expect(await screen.findByRole('heading', { name: /emergency.title/ })).toBeTruthy();
     expect(screen.queryByText('יום עמוס? רק מה שחייב היום')).toBeNull();
     state.flag = true; view.rerender(<EmergencyPage />);
     expect(await screen.findByText('יום עמוס? רק מה שחייב היום')).toBeTruthy();
     state.flag = false; view.rerender(<EmergencyPage />);
+    expect(await screen.findByRole('heading', { name: /emergency.title/ })).toBeTruthy();
     expect(screen.queryByText('יום עמוס? רק מה שחייב היום')).toBeNull();
   });
 });
