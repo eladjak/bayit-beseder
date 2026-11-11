@@ -1,0 +1,284 @@
+[
+  {
+    "route": "/shopping",
+    "name": "list-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "normal",
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "רשימת קניות"
+      }
+    ]
+  },
+  {
+    "route": "/shopping",
+    "name": "suggestions-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "normal",
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "רשימת קניות"
+      },
+      {
+        "type": "fill",
+        "role": "combobox",
+        "name": "הוספת פריט",
+        "value": "חל"
+      }
+    ]
+  },
+  {
+    "route": "/shopping",
+    "name": "clear-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "normal",
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "רשימת קניות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "נקנו",
+        "exact": false
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "ניקוי הפריטים שנקנו"
+      }
+    ]
+  },
+  {
+    "route": "/shopping",
+    "name": "empty-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "empty",
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "רשימת קניות"
+      }
+    ]
+  },
+  {
+    "route": "/shopping",
+    "name": "list-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "normal",
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Shopping list"
+      }
+    ]
+  },
+  {
+    "route": "/shopping",
+    "name": "suggestions-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "normal",
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Shopping list"
+      },
+      {
+        "type": "fill",
+        "role": "combobox",
+        "name": "Add item",
+        "value": "mi"
+      }
+    ]
+  },
+  {
+    "route": "/shopping",
+    "name": "clear-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "normal",
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Shopping list"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Bought",
+        "exact": false
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Clear bought items"
+      }
+    ]
+  },
+  {
+    "route": "/shopping",
+    "name": "empty-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "empty",
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Shopping list"
+      }
+    ]
+  }
+]

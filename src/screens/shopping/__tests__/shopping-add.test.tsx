@@ -15,6 +15,11 @@ describe('shopping add', () => {
   fireEvent.keyDown(input, {key:'Enter'});
   await waitFor(() => expect(add).toHaveBeenCalledWith('חלב'));
  });
+ it('finds Hebrew suggestions with niqqud and a small typo', () => {
+  render(<ShoppingAdd locale="he" onAdd={vi.fn()} />); const input = screen.getByRole('combobox');
+  fireEvent.change(input, {target:{value:'חָלב'}}); expect(screen.getAllByRole('option').some(option => option.textContent === 'חלב')).toBe(true);
+  fireEvent.change(input, {target:{value:'חלפ'}}); expect(screen.getAllByRole('option').some(option => option.textContent === 'חלב')).toBe(true);
+ });
  it('adds an arbitrary item on Enter', async () => {
   const add = vi.fn().mockResolvedValue({ok:true}); render(<ShoppingAdd locale="he" onAdd={add} />);
   fireEvent.change(screen.getByRole('combobox'), {target:{value:'פריט מיוחד'}}); fireEvent.submit(screen.getByRole('combobox').closest('form')!);
@@ -34,6 +39,9 @@ describe('shopping actions', () => {
  beforeEach(() => { vi.clearAllMocks(); });
  it('clears bought after five seconds and undo cancels', () => {
   vi.useFakeTimers(); const view = render(<ShoppingV2 />); fireEvent.click(screen.getByRole('button',{name:/נקנו/})); fireEvent.click(screen.getByRole('button',{name:'ניקוי הפריטים שנקנו'})); expect(mocks.remove).not.toHaveBeenCalled(); mocks.toast.mock.calls.at(-1)![1].action.onClick(); vi.advanceTimersByTime(5000); expect(mocks.remove).not.toHaveBeenCalled(); view.unmount(); vi.useRealTimers();
+ });
+ it('sends clear only after five seconds', () => {
+  vi.useFakeTimers(); const view = render(<ShoppingV2 />); fireEvent.click(screen.getByRole('button',{name:/נקנו/})); fireEvent.click(screen.getByRole('button',{name:'ניקוי הפריטים שנקנו'})); vi.advanceTimersByTime(4999); expect(mocks.remove).not.toHaveBeenCalled(); vi.advanceTimersByTime(1); expect(mocks.remove).toHaveBeenCalledWith('2'); view.unmount(); vi.useRealTimers();
  });
  it('flushes clear on pagehide', () => {
   vi.useFakeTimers(); const view = render(<ShoppingV2 />); fireEvent.click(screen.getByRole('button',{name:/נקנו/})); fireEvent.click(screen.getByRole('button',{name:'ניקוי הפריטים שנקנו'})); fireEvent(window,new Event('pagehide')); expect(mocks.remove).toHaveBeenCalledWith('2'); view.unmount(); vi.useRealTimers();
