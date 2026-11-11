@@ -249,6 +249,12 @@ export type Database = {
           },
         ];
       };
+      ui_v2_households: {
+        Row: { household_id: string; added_at: string | null; added_by: string | null };
+        Insert: { household_id: string; added_at?: string | null; added_by?: string | null };
+        Update: { household_id?: string; added_at?: string | null; added_by?: string | null };
+        Relationships: [{ foreignKeyName: "ui_v2_households_household_id_fkey"; columns: ["household_id"]; isOneToOne: true; referencedRelation: "households"; referencedColumns: ["id"] }];
+      };
       households: {
         Row: {
           id: string;
