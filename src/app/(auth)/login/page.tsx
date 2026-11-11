@@ -212,7 +212,7 @@ function LoginContent() {
                     onChange={(e) => setResetEmail(e.target.value)}
                     aria-invalid={resetError ? true : undefined}
                     aria-describedby={resetError ? "reset-email-error" : undefined}
-                    className={`w-full bg-background/60 dark:bg-background/80 border rounded-xl pe-10 ps-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 transition-all ${
+                    className={`w-full bg-background/60 dark:bg-background/80 border rounded-xl px-10 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 transition-all ${
                       resetError
                         ? "border-danger focus:border-danger focus:ring-danger/20"
                         : "border-border focus:border-primary focus:ring-primary/20"
@@ -277,7 +277,7 @@ function LoginContent() {
                       onChange={(e) => setEmail(e.target.value)}
                       aria-invalid={errors.email ? true : undefined}
                       aria-describedby={errors.email ? "login-email-error" : undefined}
-                      className={`w-full bg-background/60 dark:bg-background/80 border rounded-xl pe-10 ps-4 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full bg-background/60 dark:bg-background/80 border rounded-xl px-10 py-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 transition-all ${
                         errors.email
                           ? "border-danger focus:border-danger focus:ring-danger/20"
                           : "border-border focus:border-primary focus:ring-primary/20"
@@ -424,7 +424,7 @@ function LoginContent() {
         </div>
 
         <p className="text-xs text-white/90 text-center">
-          בהתחברות אתם מסכימים לתנאי השימוש ולמדיניות הפרטיות
+          בהתחברות אתם מסכימים ל<Link href="/terms" className="underline underline-offset-2">תנאי השימוש</Link> ול<Link href="/privacy" className="underline underline-offset-2">מדיניות הפרטיות</Link>
         </p>
       </div>
     </div>

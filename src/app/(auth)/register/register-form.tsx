@@ -142,7 +142,7 @@ export function RegisterForm() {
                 onChange={(e) => setEmail(e.target.value)}
                 aria-invalid={errors.email ? true : undefined}
                 aria-describedby={errors.email ? "reg-email-error" : undefined}
-                className={`w-full bg-surface border rounded-xl pe-10 ps-4 py-3 text-sm focus:outline-none ${errors.email ? "border-danger focus:border-danger" : "border-border focus:border-primary"}`}
+                className={`w-full bg-surface border rounded-xl px-10 py-3 text-sm focus:outline-none ${errors.email ? "border-danger focus:border-danger" : "border-border focus:border-primary"}`}
                 dir="ltr"
                 autoComplete="email"
               />
@@ -203,7 +203,7 @@ export function RegisterForm() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 aria-invalid={errors.confirmPassword ? true : undefined}
                 aria-describedby={errors.confirmPassword ? "reg-confirm-error" : undefined}
-                className={`w-full bg-surface border rounded-xl pe-10 ps-4 py-3 text-sm focus:outline-none ${errors.confirmPassword ? "border-danger focus:border-danger" : "border-border focus:border-primary"}`}
+                className={`w-full bg-surface border rounded-xl px-10 py-3 text-sm focus:outline-none ${errors.confirmPassword ? "border-danger focus:border-danger" : "border-border focus:border-primary"}`}
                 dir="ltr"
                 autoComplete="new-password"
               />
@@ -279,7 +279,7 @@ export function RegisterForm() {
         </p>
 
         <p className="text-xs text-muted text-center">
-          בהרשמה אתם מסכימים לתנאי השימוש ולמדיניות הפרטיות
+          בהרשמה אתם מסכימים ל<Link href="/terms" className="underline underline-offset-2">תנאי השימוש</Link> ול<Link href="/privacy" className="underline underline-offset-2">מדיניות הפרטיות</Link>
         </p>
       </div>
     </div>
