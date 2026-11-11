@@ -1,0 +1,314 @@
+[
+  {
+    "route": "/tasks",
+    "name": "categories-he",
+    "scenario": "normal",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "עוד פעולות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "קטגוריות"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "templates-he",
+    "scenario": "normal",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "עוד פעולות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "תבניות"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "sort-he",
+    "scenario": "normal",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "עוד פעולות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "מיון"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "review-he",
+    "scenario": "normal",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "עוד פעולות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בדיקת משימות ישנות"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "categories-en",
+    "scenario": "normal",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "More actions"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Categories"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "templates-en",
+    "scenario": "normal",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "More actions"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Templates"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "sort-en",
+    "scenario": "normal",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "More actions"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Sort"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "review-en",
+    "scenario": "normal",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "More actions"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Review old tasks"
+      }
+    ],
+    "reducedMotion": true
+  }
+]
