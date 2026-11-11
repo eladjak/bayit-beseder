@@ -29,7 +29,7 @@ export function AuthGuard({ children, allowDemo = false }: AuthGuardProps) {
     if (!user && !allowDemo) {
       const next = safeNext(`${pathname}${window.location.search}`);
       router.replace(
-        process.env.NEXT_PUBLIC_NEW_UI === "true" && next !== "/dashboard"
+        process.env.NEXT_PUBLIC_NEW_UI === "true" && pathname !== "/dashboard" && next !== "/dashboard"
           ? `/login?next=${encodeURIComponent(next)}`
           : "/login"
       );
