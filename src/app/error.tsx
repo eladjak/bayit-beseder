@@ -1,9 +1,12 @@
 "use client";
 
+import { useNewUi } from "@/hooks/useNewUi";
+import { ErrorV2 } from "@/screens/system/ErrorV2";
+
 import { useEffect } from "react";
 import Link from "next/link";
 
-export default function Error({
+function ErrorV1({
   error,
   reset,
 }: {
@@ -68,3 +71,5 @@ export default function Error({
     </div>
   );
 }
+
+export default function Error({ error, reset }: { error: globalThis.Error & { digest?: string }; reset: () => void }) { const newUi = useNewUi(); return newUi ? <ErrorV2 error={error} reset={reset} report /> : <ErrorV1 error={error} reset={reset} />; }

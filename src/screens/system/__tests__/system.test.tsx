@@ -1,0 +1,30 @@
+import { describe, it, expect, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { ErrorV2 } from '../ErrorV2';
+import { OfflineV2 } from '../OfflineV2';
+
+describe('system screens', () => {
+  it('retries and exposes only the digest', () => {
+    const reset = vi.fn();
+    const error = Object.assign(new Error('private stack'), { digest: 'safe-id' });
+    render(<ErrorV2 error={error} reset={reset} />);
+    fireEvent.click(screen.getByRole('button', { name: 'נסו שוב' }));
+    expect(reset).toHaveBeenCalledOnce();
+    expect(screen.getByText('safe-id')).toBeTruthy();
+    expect(document.body.textContent).not.toContain('private stack');
+  });
+  it('explains offline limitations without promising synchronization', () => {
+    render(<OfflineV2 />);
+    expect(screen.getByText(/לא כל הפעולות זמינות ללא חיבור/)).toBeTruthy();
+  });
+});
+
+it('shows when actions remain on this device while offline', async () => {
+  const { OfflineIndicatorV2 } = await import('../OfflineV2');
+  Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
+  localStorage.setItem('bayit-offline-queue', JSON.stringify([{ id: 'one' }]));
+  render(<OfflineIndicatorV2 />);
+  expect(await screen.findByText(/פעולות שממתינות במכשיר/)).toBeTruthy();
+  localStorage.removeItem('bayit-offline-queue');
+  Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
+});

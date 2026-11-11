@@ -1,8 +1,11 @@
 "use client";
 
+import { useNewUi } from "@/hooks/useNewUi";
+import { ErrorV2 } from "@/screens/system/ErrorV2";
+
 import { useTranslation } from "@/hooks/useTranslation";
 
-export default function Error({
+function ErrorV1({
   reset,
 }: {
   error: Error & { digest?: string };
@@ -41,3 +44,5 @@ export default function Error({
     </div>
   );
 }
+
+export default function Error({ error, reset }: { error: globalThis.Error & { digest?: string }; reset: () => void }) { const newUi = useNewUi(); return newUi ? <ErrorV2 error={error} reset={reset} /> : <ErrorV1 error={error} reset={reset} />; }
