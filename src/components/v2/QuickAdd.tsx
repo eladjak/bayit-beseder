@@ -1,0 +1,8 @@
+'use client';
+import { useCallback, useRef, useState } from 'react';
+import { ArrowUp, LoaderCircle } from 'lucide-react';
+import { VoiceInputButton } from '@/components/voice-input-button';
+import { Field } from './Field';
+import { IconButton } from './IconButton';
+type Props={label:string; placeholder:string; submitLabel?:string; onSubmit:(text:string)=>Promise<{ok:true}|{ok:false;message:string}>};
+export function QuickAdd({label,placeholder,submitLabel='הוספה',onSubmit}:Props) { const [text,setText]=useState(''); const [error,setError]=useState(''); const [saving,setSaving]=useState(false); const input=useRef<HTMLInputElement>(null); const transcript=useCallback((value:string)=>setText(value),[]); async function submit(e:React.FormEvent) { e.preventDefault(); if(!text.trim()||saving)return; setSaving(true); setError(''); try { const result=await onSubmit(text.trim()); if(result.ok) {setText(''); input.current?.focus();} else setError(result.message); } catch {setError('לא הצלחנו לשמור. אפשר לנסות שוב.');} finally {setSaving(false);} } return <form onSubmit={submit}><div className="flex items-start gap-1"><div className="min-w-0 flex-1"><Field ref={input} label={label} hideLabel placeholder={placeholder} value={text} onChange={e=>setText(e.target.value)} error={error}/></div><VoiceInputButton onTranscript={transcript} className="min-h-11 min-w-11 [&_button]:min-h-11 [&_button]:min-w-11"/><IconButton label={submitLabel} type="submit" disabled={saving || !text.trim()} aria-busy={saving || undefined}>{saving ? <LoaderCircle className="size-5 motion-safe:animate-spin" aria-hidden="true"/> : <ArrowUp className="size-5" aria-hidden="true"/>}</IconButton></div></form>; }
