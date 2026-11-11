@@ -190,3 +190,19 @@ it('blends the 404 illustration into the light paper surface', async () => {
   const { container } = render(<NotFoundV2 />);
   expect(container.querySelector('.mix-blend-multiply img')).toBeTruthy();
 });
+
+it('keeps the inline offline notice subordinate to the page heading', () => {
+  render(<OfflineV2 dismiss={vi.fn()} />);
+  expect(screen.getByRole('heading', { name: 'אין חיבור לאינטרנט', level: 2 })).toBeTruthy();
+});
+
+it('gives offline guidance comfortable line spacing', () => {
+  render(<OfflineV2 />);
+  expect(screen.getByText(/לא כל הפעולות זמינות ללא חיבור/).className).toContain('leading-relaxed');
+});
+
+it('keeps the 404 illustration compact on small screens', async () => {
+  const { NotFoundV2 } = await import('../NotFoundV2');
+  const { container } = render(<NotFoundV2 />);
+  expect(container.querySelector('.mix-blend-multiply')?.className).toContain('max-w-64');
+});
