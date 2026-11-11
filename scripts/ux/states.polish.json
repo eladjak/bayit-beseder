@@ -1,0 +1,76 @@
+[
+  {
+    "route": "/__ui",
+    "name": "gallery-he-light",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "he"
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "עברית"
+      }
+    ]
+  },
+  {
+    "route": "/__ui",
+    "name": "gallery-en-light",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "עברית"
+      }
+    ]
+  },
+  {
+    "route": "/__ui",
+    "name": "gallery-he-dark",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "dark": true,
+    "storage": {
+      "bayit-beseder-language": "he"
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "עברית"
+      }
+    ]
+  },
+  {
+    "route": "/__ui",
+    "name": "gallery-en-dark",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "dark": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "עברית"
+      }
+    ]
+  }
+]
