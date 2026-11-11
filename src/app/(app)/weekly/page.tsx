@@ -58,8 +58,15 @@ import { WeeklyStats } from "@/components/weekly/weekly-stats";
 import { WeeklyHeader } from "@/components/weekly/weekly-header";
 
 import { addDaysStr, ilDay, ilToday } from "@/lib/il-date";
+import { useNewUi } from "@/hooks/useNewUi";
+import WeeklyV2 from "@/screens/weekly/WeeklyV2";
 
 export default function WeeklyPage() {
+  const newUi = useNewUi();
+  return newUi ? <WeeklyV2 /> : <WeeklyPageV1 />;
+}
+
+function WeeklyPageV1() {
   const { t } = useTranslation();
   const { profile } = useProfile();
   const todayStr = useMemo(() => ilToday(), []);
