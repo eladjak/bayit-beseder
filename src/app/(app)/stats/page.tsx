@@ -8,7 +8,6 @@ import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import { Trophy, History, TrendingUp, Users, ChevronDown, BarChart3, Flame, CalendarDays } from "lucide-react";
 
-import { ACHIEVEMENTS } from "@/lib/achievements";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import {
   computeWeeklyTrend,
@@ -27,7 +26,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { usePartner } from "@/hooks/usePartner";
 import { useHouseholdMembers } from "@/hooks/useHouseholdMembers";
 import { AnimatedNumber } from "@/components/animated-number";
-import { CATEGORY_NAME_TO_KEY, CATEGORY_ICONS } from "@/lib/categories";
+import { CATEGORY_NAME_TO_KEY } from "@/lib/categories";
 // WeeklyShareCard uses canvas — lazy-load it
 const WeeklyShareCard = dynamic(
   () => import("@/components/gamification/weekly-share-card").then((m) => m.WeeklyShareCard),
@@ -385,7 +384,7 @@ export default function StatsPage() {
   // Compute weekly trend from recorded data
   const weeklyData = useMemo(() => {
     return computeWeeklyTrend(completions, tasks, today);
-  }, [hasDbData, completions, tasks, today]);
+  }, [completions, tasks, today]);
 
   // Category breakdown from recorded data
   const categoryData = useMemo(() => {
@@ -395,7 +394,7 @@ export default function StatsPage() {
       categoryIdToKey
     );
     return breakdown;
-  }, [hasDbData, completions, tasks, categoryIdToKey]);
+  }, [completions, tasks, categoryIdToKey]);
 
   // Partner / household comparison
   // If household_members table has data, use N-member comparison; otherwise fall back to 2-user

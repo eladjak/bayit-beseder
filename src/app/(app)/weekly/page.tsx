@@ -36,7 +36,7 @@ import {
   getWeekRange,
   type Suggestion,
 } from "@/lib/smart-scheduler";
-import type { TaskRow, TaskInsert } from "@/lib/types/database";
+import type { TaskRow } from "@/lib/types/database";
 import { haptic } from "@/lib/haptics";
 import { useTranslation } from "@/hooks/useTranslation";
 import { CATEGORY_ICONS, CATEGORY_LABELS } from "@/lib/categories";
@@ -403,7 +403,7 @@ export default function WeeklyPage() {
         toast.success(t("weekly.completed"));
       }
     },
-    [profile?.id, markComplete, undoComplete, refetch, refetchCompletions, t]
+    [profile, markComplete, undoComplete, refetch, refetchCompletions, t]
   );
   const retryCompletion = () => { if (completionError) void handleToggleComplete(completionError); };
 
