@@ -1,3 +1,27 @@
-import type { ButtonHTMLAttributes } from 'react';
-type Props = ButtonHTMLAttributes<HTMLButtonElement> & {label: string; size?: 36|44};
-export function IconButton({label, size=44, children, className='', ...props}: Props) { return <button {...props} type={props.type ?? 'button'} aria-label={label} className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-bb-ink hover:bg-bb-primary-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-primary disabled:opacity-50 motion-safe:transition-transform motion-safe:duration-150 motion-safe:active:scale-[.97] ${className}`}><span className={`inline-flex items-center justify-center ${size === 36 ? 'size-9' : 'size-11'}`}>{children}</span></button>; }
+import type { ButtonHTMLAttributes } from "react";
+type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
+  label: string;
+  size?: 36 | 44;
+};
+export function IconButton({
+  label,
+  size = 44,
+  children,
+  className = "",
+  ...props
+}: Props) {
+  return (
+    <button
+      {...props}
+      type={props.type ?? "button"}
+      aria-label={label}
+      className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-bb-ink hover:bg-bb-primary-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-primary disabled:opacity-50 motion-safe:transition-transform motion-safe:duration-150 motion-safe:active:scale-[.97] ${className}`}
+    >
+      <span
+        className={`inline-flex items-center justify-center ${size === 36 ? "size-9" : "size-11"}`}
+      >
+        {children}
+      </span>
+    </button>
+  );
+}

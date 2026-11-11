@@ -1,3 +1,50 @@
-import { LoaderCircle } from 'lucide-react';
-type Props={checked:boolean; pending:boolean; failed?:boolean; onToggle:()=>void; label:string};
-export function Check({checked,pending,failed,onToggle,label}:Props) {return <button type="button" role="checkbox" aria-label={`סימון כבוצע: ${label}`} aria-checked={checked} aria-busy={pending || undefined} disabled={pending} onClick={onToggle} className="inline-flex size-11 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-primary"><span className={`relative flex size-6 items-center justify-center rounded-full border-2 ${failed ? 'border-bb-danger-ink' : 'border-bb-primary'} ${checked ? 'bg-bb-primary text-bb-on-primary' : 'bg-bb-card'}`}>{pending ? <LoaderCircle className="size-5 motion-safe:animate-spin" aria-hidden="true"/> : checked ? <span className="bb-mark"><svg className="bb-mark__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path pathLength={1} d="m5 12 4 4L19 6"/></svg></span> : null}</span></button>;}
+import { CircleAlert, LoaderCircle } from "lucide-react";
+
+type Props = {
+  checked: boolean;
+  pending: boolean;
+  failed?: boolean;
+  onToggle: () => void;
+  label: string;
+};
+export function Check({ checked, pending, failed, onToggle, label }: Props) {
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-label={`סימון כבוצע: ${label}`}
+      aria-checked={checked}
+      aria-invalid={failed || undefined}
+      aria-busy={pending || undefined}
+      disabled={pending}
+      onClick={onToggle}
+      className="inline-flex size-11 items-center justify-center rounded-full hover:bg-bb-primary-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-primary motion-safe:transition-transform motion-safe:duration-150 motion-safe:active:scale-[.97]"
+    >
+      <span
+        className={`relative flex size-6 items-center justify-center rounded-full border-2 ${failed ? "border-bb-danger-ink text-bb-danger-ink" : "border-bb-primary"} ${checked ? "bg-bb-primary text-bb-on-primary" : "bg-bb-card"}`}
+      >
+        {pending ? (
+          <LoaderCircle
+            className="size-5 motion-safe:animate-spin"
+            aria-hidden="true"
+          />
+        ) : failed ? (
+          <CircleAlert className="size-4" aria-hidden="true" />
+        ) : checked ? (
+          <span className="bb-mark">
+            <svg
+              className="bb-mark__check"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path pathLength={1} d="m5 12 4 4L19 6" />
+            </svg>
+          </span>
+        ) : null}
+      </span>
+    </button>
+  );
+}
