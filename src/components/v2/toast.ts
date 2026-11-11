@@ -2,11 +2,12 @@ import { toast } from 'sonner';
 
 const classNames = {
   toast: 'bg-bb-card text-bb-ink shadow-bb-2 rounded-bb-md',
+  // Sonner's action styles are more specific, so override its background and text colors.
   actionButton: 'min-h-11 min-w-11 !bg-bb-card !text-bb-primary underline focus-visible:outline-2 focus-visible:outline-bb-primary',
   success: 'text-bb-ink', error: 'text-bb-danger-ink', info: 'text-bb-ink',
 };
 export function showToast({ message, tone, undo }: { message: string; tone: 'success' | 'error' | 'info'; undo?: () => Promise<boolean> }) {
-  const language = typeof document === 'undefined' ? 'he' : (document.activeElement?.closest('[lang]')?.getAttribute('lang') || document.documentElement.lang);
+  const language = typeof document === 'undefined' ? 'he' : document.documentElement.lang;
   const undoLabel = language?.toLowerCase().startsWith('en') ? 'Undo' : 'ביטול';
   return toast(message, {
     duration: 5000, classNames,
