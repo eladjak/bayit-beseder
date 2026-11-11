@@ -13,3 +13,8 @@ export function overrideAllowed(): boolean {
   if (VERCEL_ENV === "production") return false;
   return VERCEL_ENV === "preview" || VERCEL_ENV === "development" || NODE_ENV === "development";
 }
+
+/** A row is visible only to an authenticated member, as enforced by RLS. */
+export function householdAllowsNewUi(row: { household_id: string } | null): boolean {
+  return row !== null;
+}
