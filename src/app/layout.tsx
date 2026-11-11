@@ -3,6 +3,7 @@ import { Heebo } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider, ThemeScript } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
+import { UiFlagScript } from "@/components/UiFlagScript";
 import { BootReady } from "@/components/BootReady";
 import { BOOT_GUARD_SOURCE } from "@/lib/boot-guard";
 import "./globals.css";
@@ -113,7 +114,6 @@ export const viewport: Viewport = {
   themeColor: "#4F46E5",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default function RootLayout({
@@ -130,6 +130,7 @@ export default function RootLayout({
         {/* Must run before any app chunk: recovers from stale-build 404s (white screen). */}
         <script dangerouslySetInnerHTML={{ __html: BOOT_GUARD_SOURCE }} />
         <ThemeScript />
+        <UiFlagScript />
         {/* Preconnect to Google Fonts to reduce font loading latency */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
