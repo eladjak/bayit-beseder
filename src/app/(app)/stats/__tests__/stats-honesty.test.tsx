@@ -11,3 +11,8 @@ describe('stats honesty safeguards', () => {
     expect(page).toMatch(/tasksLoading \|\| completionsLoading \|\| subscriptionLoading/);
   });
 });
+
+it('does not display a category percentage as a task count or demo badges', () => {
+  expect(page).not.toContain('count: categoryData[0].value');
+  expect(page).toContain('{completions.length > 0 && <BadgesDisplay />}');
+});

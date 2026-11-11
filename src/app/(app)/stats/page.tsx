@@ -529,11 +529,7 @@ export default function StatsPage() {
         completedTasks={weeklyTotal}
         totalTasks={tasks.filter((task) => task.due_date && task.due_date >= addDaysStr(today, -new Date(today).getUTCDay()) && task.due_date <= addDaysStr(today, 6 - new Date(today).getUTCDay())).length}
         streakDays={profile?.streak ?? 0}
-        topCategory={categoryData.length > 0 ? {
-          name: categoryData[0].name,
-          icon: CATEGORY_ICONS[categoryData[0].category] ?? "🏠",
-          count: categoryData[0].value,
-        } : null}
+        topCategory={null}
         householdName="הבית שלנו"
       />
 
@@ -637,7 +633,7 @@ export default function StatsPage() {
           <Trophy className="w-5 h-5 text-amber-500" />
           <h2 className="font-semibold text-sm"><Trophy aria-hidden="true" className="inline size-4" /> {t("badges.sectionTitle")}</h2>
         </div>
-        <BadgesDisplay />
+        {completions.length > 0 && <BadgesDisplay />}
       </motion.div>
 
       {/* Task Calendar */}
