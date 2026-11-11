@@ -1,0 +1,82 @@
+[
+  {
+    "route": "/dashboard",
+    "name": "dashboard",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true
+  },
+  {
+    "route": "/tasks",
+    "name": "tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true
+  },
+  {
+    "route": "/shopping",
+    "name": "shopping",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true
+  },
+  {
+    "route": "/more",
+    "name": "more",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true
+  },
+  {
+    "route": "/settings",
+    "name": "settings",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true
+  }
+]
