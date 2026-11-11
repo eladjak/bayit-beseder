@@ -1,0 +1,8 @@
+import { Check } from '@/components/v2/Check';
+import { AvatarChip } from '@/components/v2/AvatarChip';
+import { RoomMark } from '@/components/v2/RoomMark';
+import { CATEGORY_NAME_TO_KEY, type CategoryKey } from '@/lib/categories';
+import type { TaskRow as Task } from '@/lib/types/database';
+export function TaskRow({ task, name, room, when, pending, failed, onToggle, onDelete, menu, remove, retry }: { task:Task; name:string; room?:string; when:string; pending:boolean; failed:boolean; onToggle:()=>void; onDelete:()=>void; menu:string; remove:string; retry:string }) {
+ return <li className="flex min-h-11 items-start gap-2 border-b border-bb-ink-4/20 py-3"><Check checked={task.status === 'completed'} pending={pending} failed={failed} onToggle={onToggle} label={task.title}/><div className="min-w-0 flex-1"><p className="break-words font-semibold">{task.title}</p><div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm"><AvatarChip id={task.assigned_to ?? 'shared'} name={name} size="sm"/><span>{when}</span>{room && <RoomMark room={(CATEGORY_NAME_TO_KEY[room] ?? 'general') as CategoryKey} name={room}/>}</div>{failed && <button className="min-h-11 text-bb-danger-ink underline" onClick={onToggle}>{retry}</button>}</div><details className="relative"><summary aria-label={`${menu}: ${task.title}`} className="flex min-h-11 min-w-11 cursor-pointer list-none items-center justify-center rounded-full text-xl">⋮</summary><button type="button" className="absolute end-0 z-10 min-h-11 min-w-24 rounded bg-bb-card px-4 shadow-bb-2" onClick={onDelete}>{remove}</button></details></li>;
+}
