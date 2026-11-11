@@ -88,3 +88,13 @@ suite('completion flow', () => {
  });
  it('shows an honest empty shopping list', () => { render(<TodayV2/>); expect(screen.getByText('shoppingEmpty')).toBeTruthy(); });
 });
+
+const mealClient = vi.hoisted(() => ({ from: () => ({ select: () => ({ eq: () => ({ eq: () => ({ neq: () => ({ limit: () => Promise.resolve({ data: [], error: null }) }) }) }) }) }) }));
+vi.mock('@/components/SupabaseProvider', () => ({ useSupabase: () => mealClient }));
+suite('meal read', () => {
+ it('shows an honest meal empty state', async () => {
+  const { TodayMeal } = await vi.importActual<typeof import('../TodayMeal')>('../TodayMeal');
+  render(<TodayMeal householdId="home" today="2026-11-11" />);
+  expect(await screen.findByText('noMeal')).toBeTruthy();
+ });
+});
