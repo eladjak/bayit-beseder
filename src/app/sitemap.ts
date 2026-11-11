@@ -1,4 +1,6 @@
+export const revalidate = 60;
 import type { MetadataRoute } from "next";
+import { getBlogPosts, uniquePosts } from "@/lib/sanity/client";
 
 // Blog post IDs and their publish dates — keep in sync with blog-content.tsx
 const BLOG_POSTS = [
@@ -10,8 +12,8 @@ const BLOG_POSTS = [
   { id: "quick-clean", date: "2026-02-22" },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://www.bayitbeseder.com";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const base = process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://www.bayitbeseder.com";
   const now = new Date();
 
   const blogPostEntries: MetadataRoute.Sitemap = BLOG_POSTS.map((post) => ({
@@ -41,6 +43,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.8,
     },
     ...blogPostEntries,
+    ...uniquePosts(await getBlogPosts()).map(post => ({ url: `${base}/blog/${post.slug.current}`, lastModified: new Date(post.publishedAt!) })),
     {
       url: `${base}/contact`,
       lastModified: now,
