@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSupabase } from '@/components/SupabaseProvider';
 import { useProfile } from '@/hooks/useProfile';
+import { useTranslation } from '@/hooks/useTranslation';
 import { addDaysStr, ilDay, ilToday } from '@/lib/il-date';
 
 export type Period = 'week' | 'month';
@@ -21,7 +22,7 @@ export function israelMidnight(day: string) {
  const minutes = match ? (match[1] === '+' ? 1 : -1) * (Number(match[2]) * 60 + Number(match[3] ?? 0)) : 0;
  return new Date(utc - minutes * 60000).toISOString();
 }
-export function summarize(completions: Completion[], tasks: Task[], categories: Category[]) {
+export function summarize(completions: Completion[], tasks: Task[], categories: Category[], range?: {start:string; end:string}, locale: 'he' | 'en' = 'he') {
  const byTask = new Map(tasks.map(t => [t.id, t.category_id]));
  const byCategory = new Map(categories.map(c => [c.id, c.name]));
  const days = new Map<string, number>(), rooms = new Map<string, number>();
@@ -30,10 +31,12 @@ export function summarize(completions: Completion[], tasks: Task[], categories: 
   const category = byTask.get(item.task_id); const room = category ? byCategory.get(category) : undefined;
   if (room) rooms.set(room, (rooms.get(room) ?? 0) + 1);
  }
- return {total: completions.length, days: [...days].sort(([a],[b]) => a.localeCompare(b)).map(([label,value]) => ({label,value})), rooms: [...rooms].map(([label,value]) => ({label,value}))};
+ const weekdays = locale === 'he' ? ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'] : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+ const dayItems = range ? (() => { const result = []; for(let date=range.start; date<range.end; date=addDaysStr(date,1)) result.push({label:weekdays[new Date(`${date}T00:00:00Z`).getUTCDay()], value:days.get(date) ?? 0}); return result; })() : [...days].sort(([a],[b]) => a.localeCompare(b)).map(([label,value]) => ({label,value}));
+ return {total: completions.length, days: dayItems, rooms: [...rooms].map(([label,value]) => ({label,value}))};
 }
 export function useStatsModel(period: Period) {
- const supabase = useSupabase(); const {profile, loading: profileLoading, error: profileError, refetch} = useProfile();
+ const supabase = useSupabase(); const {locale} = useTranslation(); const {profile, loading: profileLoading, error: profileError, refetch} = useProfile();
  const [state, setState] = useState<{loading:boolean; error:boolean; data:ReturnType<typeof summarize> | null}>({loading:true,error:false,data:null});
  const [version, setVersion] = useState(0);
  const retry = useCallback(() => { void refetch(); setVersion(v => v + 1); }, [refetch]);
@@ -42,15 +45,23 @@ export function useStatsModel(period: Period) {
   let active = true; const household = profile.household_id; const range = periodRange(period);
   setState({loading:true,error:false,data:null});
   void (async () => { try {
-   const [completions, tasks, categories] = await Promise.all([
-    supabase.from('task_completions').select('task_id,completed_at').eq('household_id', household).gte('completed_at',israelMidnight(range.start)).lt('completed_at',israelMidnight(range.end)),
+   const [tasks, categories] = await Promise.all([
     supabase.from('tasks').select('id,category_id').eq('household_id', household),
-    supabase.from('categories').select('id,name').eq('household_id', household),
+    supabase.from('categories').select('id,name'),
    ]);
-   if (completions.error || tasks.error || categories.error) throw new Error('query');
-   if (active) setState({loading:false,error:false,data:summarize(completions.data ?? [],tasks.data ?? [],categories.data ?? [])});
+   if (tasks.error || categories.error) throw new Error('query');
+   const rows: Completion[] = []; let total: number | null = null;
+   do {
+    const page = await supabase.from('task_completions').select('task_id,completed_at', {count:'exact'}).eq('household_id', household).gte('completed_at',israelMidnight(range.start)).lt('completed_at',israelMidnight(range.end)).order('id').range(rows.length,rows.length+999);
+    if (page.error) throw new Error('query');
+    const batch = page.data ?? []; total = page.count;
+    rows.push(...batch);
+    if (!batch.length && total !== null && rows.length < total) throw new Error('incomplete results');
+    if (!batch.length || (total === null && batch.length < 1000)) break;
+   } while (total === null || rows.length < total);
+   if (active) setState({loading:false,error:false,data:summarize(rows,tasks.data ?? [],categories.data ?? [],range,locale)});
   } catch { if(active) setState({loading:false,error:true,data:null}); } })();
   return () => {active = false};
- }, [supabase,profile?.household_id,profileLoading,period,version]);
+ }, [supabase,profile?.household_id,profileLoading,period,version,locale]);
  return {...state, loading: profileLoading || (!!profile?.household_id && state.loading), error: !!profileError || state.error, noHousehold: !profileLoading && !profileError && !profile?.household_id, retry};
 }
