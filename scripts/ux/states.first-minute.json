@@ -1,0 +1,14 @@
+[
+  {
+    "route": "/dashboard",
+    "name": "first-minute-household-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "he"
+    }
+  }
+]
