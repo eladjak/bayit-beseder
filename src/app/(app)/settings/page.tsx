@@ -1,5 +1,8 @@
 "use client";
 
+import SettingsV2 from "@/screens/settings/SettingsV2";
+import { useNewUi } from "@/hooks/useNewUi";
+
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { isRecurring } from "@/lib/task-flags";
 import dynamic from "next/dynamic";
@@ -108,7 +111,7 @@ function setStoredLanguage(lang: Language) {
 // ============================================
 // Settings Page
 // ============================================
-export default function SettingsPage() {
+function SettingsPageV1() {
   const router = useRouter();
   const { user } = useAuth();
   const { profile, loading: profileLoading, refetch: refetchProfile, updateProfile } = useProfile();
@@ -1029,4 +1032,9 @@ export default function SettingsPage() {
       )}
     </div>
   );
+}
+
+export default function SettingsPage() {
+  const newUi = useNewUi();
+  return newUi ? <SettingsV2 /> : <SettingsPageV1 />;
 }
