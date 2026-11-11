@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { ErrorV2 } from '../ErrorV2';
 import { OfflineV2 } from '../OfflineV2';
+vi.mock('sonner', () => ({ toast: vi.fn() }));
 
 describe('system screens', () => {
   it('retries and exposes only the digest', () => {
@@ -54,4 +55,28 @@ it('replaces the legacy update toast when the flag turns on and restores it when
   flag.value = false;
   view.rerender(<ServiceWorkerUpdateToast />);
   expect(screen.queryByText('יש גרסה חדשה לבית בסדר.')).toBeNull();
+});
+
+it('shows the legacy update signal while the switch is off', async () => {
+  const { toast } = await import('sonner');
+  const { ServiceWorkerUpdateToast } = await import('@/components/ServiceWorkerUpdateToast');
+  const worker = new EventTarget();
+  Object.defineProperty(navigator, 'serviceWorker', { configurable: true, value: worker });
+  flag.value = false;
+  render(<ServiceWorkerUpdateToast />);
+  vi.mocked(toast).mockClear();
+  worker.dispatchEvent(new MessageEvent('message', { data: { type: 'SW_UPDATED' } }));
+  expect(toast).toHaveBeenCalledOnce();
+  expect(screen.queryByText('יש גרסה חדשה לבית בסדר.')).toBeNull();
+});
+
+it('shows no pending message when the offline queue is empty', () => {
+  render(<OfflineV2 pendingCount={0} />);
+  expect(screen.queryByText(/פעולות שממתינות במכשיר/)).toBeNull();
+});
+
+it('loading uses accessible skeletons', async () => {
+  const { LoadingV2 } = await import('../LoadingV2');
+  render(<LoadingV2 />);
+  expect(screen.getAllByText('טוענים את התוכן').length).toBeGreaterThan(0);
 });
