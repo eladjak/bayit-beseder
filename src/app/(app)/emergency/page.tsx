@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Shield, Check, Clock, Loader2, AlertTriangle } from "lucide-react";
@@ -24,8 +24,8 @@ interface EmergencyTask {
 }
 
 const COPY = {
-  he: { failure: "לא הצלחנו לשמור. נסו שוב.", retry: "נסו שוב", pending: "שומר…" },
-  en: { failure: "We couldn't save. Please try again.", retry: "Try again", pending: "Saving…" },
+  he: { failure: "לא הצלחנו לשמור. נסו שוב.", retry: "נסו שוב", pending: "שומר…", offline: "אין חיבור לאינטרנט. התחברו ונסו שוב." },
+  en: { failure: "We couldn't save. Please try again.", retry: "Try again", pending: "Saving…", offline: "No internet connection. Reconnect and try again." },
 };
 
 // Emergency mode state is stored in localStorage since the households table
@@ -43,24 +43,16 @@ function setStoredEmergencyMode(value: boolean): void {
 }
 
 export default function EmergencyPage() {
-  return process.env.NEXT_PUBLIC_NEW_UI === "true" ? <NewEmergencyPage /> : <EmergencyContent />;
-}
-
-function NewEmergencyPage() {
   const completions = useCompletions();
-  return <EmergencyContent completions={completions} />;
-}
-
-function EmergencyContent({ completions }: { completions?: ReturnType<typeof useCompletions> }) {
   const { t, locale } = useTranslation();
   const copy = COPY[locale];
-  const usingNewUi = !!completions;
   const [userId, setUserId] = useState<string | null>(null);
   const [overrides, setOverrides] = useState<Record<string, boolean>>({});
   const [pending, setPending] = useState<Set<string>>(new Set());
   const [failures, setFailures] = useState<Set<string>>(new Set());
   const [tasks, setTasks] = useState<EmergencyTask[]>([]);
-  const [completedIds, setCompletedIds] = useState<Set<string>>(new Set());
+  const pendingRef = useRef(new Set<string>());
+  const [offlineFailures, setOfflineFailures] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [emergencyMode, setEmergencyMode] = useState(false);
   const [togglingEmergency, setTogglingEmergency] = useState(false);
@@ -86,9 +78,7 @@ function EmergencyContent({ completions }: { completions?: ReturnType<typeof use
         .from("tasks")
         .select("id, title, category_id, due_date, status, points, recurring")
         .lte("due_date", today);
-      const { data: pendingTasks } = await (usingNewUi
-        ? query.in("status", ["pending", "completed"])
-        : query.eq("status", "pending")).order("due_date", { ascending: true });
+      const { data: pendingTasks } = await query.in("status", ["pending", "completed"]).order("due_date", { ascending: true });
 
       if (pendingTasks && pendingTasks.length > 0) {
         // In emergency mode, show all pending + overdue tasks as essential
@@ -108,73 +98,50 @@ function EmergencyContent({ completions }: { completions?: ReturnType<typeof use
     } finally {
       setLoading(false);
     }
-  }, [usingNewUi]);
+  }, []);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
   function isDone(task: EmergencyTask) {
-    return completions ? (overrides[task.id] ?? (isRecurring(task.recurring)
-      ? completions.isCompletedToday(task.id) : task.status === "completed")) : completedIds.has(task.id);
+    return overrides[task.id] ?? (isRecurring(task.recurring)
+      ? completions.isCompletedToday(task.id) : task.status === "completed");
   }
-  const completedCount = tasks.filter(isDone).length;
-  const totalCount = tasks.length;
+  // Old completed one-time tasks must not inflate today's progress.
+  const visibleTasks = tasks.filter((task) => isRecurring(task.recurring) ||
+    task.status !== "completed" || completions.isCompletedToday(task.id) || overrides[task.id] !== undefined);
+  const completedCount = visibleTasks.filter(isDone).length;
+  const totalCount = visibleTasks.length;
   const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   async function toggleTask(taskId: string) {
-    if (completions) {
-      const task = tasks.find((item) => item.id === taskId);
-      if (!task || !userId || pending.has(taskId)) return;
-      const done = isDone(task);
-      if (done && !(overrides[taskId] === true || completions.isCompletedToday(taskId))) return;
-      setPending((prev) => new Set(prev).add(taskId));
-      setFailures((prev) => { const next = new Set(prev); next.delete(taskId); return next; });
-      try {
-        const success = done ? await completions.undoComplete(taskId)
-          : await completions.markComplete({ taskId, userId, recurring: isRecurring(task.recurring) });
-        if (success) setOverrides((prev) => ({ ...prev, [taskId]: !done }));
-        else setFailures((prev) => new Set(prev).add(taskId));
-      } catch {
-        setFailures((prev) => new Set(prev).add(taskId));
-      } finally {
-        setPending((prev) => { const next = new Set(prev); next.delete(taskId); return next; });
-      }
+    const task = tasks.find((item) => item.id === taskId);
+    if (!task || pendingRef.current.has(taskId)) return;
+    if (!userId) {
+      setFailures((prev) => new Set(prev).add(taskId));
       return;
     }
-    setCompletedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(taskId)) {
-        next.delete(taskId);
-      } else {
-        next.add(taskId);
+    const done = isDone(task);
+    if (done && !(overrides[taskId] === true || completions.isCompletedToday(taskId))) return;
+    pendingRef.current.add(taskId);
+    setPending((prev) => new Set(prev).add(taskId));
+    setFailures((prev) => { const next = new Set(prev); next.delete(taskId); return next; });
+    setOfflineFailures((prev) => { const next = new Set(prev); next.delete(taskId); return next; });
+    try {
+      const success = done ? await completions.undoComplete(taskId)
+        : await completions.markComplete({ taskId, userId, recurring: isRecurring(task.recurring) });
+      if (success) setOverrides((prev) => ({ ...prev, [taskId]: !done }));
+      else {
+        setFailures((prev) => new Set(prev).add(taskId));
+        if (!navigator.onLine) setOfflineFailures((prev) => new Set(prev).add(taskId));
       }
-      return next;
-    });
-
-    // Mark as completed in DB
-    const isNowCompleted = !completedIds.has(taskId);
-    if (isNowCompleted) {
-      try {
-        const supabase = createClient();
-        await supabase
-          .from("tasks")
-          .update({ status: "completed" })
-          .eq("id", taskId);
-      } catch {
-        // Silently ignore - optimistic update still works
-      }
-    } else {
-      // Undo completion
-      try {
-        const supabase = createClient();
-        await supabase
-          .from("tasks")
-          .update({ status: "pending" })
-          .eq("id", taskId);
-      } catch {
-        // Silently ignore
-      }
+    } catch {
+      setFailures((prev) => new Set(prev).add(taskId));
+      if (!navigator.onLine) setOfflineFailures((prev) => new Set(prev).add(taskId));
+    } finally {
+      pendingRef.current.delete(taskId);
+      setPending((prev) => { const next = new Set(prev); next.delete(taskId); return next; });
     }
   }
 
@@ -187,7 +154,7 @@ function EmergencyContent({ completions }: { completions?: ReturnType<typeof use
     setTogglingEmergency(false);
   }
 
-  if (loading || completions?.loading) {
+  if (loading || completions.loading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -285,11 +252,11 @@ function EmergencyContent({ completions }: { completions?: ReturnType<typeof use
           {/* Emergency Tasks */}
           <div className="space-y-2">
             <h2 className="font-semibold text-sm text-foreground px-1">
-              {t("emergency.essentialOnly")} {tasks.length === 0 && "— אין פתוחות, כל הכבוד! 🎉"}
+              {t("emergency.essentialOnly")} {visibleTasks.length === 0 && "— אין פתוחות, כל הכבוד! 🎉"}
             </h2>
-            {tasks.map((task: EmergencyTask, i: number) => {
+            {visibleTasks.map((task: EmergencyTask, i: number) => {
               const isCompleted = isDone(task);
-              const cannotUndo = !!completions && isCompleted && overrides[task.id] !== true && !completions.isCompletedToday(task.id);
+              const cannotUndo = isCompleted && overrides[task.id] !== true && !completions.isCompletedToday(task.id);
               return (
                 <motion.div
                   key={task.id}
@@ -302,11 +269,11 @@ function EmergencyContent({ completions }: { completions?: ReturnType<typeof use
                 >
                   <button
                     onClick={() => toggleTask(task.id)}
-                    role={completions ? "checkbox" : undefined}
-                    aria-label={completions ? task.title : undefined}
-                    aria-checked={completions ? isCompleted : undefined}
-                    disabled={!!completions && (pending.has(task.id) || cannotUndo)}
-                    className={`${completions ? "w-11 h-11 focus-visible:outline focus-visible:outline-2 disabled:opacity-60" : "w-7 h-7"} rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                    role="checkbox"
+                    aria-label={task.title}
+                    aria-checked={isCompleted}
+                    disabled={pending.has(task.id) || cannotUndo}
+                    className={`w-11 h-11 focus-visible:outline focus-visible:outline-2 disabled:opacity-60 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
                       isCompleted
                         ? "bg-blue-500 border-blue-500"
                         : "border-blue-300 hover:border-blue-500"
@@ -327,10 +294,10 @@ function EmergencyContent({ completions }: { completions?: ReturnType<typeof use
                     >
                       {task.title}
                     </p>
-                    {completions && <div aria-live="polite">
+                    {<div aria-live="polite">
                       {failures.has(task.id) && <div className="text-sm text-red-600 dark:text-red-400">
-                        <p>{copy.failure}</p>
-                        <button className="min-h-11 min-w-11 underline focus-visible:outline focus-visible:outline-2" onClick={() => toggleTask(task.id)}>{copy.retry}</button>
+                        <p>{offlineFailures.has(task.id) ? copy.offline : copy.failure}</p>
+                        <button className="min-h-11 min-w-11 underline focus-visible:outline focus-visible:outline-2" disabled={pending.has(task.id)} onClick={() => toggleTask(task.id)}>{copy.retry}</button>
                       </div>}
                     </div>}
                     <div className="flex items-center gap-2 mt-0.5">
@@ -353,7 +320,7 @@ function EmergencyContent({ completions }: { completions?: ReturnType<typeof use
               );
             })}
 
-            {tasks.length === 0 && (
+            {visibleTasks.length === 0 && (
               <div className="text-center py-8 text-muted text-sm">
                 <Shield className="w-10 h-10 mx-auto mb-2 text-blue-300" />
                 <p>{t("emergency.allDone")}</p>
