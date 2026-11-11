@@ -25,6 +25,13 @@
           "accepted": true
         }
       }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לשטוף כלים",
+        "exact": true
+      }
     ]
   },
   {
@@ -53,6 +60,13 @@
           "accepted": true
         }
       }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "אין משימות לשבוע הזה עדיין.",
+        "exact": true
+      }
     ]
   },
   {
@@ -76,7 +90,7 @@
     "actions": [
       {
         "type": "click",
-        "role": "combobox",
+        "role": "button",
         "name": "בחירת יום להעברה של לשטוף כלים"
       }
     ],
@@ -116,6 +130,13 @@
           "accepted": true
         }
       }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לא הצלחנו לטעון את השבוע. אפשר לנסות שוב.",
+        "exact": true
+      }
     ]
   },
   {
@@ -143,6 +164,13 @@
         "body": {
           "accepted": true
         }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לשטוף כלים",
+        "exact": true
       }
     ]
   },
@@ -172,6 +200,13 @@
           "accepted": true
         }
       }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "There are no tasks for this week yet.",
+        "exact": true
+      }
     ]
   },
   {
@@ -195,7 +230,7 @@
     "actions": [
       {
         "type": "click",
-        "role": "combobox",
+        "role": "button",
         "name": "Choose a day to move לשטוף כלים"
       }
     ],
@@ -234,6 +269,13 @@
         "body": {
           "accepted": true
         }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Could not load the week. Please try again.",
+        "exact": true
       }
     ]
   }
