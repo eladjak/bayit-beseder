@@ -9,6 +9,9 @@ export function CountUp({ value, className = '' }: { value: number; className?: 
     if (started.current) return;
     const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
     if (media?.matches || !('IntersectionObserver' in window)) return;
+    // Preserve the server-rendered final value if it is already on screen.
+    const rect = ref.current?.getBoundingClientRect();
+    if (rect && rect.bottom > 0 && rect.top < window.innerHeight && rect.right > 0 && rect.left < window.innerWidth) { started.current = true; return; }
     let frame = 0;
     const observer = new IntersectionObserver(entries => {
       if (!entries.some(entry => entry.isIntersecting) || started.current) return;
