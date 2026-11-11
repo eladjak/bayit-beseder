@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import firstMinute from "@/lib/i18n/fragments/first-minute";
 import { loadHousehold, saveHousehold } from "@/lib/household-type";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -13,6 +14,7 @@ const button = "min-h-12 rounded-bb-md bg-bb-primary px-6 font-semibold text-bb-
 export function FirstMinute() {
   const { locale } = useTranslation(); const en = locale === "en"; const copy = firstMinute[en ? "en" : "he"];
   const flow = useFirstMinute();
+  const router = useRouter();
   const [closed, setClosed] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -34,6 +36,6 @@ export function FirstMinute() {
     {flow.step === "focus" && <><p className="text-bb-ink-2">{copy.stepTwo}</p><h1 id="first-minute-heading" className="mt-2 text-3xl font-bold">{copy.focusTitle}</h1><p className="my-4">{copy.focusHint}</p><div className="flex flex-wrap gap-3">{focuses.map((key) => <button key={key} aria-pressed={flow.focus.includes(firstMinute.he[key])} onClick={() => flow.setFocus(flow.focus.includes(firstMinute.he[key]) ? flow.focus.filter(x => x !== firstMinute.he[key]) : [...flow.focus, firstMinute.he[key]])} className="min-h-12 rounded-full border border-bb-line-strong bg-bb-card px-5 aria-pressed:bg-bb-primary aria-pressed:text-bb-on-primary focus-visible:outline-2 focus-visible:outline-bb-primary">{copy[key]}</button>)}</div><button className={`${button} mt-8`} disabled={flow.busy} onClick={() => void flow.prepare()}>{flow.busy ? (copy.preparing) : (flow.error ? (copy.retry) : (copy.prepare))}</button>{flow.error && <p role="alert" className="mt-4 text-bb-danger-ink">{copy.prepareError}</p>}</>}
     {flow.step === "ready" && <><h1 id="first-minute-heading" className="text-3xl font-bold">{copy.readyTitle}</h1><p className="my-5">{copy.readyDescription}</p><button className={button} onClick={() => flow.setStep("win")}>{copy.showMe}</button></>}
     {flow.step === "win" && <><h1 id="first-minute-heading" className="text-3xl font-bold">{copy.winTitle}</h1><p className="my-5 text-xl">{copy.openWindow}</p><p className="mb-5">{copy.winHint}</p><button className={button} disabled={flow.busy} onClick={() => void flow.complete()}>{flow.busy ? (copy.saving) : (copy.done)}</button>{flow.error && <p role="alert" className="mt-4 text-bb-danger-ink">{copy.completionError}</p>}</>}
-    {flow.step === "celebrate" && <><h1 id="first-minute-heading" className="text-3xl font-bold">{copy.celebrateTitle}</h1>{!isQuietTime() && <img src="/illustrations/welcome-home.jpg" alt="" className="my-5 w-full max-w-sm rounded-bb-md" />}<p className="mb-5">{copy.celebrateDescription}</p><button className={button} onClick={() => window.location.reload()}>{copy.continueToday}</button></>}
+    {flow.step === "celebrate" && <><h1 id="first-minute-heading" className="text-3xl font-bold">{copy.celebrateTitle}</h1>{!isQuietTime() && <img src="/illustrations/welcome-home.jpg" alt="" className="my-5 w-full max-w-sm rounded-bb-md" />}<p className="mb-5">{copy.celebrateDescription}</p><button className={button} onClick={() => { flow.setStep("invite"); router.refresh(); }}>{copy.continueToday}</button></>}
   </div></div>, document.body);
 }

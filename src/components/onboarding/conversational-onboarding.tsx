@@ -1016,5 +1016,5 @@ function ConversationalOnboardingV1({ open, onComplete, onSkip }: Conversational
 
 export function ConversationalOnboarding(props: ConversationalOnboardingProps) {
   const newUi = useNewUi();
-  return newUi ? <FirstMinute /> : <ConversationalOnboardingV1 {...props} />;
+  return newUi ? (props.open ? <FirstMinute /> : null) : <ConversationalOnboardingV1 {...props} />;
 }
