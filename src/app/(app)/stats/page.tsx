@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
+import { useCopy } from "@/hooks/useCopy";
+import honestyCopy from "@/lib/i18n/fragments/honesty-weekly-stats";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,9 +26,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useProfile } from "@/hooks/useProfile";
 import { usePartner } from "@/hooks/usePartner";
 import { useHouseholdMembers } from "@/hooks/useHouseholdMembers";
-import { useUserAchievements } from "@/hooks/useUserAchievements";
 import { AnimatedNumber } from "@/components/animated-number";
-import type { TaskCompletionRow, TaskRow } from "@/lib/types/database";
 import { CATEGORY_NAME_TO_KEY, CATEGORY_ICONS } from "@/lib/categories";
 // WeeklyShareCard uses canvas — lazy-load it
 const WeeklyShareCard = dynamic(
@@ -40,7 +39,7 @@ import { StatCardSkeleton, RingSkeleton } from "@/components/skeleton";
 import { useAdvancedStats } from "@/hooks/useAdvancedStats";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradePrompt } from "@/components/upgrade-prompt";
-import { ilToday } from "@/lib/il-date";
+import { addDaysStr, ilToday } from "@/lib/il-date";
 
 // Badges + Calendar — lazy-load
 const BadgesDisplay = dynamic(
@@ -93,67 +92,6 @@ const PersonalRecordsSection = dynamic(
     loading: () => <div className="h-32 bg-muted/30 rounded-xl animate-pulse" />,
   }
 );
-
-const MOCK_WEEKLY_DATA = [
-  { day: "א׳", completed: 7, total: 10 },
-  { day: "ב׳", completed: 9, total: 10 },
-  { day: "ג׳", completed: 6, total: 10 },
-  { day: "ד׳", completed: 8, total: 10 },
-  { day: "ה׳", completed: 10, total: 10 },
-  { day: "ו׳", completed: 5, total: 8 },
-  { day: "ש׳", completed: 3, total: 5 },
-];
-
-const MOCK_CATEGORY_DATA = [
-  { name: "מטבח", value: 35, category: "kitchen" },
-  { name: "אמבטיה", value: 20, category: "bathroom" },
-  { name: "סלון", value: 15, category: "living" },
-  { name: "חיות", value: 15, category: "pets" },
-  { name: "כביסה", value: 10, category: "laundry" },
-  { name: "כללי", value: 5, category: "general" },
-];
-
-// Compute unlocked achievements from real data
-function computeUnlockedAchievements(
-  completions: TaskCompletionRow[],
-  streak: number,
-  tasks: TaskRow[]
-): Set<string> {
-  const unlocked = new Set<string>();
-
-  // first_task - completed at least 1 task
-  if (completions.length >= 1) {
-    unlocked.add("first_task");
-  }
-
-  // streak achievements
-  if (streak >= 3) unlocked.add("streak_3");
-  if (streak >= 7) unlocked.add("streak_7");
-  if (streak >= 30) unlocked.add("streak_30");
-
-  // kitchen_master - 50 kitchen tasks completed
-  const kitchenCompletions = completions.filter((c) => {
-    const task = tasks.find((t) => t.id === c.task_id);
-    return task?.title.includes("מטבח") || task?.title.includes("כלים");
-  }).length;
-  if (kitchenCompletions >= 50) {
-    unlocked.add("kitchen_master");
-  }
-
-  // all_daily_10 - completed all daily tasks 10+ times
-  // Simplified: if total completions > 100, assume this is unlocked
-  if (completions.length >= 100) {
-    unlocked.add("all_daily_10");
-  }
-
-  // golden_rule_5 - met golden rule target 5+ times
-  // Simplified: if completions > 50, assume golden rule hit multiple times
-  if (completions.length >= 50) {
-    unlocked.add("golden_rule_5");
-  }
-
-  return unlocked;
-}
 
 // ============================================
 // Streak Visualization Component
@@ -413,6 +351,7 @@ function MembersComparisonSection({
 
 export default function StatsPage() {
   const { t } = useTranslation();
+  const { c } = useCopy(honestyCopy);
   const today = useMemo(() => ilToday(), []);
   const { tasks, loading: tasksLoading } = useTasks({});
   const { completions, loading: completionsLoading } = useCompletions({ limit: 500 });
@@ -420,9 +359,8 @@ export default function StatsPage() {
   const { profile } = useProfile();
   const { partner } = usePartner(profile?.partner_id, today);
   const { members: householdMembers } = useHouseholdMembers(profile?.household_id ?? null, today);
-  const { dbUnlockedCodes, hasDbData: hasAchievementsDbData } = useUserAchievements();
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const { canUse } = useSubscription(profile?.household_id ?? null);
+  const { canUse, loading: subscriptionLoading } = useSubscription(profile?.household_id ?? null);
 
   // Build category_id -> key mapping
   const categoryIdToKey = useMemo(() => {
@@ -444,21 +382,19 @@ export default function StatsPage() {
     userId: profile?.id,
   });
 
-  // Compute weekly trend from real data (falls back to mock)
+  // Compute weekly trend from recorded data
   const weeklyData = useMemo(() => {
-    if (!hasDbData) return MOCK_WEEKLY_DATA;
     return computeWeeklyTrend(completions, tasks, today);
   }, [hasDbData, completions, tasks, today]);
 
-  // Category breakdown - real or mock
+  // Category breakdown from recorded data
   const categoryData = useMemo(() => {
-    if (!hasDbData) return MOCK_CATEGORY_DATA;
     const breakdown = computeCategoryBreakdown(
       completions,
       tasks,
       categoryIdToKey
     );
-    return breakdown.length > 0 ? breakdown : MOCK_CATEGORY_DATA;
+    return breakdown;
   }, [hasDbData, completions, tasks, categoryIdToKey]);
 
   // Partner / household comparison
@@ -479,7 +415,7 @@ export default function StatsPage() {
   // Legacy 2-user comparison (used by PartnerComparisonSection when N-member not available)
   const partnerComparison = useMemo(() => {
     if (!hasDbData || !profile) {
-      return { myCount: 48, partnerCount: 42, myUserId: "", partnerUserId: "" };
+      return { myCount: 0, partnerCount: 0, myUserId: "", partnerUserId: "" };
     }
     return computePartnerComparison(
       completions,
@@ -511,29 +447,8 @@ export default function StatsPage() {
     [completions, today]
   );
 
-  // Compute unlocked achievements:
-  // 1. Try DB (user_achievements table) first
-  // 2. Fall back to client-side computation from completions/streaks
-  // 3. Fall back to mock data for demo
-  const unlockedAchievements = useMemo(() => {
-    if (hasAchievementsDbData && dbUnlockedCodes.size > 0) {
-      // DB data available - use it as the source of truth
-      return dbUnlockedCodes;
-    }
-    if (!hasDbData) {
-      // Mock data for demo
-      return new Set(["first_task", "streak_3", "streak_7", "golden_rule_5"]);
-    }
-    // Client-side computation as fallback when DB has no achievement records yet
-    return computeUnlockedAchievements(
-      completions,
-      profile?.streak ?? 0,
-      tasks
-    );
-  }, [hasAchievementsDbData, dbUnlockedCodes, hasDbData, completions, profile?.streak, tasks]);
-
   // Show skeleton while data is loading to prevent blank flash
-  if (tasksLoading || completionsLoading) {
+  if (tasksLoading || completionsLoading || subscriptionLoading) {
     return (
       <div className="space-y-4 pb-28 px-4 pt-6" dir="rtl">
         <RingSkeleton />
@@ -573,6 +488,12 @@ export default function StatsPage() {
 
       <div className="px-4 space-y-4">
 
+      {!hasDbData && (
+        <div className="card-elevated p-5 text-center">
+          <p className="font-medium">{c("statsEmpty")}</p>
+          <Link href="/tasks" className="inline-flex min-h-11 items-center mt-3 px-4 rounded-xl gradient-primary text-white">{c("statsAction")}</Link>
+        </div>
+      )}
       {/* Stats upgrade gate — free tier sees a preview with upgrade prompt */}
       {!canUse("stats_full") && (
         <div className="relative">
@@ -600,13 +521,13 @@ export default function StatsPage() {
       )}
 
       {/* Rest of stats — only shown to plus/family */}
-      {canUse("stats_full") && (<>
+      {canUse("stats_full") && hasDbData && (<>
 
       {/* Weekly share card */}
       <WeeklyShareCard
         weekRange={`${new Date().toLocaleDateString("he-IL", { day: "numeric", month: "short" })}`}
         completedTasks={weeklyTotal}
-        totalTasks={tasks.length > 0 ? Math.min(tasks.length, weeklyTotal + 10) : 44}
+        totalTasks={tasks.filter((task) => task.due_date && task.due_date >= addDaysStr(today, -new Date(today).getUTCDay()) && task.due_date <= addDaysStr(today, 6 - new Date(today).getUTCDay())).length}
         streakDays={profile?.streak ?? 0}
         topCategory={categoryData.length > 0 ? {
           name: categoryData[0].name,
@@ -615,27 +536,6 @@ export default function StatsPage() {
         } : null}
         householdName="הבית שלנו"
       />
-
-      {/* Empty state illustration - shown when no real data yet */}
-      {!hasDbData && (
-        <motion.div
-          className="bb-joy p-4 text-center"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <Image
-            src="/illustrations/empty-stats.jpg"
-            alt="אין נתונים עדיין"
-            width={192}
-            height={192}
-            sizes="192px"
-            className="w-48 h-48 mx-auto object-cover rounded-2xl mb-3"
-          />
-          <p className="font-medium text-foreground">{t("stats.emptyTitle")}</p>
-          <p className="text-sm text-muted">{t("stats.emptySubtitle")}</p>
-        </motion.div>
-      )}
 
       {/* Dashboard Analytics - shown when DB data is available */}
       {hasDbData && (
