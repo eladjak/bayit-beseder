@@ -1,14 +1,14 @@
 /**
  * GET  /api/sumit/cancel-subscription — { cancellable: boolean } and nothing else: does one of MY households,
- *       where I am the owner, have an active paid plan in our records? (used by the privacy gate screen,
+ *       where I am the owner, or a plan I pay for, have an active paid plan in our records? (used by the privacy gate screen,
  *       where the browser may not read this app's tables)
- * POST /api/sumit/cancel-subscription — household owner cancels their Plus subscription.
+ * POST /api/sumit/cancel-subscription — household owner or payer records cancellation of their Plus subscription.
  *
  * Both work WITHOUT privacy consent (allow-listed): stopping a charge must always work. They use the
  * service client for every lookup, because the consent gate in the database (migration 028) closes the
  * household tables to the browser session for someone who has not consented. The caller is identified
  * only by the verified session; a body householdId is optional and, if given, must be one of the
- * caller's own households.
+ * caller's owned household or paid subscription.
  *
  * ── What this does and does NOT guarantee ───────────────────────────────────
  * Sumit's public documentation (help.sumit.co.il) and the two targeted web
@@ -92,6 +92,10 @@ export async function GET(req: NextRequest) {
   const service = serviceClient();
   if (!service) return NextResponse.json({ error: 'Server not configured' }, { status: 500 });
 
+  const { data: paid, error: paidError } = await service.from('subscriptions').select('id')
+    .eq('user_id', user.id).in('status', ['active', 'past_due']).neq('tier', 'free').limit(1);
+  if (paidError) return NextResponse.json({ error: 'Lookup failed' }, { status: 500 });
+  if (Array.isArray(paid) && paid.length > 0) return NextResponse.json({ cancellable: true });
   const owned = await ownedHouseholds(service, user.id);
   if ('error' in owned) return NextResponse.json({ error: 'Lookup failed' }, { status: 500 });
   if (owned.ids.length === 0) return NextResponse.json({ cancellable: false });
@@ -127,24 +131,27 @@ export async function POST(req: NextRequest) {
   const service = serviceClient();
   if (!service) return NextResponse.json({ error: 'Server not configured' }, { status: 500 });
 
-  // Household-owner only (same rule as is_household_owner in migration 019), decided with the service
-  // client so that it also works for someone who has not consented.
+  // Owners can cancel household plans; non-owners can cancel only plans billed to them.
   const owned = await ownedHouseholds(service, user.id);
   if ('error' in owned) return NextResponse.json({ error: 'Lookup failed' }, { status: 500 });
+  const { data: payerRows, error: payerError } = await service.from('subscriptions').select('household_id')
+    .eq('user_id', user.id).in('status', ['active', 'past_due']).neq('tier', 'free');
+  if (payerError) return NextResponse.json({ error: 'Lookup failed' }, { status: 500 });
+  const payerIds = ((payerRows ?? []) as { household_id: string }[]).map((r) => r.household_id);
   let householdId = requested;
   if (householdId) {
-    if (!owned.ids.includes(householdId)) {
-      return NextResponse.json({ error: 'Forbidden — household owner only' }, { status: 403 });
+    if (!owned.ids.includes(householdId) && !payerIds.includes(householdId)) {
+      return NextResponse.json({ error: 'Forbidden — household owner or payer only' }, { status: 403 });
     }
   } else {
-    if (owned.ids.length === 0) {
-      return NextResponse.json({ error: 'Forbidden — household owner only' }, { status: 403 });
+    if (owned.ids.length === 0 && payerIds.length === 0) {
+      return NextResponse.json({ error: 'Forbidden — household owner or payer only' }, { status: 403 });
     }
     // No household named: the one (of the caller's own) that has an active paid plan.
     const { data: rows, error } = await service
       .from('subscriptions')
       .select('household_id')
-      .in('household_id', owned.ids)
+      .in('household_id', [...new Set([...owned.ids, ...payerIds])])
       .in('status', ['active', 'past_due'])
       .neq(PAID_ACTIVE.column, PAID_ACTIVE.notValue);
     if (error) return NextResponse.json({ error: 'Lookup failed' }, { status: 500 });
@@ -158,13 +165,14 @@ export async function POST(req: NextRequest) {
     householdId = candidates[0];
   }
 
-  const { data: activeRow, error: findErr } = await service
+  let activeQuery = service
     .from('subscriptions')
     .select('id, sumit_payment_method_id')
     .eq('household_id', householdId)
     .in('status', ['active', 'past_due'])
-    .neq(PAID_ACTIVE.column, PAID_ACTIVE.notValue)
-    .maybeSingle();
+    .neq(PAID_ACTIVE.column, PAID_ACTIVE.notValue);
+  if (!owned.ids.includes(householdId)) activeQuery = activeQuery.eq('user_id', user.id);
+  const { data: activeRow, error: findErr } = await activeQuery.maybeSingle();
   if (findErr) {
     console.error('[sumit/cancel-subscription] lookup failed:', findErr.message);
     return NextResponse.json({ error: 'Lookup failed' }, { status: 500 });

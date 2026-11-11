@@ -30,6 +30,8 @@ function fake(cfg: Cfg) {
       let only: unknown[] | null = null;
       const b: Record<string, unknown> = {
         select: () => b,
+        order: () => b,
+        range: () => b,
         is: () => b,
         not: () => b,
         eq: () => b,

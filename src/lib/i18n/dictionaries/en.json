@@ -1350,16 +1350,16 @@
       "tooMany": "Too many attempts. Wait a minute and try again.",
       "checking": "Checking your confirmation...",
       "version": "Version {version}",
-      "youCanDelete": "You can delete your account any time: in Settings, or here after tapping \"Not now\".",
+      "youCanDelete": "You can request deletion any time: in Settings, or here after tapping \"Not now\".",
       "inviteTitle": "One moment before you join the household",
       "checkError": "We could not check right now whether you already confirmed. This is a temporary problem on our side, not a problem with your account.",
       "checkErrorHint": "If you confirmed before, you do not need to confirm again. Please try again in a moment.",
       "signOut": "Sign out",
       "declinedTitle": "Without your confirmation we cannot open the app",
-      "declinedBody": "That is completely fine. You can go back and confirm, sign out, or delete your account and data right here.",
+      "declinedBody": "That is completely fine. You can go back and confirm, sign out, or request deletion here.",
       "declinedBack": "Back to the confirmation",
       "declinedMore": "What you can do now",
-      "subscriptionNote": "Do you have an active Plus subscription? You can cancel it here so you are not charged.",
+      "subscriptionNote": "You can record a Plus cancellation here. Contact us to confirm that Sumit billing has stopped.",
       "billingCheckError": "We could not check right now whether there is a paid subscription. You can try again."
     },
     "register": {
@@ -1386,16 +1386,16 @@
     },
     "delete": {
       "title": "Delete my account",
-      "desc": "Deletes your account and personal data. You can download a copy of your data first, using the export above.",
-      "descGate": "Deletes your account and personal data.",
+      "desc": "Request deletion of your data. Some data remains for manual review. You can export a copy first.",
+      "descGate": "Request deletion of your data. Some data remains for manual review.",
       "open": "Delete my account",
       "dialogTitle": "Delete your account?",
-      "intro": "This is what happens as soon as you confirm:",
-      "i1": "Your profile, points, achievements and personal history in Bayit BeSeder are deleted now.",
-      "i2": "Your WhatsApp, Google Calendar and notification connections are disconnected and deleted.",
-      "i3": "If the household has other members, you leave it. The shared tasks and lists stay with them.",
+      "intro": "When you confirm:",
+      "i1": "Some personal data, including points and task completion history, is deleted. The shared profile remains for manual review.",
+      "i2": "Your WhatsApp, Google Calendar and notification connections are disconnected.",
+      "i3": "You leave the household. The household and shared content remain for review, even if you are the last member, including content you wrote. Some records may still identify you.",
       "i4": "Receipts and accounting documents are kept by the payment company as the law requires.",
-      "i5": "The login itself (email and password) is deleted within the time the law allows, after a manual check, because the account is shared with another app of ours.",
+      "i5": "Your login, shared with another app, and some photos remain for manual review. Contact privacy@bayitbeseder.com to follow up.",
       "cannotUndo": "This cannot be undone.",
       "typeLabel": "To confirm, type your account email address",
       "typeExample": "For example name@example.com",
@@ -1406,10 +1406,10 @@
       "errSubscription": "According to our records you have a paid subscription that is still active. Cancel it first (in Settings, or right here on this screen), then you can delete the account.",
       "errGeneric": "The deletion did not finish. You can try again, and nothing already deleted is affected. If it keeps happening, write to privacy@bayitbeseder.com.",
       "errTooMany": "Too many attempts. Wait a minute and try again.",
-      "done": "Your data in Bayit BeSeder was deleted.",
-      "keptNote": "The login itself (the account is shared with another app of ours) will be removed within the time the law allows, after a manual check. Until then it holds none of your Bayit BeSeder data.",
+      "done": "Your deletion request was processed.",
+      "keptNote": "Some data and your shared login remain for manual review. Contact privacy@bayitbeseder.com to follow up.",
       "errUnavailable": "Deletion is not available right now, and nothing was deleted. Please try again later or write to privacy@bayitbeseder.com.",
-      "photosPending": "Some photos are still waiting to be deleted and will be removed shortly."
+      "photosPending": "Some photos could not be removed and remain for review."
     }
   }
 }

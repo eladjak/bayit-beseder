@@ -117,16 +117,26 @@ export async function consentedHouseholdIds(service: AnyClient, only?: string[])
       if (!members.has(household)) members.set(household, new Set());
       members.get(household)!.add(user);
     };
-    let hm = service.from("household_members").select("household_id, user_id");
-    let pr = service.from("profiles").select("id, household_id").not("household_id", "is", null);
-    if (only) {
-      hm = hm.in("household_id", only);
-      pr = pr.in("household_id", only);
-    }
-    const [m, p] = await Promise.all([hm, pr]);
-    if (m.error || p.error || !Array.isArray(m.data) || !Array.isArray(p.data)) return [];
-    for (const r of m.data as { household_id: string; user_id: string }[]) add(r.household_id, r.user_id);
-    for (const r of p.data as { id: string; household_id: string }[]) add(r.household_id, r.id);
+    if (only?.length === 0) return [];
+    // Request every page: PostgREST may silently cap a response at 1000 rows.
+    // A deterministic unique ordering avoids losing rows between pages in a stable dataset.
+    const readPages = async (table: "household_members" | "profiles") => {
+      const rows: Record<string, string>[] = [];
+      const pageSize = 500;
+      for (let offset = 0; ; offset += pageSize) {
+        let query = table === "household_members"
+          ? service.from(table).select("household_id, user_id").order("household_id").order("user_id")
+          : service.from(table).select("id, household_id").not("household_id", "is", null).order("id");
+        if (only) query = query.in("household_id", only);
+        const result = await query.range(offset, offset + pageSize - 1);
+        if (result.error || !Array.isArray(result.data)) throw new Error("membership lookup failed");
+        rows.push(...result.data);
+        if (result.data.length < pageSize) return rows;
+      }
+    };
+    const [m, p] = await Promise.all([readPages("household_members"), readPages("profiles")]);
+    for (const r of m) add(r.household_id, r.user_id);
+    for (const r of p) add(r.household_id, r.id);
     const everyone = [...members.values()].flatMap((set) => [...set]);
     const consented = await filterConsentedUserIds(service, everyone);
     return [...members.entries()]

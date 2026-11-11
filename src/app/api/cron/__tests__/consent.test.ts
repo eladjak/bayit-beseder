@@ -24,6 +24,8 @@ vi.mock("@supabase/supabase-js", () => ({
       let rows: Record<string, unknown>[] = ((db as unknown as Record<string, Record<string, unknown>[]>)[table] ?? []).slice();
       const b = {
         select: () => b,
+        order: () => b,
+        range: () => b,
         eq: (c: string, v: unknown) => ((rows = rows.filter((r) => r[c] === v)), b),
         neq: () => b,
         lt: () => b,

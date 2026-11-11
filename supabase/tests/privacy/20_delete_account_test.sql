@@ -269,6 +269,17 @@ SELECT pg_temp.ok(EXISTS (SELECT 1 FROM public.households WHERE id = :'HZ') AND 
 SELECT pg_temp.delete_as_service(:'R') AS r2 \gset
 SELECT pg_temp.ok(EXISTS (SELECT 1 FROM auth.users WHERE id = :'R') AND (SELECT count(*) FROM public.bayit_identity_deletion_requests WHERE user_id = :'R') = 1 AND pg_temp.cnt('task_completions', 'user_id = ''' || :'F' || '''') = 1, 'RERUN a second run changes nothing and keeps one request');
 
+SELECT pg_temp.ok((SELECT kept_shared @> ARRAY['photo_unverified:a0000000-0000-0000-0000-00000000000a-shared.webp'] FROM public.bayit_identity_deletion_requests WHERE user_id = :'R'), 'RETRY preserves legacy photo review list');
+UPDATE public.bayit_identity_deletion_requests SET status = 'done' WHERE user_id = :'R';
+SELECT pg_temp.delete_as_service(:'R');
+SELECT pg_temp.ok((SELECT status = 'done' FROM public.bayit_identity_deletion_requests WHERE user_id = :'R'), 'RETRY does not reopen completed review');
+
+SELECT pg_temp.mk_person('61000000-0000-0000-0000-000000000001', '62000000-0000-0000-0000-000000000001', 'owner');
+SELECT pg_temp.mk_person('61000000-0000-0000-0000-000000000002', NULL);
+UPDATE public.profiles SET household_id = '62000000-0000-0000-0000-000000000001' WHERE id = '61000000-0000-0000-0000-000000000002';
+SELECT pg_temp.delete_as_service('61000000-0000-0000-0000-000000000001');
+SELECT pg_temp.ok(EXISTS (SELECT 1 FROM public.household_members WHERE household_id = '62000000-0000-0000-0000-000000000001' AND user_id = '61000000-0000-0000-0000-000000000002' AND role = 'owner'), 'HANDOVER profile-only remaining member becomes owner');
+
 -- ================================================================= which subscriptions block
 \set S1 40000000-0000-0000-0000-0000000000a1
 \set S2 40000000-0000-0000-0000-0000000000a2

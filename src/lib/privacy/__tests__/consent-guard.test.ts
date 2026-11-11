@@ -105,8 +105,11 @@ function dbClient(cfg: { consents?: Record<string, unknown>[]; members?: { house
     from(table: string) {
       let rows: Record<string, unknown>[] =
         table === "privacy_consents" ? cfg.consents ?? [] : table === "household_members" ? (cfg.members as never) ?? [] : table === "profiles" ? (cfg.profiles as never) ?? [] : [];
+      let start = 0, end = 999;
       const b = {
         select: () => b,
+        order: () => b,
+        range: (a: number, z: number) => ((start = a), (end = z), b),
         eq: (c: string, v: unknown) => ((rows = rows.filter((r) => r[c] === v)), b),
         in: (c: string, vs: unknown[]) => ((rows = rows.filter((r) => vs.includes(r[c]))), b),
         not: (c: string, _op: string, v: unknown) => ((rows = rows.filter((r) => r[c] !== v)), b),
@@ -114,7 +117,7 @@ function dbClient(cfg: { consents?: Record<string, unknown>[]; members?: { house
           if (cfg.fail === "throw") return Promise.reject(new Error("down")).then(res, rej);
           if ((cfg.fail === "consents" && table === "privacy_consents") || (cfg.fail === "members" && table === "household_members"))
             return Promise.resolve({ data: null, error: { message: "x" } }).then(res, rej);
-          return Promise.resolve({ data: rows, error: null }).then(res, rej);
+          return Promise.resolve({ data: rows.slice(start, end + 1), error: null }).then(res, rej);
         },
       };
       return b;
@@ -163,6 +166,11 @@ describe("consentedHouseholdIds / householdConsentOk: EVERY member must have con
   });
   it("a new member who has not consented closes the household again; an old-version consent does not count", async () => {
     const db = dbClient({ members: members.slice(0, 2), profiles: [], consents: [C("a"), C("b", { policy_version: "old" })] });
+    expect(await householdConsentOk(db, "h1")).toBe(false);
+  });
+  it("does not miss an unconsented member beyond the PostgREST row limit", async () => {
+    const members = Array.from({ length: 1001 }, (_, i) => ({ household_id: "h1", user_id: `u${i}` }));
+    const db = dbClient({ members, consents: members.slice(0, 1000).map(({ user_id }) => C(user_id)) });
     expect(await householdConsentOk(db, "h1")).toBe(false);
   });
   it("a household with no members is not served", async () => {

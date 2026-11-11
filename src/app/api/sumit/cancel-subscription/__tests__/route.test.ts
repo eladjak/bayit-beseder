@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 interface Tables {
   household_members: { household_id: string; user_id: string; role: string }[];
-  subscriptions: { id: string; household_id: string; tier: string; status: string; sumit_payment_method_id?: string | null }[];
+  subscriptions: { id: string; household_id: string; tier: string; status: string; user_id?: string; sumit_payment_method_id?: string | null }[];
 }
 let tables: Tables;
 let sessionUser: { id: string } | null;
@@ -100,6 +100,13 @@ describe("GET /api/sumit/cancel-subscription (for the gate screen)", () => {
     expect(await (await GET(get())).json()).toEqual({ cancellable: false });
     tables.subscriptions = [{ id: "d", household_id: "h-mine", tier: "plus", status: "canceled" }];
     expect(await (await GET(get())).json()).toEqual({ cancellable: false });
+  });
+
+  it("lets a non-owner payer find and cancel their own plan", async () => {
+    tables.subscriptions = [{ id: "payer", household_id: "h-member", user_id: "me", tier: "plus", status: "active" }];
+    expect(await (await GET(get())).json()).toEqual({ cancellable: true });
+    expect((await POST(post({}))).status).toBe(200);
+    expect(updates).toEqual([{ id: "payer", patch: expect.objectContaining({ status: "canceled" }) }]);
   });
 
   it("offers cancellation for a past-due paid plan", async () => {

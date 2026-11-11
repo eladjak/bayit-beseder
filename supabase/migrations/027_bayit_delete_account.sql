@@ -227,10 +227,17 @@ BEGIN
       IF NOT EXISTS (SELECT 1 FROM public.household_members WHERE household_id = hh AND user_id <> p_user AND role = 'owner') THEN
         SELECT user_id INTO v_next FROM public.household_members
           WHERE household_id = hh AND user_id <> p_user ORDER BY joined_at, user_id LIMIT 1;
-        IF v_next IS NOT NULL THEN
+        IF v_next IS NULL THEN
+          -- Legacy membership can exist only in profiles; give that member an owner row.
+          SELECT id INTO v_next FROM public.profiles WHERE household_id = hh AND id <> p_user ORDER BY id LIMIT 1;
+          IF v_next IS NOT NULL THEN
+            INSERT INTO public.household_members (household_id, user_id, role) VALUES (hh, v_next, 'owner')
+              ON CONFLICT (household_id, user_id) DO UPDATE SET role = 'owner';
+          END IF;
+        ELSE
           UPDATE public.household_members SET role = 'owner' WHERE household_id = hh AND user_id = v_next;
-          v_new_owner := v_next;
         END IF;
+        IF v_next IS NOT NULL THEN v_new_owner := v_next; END IF;
       END IF;
       IF v_household NOT IN ('emptied', 'deleted') THEN v_household := 'left'; END IF;
     ELSE
@@ -261,7 +268,7 @@ BEGIN
     SELECT DISTINCT n FROM unnest(v_photos) AS n WHERE n <> '' ON CONFLICT DO NOTHING;
 
   INSERT INTO public.bayit_identity_deletion_requests (user_id, kept_shared) VALUES (p_user, v_kept)
-    ON CONFLICT (user_id) DO UPDATE SET requested_at = now(), status = 'pending', kept_shared = EXCLUDED.kept_shared;
+    ON CONFLICT (user_id) DO UPDATE SET kept_shared = ARRAY(SELECT DISTINCT item FROM unnest(public.bayit_identity_deletion_requests.kept_shared || EXCLUDED.kept_shared) AS item ORDER BY item);
 
   RETURN jsonb_build_object(
     'identity_deletion_requested', true,

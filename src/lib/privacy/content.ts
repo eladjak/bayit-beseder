@@ -368,27 +368,27 @@ export const PRIVACY_SECTIONS: Section[] = [
     blocks: [
       {
         p: {
-          he: "אנחנו שומרים את המידע כל עוד החשבון קיים. אפשר למחוק את החשבון בעצמכם: הגדרות, \"מחיקת החשבון\". המחיקה מתבצעת מיד.",
-          en: "We keep your data as long as your account exists. You can delete your account yourself: Settings, \"Delete my account\". The deletion happens immediately.",
+          he: "אפשר לבקש מחיקה דרך הגדרות, \"מחיקת החשבון\". חלק מהמידע נמחק מיד, וחלק נשאר לבדיקה ידנית כמפורט כאן.",
+          en: "You can request deletion in Settings, \"Delete my account\". Some data is deleted immediately; some remains for manual review as described below.",
         },
       },
       {
         list: [
           {
-            he: "אם אתם החבר האחרון בבית, הבית וכל המידע שלו נמחקים.",
-            en: "If you are the last member of a household, the household and all its data are deleted.",
+            he: "גם אם אתם האחרונים בבית, הבית והתוכן המשותף נשארים לבדיקה ידנית, כולל תוכן שכתבתם.",
+            en: "Even if you are the last member, the household and its shared content remain for manual review, including content you wrote.",
           },
           {
-            he: "אם יש בבית חברים אחרים, אתם יוצאים מהבית. המשימות והרשימות המשותפות נשארות לחברים שנשארו, בלי השם שלכם. אם הייתם הבעלים, מי שהצטרף ראשון אחריכם הופך לבעלים.",
-            en: "If other members remain, you leave the household. Shared tasks and lists stay with the remaining members, without your name. If you were the owner, the member who joined next becomes the owner.",
+            he: "אתם יוצאים מהבית. תוכן משותף נשאר, ובחלק מהרשומות עשוי להישאר גם מזהה שלכם. אם יש חברים נוספים והייתם הבעלים, הבעלות מועברת לחבר אחר.",
+            en: "You leave the household. Shared content remains, and some records may retain your identifier. If other members remain and you were the owner, ownership passes to another member.",
           },
           {
-            he: "הפרטים האישיים שלכם נמחקים: חשבון, פרופיל, היסטוריית המשימות שביצעתם (כולל תמונות שצירפתם), נקודות, משוב, מפתח היומן, כתובת ההתראות והמספר של וואטסאפ. קודי גישה לעוזרים שיצרתם מתבטלים.",
-            en: "Your personal details are deleted: account, profile, the history of tasks you completed (including photos you attached), points, feedback, calendar key, notification address and WhatsApp number. Access codes you created for assistants stop working.",
+            he: "מידע אישי מסוים נמחק או מנותק, כולל היסטוריית ביצוע משימות, נקודות וחיבורי התראות. החשבון והפרופיל המשותפים לאפליקציה נוספת נשארים לבדיקה ידנית, וכך גם חלק מהרשומות והתמונות שלא ניתן לוודא למי הן שייכות. קודי גישה לעוזרים שיצרתם מתבטלים.",
+            en: "Some personal data is deleted or disconnected, including task completion history, points and notification connections. The account and profile shared with another app remain for manual review, as do some records and photos whose ownership cannot be verified. Access codes you created for assistants stop working.",
           },
           {
-            he: "מנוי Plus פעיל צריך לבטל לפני המחיקה, כדי שלא תחויבו על חשבון שלא קיים. קבלות ומסמכי חשבונאות נשמרים אצל סאמיט כפי שהחוק מחייב.",
-            en: "An active Plus subscription must be cancelled first, so you are not charged for an account that no longer exists. Receipts and accounting documents are kept by Sumit as the law requires.",
+            he: "יש לבטל מנוי Plus לפני המחיקה. הביטול באפליקציה נרשם אצלנו בלבד; יש לוודא מולנו שגם החיוב אצל סאמיט הופסק. קבלות ומסמכי חשבונאות נשמרים אצל סאמיט כפי שהחוק מחייב.",
+            en: "A Plus subscription must be cancelled before deletion. Cancellation in the app is recorded only in our system; contact us to confirm that Sumit billing has also stopped. Receipts and accounting documents are kept by Sumit as the law requires.",
           },
           {
             he: "אירועים שכבר נוצרו ביומן Google שלכם נשארים שם. אפשר למחוק אותם מהיומן.",
@@ -529,8 +529,8 @@ export const TERMS_SECTIONS: Section[] = [
       },
       {
         p: {
-          he: "יציאה מהבית או מחיקת חשבון: מי שעוזב מאבד גישה למידע של הבית. הרשומות המשותפות (למשל משימות ורשימות) נשארות לחברים שנשארו, בלי השם של מי שעזב. כל אחד יכול למחוק את החשבון שלו בעצמו בהגדרות.",
-          en: "Leaving a household or deleting an account: whoever leaves loses access to the household's data. Shared records (such as tasks and lists) stay with the remaining members, without the name of the person who left. Anyone can delete their own account in Settings.",
+          he: "יציאה מהבית או בקשת מחיקה: מי שעוזב מאבד גישה למידע של הבית. הרשומות המשותפות נשארות, וגם אם לא נשארו חברים בבית הן נשמרות לבדיקה ידנית. בחלקן עשוי להישאר מזהה של מי שעזב. אפשר לבקש מחיקה בהגדרות.",
+          en: "Leaving a household or requesting deletion: whoever leaves loses access to the household's data. Shared records remain, including when no members remain, for manual review. Some may retain the departing person's identifier. You can request deletion in Settings.",
         },
       },
       {
@@ -565,8 +565,8 @@ export const TERMS_SECTIONS: Section[] = [
       },
       {
         p: {
-          he: "ביטול: אפשר לבטל בכל עת, מההגדרות או באימייל. החיוב הבא ייעצר תוך 3 ימי עסקים לכל היותר, ו-Plus נשאר פעיל עד סוף התקופה ששולמה.",
-          en: "Cancellation: you can cancel any time, in Settings or by email. The next charge stops within 3 business days at most, and Plus stays active until the end of the paid period.",
+          he: "ביטול: אפשר לבטל בכל עת, מההגדרות או באימייל. הביטול נרשם אצלנו. פנו אלינו כדי לוודא שהחיוב אצל סאמיט הופסק.",
+          en: "Cancellation: you can cancel any time, in Settings or by email. The cancellation is recorded in our system. Contact us to confirm that Sumit billing has stopped.",
         },
       },
       {
@@ -728,7 +728,7 @@ export const GATE_CARDS: { icon: "collect" | "why" | "who" | "rights"; title: L;
     title: { he: "הזכויות שלכם", en: "Your rights" },
     text: {
       he: "אפשר להוריד את המידע בהגדרות, ולמחוק את החשבון בלחיצה. הכל מוסבר במדיניות המלאה.",
-      en: "You can download your data in Settings and delete your account in a click. Everything is explained in the full policy.",
+      en: "You can download your data and request deletion in Settings. Some data remains for manual review, as explained in the full policy.",
     },
   },
 ];
