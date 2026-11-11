@@ -6,6 +6,7 @@ const mode = targetMode(base, process.env.SMOKE_ALLOW_PRODUCTION_READONLY);
 test('partner sees the task added by the member', async ({page, context}) => {
   test.skip(mode === 'readonly', 'Production runs only the member read-only flow');
   await context.route('**/*', route => requestAllowed(route.request().url(), route.request().method(), base, mode, local) ? route.continue() : route.abort());
+  if (local) await context.routeWebSocket('**/*', ws => { if (/^wss?:\/\/(localhost|127\.0\.0\.1)(:|\/)/.test(ws.url())) ws.connectToServer(); else ws.close(); });
   await page.goto('/login');
   await page.locator('#login-email').fill(local ? 'partner@example.invalid' : process.env.SMOKE_PARTNER_EMAIL!);
   await page.locator('#login-password').fill(local ? 'fake-password' : process.env.SMOKE_PARTNER_PASSWORD!);

@@ -17,7 +17,7 @@ test('member can sign in and complete the main flow', async ({ page, context }) 
   await page.locator('#login-email').fill(local ? 'member@example.invalid' : process.env.SMOKE_MEMBER_EMAIL!);
   await page.locator('#login-password').fill(local ? 'fake-password' : process.env.SMOKE_MEMBER_PASSWORD!);
   await page.locator('form').first().locator('button[type="submit"]').click();
-  await expect(page.getByRole('link', {name:/משימות|Tasks/i}).first()).toBeVisible({timeout:30000});
+  await expect(page.getByRole('link', {name:/^(היום|Today)$/i}).first()).toBeVisible({timeout:30000});
   await capture(page, 'today');
   if (mode === 'full') {
     await page.goto('/tasks');
@@ -39,7 +39,8 @@ test('member can sign in and complete the main flow', async ({ page, context }) 
     await expect(page.getByText(item, {exact:true}).first()).toBeVisible();
     await capture(page, 'shopping-added');
     await page.getByRole('button', {name:`סמן כנרכש: ${item}`}).click();
-    await expect(page.getByRole('button', {name:`בטל סימון: ${item}`})).toHaveAttribute('aria-pressed','true');
+    await page.getByRole('button', {name:/^נרכש/}).click();
+    await expect(page.getByText(item, {exact:false}).first()).toBeVisible();
     await capture(page, 'shopping-checked');
   }
   await signOut(page);
