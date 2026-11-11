@@ -47,3 +47,11 @@ test('runner refuses production without printing a supplied secret', async () =>
   assert.doesNotMatch(result.stdout + result.stderr, new RegExp(marker));
   assert.match(result.stdout + result.stderr, /blocked/i);
 });
+
+test('read-only and local network policies reject unsafe traffic and production redirects', async () => {
+  const { requestAllowed } = await import('../../../e2e/smoke/guard.ts');
+  assert.equal(requestAllowed('https://bayit-beseder.vercel.app/tasks','GET','https://preview.invalid','full',false),false);
+  assert.equal(requestAllowed('https://prod.example.invalid/rest/v1/tasks','POST','https://bayit-beseder.vercel.app','readonly',false),false);
+  assert.equal(requestAllowed('https://prod.example.invalid/auth/v1/token?grant_type=password','POST','https://bayit-beseder.vercel.app','readonly',false),true);
+  assert.equal(requestAllowed('https://external.invalid/','GET','http://localhost:3000','full',true),false);
+});
