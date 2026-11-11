@@ -50,6 +50,15 @@ it('replaces the legacy update toast when the flag turns on and restores it when
   Object.defineProperty(navigator, 'serviceWorker', { configurable: true, value: worker });
   flag.value = null;
   const view = render(<ServiceWorkerUpdateToast />);
+  const { toast } = await import('sonner');
+  vi.mocked(toast).mockClear();
+  worker.dispatchEvent(new MessageEvent('message', { data: { type: 'SW_UPDATED' } }));
+  expect(toast).toHaveBeenCalledOnce();
+  flag.value = false; view.rerender(<ServiceWorkerUpdateToast />);
+  vi.mocked(toast).mockClear();
+  worker.dispatchEvent(new MessageEvent('message', { data: { type: 'SW_UPDATED' } }));
+  expect(toast).toHaveBeenCalledOnce();
+  flag.value = null; view.rerender(<ServiceWorkerUpdateToast />);
   flag.value = true;
   view.rerender(<ServiceWorkerUpdateToast />);
   worker.dispatchEvent(new MessageEvent('message', { data: { type: 'SW_UPDATED' } }));
@@ -97,4 +106,55 @@ it('offers installation and remembers dismissal', async () => {
   expect(localStorage.getItem('bayit-beseder-pwa-install-dismissed')).toBeTruthy();
   localStorage.removeItem('bayit-beseder-pwa-install-dismissed');
   localStorage.removeItem('bayit-beseder-pwa-install-dismissed-count');
+});
+
+it.each([
+  ['not found', async () => (await import('../../../app/not-found')).default, 'הדף לא נמצא', 'הדף הזה לא נמצא, אבל אפשר להמשיך מכאן.'],
+  ['loading', async () => (await import('../../../app/(app)/loading')).default, null, 'טוענים את התוכן'],
+  ['offline page', async () => (await import('../../../app/offline/offline-content')).OfflineContent, null, 'לא כל הפעולות זמינות ללא חיבור'],
+  ['offline indicator', async () => (await import('@/components/offline-indicator')).OfflineIndicator, null, 'לא כל הפעולות זמינות ללא חיבור'],
+  ['install banner', async () => (await import('@/components/pwa-install-banner')).PWAInstallBanner, null, 'אפשר להוסיף את בית בסדר למסך הבית.'],
+] as const)('%s retains V1 for null and false and safely toggles', async (name, load, legacyText, newText) => {
+  Object.defineProperty(navigator, 'onLine', { configurable: true, value: false });
+  Object.defineProperty(window, 'matchMedia', { configurable: true, value: () => ({ matches: false }) });
+  localStorage.clear();
+  const Component = await load();
+  const prompt = () => act(() => { window.dispatchEvent(new Event('beforeinstallprompt', { cancelable: true })); });
+  const legacy = (container: HTMLElement) => {
+    if (legacyText) expect(screen.getByText(legacyText)).toBeTruthy();
+    else if (name === 'loading') expect(container.querySelector('.gradient-primary')).toBeTruthy();
+    else if (name === 'offline page') expect(container.querySelector('[aria-label="בית"]')).toBeTruthy();
+    else if (name === 'offline indicator') expect(screen.getByRole('alert')).toBeTruthy();
+    else expect(screen.getByRole('complementary')).toBeTruthy();
+    expect(screen.queryByText(new RegExp(newText))).toBeNull();
+  };
+  flag.value = null;
+  const view = render(<Component />);
+  if (name === 'install banner') prompt();
+  legacy(view.container);
+  flag.value = false; view.rerender(<Component />); legacy(view.container);
+  flag.value = null; view.rerender(<Component />); legacy(view.container);
+  flag.value = true; view.rerender(<Component />);
+  if (name === 'install banner') prompt();
+  expect(screen.getAllByText(new RegExp(newText)).length).toBeGreaterThan(0);
+  flag.value = false; view.rerender(<Component />);
+  if (name === 'install banner') prompt();
+  legacy(view.container);
+  view.unmount();
+  Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
+});
+
+it('root error retains V1 for null and false and safely toggles', async () => {
+  const { default: RootError } = await import('../../../app/error');
+  const props = { error: new Error('hidden'), reset: vi.fn() };
+  flag.value = null;
+  const view = render(<RootError {...props} />);
+  expect(screen.getByText('משהו השתבש')).toBeTruthy();
+  flag.value = false; view.rerender(<RootError {...props} />);
+  expect(screen.getByText('משהו השתבש')).toBeTruthy();
+  flag.value = null; view.rerender(<RootError {...props} />);
+  flag.value = true; view.rerender(<RootError {...props} />);
+  expect(screen.getByText('משהו לא הסתדר. אפשר לנסות שוב.')).toBeTruthy();
+  flag.value = false; view.rerender(<RootError {...props} />);
+  expect(screen.getByText('משהו השתבש')).toBeTruthy();
 });
