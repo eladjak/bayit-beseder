@@ -27,6 +27,7 @@ it('marks the current page in both navigation surfaces', () => {
   for (const nav of screen.getAllByRole('navigation')) {
     expect(nav.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
     expect(nav.querySelector('[aria-current="page"]')?.getAttribute('href')).toBe('/tasks');
+    expect(nav.querySelector('[aria-current="page"]')?.className).toContain('ring-bb-primary');
   }
 });
 it('allows local development while explicitly denying production', () => {

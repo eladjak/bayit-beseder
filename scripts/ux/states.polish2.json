@@ -33,7 +33,15 @@
     "plannerFake": true,
     "storage": {
       "bayit-beseder-language": "he"
-    }
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
   },
   {
     "route": "/dashboard",
@@ -45,6 +53,14 @@
     "plannerFake": true,
     "storage": {
       "bayit-beseder-language": "en"
-    }
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
   }
 ]

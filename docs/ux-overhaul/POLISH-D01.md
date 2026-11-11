@@ -35,7 +35,7 @@
 ## סבב D-02: מה השתנה ואיפה
 
 - כפתור עם טקסט ארוך קיבל רווח בין השורות ומסביב למילים. לפני: `before/gallery-he-375-fold.png`; אחרי: `after/gallery-he-375-fold.png`.
-- סרגלי הניווט מדגישים את העמוד הנוכחי גם במסגרת סביבו. לפני: `before/shell-he-375-fold.png`, `before/shell-he-1280-fold.png`; אחרי: `after/shell-he-375-fold.png`, `after/shell-he-1280-fold.png`.
+- סרגלי הניווט מדגישים את העמוד הנוכחי גם במסגרת סביבו. לפני: `before-shell/shell-he-375-fold.png`, `before-shell/shell-he-1280-fold.png`; אחרי: `after/shell-he-375-fold.png`, `after/shell-he-1280-fold.png`.
 - פעולת הביטול בהודעה נבחרת לפי שפת הדף, גם כשהמיקוד נמצא בתוך תוכן בשפה אחרת. נבדק בבדיקה אוטומטית.
 
 ### ממצאים להמשך
