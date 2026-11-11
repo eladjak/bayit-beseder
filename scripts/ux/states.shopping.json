@@ -13,7 +13,25 @@
       "bayit-beseder-onboarding-done": "true",
       "bayit-welcome-gift-claimed-v1": "1",
       "bayit-beseder-language": "he"
-    }
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "רשימת קניות"
+      },
+      {
+        "type": "waitForText",
+        "text": "עגבניות"
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
   },
   {
     "route": "/shopping",
@@ -29,7 +47,25 @@
       "bayit-beseder-onboarding-done": "true",
       "bayit-welcome-gift-claimed-v1": "1",
       "bayit-beseder-language": "en"
-    }
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Shopping list"
+      },
+      {
+        "type": "waitForText",
+        "text": "עגבניות"
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
   },
   {
     "route": "/shopping",
@@ -45,7 +81,25 @@
       "bayit-beseder-onboarding-done": "true",
       "bayit-welcome-gift-claimed-v1": "1",
       "bayit-beseder-language": "he"
-    }
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "רשימת קניות"
+      },
+      {
+        "type": "waitForText",
+        "text": "הרשימה ריקה. אפשר להוסיף כאן את מה שחסר בבית."
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
   },
   {
     "route": "/shopping",
@@ -61,7 +115,25 @@
       "bayit-beseder-onboarding-done": "true",
       "bayit-welcome-gift-claimed-v1": "1",
       "bayit-beseder-language": "en"
-    }
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Shopping list"
+      },
+      {
+        "type": "waitForText",
+        "text": "The list is empty. Add what your home needs here."
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
   },
   {
     "route": "/shopping",
@@ -78,7 +150,25 @@
       "bayit-welcome-gift-claimed-v1": "1",
       "bayit-beseder-language": "he",
       "bayit-beseder-shopping-list": "[{\"id\": \"local1\", \"title\": \"קפה מקומי\", \"category\": \"שונות\", \"checked\": false, \"added_by\": \"unknown\", \"created_at\": \"2026-01-01T00:00:00Z\"}]"
-    }
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "רשימת קניות"
+      },
+      {
+        "type": "waitForText",
+        "text": "עגבניות"
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
   },
   {
     "route": "/shopping",
@@ -95,7 +185,25 @@
       "bayit-welcome-gift-claimed-v1": "1",
       "bayit-beseder-language": "en",
       "bayit-beseder-shopping-list": "[{\"id\": \"local1\", \"title\": \"קפה מקומי\", \"category\": \"שונות\", \"checked\": false, \"added_by\": \"unknown\", \"created_at\": \"2026-01-01T00:00:00Z\"}]"
-    }
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Shopping list"
+      },
+      {
+        "type": "waitForText",
+        "text": "עגבניות"
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
   },
   {
     "route": "/shopping",
@@ -111,7 +219,25 @@
       "bayit-beseder-onboarding-done": "true",
       "bayit-welcome-gift-claimed-v1": "1",
       "bayit-beseder-language": "he"
-    }
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "רשימת קניות"
+      },
+      {
+        "type": "waitForText",
+        "text": "הרשימה נשמרת רק במכשיר הזה ולא משותפת עם בני הבית."
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
   },
   {
     "route": "/shopping",
@@ -127,7 +253,25 @@
       "bayit-beseder-onboarding-done": "true",
       "bayit-welcome-gift-claimed-v1": "1",
       "bayit-beseder-language": "en"
-    }
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Shopping list"
+      },
+      {
+        "type": "waitForText",
+        "text": "This list is saved only on this device and is not shared with your household."
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
   },
   {
     "route": "/shopping",
@@ -143,7 +287,25 @@
       "bayit-beseder-onboarding-done": "true",
       "bayit-welcome-gift-claimed-v1": "1",
       "bayit-beseder-language": "he"
-    }
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "רשימת קניות"
+      },
+      {
+        "type": "waitForText",
+        "text": "עגבניות"
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
   },
   {
     "route": "/shopping",
@@ -159,6 +321,24 @@
       "bayit-beseder-onboarding-done": "true",
       "bayit-welcome-gift-claimed-v1": "1",
       "bayit-beseder-language": "en"
-    }
+    },
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Shopping list"
+      },
+      {
+        "type": "waitForText",
+        "text": "עגבניות"
+      }
+    ],
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
   }
 ]
