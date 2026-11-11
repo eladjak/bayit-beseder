@@ -31,3 +31,15 @@ describe('D-01 polish', () => {
     expect(options.classNames?.actionButton).toContain('bg-bb-card');
   });
 });
+
+it('uses the icon set in gallery icon buttons', async () => {
+  const { readFileSync } = await import('node:fs');
+  const gallery = readFileSync('src/app/%5F%5Fui/page.tsx', 'utf8');
+  expect(gallery).toContain('<Plus aria-hidden="true"');
+  expect(gallery).not.toMatch(/<IconButton[^>]*>\+<\/IconButton>/);
+});
+it('blends illustration paper in light mode while keeping dark images legible', async () => {
+  const { readFileSync } = await import('node:fs');
+  const illustration = readFileSync('src/components/v2/Illustration.tsx', 'utf8');
+  expect(illustration).toContain('mix-blend-multiply dark:mix-blend-normal');
+});
