@@ -13,7 +13,16 @@
       "bayit-onboarding-done-v1": "1",
       "bayit-beseder-onboarding-done": "true",
       "bayit-welcome-gift-claimed-v1": "1"
-    }
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      }
+    ]
   },
   {
     "route": "/stats",
@@ -29,7 +38,16 @@
       "bayit-onboarding-done-v1": "1",
       "bayit-beseder-onboarding-done": "true",
       "bayit-welcome-gift-claimed-v1": "1"
-    }
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      }
+    ]
   },
   {
     "route": "/stats",
@@ -47,6 +65,13 @@
       "bayit-welcome-gift-claimed-v1": "1"
     },
     "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      },
       {
         "url": "/rest/v1/task_completions",
         "body": []
@@ -70,6 +95,13 @@
     },
     "routes": [
       {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      },
+      {
         "url": "/rest/v1/task_completions",
         "body": []
       }
@@ -91,6 +123,13 @@
       "bayit-welcome-gift-claimed-v1": "1"
     },
     "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      },
       {
         "url": "/rest/v1/task_completions",
         "status": 500,
@@ -117,6 +156,13 @@
     },
     "routes": [
       {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      },
+      {
         "url": "/rest/v1/task_completions",
         "status": 500,
         "body": {
@@ -139,7 +185,16 @@
       "bayit-onboarding-done-v1": "1",
       "bayit-beseder-onboarding-done": "true",
       "bayit-welcome-gift-claimed-v1": "1"
-    }
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      }
+    ]
   },
   {
     "route": "/history",
@@ -155,7 +210,16 @@
       "bayit-onboarding-done-v1": "1",
       "bayit-beseder-onboarding-done": "true",
       "bayit-welcome-gift-claimed-v1": "1"
-    }
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      }
+    ]
   },
   {
     "route": "/history",
@@ -173,6 +237,13 @@
       "bayit-welcome-gift-claimed-v1": "1"
     },
     "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      },
       {
         "url": "/rest/v1/task_completions",
         "body": []
@@ -195,6 +266,13 @@
       "bayit-welcome-gift-claimed-v1": "1"
     },
     "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      },
       {
         "url": "/rest/v1/task_completions",
         "body": []
