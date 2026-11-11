@@ -23,5 +23,5 @@ html[data-ui="v2"] .print-v2-check { display: inline-block; width: 6mm; height: 
   html[data-ui="v2"]:has(.print-v2) .print-v2 h2 { font-size: 13pt; break-after: avoid; }
   html[data-ui="v2"]:has(.print-v2) .print-v2-row { break-inside: avoid; }
   html[data-ui="v2"]:has(.print-v2) body { page: print-v2; }
-  @page print-v2 { size: A4; margin: 15mm; }
 }
+@page print-v2 { size: A4; margin: 15mm; }

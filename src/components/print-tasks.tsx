@@ -4,6 +4,7 @@ import { Printer } from "lucide-react";
 import { useNewUi } from "@/hooks/useNewUi";
 import { useLanguage } from "@/components/LanguageProvider";
 import { useCopy } from "@/hooks/useCopy";
+import { ilToday } from "@/lib/il-date";
 import printCopy from "@/lib/i18n/fragments/print";
 
 export interface PrintTask {
@@ -103,16 +104,16 @@ export function PrintTasks({ tasks, categories, members, houseName }: PrintTasks
   if (newUi) {
     const dates = tasks.map(t => t.due_date).filter((date): date is string => Boolean(date)).sort();
     const format = (date: string) => new Date(`${date}T12:00:00`).toLocaleDateString(locale === "he" ? "he-IL" : "en-US");
-    const range = dates.length ? `${format(dates[0])} – ${format(dates[dates.length - 1])}` : c("noDates");
+    const range = dates.length ? (dates[0] === dates[dates.length - 1] ? format(dates[0]) : `${format(dates[0])} – ${format(dates[dates.length - 1])}`) : c("noDates");
     return <div className="print-v2" dir={locale === "he" ? "rtl" : "ltr"}>
       <div className="print-v2-actions"><button type="button" onClick={() => window.print()}><Printer size={20} aria-hidden="true" />{c("print")}</button></div>
-      <header className="print-v2-header"><h1>{houseName}</h1><p>{c("range")}: {range}</p><p>{c("printed")}: {today.toLocaleDateString(locale === "he" ? "he-IL" : "en-US")}</p></header>
+      <header className="print-v2-header"><h1>{houseName}</h1><p>{c("range")}: {range}{dates.length > 0 && dates.length < tasks.length ? ` (${c("someUndated")})` : ""}</p><p>{c("printed")}: {format(ilToday())}</p></header>
       {orderedGroups.length === 0 && <p>{c("empty")}</p>}
       {orderedGroups.map(group => <section key={group.id ?? "__none__"}>
         <h2>{group.id === null ? c("general") : group.name}</h2>
         {group.tasks.map(task => <div className="print-v2-row" key={task.id}>
           <span className="print-v2-check" aria-hidden="true" /><span className="print-v2-title">{task.title}</span>
-          <span>{task.assigned_to ? memberMap.get(task.assigned_to) : ""}</span>
+          <span>{group.id === null ? c("general") : group.name}</span><span>{task.assigned_to ? memberMap.get(task.assigned_to) : ""}</span>
         </div>)}
       </section>)}
     </div>;
