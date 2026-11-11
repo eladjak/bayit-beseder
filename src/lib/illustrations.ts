@@ -38,6 +38,7 @@ export const ILLUSTRATIONS = {
   tasksDone: { src480: "/illustrations/v2/tasks-done-480.webp", src960: "/illustrations/v2/tasks-done-960.webp", width: 1024, height: 1024, alt: { he: "שני אנשים נותנים כיף בסלון", en: "Two people high-fiving in a living room" }, role: "success" },
   weeklyPlan: { src480: "/illustrations/v2/weekly-plan-480.webp", src960: "/illustrations/v2/weekly-plan-960.webp", width: 1376, height: 768, alt: { he: "לוח שבועי צבעוני עם סמלי מטלות", en: "A colorful weekly board with chore symbols" }, role: "category" },
   welcomeHome: { src480: "/illustrations/v2/welcome-home-480.webp", src960: "/illustrations/v2/welcome-home-960.webp", width: 1024, height: 1024, alt: { he: "דלת כניסה סגולה ובצידה עציצים", en: "A purple front door with plants beside it" }, role: "hero" },
+  stateNoHousehold: { src480: "/illustrations/v2/state-no-household-480.webp", src960: "/illustrations/v2/state-no-household-960.webp", width: 1254, height: 1254, alt: { he: "דלת כניסה וצמח מקדמים בברכה לקראת יצירת בית", en: "A front door and plant welcome the creation of a household" }, role: "empty" },
 } as const;
 
 export type IllustrationId = keyof typeof ILLUSTRATIONS;
