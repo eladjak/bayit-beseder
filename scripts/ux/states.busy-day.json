@@ -1,0 +1,154 @@
+[
+  {
+    "route": "/emergency",
+    "name": "list-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "normal",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/emergency",
+    "name": "empty-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "empty",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/emergency",
+    "name": "error-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "error:tasks",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/emergency",
+    "name": "no-home-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "no-household",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/emergency",
+    "name": "list-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "normal",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "en"
+    }
+  },
+  {
+    "route": "/emergency",
+    "name": "empty-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "empty",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "en"
+    }
+  },
+  {
+    "route": "/emergency",
+    "name": "error-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "error:tasks",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "en"
+    }
+  },
+  {
+    "route": "/emergency",
+    "name": "no-home-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "no-household",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "en"
+    }
+  }
+]
