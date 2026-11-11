@@ -153,5 +153,116 @@
         "name": "Show toast"
       }
     ]
+  },
+  {
+    "route": "/__ui",
+    "name": "sheet-dark",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "פתיחת גיליון"
+      }
+    ],
+    "dark": true
+  },
+  {
+    "route": "/__ui",
+    "name": "dialog-dark",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "פתיחת חלון"
+      }
+    ],
+    "dark": true
+  },
+  {
+    "route": "/__ui",
+    "name": "toast-dark",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "הצגת הודעה"
+      }
+    ],
+    "dark": true
+  },
+  {
+    "route": "/__ui",
+    "name": "sheet-en-dark",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Open sheet"
+      }
+    ],
+    "dark": true
+  },
+  {
+    "route": "/__ui",
+    "name": "dialog-en-dark",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Open dialog"
+      }
+    ],
+    "dark": true
+  },
+  {
+    "route": "/__ui",
+    "name": "toast-en-dark",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Show toast"
+      }
+    ],
+    "dark": true
   }
 ]
