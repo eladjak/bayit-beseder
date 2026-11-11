@@ -2,7 +2,6 @@
   {
     "route": "/tasks",
     "name": "categories-he",
-    "scenario": "normal",
     "widths": [
       375,
       1280
@@ -41,7 +40,6 @@
   {
     "route": "/tasks",
     "name": "templates-he",
-    "scenario": "normal",
     "widths": [
       375,
       1280
@@ -80,7 +78,6 @@
   {
     "route": "/tasks",
     "name": "sort-he",
-    "scenario": "normal",
     "widths": [
       375,
       1280
@@ -119,7 +116,6 @@
   {
     "route": "/tasks",
     "name": "review-he",
-    "scenario": "normal",
     "widths": [
       375,
       1280
@@ -158,7 +154,6 @@
   {
     "route": "/tasks",
     "name": "categories-en",
-    "scenario": "normal",
     "widths": [
       375,
       1280
@@ -190,6 +185,10 @@
         "type": "click",
         "role": "button",
         "name": "Categories"
+      },
+      {
+        "type": "waitForText",
+        "text": "home מטבח"
       }
     ],
     "reducedMotion": true
@@ -197,7 +196,6 @@
   {
     "route": "/tasks",
     "name": "templates-en",
-    "scenario": "normal",
     "widths": [
       375,
       1280
@@ -236,7 +234,6 @@
   {
     "route": "/tasks",
     "name": "sort-en",
-    "scenario": "normal",
     "widths": [
       375,
       1280
@@ -275,7 +272,6 @@
   {
     "route": "/tasks",
     "name": "review-en",
-    "scenario": "normal",
     "widths": [
       375,
       1280
@@ -307,6 +303,59 @@
         "type": "click",
         "role": "button",
         "name": "Review old tasks"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "category-error-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "עוד פעולות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "קטגוריות"
+      },
+      {
+        "type": "fill",
+        "role": "textbox",
+        "name": "שם הקטגוריה",
+        "value": "בדיקה"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "הוספת קטגוריה"
+      },
+      {
+        "type": "waitForText",
+        "text": "לא הצלחנו לשמור. אפשר לנסות שוב."
       }
     ],
     "reducedMotion": true
