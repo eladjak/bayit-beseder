@@ -8,4 +8,16 @@ Originals with no filename reference in `src` or `public` at the time of this ch
 
 ## V-02 states
 
-- `state-no-household`: a welcoming entrance before a household is created.
+- `state-no-household`: No household.
+- `state-offline`: Offline.
+- `state-error`: Something went wrong.
+- `state-invite-sent`: Invite sent.
+- `state-week-done`: Week done.
+- `state-morning-done`: Day done, morning.
+- `state-evening-done`: Day done, evening.
+- `state-busy-day`: Busy-day calm.
+- `state-shopping-done`: Shopping list done.
+- `state-meals-empty`: Meals plan empty.
+- `state-playlist-done`: Playlist finished.
+- `state-first-task-done`: First task done.
+- `state-not-found`: Page not found.
