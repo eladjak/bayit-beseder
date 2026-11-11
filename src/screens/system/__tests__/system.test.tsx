@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { ErrorV2 } from '../ErrorV2';
 import { OfflineV2 } from '../OfflineV2';
 vi.mock('sonner', () => ({ toast: vi.fn() }));
@@ -48,8 +48,10 @@ it('replaces the legacy update toast when the flag turns on and restores it when
   const { ServiceWorkerUpdateToast } = await import('@/components/ServiceWorkerUpdateToast');
   const worker = new EventTarget();
   Object.defineProperty(navigator, 'serviceWorker', { configurable: true, value: worker });
-  flag.value = true;
+  flag.value = null;
   const view = render(<ServiceWorkerUpdateToast />);
+  flag.value = true;
+  view.rerender(<ServiceWorkerUpdateToast />);
   worker.dispatchEvent(new MessageEvent('message', { data: { type: 'SW_UPDATED' } }));
   expect(await screen.findByText('יש גרסה חדשה לבית בסדר.')).toBeTruthy();
   flag.value = false;
@@ -79,4 +81,20 @@ it('loading uses accessible skeletons', async () => {
   const { LoadingV2 } = await import('../LoadingV2');
   render(<LoadingV2 />);
   expect(screen.getAllByText('טוענים את התוכן').length).toBeGreaterThan(0);
+});
+
+
+it('offers installation and remembers dismissal', async () => {
+  Object.defineProperty(window, 'matchMedia', { configurable: true, value: () => ({ matches: false }) });
+  const { InstallBannerV2 } = await import('../InstallBannerV2');
+  localStorage.removeItem('bayit-beseder-pwa-install-dismissed');
+  localStorage.removeItem('bayit-beseder-pwa-install-dismissed-until');
+  render(<InstallBannerV2 />);
+  act(() => { window.dispatchEvent(new Event('beforeinstallprompt', { cancelable: true })); });
+  expect(screen.getByRole('button', { name: 'התקנה' })).toBeTruthy();
+  fireEvent.click(screen.getByRole('button', { name: 'סגירה' }));
+  expect(screen.queryByRole('button', { name: 'התקנה' })).toBeNull();
+  expect(localStorage.getItem('bayit-beseder-pwa-install-dismissed')).toBeTruthy();
+  localStorage.removeItem('bayit-beseder-pwa-install-dismissed');
+  localStorage.removeItem('bayit-beseder-pwa-install-dismissed-count');
 });
