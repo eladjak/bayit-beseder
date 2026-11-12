@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { FirstMinute } from '../FirstMinute';
 import { FIRST_TASK, isQuietTime } from '../useFirstMinute';
 import { ConversationalOnboarding } from '@/components/onboarding/conversational-onboarding';
@@ -21,6 +21,23 @@ afterEach(cleanup);
 async function focusStep() { render(<FirstMinute />); fireEvent.click(screen.getByRole('button', { name: 'A couple' })); }
 async function firstWin() { await focusStep(); fireEvent.click(screen.getByRole('button', { name: 'Prepare my home' })); await screen.findByText('Your home is ready'); fireEvent.click(screen.getByRole('button', { name: 'Show me' })); }
 describe('first minute', () => {
+  it('announces each new step by focusing its heading', async () => {
+    render(<FirstMinute />);
+    expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Who lives here?' }));
+    fireEvent.click(screen.getByRole('button', { name: 'A couple' }));
+    expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'What matters this week?' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Prepare my home' }));
+    await screen.findByText('Your home is ready');
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByRole('heading', { name: 'Your home is ready' })));
+  });
+  it('shows progress on the ready and first-win steps', async () => {
+    await focusStep();
+    fireEvent.click(screen.getByRole('button', { name: 'Prepare my home' }));
+    await screen.findByText('Your home is ready');
+    expect(screen.getByText('Step 3 of 4')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Show me' }));
+    expect(screen.getByText('Step 4 of 4')).toBeTruthy();
+  });
   it('saves the chosen household type in the existing household preference', () => { render(<FirstMinute />); fireEvent.click(screen.getByRole('button', { name: 'Just me' })); expect(JSON.parse(localStorage.getItem('bayit-household-type-v1') || '{}').type).toBe('solo'); });
   it('starts with a thirty second task', () => expect(FIRST_TASK.estimatedMinutes).toBe(0.5));
   it('offers a retry and never shows ready if the seed fails', async () => { mock.seed.mockResolvedValueOnce({ ok: false }); await focusStep(); fireEvent.click(screen.getByRole('button', { name: 'Prepare my home' })); expect((await screen.findByRole('alert')).textContent).toContain("couldn't prepare"); expect(screen.queryByText('Your home is ready')).toBeNull(); fireEvent.click(screen.getByRole('button', { name: 'Try again' })); expect(await screen.findByText('Your home is ready')).toBeTruthy(); });
