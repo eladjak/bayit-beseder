@@ -31,7 +31,7 @@ describe('weekly interactions', () => {
  beforeEach(() => {vi.clearAllMocks(); mock.task={id:'task-1',title:'Clean',due_date:weekDays()[new Date(`${new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date())}T00:00:00Z`).getUTCDay()],status:'pending',recurring:false,assigned_to:'partner',category_id:null}; mock.refetch.mockResolvedValue(undefined); mock.mark.mockResolvedValue({id:'confirmed'}); mock.undo.mockResolvedValue(true); mock.update.mockResolvedValue(true);});
  afterEach(cleanup);
  it('completes via the real completion hook and offers undo', async () => {render(<WeeklyV2/>); fireEvent.click(screen.getByRole('checkbox')); await waitFor(()=>expect(mock.mark).toHaveBeenCalledWith({taskId:'task-1',userId:'me',recurring:false})); await waitFor(()=>expect(mock.toast).toHaveBeenCalled()); mock.toast.mock.calls[0][1].action.onClick(); await waitFor(()=>expect(mock.undo).toHaveBeenCalledWith('task-1'));});
- it('moves with the accessible menu and undo restores its date', async () => {render(<WeeklyV2/>); const select=screen.getByLabelText('Move task') as HTMLSelectElement; const destination=select.options[1].value; fireEvent.change(select,{target:{value:destination}}); await waitFor(()=>expect(mock.update).toHaveBeenCalledWith('task-1',{due_date:destination})); await waitFor(()=>expect(mock.toast).toHaveBeenCalled()); mock.toast.mock.calls[0][1].action.onClick(); await waitFor(()=>expect(mock.update).toHaveBeenCalledWith('task-1',{due_date:mock.task.due_date}));});
+ it('moves with the accessible menu and undo restores its date', async () => {render(<WeeklyV2/>); fireEvent.click(screen.getByRole('button',{name:'Move task'})); const destination=weekDays().find(day=>day!==mock.task.due_date)!; const label=new Intl.DateTimeFormat('en-US',{weekday:'long',day:'numeric',month:'short',timeZone:'UTC'}).format(new Date(`${destination}T12:00:00Z`)); fireEvent.click(screen.getByRole('button',{name:label})); await waitFor(()=>expect(mock.update).toHaveBeenCalledWith('task-1',{due_date:destination})); await waitFor(()=>expect(mock.toast).toHaveBeenCalled()); mock.toast.mock.calls[0][1].action.onClick(); await waitFor(()=>expect(mock.update).toHaveBeenCalledWith('task-1',{due_date:mock.task.due_date}));});
  it('does not generate on load or when opening the dialog', () => {render(<WeeklyV2/>); expect(mock.generate).not.toHaveBeenCalled(); fireEvent.click(screen.getByText('Suggest a plan')); expect(mock.generate).not.toHaveBeenCalled(); fireEvent.click(screen.getByText('Prepare suggestions')); expect(mock.generate).toHaveBeenCalledOnce();});
  it('shows a failed completion on its row and retries it', async () => {mock.mark.mockResolvedValueOnce(null); render(<WeeklyV2/>); fireEvent.click(screen.getByRole('checkbox')); expect(await screen.findByRole('alert')).toBeTruthy(); fireEvent.click(screen.getByText('Retry')); await waitFor(()=>expect(mock.mark).toHaveBeenCalledTimes(2));});
  it('shows the person without a personal count or comparison', () => {const {container}=render(<WeeklyV2/>); expect(screen.getByText('Dana')).toBeTruthy(); expect(container.textContent).not.toMatch(/Dana\s*\d/);});
@@ -54,4 +54,13 @@ it('renders the legacy view for unknown and off, and switches without hook error
  const view=render(<WeeklyPage/>); expect(screen.getByTestId('legacy-week')).toBeTruthy();
  flag.value=true; view.rerender(<WeeklyPage/>); expect(screen.getByText('Our week')).toBeTruthy();
  flag.value=false; view.rerender(<WeeklyPage/>); expect(screen.getByTestId('legacy-week')).toBeTruthy(); cleanup();
+});
+
+describe('weekly polish', () => {
+ beforeEach(() => {mock.task={id:'task-1',title:'Clean',due_date:weekDays()[0],status:'pending',recurring:false,assigned_to:'partner',category_id:null};});
+ afterEach(cleanup);
+ it('uses a compact button to reveal the move choices', () => {render(<WeeklyV2/>); expect(screen.getByRole('button',{name:'Move task'})).toBeTruthy(); expect(screen.queryByRole('combobox')).toBeNull();});
+ it('shows short weekday labels with dates and task counts', () => {render(<WeeklyV2/>); expect(screen.getByRole('button',{name:/Sun.*1 task/})).toBeTruthy();});
+ it('provides an accessible weekly progress indicator', () => {render(<WeeklyV2/>); expect(screen.getByRole('progressbar').getAttribute('aria-valuemax')).toBe('1');});
+ it('keeps desktop day columns wide enough for readable cards', () => {const {container}=render(<WeeklyV2/>); expect(container.querySelector('.md\\:min-w-\\[180px\\]')).toBeTruthy();});
 });
