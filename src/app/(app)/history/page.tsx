@@ -1,5 +1,8 @@
 "use client";
 
+import { useNewUi } from "@/hooks/useNewUi";
+import HistoryV2 from "@/screens/history/HistoryV2";
+
 import { useState, useMemo } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -145,7 +148,7 @@ interface HistoryEntry {
 // Main History Page
 // ============================================
 
-export default function HistoryPage() {
+function HistoryPageV1() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortOrder] = useState<"desc">("desc"); // newest first always
@@ -336,4 +339,9 @@ export default function HistoryPage() {
       )}
     </div>
   );
+}
+
+export default function HistoryPage() {
+  const newUi = useNewUi();
+  return newUi ? <HistoryV2 /> : <HistoryPageV1 />;
 }

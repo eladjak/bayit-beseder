@@ -5,7 +5,7 @@ const today = () => new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'})
 function fixtures(scenario = 'normal') {
   const absent = scenario === 'no-household';
   const blank = ['empty','no-household','first-run'].includes(scenario);
-  const categories = ['מטבח','כביסה','סלון'].map((name,i)=>({id:`cat-${i}`,household_id:home,name,icon:'home',color:'#F59E0B',sort_order:i}));
+  const categories = ['מטבח','כביסה','סלון'].map((name,i)=>({id:`cat-${i}`,name,icon:'home',color:'#F59E0B',created_at:user.created_at}));
   const tasks = ['לשטוף כלים','לקפל כביסה','לסדר סלון','לנקות שולחן','להפעיל מכונה','לטאטא'].map((title,i)=>({id:`task-${i}`,household_id:home,title,description:null,status:i<2?'completed':'pending',priority:'medium',category:'cleaning',category_id:categories[i%3].id,assigned_to:user.id,due_date:today(),recurring:'none',estimated_minutes:15,created_at:user.created_at,updated_at:user.created_at}));
   const meals = ['שניצל ואורז','פסטה ברוטב עגבניות','שקשוקה','מרק ירקות','קציצות','סלט','פשטידה'].map((name,i)=>({id:`meal-${i}`,household_id:home,name,who_eats:[],prep_lead_hours:0,prep_note:null,min_repeat_days:7,tags:[],ingredients:[],last_served_at:null,active:true,created_at:user.created_at}));
   const meal_plan = meals.map((meal,i)=>({id:`plan-${i}`,household_id:home,meal_id:meal.id,plan_date:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Jerusalem'}).format(new Date(Date.now()+i*86400000)),status:'planned',note:null,created_at:user.created_at}));

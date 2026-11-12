@@ -1,0 +1,352 @@
+[
+  {
+    "route": "/stats",
+    "name": "stats-normal-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "יחד סגרנו",
+        "exact": false
+      }
+    ]
+  },
+  {
+    "route": "/stats",
+    "name": "stats-normal-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "Together we completed",
+        "exact": false
+      }
+    ]
+  },
+  {
+    "route": "/stats",
+    "name": "stats-empty-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      },
+      {
+        "url": "/rest/v1/task_completions",
+        "body": []
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "עוד אין מספיק נתונים",
+        "exact": false
+      }
+    ]
+  },
+  {
+    "route": "/stats",
+    "name": "stats-empty-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      },
+      {
+        "url": "/rest/v1/task_completions",
+        "body": []
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "There is not enough data",
+        "exact": false
+      }
+    ]
+  },
+  {
+    "route": "/stats",
+    "name": "stats-error-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      },
+      {
+        "url": "/rest/v1/task_completions",
+        "status": 500,
+        "body": {
+          "message": "simulated"
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לא הצלחנו לטעון",
+        "exact": false
+      }
+    ]
+  },
+  {
+    "route": "/stats",
+    "name": "stats-error-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      },
+      {
+        "url": "/rest/v1/task_completions",
+        "status": 500,
+        "body": {
+          "message": "simulated"
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "We could not load",
+        "exact": false
+      }
+    ]
+  },
+  {
+    "route": "/history",
+    "name": "history-normal-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לשטוף כלים",
+        "exact": false
+      }
+    ]
+  },
+  {
+    "route": "/history",
+    "name": "history-normal-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לשטוף כלים",
+        "exact": false
+      }
+    ]
+  },
+  {
+    "route": "/history",
+    "name": "history-empty-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      },
+      {
+        "url": "/rest/v1/task_completions",
+        "body": []
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "עדיין אין משימות",
+        "exact": false
+      }
+    ]
+  },
+  {
+    "route": "/history",
+    "name": "history-empty-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true,
+          "version": "test"
+        }
+      },
+      {
+        "url": "/rest/v1/task_completions",
+        "body": []
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "No completed tasks",
+        "exact": false
+      }
+    ]
+  }
+]

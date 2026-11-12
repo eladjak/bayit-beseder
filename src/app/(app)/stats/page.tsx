@@ -1,5 +1,8 @@
 "use client";
 
+import { useNewUi } from "@/hooks/useNewUi";
+import StatsV2 from "@/screens/stats/StatsV2";
+
 import { useMemo, useState } from "react";
 import { useCopy } from "@/hooks/useCopy";
 import honestyCopy from "@/lib/i18n/fragments/honesty-weekly-stats";
@@ -337,7 +340,7 @@ function MembersComparisonSection({
 // Main Stats Page
 // ============================================
 
-export default function StatsPage() {
+function StatsPageV1() {
   const { t } = useTranslation();
   const { c } = useCopy(honestyCopy);
   const today = useMemo(() => ilToday(), []);
@@ -684,4 +687,9 @@ export default function StatsPage() {
       </div>
     </div>
   );
+}
+
+export default function StatsPage() {
+  const newUi = useNewUi();
+  return newUi ? <StatsV2 /> : <StatsPageV1 />;
 }
