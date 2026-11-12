@@ -1,5 +1,7 @@
 "use client";
 
+import { useNewUi } from "@/hooks/useNewUi";
+
 /**
  * Adult-toned Onboarding Wizard — Alopik v2 #3.
  *
@@ -81,7 +83,7 @@ type Props = {
   readonly onComplete: () => void;
 };
 
-export function OnboardingWizard({ open, onClose, onComplete }: Props) {
+function OnboardingWizardV1({ open, onClose, onComplete }: Props) {
   const { t } = useTranslation();
   const [stepIndex, setStepIndex] = useState(0);
   const [selectedType, setSelectedType] = useState<HouseholdType>(() =>
@@ -282,4 +284,9 @@ export function markOnboardingDone(): void {
 export function resetOnboarding(): void {
   if (typeof window === "undefined") return;
   localStorage.removeItem(ONBOARDING_DONE_KEY);
+}
+
+export function OnboardingWizard(props: Props) {
+  const newUi = useNewUi();
+  return newUi ? null : <OnboardingWizardV1 {...props} />;
 }

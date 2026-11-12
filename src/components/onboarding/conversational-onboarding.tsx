@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Check, Sparkles, Home, Loader2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useTranslation } from "@/hooks/useTranslation";
+import { useNewUi } from "@/hooks/useNewUi";
+import { FirstMinute } from "@/screens/first-minute/FirstMinute";
 
 const VoiceInputButton = dynamic(
   () => import("@/components/voice-input-button").then((m) => m.VoiceInputButton),
@@ -778,7 +780,7 @@ function SlimProgressBar({ current, total }: { current: number; total: number })
 
 const TOTAL_STEPS = 7; // 0=welcome,1=name,2=rooms,3=residents,4=personality,5=generating+plan,6=done
 
-export function ConversationalOnboarding({ open, onComplete, onSkip }: ConversationalOnboardingProps) {
+function ConversationalOnboardingV1({ open, onComplete, onSkip }: ConversationalOnboardingProps) {
   const { t } = useTranslation();
   const [step, setStep] = useState(0); // 0 = welcome
   const [homeName, setHomeName] = useState("");
@@ -1010,4 +1012,9 @@ export function ConversationalOnboarding({ open, onComplete, onSkip }: Conversat
       )}
     </div>
   );
+}
+
+export function ConversationalOnboarding(props: ConversationalOnboardingProps) {
+  const newUi = useNewUi();
+  return newUi ? (props.open ? <FirstMinute /> : null) : <ConversationalOnboardingV1 {...props} />;
 }

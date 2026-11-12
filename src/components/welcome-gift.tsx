@@ -1,5 +1,7 @@
 "use client";
 
+import { useNewUi } from "@/hooks/useNewUi";
+
 /**
  * Welcome Gift Modal — Sprint 7.30 Loop L.
  *
@@ -21,7 +23,7 @@ import {
 import { playSparkle } from "@/lib/sound-effects";
 import { tryHaptic } from "@/lib/ux-preferences";
 
-export function WelcomeGiftModal() {
+function WelcomeGiftModalV1() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -136,4 +138,9 @@ export function WelcomeGiftModal() {
       `}</style>
     </details>
   );
+}
+
+export function WelcomeGiftModal() {
+  const newUi = useNewUi();
+  return newUi ? null : <WelcomeGiftModalV1 />;
 }
