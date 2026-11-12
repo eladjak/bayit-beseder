@@ -1,0 +1,513 @@
+[
+  {
+    "route": "/tasks",
+    "name": "categories-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "עוד פעולות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "קטגוריות"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "templates-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "עוד פעולות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "תבניות"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "sort-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "עוד פעולות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "מיון"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "review-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "עוד פעולות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בדיקת משימות ישנות"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "categories-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "More actions"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Categories"
+      },
+      {
+        "type": "waitForText",
+        "text": "home מטבח"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "templates-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "More actions"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Templates"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "sort-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "More actions"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Sort"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "review-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "More actions"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Review old tasks"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "category-error-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "עוד פעולות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "קטגוריות"
+      },
+      {
+        "type": "fill",
+        "role": "textbox",
+        "name": "שם הקטגוריה",
+        "value": "בדיקה"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "הוספת קטגוריה"
+      },
+      {
+        "type": "waitForText",
+        "text": "לא הצלחנו לשמור. אפשר לנסות שוב."
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "review-populated-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/rest/v1/tasks",
+        "body": [
+          {
+            "id": "task-2",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לסדר סלון",
+            "description": null,
+            "status": "pending",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-2",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2020-01-01",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "task-3",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לנקות שולחן",
+            "description": null,
+            "status": "pending",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-0",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2020-01-01",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "עוד פעולות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בדיקת משימות ישנות"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "name": "review-populated-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/rest/v1/tasks",
+        "body": [
+          {
+            "id": "task-2",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לסדר סלון",
+            "description": null,
+            "status": "pending",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-2",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2020-01-01",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "task-3",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לנקות שולחן",
+            "description": null,
+            "status": "pending",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-0",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2020-01-01",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "More actions"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Review old tasks"
+      }
+    ],
+    "reducedMotion": true
+  }
+]

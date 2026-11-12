@@ -17,3 +17,14 @@ export function groupTasks<T extends Groupable>(tasks: T[], now = new Date()) {
   groups.today.sort((a, b) => (a.due_date ?? '').localeCompare(b.due_date ?? ''));
   return groups;
 }
+
+export type TaskSort = 'due' | 'room' | 'who' | 'newest';
+export function sortTasks<T extends { due_date: string | null; category_id: string | null; assigned_to: string | null; created_at: string }>(tasks:T[], sort:TaskSort, rooms:Record<string,string> = {}, people:Record<string,string> = {}):T[] {
+ return [...tasks].sort((a,b) => {
+  if (sort === 'newest') return b.created_at.localeCompare(a.created_at);
+  if (sort === 'due') return (a.due_date ?? '9999').localeCompare(b.due_date ?? '9999');
+  const key = sort === 'room' ? 'category_id' : 'assigned_to';
+  const labels = sort === 'room' ? rooms : people;
+  return (labels[a[key] ?? ''] ?? a[key] ?? '\uffff').localeCompare(labels[b[key] ?? ''] ?? b[key] ?? '\uffff');
+ });
+}
