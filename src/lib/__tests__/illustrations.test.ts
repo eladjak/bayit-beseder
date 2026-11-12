@@ -6,7 +6,7 @@ import { ILLUSTRATIONS } from "../illustrations";
 
 describe("illustration assets", () => {
   it("covers all 38 originals with bilingual descriptions and correctly sized variants", async () => {
-    expect(Object.keys(ILLUSTRATIONS)).toHaveLength(38);
+    expect(Object.keys(ILLUSTRATIONS)).toHaveLength(51);
     for (const item of Object.values(ILLUSTRATIONS)) {
       expect(item.alt.he.trim()).not.toBe("");
       expect(item.alt.en.trim()).not.toBe("");
@@ -20,4 +20,22 @@ describe("illustration assets", () => {
       }
     }
   });
+});
+
+describe("V-02 state illustrations", () => {
+  const ids = ["stateNoHousehold", "stateOffline", "stateError", "stateInviteSent", "stateWeekDone", "stateMorningDone", "stateEveningDone", "stateBusyDay", "stateShoppingDone", "stateMealsEmpty", "statePlaylistDone", "stateFirstTaskDone", "stateNotFound"] as const;
+  for (const id of ids) {
+    it(`provides ${id} with a square original, bilingual alt text and both responsive assets`, async () => {
+      const item = (ILLUSTRATIONS as Record<string, { src480: string; src960: string; alt: { he: string; en: string } }>)[id];
+      expect(item, `missing ${id}`).toBeDefined();
+      expect(item.alt.he.trim(), id).not.toBe("");
+      expect(item.alt.en.trim(), id).not.toBe("");
+      expect(existsSync(path.join(process.cwd(), "public", item.src480)), id).toBe(true);
+      expect(existsSync(path.join(process.cwd(), "public", item.src960)), id).toBe(true);
+      const original = path.join(process.cwd(), "public", item.src960.replace("/v2/", "/").replace("-960.webp", ".jpg"));
+      expect(existsSync(original), id).toBe(true);
+      const metadata = await sharp(original).metadata();
+      expect(metadata.width, id).toBe(metadata.height);
+    });
+  }
 });
