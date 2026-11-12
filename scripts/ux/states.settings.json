@@ -1,0 +1,76 @@
+[
+  {
+    "route": "/settings",
+    "name": "settings-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  },
+  {
+    "route": "/settings",
+    "name": "settings-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  },
+  {
+    "route": "/settings",
+    "name": "settings-error",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/rest/v1/households",
+        "status": 500,
+        "body": {
+          "message": "test error"
+        }
+      }
+    ]
+  }
+]
