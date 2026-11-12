@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useNewUi } from "@/hooks/useNewUi";
+import MoreV2 from "@/screens/more/MoreV2";
 import { useTranslation } from "@/hooks/useTranslation";
 import { CalendarDays, ChartNoAxesCombined, History, Music, Settings, ShieldAlert, BookOpen, Printer, CircleHelp, ChevronLeft, Wrench } from "lucide-react";
 
@@ -29,8 +31,13 @@ const english: Record<string, string> = {
   "רעיונות והנאה": "Ideas and fun", "כלי הבית": "Household tools", "מילה טובה, הפתעות וגלגל המזל": "Appreciation, surprises and the wheel", "פלייליסטים": "Playlists", "מוזיקה לבית": "Music for home", "טיפים וכתבות": "Tips and articles", "רעיונות לבית": "Ideas for home",
   "הגדרות ועזרה": "Settings and help", "הגדרות הבית והחשבון": "Home and account settings", "חברי הבית, התראות והעדפות": "Members, notifications and preferences", "עזרה באפליקציה": "App help", "אפשרויות ועזרה": "Options and help"
 };
-export default function MorePage() {
+function MorePageV1() {
   const { locale } = useTranslation();
   const tr = (value: string) => locale === "en" ? (english[value] ?? value) : value;
   return <div className="space-y-7 px-4 py-8 sm:px-6"><header><p className="text-sm font-semibold text-primary">{tr("הבית שלנו")}</p><h1 className="mt-2 text-3xl font-bold">{locale === "en" ? "More at home" : "עוד בבית"}</h1><p className="mt-2 text-muted">{locale === "en" ? "Tools and settings, whenever you need them." : "כל הכלים וההגדרות, כשצריכים אותם."}</p></header>{groups.map(group => <section key={group.title}><h2 className="mb-2 px-1 text-sm font-bold text-muted">{tr(group.title)}</h2><div className="overflow-hidden rounded-2xl border border-border bg-surface">{group.links.map(({href,label,description,icon: Icon}) => <Link key={href} href={href} className="flex min-h-18 items-center gap-4 border-b border-border p-4 last:border-0 hover:bg-surface-hover focus-visible:outline-2 focus-visible:outline-primary"><span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><Icon className="size-5" aria-hidden="true"/></span><span className="flex-1"><strong className="block">{tr(label)}</strong><span className="text-sm text-muted">{tr(description)}</span></span><ChevronLeft className="size-5 text-muted" aria-hidden="true"/></Link>)}</div></section>)}</div>;
+}
+
+export default function MorePage() {
+  const newUi = useNewUi();
+  return newUi ? <MoreV2 /> : <MorePageV1 />;
 }
