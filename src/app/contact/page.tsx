@@ -1,3 +1,5 @@
+import { isNewUiBuild } from "@/lib/ui-flag";
+import { PublicInformation } from "@/screens/public/PublicPage";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -55,6 +57,7 @@ const contacts = [
 ];
 
 export default function ContactPage() {
+  if (isNewUiBuild()) return <PublicInformation kind="contact" />;
   return (
     <div className="min-h-dvh bg-background" dir="rtl" lang="he">
 

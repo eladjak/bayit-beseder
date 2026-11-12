@@ -1,3 +1,5 @@
+import { isNewUiBuild } from "@/lib/ui-flag";
+import { PublicInformation } from "@/screens/public/PublicPage";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -26,6 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage() {
+  if (isNewUiBuild()) return <PublicInformation kind="about" />;
   return (
     <div className="min-h-dvh bg-background" dir="rtl" lang="he">
       <main className="max-w-3xl mx-auto px-4 py-10">

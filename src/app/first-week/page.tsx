@@ -1,5 +1,7 @@
 "use client";
 
+import { useNewUi } from "@/hooks/useNewUi";
+import { PublicPage } from "@/screens/public/PublicPage";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { DAYS, DEFAULT_WEEK, RECIPES, shoppingList, swapMeal } from "@/lib/first-week/plan";
@@ -21,6 +23,11 @@ function validDraft(value: unknown): value is Draft {
 }
 
 export default function FirstWeekPage() {
+  const newUi = useNewUi();
+  return newUi ? <PublicPage existingDocument><FirstWeekPageV1 /></PublicPage> : <FirstWeekPageV1 />;
+}
+
+function FirstWeekPageV1() {
   const startedAt = useRef(0);
   const seen = useRef(new Set<number>());
   const heading = useRef<HTMLHeadingElement>(null);

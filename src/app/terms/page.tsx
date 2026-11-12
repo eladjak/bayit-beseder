@@ -1,3 +1,5 @@
+import { isNewUiBuild } from "@/lib/ui-flag";
+import { PublicPage } from "@/screens/public/PublicPage";
 import type { Metadata } from "next";
 import { PolicyDocument } from "@/components/privacy/PolicyDocument";
 
@@ -31,5 +33,6 @@ export const metadata: Metadata = {
 };
 
 export default function TermsPage() {
+  if (isNewUiBuild()) return <PublicPage existingDocument><PolicyDocument kind="terms" /></PublicPage>;
   return <PolicyDocument kind="terms" />;
 }

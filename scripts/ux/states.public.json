@@ -1,0 +1,134 @@
+[
+  {
+    "route": "/how-it-works",
+    "name": "how-it-works-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/how-it-works",
+    "name": "how-it-works-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "en"
+    }
+  },
+  {
+    "route": "/about",
+    "name": "about-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/about",
+    "name": "about-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "en"
+    }
+  },
+  {
+    "route": "/contact",
+    "name": "contact-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/contact",
+    "name": "contact-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "en"
+    }
+  },
+  {
+    "route": "/first-week",
+    "name": "first-week-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/first-week",
+    "name": "first-week-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "en"
+    }
+  },
+  {
+    "route": "/privacy",
+    "name": "privacy-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/privacy",
+    "name": "privacy-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "en"
+    }
+  },
+  {
+    "route": "/terms",
+    "name": "terms-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/terms",
+    "name": "terms-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "en"
+    }
+  }
+]

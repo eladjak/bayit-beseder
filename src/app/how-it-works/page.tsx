@@ -1,3 +1,5 @@
+import { isNewUiBuild } from "@/lib/ui-flag";
+import { PublicInformation } from "@/screens/public/PublicPage";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
@@ -41,6 +43,7 @@ const STEPS: ReadonlyArray<Step> = [
 ];
 
 export default function HowItWorksPage() {
+  if (isNewUiBuild()) return <PublicInformation kind="how" />;
   return (
     <div
       className="min-h-dvh bg-gradient-to-b from-indigo-50 via-white to-violet-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950"
