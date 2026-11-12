@@ -3,11 +3,12 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { Player } from '../Player';
 import { playlistMinutes, taskPlaylist } from '../useTaskPlaylist';
 import type { TaskRow } from '@/lib/types/database';
+import PlaylistsV2 from '../PlaylistsV2';
 import PlaylistsPage from '@/app/(app)/playlists/page';
-const mocks = vi.hoisted(() => ({ mark: vi.fn(), undo: vi.fn(), flag: null as boolean | null }));
+const mocks = vi.hoisted(() => ({ mark: vi.fn(), undo: vi.fn(), flag: null as boolean | null, tasks: [] as TaskRow[] }));
 vi.mock('@/hooks/useCompletions', () => ({ useCompletions: () => ({ markComplete:mocks.mark, undoComplete:mocks.undo, todayCompletionIds:new Set(), loading:false, error:null, refetch:vi.fn() }) }));
 vi.mock('@/hooks/useProfile', () => ({ useProfile: () => ({ profile:{ id:'user', household_id:'home' } }) }));
-vi.mock('@/hooks/useTasks', () => ({ useTasks: () => ({ tasks:[], loading:false, error:null, refetch:vi.fn() }) }));
+vi.mock('@/hooks/useTasks', () => ({ useTasks: () => ({ tasks:mocks.tasks, loading:false, error:null, refetch:vi.fn() }) }));
 vi.mock('@/hooks/useNewUi', () => ({ useNewUi: () => mocks.flag }));
 vi.mock('@/hooks/useTranslation', () => ({ useTranslation: () => ({ t:(key:string) => key, locale:'en' }) }));
 vi.mock('@/hooks/useCopy', () => ({ useCopy: () => ({ c:(key:string) => key }) }));
@@ -17,8 +18,11 @@ vi.mock('sonner', () => ({ toast:Object.assign(vi.fn(), { error:vi.fn() }) }));
 const task = (id:string, date:string, created:string) => ({ id, title:id, due_date:date, created_at:created, status:'pending', recurring:false }) as TaskRow;
 const tasks = [task('later','2026-11-11','2026-01-02'), task('first','2026-11-11','2026-01-01')];
 const playlist = { id:'today', name:'Today', icon:'', totalMinutes:999, tasks:tasks.map(t => ({title:t.title,durationSeconds:1})) };
-afterEach(() => { cleanup(); vi.clearAllMocks(); vi.useRealTimers(); });
+afterEach(() => { cleanup(); mocks.tasks = []; vi.clearAllMocks(); vi.useRealTimers(); });
 describe('playlist contract', () => {
+ it('includes overdue open tasks first, excluding future and completed tasks', () => { const overdue = task('overdue','2026-11-09','2026-01-03'); expect(taskPlaylist([...tasks, overdue, task('future','2026-11-12','2026-01-01')], '2026-11-11').map(t => t.id)).toEqual(['overdue','first','later']); });
+ it('shows an accessible progress bar and centered timer with a prominent pause control', () => { render(<Player playlist={playlist} tasks={tasks} onStop={() => {}} />); expect(screen.getByRole('progressbar').getAttribute('value')).toBe('0'); expect(screen.getByLabelText('left: 0:01').parentElement?.className).toContain('text-center'); expect(screen.getByText('pause').className).toContain('w-full'); });
+ it('places the generated card details below its title', () => { mocks.tasks = [task('today', new Intl.DateTimeFormat('en-CA', {timeZone:'Asia/Jerusalem', year:'numeric', month:'2-digit', day:'2-digit'}).format(new Date()), '2026-01-01')]; render(<PlaylistsV2 />); const card = screen.getByRole('button', {name:/ours.*minutes/}); expect(card.querySelector('strong')?.parentElement?.className).toContain('flex-col'); });
  it('calculates totals from step durations', () => expect(playlistMinutes([{title:'a',durationSeconds:120},{title:'b',durationSeconds:30}])).toBe(3));
  it('orders open today tasks and excludes completed or other days', () => expect(taskPlaylist([...tasks,task('tomorrow','2026-11-12','2026-01-01')], '2026-11-11').map(t=>t.id)).toEqual(['first','later']));
  it('finishing the player never completes tasks', () => { render(<Player playlist={playlist} tasks={tasks} onStop={()=>{}}/>); fireEvent.click(screen.getByText('skip')); fireEvent.click(screen.getByText('skip')); expect(screen.getByText('review')).toBeTruthy(); expect(mocks.mark).not.toHaveBeenCalled(); });

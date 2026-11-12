@@ -6,7 +6,7 @@ export function playlistMinutes(tasks: PlaylistTask[]) {
   return Math.ceil(tasks.reduce((sum, task) => sum + task.durationSeconds, 0) / 60);
 }
 export function taskPlaylist(tasks: TaskRow[], today: string, completed = new Set<string>()) {
-  return tasks.filter(task => task.due_date === today && (task.status === 'pending' || task.status === 'in_progress') && !completed.has(task.id))
+  return tasks.filter(task => task.due_date !== null && task.due_date <= today && (task.status === 'pending' || task.status === 'in_progress') && !completed.has(task.id))
     .sort((a, b) => (a.due_date ?? '').localeCompare(b.due_date ?? '') || a.created_at.localeCompare(b.created_at));
 }
 export function taskMinutes(task: TaskRow) {
