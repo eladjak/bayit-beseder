@@ -31,11 +31,11 @@ export function Button({
   disabled,
   ...props
 }: Props) {
-  const classes = `relative inline-flex items-center justify-center gap-2 rounded-bb-md px-5 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-primary motion-safe:transition-transform motion-safe:duration-150 motion-safe:active:scale-[.97] disabled:opacity-50 ${size === "lg" ? "min-h-14" : "min-h-12"} ${{ primary: "bg-bb-primary text-bb-on-primary hover:bg-bb-primary-hover", quiet: "bg-bb-card text-bb-ink hover:bg-bb-primary-50", danger: "bg-bb-danger-50 text-bb-danger-ink hover:opacity-80", link: "text-bb-primary underline hover:text-bb-primary-hover" }[variant]} ${className}`;
+  const classes = `relative inline-flex items-center justify-center gap-2 rounded-bb-md px-5 py-3 leading-[1.45] font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-primary motion-safe:transition-transform motion-safe:duration-150 motion-safe:active:scale-[.97] disabled:bg-bb-card-hover disabled:text-bb-ink-2 disabled:cursor-not-allowed ${size === "lg" ? "min-h-14" : "min-h-12"} ${{ primary: "bg-bb-primary text-bb-on-primary hover:bg-bb-primary-hover", quiet: "bg-bb-card text-bb-ink hover:bg-bb-primary-50", danger: "bg-bb-danger-50 text-bb-danger-ink hover:opacity-80", link: "text-bb-primary underline hover:text-bb-primary-hover" }[variant]} ${className}`;
   const content = (
     <>
       <span
-        className={`inline-flex items-center justify-center gap-2 ${loading ? "opacity-0" : ""}`}
+        className="inline-flex items-center justify-center gap-2"
       >
         {startIcon}
         {children}
@@ -43,7 +43,7 @@ export function Button({
       </span>
       {loading && (
         <LoaderCircle
-          className="absolute size-4 motion-safe:animate-spin"
+          className="size-4 motion-safe:animate-spin"
           aria-hidden="true"
         />
       )}
@@ -55,7 +55,7 @@ export function Button({
       <Link
         {...anchorProps}
         href={href}
-        className={`${classes} ${disabled || loading ? "opacity-50" : ""}`}
+        className={`${classes} ${disabled || loading ? "bg-bb-card-hover text-bb-ink-2 cursor-not-allowed" : ""}`}
         aria-disabled={disabled || loading || undefined}
         aria-busy={loading || undefined}
         onClick={(event) => {

@@ -88,6 +88,7 @@ export function QuickAdd({
         />
         <IconButton
           label={submitLabel}
+          className="bg-bb-primary text-bb-on-primary hover:bg-bb-primary-hover disabled:bg-bb-card-hover disabled:text-bb-ink-2 disabled:opacity-100"
           type="submit"
           disabled={saving || !text.trim()}
           aria-busy={saving || undefined}

@@ -18,6 +18,7 @@ export function Illustration({ id, sizes, priority = false, decorative = false }
     // These are already optimized, local WebP files with explicit responsive variants.
     // eslint-disable-next-line @next/next/no-img-element
     <img
+      className="rounded-bb-md mix-blend-multiply dark:mix-blend-normal"
       src={item.src960}
       srcSet={`${item.src480} 480w, ${item.src960} 960w`}
       sizes={sizes}

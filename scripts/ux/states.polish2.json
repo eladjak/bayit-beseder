@@ -1,0 +1,66 @@
+[
+  {
+    "route": "/__ui",
+    "name": "gallery-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "he"
+    }
+  },
+  {
+    "route": "/__ui",
+    "name": "gallery-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    }
+  },
+  {
+    "route": "/dashboard",
+    "name": "shell-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  },
+  {
+    "route": "/dashboard",
+    "name": "shell-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ]
+  }
+]

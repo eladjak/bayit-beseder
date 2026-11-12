@@ -18,7 +18,7 @@ export function SideRail() {
     <div className="px-3 pb-8 text-xl font-bold text-bb-ink">{c('brand')}</div>
     <div className="flex flex-col gap-1">{items.map(({ href, key, icon: Icon }) => {
       const active = isActive(href, pathname);
-      return <Link key={href} href={href} aria-current={active ? 'page' : undefined} className={`flex min-h-14 items-center gap-3 rounded-bb-md px-3 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-primary motion-safe:transition-opacity motion-safe:duration-150 active:opacity-80 ${active ? 'bg-bb-primary-50 text-bb-primary' : 'text-bb-ink-2 hover:bg-bb-card-hover'}`}><Icon className="size-6" aria-hidden="true"/><span>{c(key)}</span></Link>;
+      return <Link key={href} href={href} aria-current={active ? 'page' : undefined} className={`flex min-h-14 items-center gap-3 rounded-bb-md px-3 text-bb-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bb-primary motion-safe:transition-opacity motion-safe:duration-150 active:opacity-80 ${active ? 'bg-bb-primary-50 text-bb-primary ring-1 ring-inset ring-bb-primary' : 'text-bb-ink-2 hover:bg-bb-card-hover'}`}><Icon className="size-6" aria-hidden="true"/><span>{c(key)}</span></Link>;
     })}</div>
   </nav>;
 }

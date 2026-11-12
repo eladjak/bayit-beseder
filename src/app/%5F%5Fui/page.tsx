@@ -4,6 +4,7 @@
 
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { notFound } from 'next/navigation';
+import { Plus } from 'lucide-react';
 import { Button, IconButton, Card, Field, QuickAdd, Check, HelpTip, EmptyState, Notice, Skeleton, StepIndicator, AvatarChip, RoomMark, CountUp, Sheet, Dialog, showToast, Illustration } from '@/components/v2';
 import { galleryCopy, isGalleryAllowed } from '@/lib/i18n/fragments/gallery';
 
@@ -16,7 +17,7 @@ function Examples({ language }: { language: 'he' | 'en' }) {
   const [checked, setChecked] = useState(false);
   const sections: [string, ReactNode][] = [
     ['Button', <div className="flex flex-wrap gap-2">{(['primary', 'quiet', 'danger', 'link'] as const).map(variant => <Button key={variant} variant={variant}>{variant}</Button>)}<Button>{c.long}</Button><Button size="lg">Large</Button><Button disabled>Disabled</Button><Button loading>Loading</Button><Button className="outline-2 outline-offset-2 outline-bb-primary">Focus</Button><Button className="scale-[.97]">Pressed</Button></div>],
-    ['IconButton', <div className="flex gap-2"><IconButton label={c.action}>+</IconButton><IconButton label={`${c.action} 36`} size={36}>+</IconButton><IconButton label="Disabled" disabled>+</IconButton></div>],
+    ['IconButton', <div className="flex gap-2"><IconButton label={c.action}><Plus aria-hidden="true" className="size-5" /></IconButton><IconButton label={`${c.action} 36`} size={36}><Plus aria-hidden="true" className="size-5" /></IconButton><IconButton label="Disabled" disabled><Plus aria-hidden="true" className="size-5" /></IconButton></div>],
     ['Card', <div className="space-y-2"><Card>{c.long}</Card><Card room={c.field} onClick={() => setDialog(true)}>{c.action}</Card></div>],
     ['Field', <div className="space-y-3"><Field label={c.field} hint={c.hint} /><Field label={c.field} error={c.error} /><Field label={c.field} multiline maxLength={120} /><Field label={c.field} disabled /></div>],
     ['QuickAdd', <div className="space-y-4"><QuickAdd label={c.field} placeholder={c.hint} submitLabel={c.action} errorMessage={c.error} savedMessage={c.saved} onSubmit={async () => ({ ok: true })} /><div><p>{language === 'he' ? 'דוגמת שגיאה: הקלידו ושלחו כדי לראות את ההודעה' : 'Error example: enter text and submit to see the message'}</p><QuickAdd label={language === 'he' ? 'דוגמת הוספה שנכשלת' : 'Failing quick add example'} placeholder={c.hint} submitLabel={c.action} errorMessage={c.error} savedMessage={c.saved} onSubmit={async () => ({ ok: false, message: c.error })} /></div></div>],
