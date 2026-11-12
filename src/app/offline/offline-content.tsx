@@ -1,10 +1,13 @@
 "use client";
 
+import { useNewUi } from "@/hooks/useNewUi";
+import { OfflineV2 } from "@/screens/system/OfflineV2";
+
 import { useState, useCallback } from "react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { WifiOff } from "lucide-react";
 
-export function OfflineContent() {
+function OfflineContentV1() {
   const { t } = useTranslation();
   const [retrying, setRetrying] = useState(false);
 
@@ -64,3 +67,5 @@ export function OfflineContent() {
     </div>
   );
 }
+
+export function OfflineContent() { const newUi = useNewUi(); return newUi ? <OfflineV2 /> : <OfflineContentV1 />; }

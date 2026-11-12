@@ -1,3 +1,4 @@
+import { NotFoundSwitch } from "@/screens/system/NotFoundV2";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -5,7 +6,7 @@ export const metadata: Metadata = {
   title: "הדף לא נמצא | בית בסדר",
 };
 
-export default function NotFound() {
+function NotFoundV1() {
   return (
     <div
       className="flex min-h-dvh items-center justify-center p-6 bg-background"
@@ -64,3 +65,5 @@ export default function NotFound() {
     </div>
   );
 }
+
+export default function NotFound() { return <NotFoundSwitch><NotFoundV1 /></NotFoundSwitch>; }

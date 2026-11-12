@@ -1,5 +1,8 @@
 "use client";
 
+import { useNewUi } from "@/hooks/useNewUi";
+import { OfflineIndicatorV2 } from "@/screens/system/OfflineV2";
+
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WifiOff, X } from "lucide-react";
@@ -28,7 +31,7 @@ interface OfflineIndicatorProps {
  * Displays the number of queued actions waiting to sync.
  * Slides in from the top with framer-motion.
  */
-export function OfflineIndicator({ pendingCount: externalCount }: OfflineIndicatorProps) {
+function OfflineIndicatorV1({ pendingCount: externalCount }: OfflineIndicatorProps) {
   const { t } = useTranslation();
   const [isOnline, setIsOnline] = useState<boolean>(
     typeof window !== "undefined" ? navigator.onLine : true
@@ -119,3 +122,5 @@ export function OfflineIndicator({ pendingCount: externalCount }: OfflineIndicat
     </AnimatePresence>
   );
 }
+
+export function OfflineIndicator({ pendingCount }: OfflineIndicatorProps) { const newUi = useNewUi(); return newUi ? <OfflineIndicatorV2 pendingCount={pendingCount} /> : <OfflineIndicatorV1 pendingCount={pendingCount} />; }

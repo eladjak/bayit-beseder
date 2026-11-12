@@ -1,4 +1,5 @@
-export default function Loading() {
+import { LoadingSwitch } from "@/screens/system/LoadingV2";
+function LoadingV1() {
   return (
     <div className="min-h-[60dvh] flex items-center justify-center" dir="rtl">
       <div className="flex flex-col items-center gap-3">
@@ -14,3 +15,5 @@ export default function Loading() {
     </div>
   );
 }
+
+export default function Loading() { return <LoadingSwitch><LoadingV1 /></LoadingSwitch>; }

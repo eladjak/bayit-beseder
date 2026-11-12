@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import { useNewUi } from "@/hooks/useNewUi";
+import { UpdateToastV2 } from "@/screens/system/UpdateToastV2";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -11,7 +13,7 @@ import { useTranslation } from "@/hooks/useTranslation";
  * The service worker broadcasts this message after it activates and takes
  * control of all clients, signalling that stale chunks have been replaced.
  */
-export function ServiceWorkerUpdateToast() {
+function ServiceWorkerUpdateToastV1() {
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -63,4 +65,9 @@ export function ServiceWorkerUpdateToast() {
   }, [t]);
 
   return null;
+}
+
+export function ServiceWorkerUpdateToast() {
+  const newUi = useNewUi();
+  return newUi ? <UpdateToastV2 /> : <ServiceWorkerUpdateToastV1 />;
 }

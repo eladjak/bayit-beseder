@@ -1,5 +1,8 @@
 "use client";
 
+import { useNewUi } from "@/hooks/useNewUi";
+import { InstallBannerV2 } from "@/screens/system/InstallBannerV2";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { Download, X } from "lucide-react";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
@@ -9,7 +12,7 @@ import { useTranslation } from "@/hooks/useTranslation";
  * PWA Install Banner — shows a subtle banner prompting users to install
  * the app on their home screen. Dismissible for 7 days.
  */
-export function PWAInstallBanner() {
+function PWAInstallBannerV1() {
   const { canInstall, promptInstall, dismiss } = usePWAInstall();
   const { t } = useTranslation();
 
@@ -60,3 +63,5 @@ export function PWAInstallBanner() {
     </AnimatePresence>
   );
 }
+
+export function PWAInstallBanner() { const newUi = useNewUi(); return newUi ? <InstallBannerV2 /> : <PWAInstallBannerV1 />; }
