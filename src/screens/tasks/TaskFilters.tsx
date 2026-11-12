@@ -1,0 +1,3 @@
+export function TaskFilters({ choices, value, onChange }: { choices: {id:string; label:string}[]; value:string; onChange:(id:string)=>void }) {
+ return <div className="flex flex-wrap gap-2" role="group" aria-label="Filters">{choices.map(choice => <button key={choice.id} type="button" onClick={() => onChange(choice.id)} aria-pressed={value === choice.id} className={`min-h-11 rounded-full border px-4 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-bb-primary ${value === choice.id ? 'bg-bb-primary text-bb-on-primary' : 'bg-bb-card text-bb-ink'}`}>{choice.label}</button>)}</div>;
+}

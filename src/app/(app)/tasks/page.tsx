@@ -1,5 +1,8 @@
 "use client";
 
+import { useNewUi } from "@/hooks/useNewUi";
+import { TasksV2 } from "@/screens/tasks/TasksV2";
+
 import { useState, useMemo, useCallback, useRef, useEffect, type CSSProperties, type FormEvent, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -89,7 +92,7 @@ interface DbTaskView {
   needsReview: boolean;
 }
 
-export default function TasksPage() {
+function TasksPageV1() {
   const { isFirstVisit: showTasksTip, dismiss: dismissTasksTip } = useFirstVisit("tasks");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [showAddForm, setShowAddForm] = useState(false);
@@ -1847,4 +1850,9 @@ function EditTaskModal({
       </motion.form>
     </>
   );
+}
+
+export default function TasksPage() {
+  const newUi = useNewUi();
+  return newUi ? <TasksV2 /> : <TasksPageV1 />;
 }
