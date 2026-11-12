@@ -3,6 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import WeeklyPage from '../page';
+import { addDaysStr } from '@/lib/il-date';
 
 const state = vi.hoisted(() => ({ tasks: [] as any[], profile: { id: 'u1', household_id: 'h1', name: 'Me' } as any, mark: vi.fn(), undo: vi.fn(), create: vi.fn(), update: vi.fn(), success: vi.fn(), error: vi.fn(), completedToday: false }));
 vi.mock('next/dynamic', () => ({ default: () => () => null }));
@@ -33,7 +34,24 @@ it('recurring completion failure shows error and retry without a success toast',
 it('prevents double completion while request is pending', () => { state.tasks = [task()]; state.mark.mockReturnValue(new Promise(() => {})); render(<WeeklyPage />); fireEvent.click(screen.getByText('Clean')); fireEvent.click(screen.getByText('Clean')); expect(state.mark).toHaveBeenCalledTimes(1); });
 it('reports a missing profile when toggling', async () => { state.tasks = [task()]; state.profile = null; render(<WeeklyPage />); fireEvent.click(screen.getByText('Clean')); expect(screen.getByRole('alert')).toBeTruthy(); });
 it('passes quick-add through the page handler', async () => { state.create.mockResolvedValue({ id: 'new' }); render(<WeeklyPage />); fireEvent.click(screen.getAllByText(/^add-/)[0]); await waitFor(() => expect(state.create).toHaveBeenCalledWith(expect.objectContaining({ title: 'Table', category_id: 'general', status: 'pending', recurring: false }))); });
-it('only marks a recurring task complete today on its own date', () => { state.completedToday = true; state.tasks = [task({ due_date: new Date(Date.now() + 86400000).toISOString().slice(0, 10) })]; render(<WeeklyPage />); expect(screen.getByText('Clean').getAttribute('data-status')).toBe('pending'); });
+it.each([
+  ['2026-11-11T23:30:00Z', '2026-11-12'],
+  ['2026-11-11T21:30:00Z', '2026-11-11'],
+  ['2026-12-10T23:30:00Z', '2026-12-11'],
+])('only marks a recurring task complete today on its own date at %s (Israel %s)', (instant, today) => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date(instant));
+  try {
+    state.completedToday = true;
+    state.tasks = [task({ due_date: addDaysStr(today, 1) })];
+    render(<WeeklyPage />);
+    expect(screen.getByText('Clean').getAttribute('data-status')).toBe('pending');
+    cleanup();
+    state.tasks = [task({ due_date: today })];
+    render(<WeeklyPage />);
+    expect(screen.getByText('Clean').getAttribute('data-status')).toBe('completed');
+  } finally { cleanup(); vi.useRealTimers(); }
+});
 
 it('undo uses the completion service and does not announce a new completion', async () => {
   state.tasks = [task({ status: 'completed', recurring: false })]; state.undo.mockResolvedValue(true);
