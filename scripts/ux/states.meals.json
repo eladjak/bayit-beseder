@@ -1,0 +1,208 @@
+[
+  {
+    "route": "/meals",
+    "name": "normal-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "he",
+      "bayit-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "normal",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "השבוע"
+      }
+    ]
+  },
+  {
+    "route": "/meals",
+    "name": "normal-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "en",
+      "bayit-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "normal",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "This week"
+      }
+    ]
+  },
+  {
+    "route": "/meals",
+    "name": "empty-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "he",
+      "bayit-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "empty",
+    "routes": [
+      {
+        "url": "/api/meals/plan",
+        "body": {
+          "weekStart": "2026-11-08",
+          "days": []
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "עדיין אין תוכנית ארוחות לשבוע."
+      }
+    ]
+  },
+  {
+    "route": "/meals",
+    "name": "empty-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "en",
+      "bayit-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "empty",
+    "routes": [
+      {
+        "url": "/api/meals/plan",
+        "body": {
+          "weekStart": "2026-11-08",
+          "days": []
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "There is no meal plan for this week yet."
+      }
+    ]
+  },
+  {
+    "route": "/meals",
+    "name": "error-meals-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "he",
+      "bayit-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "error:meals",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לא הצלחנו לטעון את התוכנית."
+      }
+    ]
+  },
+  {
+    "route": "/meals",
+    "name": "error-meals-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "en",
+      "bayit-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "error:meals",
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "We could not load the plan."
+      }
+    ]
+  },
+  {
+    "route": "/meals",
+    "name": "slow-15000-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "he",
+      "bayit-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "slow:15000"
+  },
+  {
+    "route": "/meals",
+    "name": "slow-15000-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "storage": {
+      "bayit-beseder-language": "en",
+      "bayit-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "plannerFake": true,
+    "scenario": "slow:15000"
+  }
+]
