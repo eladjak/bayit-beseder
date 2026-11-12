@@ -17,7 +17,7 @@ const db = vi.hoisted(() => {
     q.then = (resolve: (value: unknown) => void) => resolve({ data, error: null });
     return q;
   };
-  return { auth: { getUser: async () => ({ data: { user: { id: 'user' } }, error: null }) }, from: (table: string) => chain(table === 'profiles' ? { household_id: 'home' } : table === 'tasks' ? [{ id: 'due', title: 'משימה', due_date: '2026-11-11', status: 'pending', recurring: false }, { id: 'future', title: 'עתיד', due_date: '2026-11-12', status: 'pending', recurring: false }] : []), rpc: (...args: unknown[]) => { state.rpc(...args); return { single: async () => state.fail ? { data: null, error: { message: 'failed' } } : { data: { id: 'completion', task_id: 'due', user_id: 'user', completed_at: new Date().toISOString() }, error: null } }; } };
+  return { auth: { getUser: async () => ({ data: { user: { id: 'user' } }, error: null }) }, from: (table: string) => chain(table === 'profiles' ? { household_id: 'home' } : table === 'tasks' ? [{ id: 'due', title: 'משימה', due_date: '2026-11-11', status: 'pending', recurring: false }, { id: 'overdue', title: 'משימה באיחור', due_date: '2026-11-10', status: 'pending', recurring: false }, { id: 'future', title: 'עתיד', due_date: '2026-11-12', status: 'pending', recurring: false }] : []), rpc: (...args: unknown[]) => { state.rpc(...args); return { single: async () => state.fail ? { data: null, error: { message: 'failed' } } : { data: { id: 'completion', task_id: 'due', user_id: 'user', completed_at: new Date().toISOString() }, error: null } }; } };
 });
 vi.mock('@/lib/supabase', () => ({ createClient: () => db }));
 vi.mock('@/components/SupabaseProvider', () => ({ useSupabase: () => db }));
@@ -34,10 +34,30 @@ describe('busy day contract', () => {
     expect(screen.queryByText('עתיד')).toBeNull();
     expect(selectEssentialTasks([{ id: 'old', due_date: '2026-11-10', status: 'completed', recurring: false }], '2026-11-11', () => false, {})).toEqual([]);
   }, 15000);
+  it('explains the device setting on the switch', async () => {
+    render(<BusyDayV2 />);
+    const toggle = screen.getByRole('switch');
+    expect(toggle.getAttribute('aria-describedby')).toBe('busy-day-device');
+    expect(document.getElementById('busy-day-device')?.textContent).toContain('מכשיר');
+  });
+  it('marks overdue tasks with a distinct readable badge', async () => {
+    render(<BusyDayV2 />);
+    const badge = await screen.findByText('באיחור');
+    expect(badge.className).toContain('bg-bb-warning-50');
+  });
+  it('dims completed text without dimming the entire task and its controls', async () => {
+    render(<BusyDayV2 />);
+    const check = await screen.findByRole('checkbox', { name: /משימה$/ });
+    fireEvent.click(check);
+    await waitFor(() => expect(check.getAttribute('aria-checked')).toBe('true'));
+    const row = check.closest('li')!;
+    expect(row.className).not.toContain('opacity-60');
+    expect(screen.getByText('משימה').className).toContain('text-bb-ink-2');
+  });
   it('shares the legacy device key', () => { localStorage.setItem('bayit-beseder-emergency-mode', 'true'); expect(readBusyDay()).toBe(true); });
   it('completes and undoes through the real completion hook', async () => {
     render(<BusyDayV2 />);
-    const check = await screen.findByRole('checkbox');
+    const check = await screen.findByRole('checkbox', { name: /משימה$/ });
     fireEvent.click(check);
     await waitFor(() => expect(state.rpc).toHaveBeenCalledWith('transition_task_completion', expect.objectContaining({ p_task_id: 'due', p_action: 'complete' })));
     await waitFor(() => expect(state.toast).toHaveBeenCalled());
@@ -49,7 +69,7 @@ describe('busy day contract', () => {
   });
   it('shows retry and no success on failure, then retries', async () => {
     state.fail = true; render(<BusyDayV2 />);
-    fireEvent.click(await screen.findByRole('checkbox'));
+    fireEvent.click(await screen.findByRole('checkbox', { name: /משימה$/ }));
     expect(await screen.findByText('לא הצלחנו לשמור. נסו שוב.')).toBeTruthy();
     expect(state.toast).not.toHaveBeenCalled();
     state.fail = false; fireEvent.click(screen.getByRole('button', { name: 'נסו שוב' }));
