@@ -5,7 +5,7 @@ function parts(date: Date) {
 }
 export function isQuiet(date: Date): boolean {
  const {day, minutes} = parts(date);
- return minutes >= 22 * 60 || minutes < 7 * 60 || (day === 'Fri' && minutes >= 15 * 60 + 30) || (day === 'Sat' && minutes < 19 * 60);
+ return minutes >= 22 * 60 || minutes < 7 * 60 || (day === 'Fri' && minutes >= 15 * 60 + 30) || day === 'Sat';
 }
 export function isRecapTime(date: Date): boolean {
  const {day, minutes} = parts(date);

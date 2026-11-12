@@ -6,7 +6,7 @@ describe('delight timing and weekly count', () => {
   ['2026-11-09T19:59:00Z', false], ['2026-11-09T20:00:00Z', true],
   ['2026-11-10T04:59:00Z', true], ['2026-11-10T05:00:00Z', false],
   ['2026-07-10T16:00:00Z', true], ['2026-12-04T16:00:00Z', true],
-  ['2026-12-05T12:00:00Z', true],
+  ['2026-12-05T12:00:00Z', true], ['2026-07-11T17:30:00Z', true],
  ])('quiet at %s', (date, expected) => expect(isQuiet(new Date(date))).toBe(expected));
  it('shows the recap on Friday afternoon, Saturday and Sunday morning only', () => {
   expect(isRecapTime(new Date('2026-12-04T13:30:00Z'))).toBe(true);
