@@ -1,0 +1,20 @@
+import { test, expect } from '@playwright/test';
+import { requestAllowed, targetMode } from './guard';
+const base = process.env.SMOKE_BASE_URL || 'http://127.0.0.1:3000';
+const local = process.env.SMOKE_LOCAL === '1';
+const mode = targetMode(base, process.env.SMOKE_ALLOW_PRODUCTION_READONLY);
+test('partner sees the task added by the member', async ({page, context}) => {
+  test.skip(mode === 'readonly', 'Production runs only the member read-only flow');
+  await context.route('**/*', route => requestAllowed(route.request().url(), route.request().method(), base, mode, local) ? route.continue() : route.abort());
+  if (local) await context.routeWebSocket('**/*', ws => { if (/^wss?:\/\/(localhost|127\.0\.0\.1)(:|\/)/.test(ws.url())) ws.connectToServer(); else ws.close(); });
+  await page.goto('/login');
+  await page.locator('#login-email').fill(local ? 'partner@example.invalid' : process.env.SMOKE_PARTNER_EMAIL!);
+  await page.locator('#login-password').fill(local ? 'fake-password' : process.env.SMOKE_PARTNER_PASSWORD!);
+  await page.locator('form').first().locator('button[type="submit"]').click();
+  await expect(page.getByRole('link', {name:/משימות|Tasks/i}).first()).toBeVisible({timeout:30000});
+  await page.goto('/tasks');
+  await expect(page.getByText(process.env.SMOKE_TASK || 'בדיקת עשייה משותפת', {exact:true}).first()).toBeVisible();
+  await page.goto('/settings');
+  await page.getByRole('button', {name:'התנתקות', exact:true}).click();
+  await expect(page.locator('#login-email')).toBeVisible();
+});
