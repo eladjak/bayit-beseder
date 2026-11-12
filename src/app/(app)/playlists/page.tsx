@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useNewUi } from "@/hooks/useNewUi";
+import PlaylistsV2 from "@/screens/playlists/PlaylistsV2";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, ListChecks } from "lucide-react";
@@ -9,7 +11,7 @@ import { usePlaylistTimer } from "@/hooks/usePlaylistTimer";
 import { PlaylistPlayer } from "@/components/playlist-player";
 import { useTranslation } from "@/hooks/useTranslation";
 
-export default function PlaylistsPage() {
+function PlaylistsPageV1() {
   const { t } = useTranslation();
   const timer = usePlaylistTimer();
   const [showPlayer, setShowPlayer] = useState(false);
@@ -105,4 +107,9 @@ export default function PlaylistsPage() {
       </AnimatePresence>
     </div>
   );
+}
+
+export default function PlaylistsPage() {
+  const newUi = useNewUi();
+  return newUi ? <PlaylistsV2 /> : <PlaylistsPageV1 />;
 }
