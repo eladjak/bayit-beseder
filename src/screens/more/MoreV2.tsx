@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { BookOpen, CalendarDays, ChevronLeft, History, Keyboard, Music, Printer, Settings, ShieldAlert, Wrench, type LucideIcon } from 'lucide-react';
+import { BarChart3, BookOpen, CalendarDays, ChevronLeft, History, Keyboard, Music, Printer, Settings, ShieldAlert, type LucideIcon } from 'lucide-react';
 import { useCopy } from '@/hooks/useCopy';
 import moreCopy from '@/lib/i18n/fragments/more';
 
@@ -11,11 +11,11 @@ const groups: { title: string; items: Item[] }[] = [
   { title: 'planning', items: [
     { href: '/weekly', title: 'weekly', description: 'weeklyDesc', icon: CalendarDays },
     { href: '/history', title: 'history', description: 'historyDesc', icon: History },
+    { href: '/stats', title: 'stats', description: 'statsDesc', icon: BarChart3 },
     { href: '/tasks/print', title: 'print', description: 'printDesc', icon: Printer },
   ] },
   { title: 'home', items: [
     { href: '/playlists', title: 'playlists', description: 'playlistsDesc', icon: Music },
-    { href: '/more#house-tools', title: 'tools', description: 'toolsDesc', icon: Wrench },
   ] },
   { title: 'account', items: [
     { href: '/settings', title: 'settings', description: 'settingsDesc', icon: Settings },
