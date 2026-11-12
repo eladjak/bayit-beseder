@@ -1,0 +1,350 @@
+[
+  {
+    "route": "/emergency?ui=v2",
+    "name": "list-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "normal",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לסדר סלון"
+      }
+    ]
+  },
+  {
+    "route": "/emergency?ui=v2",
+    "name": "empty-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "empty",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "אין היום שום דבר שחייב לקרות. אפשר לנשום."
+      }
+    ]
+  },
+  {
+    "route": "/emergency?ui=v2",
+    "name": "error-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "error:tasks",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לא הצלחנו לטעון את המשימות. נסו שוב."
+      }
+    ]
+  },
+  {
+    "route": "/emergency?ui=v2",
+    "name": "no-home-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "no-household",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "עוד לא מחובר בית לחשבון הזה."
+      }
+    ]
+  },
+  {
+    "route": "/emergency?ui=v2",
+    "name": "list-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "normal",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לסדר סלון"
+      }
+    ]
+  },
+  {
+    "route": "/emergency?ui=v2",
+    "name": "empty-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "empty",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "There is nothing that has to happen today. Take a breath."
+      }
+    ]
+  },
+  {
+    "route": "/emergency?ui=v2",
+    "name": "error-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "error:tasks",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "We could not load the tasks. Please try again."
+      }
+    ]
+  },
+  {
+    "route": "/emergency?ui=v2",
+    "name": "no-home-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "no-household",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "No home is connected to this account yet."
+      }
+    ]
+  },
+  {
+    "route": "/emergency?ui=v2",
+    "name": "toast-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "normal",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "he"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לסדר סלון"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לסדר סלון"
+      },
+      {
+        "type": "waitForText",
+        "text": "המשימה הושלמה."
+      }
+    ]
+  },
+  {
+    "route": "/emergency?ui=v2",
+    "name": "toast-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "scenario": "normal",
+    "storage": {
+      "bayit-first-visit-tasks": "1",
+      "bayit-first-visit-dashboard": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1",
+      "bayit-beseder-emergency-mode": "true",
+      "bayit-beseder-language": "en"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "waitForText",
+        "text": "לסדר סלון"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לסדר סלון"
+      },
+      {
+        "type": "waitForText",
+        "text": "Task completed."
+      }
+    ]
+  }
+]

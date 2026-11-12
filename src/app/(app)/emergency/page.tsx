@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useCompletions } from "@/hooks/useCompletions";
 import { isRecurring, isTaskOverdue } from "@/lib/task-flags";
+import { useNewUi } from "@/hooks/useNewUi";
+import { BusyDayV2 } from "@/screens/busy-day/BusyDayV2";
 import { ilToday } from "@/lib/il-date";
 
 interface EmergencyTask {
@@ -43,6 +45,10 @@ function setStoredEmergencyMode(value: boolean): void {
 }
 
 export default function EmergencyPage() {
+  return useNewUi() === true ? <BusyDayV2 /> : <OldEmergencyPage />;
+}
+
+function OldEmergencyPage() {
   const completions = useCompletions();
   const { t, locale } = useTranslation();
   const copy = COPY[locale];
