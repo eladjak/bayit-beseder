@@ -1,0 +1,314 @@
+[
+  {
+    "route": "/tasks",
+    "name": "day-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "clock": "2026-11-12T10:00:00Z",
+    "actions": [
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לסדר סלון"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לנקות שולחן"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: להפעיל מכונה"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לטאטא"
+      },
+      {
+        "type": "waitForText",
+        "text": "סגרנו את היום. כל הכבוד לנו."
+      }
+    ]
+  },
+  {
+    "route": "/tasks",
+    "name": "day-quiet-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "clock": "2026-11-12T20:30:00Z",
+    "actions": [
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לסדר סלון"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לנקות שולחן"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: להפעיל מכונה"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לטאטא"
+      },
+      {
+        "type": "waitForText",
+        "text": "סגרנו את היום. כל הכבוד לנו."
+      }
+    ]
+  },
+  {
+    "route": "/tasks",
+    "name": "week-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "clock": "2026-11-13T14:00:00Z"
+  },
+  {
+    "route": "/tasks",
+    "name": "baseline-he",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "clock": "2026-11-12T10:00:00Z"
+  },
+  {
+    "route": "/tasks",
+    "name": "day-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "clock": "2026-11-12T10:00:00Z",
+    "actions": [
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לסדר סלון"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לנקות שולחן"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: להפעיל מכונה"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לטאטא"
+      },
+      {
+        "type": "waitForText",
+        "text": "We wrapped up the day. Well done, us."
+      }
+    ]
+  },
+  {
+    "route": "/tasks",
+    "name": "day-quiet-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "clock": "2026-11-12T20:30:00Z",
+    "actions": [
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לסדר סלון"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לנקות שולחן"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: להפעיל מכונה"
+      },
+      {
+        "type": "click",
+        "role": "checkbox",
+        "name": "סימון כבוצע: לטאטא"
+      },
+      {
+        "type": "waitForText",
+        "text": "We wrapped up the day. Well done, us."
+      }
+    ]
+  },
+  {
+    "route": "/tasks",
+    "name": "week-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "clock": "2026-11-13T14:00:00Z"
+  },
+  {
+    "route": "/tasks",
+    "name": "baseline-en",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "clock": "2026-11-12T10:00:00Z"
+  }
+]
