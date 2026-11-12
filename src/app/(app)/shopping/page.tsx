@@ -1,6 +1,8 @@
 "use client";
 
 import { Fragment, useState, useMemo, useRef } from "react";
+import { useNewUi } from "@/hooks/useNewUi";
+import ShoppingV2 from "@/screens/shopping/ShoppingV2";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -111,6 +113,11 @@ const COPY = {
 };
 
 export default function ShoppingPage() {
+  const newUi = useNewUi();
+  return newUi ? <ShoppingV2 /> : <ShoppingPageV1 />;
+}
+
+function ShoppingPageV1() {
   const { isFirstVisit: showShoppingTip, dismiss: dismissShoppingTip } = useFirstVisit("shopping");
   const { items, loading, storage, deviceItems, retrying, retry, addItem, toggleItem, removeItem, editItem, moveItemToCategory, clearChecked } =
     useShoppingList();
