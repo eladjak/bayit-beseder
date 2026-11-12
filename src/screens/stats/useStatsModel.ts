@@ -32,7 +32,7 @@ export function summarize(completions: Completion[], tasks: Task[], categories: 
   if (room) rooms.set(room, (rooms.get(room) ?? 0) + 1);
  }
  const weekdays = locale === 'he' ? ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'] : ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
- const dayItems = range ? (() => { const result = []; for(let date=range.start; date<range.end; date=addDaysStr(date,1)) result.push({label:weekdays[new Date(`${date}T00:00:00Z`).getUTCDay()], value:days.get(date) ?? 0}); return result; })() : [...days].sort(([a],[b]) => a.localeCompare(b)).map(([label,value]) => ({label,value}));
+ const dayItems = range ? (() => { const result = []; const showDate = addDaysStr(range.start, 7) < range.end; for(let date=range.start; date<range.end; date=addDaysStr(date,1)) { const weekday = weekdays[new Date(`${date}T00:00:00Z`).getUTCDay()]; result.push({label:showDate ? `${weekday} ${Number(date.slice(-2))}` : weekday, value:days.get(date) ?? 0}); } return result; })() : [...days].sort(([a],[b]) => a.localeCompare(b)).map(([label,value]) => ({label,value}));
  return {total: completions.length, days: dayItems, rooms: [...rooms].map(([label,value]) => ({label,value}))};
 }
 export function useStatsModel(period: Period) {

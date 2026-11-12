@@ -75,3 +75,11 @@ it('includes zero days and weekday labels for the full selected period', () => {
  const result = summarize([{task_id:'a',completed_at:'2026-11-10T12:00:00Z'}], [], [], {start:'2026-11-08',end:'2026-11-12'}, 'he');
  expect(result.days).toEqual([{label:'א׳',value:0},{label:'ב׳',value:0},{label:'ג׳',value:1},{label:'ד׳',value:0}]);
 });
+it('labels monthly chart days with calendar dates so repeated weekdays are distinguishable', () => {
+ const result = summarize([{task_id:'a',completed_at:'2026-11-10T12:00:00Z'}], [], [], {start:'2026-11-01',end:'2026-11-10'}, 'en');
+ expect(result.days[0].label).not.toEqual(result.days[7].label);
+});
+it('offers a next step when there are no completed tasks', () => {
+ const model=vi.spyOn(modelModule,'useStatsModel').mockReturnValue({loading:false,error:false,noHousehold:false,retry:vi.fn(),data:{total:0,days:[],rooms:[]}});
+ render(<StatsV2/>); expect(screen.getByText('emptyHint')).toBeTruthy(); model.mockRestore();
+});
