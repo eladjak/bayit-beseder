@@ -1,0 +1,658 @@
+[
+  {
+    "route": "/tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "name": "closed-he",
+    "actions": [],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "name": "open-he",
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "הוספת משימה",
+        "exact": false
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "name": "details-he",
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "הוספת משימה",
+        "exact": false
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "עוד פרטים"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "name": "edit-he",
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "לסדר סלון"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/rest/v1/tasks?id=eq.task-2",
+        "body": []
+      }
+    ],
+    "name": "deleted-he",
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "לסדר סלון"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "מחיקה"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "name": "closed-en",
+    "actions": [],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "name": "open-en",
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Add task",
+        "exact": false
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "name": "details-en",
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Add task",
+        "exact": false
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "More details"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      }
+    ],
+    "name": "edit-en",
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "לסדר סלון"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/rest/v1/tasks?id=eq.task-2",
+        "body": []
+      }
+    ],
+    "name": "deleted-en",
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "לסדר סלון"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Delete"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "he",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/rest/v1/tasks?select=*&household_id=",
+        "body": [
+          {
+            "id": "task-0",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לשטוף כלים",
+            "description": null,
+            "status": "completed",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-0",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2026-11-11",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "task-1",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לקפל כביסה",
+            "description": null,
+            "status": "completed",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-1",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2026-11-11",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "task-2",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לסדר סלון",
+            "description": null,
+            "status": "pending",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-2",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2026-11-11",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "task-3",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לנקות שולחן",
+            "description": null,
+            "status": "pending",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-0",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2026-11-11",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "task-4",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "להפעיל מכונה",
+            "description": null,
+            "status": "pending",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-1",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2026-11-11",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "task-5",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לטאטא",
+            "description": null,
+            "status": "pending",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-2",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2026-11-11",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          }
+        ]
+      },
+      {
+        "url": "/rest/v1/tasks?select=*",
+        "status": 500,
+        "body": {
+          "message": "Simulated failure"
+        }
+      }
+    ],
+    "name": "error-he",
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "הוספת משימה",
+        "exact": false
+      },
+      {
+        "type": "fill",
+        "role": "textbox",
+        "name": "שם המשימה",
+        "value": "Laundry"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "שמירה"
+      }
+    ],
+    "reducedMotion": true
+  },
+  {
+    "route": "/tasks",
+    "widths": [
+      375,
+      1280
+    ],
+    "plannerFake": true,
+    "storage": {
+      "bayit-ui": "v2",
+      "bayit-beseder-language": "en",
+      "bayit-first-visit-tasks": "1",
+      "bayit-onboarding-done-v1": "1",
+      "bayit-beseder-onboarding-done": "true",
+      "bayit-welcome-gift-claimed-v1": "1"
+    },
+    "routes": [
+      {
+        "url": "/api/privacy/consent",
+        "body": {
+          "accepted": true
+        }
+      },
+      {
+        "url": "/rest/v1/tasks?select=*&household_id=",
+        "body": [
+          {
+            "id": "task-0",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לשטוף כלים",
+            "description": null,
+            "status": "completed",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-0",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2026-11-11",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "task-1",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לקפל כביסה",
+            "description": null,
+            "status": "completed",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-1",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2026-11-11",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "task-2",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לסדר סלון",
+            "description": null,
+            "status": "pending",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-2",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2026-11-11",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "task-3",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לנקות שולחן",
+            "description": null,
+            "status": "pending",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-0",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2026-11-11",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "task-4",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "להפעיל מכונה",
+            "description": null,
+            "status": "pending",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-1",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2026-11-11",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          },
+          {
+            "id": "task-5",
+            "household_id": "00000000-0000-4000-8000-000000000002",
+            "title": "לטאטא",
+            "description": null,
+            "status": "pending",
+            "priority": "medium",
+            "category": "cleaning",
+            "category_id": "cat-2",
+            "assigned_to": "00000000-0000-4000-8000-000000000001",
+            "due_date": "2026-11-11",
+            "recurring": "none",
+            "estimated_minutes": 15,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z"
+          }
+        ]
+      },
+      {
+        "url": "/rest/v1/tasks?select=*",
+        "status": 500,
+        "body": {
+          "message": "Simulated failure"
+        }
+      }
+    ],
+    "name": "error-en",
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Add task",
+        "exact": false
+      },
+      {
+        "type": "fill",
+        "role": "textbox",
+        "name": "Task name",
+        "value": "Laundry"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "Save"
+      }
+    ],
+    "reducedMotion": true
+  }
+]
