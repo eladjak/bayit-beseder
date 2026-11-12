@@ -10,7 +10,7 @@ import {
   ZOEY_NAME,
   confirmRequiredResponse,
   isZoey,
-  readAgentConfirm,
+  checkAgentConfirm,
   zoeyWriteRateLimited,
 } from "@/lib/agent/zoey";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
@@ -251,7 +251,8 @@ async function handleDelete(
 ) {
   const headers = { "Cache-Control": "no-store", "X-RateLimit-Remaining": String(rlRemaining) };
   const zoey = isZoey(auth);
-  const zoeyConfirm = zoey ? readAgentConfirm(request) : null;
+  const zoeyChk = zoey ? checkAgentConfirm(request) : null;
+  const zoeyConfirm = zoeyChk?.text ?? null;
   const audit = (
     outcome: "preview" | "executed" | "denied" | "rejected" | "failed",
     detail?: string
@@ -284,7 +285,7 @@ async function handleDelete(
   // Zoey guard rail (class: delete): no confirm statement -> 428, nothing touched.
   if (zoey && !zoeyConfirm) {
     await audit("denied", "נדרש X-Agent-Confirm (428)");
-    return confirmRequiredResponse("delete");
+    return confirmRequiredResponse("delete", zoeyChk?.reason ?? "missing");
   }
 
   const { data: task } = await supabase

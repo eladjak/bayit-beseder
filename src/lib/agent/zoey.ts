@@ -32,22 +32,39 @@ export function isZoey(auth: AgentAuthResult): boolean {
   return auth.ok && auth.via === "token" && auth.isAgent === true;
 }
 
-/** Decoded confirm text, or null when missing / malformed / too short. */
-export function readAgentConfirm(request: Request): string | null {
+export const CONFIRM_MAX_CHARS = 600;
+export type ConfirmReason = "missing" | "too_short" | "too_long";
+
+/** Characters that count for nothing: whitespace, control, format (zero-width, joiners, BOM), combining marks, variation selectors. */
+const INVISIBLE = /[\s\p{Cf}\p{Cc}\p{M}\uFE00-\uFE0F\u{E0100}-\u{E01EF}]/gu;
+export const visibleLength = (text: string): number => [...text.replace(INVISIBLE, "")].length;
+
+/**
+ * Decoded confirm text, or the reason it was refused. Counted in code points after removing invisible characters;
+ * a text over 600 code points is refused, never truncated.
+ */
+export function checkAgentConfirm(request: Request): { text: string; reason: null } | { text: null; reason: ConfirmReason } {
   const raw = request.headers.get(CONFIRM_HEADER);
-  if (!raw) return null;
+  if (!raw) return { text: null, reason: "missing" };
   let text: string;
   try {
     text = decodeURIComponent(raw).trim();
   } catch {
-    return null;
+    return { text: null, reason: "missing" };
   }
-  return text.length >= CONFIRM_MIN_CHARS ? text : null;
+  if ([...text].length > CONFIRM_MAX_CHARS) return { text: null, reason: "too_long" };
+  if (visibleLength(text) < CONFIRM_MIN_CHARS) return { text: null, reason: "too_short" };
+  return { text, reason: null };
 }
 
-export function confirmRequiredResponse(klass: GuardClass): NextResponse {
+/** Decoded confirm text, or null when missing / malformed / too short / too long. */
+export function readAgentConfirm(request: Request): string | null {
+  return checkAgentConfirm(request).text;
+}
+
+export function confirmRequiredResponse(klass: GuardClass, reason: ConfirmReason = "missing"): NextResponse {
   return NextResponse.json(
-    { error: "agent_confirm_required", class: klass },
+    { error: "agent_confirm_required", class: klass, reason },
     { status: 428, headers: { "Cache-Control": "no-store" } }
   );
 }

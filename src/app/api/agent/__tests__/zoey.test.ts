@@ -158,7 +158,7 @@ describe("Zoey: guard rail class=delete", () => {
   it("without X-Agent-Confirm -> 428 {agent_confirm_required, delete}, nothing deleted, denial audited", async () => {
     const r = await taskPOST(taskReq(RAW.zoey, { action: "delete", taskId: T_A }));
     expect(r.status).toBe(428);
-    expect(await r.json()).toEqual({ error: "agent_confirm_required", class: "delete" });
+    expect(await r.json()).toEqual({ error: "agent_confirm_required", class: "delete", reason: "missing" });
     expect(exists(T_A)).toBe(true);
     expect(audit().some((a) => a.outcome === "denied")).toBe(true);
   });
@@ -166,6 +166,23 @@ describe("Zoey: guard rail class=delete", () => {
     const r = await taskPOST(taskReq(RAW.zoey, { action: "delete", taskId: T_A }, { "x-agent-confirm": hdr("ok yes") }));
     expect(r.status).toBe(428);
     expect(exists(T_A)).toBe(true);
+  });
+  it.each([
+    ["10 emoji", "😀".repeat(10), "too_short"],
+    ["20 zero-width spaces", "\u200B".repeat(20), "too_short"],
+    ["20 combining marks", "\u0301".repeat(20), "too_short"],
+    ["601 characters", "א".repeat(601), "too_long"],
+  ])("Step 0: %s -> 428 (%s), nothing deleted", async (_n, text, reason) => {
+    const r = await taskPOST(taskReq(RAW.zoey, { action: "delete", taskId: T_A }, { "x-agent-confirm": hdr(text) }));
+    expect(r.status).toBe(428);
+    expect(await r.json()).toEqual({ error: "agent_confirm_required", class: "delete", reason });
+    expect(exists(T_A)).toBe(true);
+  });
+  it("Step 0: a normal Hebrew sentence of 25 letters is accepted", async () => {
+    const text = "אלעד אישר בוואטסאפ מחיקה";
+    const r = await taskPOST(taskReq(RAW.zoey, { action: "delete", taskId: T_A }, { "x-agent-confirm": hdr(text) }));
+    expect(r.status).toBe(200);
+    expect(audit().find((a) => a.outcome === "executed")?.confirm_text).toBe(text);
   });
   it("with a Hebrew confirm statement -> deleted, text stored in the audit row", async () => {
     const text = "וואטסאפ מאלעד 13.11 09:02: למחוק את משימת הכלים";
@@ -197,7 +214,7 @@ describe("Zoey: guard rail class=send (deliver_to_me)", () => {
   it("without confirm -> 428 {send}, nothing sent", async () => {
     const r = await brief();
     expect(r.status).toBe(428);
-    expect(await r.json()).toEqual({ error: "agent_confirm_required", class: "send" });
+    expect(await r.json()).toEqual({ error: "agent_confirm_required", class: "send", reason: "missing" });
     expect(sendWhatsAppMessage).not.toHaveBeenCalled();
   });
   it("with confirm -> sent once, to the creator's own number only, audited with the text", async () => {

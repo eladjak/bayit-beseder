@@ -44,7 +44,7 @@ export async function logAgentAudit(supabase: Client, entry: AuditEntry): Promis
       entry.agentName || entry.confirmText
         ? {
             agent_name: entry.agentName ?? null,
-            confirm_text: entry.confirmText ? entry.confirmText.slice(0, 500) : null,
+            confirm_text: entry.confirmText ? entry.confirmText : null,
           }
         : {};
     const { error } = await supabase.from("agent_audit_log").insert({

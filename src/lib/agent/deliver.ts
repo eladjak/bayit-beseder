@@ -34,7 +34,7 @@ import {
   fingerprint,
 } from "@/lib/agent/confirm";
 import { logAgentAudit } from "@/lib/agent/audit";
-import { ZOEY_NAME, confirmRequiredResponse, isZoey, readAgentConfirm } from "@/lib/agent/zoey";
+import { ZOEY_NAME, checkAgentConfirm, confirmRequiredResponse, isZoey } from "@/lib/agent/zoey";
 
 export type DeliverChannel = "whatsapp";
 
@@ -210,9 +210,10 @@ export async function gateDelivery(
     };
   }
   // Zoey guard rail (class: send): no confirm statement -> 428 before anything is built or sent.
-  if (isZoey(auth) && !(request && readAgentConfirm(request))) {
+  const zoeyChk = isZoey(auth) && request ? checkAgentConfirm(request) : null;
+  if (isZoey(auth) && !(zoeyChk && zoeyChk.text)) {
     await auditDenied(auth, "נדרש X-Agent-Confirm (428)");
-    return { ok: false, response: confirmRequiredResponse("send") };
+    return { ok: false, response: confirmRequiredResponse("send", zoeyChk?.reason ?? "missing") };
   }
   return { ok: true };
 }
