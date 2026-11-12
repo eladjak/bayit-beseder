@@ -1034,6 +1034,9 @@ export type Database = {
           /** Migration 024. Absent (treated as default scopes) until applied. */
           scopes?: string[];
           created_by?: string | null;
+          /** Migration 030: the named Zoey agent identity. */
+          is_agent?: boolean;
+          agent_name?: string | null;
         };
         Insert: {
           id?: string;
@@ -1044,6 +1047,9 @@ export type Database = {
           revoked_at?: string | null;
           scopes?: string[];
           created_by?: string | null;
+          /** Migration 030: the named Zoey agent identity. */
+          is_agent?: boolean;
+          agent_name?: string | null;
         };
         Update: {
           id?: string;
@@ -1054,6 +1060,9 @@ export type Database = {
           revoked_at?: string | null;
           scopes?: string[];
           created_by?: string | null;
+          /** Migration 030: the named Zoey agent identity. */
+          is_agent?: boolean;
+          agent_name?: string | null;
         };
         Relationships: [
           {
@@ -1112,6 +1121,9 @@ export type Database = {
           outcome: string;
           detail: string | null;
           created_at: string;
+          /** Migration 030. */
+          agent_name?: string | null;
+          confirm_text?: string | null;
         };
         Insert: {
           id?: string;
@@ -1124,6 +1136,8 @@ export type Database = {
           outcome: string;
           detail?: string | null;
           created_at?: string;
+          agent_name?: string | null;
+          confirm_text?: string | null;
         };
         Update: {
           id?: string;
@@ -1136,6 +1150,8 @@ export type Database = {
           outcome?: string;
           detail?: string | null;
           created_at?: string;
+          agent_name?: string | null;
+          confirm_text?: string | null;
         };
         Relationships: [];
       };

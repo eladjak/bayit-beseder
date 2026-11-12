@@ -61,6 +61,8 @@ export interface IssueTokenOptions {
   scopes?: readonly AgentScope[];
   /** auth.users id of the member creating the token ("me" for deliver_to_me). */
   createdBy?: string | null;
+  /** Issue the named Zoey agent identity (needs migration 030). Never set by the self-serve UI. */
+  agent?: { name: string };
 }
 
 /** Thrown when a sensitive scope is requested but migration 024 is not applied. */
@@ -83,12 +85,17 @@ export async function issueHouseholdToken(
   const wantsMore = scopes.some((s) => s !== "read" && s !== "write");
 
   const base = { household_id: householdId, token_hash: tokenHash, label: label ?? null };
-  const hasExtras = wantsMore || Boolean(options.createdBy);
+  const hasExtras = wantsMore || Boolean(options.createdBy) || Boolean(options.agent);
 
   let { data, error } = hasExtras
     ? await supabase
         .from("household_agent_tokens")
-        .insert({ ...base, scopes, created_by: options.createdBy ?? null })
+        .insert({
+          ...base,
+          scopes,
+          created_by: options.createdBy ?? null,
+          ...(options.agent ? { is_agent: true, agent_name: options.agent.name } : {}),
+        })
         .select("id, household_id, created_at")
         .single()
     : await supabase
@@ -100,7 +107,7 @@ export async function issueHouseholdToken(
   if (hasExtras && error && isMissingColumnError(error.message)) {
     // Migration 024 not applied. A token that only wants the default scopes can
     // still be issued the old way; a token that wants an opt-in scope cannot.
-    if (wantsMore) throw new ScopesUnavailableError();
+    if (wantsMore || options.agent) throw new ScopesUnavailableError();
     ({ data, error } = await supabase
       .from("household_agent_tokens")
       .insert(base)
@@ -160,6 +167,9 @@ export type TokenLookupResult =
       scopes: AgentScope[];
       /** Member who created the token; null if unknown / column absent. */
       createdBy: string | null;
+      /** true for the named Zoey agent identity (migration 030); false when the column is absent. */
+      isAgent: boolean;
+      agentName: string | null;
     }
   | { status: "not_found" }
   | { status: "error"; message: string };
@@ -183,7 +193,13 @@ export async function resolveHouseholdForToken(
       .is("revoked_at", null)
       .maybeSingle();
 
-  let { data, error } = await lookup("id, household_id, label, scopes, created_by");
+  let { data, error } = await lookup(
+    "id, household_id, label, scopes, created_by, is_agent, agent_name"
+  );
+  if (error && isMissingColumnError(error.message)) {
+    // Migration 030 not applied: same lookup without the Zoey columns.
+    ({ data, error } = await lookup("id, household_id, label, scopes, created_by"));
+  }
   if (error && isMissingColumnError(error.message)) {
     // Migration 024 not applied: same lookup, default scopes, no creator.
     ({ data, error } = await lookup("id, household_id, label"));
@@ -204,6 +220,8 @@ export async function resolveHouseholdForToken(
     label: (row.label as string | null | undefined) ?? null,
     scopes: normalizeScopes(row.scopes),
     createdBy: (row.created_by as string | null | undefined) ?? null,
+    isAgent: row.is_agent === true,
+    agentName: (row.agent_name as string | null | undefined) ?? null,
   };
 }
 

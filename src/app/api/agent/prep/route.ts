@@ -9,6 +9,7 @@ import { rowToMeal } from "@/lib/meals/db";
 import { computeTonightPrep } from "@/lib/meals/defrost";
 import { comingSunday } from "@/lib/meals/week";
 import { deliverWhatsApp, gateDelivery } from "@/lib/agent/deliver";
+import { readAgentConfirm } from "@/lib/agent/zoey";
 
 /**
  * GET /api/agent/prep?householdId=<uuid> — "מה להפשיר הערב?"
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest) {
   }
   const { deliver } = parsed.data;
   const confirmToken = searchParams.get("confirm_token")?.slice(0, 200) || undefined;
-  const gate = await gateDelivery(auth, deliver, [...searchParams.keys()]);
+  const gate = await gateDelivery(auth, deliver, [...searchParams.keys()], request);
   if (!gate.ok) return gate.response;
   // Household is ALWAYS the one the bearer token authorizes, never the query
   // param above (which is parsed only for backward-compat, then discarded).
@@ -135,6 +136,7 @@ export async function GET(request: NextRequest) {
 
     const delivery = await deliverWhatsApp({
       auth,
+      agentConfirm: readAgentConfirm(request),
       kind: "prep",
       text: whatsappText,
       deliver,

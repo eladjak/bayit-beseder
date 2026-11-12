@@ -8,7 +8,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
 
-export type AuditAction = "delete_task" | "deliver_to_me";
+export type AuditAction = "delete_task" | "deliver_to_me" | "create_task" | "complete_task";
 export type AuditOutcome = "preview" | "executed" | "denied" | "rejected" | "failed";
 
 export interface AuditEntry {
@@ -21,6 +21,9 @@ export interface AuditEntry {
   outcome: AuditOutcome;
   /** Short human note. Never a phone number. */
   detail?: string | null;
+  /** Zoey identity (migration 030): who acted, and the human instruction behind a guarded action. */
+  agentName?: string | null;
+  confirmText?: string | null;
 }
 
 export interface AuditRow {
@@ -37,7 +40,15 @@ type Client = SupabaseClient<Database>;
 
 export async function logAgentAudit(supabase: Client, entry: AuditEntry): Promise<boolean> {
   try {
+    const zoeyCols =
+      entry.agentName || entry.confirmText
+        ? {
+            agent_name: entry.agentName ?? null,
+            confirm_text: entry.confirmText ? entry.confirmText.slice(0, 500) : null,
+          }
+        : {};
     const { error } = await supabase.from("agent_audit_log").insert({
+      ...zoeyCols,
       household_id: entry.householdId,
       token_id: entry.tokenId,
       token_label: entry.tokenLabel ?? null,

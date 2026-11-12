@@ -7,6 +7,7 @@ import { generateWeekPlan } from "@/lib/weekly-generator";
 import type { TaskRow } from "@/lib/types/database";
 import { buildPlanSummary, buildPlanWhatsAppText } from "@/lib/agent/plan-format";
 import { deliverWhatsApp, gateDelivery } from "@/lib/agent/deliver";
+import { readAgentConfirm } from "@/lib/agent/zoey";
 
 /**
  * POST /api/agent/plan
@@ -108,7 +109,8 @@ export async function POST(request: NextRequest) {
   const gate = await gateDelivery(
     auth,
     deliver,
-    raw && typeof raw === "object" ? Object.keys(raw as object) : []
+    raw && typeof raw === "object" ? Object.keys(raw as object) : [],
+    request
   );
   if (!gate.ok) return gate.response;
 
@@ -177,6 +179,7 @@ export async function POST(request: NextRequest) {
   // 8. Optional delivery: only to the token creator's own phone, behind scope + confirm.
   const delivery = await deliverWhatsApp({
     auth,
+    agentConfirm: readAgentConfirm(request),
     kind: "plan",
     text: whatsappText,
     deliver,
