@@ -70,6 +70,27 @@ describe('settings v2', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save number' }));
     await waitFor(() => expect(mocks.updateProfile).toHaveBeenCalledWith({ whatsapp_phone: '972501234567' }));
   });
+  it('explains whether a WhatsApp number is saved and gives the phone keyboard', () => {
+    render(<SettingsV2 />);
+    expect(screen.getByText('No phone number saved.')).toBeTruthy();
+    expect(screen.getByLabelText('Phone number').getAttribute('autocomplete')).toBe('tel');
+    expect(screen.getByLabelText('Phone number').getAttribute('inputmode')).toBe('tel');
+  });
+  it('clears an outdated home save message when editing again', async () => {
+    render(<SettingsV2 />);
+    fireEvent.click(screen.getByRole('button', { name: 'Save home name' }));
+    expect(await screen.findByText('Home name saved.')).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Home name'), { target: { value: 'Another home' } });
+    expect(screen.queryByText('Home name saved.')).toBeNull();
+  });
+  it('clears an outdated phone error when editing again', async () => {
+    render(<SettingsV2 />);
+    fireEvent.change(screen.getByLabelText('Phone number'), { target: { value: '1' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save number' }));
+    expect(await screen.findByText(/Enter a valid Israeli mobile number/)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Phone number'), { target: { value: '0501234567' } });
+    expect(screen.queryByText(/Enter a valid Israeli mobile number/)).toBeNull();
+  });
   it('reuses the original deletion flow and checks consent', async () => {
     render(<SettingsV2 />); expect(screen.getByText('Original delete component')).toBeTruthy();
     expect(await screen.findByText('Consent is recorded.')).toBeTruthy(); expect(mocks.consent).toHaveBeenCalled();
