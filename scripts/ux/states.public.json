@@ -130,5 +130,179 @@
     "storage": {
       "bayit-beseder-language": "en"
     }
+  },
+  {
+    "route": "/first-week",
+    "name": "first-week-meals",
+    "widths": [
+      375,
+      1280
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בואו נכין שבוע"
+      }
+    ]
+  },
+  {
+    "route": "/first-week",
+    "name": "first-week-shopping",
+    "widths": [
+      375,
+      1280
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בואו נכין שבוע"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "המשך לרשימת הקניות"
+      }
+    ]
+  },
+  {
+    "route": "/first-week",
+    "name": "first-week-save",
+    "widths": [
+      375,
+      1280
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בואו נכין שבוע"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "המשך לרשימת הקניות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "המשך לשמירה"
+      }
+    ]
+  },
+  {
+    "route": "/first-week",
+    "name": "first-week-blocked",
+    "widths": [
+      375,
+      1280
+    ],
+    "routes": [
+      {
+        "url": "/api/first-week",
+        "status": 401,
+        "body": {}
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בואו נכין שבוע"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "המשך לרשימת הקניות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "המשך לשמירה"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "שמירת השבוע בבית"
+      }
+    ]
+  },
+  {
+    "route": "/first-week",
+    "name": "first-week-error",
+    "widths": [
+      375,
+      1280
+    ],
+    "routes": [
+      {
+        "url": "/api/first-week",
+        "status": 500,
+        "body": {}
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בואו נכין שבוע"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "המשך לרשימת הקניות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "המשך לשמירה"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "שמירת השבוע בבית"
+      }
+    ]
+  },
+  {
+    "route": "/first-week",
+    "name": "first-week-success",
+    "widths": [
+      375,
+      1280
+    ],
+    "routes": [
+      {
+        "url": "/api/first-week",
+        "status": 200,
+        "body": {
+          "matched": 7,
+          "preserved": 0
+        }
+      }
+    ],
+    "actions": [
+      {
+        "type": "click",
+        "role": "button",
+        "name": "בואו נכין שבוע"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "המשך לרשימת הקניות"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "המשך לשמירה"
+      },
+      {
+        "type": "click",
+        "role": "button",
+        "name": "שמירת השבוע בבית"
+      }
+    ]
   }
 ]

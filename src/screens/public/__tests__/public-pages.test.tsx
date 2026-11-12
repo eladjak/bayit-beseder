@@ -43,6 +43,12 @@ describe('six public routes', () => {
     flags.build = true;
     expect(renderToStaticMarkup(<Page />)).toContain(renderToStaticMarkup(<PolicyDocument kind={kind} />));
   });
+  it('provides a heading in the initial first-week HTML', () => {
+    flags.runtime = true;
+    const html = renderToStaticMarkup(<FirstWeek />);
+    expect((html.match(/<h1(?:\s|>)/g) || [])).toHaveLength(1);
+    expect(html).toContain('id="main-content"');
+  });
   it('keeps the first week flow mounted safely as the switch changes', () => {
     flags.runtime = null;
     const result = render(<FirstWeek />);
@@ -55,4 +61,21 @@ describe('six public routes', () => {
     expect(result.container.querySelector('#main-content')).toBeNull();
     cleanup();
   });
+});
+
+import { createHash } from 'node:crypto';
+
+// Server HTML generated from origin/master at 4f943fb3, before this contract.
+const masterHashes = {
+  how: '20e1bb49b7a7f63ea76972270e1eecf747f7c7127b8c9d6055be14072d39a045',
+  about: '5387dbbe6bc05eaa26e80a9ef8094ed91decfb2e50ea7cc68d178c7dc257c32e',
+  contact: '50f33a854e25fe5c266b48bd4dcb98cbba1ed4cce2992208f4754fc20c2bca06',
+  privacy: 'aafae15a42440f3da79384a4ddfe6b6dea04be8b4b70214d17787024a8e4e175',
+  terms: 'df6589e93cc0dfbb09711fbbd7c8da94933fd8de1732ebfa99979f15f9877d0d',
+  firstWeek: 'ff5ba28f4ece5287c547115e3a806a8dc68041e6d1e766e30f5ece29669fb1e2',
+};
+it.each(Object.entries({how: How, about: About, contact: Contact, privacy: Privacy, terms: Terms, firstWeek: FirstWeek}))('%s keeps master HTML with the switch off', (name, Page) => {
+  flags.build = false; flags.runtime = false;
+  const hash = createHash('sha256').update(renderToStaticMarkup(<Page />)).digest('hex');
+  expect(hash).toBe(masterHashes[name as keyof typeof masterHashes]);
 });
