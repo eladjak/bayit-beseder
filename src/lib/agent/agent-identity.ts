@@ -1,7 +1,7 @@
 /**
- * The named agent identity "Zoey (סוכנת)" (owner decision 12.11.2026).
+ * named agent identity (display name from BAYIT_AGENT_DISPLAY_NAME, default "סוכן"; owner decision 12.11.2026).
  *
- * Zoey is NOT a second auth mechanism: it is a normal per-household agent token
+ * A named agent is NOT a second auth mechanism: it is a normal per-household agent token
  * (src/lib/agent/tokens.ts) flagged `is_agent` (migration 030), pinned to one
  * household like every other token. This module holds the three things that are
  * extra for that identity:
@@ -9,7 +9,7 @@
  *  1. Guard rails: delete and send actions are REFUSED (HTTP 428) unless the
  *     request carries `X-Agent-Confirm: <encodeURIComponent(text)>` naming the
  *     human instruction (>= 20 characters decoded). Same convention in every
- *     Zoey system. Ordinary tokens keep the older two-step confirm_token flow.
+ *     named agent system. Ordinary tokens keep the older two-step confirm_token flow.
  *  2. A write rate limit: 60 state-changing calls per minute per token (429).
  *  3. The display name used in the audit trail.
  *
@@ -21,14 +21,14 @@ import { NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 import type { AgentAuthResult } from "@/lib/agent/auth";
 
-export const ZOEY_NAME = "Zoey (סוכנת)";
+export const AGENT_DISPLAY_NAME = process.env.BAYIT_AGENT_DISPLAY_NAME?.trim() || "סוכן";
 export const CONFIRM_HEADER = "x-agent-confirm";
 export const CONFIRM_MIN_CHARS = 20;
-export const ZOEY_WRITES_PER_MINUTE = 60;
+export const AGENT_WRITES_PER_MINUTE = 60;
 
 export type GuardClass = "money" | "send" | "delete" | "access";
 
-export function isZoey(auth: AgentAuthResult): boolean {
+export function isNamedAgent(auth: AgentAuthResult): boolean {
   return auth.ok && auth.via === "token" && auth.isAgent === true;
 }
 
@@ -69,11 +69,11 @@ export function confirmRequiredResponse(klass: GuardClass, reason: ConfirmReason
   );
 }
 
-const writeLimiter = rateLimit({ windowMs: 60_000, max: ZOEY_WRITES_PER_MINUTE });
+const writeLimiter = rateLimit({ windowMs: 60_000, max: AGENT_WRITES_PER_MINUTE });
 
 /** Returns a 429 response when this token exceeded its write budget, else null. */
-export async function zoeyWriteRateLimited(tokenId: string): Promise<NextResponse | null> {
-  const r = await writeLimiter.check(`zoey-write:${tokenId}`);
+export async function agentWriteRateLimited(tokenId: string): Promise<NextResponse | null> {
+  const r = await writeLimiter.check(`agent-write:${tokenId}`);
   if (r.success) return null;
   return NextResponse.json(
     { error: "יותר מדי כתיבות של הסוכנת. נסו שוב עוד דקה.", class: "rate_limit" },

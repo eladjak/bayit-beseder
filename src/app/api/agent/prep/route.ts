@@ -9,7 +9,7 @@ import { rowToMeal } from "@/lib/meals/db";
 import { computeTonightPrep } from "@/lib/meals/defrost";
 import { comingSunday } from "@/lib/meals/week";
 import { deliverWhatsApp, gateDelivery } from "@/lib/agent/deliver";
-import { readAgentConfirm } from "@/lib/agent/zoey";
+import { readAgentConfirm } from "@/lib/agent/agent-identity";
 
 /**
  * GET /api/agent/prep?householdId=<uuid> — "מה להפשיר הערב?"

@@ -94,9 +94,9 @@ export interface AgentAuthResult {
   scopes?: readonly AgentScope[];
   /** Member who created the token: "me" for `deliver_to_me`. Null if unknown. */
   createdBy?: string | null;
-  /** true when the credential is the named Zoey agent identity (migration 030). */
+  /** true when the credential is the named agent identity (migration 030). */
   isAgent?: boolean;
-  /** Display name of the agent identity, e.g. "Zoey (סוכנת)". */
+  /** Display name of the agent identity, default "סוכן". */
   agentName?: string | null;
 }
 
