@@ -225,6 +225,16 @@ describe("Zoey: guard rail class=send (deliver_to_me)", () => {
     const row = audit().find((a) => a.action === "deliver_to_me" && a.outcome === "executed");
     expect(row?.confirm_text).toContain("daily brief");
   });
+  it("release review 13.11: a confirmed send counts against the same 60/min write limit", async () => {
+    for (let i = 0; i < 60; i++) {
+      const r = await taskPOST(taskReq(RAW.zoey, { action: "add", title: `s${i}` }, { "x-test-ip": `10.1.0.${i}` }));
+      expect(r.status).toBe(201);
+    }
+    const r = await brief("WhatsApp from Elad 13.11 09:05: send me the daily brief");
+    expect(sendWhatsAppMessage).not.toHaveBeenCalled();
+    const body = await r.json();
+    expect(JSON.stringify(body)).toContain("יותר מדי כתיבות של הסוכנת");
+  });
 });
 
 describe("classes with no agent route in this product", () => {

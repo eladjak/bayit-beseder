@@ -34,7 +34,7 @@ import {
   fingerprint,
 } from "@/lib/agent/confirm";
 import { logAgentAudit } from "@/lib/agent/audit";
-import { ZOEY_NAME, checkAgentConfirm, confirmRequiredResponse, isZoey } from "@/lib/agent/zoey";
+import { ZOEY_NAME, checkAgentConfirm, confirmRequiredResponse, isZoey, zoeyWriteRateLimited } from "@/lib/agent/zoey";
 
 export type DeliverChannel = "whatsapp";
 
@@ -343,6 +343,15 @@ export async function deliverWhatsApp(opts: {
 
   // Step 2: the confirm token must match this token, this action, this kind and
   // this recipient, be unexpired, and be unused.
+  // Release review 13.11 (Codex): a Zoey send counts against the same per-token
+  // write limit as task writes (60/min), so one confirm header cannot fan out.
+  if (agentConfirm) {
+    const limited = await zoeyWriteRateLimited(auth.tokenId as string);
+    if (limited) {
+      await audit("rejected", binding.target, "נדחה: יותר מדי כתיבות של הסוכנת בדקה");
+      return refuse("יותר מדי כתיבות של הסוכנת. נסו שוב עוד דקה.");
+    }
+  }
   const consumed = agentConfirm
     ? ({ ok: true } as const)
     : await consumeConfirmation(service, binding, confirmToken as string);
