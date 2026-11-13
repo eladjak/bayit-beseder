@@ -34,7 +34,7 @@ import {
   fingerprint,
 } from "@/lib/agent/confirm";
 import { logAgentAudit } from "@/lib/agent/audit";
-import { ZOEY_NAME, checkAgentConfirm, confirmRequiredResponse, isZoey, zoeyWriteRateLimited } from "@/lib/agent/zoey";
+import { AGENT_DISPLAY_NAME, checkAgentConfirm, confirmRequiredResponse, isNamedAgent, agentWriteRateLimited } from "@/lib/agent/agent-identity";
 
 export type DeliverChannel = "whatsapp";
 
@@ -209,11 +209,11 @@ export async function gateDelivery(
       ),
     };
   }
-  // Zoey guard rail (class: send): no confirm statement -> 428 before anything is built or sent.
-  const zoeyChk = isZoey(auth) && request ? checkAgentConfirm(request) : null;
-  if (isZoey(auth) && !(zoeyChk && zoeyChk.text)) {
+  // named agent guard rail (class: send): no confirm statement -> 428 before anything is built or sent.
+  const agentChk = isNamedAgent(auth) && request ? checkAgentConfirm(request) : null;
+  if (isNamedAgent(auth) && !(agentChk && agentChk.text)) {
     await auditDenied(auth, "נדרש X-Agent-Confirm (428)");
-    return { ok: false, response: confirmRequiredResponse("send", zoeyChk?.reason ?? "missing") };
+    return { ok: false, response: confirmRequiredResponse("send", agentChk?.reason ?? "missing") };
   }
   return { ok: true };
 }
@@ -229,7 +229,7 @@ async function auditDenied(auth: AgentAuthResult, detail: string) {
     action: "deliver_to_me",
     outcome: "denied",
     detail,
-    ...(isZoey(auth) ? { agentName: auth.agentName ?? ZOEY_NAME } : {}),
+    ...(isNamedAgent(auth) ? { agentName: auth.agentName ?? AGENT_DISPLAY_NAME } : {}),
   });
 }
 
@@ -248,11 +248,11 @@ export async function deliverWhatsApp(opts: {
   text: string;
   deliver: DeliverChannel | undefined;
   confirmToken?: string;
-  /** Zoey only: decoded X-Agent-Confirm text. Replaces the two-step confirm_token flow. */
+  /** named agent only: decoded X-Agent-Confirm text. Replaces the two-step confirm_token flow. */
   agentConfirm?: string | null;
 }): Promise<DeliveryResult> {
   const { auth, kind, text, deliver, confirmToken } = opts;
-  const agentConfirm = isZoey(auth) ? (opts.agentConfirm ?? null) : null;
+  const agentConfirm = isNamedAgent(auth) ? (opts.agentConfirm ?? null) : null;
   if (deliver !== "whatsapp") return NOT_REQUESTED;
   if (auth.via === "legacy") return maybeDeliverToOwner(deliver, text);
 
@@ -289,8 +289,8 @@ export async function deliverWhatsApp(opts: {
       target,
       outcome,
       detail,
-      ...(isZoey(auth)
-        ? { agentName: auth.agentName ?? ZOEY_NAME, confirmText: agentConfirm }
+      ...(isNamedAgent(auth)
+        ? { agentName: auth.agentName ?? AGENT_DISPLAY_NAME, confirmText: agentConfirm }
         : {}),
     });
 
@@ -343,10 +343,10 @@ export async function deliverWhatsApp(opts: {
 
   // Step 2: the confirm token must match this token, this action, this kind and
   // this recipient, be unexpired, and be unused.
-  // Release review 13.11 (Codex): a Zoey send counts against the same per-token
+  // Release review 13.11 (Codex): a named agent send counts against the same per-token
   // write limit as task writes (60/min), so one confirm header cannot fan out.
   if (agentConfirm) {
-    const limited = await zoeyWriteRateLimited(auth.tokenId as string);
+    const limited = await agentWriteRateLimited(auth.tokenId as string);
     if (limited) {
       await audit("rejected", binding.target, "נדחה: יותר מדי כתיבות של הסוכנת בדקה");
       return refuse("יותר מדי כתיבות של הסוכנת. נסו שוב עוד דקה.");

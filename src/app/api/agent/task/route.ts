@@ -7,12 +7,12 @@ import { hasScope } from "@/lib/agent/scopes";
 import { CONSUME_MESSAGES, consumeConfirmation, createConfirmation } from "@/lib/agent/confirm";
 import { logAgentAudit } from "@/lib/agent/audit";
 import {
-  ZOEY_NAME,
+  AGENT_DISPLAY_NAME,
   confirmRequiredResponse,
-  isZoey,
+  isNamedAgent,
   checkAgentConfirm,
-  zoeyWriteRateLimited,
-} from "@/lib/agent/zoey";
+  agentWriteRateLimited,
+} from "@/lib/agent/agent-identity";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
 import { ilToday } from "@/lib/il-date";
 
@@ -185,22 +185,22 @@ export async function POST(request: NextRequest) {
 
   // 5. Dispatch to handler
   const body = parsed.data;
-  const zoey = isZoey(auth) && Boolean(auth.tokenId);
+  const namedAgent = isNamedAgent(auth) && Boolean(auth.tokenId);
 
-  // Zoey: 60 state-changing calls/min per token (the per-IP limiter above stays).
-  if (zoey && body.action !== "list") {
-    const limited = await zoeyWriteRateLimited(auth.tokenId as string);
+  // named agent: 60 state-changing calls/min per token (the per-IP limiter above stays).
+  if (namedAgent && body.action !== "list") {
+    const limited = await agentWriteRateLimited(auth.tokenId as string);
     if (limited) return limited;
   }
 
-  // Zoey: every successful write is audited (best-effort, never blocks the answer).
-  const auditZoeyWrite = async (
+  // named agent: every successful write is audited (best-effort, never blocks the answer).
+  const auditAgentWrite = async (
     action: "create_task" | "complete_task",
     res: Response,
     target: string,
     detail: string
   ) => {
-    if (!zoey || res.status >= 300) return;
+    if (!namedAgent || res.status >= 300) return;
     let id = target;
     try {
       const j = (await res.clone().json()) as { task?: { id?: string }; taskId?: string };
@@ -217,7 +217,7 @@ export async function POST(request: NextRequest) {
       target: id,
       outcome: "executed",
       detail,
-      agentName: auth.agentName ?? ZOEY_NAME,
+      agentName: auth.agentName ?? AGENT_DISPLAY_NAME,
     });
   };
 
@@ -226,12 +226,12 @@ export async function POST(request: NextRequest) {
       return handleList(supabase, householdId, body, rl.remaining);
     case "add": {
       const res = await handleAdd(supabase, householdId, body, rl.remaining);
-      await auditZoeyWrite("create_task", res, "new", `נוספה: ${body.title}`);
+      await auditAgentWrite("create_task", res, "new", `נוספה: ${body.title}`);
       return res;
     }
     case "complete": {
       const res = await handleComplete(supabase, householdId, body, rl.remaining);
-      await auditZoeyWrite("complete_task", res, body.taskId, "הושלמה");
+      await auditAgentWrite("complete_task", res, body.taskId, "הושלמה");
       return res;
     }
     case "delete":
@@ -250,9 +250,9 @@ async function handleDelete(
   request: NextRequest
 ) {
   const headers = { "Cache-Control": "no-store", "X-RateLimit-Remaining": String(rlRemaining) };
-  const zoey = isZoey(auth);
-  const zoeyChk = zoey ? checkAgentConfirm(request) : null;
-  const zoeyConfirm = zoeyChk?.text ?? null;
+  const namedAgent = isNamedAgent(auth);
+  const agentChk = namedAgent ? checkAgentConfirm(request) : null;
+  const agentConfirmText = agentChk?.text ?? null;
   const audit = (
     outcome: "preview" | "executed" | "denied" | "rejected" | "failed",
     detail?: string
@@ -266,7 +266,7 @@ async function handleDelete(
       target: body.taskId,
       outcome,
       detail,
-      ...(zoey ? { agentName: auth.agentName ?? ZOEY_NAME, confirmText: zoeyConfirm } : {}),
+      ...(namedAgent ? { agentName: auth.agentName ?? AGENT_DISPLAY_NAME, confirmText: agentConfirmText } : {}),
     });
 
   // Scope check FIRST: a token without `delete_tasks` (and the legacy key, which
@@ -282,10 +282,10 @@ async function handleDelete(
     );
   }
 
-  // Zoey guard rail (class: delete): no confirm statement -> 428, nothing touched.
-  if (zoey && !zoeyConfirm) {
+  // named agent guard rail (class: delete): no confirm statement -> 428, nothing touched.
+  if (namedAgent && !agentConfirmText) {
     await audit("denied", "נדרש X-Agent-Confirm (428)");
-    return confirmRequiredResponse("delete", zoeyChk?.reason ?? "missing");
+    return confirmRequiredResponse("delete", agentChk?.reason ?? "missing");
   }
 
   const { data: task } = await supabase
@@ -308,9 +308,9 @@ async function handleDelete(
     target: task.id as string,
   };
 
-  // Step 1: preview only. (Zoey with a confirm statement skips the two-step flow:
+  // Step 1: preview only. (named agent with a confirm statement skips the two-step flow:
   // the human instruction in X-Agent-Confirm is the confirmation, stored in the audit row.)
-  if (!zoeyConfirm && !body.confirm_token) {
+  if (!agentConfirmText && !body.confirm_token) {
     const created = await createConfirmation(supabase, binding);
     if (!created.ok) {
       return NextResponse.json({ error: CONSUME_MESSAGES.unavailable }, { status: 503, headers });
@@ -336,7 +336,7 @@ async function handleDelete(
   }
 
   // Step 2: execute, but only with a valid, unused, unexpired, matching token.
-  const consumed = zoeyConfirm
+  const consumed = agentConfirmText
     ? ({ ok: true } as const)
     : await consumeConfirmation(supabase, binding, body.confirm_token as string);
   if (!consumed.ok) {

@@ -1,7 +1,7 @@
 /**
- * "Zoey (סוכנת)" named agent identity (migration 030).
+ * Named agent identity (migration 030).
  *
- * Properties: key works / no key / wrong key / revoked key; a Zoey write is audited
+ * Properties: key works / no key / wrong key / revoked key; a named agent write is audited
  * with the agent name; delete and send are refused with 428 without X-Agent-Confirm
  * and allowed with it (confirm text stored in the audit row); a normal token keeps the
  * old two-step flow; the 61st write in a minute is 429; household isolation still holds.
@@ -23,8 +23,8 @@ const HH_B = "22222222-2222-4222-8222-222222222222";
 const OWNER = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
 const RAW = {
-  zoey: "bbs_agent_" + "a".repeat(64),
-  zoeyRevoked: "bbs_agent_" + "b".repeat(64),
+  agent: "bbs_agent_" + "a".repeat(64),
+  agentRevoked: "bbs_agent_" + "b".repeat(64),
   plain: "bbs_agent_" + "c".repeat(64),
   plainDel: "bbs_agent_" + "d".repeat(64),
 };
@@ -72,8 +72,8 @@ const ALL = ["read", "write", "deliver_to_me", "delete_tasks"];
 function seed() {
   return {
     household_agent_tokens: [
-      tok("t-zoey", RAW.zoey, HH_A, ALL, { is_agent: true, agent_name: "Zoey (סוכנת)" }),
-      tok("t-zoey-rev", RAW.zoeyRevoked, HH_A, ALL, { is_agent: true, agent_name: "Zoey (סוכנת)", revoked_at: "2026-02-01" }),
+      tok("t-agent", RAW.agent, HH_A, ALL, { is_agent: true, agent_name: "סוכן" }),
+      tok("t-agent-rev", RAW.agentRevoked, HH_A, ALL, { is_agent: true, agent_name: "סוכן", revoked_at: "2026-02-01" }),
       tok("t-plain", RAW.plain, HH_A, ["read", "write"]),
       tok("t-plain-del", RAW.plainDel, HH_A, ["read", "write", "delete_tasks"]),
     ],
@@ -105,9 +105,9 @@ beforeEach(() => {
   for (const k of ["BAYIT_AGENT_KEY", "AGENT_API_TOKEN", "BAYIT_AGENT_KEY_HOUSEHOLD_ID", "BAYIT_AGENT_WHATSAPP_TO"]) delete process.env[k];
 });
 
-describe("Zoey: authentication", () => {
+describe("named agent: authentication", () => {
   it("valid key -> 200", async () => {
-    expect((await taskPOST(taskReq(RAW.zoey, { action: "list" }))).status).toBe(200);
+    expect((await taskPOST(taskReq(RAW.agent, { action: "list" }))).status).toBe(200);
   });
   it("no key -> 401", async () => {
     expect((await taskPOST(taskReq(null, { action: "list" }))).status).toBe(401);
@@ -117,53 +117,53 @@ describe("Zoey: authentication", () => {
     expect([401, 403]).toContain(s);
   });
   it("revoked key -> refused", async () => {
-    const s = (await taskPOST(taskReq(RAW.zoeyRevoked, { action: "list" }))).status;
+    const s = (await taskPOST(taskReq(RAW.agentRevoked, { action: "list" }))).status;
     expect([401, 403]).toContain(s);
   });
   it("is pinned to its own household (cannot touch HH_B tasks even if named)", async () => {
-    const r = await taskPOST(taskReq(RAW.zoey, { action: "delete", taskId: T_B, householdId: HH_B }, { "x-agent-confirm": hdr(CONFIRM) }));
+    const r = await taskPOST(taskReq(RAW.agent, { action: "delete", taskId: T_B, householdId: HH_B }, { "x-agent-confirm": hdr(CONFIRM) }));
     expect(r.status).toBe(404);
     expect(exists(T_B)).toBe(true);
   });
 });
 
-describe("Zoey: audit + rate limit", () => {
+describe("named agent: audit + rate limit", () => {
   it("add and complete write audit rows carrying the agent name", async () => {
-    const add = await taskPOST(taskReq(RAW.zoey, { action: "add", title: "לקנות חלב" }));
+    const add = await taskPOST(taskReq(RAW.agent, { action: "add", title: "לקנות חלב" }));
     expect(add.status).toBe(201);
-    const done = await taskPOST(taskReq(RAW.zoey, { action: "complete", taskId: T_A }));
+    const done = await taskPOST(taskReq(RAW.agent, { action: "complete", taskId: T_A }));
     expect(done.status).toBe(200);
     const rows = audit();
     expect(rows.map((r) => r.action)).toEqual(["create_task", "complete_task"]);
-    expect(rows.every((r) => r.agent_name === "Zoey (סוכנת)" && r.outcome === "executed")).toBe(true);
+    expect(rows.every((r) => r.agent_name === "סוכן" && r.outcome === "executed")).toBe(true);
     expect(rows[1].target).toBe(T_A);
   });
-  it("a normal token's writes are not Zoey-audited (behaviour unchanged)", async () => {
+  it("a normal token's writes are not named-agent audited (behaviour unchanged)", async () => {
     await taskPOST(taskReq(RAW.plain, { action: "add", title: "x" }));
     expect(audit().length).toBe(0);
   });
   it("61st write in a minute -> 429, reads are not counted", async () => {
     for (let i = 0; i < 60; i++) {
-      // distinct IP per call so only the Zoey per-token limiter can trip
-      const r = await taskPOST(taskReq(RAW.zoey, { action: "add", title: `t${i}` }, { "x-test-ip": `10.0.0.${i}` }));
+      // distinct IP per call so only the named agent per-token limiter can trip
+      const r = await taskPOST(taskReq(RAW.agent, { action: "add", title: `t${i}` }, { "x-test-ip": `10.0.0.${i}` }));
       expect(r.status).toBe(201);
     }
-    const over = await taskPOST(taskReq(RAW.zoey, { action: "add", title: "one too many" }, { "x-test-ip": "10.9.9.9" }));
+    const over = await taskPOST(taskReq(RAW.agent, { action: "add", title: "one too many" }, { "x-test-ip": "10.9.9.9" }));
     expect(over.status).toBe(429);
-    expect((await taskPOST(taskReq(RAW.zoey, { action: "list" }, { "x-test-ip": "10.8.8.8" }))).status).toBe(200);
+    expect((await taskPOST(taskReq(RAW.agent, { action: "list" }, { "x-test-ip": "10.8.8.8" }))).status).toBe(200);
   });
 });
 
-describe("Zoey: guard rail class=delete", () => {
+describe("named agent: guard rail class=delete", () => {
   it("without X-Agent-Confirm -> 428 {agent_confirm_required, delete}, nothing deleted, denial audited", async () => {
-    const r = await taskPOST(taskReq(RAW.zoey, { action: "delete", taskId: T_A }));
+    const r = await taskPOST(taskReq(RAW.agent, { action: "delete", taskId: T_A }));
     expect(r.status).toBe(428);
     expect(await r.json()).toEqual({ error: "agent_confirm_required", class: "delete", reason: "missing" });
     expect(exists(T_A)).toBe(true);
     expect(audit().some((a) => a.outcome === "denied")).toBe(true);
   });
   it("with a too-short confirm -> still 428", async () => {
-    const r = await taskPOST(taskReq(RAW.zoey, { action: "delete", taskId: T_A }, { "x-agent-confirm": hdr("ok yes") }));
+    const r = await taskPOST(taskReq(RAW.agent, { action: "delete", taskId: T_A }, { "x-agent-confirm": hdr("ok yes") }));
     expect(r.status).toBe(428);
     expect(exists(T_A)).toBe(true);
   });
@@ -173,25 +173,25 @@ describe("Zoey: guard rail class=delete", () => {
     ["20 combining marks", "\u0301".repeat(20), "too_short"],
     ["601 characters", "א".repeat(601), "too_long"],
   ])("Step 0: %s -> 428 (%s), nothing deleted", async (_n, text, reason) => {
-    const r = await taskPOST(taskReq(RAW.zoey, { action: "delete", taskId: T_A }, { "x-agent-confirm": hdr(text) }));
+    const r = await taskPOST(taskReq(RAW.agent, { action: "delete", taskId: T_A }, { "x-agent-confirm": hdr(text) }));
     expect(r.status).toBe(428);
     expect(await r.json()).toEqual({ error: "agent_confirm_required", class: "delete", reason });
     expect(exists(T_A)).toBe(true);
   });
   it("Step 0: a normal Hebrew sentence of 25 letters is accepted", async () => {
     const text = "אלעד אישר בוואטסאפ מחיקה";
-    const r = await taskPOST(taskReq(RAW.zoey, { action: "delete", taskId: T_A }, { "x-agent-confirm": hdr(text) }));
+    const r = await taskPOST(taskReq(RAW.agent, { action: "delete", taskId: T_A }, { "x-agent-confirm": hdr(text) }));
     expect(r.status).toBe(200);
     expect(audit().find((a) => a.outcome === "executed")?.confirm_text).toBe(text);
   });
   it("with a Hebrew confirm statement -> deleted, text stored in the audit row", async () => {
     const text = "וואטסאפ מאלעד 13.11 09:02: למחוק את משימת הכלים";
-    const r = await taskPOST(taskReq(RAW.zoey, { action: "delete", taskId: T_A }, { "x-agent-confirm": hdr(text) }));
+    const r = await taskPOST(taskReq(RAW.agent, { action: "delete", taskId: T_A }, { "x-agent-confirm": hdr(text) }));
     expect(r.status).toBe(200);
     expect(exists(T_A)).toBe(false);
     const row = audit().find((a) => a.outcome === "executed");
     expect(row?.confirm_text).toBe(text);
-    expect(row?.agent_name).toBe("Zoey (סוכנת)");
+    expect(row?.agent_name).toBe("סוכן");
   });
   it("a normal token still uses the two-step confirm_token flow (preview, nothing deleted)", async () => {
     const r = await taskPOST(taskReq(RAW.plainDel, { action: "delete", taskId: T_A }));
@@ -199,17 +199,17 @@ describe("Zoey: guard rail class=delete", () => {
     expect((await r.json()).requiresConfirmation).toBe(true);
     expect(exists(T_A)).toBe(true);
   });
-  it("a normal token is NOT unlocked by the header alone (header is Zoey-only)", async () => {
+  it("a normal token is NOT unlocked by the header alone (header is named-agent only)", async () => {
     const r = await taskPOST(taskReq(RAW.plainDel, { action: "delete", taskId: T_A }, { "x-agent-confirm": hdr(CONFIRM) }));
     expect((await r.json()).requiresConfirmation).toBe(true);
     expect(exists(T_A)).toBe(true);
   });
 });
 
-describe("Zoey: guard rail class=send (deliver_to_me)", () => {
+describe("named agent: guard rail class=send (deliver_to_me)", () => {
   const brief = (confirm?: string) =>
     briefGET(new NextRequest("http://localhost/api/agent/brief?deliver=whatsapp", {
-      headers: { authorization: `Bearer ${RAW.zoey}`, ...(confirm ? { "x-agent-confirm": hdr(confirm) } : {}) },
+      headers: { authorization: `Bearer ${RAW.agent}`, ...(confirm ? { "x-agent-confirm": hdr(confirm) } : {}) },
     }));
   it("without confirm -> 428 {send}, nothing sent", async () => {
     const r = await brief();
@@ -227,7 +227,7 @@ describe("Zoey: guard rail class=send (deliver_to_me)", () => {
   });
   it("release review 13.11: a confirmed send counts against the same 60/min write limit", async () => {
     for (let i = 0; i < 60; i++) {
-      const r = await taskPOST(taskReq(RAW.zoey, { action: "add", title: `s${i}` }, { "x-test-ip": `10.1.0.${i}` }));
+      const r = await taskPOST(taskReq(RAW.agent, { action: "add", title: `s${i}` }, { "x-test-ip": `10.1.0.${i}` }));
       expect(r.status).toBe(201);
     }
     const r = await brief("WhatsApp from Elad 13.11 09:05: send me the daily brief");
@@ -238,12 +238,12 @@ describe("Zoey: guard rail class=send (deliver_to_me)", () => {
 });
 
 describe("classes with no agent route in this product", () => {
-  it("access: the token-management route is cookie-session only (a Zoey bearer cannot use it)", async () => {
+  it("access: the token-management route is cookie-session only (a named agent bearer cannot use it)", async () => {
     const mod = await import("../../agent-tokens/route");
     const r = await (mod as { POST: (r: NextRequest) => Promise<Response> }).POST(
       new NextRequest("http://localhost/api/agent-tokens", {
         method: "POST",
-        headers: { authorization: `Bearer ${RAW.zoey}`, "content-type": "application/json" },
+        headers: { authorization: `Bearer ${RAW.agent}`, "content-type": "application/json" },
         body: JSON.stringify({ householdId: HH_A, label: "x", scopes: ["delete_tasks"] }),
       })
     );

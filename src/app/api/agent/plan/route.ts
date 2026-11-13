@@ -7,7 +7,7 @@ import { generateWeekPlan } from "@/lib/weekly-generator";
 import type { TaskRow } from "@/lib/types/database";
 import { buildPlanSummary, buildPlanWhatsAppText } from "@/lib/agent/plan-format";
 import { deliverWhatsApp, gateDelivery } from "@/lib/agent/deliver";
-import { readAgentConfirm } from "@/lib/agent/zoey";
+import { readAgentConfirm } from "@/lib/agent/agent-identity";
 
 /**
  * POST /api/agent/plan

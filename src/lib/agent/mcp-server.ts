@@ -36,7 +36,7 @@ export interface McpCallContext {
   forwardedFor: string | null;
   /** The token's scopes; decides which sensitive tools are offered. Default scopes if omitted. */
   scopes?: readonly AgentScope[];
-  /** The caller's `X-Agent-Confirm` header, verbatim (Zoey guard rails). */
+  /** The caller's `X-Agent-Confirm` header, verbatim (named agent guard rails). */
   agentConfirm?: string | null;
 }
 

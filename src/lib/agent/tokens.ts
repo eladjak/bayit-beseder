@@ -61,7 +61,7 @@ export interface IssueTokenOptions {
   scopes?: readonly AgentScope[];
   /** auth.users id of the member creating the token ("me" for deliver_to_me). */
   createdBy?: string | null;
-  /** Issue the named Zoey agent identity (needs migration 030). Never set by the self-serve UI. */
+  /** Issue the named agent identity (needs migration 030). Never set by the self-serve UI. */
   agent?: { name: string };
 }
 
@@ -167,7 +167,7 @@ export type TokenLookupResult =
       scopes: AgentScope[];
       /** Member who created the token; null if unknown / column absent. */
       createdBy: string | null;
-      /** true for the named Zoey agent identity (migration 030); false when the column is absent. */
+      /** true for the named agent identity (migration 030); false when the column is absent. */
       isAgent: boolean;
       agentName: string | null;
     }
@@ -197,7 +197,7 @@ export async function resolveHouseholdForToken(
     "id, household_id, label, scopes, created_by, is_agent, agent_name"
   );
   if (error && isMissingColumnError(error.message)) {
-    // Migration 030 not applied: same lookup without the Zoey columns.
+    // Migration 030 not applied: same lookup without the named agent columns.
     ({ data, error } = await lookup("id, household_id, label, scopes, created_by"));
   }
   if (error && isMissingColumnError(error.message)) {

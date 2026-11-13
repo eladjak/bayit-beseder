@@ -9,7 +9,7 @@ import {
   type DailyBriefData,
 } from "@/lib/whatsapp-messages";
 import { deliverWhatsApp, gateDelivery } from "@/lib/agent/deliver";
-import { readAgentConfirm } from "@/lib/agent/zoey";
+import { readAgentConfirm } from "@/lib/agent/agent-identity";
 import { isTaskOverdue } from "@/lib/task-flags";
 import { ilToday } from "@/lib/il-date";
 
