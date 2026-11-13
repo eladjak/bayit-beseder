@@ -36,6 +36,8 @@ export interface McpCallContext {
   forwardedFor: string | null;
   /** The token's scopes; decides which sensitive tools are offered. Default scopes if omitted. */
   scopes?: readonly AgentScope[];
+  /** The caller's `X-Agent-Confirm` header, verbatim (Zoey guard rails). */
+  agentConfirm?: string | null;
 }
 
 type RouteHandler = (req: NextRequest) => Promise<Response>;
@@ -48,6 +50,7 @@ function buildRequest(
 ): NextRequest {
   const headers: Record<string, string> = { authorization: ctx.authorization };
   if (ctx.forwardedFor) headers["x-forwarded-for"] = ctx.forwardedFor;
+  if (ctx.agentConfirm) headers["x-agent-confirm"] = ctx.agentConfirm;
   if (body !== undefined) headers["content-type"] = "application/json";
   return new NextRequest(new URL(path, ctx.origin), {
     method,

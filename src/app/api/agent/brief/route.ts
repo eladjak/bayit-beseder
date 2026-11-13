@@ -9,6 +9,7 @@ import {
   type DailyBriefData,
 } from "@/lib/whatsapp-messages";
 import { deliverWhatsApp, gateDelivery } from "@/lib/agent/deliver";
+import { readAgentConfirm } from "@/lib/agent/zoey";
 import { isTaskOverdue } from "@/lib/task-flags";
 import { ilToday } from "@/lib/il-date";
 
@@ -75,7 +76,7 @@ export async function GET(request: NextRequest) {
   }
   const { deliver } = parsed.data;
   const confirmToken = searchParams.get("confirm_token")?.slice(0, 200) || undefined;
-  const gate = await gateDelivery(auth, deliver, [...searchParams.keys()]);
+  const gate = await gateDelivery(auth, deliver, [...searchParams.keys()], request);
   if (!gate.ok) return gate.response;
   // Household is ALWAYS the one the bearer token authorizes, never the query
   // param above (which is parsed only for backward-compat, then discarded).
@@ -173,6 +174,7 @@ export async function GET(request: NextRequest) {
   // Optional delivery: only to the token creator's own phone, behind scope + confirm.
   const delivery = await deliverWhatsApp({
     auth,
+    agentConfirm: readAgentConfirm(request),
     kind: "brief",
     text: whatsappText,
     deliver,

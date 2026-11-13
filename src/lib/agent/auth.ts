@@ -94,6 +94,10 @@ export interface AgentAuthResult {
   scopes?: readonly AgentScope[];
   /** Member who created the token: "me" for `deliver_to_me`. Null if unknown. */
   createdBy?: string | null;
+  /** true when the credential is the named Zoey agent identity (migration 030). */
+  isAgent?: boolean;
+  /** Display name of the agent identity, e.g. "Zoey (סוכנת)". */
+  agentName?: string | null;
 }
 
 /** Read the configured legacy agent key (BAYIT_AGENT_KEY preferred, AGENT_API_TOKEN alias). */
@@ -204,6 +208,8 @@ async function verifyAgentCredentials(request: Request): Promise<AgentAuthResult
         tokenLabel: resolved.label,
         scopes: resolved.scopes,
         createdBy: resolved.createdBy,
+        isAgent: resolved.isAgent,
+        agentName: resolved.agentName,
       };
     }
     if (resolved.status === "error" && !legacyMatches) {
