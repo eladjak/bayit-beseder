@@ -67,6 +67,9 @@ const ALLOW: Record<string, string> = {
   "api/sumit/cancel-subscription/route.ts": "stopping a charge must always work, consent or not. GET returns only a boolean (is there a paid plan to cancel); POST cancels the caller's own plan; both use the service client, never the session's household tables",
   "api/calendar/disconnect/route.ts": "withdrawing a connection must always work",
   "(auth)/callback/route.ts": "sign-in redirect: exchanges the login code and serves no household data (sign-out is a client call to Supabase)",
+  // Temporary no-source 503 containment: both routes reject before household reads or sending.
+  "api/cron/daily-brief/route.ts": "authenticated cron returns 503 before any source read or dispatch",
+  "api/cron/daily-summary/route.ts": "authenticated cron returns 503 before any source read or dispatch",
   // Never serve a person's data:
   "api/agent/openapi.json/route.ts": "static public API description, no household data",
   // Narrowly justified exceptions. What each one reads / writes / returns / sends:
